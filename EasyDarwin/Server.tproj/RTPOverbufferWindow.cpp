@@ -34,7 +34,7 @@
 #include "RTPOverbufferWindow.h"
 
 RTPOverbufferWindow::RTPOverbufferWindow(UInt32 inSendInterval, UInt32 inInitialWindowSize, UInt32 inMaxSendAheadTimeInSec,
-	Float32 inOverbufferRate)
+	float inOverbufferRate)
 	: fWindowSize(inInitialWindowSize),
 	fBytesSentSinceLastReport(0),
 	fSendInterval(inSendInterval),

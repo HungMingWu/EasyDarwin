@@ -489,7 +489,7 @@ time_t QTSSRollingLog::ReadLogHeader(FILE* inFile)
     return theTime;
 }
 
-SInt64 QTSSRollingLog::Run()
+int64_t QTSSRollingLog::Run()
 {
     //
     // If we are going away, just return

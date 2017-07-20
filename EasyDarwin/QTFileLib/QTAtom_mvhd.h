@@ -57,9 +57,9 @@ public:
 	inline  double     GetTimeScale() { return (double)fTimeScale; }
 #if __Win32__
 
-	// Win compiler can't convert UInt64 to double. It does support SInt64 to double though.
+	// Win compiler can't convert UInt64 to double. It does support int64_t to double though.
 
-	inline  double     GetDurationInSeconds() { if (fTimeScale != 0) { return (double)((SInt64)fDuration) / (double)((SInt64)fTimeScale); } else { return (double) 0.0; } }
+	inline  double     GetDurationInSeconds() { if (fTimeScale != 0) { return (double)((int64_t)fDuration) / (double)((int64_t)fTimeScale); } else { return (double) 0.0; } }
 
 #else
 

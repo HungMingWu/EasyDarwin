@@ -88,7 +88,7 @@ public:
 	inline  uint32_t      GetTrackID() { return fTrackHeaderAtom->GetTrackID(); }
 	inline  UInt64      GetCreationTime() { return fTrackHeaderAtom->GetCreationTime(); }
 	inline  UInt64      GetModificationTime() { return fTrackHeaderAtom->GetModificationTime(); }
-	inline  SInt64      GetDuration() { return (SInt64)fTrackHeaderAtom->GetDuration(); }
+	inline  int64_t      GetDuration() { return (int64_t)fTrackHeaderAtom->GetDuration(); }
 	inline  double     GetTimeScale() { return fMediaHeaderAtom->GetTimeScale(); }
 	inline  double     GetTimeScaleRecip() { return fMediaHeaderAtom->GetTimeScaleRecip(); }
 	inline  double     GetDurationInSeconds() { return GetDuration() / (double)GetTimeScale(); }

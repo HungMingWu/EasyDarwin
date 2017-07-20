@@ -836,8 +836,8 @@ uint32_t QTRTPFile::GetBytesPerSecond()
 {
 	if (NULL == fFile)
 		return 0;
-	// Must be a SInt64 bc Win32 doesn't implement UInt64 -> double
-	SInt64  totalBytes = (SInt64)QTRTPFile::GetAddedTracksRTPBytes();
+	// Must be a int64_t bc Win32 doesn't implement UInt64 -> double
+	int64_t  totalBytes = (int64_t)QTRTPFile::GetAddedTracksRTPBytes();
 
 #ifdef USE_RTP_TRACK_DURATION
 	double duration = 0;

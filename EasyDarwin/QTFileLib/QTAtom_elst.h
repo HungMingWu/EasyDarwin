@@ -49,7 +49,7 @@ class QTAtom_elst : public QTAtom {
 	struct EditListEntry {
 		// Edit information
 		UInt64          EditDuration;
-		SInt64          StartingMediaTime;
+		int64_t          StartingMediaTime;
 		uint32_t          EditMediaRate;
 	};
 

@@ -54,8 +54,8 @@
 #define TEST_TIME 0
 
 #if TEST_TIME
-static SInt64 startTime = 0;
-static SInt64 durationTime = 0;
+static int64_t startTime = 0;
+static int64_t durationTime = 0;
 static int32_t sReadCount = 0;
 static int32_t sByteCount = 0;
 static bool sMovie = false;
@@ -263,7 +263,7 @@ void FileMap::DeleteOldBuffs()
 	}
 }
 
-char* FileMap::GetBuffer(SInt64 buffIndex, bool* outFillBuff)
+char* FileMap::GetBuffer(int64_t buffIndex, bool* outFillBuff)
 {
 	Assert(outFillBuff != NULL);
 	*outFillBuff = true; // we are re-using or just created a buff
@@ -415,16 +415,16 @@ OS_Error OSFileSource::ReadFromCache(UInt64 inPosition, void* inBuffer, uint32_t
 	if (inPosition >= fLength) // eof
 		return OS_NoErr;
 
-	SInt64 buffIndex = fFileMap.GetBuffIndex(inPosition);
-	SInt64 buffSize = 0;
-	SInt64 maxBuffSize = fFileMap.GetMaxBufSize();
-	SInt64 endIndex = fFileMap.GetBuffIndex(inPosition + inLength);
-	SInt64 maxIndex = fFileMap.GetMaxBuffIndex();
-	SInt64 buffPos = inPosition - fFileMap.GetBuffOffset(buffIndex);
-	SInt64 buffOffsetLen = 0;
+	int64_t buffIndex = fFileMap.GetBuffIndex(inPosition);
+	int64_t buffSize = 0;
+	int64_t maxBuffSize = fFileMap.GetMaxBufSize();
+	int64_t endIndex = fFileMap.GetBuffIndex(inPosition + inLength);
+	int64_t maxIndex = fFileMap.GetMaxBuffIndex();
+	int64_t buffPos = inPosition - fFileMap.GetBuffOffset(buffIndex);
+	int64_t buffOffsetLen = 0;
 	char* buffStart = NULL;
-	SInt64 buffCopyLen = inLength;
-	SInt64 bytesToCopy = inLength;
+	int64_t buffCopyLen = inLength;
+	int64_t bytesToCopy = inLength;
 	char* buffOut = (char*)inBuffer;
 	bool fillBuff = true;
 	char* buffOffset = NULL;
@@ -477,7 +477,7 @@ OS_Error OSFileSource::ReadFromCache(UInt64 inPosition, void* inBuffer, uint32_t
 #if FILE_SOURCE_DEBUG
 			qtss_printf("OSFileSource::ReadFromCache end of file reached buffIndex=%" _U32BITARG_ " buffSize = %" _S32BITARG_ " bytesToCopy=%"   _U32BITARG_   "\n", buffIndex, buffSize, bytesToCopy);
 #endif
-			Assert(buffSize <= (SInt64)UINT32_MAX);
+			Assert(buffSize <= (int64_t)UINT32_MAX);
 			::memcpy(buffOut, buffOffset, (uint32_t)buffSize);
 			*outRcvLen += (uint32_t)buffSize;
 			break;

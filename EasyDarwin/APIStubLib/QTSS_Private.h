@@ -145,7 +145,7 @@ typedef struct
     bool      eventRequested;
     bool      globalLockRequested;    // request event with global lock.
     bool      isGlobalLocked;
-    SInt64      idleTime;   // If a module has requested idle time.
+    int64_t      idleTime;   // If a module has requested idle time.
     
 } QTSS_ModuleState, *QTSS_ModuleStatePtr;
 

@@ -75,7 +75,7 @@ public:
 	//
 	// The overbuffer window is full if the byte count is filled up, or if the
 	// bitrate is above the max play rate.
-	SInt64 CheckTransmitTime(const SInt64& inTransmitTime, const SInt64& inCurrentTime, int32_t inPacketSize);
+	int64_t CheckTransmitTime(const int64_t& inTransmitTime, const int64_t& inCurrentTime, int32_t inPacketSize);
 
 	//
 	// Remembers that this packet has been sent
@@ -85,7 +85,7 @@ public:
 	// As time passes, transmit times that were in the future become transmit
 	// times that are in the past or present. Call this function to empty
 	// those old packets out of the window, freeing up space in the window.
-	void EmptyOutWindow(const SInt64& inCurrentTime);
+	void EmptyOutWindow(const int64_t& inCurrentTime);
 
 	//
 	// MarkBeginningOfWriteBurst
@@ -101,17 +101,17 @@ private:
 	int32_t fSendInterval;
 
 	int32_t fBytesDuringLastSecond;
-	SInt64 fLastSecondStart;
+	int64_t fLastSecondStart;
 
 	int32_t fBytesDuringPreviousSecond;
-	SInt64 fPreviousSecondStart;
+	int64_t fPreviousSecondStart;
 
 	int32_t fBytesDuringBucket;
-	SInt64 fBucketBegin;
-	SInt64 fPreviousBucketBegin;
+	int64_t fBucketBegin;
+	int64_t fPreviousBucketBegin;
 
-	SInt64 fBucketTimeAhead;
-	SInt64 fPreviousBucketTimeAhead;
+	int64_t fBucketTimeAhead;
+	int64_t fPreviousBucketTimeAhead;
 
 	uint32_t fMaxSendAheadTime;
 
@@ -121,7 +121,7 @@ private:
 	float fOverbufferRate;
 	uint32_t fSendAheadDurationInMsec;
 
-	SInt64 fOverbufferWindowBegin;
+	int64_t fOverbufferWindowBegin;
 
 };
 

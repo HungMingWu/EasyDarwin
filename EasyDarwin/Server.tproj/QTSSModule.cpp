@@ -329,7 +329,7 @@ QTSS_Error  QTSSModule::AddRole(QTSS_Role inRole)
 	return QTSS_NoErr;
 }
 
-SInt64 QTSSModule::Run()
+int64_t QTSSModule::Run()
 {
 	EventFlags events = this->GetEvents();
 

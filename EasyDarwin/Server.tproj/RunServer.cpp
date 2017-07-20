@@ -57,7 +57,7 @@ int sStatusUpdateInterval = 0;
 bool sHasPID = false;
 UInt64 sLastStatusPackets = 0;
 UInt64 sLastDebugPackets = 0;
-SInt64 sLastDebugTotalQuality = 0;
+int64_t sLastDebugTotalQuality = 0;
 #ifdef __sgi__ 
 #include <sched.h>
 #endif
@@ -432,16 +432,16 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 
 	//is the server keeping up with the streams?
 	//what quality are the streams?
-	SInt64 totalRTPPaackets = sServer->GetTotalRTPPackets();
-	SInt64 deltaPackets = totalRTPPaackets - sLastDebugPackets;
+	int64_t totalRTPPaackets = sServer->GetTotalRTPPackets();
+	int64_t deltaPackets = totalRTPPaackets - sLastDebugPackets;
 	sLastDebugPackets = totalRTPPaackets;
 
-	SInt64 totalQuality = sServer->GetTotalQuality();
-	SInt64 deltaQuality = totalQuality - sLastDebugTotalQuality;
+	int64_t totalQuality = sServer->GetTotalQuality();
+	int64_t deltaQuality = totalQuality - sLastDebugTotalQuality;
 	sLastDebugTotalQuality = totalQuality;
 
-	SInt64 currentMaxLate = sServer->GetCurrentMaxLate();
-	SInt64 totalLate = sServer->GetTotalLate();
+	int64_t currentMaxLate = sServer->GetCurrentMaxLate();
+	int64_t totalLate = sServer->GetTotalLate();
 
 	sServer->ClearTotalLate();
 	sServer->ClearCurrentMaxLate();
@@ -449,7 +449,7 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 
 	::qtss_snprintf(numStr, sizeof(numStr) - 1, "%s", "0");
 	if (deltaPackets > 0)
-		qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)((SInt64)totalLate / (SInt64)deltaPackets));
+		qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)((int64_t)totalLate / (int64_t)deltaPackets));
 	print_status(statusFile, stdOut, "%11s", numStr);
 
 	qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)currentMaxLate);
@@ -460,7 +460,7 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 
 	::qtss_snprintf(numStr, sizeof(numStr) - 1, "%s", "0");
 	if (deltaPackets > 0)
-		qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)((SInt64)deltaQuality / (SInt64)deltaPackets));
+		qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)((int64_t)deltaQuality / (int64_t)deltaPackets));
 	print_status(statusFile, stdOut, "%11s", numStr);
 
 	qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)sServer->GetNumThinned());
@@ -522,7 +522,7 @@ void FormattedTotalBytesBuffer(char *outBuffer, int outBufferLen, UInt64 totalBy
 
 	if (totalBytes > 1073741824) //GBytes
 	{
-		displayBytes = (float)((double)(SInt64)totalBytes / (double)(SInt64)1073741824);
+		displayBytes = (float)((double)(int64_t)totalBytes / (double)(int64_t)1073741824);
 		sizeStr[0] = 'G';
 		format = "%.4f%s ";
 	}

@@ -363,7 +363,7 @@ enum
     qtssAttrDataTypeUInt16          = 4,
     qtssAttrDataTypeint32_t          = 5,
     qtssAttrDataTypeUInt32          = 6,
-    qtssAttrDataTypeSInt64          = 7,
+    qtssAttrDataTypeint64_t          = 7,
     qtssAttrDataTypeUInt64          = 8,
     qtssAttrDataTypeQTSS_Object     = 9,
     qtssAttrDataTypeQTSS_StreamRef  = 10,
@@ -504,7 +504,7 @@ enum
 
     qtssCliSesCurrentBitRate        = 26,   //read      //uint32_t    //Current bit rate of all the streams on this session. This is not an average. In bits per second.
     qtssCliSesPacketLossPercent     = 27,   //read      //Float32   //Current percent loss as a fraction. .5 = 50%. This is not an average.
-    qtssCliSesTimeConnectedInMsec   = 28,   //read      //SInt64    //Time in milliseconds that this client has been connected.
+    qtssCliSesTimeConnectedInMsec   = 28,   //read      //int64_t    //Time in milliseconds that this client has been connected.
     qtssCliSesCounterID             = 29,   //read      //uint32_t    //A unique, non-repeating ID for this session.
     qtssCliSesRTSPSessionID         = 30,   //read      //char array//The RTSP session ID that refers to this client session
     qtssCliSesFramesSkipped         = 31,   //r/w       //uint32_t    //Modules can set this to be the number of frames skipped for this client
@@ -1038,7 +1038,7 @@ typedef void*           QTSS_Object;
 typedef void*           QTSS_ServiceFunctionArgsPtr;
 typedef int32_t          QTSS_AttributeID;
 typedef int32_t          QTSS_ServiceID;
-typedef SInt64          QTSS_TimeVal;
+typedef int64_t          QTSS_TimeVal;
 
 typedef QTSS_Object             QTSS_RTPStreamObject;
 typedef QTSS_Object             QTSS_RTSPSessionObject;
@@ -1984,8 +1984,8 @@ QTSS_Error  QTSS_DestroySocketStream(QTSS_SocketStream inStream);
 QTSS_Error  QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_EventType inEventMask);
 QTSS_Error  QTSS_SignalStream(QTSS_StreamRef inStream, QTSS_EventType inEventMask);
 
-QTSS_Error  QTSS_SetIdleTimer(SInt64 inIdleMsec);
-QTSS_Error  QTSS_SetIntervalRoleTimer(SInt64 inIdleMsec);
+QTSS_Error  QTSS_SetIdleTimer(int64_t inIdleMsec);
+QTSS_Error  QTSS_SetIntervalRoleTimer(int64_t inIdleMsec);
 
 QTSS_Error  QTSS_RequestGlobalLock();
 bool      QTSS_IsGlobalLocked();

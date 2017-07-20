@@ -65,7 +65,7 @@ RTPOverbufferWindow::RTPOverbufferWindow(uint32_t inSendInterval, uint32_t inIni
 
 }
 
-SInt64 RTPOverbufferWindow::CheckTransmitTime(const SInt64& inTransmitTime, const SInt64& inCurrentTime, int32_t inPacketSize)
+int64_t RTPOverbufferWindow::CheckTransmitTime(const int64_t& inTransmitTime, const int64_t& inCurrentTime, int32_t inPacketSize)
 {
 	// if this is the beginning of a bucket interval, roll over figures from last time.
 	// accumulate statistics over the period of a second
@@ -132,10 +132,10 @@ SInt64 RTPOverbufferWindow::CheckTransmitTime(const SInt64& inTransmitTime, cons
 
 	// but don't send at more that double the bitrate (for any given time we should only get further
 	// ahead by that amount of time)
-	//printf("cta - pta = %qd, ct - pbb = %qd\n", fBucketTimeAhead - fPreviousBucketTimeAhead, SInt64((inCurrentTime - fPreviousBucketBegin) * (fOverbufferRate - 1.0)));
+	//printf("cta - pta = %qd, ct - pbb = %qd\n", fBucketTimeAhead - fPreviousBucketTimeAhead, int64_t((inCurrentTime - fPreviousBucketBegin) * (fOverbufferRate - 1.0)));
 	if (fBucketTimeAhead - fPreviousBucketTimeAhead > ((inCurrentTime - fPreviousBucketBegin) * (fOverbufferRate - 1.0)))
 	{
-		fBucketTimeAhead = fPreviousBucketTimeAhead + SInt64((inCurrentTime - fPreviousBucketBegin) * (fOverbufferRate - 1.0));
+		fBucketTimeAhead = fPreviousBucketTimeAhead + int64_t((inCurrentTime - fPreviousBucketBegin) * (fOverbufferRate - 1.0));
 		return inCurrentTime + fSendInterval;		// this will get us to the next bucket
 	}
 
@@ -166,7 +166,7 @@ void RTPOverbufferWindow::AddPacketToWindow(int32_t inPacketSize)
 	fBytesSentSinceLastReport += inPacketSize;
 }
 
-void RTPOverbufferWindow::EmptyOutWindow(const SInt64& inCurrentTime)
+void RTPOverbufferWindow::EmptyOutWindow(const int64_t& inCurrentTime)
 {
 	// no longer needed
 }

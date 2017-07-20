@@ -117,7 +117,7 @@ bool RTPMetaInfoPacket::ParsePacket(uint8_t* inPacketBuffer, uint32_t inPacketLe
 	uint8_t* theFieldP = inPacketBuffer + 12; // skip RTP header
 	uint8_t* theEndP = inPacketBuffer + inPacketLen;
 
-	SInt64 sInt64Val = 0;
+	int64_t sInt64Val = 0;
 	uint16_t uint16_tVal = 0;
 
 	while (theFieldP < (theEndP - 2))

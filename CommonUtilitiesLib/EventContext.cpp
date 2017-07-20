@@ -310,7 +310,7 @@ void EventThread::Entry()
 		}
 
 #if EVENT_CONTEXT_DEBUG
-		SInt64  yieldStart = OS::Milliseconds();
+		int64_t  yieldStart = OS::Milliseconds();
 #endif
 
 #if 0//defined(__linux__) && !defined(EASY_DEVICE)
@@ -320,8 +320,8 @@ void EventThread::Entry()
 #endif
 
 #if EVENT_CONTEXT_DEBUG
-		SInt64  yieldDur = OS::Milliseconds() - yieldStart;
-		static SInt64   numZeroYields;
+		int64_t  yieldDur = OS::Milliseconds() - yieldStart;
+		static int64_t   numZeroYields;
 
 		if (yieldDur > 1)
 		{

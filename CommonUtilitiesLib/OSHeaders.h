@@ -27,18 +27,6 @@
 #define OSHeaders_H
 #include <limits.h>
 
-
-
-#ifndef TRUE
-    #define TRUE 1
-#endif
-
-#ifndef FALSE
-    #define FALSE 0
-#endif
-
-
-
 /* Platform-specific components */
 #if __MacOSX__
     
@@ -77,7 +65,6 @@
 
 #if 0 // old defs we are now using MacTypes.h
     /* Typedefs */
-    typedef signed long long	SInt64;
     typedef unsigned long long	UInt64;
     typedef UInt32              FourCharCode;
     typedef FourCharCode        OSType;
@@ -136,7 +123,6 @@
     /* Typedefs */
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef int64_t         	SInt64;
     typedef uint64_t          	UInt64;
     
     typedef unsigned int	FourCharCode;
@@ -232,7 +218,6 @@
     /* Typedefs */
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef LONGLONG            SInt64;
     typedef ULONGLONG           UInt64;
     
     typedef unsigned long       FourCharCode;
@@ -282,7 +267,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
 	
 	typedef unsigned long		FourCharCode;
@@ -339,7 +323,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
     
     typedef unsigned long       FourCharCode;
@@ -389,7 +372,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
 
     typedef unsigned long       FourCharCode;
@@ -437,7 +419,6 @@
 
     /* Typedefs */
     typedef unsigned long       PointerSizedInt;
-    typedef signed long         SInt64;
     typedef unsigned long       UInt64;
     
     typedef unsigned int        FourCharCode;

@@ -209,7 +209,7 @@ void TCPListenerSocket::ProcessEvent(int /*eventBits*/)
 	fOutOfDescriptors = false; // always false for now  we don't properly handle this elsewhere in the code
 }
 
-SInt64 TCPListenerSocket::Run()
+int64_t TCPListenerSocket::Run()
 {
 	EventFlags events = this->GetEvents();
 

@@ -213,7 +213,7 @@ RTSPSession::~RTSPSession()
 	}
 }
 
-SInt64 RTSPSession::Run()
+int64_t RTSPSession::Run()
 {
 	EventFlags events = this->GetEvents();
 	QTSS_Error err = QTSS_NoErr;
@@ -1971,11 +1971,11 @@ uint32_t RTSPSession::GenerateNewSessionID(char* ioBuffer)
 	//RANDOM NUMBER GENERATOR
 
 	//We want to make our session IDs as random as possible, so use a bunch of
-	//current server statistics to generate a random SInt64.
+	//current server statistics to generate a random int64_t.
 
 	//Generate the random number in two uint32_t parts. The first uint32_t uses
 	//statistics out of a random RTP session.
-	SInt64 theMicroseconds = OS::Microseconds();
+	int64_t theMicroseconds = OS::Microseconds();
 	::srand((unsigned int)theMicroseconds);
 	uint32_t theFirstRandom = ::rand();
 
@@ -2016,9 +2016,9 @@ uint32_t RTSPSession::GenerateNewSessionID(char* ioBuffer)
 	::srand((unsigned int)theSecondRandom);
 	theSecondRandom = ::rand();
 
-	SInt64 theSessionID = (SInt64)theFirstRandom;
+	int64_t theSessionID = (int64_t)theFirstRandom;
 	theSessionID <<= 32;
-	theSessionID += (SInt64)theSecondRandom;
+	theSessionID += (int64_t)theSecondRandom;
 	qtss_sprintf(ioBuffer, "%" _64BITARG_ "d", theSessionID);
 	Assert(::strlen(ioBuffer) < QTSS_MAX_SESSION_ID_LENGTH);
 	return ::strlen(ioBuffer);

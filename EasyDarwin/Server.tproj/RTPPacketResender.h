@@ -54,9 +54,9 @@ public:
 	void*               fPacketData;
 	uint32_t              fPacketSize;
 	bool              fIsSpecialBuffer;
-	SInt64              fExpireTime;
-	SInt64              fAddedTime;
-	SInt64              fOrigRetransTimeout;
+	int64_t              fExpireTime;
+	int64_t              fAddedTime;
+	int64_t              fOrigRetransTimeout;
 	uint32_t              fNumResends;
 	uint16_t              fSeqNum;
 #if RTP_PACKET_RESENDER_DEBUGGING
@@ -84,7 +84,7 @@ public:
 
 	//
 	// Acks a packet. Also not thread safe.
-	void                AckPacket(uint16_t sequenceNumber, SInt64& inCurTimeInMsec);
+	void                AckPacket(uint16_t sequenceNumber, int64_t& inCurTimeInMsec);
 
 	//
 	// Resends outstanding packets in the queue. Guess what. Not thread safe.
@@ -109,7 +109,7 @@ public:
 	void                SetDebugInfo(uint32_t trackID, uint16_t remoteRTCPPort, uint32_t curPacketDelay);
 	void                SetLog(StrPtrLen *logname);
 	uint32_t              SpillGuts(uint32_t inBytesSentThisInterval);
-	void                LogClose(SInt64 inTimeSpentInFlowControl);
+	void                LogClose(int64_t inTimeSpentInFlowControl);
 	void                logprintf(const char * format, ...);
 
 #else

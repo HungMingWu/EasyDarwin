@@ -144,7 +144,7 @@ void RTPBandwidthTracker::AdjustWindowForRetransmit()
 
 //  fCongestionWindow = kMaximumSegmentSize;
 //  fCongestionWindow = fCongestionWindow / 2;  // half the congestion window size
-	SInt64 theTime = OS::Milliseconds();
+	int64_t theTime = OS::Milliseconds();
 	if (theTime - fLastCongestionAdjust > 250)
 	{
 		fSlowStartThreshold = fCongestionWindow * 3 / 4;
@@ -229,7 +229,7 @@ void RTPBandwidthTracker::UpdateStats()
 	fTotalRTO += fUnadjustedRTO;
 }
 
-void RTPBandwidthTracker::UpdateAckTimeout(uint32_t bitsSentInInterval, SInt64 intervalLengthInMsec)
+void RTPBandwidthTracker::UpdateAckTimeout(uint32_t bitsSentInInterval, int64_t intervalLengthInMsec)
 {
 	//
 	// First figure out how long it will take us to fill up our window, based on

@@ -46,8 +46,8 @@ public:
 	static void     QTSS_Delete(void* inMemory);
 
 	// TIME ROUTINES
-	static void QTSS_Milliseconds(SInt64* outMilliseconds);
-	static void QTSS_ConvertToUnixTime(SInt64* inQTSS_MilliSecondsPtr, time_t* outSecondsPtr);
+	static void QTSS_Milliseconds(int64_t* outMilliseconds);
+	static void QTSS_ConvertToUnixTime(int64_t* inQTSS_MilliSecondsPtr, time_t* outSecondsPtr);
 
 	// STARTUP ROUTINES
 
@@ -142,8 +142,8 @@ public:
 	// ASYNC I/O ROUTINES
 	static QTSS_Error   QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_EventType inEventMask);
 	static QTSS_Error   QTSS_SignalStream(QTSS_StreamRef inStream);
-	static QTSS_Error   QTSS_SetIdleTimer(SInt64 inMsecToWait);
-	static QTSS_Error   QTSS_SetIdleRoleTimer(SInt64 inMsecToWait);
+	static QTSS_Error   QTSS_SetIdleTimer(int64_t inMsecToWait);
+	static QTSS_Error   QTSS_SetIdleRoleTimer(int64_t inMsecToWait);
 
 
 	static QTSS_Error   QTSS_RequestLockedCallback();

@@ -56,7 +56,7 @@ public:
 	uint32_t GetFillSize() const
 	{ return fBufferFillSize; }
 	OSQueueElem* GetQElem() { return &fQElem; }
-	SInt64              fArrayIndex;
+	int64_t              fArrayIndex;
 	uint32_t              fBufferSize;
 	uint32_t              fBufferFillSize;
 	char*				fDataBuffer;
@@ -114,14 +114,14 @@ public:
 	FileMap() :fFileMapArray(nullptr), fDataBufferSize(0), fMapArraySize(0), fNumBuffSizeUnits(0) {}
 	~FileMap() { fFileMapArray = nullptr; }
 	void    AllocateBufferMap(uint32_t inUnitSizeInK, uint32_t inNumBuffSizeUnits, uint32_t inBufferIncCount, uint32_t inMaxBitRateBuffSizeInBlocks, UInt64 fileLen, uint32_t inBitRate);
-	char*   GetBuffer(SInt64 bufIndex, bool* outIsEmptyBuff);
+	char*   GetBuffer(int64_t bufIndex, bool* outIsEmptyBuff);
 	void    TestBuffer(int32_t bufIndex) const
 	{ Assert(bufIndex >= 0); fFileMapArray[bufIndex]->TestBuffer(); };
 	void    SetIndexBuffFillSize(int32_t bufIndex, uint32_t fillSize) const
 	{ Assert(bufIndex >= 0); fFileMapArray[bufIndex]->SetFillSize(fillSize); }
 	uint32_t  GetMaxBufSize() const
 	{ return fDataBufferSize; }
-	uint32_t  GetBuffSize(SInt64 bufIndex) const
+	uint32_t  GetBuffSize(int64_t bufIndex) const
 	{ Assert(bufIndex >= 0); return fFileMapArray[bufIndex]->GetFillSize(); }
 	uint32_t  GetIncBuffers() const
 	{ return fBlockPool.GetIncBuffers(); }
@@ -132,11 +132,11 @@ public:
 	void    Clean();
 	void    DeleteMap();
 	void    DeleteOldBuffs();
-	SInt64  GetBuffIndex(UInt64 inPosition) const
+	int64_t  GetBuffIndex(UInt64 inPosition) const
 	{ return inPosition / this->GetMaxBufSize(); }
-	SInt64  GetMaxBuffIndex() const
+	int64_t  GetMaxBuffIndex() const
 	{ Assert(fMapArraySize > 0); return fMapArraySize - 1; }
-	UInt64  GetBuffOffset(SInt64 bufIndex) const
+	UInt64  GetBuffOffset(int64_t bufIndex) const
 	{ return static_cast<UInt64>(bufIndex * this->GetMaxBufSize()); }
 	FileBlockPool fBlockPool;
 
@@ -145,7 +145,7 @@ public:
 private:
 
 	uint32_t              fDataBufferSize;
-	SInt64              fMapArraySize;
+	int64_t              fMapArraySize;
 	uint32_t              fNumBuffSizeUnits;
 
 };
@@ -217,7 +217,7 @@ public:
 	{ return fLength; }
 	UInt64          GetCurOffset() const
 	{ return fPosition; }
-	void            Seek(SInt64 newPosition) { fPosition = newPosition; }
+	void            Seek(int64_t newPosition) { fPosition = newPosition; }
 	bool IsValid() const
 	{ return fFile != -1; }
 	bool IsDir() const

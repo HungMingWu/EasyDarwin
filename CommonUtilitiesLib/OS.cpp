@@ -75,12 +75,12 @@
 
 double  OS::sDivisor = 0;
 double  OS::sMicroDivisor = 0;
-SInt64  OS::sMsecSince1970 = 0;
-SInt64  OS::sMsecSince1900 = 0;
-SInt64  OS::sInitialMsec = 0;
-SInt64  OS::sWrapTime = 0;
-SInt64  OS::sCompareWrap = 0;
-SInt64  OS::sLastTimeMilli = 0;
+int64_t  OS::sMsecSince1970 = 0;
+int64_t  OS::sMsecSince1900 = 0;
+int64_t  OS::sInitialMsec = 0;
+int64_t  OS::sWrapTime = 0;
+int64_t  OS::sCompareWrap = 0;
+int64_t  OS::sLastTimeMilli = 0;
 OSMutex OS::sStdLibOSMutex;
 
 #if DEBUG || __Win32__
@@ -97,11 +97,11 @@ void OS::Initialize()
 	//setup t0 value for msec since 1900
 
 	//t.tv_sec is number of seconds since Jan 1, 1970. Convert to seconds since 1900    
-	SInt64 the1900Sec = (SInt64)(24 * 60 * 60) * (SInt64)((70 * 365) + 17);
+	int64_t the1900Sec = (int64_t)(24 * 60 * 60) * (int64_t)((70 * 365) + 17);
 	sMsecSince1900 = the1900Sec * 1000;
 
-	sWrapTime = (SInt64)0x00000001 << 32;
-	sCompareWrap = (SInt64)0xffffffff << 32;
+	sWrapTime = (int64_t)0x00000001 << 32;
+	sCompareWrap = (int64_t)0xffffffff << 32;
 	sLastTimeMilli = 0;
 
 	sInitialMsec = OS::Milliseconds(); //Milliseconds uses sInitialMsec so this assignment is valid only once.
@@ -115,7 +115,7 @@ void OS::Initialize()
 #endif
 }
 
-SInt64 OS::Milliseconds()
+int64_t OS::Milliseconds()
 {
 	/*
 	#if __MacOSX__
@@ -126,13 +126,13 @@ SInt64 OS::Milliseconds()
 
 	   UnsignedWide theMicros;
 		::Microseconds(&theMicros);
-		SInt64 scalarMicros = theMicros.hi;
+		int64_t scalarMicros = theMicros.hi;
 		scalarMicros <<= 32;
 		scalarMicros += theMicros.lo;
 		scalarMicros = ((scalarMicros / 1000) - sInitialMsec) + sMsecSince1970; // convert to msec
 
 	#if DEBUG
-		static SInt64 sLastMillis = 0;
+		static int64_t sLastMillis = 0;
 		//Assert(scalarMicros >= sLastMillis); // currently this fails on dual processor machines
 		sLastMillis = scalarMicros;
 	#endif
@@ -144,7 +144,7 @@ SInt64 OS::Milliseconds()
 	// using binary & to reduce it to one operation from two
 	// sCompareWrap and sWrapTime are constants that are never changed
 	// sLastTimeMilli is updated with the curTimeMilli after each call to this function
-	SInt64 curTimeMilli = (uint32_t) ::timeGetTime() + (sLastTimeMilli & sCompareWrap);
+	int64_t curTimeMilli = (uint32_t) ::timeGetTime() + (sLastTimeMilli & sCompareWrap);
 	if ((curTimeMilli - sLastTimeMilli) < 0)
 	{
 		curTimeMilli += sWrapTime;
@@ -152,7 +152,7 @@ SInt64 OS::Milliseconds()
 	sLastTimeMilli = curTimeMilli;
 
 	// For debugging purposes
-	//SInt64 tempCurMsec = (curTimeMilli - sInitialMsec) + sMsecSince1970;
+	//int64_t tempCurMsec = (curTimeMilli - sInitialMsec) + sMsecSince1970;
 	//int32_t tempCurSec = tempCurMsec / 1000;
 	//char buffer[kTimeStrSize];
 	//qtss_printf("OS::MilliSeconds current time = %s\n", qtss_ctime(&tempCurSec, buffer, sizeof(buffer)));
@@ -167,7 +167,7 @@ SInt64 OS::Milliseconds()
 #endif
 	Assert(theErr == 0);
 
-	SInt64 curTime;
+	int64_t curTime;
 	curTime = t.tv_sec;
 	curTime *= 1000;                // sec -> msec
 	curTime += t.tv_usec / 1000;    // usec -> msec
@@ -177,19 +177,19 @@ SInt64 OS::Milliseconds()
 
 }
 
-SInt64 OS::Microseconds()
+int64_t OS::Microseconds()
 {
 	/*
 	#if __MacOSX__
 		UnsignedWide theMicros;
 		::Microseconds(&theMicros);
-		SInt64 theMillis = theMicros.hi;
+		int64_t theMillis = theMicros.hi;
 		theMillis <<= 32;
 		theMillis += theMicros.lo;
 		return theMillis;
 	*/
 #if __Win32__
-	SInt64 curTime = (SInt64)::timeGetTime(); //  system time in milliseconds
+	int64_t curTime = (int64_t)::timeGetTime(); //  system time in milliseconds
 	curTime -= sInitialMsec; // convert to application time
 	curTime *= 1000; // convert to microseconds                   
 	return curTime;
@@ -202,7 +202,7 @@ SInt64 OS::Microseconds()
 #endif
 	Assert(theErr == 0);
 
-	SInt64 curTime;
+	int64_t curTime;
 	curTime = t.tv_sec;
 	curTime *= 1000000;     // sec -> usec
 	curTime += t.tv_usec;
@@ -232,24 +232,24 @@ int32_t OS::GetGMTOffset()
 }
 
 
-SInt64 OS::HostToNetworkSInt64(SInt64 hostOrdered)
+int64_t OS::HostToNetworkSInt64(int64_t hostOrdered)
 {
 #if BIGENDIAN
 	return hostOrdered;
 #else
-	return (SInt64)((UInt64)(hostOrdered << 56) | (UInt64)(((UInt64)0x00ff0000 << 32) & (hostOrdered << 40))
+	return (int64_t)((UInt64)(hostOrdered << 56) | (UInt64)(((UInt64)0x00ff0000 << 32) & (hostOrdered << 40))
 		| (UInt64)(((UInt64)0x0000ff00 << 32) & (hostOrdered << 24)) | (UInt64)(((UInt64)0x000000ff << 32) & (hostOrdered << 8))
 		| (UInt64)(((UInt64)0x00ff0000 << 8) & (hostOrdered >> 8)) | (UInt64)((UInt64)0x00ff0000 & (hostOrdered >> 24))
 		| (UInt64)((UInt64)0x0000ff00 & (hostOrdered >> 40)) | (UInt64)((UInt64)0x00ff & (hostOrdered >> 56)));
 #endif
 }
 
-SInt64 OS::NetworkToHostSInt64(SInt64 networkOrdered)
+int64_t OS::NetworkToHostSInt64(int64_t networkOrdered)
 {
 #if BIGENDIAN
 	return networkOrdered;
 #else
-	return (SInt64)((UInt64)(networkOrdered << 56) | (UInt64)(((UInt64)0x00ff0000 << 32) & (networkOrdered << 40))
+	return (int64_t)((UInt64)(networkOrdered << 56) | (UInt64)(((UInt64)0x00ff0000 << 32) & (networkOrdered << 40))
 		| (UInt64)(((UInt64)0x0000ff00 << 32) & (networkOrdered << 24)) | (UInt64)(((UInt64)0x000000ff << 32) & (networkOrdered << 8))
 		| (UInt64)(((UInt64)0x00ff0000 << 8) & (networkOrdered >> 8)) | (UInt64)((UInt64)0x00ff0000 & (networkOrdered >> 24))
 		| (UInt64)((UInt64)0x0000ff00 & (networkOrdered >> 40)) | (UInt64)((UInt64)0x00ff & (networkOrdered >> 56)));
@@ -462,9 +462,9 @@ uint32_t OS::GetNumProcessors()
 }
 
 //CISCO provided fix for integer + fractional fixed64.
-SInt64 OS::TimeMilli_To_Fixed64Secs(SInt64 inMilliseconds)
+int64_t OS::TimeMilli_To_Fixed64Secs(int64_t inMilliseconds)
 {
-	SInt64 result = inMilliseconds / 1000;  // The result is in lower bits.
+	int64_t result = inMilliseconds / 1000;  // The result is in lower bits.
 	result <<= 32;  // shift it to higher 32 bits
 	// Take the remainder (rem = inMilliseconds%1000) and multiply by
 	// 2**32, divide by 1000, effectively this gives (rem/1000) as a

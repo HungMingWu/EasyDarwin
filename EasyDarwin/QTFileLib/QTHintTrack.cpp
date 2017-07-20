@@ -100,19 +100,19 @@
 static bool timerStarted = false;
 static bool doneMediaCount = false;
 static bool doneHintCount = false;
-static SInt64 totalMediaSampleReadTime = 0;
-static SInt64 totalHintSampleReadTime = 0;
+static int64_t totalMediaSampleReadTime = 0;
+static int64_t totalHintSampleReadTime = 0;
 enum { eMicro = 1000000, eMilli = 1000 };
 #define kMaxPacketCount 10000
 static int32_t mediaPacketCount = 0;
 static int32_t hintPacketCount = 0;
 static int32_t totalMediaLength = 0;
 static int32_t totalHintLength = 0;
-static SInt64 totalMediaReadTime = 0;
-static SInt64 totalHintReadTime = 0;
+static int64_t totalMediaReadTime = 0;
+static int64_t totalHintReadTime = 0;
 
 
-SInt64 GetMicroseconds()
+int64_t GetMicroseconds()
 {
 	return OS::Milliseconds();
 }
@@ -701,10 +701,10 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 	uint32_t      sampleLength = 0;
 	UInt64      cacheHintSampleLen = 0;
 	int32_t      hintMaxRead = 0;
-	SInt64      sizeOfSamplesInChunk = 0;
-	SInt64      endOfSampleInChunk = 0;
-	SInt64      sampleFirstPartLength = 0;
-	SInt64      remainingLength = 0;
+	int64_t      sizeOfSamplesInChunk = 0;
+	int64_t      endOfSampleInChunk = 0;
+	int64_t      sampleFirstPartLength = 0;
+	int64_t      remainingLength = 0;
 	bool      isOneForOne = false;
 	bool      isCompressed = false;
 
@@ -713,8 +713,8 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 #if TESTTIME
 	bool isMediaSample = false;
 	bool isHintSample = false;
-	SInt64 startTime = GetMicroseconds();
-	SInt64 readStart = 0;
+	int64_t startTime = GetMicroseconds();
+	int64_t readStart = 0;
 #endif
 
 	if (NULL == ppPacketBufOut || NULL == *ppPacketBufOut) return errInternalError;
@@ -1316,13 +1316,13 @@ QTTrack::ErrorCode QTHintTrack::GetPacket(uint32_t sampleNumber, uint16_t packet
 		{
 		case RTPMetaInfoPacket::kPacketPosField:
 			{
-				SInt64 curPacketPos = OS::HostToNetworkSInt64(htcb->fCurrentPacketPosition);
+				int64_t curPacketPos = OS::HostToNetworkSInt64(htcb->fCurrentPacketPosition);
 				this->WriteMetaInfoField(RTPMetaInfoPacket::kPacketPosField, htcb->fRTPMetaInfoFieldArray[fieldCount], &curPacketPos, sizeof(curPacketPos), &pPacketOutBuf);
 				break;
 			}
 		case RTPMetaInfoPacket::kTransTimeField:
 			{
-				SInt64 transmitTimeInMsec = OS::HostToNetworkSInt64((SInt64)(*transmitTime * 1000));
+				int64_t transmitTimeInMsec = OS::HostToNetworkSInt64((int64_t)(*transmitTime * 1000));
 				this->WriteMetaInfoField(RTPMetaInfoPacket::kTransTimeField, htcb->fRTPMetaInfoFieldArray[fieldCount], &transmitTimeInMsec, sizeof(transmitTimeInMsec), &pPacketOutBuf);
 				break;
 			}
@@ -1346,7 +1346,7 @@ QTTrack::ErrorCode QTHintTrack::GetPacket(uint32_t sampleNumber, uint16_t packet
 			}
 		case RTPMetaInfoPacket::kPacketNumField:
 			{
-				SInt64 curPacketNum = OS::HostToNetworkSInt64(htcb->fCurrentPacketNumber);
+				int64_t curPacketNum = OS::HostToNetworkSInt64(htcb->fCurrentPacketNumber);
 				this->WriteMetaInfoField(RTPMetaInfoPacket::kPacketNumField, htcb->fRTPMetaInfoFieldArray[fieldCount], &curPacketNum, sizeof(curPacketNum), &pPacketOutBuf);
 				break;
 			}

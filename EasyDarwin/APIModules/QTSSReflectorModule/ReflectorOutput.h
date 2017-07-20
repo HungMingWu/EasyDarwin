@@ -111,7 +111,7 @@ inline  bool          SetBookMarkPacket(OSQueueElem* thePacketElemPtr);
         // packetLateness is how many MSec's late this packet is in being delivered ( will be < 0 if its early )
         // If this function returns QTSS_WouldBlock, timeToSendThisPacketAgain will
         // be set to # of msec in which the packet can be sent, or -1 if unknown
-        virtual QTSS_Error  WritePacket(StrPtrLen* inPacket, void* inStreamCookie, uint32_t inFlags, SInt64 packetLatenessInMSec, SInt64* timeToSendThisPacketAgain, UInt64* packetIDPtr, SInt64* arrivalTimeMSec, bool firstPacket ) = 0;
+        virtual QTSS_Error  WritePacket(StrPtrLen* inPacket, void* inStreamCookie, uint32_t inFlags, int64_t packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, UInt64* packetIDPtr, int64_t* arrivalTimeMSec, bool firstPacket ) = 0;
     
         virtual void        TearDown() = 0;
         virtual bool      IsUDP() = 0;

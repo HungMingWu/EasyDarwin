@@ -74,13 +74,13 @@ void    QTSSCallbacks::QTSS_Delete(void* inMemory)
 	delete[] inMemory;
 }
 
-void    QTSSCallbacks::QTSS_Milliseconds(SInt64* outMilliseconds)
+void    QTSSCallbacks::QTSS_Milliseconds(int64_t* outMilliseconds)
 {
 	if (outMilliseconds != NULL)
 		*outMilliseconds = OS::Milliseconds();
 }
 
-void    QTSSCallbacks::QTSS_ConvertToUnixTime(SInt64 *inQTSS_MilliSecondsPtr, time_t* outSecondsPtr)
+void    QTSSCallbacks::QTSS_ConvertToUnixTime(int64_t *inQTSS_MilliSecondsPtr, time_t* outSecondsPtr)
 {
 	if ((NULL != outSecondsPtr) && (NULL != inQTSS_MilliSecondsPtr))
 		*outSecondsPtr = OS::TimeMilli_To_UnixTimeSecs(*inQTSS_MilliSecondsPtr);
@@ -682,7 +682,7 @@ QTSS_Error  QTSSCallbacks::QTSS_SignalStream(QTSS_StreamRef inStream)
 	return QTSS_NoErr;
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_SetIdleTimer(SInt64 inMsecToWait)
+QTSS_Error  QTSSCallbacks::QTSS_SetIdleTimer(int64_t inMsecToWait)
 {
 	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
 	if (OSThread::GetCurrent() != NULL)
@@ -700,7 +700,7 @@ QTSS_Error  QTSSCallbacks::QTSS_SetIdleTimer(SInt64 inMsecToWait)
 	return QTSS_NoErr;
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_SetIdleRoleTimer(SInt64 inMsecToWait)
+QTSS_Error  QTSSCallbacks::QTSS_SetIdleRoleTimer(int64_t inMsecToWait)
 {
 
 	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();

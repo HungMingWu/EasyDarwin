@@ -71,7 +71,7 @@ public:
 
 private:
 
-	SInt64 Run() override;
+	int64_t Run() override;
 
 	char*	fStreamName;
 	uint32_t	fChannelNum;

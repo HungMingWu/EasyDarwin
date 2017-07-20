@@ -212,7 +212,7 @@ void TaskThread::Entry()
 #endif
 			theTask->fUseThisThread = NULL; // Each invocation of Run must independently
 											// request a specific thread.
-			SInt64 theTimeout = 0;
+			int64_t theTimeout = 0;
 
 			if (theTask->fWriteLock)
 			{
@@ -287,13 +287,13 @@ void TaskThread::Entry()
 
 
 #if TASK_DEBUG
-			SInt64  yieldStart = OS::Milliseconds();
+			int64_t  yieldStart = OS::Milliseconds();
 #endif
 
 			this->ThreadYield();
 #if TASK_DEBUG
-			SInt64  yieldDur = OS::Milliseconds() - yieldStart;
-			static SInt64   numZeroYields;
+			int64_t  yieldDur = OS::Milliseconds() - yieldStart;
+			static int64_t   numZeroYields;
 
 			if (yieldDur > 1)
 			{
@@ -312,7 +312,7 @@ Task* TaskThread::WaitForTask()
 {
 	while (true)
 	{
-		SInt64 theCurrentTime = OS::Milliseconds();
+		int64_t theCurrentTime = OS::Milliseconds();
 
 		if ((fHeap.PeekMin() != NULL) && (fHeap.PeekMin()->GetValue() <= theCurrentTime))
 		{
@@ -321,7 +321,7 @@ Task* TaskThread::WaitForTask()
 		}
 
 		//if there is an element waiting for a timeout, figure out how long we should wait.
-		SInt64 theTimeout = 0;
+		int64_t theTimeout = 0;
 		if (fHeap.PeekMin() != NULL)
 			theTimeout = fHeap.PeekMin()->GetValue() - theCurrentTime;
 		Assert(theTimeout >= 0);

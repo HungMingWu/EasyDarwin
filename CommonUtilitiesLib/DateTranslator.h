@@ -48,11 +48,11 @@ public:
 	// this updates the DateBuffer to be the current date / time.
 	// If you wish to set the DateBuffer to a particular date, pass in that date.
 	// Dates should be in the OS.h compliant format
-	static void UpdateDateBuffer(DateBuffer* inDateBuffer, const SInt64& inDate, time_t gmtoffset = 0);
+	static void UpdateDateBuffer(DateBuffer* inDateBuffer, const int64_t& inDate, time_t gmtoffset = 0);
 
 	//Given an HTTP/1.1 compliant date string (in one of the three 1.1 formats)
 	//this returns an OS.h compliant date/time value.
-	static SInt64   ParseDate(StrPtrLen* inDateString);
+	static int64_t   ParseDate(StrPtrLen* inDateString);
 
 private:
 
@@ -84,7 +84,7 @@ public:
 
 	// Updates this date buffer to reflect the current time.
 	// If a date is provided, this updates the DateBuffer to be that date.
-	void Update(const SInt64& inDate) { DateTranslator::UpdateDateBuffer(this, inDate); }
+	void Update(const int64_t& inDate) { DateTranslator::UpdateDateBuffer(this, inDate); }
 
 	// Updates this date buffer to reflect the current time, with a certain degree
 	// of inexactitude (the range of error is defined by the kUpdateInterval value)
@@ -102,7 +102,7 @@ private:
 
 	//+1 for terminator +1 for padding
 	char    fDateBuffer[kDateBufferLen + 2];
-	SInt64  fLastDateUpdate;
+	int64_t  fLastDateUpdate;
 
 	friend class DateTranslator;
 };

@@ -123,16 +123,16 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         void ProcessIncomingRTCPPacket(StrPtrLen* inPacket);
 
         //Process the incoming ack RTCP packet
-        bool ProcessAckPacket(RTCPPacket &rtcpPacket, SInt64 &curTime);
+        bool ProcessAckPacket(RTCPPacket &rtcpPacket, int64_t &curTime);
 
         //Process the incoming qtss app RTCP packet
-        bool ProcessCompressedQTSSPacket(RTCPPacket &rtcpPacket, SInt64 &curTime, StrPtrLen &currentPtr);
+        bool ProcessCompressedQTSSPacket(RTCPPacket &rtcpPacket, int64_t &curTime, StrPtrLen &currentPtr);
         
-        bool ProcessNADUPacket(RTCPPacket &rtcpPacket, SInt64 &curTime, StrPtrLen &currentPtr, uint32_t highestSeqNum);
+        bool ProcessNADUPacket(RTCPPacket &rtcpPacket, int64_t &curTime, StrPtrLen &currentPtr, uint32_t highestSeqNum);
 
 
         // Send a RTCP SR on this stream. Pass in true if this SR should also have a BYE
-        void SendRTCPSR(const SInt64& inTime, bool inAppendBye = false);
+        void SendRTCPSR(const int64_t& inTime, bool inAppendBye = false);
         
         //
         // Retransmits get sent when there is new data to be sent, but this function
@@ -188,7 +188,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
             kIsRTPPacket                  = FALSE
         };
     
-        SInt64 fLastQualityChange;
+        int64_t fLastQualityChange;
         int32_t fQualityInterval;
 
         //either pointers to the statically allocated sockets (maintained by the server)
@@ -201,7 +201,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         int32_t                  fBytesSentThisInterval;
         int32_t                  fDisplayCount;
         bool                  fSawFirstPacket;
-        SInt64                  fStreamCumDuration;
+        int64_t                  fStreamCumDuration;
         // manages UDP retransmits
         RTPPacketResender       fResender;
         RTPBandwidthTracker*    fTracker;
@@ -217,7 +217,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
 		uint32_t      fPlayerToMonitorAddr;
 
         //RTCP stuff 
-        SInt64      fLastSenderReportTime;
+        int64_t      fLastSenderReportTime;
         uint32_t      fPacketCount;
         uint32_t      fLastPacketCount;
         uint32_t      fPacketCountInRTCPInterval;
@@ -251,7 +251,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         uint32_t      fNumQualityLevels;
         
         uint32_t      fLastRTPTimestamp;
-		SInt64		fLastNTPTimeStamp;
+		int64_t		fLastNTPTimeStamp;
 		uint32_t		fEstRTT;				//The estimated RTT calculated from RTCP's DLSR and LSR fields
         
         // RTCP data
@@ -290,8 +290,8 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         int32_t      fIncreaseThinningDelay_TCP;
         int32_t      fDropAllPacketsForThisStreamDelay_TCP;
         uint32_t      fStalePacketsDropped_TCP;
-        SInt64      fTimeStreamCaughtUp_TCP;
-        SInt64      fLastQualityLevelIncreaseTime_TCP;
+        int64_t      fTimeStreamCaughtUp_TCP;
+        int64_t      fLastQualityLevelIncreaseTime_TCP;
         //
         // Each stream has a set of thinning related tolerances,
         // that are dependent on prefs and parameters in the SETUP.
@@ -305,7 +305,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         int32_t      fQualityCheckInterval;
         int32_t      fDropAllPacketsForThisStreamDelay;
         uint32_t      fStalePacketsDropped;
-        SInt64      fLastCurrentPacketDelay;
+        int64_t      fLastCurrentPacketDelay;
         bool      fWaitOnLevelAdjustment;
         
         float     fBufferDelay; // from the sdp
@@ -319,8 +319,8 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         
 #if DEBUG
         uint32_t      fNumPacketsDroppedOnTCPFlowControl;
-        SInt64      fFlowControlStartedMsec;
-        SInt64      fFlowControlDurationMsec;
+        int64_t      fFlowControlStartedMsec;
+        int64_t      fFlowControlDurationMsec;
 #endif
         
         // If we are interleaving RTP data over the TCP connection,
@@ -330,13 +330,13 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         
         QTSS_RTPNetworkMode     fNetworkMode;
         
-        SInt64  fStreamStartTimeOSms;
+        int64_t  fStreamStartTimeOSms;
                 
         int32_t fLastQualityLevel;
         int32_t fLastRateLevel;
        
         bool fDisableThinning;
-        SInt64 fLastQualityUpdate;
+        int64_t fLastQualityUpdate;
         uint32_t fDefaultQualityLevel;
         int32_t fMaxQualityLevel;
 		bool fInitialMaxQualityLevelIsSet;
@@ -349,7 +349,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         QTSS_Error  InterleavedWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, unsigned char channel );
 
         // implements the ReliableRTP protocol
-        QTSS_Error  ReliableRTPWrite(void* inBuffer, uint32_t inLen, const SInt64& curPacketDelay);
+        QTSS_Error  ReliableRTPWrite(void* inBuffer, uint32_t inLen, const int64_t& curPacketDelay);
 
          
         void        SetTCPThinningParams();
@@ -364,8 +364,8 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         static char *RUDP;
         static char *TCP;
         
-        bool UpdateQualityLevel(const SInt64& inTransmitTime, const SInt64& inCurrentPacketDelay,
-                                        const SInt64& inCurrentTime, uint32_t inPacketSize);
+        bool UpdateQualityLevel(const int64_t& inTransmitTime, const int64_t& inCurrentPacketDelay,
+                                        const int64_t& inCurrentTime, uint32_t inPacketSize);
         
         void            DisableThinning() { fDisableThinning = true; }
 		void			SetInitialMaxQualityLevel();

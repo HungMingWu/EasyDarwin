@@ -123,7 +123,7 @@ public:
 	virtual ~ErrorLogCheckTask() {}
 
 private:
-	virtual SInt64 Run();
+	virtual int64_t Run();
 };
 
 const uint32_t kMaxLogStringLen = 2172;
@@ -406,7 +406,7 @@ void    WriteShutdownMessage()
 }
 
 // This task runs once an hour to check and see if the log needs to roll.
-SInt64 ErrorLogCheckTask::Run()
+int64_t ErrorLogCheckTask::Run()
 {
 	static bool firstTime = true;
 

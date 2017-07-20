@@ -71,7 +71,7 @@ void EasyCMSSession::CleanupRequest()
 	fOutputStream.ResetBytesWritten();
 }
 
-SInt64 EasyCMSSession::Run()
+int64_t EasyCMSSession::Run()
 {
 	OSMutexLocker locker(&fMutex);
 

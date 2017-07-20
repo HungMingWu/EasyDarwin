@@ -241,7 +241,7 @@ protected:
 	QTSS_RTPNetworkMode         fNetworkMode;
 
 	uint32_t                      fContentLength;
-	SInt64                      fIfModSinceDate;
+	int64_t                      fIfModSinceDate;
 	float                     fSpeed;
 	float                     fLateTolerance;
 	StrPtrLen                   fLateToleranceStr;

@@ -880,7 +880,7 @@ void DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, Resizeabl
 			editedSDP->Put(tempBuff, buffLen);
 
 			editedSDP->Put(" ");
-			qtss_snprintf(tempBuff, sizeof(tempBuff) - 1, "%" _64BITARG_ "d", (SInt64)OS::UnixTime_Secs() + 2208988800LU);
+			qtss_snprintf(tempBuff, sizeof(tempBuff) - 1, "%" _64BITARG_ "d", (int64_t)OS::UnixTime_Secs() + 2208988800LU);
 			editedSDP->Put(tempBuff);
 
 			editedSDP->Put(" IN IP4 ");
@@ -1157,7 +1157,7 @@ void DoDescribeAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, Reflector
 
 			editedSDP->Put(" ");
 			// modified date is in milliseconds.  Convert to NTP seconds as recommended by rfc 2327
-			qtss_snprintf(tempBuff, sizeof(tempBuff) - 1, "%" _64BITARG_ "d", (SInt64)(modDate / 1000) + 2208988800LU);
+			qtss_snprintf(tempBuff, sizeof(tempBuff) - 1, "%" _64BITARG_ "d", (int64_t)(modDate / 1000) + 2208988800LU);
 			editedSDP->Put(tempBuff);
 
 			editedSDP->Put(" IN IP4 ");
@@ -1809,7 +1809,7 @@ bool HaveStreamBuffers(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inS
 	bool haveBufferedStreams = true; // set to false and return if we can't set the packets
 	uint32_t y = 0;
 
-	SInt64 packetArrivalTime = 0;
+	int64_t packetArrivalTime = 0;
 
 	//lock all streams
 	for (y = 0; y < inSession->GetNumStreams(); y++)
@@ -1998,7 +1998,7 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 				}
 
 				//qtss_printf("QTSSReflectorModule:DoPlay  wait 100ms waitTimeLoopCount=%ld\n", waitTimeLoopCount);
-				SInt64 interval = 1 * 100; // 100 millisecond
+				int64_t interval = 1 * 100; // 100 millisecond
 				QTSS_SetIdleTimer(interval);
 				return QTSS_NoErr;
 			}

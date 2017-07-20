@@ -118,7 +118,7 @@ public:
 private:
 
 	//where timeouts, deletion conditions get processed
-	virtual SInt64  Run();
+	virtual int64_t  Run();
 
 	// Utility function used by Play
 	uint32_t PowerOf2Floor(uint32_t inNumToFloor);
@@ -161,7 +161,7 @@ private:
 #if DEBUG
 	bool fActivateCalled;
 #endif
-	SInt64              fLastBandwidthTrackerStatsUpdate;
+	int64_t              fLastBandwidthTrackerStatsUpdate;
 
 };
 

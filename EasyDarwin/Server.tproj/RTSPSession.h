@@ -82,7 +82,7 @@ class RTSPSession;
 //		kMaxRTSPMsgLen = 2060
 //	};
 //
-//	SInt64      fTimeArrived;
+//	int64_t      fTimeArrived;
 //	OSQueueElem fQueueElem;
 //	char        fPacketData[kMaxRTSPMsgLen];
 //	StrPtrLen   fPacketPtr;
@@ -113,7 +113,7 @@ public:
 
 private:
 
-	SInt64 Run();
+	int64_t Run();
 
 	// Gets & creates RTP session for this request.
 	QTSS_Error  FindRTPSession(OSRefTable* inTable);
@@ -244,7 +244,7 @@ private:
 //	virtual ~RTSPSessionHandler();
 //
 //private:
-//	virtual SInt64 Run();
+//	virtual int64_t Run();
 //    
 //    void Release();
 //    RTSPSession* fRTSPSession;
@@ -265,7 +265,7 @@ private:
 //
 //public:
 //    RTSPMsg* GetMsg();
-//	bool  ProcessMsg(const SInt64& inMilliseconds, RTSPMsg* theMsg);
+//	bool  ProcessMsg(const int64_t& inMilliseconds, RTSPMsg* theMsg);
 //    void HandleDataPacket(RTSPMsg* msg);
 //
 //    friend class RTSPSession;

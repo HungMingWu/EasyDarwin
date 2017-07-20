@@ -41,7 +41,7 @@
  //IDLETASKTHREAD IMPLEMENTATION:
 IdleTaskThread*     IdleTask::sIdleThread = NULL;
 
-void IdleTaskThread::SetIdleTimer(IdleTask* activeObj, SInt64 msec)
+void IdleTaskThread::SetIdleTimer(IdleTask* activeObj, int64_t msec)
 {
 	//note: OSHeap doesn't support a random remove, so this function
 	//won't change the timeout value if there is already one set
@@ -73,7 +73,7 @@ IdleTaskThread::Entry()
 		//if there are no events to process, block.
 		if (fIdleHeap.CurrentHeapSize() == 0)
 			fHeapCond.Wait(&fHeapMutex);
-		SInt64 msec = OS::Milliseconds();
+		int64_t msec = OS::Milliseconds();
 
 		//pop elements out of the heap as long as their timeout time has arrived
 		while ((fIdleHeap.CurrentHeapSize() > 0) && (fIdleHeap.PeekMin()->GetValue() <= msec))
@@ -87,7 +87,7 @@ IdleTaskThread::Entry()
 		//we need to sleep until that time.
 		if (fIdleHeap.CurrentHeapSize() > 0)
 		{
-			SInt64 timeoutTime = fIdleHeap.PeekMin()->GetValue();
+			int64_t timeoutTime = fIdleHeap.PeekMin()->GetValue();
 			//because sleep takes a 32 bit number
 			timeoutTime -= msec;
 			Assert(timeoutTime > 0);

@@ -70,14 +70,14 @@ void            QTSS_Delete(void* inMemory)
     (sCallbacks->addr [kDeleteCallback]) (inMemory);
 }
 
-SInt64          QTSS_Milliseconds(void)
+int64_t          QTSS_Milliseconds(void)
 {
-    SInt64 outMilliseconds = 0;
+    int64_t outMilliseconds = 0;
     (sCallbacks->addr [kMillisecondsCallback]) (&outMilliseconds);
     return outMilliseconds;
 }
 
-time_t          QTSS_MilliSecsTo1970Secs(SInt64 inQTSS_MilliSeconds)
+time_t          QTSS_MilliSecsTo1970Secs(int64_t inQTSS_MilliSeconds)
 {
     time_t outSeconds = 0;
     (sCallbacks->addr [kConvertToUnixTimeCallback]) (&inQTSS_MilliSeconds, &outSeconds);
@@ -333,12 +333,12 @@ QTSS_Error  QTSS_SignalStream(QTSS_StreamRef inStream)
     return (sCallbacks->addr [kSignalStreamCallback]) (inStream);       
 }
 
-QTSS_Error  QTSS_SetIdleTimer(SInt64 inIdleMsec)
+QTSS_Error  QTSS_SetIdleTimer(int64_t inIdleMsec)
 {
     return (sCallbacks->addr [kSetIdleTimerCallback]) (inIdleMsec);     
 }
 
-QTSS_Error  QTSS_SetIntervalRoleTimer(SInt64 inIdleMsec)
+QTSS_Error  QTSS_SetIntervalRoleTimer(int64_t inIdleMsec)
 {
     return (sCallbacks->addr [kSetIntervalRoleTimerCallback]) (inIdleMsec);     
 }

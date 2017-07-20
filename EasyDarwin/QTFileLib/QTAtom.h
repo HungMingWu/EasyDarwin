@@ -53,12 +53,12 @@ public:
 	// Initialization functions.
 	virtual bool      Initialize() { return true; }
 
-	static SInt64   NTOH64(SInt64 networkOrdered)
+	static int64_t   NTOH64(int64_t networkOrdered)
 	{
 #if BIGENDIAN
 		return networkOrdered;
 #else
-		return (SInt64)((UInt64)(networkOrdered << 56) | (UInt64)(((UInt64)0x00ff0000 << 32) & (networkOrdered << 40))
+		return (int64_t)((UInt64)(networkOrdered << 56) | (UInt64)(((UInt64)0x00ff0000 << 32) & (networkOrdered << 40))
 			| (UInt64)(((UInt64)0x0000ff00 << 32) & (networkOrdered << 24)) | (UInt64)(((UInt64)0x000000ff << 32) & (networkOrdered << 8))
 			| (UInt64)(((UInt64)0x00ff0000 << 8) & (networkOrdered >> 8)) | (UInt64)((UInt64)0x00ff0000 & (networkOrdered >> 24))
 			| (UInt64)((UInt64)0x0000ff00 & (networkOrdered >> 40)) | (UInt64)((UInt64)0x00ff & (networkOrdered >> 56)));
@@ -73,7 +73,7 @@ public:
 	bool      ReadInt32(UInt64 Offset, uint32_t* Datum);
 	bool      ReadInt64(UInt64 Offset, UInt64* Datum);
 	bool      ReadInt32To64(UInt64 Offset, UInt64* Datum);
-	bool		ReadInt32To64Signed(UInt64 Offset, SInt64* Datum);
+	bool		ReadInt32To64Signed(UInt64 Offset, int64_t* Datum);
 
 	bool      ReadSubAtomBytes(const char* AtomPath, char* Buffer, uint32_t Length);
 	bool      ReadSubAtomInt8(const char* AtomPath, uint8_t* Datum);

@@ -196,9 +196,9 @@ void OSThread::Sleep(uint32_t inMsec)
 	if (inMsec == 0)
 		return;
 
-	SInt64 startTime = OS::Milliseconds();
-	SInt64 timeLeft = inMsec;
-	SInt64 timeSlept = 0;
+	int64_t startTime = OS::Milliseconds();
+	int64_t timeLeft = inMsec;
+	int64_t timeSlept = 0;
 	UInt64 utimeLeft = 0;
 
 	do { // loop in case we leave the sleep early

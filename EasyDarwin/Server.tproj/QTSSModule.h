@@ -172,7 +172,7 @@ public:
 	// This returns true if this module is supposed to run in the specified role.
 	bool  RunsInRole(RoleIndex inIndex) { Assert(inIndex < kNumRoles); return fRoleArray[inIndex]; }
 
-	SInt64 Run();
+	int64_t Run();
 
 	QTSS_ModuleState* GetModuleState() { return &fModuleState; }
 

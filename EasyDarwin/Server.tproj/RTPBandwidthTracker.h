@@ -112,17 +112,17 @@ public:
 		return (fUnadjustedRTO > 0) ? (fCongestionWindow * 1000) / fUnadjustedRTO : 0;
 	}
 	inline const uint32_t RecommendedClientAckTimeout() { return fAckTimeout; }
-	void UpdateAckTimeout(uint32_t bitsSentInInterval, SInt64 intervalLengthInMsec);
+	void UpdateAckTimeout(uint32_t bitsSentInInterval, int64_t intervalLengthInMsec);
 	void UpdateStats();
 
 	//
 	// Stats
 	int32_t              GetMaxCongestionWindowSize() { return fMaxCongestionWindowSize; }
 	int32_t              GetMinCongestionWindowSize() { return fMinCongestionWindowSize; }
-	int32_t              GetAvgCongestionWindowSize() { return (int32_t)(fTotalCongestionWindowSize / (SInt64)fNumStatsSamples); }
+	int32_t              GetAvgCongestionWindowSize() { return (int32_t)(fTotalCongestionWindowSize / (int64_t)fNumStatsSamples); }
 	int32_t              GetMaxRTO() { return fMaxRTO; }
 	int32_t              GetMinRTO() { return fMinRTO; }
-	int32_t              GetAvgRTO() { return (int32_t)(fTotalRTO / (SInt64)fNumStatsSamples); }
+	int32_t              GetAvgRTO() { return (int32_t)(fTotalRTO / (int64_t)fNumStatsSamples); }
 
 	enum
 	{
@@ -147,7 +147,7 @@ private:
 
 	//
 	// Tracking our window sizes
-	SInt64              fLastCongestionAdjust;
+	int64_t              fLastCongestionAdjust;
 	int32_t              fCongestionWindow;      // implentation of VJ congestion avoidance
 	int32_t              fSlowStartThreshold;    // point at which we stop adding to the window for each ack, and add to the window for each window full of acks
 	int32_t              fSlowStartByteCount;            // counts window a full of acks when past ss thresh
@@ -164,8 +164,8 @@ private:
 	int32_t              fMinCongestionWindowSize;
 	int32_t              fMaxRTO;
 	int32_t              fMinRTO;
-	SInt64              fTotalCongestionWindowSize;
-	SInt64              fTotalRTO;
+	int64_t              fTotalCongestionWindowSize;
+	int64_t              fTotalRTO;
 	int32_t              fNumStatsSamples;
 
 	enum

@@ -179,7 +179,7 @@ void RTPPacketResender::SetLog(StrPtrLen *logname)
 	fLogger->EnableLog();
 }
 
-void RTPPacketResender::LogClose(SInt64 inTimeSpentInFlowControl)
+void RTPPacketResender::LogClose(int64_t inTimeSpentInFlowControl)
 {
 	this->logprintf("Flow control duration msec: %" _64BITARG_ "d. Max outstanding packets: %d\n", inTimeSpentInFlowControl, this->GetMaxPacketsInList());
 
@@ -198,7 +198,7 @@ uint32_t RTPPacketResender::SpillGuts(uint32_t inBytesSentThisInterval)
 		if (fBandwidthTracker->IsFlowControlled())
 			isFlowed = "flowed";
 
-		SInt64  kiloBitperSecond = (((SInt64)inBytesSentThisInterval * (SInt64)1000 * (SInt64)8) / fInfoDisplayTimer.DurationInMilliseconds()) / (SInt64)1024;
+		int64_t  kiloBitperSecond = (((int64_t)inBytesSentThisInterval * (int64_t)1000 * (int64_t)8) / fInfoDisplayTimer.DurationInMilliseconds()) / (int64_t)1024;
 
 		//fStreamCumDuration += fInfoDisplayTimer.DurationInMilliseconds();
 		fInfoDisplayTimer.Reset();
@@ -358,7 +358,7 @@ void RTPPacketResender::AddPacket(void * inRTPPacket, uint32_t packetSize, int32
 	fNumSent++;
 }
 
-void RTPPacketResender::AckPacket(uint16_t inSeqNum, SInt64& inCurTimeInMsec)
+void RTPPacketResender::AckPacket(uint16_t inSeqNum, int64_t& inCurTimeInMsec)
 {
 	//OSMutexLocker packetQLocker(&fPacketQMutex);
 
@@ -495,7 +495,7 @@ void RTPPacketResender::ResendDueEntries()
 	//
 	int32_t numResends = 0;
 	RTPResenderEntry* theEntry = NULL;
-	SInt64 curTime = OS::Milliseconds();
+	int64_t curTime = OS::Milliseconds();
 	for (int32_t packetIndex = fPacketsInList - 1; packetIndex >= 0; packetIndex--) // walk backwards because remove packet moves array members forward
 	{
 		theEntry = &fPacketArray[packetIndex];

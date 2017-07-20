@@ -56,7 +56,7 @@ private:
 	IdleTaskThread() : OSThread(), fHeapMutex() {}
 	virtual ~IdleTaskThread() { Assert(fIdleHeap.CurrentHeapSize() == 0); }
 
-	void SetIdleTimer(IdleTask* idleObj, SInt64 msec);
+	void SetIdleTimer(IdleTask* idleObj, int64_t msec);
 	void CancelTimeout(IdleTask* idleObj);
 
 	virtual void Entry();
@@ -88,7 +88,7 @@ public:
 	//This object will receive an OS_IDLE event in the following number of milliseconds.
 	//Only one timeout can be outstanding, if there is already a timeout scheduled, this
 	//does nothing.
-	void SetIdleTimer(SInt64 msec) { sIdleThread->SetIdleTimer(this, msec); }
+	void SetIdleTimer(int64_t msec) { sIdleThread->SetIdleTimer(this, msec); }
 
 	//CancelTimeout
 	//If there is a pending timeout for this object, this function cancels it.

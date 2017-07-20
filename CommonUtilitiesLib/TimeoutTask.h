@@ -66,7 +66,7 @@ private:
 		kIntervalSeconds = 15   //UInt32
 	};
 
-	virtual SInt64          Run();
+	virtual int64_t          Run();
 	OSMutex                 fMutex;
 	OSQueue                 fQueue;
 
@@ -84,13 +84,13 @@ public:
 	static  void Initialize();
 	//Pass in the task you'd like to send timeouts to. 
 	//Also pass in the timeout you'd like to use. By default, the timeout is 0 (NEVER).
-	TimeoutTask(Task* inTask, SInt64 inTimeoutInMilSecs = 15);
+	TimeoutTask(Task* inTask, int64_t inTimeoutInMilSecs = 15);
 	~TimeoutTask();
 
 	//MODIFIERS
 
 	// Changes the timeout time, also refreshes the timeout
-	void        SetTimeout(SInt64 inTimeoutInMilSecs);
+	void        SetTimeout(int64_t inTimeoutInMilSecs);
 
 	// Specified task will get a Task::kTimeoutEvent if this
 	// function isn't called within the timeout period
@@ -100,8 +100,8 @@ public:
 private:
 
 	Task*       fTask;
-	SInt64      fTimeoutAtThisTime;
-	SInt64      fTimeoutInMilSecs;
+	int64_t      fTimeoutAtThisTime;
+	int64_t      fTimeoutInMilSecs;
 	//for putting on our global queue of timeout tasks
 	OSQueueElem fQueueElem;
 

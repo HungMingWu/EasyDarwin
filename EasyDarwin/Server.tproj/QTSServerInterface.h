@@ -151,7 +151,7 @@ public:
 	}
 
 
-	void            IncrementTotalLate(SInt64 milliseconds)
+	void            IncrementTotalLate(int64_t milliseconds)
 	{
 		OSMutexLocker locker(&fMutex);
 		fTotalLate += milliseconds;
@@ -211,10 +211,10 @@ public:
 	void                SetDebugLevel(uint32_t debugLevel) { fDebugLevel = debugLevel; }
 	void                SetDebugOptions(uint32_t debugOptions) { fDebugOptions = debugOptions; }
 
-	SInt64				GetMaxLate() { return fMaxLate; };
-	SInt64				GetTotalLate() { return fTotalLate; };
-	SInt64				GetCurrentMaxLate() { return fCurrentMaxLate; };
-	SInt64				GetTotalQuality() { return fTotalQuality; };
+	int64_t				GetMaxLate() { return fMaxLate; };
+	int64_t				GetTotalLate() { return fTotalLate; };
+	int64_t				GetCurrentMaxLate() { return fCurrentMaxLate; };
+	int64_t				GetTotalQuality() { return fTotalQuality; };
 	int32_t				GetNumThinned() { return fNumThinned; };
 	uint32_t				GetNumThreads() { return fNumThreads; };
 
@@ -344,7 +344,7 @@ protected:
 	uint32_t                      fNumListeners; // Number of elements in the array
 
 	// startup time
-	SInt64						fStartupTime_UnixMilli;
+	int64_t						fStartupTime_UnixMilli;
 	int32_t						fGMTOffset;
 
 	static ResizeableStringFormatter    sPublicHeaderFormatter;
@@ -423,7 +423,7 @@ private:
 	bool              fIsOutOfDescriptors;
 
 	// Storage for current time attribute
-	SInt64              fCurrentTime_UnixMilli;
+	int64_t              fCurrentTime_UnixMilli;
 
 	// Stats for UDP retransmits
 	uint32_t              fUDPWastageInBytes;
@@ -436,10 +436,10 @@ private:
 	uint32_t              fDebugOptions;
 
 
-	SInt64          fMaxLate;
-	SInt64          fTotalLate;
-	SInt64          fCurrentMaxLate;
-	SInt64          fTotalQuality;
+	int64_t          fMaxLate;
+	int64_t          fTotalLate;
+	int64_t          fCurrentMaxLate;
+	int64_t          fTotalQuality;
 	int32_t          fNumThinned;
 	uint32_t          fNumThreads;
 
@@ -468,13 +468,13 @@ public:
 
 private:
 
-	virtual SInt64 Run();
+	virtual int64_t Run();
 	RTPSessionInterface* GetNewestSession(OSRefTable* inRTPSessionMap);
 	float GetCPUTimeInSeconds();
 
-	SInt64 fLastBandwidthTime;
-	SInt64 fLastBandwidthAvg;
-	SInt64 fLastBytesSent;
+	int64_t fLastBandwidthTime;
+	int64_t fLastBandwidthAvg;
+	int64_t fLastBytesSent;
 };
 
 #endif // __QTSSERVERINTERFACE_H__

@@ -270,7 +270,7 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 	fLastBitRateUpdateTime = fNextSendPacketsTime = fPlayTime = OS::Milliseconds();
 	if (fIsFirstPlay)
 		fFirstPlayTime = fPlayTime;
-	fAdjustedPlayTime = fPlayTime - ((SInt64)(request->GetStartTime() * 1000));
+	fAdjustedPlayTime = fPlayTime - ((int64_t)(request->GetStartTime() * 1000));
 
 	//for RTCP SRs, we also need to store the play time in NTP
 	fNTPPlayTime = OS::TimeMilli_To_1900Fixed64Secs(fPlayTime);
@@ -475,7 +475,7 @@ void    RTPSession::SendAnnounceResponse(RTSPRequestInterface* inRequest)
 	(void)inRequest->SendHeader();
 }
 
-SInt64 RTPSession::Run()
+int64_t RTPSession::Run()
 {
 #if DEBUG
 	Assert(fActivateCalled);
@@ -533,7 +533,7 @@ SInt64 RTPSession::Run()
 
 			if (this->GetPlayFlags() & qtssPlayFlagsSendRTCP)
 			{
-				SInt64 byePacketTime = OS::Milliseconds();
+				int64_t byePacketTime = OS::Milliseconds();
 				for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
 					if (theStream && *theStream != NULL)
 						(*theStream)->SendRTCPSR(byePacketTime, true);

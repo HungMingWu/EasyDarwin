@@ -73,7 +73,7 @@ public:
 	inline void SetSSRC(uint32_t inSSRC);
 	inline void SetClientSSRC(uint32_t inClientSSRC);
 
-	inline void SetNTPTimestamp(SInt64 inNTPTimestamp);
+	inline void SetNTPTimestamp(int64_t inNTPTimestamp);
 	inline void SetRTPTimestamp(uint32_t inRTPTimestamp);
 
 	inline void SetPacketCount(uint32_t inPacketCount);
@@ -130,13 +130,13 @@ inline void RTCPSRPacket::SetClientSSRC(uint32_t inClientSSRC)
 	((uint32_t*)&fSenderReportBuffer)[(fSenderReportSize >> 2) + 3] = htonl(inClientSSRC);
 }
 
-inline void RTCPSRPacket::SetNTPTimestamp(SInt64 inNTPTimestamp)
+inline void RTCPSRPacket::SetNTPTimestamp(int64_t inNTPTimestamp)
 {
 #if ALLOW_NON_WORD_ALIGN_ACCESS
-	((SInt64*)&fSenderReportBuffer)[1] = OS::HostToNetworkSInt64(inNTPTimestamp);
+	((int64_t*)&fSenderReportBuffer)[1] = OS::HostToNetworkSInt64(inNTPTimestamp);
 #else
-	SInt64 temp = OS::HostToNetworkSInt64(inNTPTimestamp);
-	::memcpy(&((SInt64*)&fSenderReportBuffer)[1], &temp, sizeof(temp));
+	int64_t temp = OS::HostToNetworkint64_t(inNTPTimestamp);
+	::memcpy(&((int64_t*)&fSenderReportBuffer)[1], &temp, sizeof(temp));
 #endif
 }
 

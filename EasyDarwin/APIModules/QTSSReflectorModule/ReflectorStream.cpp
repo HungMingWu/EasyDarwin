@@ -600,7 +600,7 @@ ReflectorSender::~ReflectorSender()
 }
 
 
-bool ReflectorSender::ShouldReflectNow(const SInt64& inCurrentTime, SInt64* ioWakeupTime)
+bool ReflectorSender::ShouldReflectNow(const int64_t& inCurrentTime, int64_t* ioWakeupTime)
 {
 	Assert(ioWakeupTime != NULL);
 	//check to make sure there actually is work to do for this stream.
@@ -608,7 +608,7 @@ bool ReflectorSender::ShouldReflectNow(const SInt64& inCurrentTime, SInt64* ioWa
 	{
 		//We don't need to do work right now, but
 		//this stream must still communicate when it needs to be woken up next
-		SInt64 theWakeupTime = fNextTimeToRun + inCurrentTime;
+		int64_t theWakeupTime = fNextTimeToRun + inCurrentTime;
 		//qtss_printf("ReflectorSender::ShouldReflectNow theWakeupTime=%qd newWakeUpTime=%qd  ioWakepTime=%qd\n", theWakeupTime, fNextTimeToRun + inCurrentTime,*ioWakeupTime);
 		if ((fNextTimeToRun > 0) && (theWakeupTime < *ioWakeupTime))
 			*ioWakeupTime = theWakeupTime;
@@ -693,7 +693,7 @@ OSQueueElem*    ReflectorSender::GetClientBufferNextPacketTime(uint32_t inRTPTim
 	return requestedPacket;
 }
 
-bool ReflectorSender::GetFirstRTPTimePacket(uint16_t* outSeqNumPtr, uint32_t* outRTPTimePtr, SInt64* outArrivalTimePtr)
+bool ReflectorSender::GetFirstRTPTimePacket(uint16_t* outSeqNumPtr, uint32_t* outRTPTimePtr, int64_t* outArrivalTimePtr)
 {
 	OSMutexLocker locker(&fStream->fBucketMutex);
 	OSQueueElem* packetElem = this->GetClientBufferStartPacketOffset(ReflectorStream::sFirstPacketOffsetMsec);
@@ -725,7 +725,7 @@ bool ReflectorSender::GetFirstRTPTimePacket(uint16_t* outSeqNumPtr, uint32_t* ou
 	return true;
 }
 
-bool ReflectorSender::GetFirstPacketInfo(uint16_t* outSeqNumPtr, uint32_t* outRTPTimePtr, SInt64* outArrivalTimePtr)
+bool ReflectorSender::GetFirstPacketInfo(uint16_t* outSeqNumPtr, uint32_t* outRTPTimePtr, int64_t* outArrivalTimePtr)
 {
 	OSMutexLocker locker(&fStream->fBucketMutex);
 	OSQueueElem* packetElem = this->GetClientBufferStartPacketOffset(ReflectorStream::sFirstPacketOffsetMsec);
@@ -769,7 +769,7 @@ static uint16_t DGetPacketSeqNumber(StrPtrLen* inPacket)
 #endif
 
 
-void ReflectorSender::ReflectRelayPackets(SInt64* ioWakeupTime, OSQueue* inFreeQueue)
+void ReflectorSender::ReflectRelayPackets(int64_t* ioWakeupTime, OSQueue* inFreeQueue)
 {
 	//Most of this code is useless i.e. buckets and bookmarks. This code will get cleaned up eventually
 
@@ -781,7 +781,7 @@ void ReflectorSender::ReflectRelayPackets(SInt64* ioWakeupTime, OSQueue* inFreeQ
 	bool	printQueueLenOnExit = false;
 #endif	
 
-	SInt64 currentTime = OS::Milliseconds();
+	int64_t currentTime = OS::Milliseconds();
 
 	//make sure to reset these state variables
 	fHasNewPackets = false;
@@ -908,14 +908,14 @@ void ReflectorSender::ReflectRelayPackets(SInt64* ioWakeupTime, OSQueue* inFreeQ
 					// during this pass mark remaining as still needed
 					if (!dodBookmarkPacket)
 					{
-						SInt64  packetLateness = currentTime - thePacket->fTimeArrived - (ReflectorStream::sBucketDelayInMsec * (SInt64)bucketIndex);
+						int64_t  packetLateness = currentTime - thePacket->fTimeArrived - (ReflectorStream::sBucketDelayInMsec * (int64_t)bucketIndex);
 						// packetLateness measures how late this packet it after being corrected for the bucket delay
 
 #if REFLECTOR_STREAM_DEBUGGING > 2
 						printf("packetLateness %li, seq# %li\n", (int32_t)packetLateness, (int32_t)DGetPacketSeqNumber(&thePacket->fPacketPtr));
 #endif
 
-						SInt64 timeToSendPacket = -1;
+						int64_t timeToSendPacket = -1;
 						err = theOutput->WritePacket(&thePacket->fPacketPtr, fStream, fWriteFlag, packetLateness, &timeToSendPacket, NULL, NULL, false);
 
 						if (err == QTSS_WouldBlock)
@@ -1021,7 +1021,7 @@ void ReflectorSender::ReflectRelayPackets(SInt64* ioWakeupTime, OSQueue* inFreeQ
 /               inFreeQueue - queue of free packets.
 */
 
-void ReflectorSender::ReflectPackets(SInt64* ioWakeupTime, OSQueue* inFreeQueue)
+void ReflectorSender::ReflectPackets(int64_t* ioWakeupTime, OSQueue* inFreeQueue)
 {
 	if (!fStream->BufferEnabled()) // Call old routine for relays; they don't want buffering.
 	{
@@ -1029,7 +1029,7 @@ void ReflectorSender::ReflectPackets(SInt64* ioWakeupTime, OSQueue* inFreeQueue)
 		return;
 	}
 
-	SInt64 currentTime = OS::Milliseconds();
+	int64_t currentTime = OS::Milliseconds();
 
 	//make sure to reset these state variables
 	fHasNewPackets = false;
@@ -1104,7 +1104,7 @@ void ReflectorSender::ReflectPackets(SInt64* ioWakeupTime, OSQueue* inFreeQueue)
 						theOutput->setNewFlag(false);
 					}
 
-					SInt64  bucketDelay = ReflectorStream::sBucketDelayInMsec * (SInt64)bucketIndex;
+					int64_t  bucketDelay = ReflectorStream::sBucketDelayInMsec * (int64_t)bucketIndex;
 					packetElem = this->SendPacketsToOutput(theOutput, packetElem, currentTime, bucketDelay, firstPacket);
 					if (packetElem)
 					{
@@ -1135,7 +1135,7 @@ void ReflectorSender::ReflectPackets(SInt64* ioWakeupTime, OSQueue* inFreeQueue)
 
 }
 
-OSQueueElem*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOutput, OSQueueElem* currentPacket, SInt64 currentTime, SInt64  bucketDelay, bool firstPacket)
+OSQueueElem*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOutput, OSQueueElem* currentPacket, int64_t currentTime, int64_t  bucketDelay, bool firstPacket)
 {
 	OSQueueElem* lastPacket = currentPacket;
 	OSQueueIter qIter(&fPacketQueue, currentPacket);  // starts from beginning if currentPacket == NULL, else from currentPacket                
@@ -1148,8 +1148,8 @@ OSQueueElem*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOutput,
 		lastPacket = currentPacket;
 
 		ReflectorPacket*    thePacket = (ReflectorPacket*)currentPacket->GetEnclosingObject();
-		SInt64  packetLateness = bucketDelay;
-		SInt64 timeToSendPacket = -1;
+		int64_t  packetLateness = bucketDelay;
+		int64_t timeToSendPacket = -1;
 
 		//printf("packetLateness %qd, seq# %li\n", packetLateness, (int32_t) DGetPacketSeqNumber( &thePacket->fPacketPtr ) );          
 
@@ -1198,11 +1198,11 @@ OSQueueElem*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOutput,
 }
 
 
-OSQueueElem* ReflectorSender::GetClientBufferStartPacketOffset(SInt64 offsetMsec, bool needKeyFrameFirstPacket)
+OSQueueElem* ReflectorSender::GetClientBufferStartPacketOffset(int64_t offsetMsec, bool needKeyFrameFirstPacket)
 {
 	OSQueueIter qIter(&fPacketQueue);// start at oldest packet in q
-	SInt64 theCurrentTime = OS::Milliseconds();
-	SInt64 packetDelay = 0;
+	int64_t theCurrentTime = OS::Milliseconds();
+	int64_t packetDelay = 0;
 	OSQueueElem* oldestPacketInClientBufferTime = NULL;
 
 
@@ -1237,9 +1237,9 @@ void    ReflectorSender::RemoveOldPackets(OSQueue* inFreeQueue)
 	// Start at the oldest packet and walk forward to the newest packet
 	// 
 	OSQueueIter removeIter(&fPacketQueue);
-	SInt64 theCurrentTime = OS::Milliseconds();
-	SInt64 packetDelay = 0;
-	SInt64 currentMaxPacketDelay = ReflectorStream::sMaxPacketAgeMSec;
+	int64_t theCurrentTime = OS::Milliseconds();
+	int64_t packetDelay = 0;
+	int64_t currentMaxPacketDelay = ReflectorStream::sMaxPacketAgeMSec;
 
 
 	while (!removeIter.IsDone())
@@ -1297,9 +1297,9 @@ OSQueueElem* ReflectorSender::NeedRelocateBookMark(OSQueueElem* elem)
 	//3、返回最新的fKeyFrameStartPacketElementPointer做为最新的BookMark
 	Assert(elem);
 
-	SInt64 theCurrentTime = OS::Milliseconds();
-	SInt64 packetDelay = 0;
-	SInt64 currentMaxPacketDelay = ReflectorStream::sRelocatePacketAgeMSec;
+	int64_t theCurrentTime = OS::Milliseconds();
+	int64_t packetDelay = 0;
+	int64_t currentMaxPacketDelay = ReflectorStream::sRelocatePacketAgeMSec;
 
 	ReflectorPacket* thePacket = (ReflectorPacket*)elem->GetEnclosingObject();
 	Assert(thePacket);
@@ -1333,7 +1333,7 @@ OSQueueElem* ReflectorSender::NeedRelocateBookMark(OSQueueElem* elem)
 	////if((currentPacket)&&IsFrameLastPacket(currentPacket))
 	//if((currentPacket)&&IsFrameFirstPacket(currentPacket))
 	//{	
-	//	SInt64 packetDelay = OS::Milliseconds() - currentPacket->fTimeArrived;
+	//	int64_t packetDelay = OS::Milliseconds() - currentPacket->fTimeArrived;
 	//	if ( packetDelay >= (ReflectorStream::sRelocatePacketAgeMSec) )
 	//	{
 	//		return true;
@@ -1352,11 +1352,11 @@ OSQueueElem* ReflectorSender::NeedRelocateBookMark(OSQueueElem* elem)
 	//return false;
 }
 
-OSQueueElem*    ReflectorSender::GetNewestKeyFrameFirstPacket(OSQueueElem* currentElem, SInt64 offsetMsec)
+OSQueueElem*    ReflectorSender::GetNewestKeyFrameFirstPacket(OSQueueElem* currentElem, int64_t offsetMsec)
 {
 	//printf("[geyijun] GetNewestKeyFrameFirstPacket---------------->1\n");
-	SInt64 theCurrentTime = OS::Milliseconds();
-	SInt64 packetDelay = 0;
+	int64_t theCurrentTime = OS::Milliseconds();
+	int64_t packetDelay = 0;
 	OSQueueElem* requestedPacket = NULL;
 	OSQueueIter qIter(&fPacketQueue, currentElem);
 	while (!qIter.IsDone()) // start at oldest packet in q
@@ -1673,7 +1673,7 @@ void    ReflectorSocket::RemoveSender(ReflectorSender* inSender)
 	Assert(err == QTSS_NoErr);
 }
 
-SInt64 ReflectorSocket::Run()
+int64_t ReflectorSocket::Run()
 {
 	//We want to make sure we can't get idle events WHILE we are inside
 	//this function. That will cause us to run the queues unnecessarily
@@ -1686,7 +1686,7 @@ SInt64 ReflectorSocket::Run()
 		return -1;
 
 	OSMutexLocker locker(this->GetDemuxer()->GetMutex());
-	SInt64 theMilliseconds = OS::Milliseconds();
+	int64_t theMilliseconds = OS::Milliseconds();
 
 	//Only check for data on the socket if we've actually been notified to that effect
 	if (theEvents & Task::kReadEvent)
@@ -1733,7 +1733,7 @@ void ReflectorSocket::FilterInvalidSSRCs(ReflectorPacket* thePacket, bool isRTCP
 {   // assume the first SSRC we see is valid and all others are to be ignored.
 	if (thePacket->fPacketPtr.Len > 0) do
 	{
-		SInt64 currentTime = OS::Milliseconds() / 1000;
+		int64_t currentTime = OS::Milliseconds() / 1000;
 		if (0 == fValidSSRC)
 		{
 			fValidSSRC = thePacket->GetSSRC(isRTCP); // SSRC of 0 is allowed
@@ -1766,7 +1766,7 @@ void ReflectorSocket::FilterInvalidSSRCs(ReflectorPacket* thePacket, bool isRTCP
 	} while (false);
 }
 
-bool ReflectorSocket::ProcessPacket(const SInt64& inMilliseconds, ReflectorPacket* thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort)
+bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPacket* thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort)
 {
 	bool done = false; // stop when result is true
 	if (thePacket != NULL) do
@@ -1977,11 +1977,11 @@ bool ReflectorSocket::ProcessPacket(const SInt64& inMilliseconds, ReflectorPacke
 				}
 
 
-				SInt64 packetOffsetFromStart = theReceiveTime - this->fFirstReceiveTime; // packets arrive at time 0 and fill forward into the future
+				int64_t packetOffsetFromStart = theReceiveTime - this->fFirstReceiveTime; // packets arrive at time 0 and fill forward into the future
 				thePacket->fTimeArrived = this->fFirstArrivalTime + packetOffsetFromStart; // offset starts negative by over buffer amount
 				thePacket->fPacketPtr.Len -= 12;
 
-				SInt64 arrivalTimeOffset = thePacket->fTimeArrived - inMilliseconds;
+				int64_t arrivalTimeOffset = thePacket->fTimeArrived - inMilliseconds;
 				if (arrivalTimeOffset > ReflectorStream::sMaxFuturePacketMSec) // way out in the future.
 					thePacket->fTimeArrived = inMilliseconds + ReflectorStream::sMaxFuturePacketMSec; //keep it but only for sMaxFuturePacketMSec =  (sMaxPacketAgeMSec <-- current --> sMaxFuturePacketMSec)
 
@@ -2010,7 +2010,7 @@ bool ReflectorSocket::ProcessPacket(const SInt64& inMilliseconds, ReflectorPacke
 }
 
 
-void ReflectorSocket::GetIncomingData(const SInt64& inMilliseconds)
+void ReflectorSocket::GetIncomingData(const int64_t& inMilliseconds)
 {
 	OSMutexLocker locker(this->GetDemuxer()->GetMutex());
 	uint32_t theRemoteAddr = 0;

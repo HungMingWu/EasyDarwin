@@ -83,11 +83,11 @@ public:
 	// ACCESSORS
 
 	bool  IsFirstPlay() { return fIsFirstPlay; }
-	SInt64  GetFirstPlayTime() { return fFirstPlayTime; }
+	int64_t  GetFirstPlayTime() { return fFirstPlayTime; }
 	//Time (msec) most recent play was issued
-	SInt64  GetPlayTime() { return fPlayTime; }
-	SInt64  GetNTPPlayTime() { return fNTPPlayTime; }
-	SInt64  GetSessionCreateTime() { return fSessionCreateTime; }
+	int64_t  GetPlayTime() { return fPlayTime; }
+	int64_t  GetNTPPlayTime() { return fNTPPlayTime; }
+	int64_t  GetSessionCreateTime() { return fSessionCreateTime; }
 	//Time (msec) most recent play, adjusted for start time of the movie
 	//ex: PlayTime() == 20,000. Client said start 10 sec into the movie,
 	//so AdjustedPlayTime() == 10,000
@@ -130,7 +130,7 @@ public:
 	//Streams can update that value by calling this function                
 	void            UpdatePacketsSent(uint32_t packetsSent) { fPacketsSent += packetsSent; }
 
-	void            UpdateCurrentBitRate(const SInt64& curTime)
+	void            UpdateCurrentBitRate(const int64_t& curTime)
 	{
 		if (curTime > (fLastBitRateUpdateTime + 3000)) this->UpdateBitRateInternal(curTime);
 	}
@@ -184,8 +184,8 @@ public:
 			QTSServerInterface::GetServer()->IncrementNumThinned(-1);
 		fSessionQualityLevel = level;
 	}
-	SInt64          fLastQualityCheckTime;
-	SInt64			fLastQualityCheckMediaTime;
+	int64_t          fLastQualityCheckTime;
+	int64_t			fLastQualityCheckMediaTime;
 	bool			fStartedThinning;
 
 	// Used by RTPStream to increment the RTCP packet and byte counts.
@@ -206,11 +206,11 @@ protected:
 	//Some stream related information that is shared amongst all streams
 	bool      fIsFirstPlay;
 	bool      fAllTracksInterleaved;
-	SInt64      fFirstPlayTime;//in milliseconds
-	SInt64      fPlayTime;
-	SInt64      fAdjustedPlayTime;
-	SInt64      fNTPPlayTime;
-	SInt64      fNextSendPacketsTime;
+	int64_t      fFirstPlayTime;//in milliseconds
+	int64_t      fPlayTime;
+	int64_t      fAdjustedPlayTime;
+	int64_t      fNTPPlayTime;
+	int64_t      fNextSendPacketsTime;
 
 	int32_t      fSessionQualityLevel;
 
@@ -231,7 +231,7 @@ protected:
 	char                fRTSPSessionIDBuf[QTSS_MAX_SESSION_ID_LENGTH + 4];
 
 	uint32_t      fLastBitRateBytes;
-	SInt64      fLastBitRateUpdateTime;
+	int64_t      fLastBitRateUpdateTime;
 	uint32_t      fMovieCurrentBitRate;
 
 	// In order to facilitate sending data over the RTSP channel from
@@ -245,7 +245,7 @@ private:
 
 	//
 	// Utility function for calculating current bit rate
-	void UpdateBitRateInternal(const SInt64& curTime);
+	void UpdateBitRateInternal(const int64_t& curTime);
 
 	static void* PacketLossPercent(QTSSDictionary* inSession, uint32_t* outLen);
 	static void* TimeConnected(QTSSDictionary* inSession, uint32_t* outLen);
@@ -297,7 +297,7 @@ private:
 	uint32_t      fTimeout;
 
 	// Time when this session got created
-	SInt64      fSessionCreateTime;
+	int64_t      fSessionCreateTime;
 
 	//Packet priority levels. Each stream has a current level, and
 	//the module that owns this session sets what the number of levels is.
@@ -307,7 +307,7 @@ private:
 	uint32_t fBytesSent;
 	uint32_t fPacketsSent;
 	float fPacketLossPercent;
-	SInt64 fTimeConnected;
+	int64_t fTimeConnected;
 	uint32_t fTotalRTCPPacketsRecv;
 	uint32_t fTotalRTCPBytesRecv;
 	// Movie size & movie duration. It may not be so good to associate these

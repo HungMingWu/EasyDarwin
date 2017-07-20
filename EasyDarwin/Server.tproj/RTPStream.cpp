@@ -821,7 +821,7 @@ void    RTPStream::SendRetransmits()
 }
 
 //ReliableRTPWrite must be called from a fSession mutex protected caller
-QTSS_Error RTPStream::ReliableRTPWrite(void* inBuffer, uint32_t inLen, const SInt64& curPacketDelay)
+QTSS_Error RTPStream::ReliableRTPWrite(void* inBuffer, uint32_t inLen, const int64_t& curPacketDelay)
 {
 	QTSS_Error err = QTSS_NoErr;
 
@@ -932,8 +932,8 @@ void RTPStream::SetInitialMaxQualityLevel()
 }
 
 
-bool RTPStream::UpdateQualityLevel(const SInt64& inTransmitTime, const SInt64& inCurrentPacketDelay,
-	const SInt64& inCurrentTime, uint32_t inPacketSize)
+bool RTPStream::UpdateQualityLevel(const int64_t& inTransmitTime, const int64_t& inCurrentPacketDelay,
+	const int64_t& inCurrentTime, uint32_t inPacketSize)
 {
 	Assert(fNumQualityLevels > 0);
 
@@ -1052,13 +1052,13 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 
 
 	QTSS_Error err = QTSS_NoErr;
-	SInt64 theTime = OS::Milliseconds();
+	int64_t theTime = OS::Milliseconds();
 
 	//
 	// Data passed into this version of write must be a QTSS_PacketStruct
 	QTSS_PacketStruct* thePacket = (QTSS_PacketStruct*)inBuffer;
 	thePacket->suggestedWakeupTime = -1;
-	SInt64 theCurrentPacketDelay = theTime - thePacket->packetTransmitTime;
+	int64_t theCurrentPacketDelay = theTime - thePacket->packetTransmitTime;
 
 	//If we are doing rate-adaptation, set the maximum quality level if the bandwidth header is received
 	if (!fInitialMaxQualityLevelIsSet && !fDisableThinning)
@@ -1156,12 +1156,12 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 			{
 				if (err == 0)
 				{
-					static SInt64 time = -1;
+					static int64_t time = -1;
 					static int byteCount = 0;
-					static SInt64 startTime = -1;
+					static int64_t startTime = -1;
 					static int totalBytes = 0;
 					static int numPackets = 0;
-					static SInt64 firstTime;
+					static int64_t firstTime;
 
 					if (theTime - time > 1000)
 					{
@@ -1261,7 +1261,7 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 
 // SendRTCPSR is called by the session as well as the strem
 // SendRTCPSR must be called from a fSession mutex protected caller
-void RTPStream::SendRTCPSR(const SInt64& inTime, bool inAppendBye)
+void RTPStream::SendRTCPSR(const int64_t& inTime, bool inAppendBye)
 {
 	// This will roll over, after which payloadByteCount will be all messed up.
 	// But because it is a 32 bit number, that is bound to happen eventually,
@@ -1319,7 +1319,7 @@ void RTPStream::ProcessIncomingInterleavedData(uint8_t inChannelNum, RTSPSession
 }
 
 
-bool RTPStream::ProcessNADUPacket(RTCPPacket &rtcpPacket, SInt64 &curTime, StrPtrLen &currentPtr, uint32_t highestSeqNum)
+bool RTPStream::ProcessNADUPacket(RTCPPacket &rtcpPacket, int64_t &curTime, StrPtrLen &currentPtr, uint32_t highestSeqNum)
 {
 	RTCPNaduPacket naduPacket(false);
 	uint8_t* packetBuffer = rtcpPacket.GetPacketBuffer();
@@ -1333,7 +1333,7 @@ bool RTPStream::ProcessNADUPacket(RTCPPacket &rtcpPacket, SInt64 &curTime, StrPt
 	return true;
 }
 
-bool RTPStream::ProcessCompressedQTSSPacket(RTCPPacket &rtcpPacket, SInt64 &curTime, StrPtrLen &currentPtr)
+bool RTPStream::ProcessCompressedQTSSPacket(RTCPPacket &rtcpPacket, int64_t &curTime, StrPtrLen &currentPtr)
 {
 	RTCPCompressedQTSSPacket compressedQTSSPacket;
 	uint8_t* packetBuffer = rtcpPacket.GetPacketBuffer();
@@ -1380,7 +1380,7 @@ bool RTPStream::ProcessCompressedQTSSPacket(RTCPPacket &rtcpPacket, SInt64 &curT
 }
 
 
-bool RTPStream::ProcessAckPacket(RTCPPacket &rtcpPacket, SInt64 &curTime)
+bool RTPStream::ProcessAckPacket(RTCPPacket &rtcpPacket, int64_t &curTime)
 {
 	RTCPAckPacket theAckPacket;
 	uint8_t* packetBuffer = rtcpPacket.GetPacketBuffer();
@@ -1468,7 +1468,7 @@ bool RTPStream::TestRTCPPackets(StrPtrLen* inPacketPtr, uint32_t itemName)
 void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 {
 	StrPtrLen currentPtr(*inPacket);
-	SInt64 curTime = OS::Milliseconds();
+	int64_t curTime = OS::Milliseconds();
 	bool hasPacketLoss = false;
 	uint32_t highestSeqNum = 0;
 	bool hasNADU = false;
@@ -1568,7 +1568,7 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 				if (lsr != 0)
 				{
 					uint32_t diff = static_cast<uint32_t>(OS::TimeMilli_To_1900Fixed64Secs(curTime) >> 16) - lsr - dlsr;
-					uint32_t measuredRTT = static_cast<uint32_t>(OS::Fixed64Secs_To_TimeMilli(static_cast<SInt64>(diff) << 16));
+					uint32_t measuredRTT = static_cast<uint32_t>(OS::Fixed64Secs_To_TimeMilli(static_cast<int64_t>(diff) << 16));
 
 					if (measuredRTT < 60000) //make sure that the RTT is not some ridiculously large value
 					{
@@ -1742,8 +1742,8 @@ void RTPStream::PrintRTCPSenderReport(char* packetBuff, uint32_t inLen)
 	uint32_t ssrc = htonl(*theReport);
 
 	theReport++;
-	SInt64 ntp = 0;
-	::memcpy(&ntp, theReport, sizeof(SInt64));
+	int64_t ntp = 0;
+	::memcpy(&ntp, theReport, sizeof(int64_t));
 	ntp = OS::NetworkToHostSInt64(ntp);
 	time_t theTime = OS::Time1900Fixed64Secs_To_UnixTimeSecs(ntp);
 

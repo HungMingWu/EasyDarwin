@@ -52,7 +52,7 @@ static char* kDataTypeStrings[] =
 	"uint16_t",
 	"int32_t",
 	"uint32_t",
-	"SInt64",
+	"int64_t",
 	"UInt64",
 	"QTSS_Object",
 	"QTSS_StreamRef",
@@ -198,9 +198,9 @@ QTSS_Error QTSSDataConverter::StringToValue(char* inValueAsString,
 		}
 		break;
 
-	case qtssAttrDataTypeSInt64:
+	case qtssAttrDataTypeint64_t:
 		{
-			theBufSize = sizeof(SInt64);
+			theBufSize = sizeof(int64_t);
 			theFormat = "%" _64BITARG_ "d";
 		}
 		break;
@@ -228,7 +228,7 @@ QTSS_Error QTSSDataConverter::StringToValue(char* inValueAsString,
 
 	case qtssAttrDataTypeTimeVal:
 		{
-			theBufSize = sizeof(SInt64);
+			theBufSize = sizeof(int64_t);
 			theFormat = "%" _64BITARG_ "d";
 		}
 		break;
@@ -346,8 +346,8 @@ char* QTSSDataConverter::ValueToString(void* inValue,
 		qtss_sprintf(theString, "%"   _U32BITARG_, *(uint32_t*)inValue);
 		break;
 
-	case qtssAttrDataTypeSInt64:
-		qtss_sprintf(theString, "%" _64BITARG_ "d", *(SInt64*)inValue);
+	case qtssAttrDataTypeint64_t:
+		qtss_sprintf(theString, "%" _64BITARG_ "d", *(int64_t*)inValue);
 		break;
 
 	case qtssAttrDataTypeUInt64:
@@ -363,7 +363,7 @@ char* QTSSDataConverter::ValueToString(void* inValue,
 		break;
 
 	case qtssAttrDataTypeTimeVal:
-		qtss_sprintf(theString, "%" _64BITARG_ "d", *(SInt64*)inValue);
+		qtss_sprintf(theString, "%" _64BITARG_ "d", *(int64_t*)inValue);
 		break;
 
 	default:

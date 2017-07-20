@@ -121,7 +121,7 @@ class QTSSRollingLog : public Task
     
         //
         // Run function to roll log right at midnight   
-        virtual SInt64      Run();
+        virtual int64_t      Run();
 
         FILE*           fLog;
         time_t          fLogCreateTime;

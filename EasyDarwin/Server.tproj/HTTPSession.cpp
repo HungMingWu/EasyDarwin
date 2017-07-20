@@ -80,7 +80,7 @@ HTTPSession::~HTTPSession()
 
 }
 
-SInt64 HTTPSession::Run()
+int64_t HTTPSession::Run()
 {
 	EventFlags events = this->GetEvents();
 	QTSS_Error err = QTSS_NoErr;
@@ -781,11 +781,11 @@ QTSS_Error HTTPSession::execNetMsgCSGetServerVersionReqRESTful(const char* query
 	QTSSCharArrayDeleter theFullPathStrDeleter(serverHeader);
 	body[EASY_TAG_SERVER_HEADER] = serverHeader;
 
-	SInt64 timeNow = OS::Milliseconds();
-	SInt64 startupTime = 0;
+	int64_t timeNow = OS::Milliseconds();
+	int64_t startupTime = 0;
 	uint32_t startupTimeSize = sizeof(startupTime);
 	(void)QTSS_GetValue(QTSServerInterface::GetServer(), qtssSvrStartupTime, 0, &startupTime, &startupTimeSize);
-	SInt64 longstTime = (timeNow - startupTime) / 1000;
+	int64_t longstTime = (timeNow - startupTime) / 1000;
 
 	unsigned int timeDays = longstTime / (24 * 60 * 60);
 	unsigned int timeHours = (longstTime % (24 * 60 * 60)) / (60 * 60);

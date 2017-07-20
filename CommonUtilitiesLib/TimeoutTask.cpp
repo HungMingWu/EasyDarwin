@@ -45,7 +45,7 @@ void TimeoutTask::Initialize()
 }
 
 
-TimeoutTask::TimeoutTask(Task* inTask, SInt64 inTimeoutInMilSecs)
+TimeoutTask::TimeoutTask(Task* inTask, int64_t inTimeoutInMilSecs)
 	: fTask(inTask), fQueueElem()
 {
 	fQueueElem.SetEnclosingObject(this);
@@ -64,7 +64,7 @@ TimeoutTask::~TimeoutTask()
 	sThread->fQueue.Remove(&fQueueElem);
 }
 
-void TimeoutTask::SetTimeout(SInt64 inTimeoutInMilSecs)
+void TimeoutTask::SetTimeout(int64_t inTimeoutInMilSecs)
 {
 	fTimeoutInMilSecs = inTimeoutInMilSecs;
 	if (inTimeoutInMilSecs == 0)
@@ -73,13 +73,13 @@ void TimeoutTask::SetTimeout(SInt64 inTimeoutInMilSecs)
 		fTimeoutAtThisTime = OS::Milliseconds() + fTimeoutInMilSecs;
 }
 
-SInt64 TimeoutTaskThread::Run()
+int64_t TimeoutTaskThread::Run()
 {
 	//ok, check for timeouts now. Go through the whole queue
 	OSMutexLocker locker(&fMutex);
-	SInt64 curTime = OS::Milliseconds();
-	SInt64 intervalMilli = kIntervalSeconds * 1000;//always default to 60 seconds but adjust to smallest interval > 0
-	SInt64 taskInterval = intervalMilli;
+	int64_t curTime = OS::Milliseconds();
+	int64_t intervalMilli = kIntervalSeconds * 1000;//always default to 60 seconds but adjust to smallest interval > 0
+	int64_t taskInterval = intervalMilli;
 
 	for (OSQueueIter iter(&fQueue); !iter.IsDone(); iter.Next())
 	{

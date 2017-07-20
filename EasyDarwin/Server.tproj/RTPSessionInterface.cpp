@@ -73,7 +73,7 @@ QTSSAttrInfoDict::AttrInfo  RTPSessionInterface::sAttributes[] =
 
 	/* 26 */ { "qtssCliSesCurrentBitRate",          CurrentBitRate,     qtssAttrDataTypeUInt32,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 27 */ { "qtssCliSesPacketLossPercent",       PacketLossPercent,  qtssAttrDataTypeFloat32, qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 28 */ { "qtssCliSesTimeConnectedinMsec",     TimeConnected,      qtssAttrDataTypeSInt64,  qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 28 */ { "qtssCliSesTimeConnectedinMsec",     TimeConnected,      qtssAttrDataTypeint64_t,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 29 */ { "qtssCliSesCounterID",               NULL,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 30 */ { "qtssCliSesRTSPSessionID",           NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 31 */ { "qtssCliSesFramesSkipped",           NULL,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
@@ -203,7 +203,7 @@ void RTPSessionInterface::SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryM
 	{
 		Assert(inNewValueLen == sizeof(uint32_t));
 		uint32_t newTimeOut = *((uint32_t *)inNewValue);
-		fTimeoutTask.SetTimeout((SInt64)newTimeOut);
+		fTimeoutTask.SetTimeout((int64_t)newTimeOut);
 	}
 }
 
@@ -249,7 +249,7 @@ QTSS_Error RTPSessionInterface::DoSessionSetupResponse(RTSPRequestInterface* inR
 	return QTSS_NoErr;
 }
 
-void RTPSessionInterface::UpdateBitRateInternal(const SInt64& curTime)
+void RTPSessionInterface::UpdateBitRateInternal(const int64_t& curTime)
 {
 	if (fState == qtssPausedState)
 	{
@@ -260,7 +260,7 @@ void RTPSessionInterface::UpdateBitRateInternal(const SInt64& curTime)
 	else
 	{
 		uint32_t bitsInInterval = (fBytesSent - fLastBitRateBytes) * 8;
-		SInt64 updateTime = (curTime - fLastBitRateUpdateTime) / 1000;
+		int64_t updateTime = (curTime - fLastBitRateUpdateTime) / 1000;
 		if (updateTime > 0) // leave Bit Rate the same if updateTime is 0 also don't divide by 0.
 			fMovieCurrentBitRate = (uint32_t)(bitsInInterval / updateTime);
 		fTracker.UpdateAckTimeout(bitsInInterval, curTime - fLastBitRateUpdateTime);
@@ -298,8 +298,8 @@ void* RTPSessionInterface::PacketLossPercent(QTSSDictionary* inSession, uint32_t
 	RTPStream* theStream = NULL;
 	uint32_t theLen = sizeof(theStream);
 
-	SInt64 packetsLost = 0;
-	SInt64 packetsSent = 0;
+	int64_t packetsLost = 0;
+	int64_t packetsSent = 0;
 
 	for (int x = 0; theSession->GetValue(qtssCliSesStreamObjects, x, (void*)&theStream, &theLen) == QTSS_NoErr; x++)
 	{
@@ -315,8 +315,8 @@ void* RTPSessionInterface::PacketLossPercent(QTSSDictionary* inSession, uint32_t
 			(void)theStream->GetValue(qtssRTPStrPacketCountInRTCPInterval, 0, &streamCurPackets, &theLen);
 			//qtss_printf("stream = %d streamCurPackets = %"   _U32BITARG_   " \n",x, streamCurPackets);
 
-			packetsSent += (SInt64)streamCurPackets;
-			packetsLost += (SInt64)streamCurPacketsLost;
+			packetsSent += (int64_t)streamCurPackets;
+			packetsLost += (int64_t)streamCurPacketsLost;
 			//qtss_printf("stream calculated loss = %f \n",x, (float) streamCurPacketsLost / (float) streamCurPackets);
 
 		}
@@ -344,7 +344,7 @@ void* RTPSessionInterface::PacketLossPercent(QTSSDictionary* inSession, uint32_t
 void RTPSessionInterface::CreateDigestAuthenticationNonce() {
 
 	// Calculate nonce: MD5 of sessionid:timestamp
-	SInt64 curTime = OS::Milliseconds();
+	int64_t curTime = OS::Milliseconds();
 	char* curTimeStr = new char[128];
 	qtss_sprintf(curTimeStr, "%" _64BITARG_ "d", curTime);
 
@@ -388,7 +388,7 @@ void RTPSessionInterface::SetChallengeParams(QTSS_AuthScheme scheme, uint32_t qo
 		if (createOpaque) {
 			// Generate a random uint32_t and convert it to a string 
 			// The base64 encoded form of the string is made the opaque value
-			SInt64 theMicroseconds = OS::Microseconds();
+			int64_t theMicroseconds = OS::Microseconds();
 			::srand((unsigned int)theMicroseconds);
 			uint32_t randomNum = ::rand();
 			char* randomNumStr = new char[128];
@@ -424,7 +424,7 @@ void RTPSessionInterface::UpdateDigestAuthChallengeParams(bool newNonce, bool cr
 	if (createOpaque) {
 		// Generate a random uint32_t and convert it to a string 
 		// The base64 encoded form of the string is made the opaque value
-		SInt64 theMicroseconds = OS::Microseconds();
+		int64_t theMicroseconds = OS::Microseconds();
 		::srand((unsigned int)theMicroseconds);
 		uint32_t randomNum = ::rand();
 		char* randomNumStr = new char[128];

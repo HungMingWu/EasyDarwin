@@ -200,7 +200,7 @@ protected:
 	// For OPTIONS request
 	StrPtrLen				fOldOutputStreamBuffer;
 	bool					fSentOptionsRequest;
-	SInt64					fOptionsRequestSendTime;
+	int64_t					fOptionsRequestSendTime;
 	int32_t					fRoundTripTime;
 	bool					fRoundTripTimeCalculation;
 

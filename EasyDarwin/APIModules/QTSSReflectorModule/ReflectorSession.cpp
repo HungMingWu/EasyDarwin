@@ -340,7 +340,7 @@ void ReflectorSession::DelRedisLive()
 	}
 }
 
-SInt64 ReflectorSession::Run()
+int64_t ReflectorSession::Run()
 {
 	EventFlags events = this->GetEvents();
 
@@ -349,8 +349,8 @@ SInt64 ReflectorSession::Run()
 		return -1;
 	}
 
-	SInt64 sNowTime = OS::Milliseconds();
-	SInt64 sNoneTime = GetNoneOutputStartTimeMS();
+	int64_t sNowTime = OS::Milliseconds();
+	int64_t sNoneTime = GetNoneOutputStartTimeMS();
 	if ((GetNumOutputs() == 0) && (sNowTime - sNoneTime >= /*QTSServerInterface::GetServer()->GetPrefs()->GetRTPSessionTimeoutInSecs()*/35 * 1000))
 	{
 		QTSS_RoleParams theParams;

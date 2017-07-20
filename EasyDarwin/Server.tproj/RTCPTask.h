@@ -45,7 +45,7 @@ public:
 	virtual ~RTCPTask() {}
 
 private:
-	virtual SInt64 Run();
+	virtual int64_t Run();
 };
 
 #endif //__RTCP_TASK_H__

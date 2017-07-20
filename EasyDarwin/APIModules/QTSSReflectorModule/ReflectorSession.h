@@ -154,8 +154,8 @@ public:
 		kNumQualityLevels = 2       //uint32_t
 	};
 
-	SInt64  GetInitTimeMS() { return fInitTimeMS; }
-	SInt64	GetNoneOutputStartTimeMS() { return fNoneOutputStartTimeMS;	}
+	int64_t  GetInitTimeMS() { return fInitTimeMS; }
+	int64_t	GetNoneOutputStartTimeMS() { return fNoneOutputStartTimeMS;	}
 	void	SetNoneOutputStartTimeMS() { fNoneOutputStartTimeMS = OS::Milliseconds(); }
 
 	void	SetHasBufferedStreams(bool enableBuffer) { fHasBufferedStreams = enableBuffer; }
@@ -189,14 +189,14 @@ private:
 	// For the QTSSSplitterModule, this object can cache a QTSS_StreamRef
 	QTSS_StreamRef fSocketStream;
 	QTSS_ClientSessionObject fBroadcasterSession;
-	SInt64		fInitTimeMS;
-	SInt64		fNoneOutputStartTimeMS;
+	int64_t		fInitTimeMS;
+	int64_t		fNoneOutputStartTimeMS;
 
 	bool		fHasBufferedStreams;
 	bool		fHasVideoKeyFrameUpdate;
 
 private:
-	virtual SInt64 Run();
+	virtual int64_t Run();
 };
 
 #endif

@@ -12,7 +12,7 @@
 
 string OSMapEx::GenerateSessionId()//生成32位的SessionId
 {
-	SInt64 theMicroseconds = OS::Microseconds();//Windows下1ms内多次执行会造成产生的随机数时一样的，因为Windows下微秒的获取也是靠毫秒*1000来进行的
+	int64_t theMicroseconds = OS::Microseconds();//Windows下1ms内多次执行会造成产生的随机数时一样的，因为Windows下微秒的获取也是靠毫秒*1000来进行的
 	::srand((unsigned int)theMicroseconds);
 	uint16_t the1Random = ::rand();
 
@@ -42,7 +42,7 @@ string OSMapEx::GenerateSessionId()//生成32位的SessionId
 	return string(chTemp);
 }
 
-bool OSMapEx::Insert(const string& strSessionId, SInt64 lastingTime)
+bool OSMapEx::Insert(const string& strSessionId, int64_t lastingTime)
 {
 	OSMutexLocker mutexLocker(&m_Mutex);
 	if (m_Map.find(strSessionId) != m_Map.end())//已经存在
@@ -55,7 +55,7 @@ bool OSMapEx::Insert(const string& strSessionId, SInt64 lastingTime)
 	}
 }
 
-string OSMapEx::GererateAndInsert(SInt64 lastingTime)
+string OSMapEx::GererateAndInsert(int64_t lastingTime)
 {
 	OSMutexLocker mutexLocker(&m_Mutex);
 	string  strSessionId;
@@ -71,7 +71,7 @@ string OSMapEx::GererateAndInsert(SInt64 lastingTime)
 bool OSMapEx::FindAndDelete(const string& strSessionID)//查找并删除，线程安全,找到返回true,否则返回false
 {
 	OSMutexLocker mutexLocker(&m_Mutex);
-	SInt64 sNowTime = OS::Microseconds();//获取当前时间
+	int64_t sNowTime = OS::Microseconds();//获取当前时间
 	bool bReVal = true;
 	MapType::iterator l_it = m_Map.find(strSessionID);
 	if (l_it != m_Map.end())//找到了
@@ -90,7 +90,7 @@ void OSMapEx::CheckTimeoutAndDelete()//遍历map里的SessionID,删除失效的SessionID
 {
 	//unsigned int num=0;
 	OSMutexLocker mutexLocker(&m_Mutex);
-	SInt64 sNowTime = OS::Microseconds();//获取当前时间
+	int64_t sNowTime = OS::Microseconds();//获取当前时间
 	for (MapType::iterator i = m_Map.begin(); i != m_Map.end(); /*i++*/)
 	{
 		if (i->second.m_LastingTime < sNowTime)//失效
@@ -109,7 +109,7 @@ void OSMapEx::CheckTimeoutAndDelete()//遍历map里的SessionID,删除失效的SessionID
 
 string OSMapEx::GenerateSessionIdForRedis(const string& strIP, uint16_t uPort)
 {
-	SInt64 theMicroseconds = OS::Microseconds();//Windows下1ms内多次执行会造成产生的随机数时一样的，因为Windows下微秒的获取也是靠毫秒*1000来进行的
+	int64_t theMicroseconds = OS::Microseconds();//Windows下1ms内多次执行会造成产生的随机数时一样的，因为Windows下微秒的获取也是靠毫秒*1000来进行的
 	::srand((unsigned int)theMicroseconds);
 	uint16_t the1Random = ::rand();
 

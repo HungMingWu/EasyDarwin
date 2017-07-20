@@ -120,7 +120,7 @@ public:
 
 	//
 	// Field Accessors
-	SInt64          GetTransmitTime() { return fTransmitTime; }
+	int64_t          GetTransmitTime() { return fTransmitTime; }
 	FrameTypeField  GetFrameType() { return fFrameType; }
 	UInt64          GetPacketNumber() { return fPacketNumber; }
 	UInt64          GetPacketPosition() { return fPacketPosition; }
@@ -133,7 +133,7 @@ private:
 	uint8_t*          fPacketBuffer;
 	uint32_t          fPacketLen;
 
-	SInt64          fTransmitTime;
+	int64_t          fTransmitTime;
 	FrameTypeField  fFrameType;
 	UInt64          fPacketNumber;
 	UInt64          fPacketPosition;

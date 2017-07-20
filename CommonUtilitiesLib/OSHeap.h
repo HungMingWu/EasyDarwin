@@ -95,15 +95,15 @@ public:
 	//be virtual. However, to avoid the use of v-functions in this data
 	//structure, I am assuming that the objects are compared using a 64 bit number.
 	//
-	void    SetValue(SInt64 newValue) { fValue = newValue; }
-	SInt64  GetValue() { return fValue; }
+	void    SetValue(int64_t newValue) { fValue = newValue; }
+	int64_t  GetValue() { return fValue; }
 	void*   GetEnclosingObject() { return fEnclosingObject; }
 	void	SetEnclosingObject(void* obj) { fEnclosingObject = obj; }
 	bool  IsMemberOfAnyHeap() { return fCurrentHeap != nullptr; }
 
 private:
 
-	SInt64  fValue;
+	int64_t  fValue;
 	void* fEnclosingObject;
 	OSHeap* fCurrentHeap;
 

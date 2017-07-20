@@ -66,7 +66,7 @@ public:
 	//derived object must implement a way of getting tasks & sockets to this object 
 	virtual Task*   GetSessionTask(TCPSocket** outSocket) = 0;
 
-	virtual SInt64  Run();
+	virtual int64_t  Run();
 
 private:
 

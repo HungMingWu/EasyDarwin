@@ -589,16 +589,16 @@ double QTFile::GetDurationInSeconds()
 	return fMovieHeaderAtom->GetDurationInSeconds();
 }
 
-SInt64 QTFile::GetModDate()
+int64_t QTFile::GetModDate()
 {
 #if DSS_USE_API_CALLBACKS
-	SInt64 theTime = 0;
-	uint32_t theLen = sizeof(SInt64);
+	int64_t theTime = 0;
+	uint32_t theLen = sizeof(int64_t);
 	(void)QTSS_GetValue(fMovieFD, qtssFlObjModDate, 0, (void*)&theTime, &theLen);
 	return theTime;
 #else
 	time_t theTime = fMovieFD.GetModDate();
-	return (SInt64)theTime * 1000;
+	return (int64_t)theTime * 1000;
 #endif
 }
 

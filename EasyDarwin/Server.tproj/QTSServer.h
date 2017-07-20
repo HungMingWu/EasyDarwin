@@ -159,7 +159,7 @@ private:
 class RereadPrefsTask : public Task
 {
 public:
-	virtual SInt64 Run()
+	virtual int64_t Run()
 	{
 		QTSServer::RereadPrefsService(NULL);
 		return -1;

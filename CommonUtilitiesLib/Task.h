@@ -91,7 +91,7 @@ public:
 	//deleted. This object provides no protection against calling a method, such as Signal,
 	//at the same time the object is being deleted (because it can't really), so watch
 	//those dangling references!
-	virtual SInt64          Run() = 0;
+	virtual int64_t          Run() = 0;
 
 	//Send an event to this task.
 	void                    Signal(EventFlags eventFlags);
@@ -122,10 +122,10 @@ protected:
 		if (TASK_DEBUG) if (fTaskName[0] == 0) ::strcpy(fTaskName, " corrupt task");
 		if (TASK_DEBUG) qtss_printf("Task::ForceSameThread fUseThisThread %p task %s enque elem=%p enclosing %p\n", (void*)fUseThisThread, fTaskName, (void *)&fTaskQueueElem, (void *)this);
 	}
-	SInt64                  CallLocked() {
+	int64_t                  CallLocked() {
 		ForceSameThread();
 		fWriteLock = true;
-		return (SInt64)10; // minimum of 10 milliseconds between locks
+		return (int64_t)10; // minimum of 10 milliseconds between locks
 	}
 
 private:

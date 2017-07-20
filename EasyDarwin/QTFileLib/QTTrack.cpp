@@ -178,7 +178,7 @@ QTTrack::ErrorCode QTTrack::Initialize()
 
 		//
 		// Compute the first edit's media time.
-		fFirstEditMediaTime = (uint32_t)((((double)(SInt64)GetFirstEditMovieTime()) / fFile->GetTimeScale()) * GetTimeScale());
+		fFirstEditMediaTime = (uint32_t)((((double)(int64_t)GetFirstEditMovieTime()) / fFile->GetTimeScale()) * GetTimeScale());
 	}
 	else {
 		fEditListAtom = NULL;

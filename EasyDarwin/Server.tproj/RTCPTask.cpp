@@ -33,7 +33,7 @@
 #include "UDPSocketPool.h"
 #include "RTPStream.h"
 
-SInt64 RTCPTask::Run()
+int64_t RTCPTask::Run()
 {
 	const uint32_t kMaxRTCPPacketSize = 2048;
 	char thePacketBuffer[kMaxRTCPPacketSize];
@@ -100,7 +100,7 @@ SInt64 RTCPTask::Run()
 
 	return 0; /* Fix for 4004432 */
 	/*
-	SInt64 result = 0;
+	int64_t result = 0;
 	if (theServer->GetNumRTPSessions() > 0)
 		result =  theServer->GetPrefs()->GetRTCPPollIntervalInMsec();
 

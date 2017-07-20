@@ -102,7 +102,7 @@ public:
 	virtual ~LogCheckTask() {}
 
 private:
-	virtual SInt64 Run();
+	virtual int64_t Run();
 };
 
 class QTSSAccessLog : public QTSSRollingLog
@@ -428,8 +428,8 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	uint32_t clientPacketsReceived = 0;
 	uint32_t clientPacketsLost = 0;
 	StrPtrLen* theTransportType = &sUnknownStr;
-	SInt64* theCreateTime = NULL;
-	SInt64* thePlayTime = NULL;
+	int64_t* theCreateTime = NULL;
+	int64_t* thePlayTime = NULL;
 
 	uint32_t startPlayTimeInSecs = 0;
 
@@ -679,7 +679,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 
 
 		// Find out what time it is
-	SInt64 curTime = QTSS_Milliseconds();
+	int64_t curTime = QTSS_Milliseconds();
 
 	uint32_t numCurClients = 0;
 	theLen = sizeof(numCurClients);
@@ -873,7 +873,7 @@ QTSS_Error RollAccessLog(QTSS_ServiceFunctionArgsPtr /*inArgs*/)
 }
 
 // This task runs once an hour to check and see if the log needs to roll.
-SInt64 LogCheckTask::Run()
+int64_t LogCheckTask::Run()
 {
 	static bool firstTime = true;
 

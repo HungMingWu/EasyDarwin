@@ -184,10 +184,10 @@ class RTCPSenderReportPacket : public RTCPReceiverPacket
 {
 public:
 	bool ParseReport(uint8_t* inPacketBuffer, uint32_t inPacketLength);
-	SInt64 GetNTPTimeStamp()
+	int64_t GetNTPTimeStamp()
 	{
 		uint32_t* fieldPtr = (uint32_t*)&fReceiverPacketBuffer[kSRPacketNTPTimeStampMSW];
-		SInt64 timestamp = ntohl(*fieldPtr);
+		int64_t timestamp = ntohl(*fieldPtr);
 		fieldPtr = (uint32_t*)&fReceiverPacketBuffer[kSRPacketNTPTimeStampLSW];
 		return (timestamp << 32) | ntohl(*fieldPtr);
 	}

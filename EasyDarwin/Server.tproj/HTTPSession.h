@@ -22,7 +22,7 @@ public:
 	QTSS_Error SendHTTPPacket(StrPtrLen* contentXML, bool connectionClose, bool decrement) override;
 
 private:
-	SInt64 Run() override;
+	int64_t Run() override;
 
 	// Does request prep & request cleanup, respectively
 	QTSS_Error SetupRequest();

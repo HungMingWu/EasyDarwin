@@ -127,7 +127,7 @@ public:
 	inline  char *      GetMoviePath() { return fMoviePath; }
 	double     GetTimeScale(void);
 	double     GetDurationInSeconds();
-	SInt64      GetModDate();
+	int64_t      GetModDate();
 	// Returns the mod date as a RFC 1123 formatted string
 	char*       GetModDateStr();
 	//

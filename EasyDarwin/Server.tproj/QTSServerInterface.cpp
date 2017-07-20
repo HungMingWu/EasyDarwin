@@ -338,7 +338,7 @@ float RTPStatsUpdaterTask::GetCPUTimeInSeconds()
 #ifdef __Win32__
 	// The Win32 way of getting the time for this process
 	HANDLE hProcess = GetCurrentProcess();
-	SInt64 createTime, exitTime, kernelTime, userTime;
+	int64_t createTime, exitTime, kernelTime, userTime;
 	if (GetProcessTimes(hProcess, (LPFILETIME)&createTime, (LPFILETIME)&exitTime, (LPFILETIME)&kernelTime, (LPFILETIME)&userTime))
 	{
 		// userTime is in 10**-7 seconds since Jan.1, 1607.
@@ -359,7 +359,7 @@ float RTPStatsUpdaterTask::GetCPUTimeInSeconds()
 	return cpuTimeInSec;
 }
 
-SInt64 RTPStatsUpdaterTask::Run()
+int64_t RTPStatsUpdaterTask::Run()
 {
 
 	QTSServerInterface* theServer = QTSServerInterface::sServer;
@@ -390,7 +390,7 @@ SInt64 RTPStatsUpdaterTask::Run()
 
 	theServer->fTotalRTPPacketsLost += periodicPacketsLost;
 
-	SInt64 curTime = OS::Milliseconds();
+	int64_t curTime = OS::Milliseconds();
 
 	//for cpu percent
 	float cpuTimeInSec = GetCPUTimeInSeconds();
@@ -441,7 +441,7 @@ SInt64 RTPStatsUpdaterTask::Run()
 		(theServer->GetPrefs()->GetAvgBandwidthUpdateTimeInSecs() * 1000))))
 	{
 		uint32_t delta = (uint32_t)(curTime - fLastBandwidthAvg);
-		SInt64 bytesSent = theServer->fTotalRTPBytes - fLastBytesSent;
+		int64_t bytesSent = theServer->fTotalRTPBytes - fLastBytesSent;
 		Assert(bytesSent >= 0);
 
 		//do the bandwidth computation using floating point divides
@@ -483,7 +483,7 @@ SInt64 RTPStatsUpdaterTask::Run()
 RTPSessionInterface* RTPStatsUpdaterTask::GetNewestSession(OSRefTable* inRTPSessionMap)
 {
 	//Caller must lock down the RTP session map
-	SInt64 theNewestPlayTime = 0;
+	int64_t theNewestPlayTime = 0;
 	RTPSessionInterface* theNewestSession = NULL;
 
 	//use the session map to iterate through all the sessions, finding the most
@@ -571,11 +571,11 @@ void* QTSServerInterface::GetNumWastedBytes(QTSSDictionary* inServer, uint32_t* 
 
 void* QTSServerInterface::TimeConnected(QTSSDictionary* inConnection, uint32_t* outLen)
 {
-	SInt64 connectTime;
+	int64_t connectTime;
 	void* result;
 	uint32_t len = sizeof(connectTime);
 	inConnection->GetValue(qtssConnectionCreateTimeInMsec, 0, &connectTime, &len);
-	SInt64 timeConnected = OS::Milliseconds() - connectTime;
+	int64_t timeConnected = OS::Milliseconds() - connectTime;
 	*outLen = sizeof(timeConnected);
 	inConnection->SetValue(qtssConnectionTimeStorage, 0, &timeConnected, sizeof(connectTime));
 	inConnection->GetValuePtr(qtssConnectionTimeStorage, 0, &result, outLen);

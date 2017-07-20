@@ -57,7 +57,7 @@ const uint32_t kMonthHashTable[] =
 const uint32_t kMonthHashTableSize = 49;
 
 
-SInt64  DateTranslator::ParseDate(StrPtrLen* inDateString)
+int64_t  DateTranslator::ParseDate(StrPtrLen* inDateString)
 {
 	//SEE RFC 1123 for details on the date string format
 	//ex: Mon, 04 Nov 1996 21:42:17 GMT
@@ -117,10 +117,10 @@ SInt64  DateTranslator::ParseDate(StrPtrLen* inDateString)
 
 	// Ok, we've filled out the tm struct completely, now convert it to a time_t
 	time_t theTime = ::mktime(&theDateStruct);
-	return (SInt64)theTime * 1000; // convert to a time value in our timebase.
+	return (int64_t)theTime * 1000; // convert to a time value in our timebase.
 }
 
-void DateTranslator::UpdateDateBuffer(DateBuffer* inDateBuffer, const SInt64& inDate, time_t gmtoffset)
+void DateTranslator::UpdateDateBuffer(DateBuffer* inDateBuffer, const int64_t& inDate, time_t gmtoffset)
 {
 	if (inDateBuffer == NULL)
 		return;
@@ -135,7 +135,7 @@ void DateTranslator::UpdateDateBuffer(DateBuffer* inDateBuffer, const SInt64& in
 	}
 	else
 	{
-		time_t convertedTime = (time_t)(inDate / (SInt64)1000) + gmtoffset; // Convert from msec to sec
+		time_t convertedTime = (time_t)(inDate / (int64_t)1000) + gmtoffset; // Convert from msec to sec
 		gmt = ::qtss_gmtime(&convertedTime, &timeResult);
 	}
 
@@ -150,7 +150,7 @@ void DateTranslator::UpdateDateBuffer(DateBuffer* inDateBuffer, const SInt64& in
 
 void DateBuffer::InexactUpdate()
 {
-	SInt64 theCurTime = OS::Milliseconds();
+	int64_t theCurTime = OS::Milliseconds();
 	if ((fLastDateUpdate == 0) || ((fLastDateUpdate + kUpdateInterval) < theCurTime))
 	{
 		fLastDateUpdate = theCurTime;

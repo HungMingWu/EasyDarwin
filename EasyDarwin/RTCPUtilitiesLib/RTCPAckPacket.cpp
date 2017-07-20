@@ -39,7 +39,7 @@
 
 
  // use if you don't know what kind of packet this is
-bool RTCPAckPacket::ParseAckPacket(UInt8* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPAckPacket::ParseAckPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength)
 {
 
 	if (!this->ParseAPPPacket(inPacketBuffer, inPacketLength))
@@ -56,7 +56,7 @@ bool RTCPAckPacket::ParseAckPacket(UInt8* inPacketBuffer, UInt32 inPacketLength)
 }
 
 
-bool RTCPAckPacket::ParseAPPData(UInt8* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPAckPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength)
 {
 	if (!this->ParseAckPacket(inPacketBuffer, inPacketLength))
 		return false;

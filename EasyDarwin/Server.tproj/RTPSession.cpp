@@ -180,7 +180,7 @@ QTSS_Error  RTPSession::Activate(const StrPtrLen& inSessionID)
 	return QTSS_NoErr;
 }
 
-RTPStream*  RTPSession::FindRTPStreamForChannelNum(UInt8 inChannelNum)
+RTPStream*  RTPSession::FindRTPStreamForChannelNum(uint8_t inChannelNum)
 {
 	RTPStream** theStream = NULL;
 	UInt32 theLen = 0;

@@ -141,7 +141,7 @@ private:
 	StrPtrLen           fFieldValues[httpNumHeaders];   // Array of header field values parsed from the request
 	StrPtrLen           fSvrHeader;                     // Server header set up at initialization
 	static StrPtrLen    sColonSpace;
-	static UInt8        sURLStopConditions[];
+	static uint8_t        sURLStopConditions[];
 };
 
 #endif // __HTTPREQUEST_H__

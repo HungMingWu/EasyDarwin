@@ -107,7 +107,7 @@ bool QTAtom::UnMap(char *memPtr, UInt32 Length)
 }
 
 
-bool QTAtom::ReadInt8(UInt64 Offset, UInt8 * Datum)
+bool QTAtom::ReadInt8(UInt64 Offset, uint8_t * Datum)
 {
 	//
 	// Read and return.
@@ -214,7 +214,7 @@ bool QTAtom::ReadSubAtomBytes(const char * AtomPath, char * Buffer, UInt32 Lengt
 	return fFile->Read(atomTOCEntry->AtomDataPos, Buffer, Length);
 }
 
-bool QTAtom::ReadSubAtomInt8(const char * AtomPath, UInt8 * Datum)
+bool QTAtom::ReadSubAtomInt8(const char * AtomPath, uint8_t * Datum)
 {
 	//
 	// Read and return.

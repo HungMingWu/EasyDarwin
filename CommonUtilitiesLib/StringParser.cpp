@@ -33,7 +33,7 @@
 
 #include "StringParser.h"
 
-UInt8 StringParser::sNonWordMask[] =
+uint8_t StringParser::sNonWordMask[] =
 {
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, //0-9 
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, //10-19 
@@ -63,7 +63,7 @@ UInt8 StringParser::sNonWordMask[] =
 	1, 1, 1, 1, 1, 1             //250-255
 };
 
-UInt8 StringParser::sWordMask[] =
+uint8_t StringParser::sWordMask[] =
 {
 	// Inverse of the above
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //0-9 
@@ -94,7 +94,7 @@ UInt8 StringParser::sWordMask[] =
 	0, 0, 0, 0, 0, 0             //250-255
 };
 
-UInt8 StringParser::sDigitMask[] =
+uint8_t StringParser::sDigitMask[] =
 {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //0-9
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //10-19 
@@ -124,7 +124,7 @@ UInt8 StringParser::sDigitMask[] =
 	0, 0, 0, 0, 0, 0             //250-255
 };
 
-UInt8 StringParser::sEOLMask[] =
+uint8_t StringParser::sEOLMask[] =
 {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //0-9   
 	1, 0, 0, 1, 0, 0, 0, 0, 0, 0, //10-19    //'\r' & '\n' are stop conditions
@@ -154,7 +154,7 @@ UInt8 StringParser::sEOLMask[] =
 	0, 0, 0, 0, 0, 0             //250-255
 };
 
-UInt8 StringParser::sWhitespaceMask[] =
+uint8_t StringParser::sWhitespaceMask[] =
 {
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 0, //0-9      // stop on '\t'
 	0, 0, 0, 0, 1, 1, 1, 1, 1, 1, //10-19    // '\r', \v', '\f' & '\n'
@@ -184,7 +184,7 @@ UInt8 StringParser::sWhitespaceMask[] =
 	1, 1, 1, 1, 1, 1             //250-255
 };
 
-UInt8 StringParser::sEOLWhitespaceMask[] =
+uint8_t StringParser::sEOLWhitespaceMask[] =
 {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 1, //0-9     // \t is a stop
 	1, 1, 1, 1, 0, 0, 0, 0, 0, 0, //10-19    //'\r' & '\n' are stop conditions
@@ -215,7 +215,7 @@ UInt8 StringParser::sEOLWhitespaceMask[] =
 };
 
 
-UInt8 StringParser::sEOLWhitespaceQueryMask[] =
+uint8_t StringParser::sEOLWhitespaceQueryMask[] =
 {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 1, //0-9     // \t is a stop
 	1, 1, 1, 1, 0, 0, 0, 0, 0, 0, //10-19    //'\r' & '\n' are stop conditions
@@ -262,7 +262,7 @@ void StringParser::ConsumeUntil(StrPtrLen* outString, char inStop)
 	}
 }
 
-void StringParser::ConsumeUntil(StrPtrLen* outString, UInt8* inMask)
+void StringParser::ConsumeUntil(StrPtrLen* outString, uint8_t* inMask)
 {
 	if (this->ParserIsEmpty(outString))
 		return;

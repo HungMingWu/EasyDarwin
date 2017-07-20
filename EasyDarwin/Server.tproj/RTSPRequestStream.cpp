@@ -271,7 +271,7 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 QTSS_Error RTSPRequestStream::Read(void* ioBuffer, UInt32 inBufLen, UInt32* outLengthRead)
 {
 	UInt32 theLengthRead = 0;
-	UInt8* theIoBuffer = (UInt8*)ioBuffer;
+	uint8_t* theIoBuffer = (uint8_t*)ioBuffer;
 
 	//
 	// If there are retreat bytes available, read them first.

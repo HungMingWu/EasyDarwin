@@ -637,8 +637,8 @@ QTSS_Error ProcessRTPData(QTSS_IncomingData_Params* inParams)
 		*/
 		char*   packetData = inParams->inPacketData;
 
-		UInt8   packetChannel;
-		packetChannel = (UInt8)packetData[1];
+		uint8_t   packetChannel;
+		packetChannel = (uint8_t)packetData[1];
 
 		UInt16  packetDataLen;
 		memcpy(&packetDataLen, &packetData[2], 2);
@@ -860,7 +860,7 @@ void DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, Resizeabl
 			(void)QTSS_GetValue(inParams->inClientSession, qtssCliSesFirstUserAgent, 0, nameStr, &buffLen);
 			for (UInt32 c = 0; c < buffLen; c++)
 			{
-				if (StringParser::sEOLWhitespaceMask[(UInt8)nameStr[c]])
+				if (StringParser::sEOLWhitespaceMask[(uint8_t)nameStr[c]])
 				{
 					nameStr[c] = 0;
 					break;

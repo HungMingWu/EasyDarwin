@@ -45,10 +45,10 @@ public:
 	virtual ~RTCPNaduPacket() {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
-	virtual bool ParseAPPData(UInt8* inPacketBuffer, UInt32 inPacketLength);
+	virtual bool ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength);
 
 	// Call to parse if you don't know what kind of packet this is
-	bool ParseNaduPacket(UInt8* inPacketBuffer, UInt32 inPacketLength);
+	bool ParseNaduPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength);
 
 	UInt32 GetNumReportBlocks() { return fNumBlocks; };
 
@@ -174,14 +174,14 @@ class NaduReport
 {
 
 public:
-	NaduReport(UInt8* inPacketBuffer, UInt32 inPacketLength, UInt32 id);
+	NaduReport(uint8_t* inPacketBuffer, UInt32 inPacketLength, UInt32 id);
 	~NaduReport() { delete fPacketBuffer; }
-	UInt8* getBuffer() { return fPacketBuffer; }
+	uint8_t* getBuffer() { return fPacketBuffer; }
 	UInt32 getLength() { return fLength; }
 	UInt32 getID() { return fid; }
 	RTCPNaduPacket * GetNaduPacket() { return &fNaduPacket; }
 
-	UInt8* fPacketBuffer;
+	uint8_t* fPacketBuffer;
 	UInt32 fLength;
 	RTCPNaduPacket fNaduPacket;
 	UInt32 fid;
@@ -207,7 +207,7 @@ public:
 	}
 	void Initialize(UInt32 listSize = 3);
 
-	bool AddReport(UInt8* inPacketBuffer, UInt32 inPacketLength, UInt32 *outID);
+	bool AddReport(uint8_t* inPacketBuffer, UInt32 inPacketLength, UInt32 *outID);
 
 	NaduReport*     GetReport(UInt32 id);
 	NaduReport*     GetLastReport();

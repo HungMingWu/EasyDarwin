@@ -43,7 +43,7 @@
 class QTAccessFile
 {
     public:
-        static UInt8 sWhitespaceAndGreaterThanMask[];
+        static uint8_t sWhitespaceAndGreaterThanMask[];
         static void Initialize();
         
         static char * GetUserNameCopy(QTSS_UserProfileObject inUserProfile);

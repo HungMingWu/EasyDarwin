@@ -69,9 +69,9 @@ public:
 	};
 
 	static UserAgentFields sFieldIDs[];
-	static UInt8 sEOLWhitespaceEqualMask[];
-	static UInt8 sEOLSemicolonCloseParenMask[];
-	static UInt8 sWhitespaceMask[];
+	static uint8_t sEOLWhitespaceEqualMask[];
+	static uint8_t sEOLSemicolonCloseParenMask[];
+	static uint8_t sWhitespaceMask[];
 
 	UserAgentData fFieldData[eNumAttributes];
 

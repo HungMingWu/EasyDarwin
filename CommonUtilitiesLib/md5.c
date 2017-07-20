@@ -54,6 +54,7 @@
 	*/
 
 #include "md5.h"
+#include <stdint.h>
 #include <string.h>
 
 	/* Constants for MD5Transform routine.
@@ -78,8 +79,8 @@
 static void MD5Transform(UInt32 state[4], unsigned char block[64]);
 static void Encode(unsigned char* output, UInt32* input, unsigned int len);
 static void Decode(UInt32* output, unsigned char* input, unsigned int len);
-static void MD5_memcpy(UInt8* output, UInt8* input, size_t len);
-static void MD5_memset(UInt8* output, int value, size_t len);
+static void MD5_memcpy(uint8_t* output, uint8_t* input, size_t len);
+static void MD5_memset(uint8_t* output, int value, size_t len);
 
 static unsigned char PADDING[64] = {
   0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -160,7 +161,7 @@ void MD5_Update(MD5_CTX* context, unsigned char* input, unsigned int inputLen)
   */
 	if (inputLen >= partLen) {
 		MD5_memcpy
-		((UInt8 *)&context->buffer[index], (UInt8 *)input, (size_t)partLen);
+		((uint8_t *)&context->buffer[index], (uint8_t *)input, (size_t)partLen);
 		MD5Transform(context->state, context->buffer);
 
 		for (i = partLen; i + 63 < inputLen; i += 64)
@@ -173,7 +174,7 @@ void MD5_Update(MD5_CTX* context, unsigned char* input, unsigned int inputLen)
 
 	/* Buffer remaining input */
 	MD5_memcpy
-	((UInt8 *)&context->buffer[index], (UInt8 *)&input[i],
+	((uint8_t *)&context->buffer[index], (uint8_t *)&input[i],
 		(size_t)(inputLen - i));
 }
 
@@ -202,7 +203,7 @@ void MD5_Final(unsigned char digest[16], MD5_CTX* context)
 
 	/* Zeroize sensitive information.
   */
-	MD5_memset((UInt8 *)context, 0, sizeof(*context));
+	MD5_memset((uint8_t *)context, 0, sizeof(*context));
 }
 
 /* MD5 basic transformation. Transforms state based on block.
@@ -292,7 +293,7 @@ static void MD5Transform(UInt32 state[4], unsigned char block[64])
 
 	/* Zeroize sensitive information.
   */
-	MD5_memset((UInt8 *)x, 0, sizeof(x));
+	MD5_memset((uint8_t *)x, 0, sizeof(x));
 }
 
 /* Encodes input (UInt32) into output (unsigned char). Assumes len is
@@ -325,7 +326,7 @@ static void Decode(UInt32* output, unsigned char* input, unsigned int len)
 /* Note: Replace "for loop" with standard memcpy if possible.
  */
 
-static void MD5_memcpy(UInt8* output, UInt8* input, size_t len)
+static void MD5_memcpy(uint8_t* output, uint8_t* input, size_t len)
 {
 	/*  unsigned int i;
 
@@ -337,7 +338,7 @@ static void MD5_memcpy(UInt8* output, UInt8* input, size_t len)
 
 /* Note: Replace "for loop" with standard memset if possible.
  */
-static void MD5_memset(UInt8* output, int value, size_t len)
+static void MD5_memset(uint8_t* output, int value, size_t len)
 {
 	/*  unsigned int i;
 

@@ -75,11 +75,11 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         virtual ~RTPStream();
         
         //
-        //ACCESS FUNCTIONS
+        //ACCESS uint8_t
         
         UInt32      GetSSRC()                   { return fSsrc; }
-        UInt8       GetRTPChannelNum()          { return fRTPChannel; }
-        UInt8       GetRTCPChannelNum()         { return fRTCPChannel; }
+        uint8_t       GetRTPChannelNum()          { return fRTPChannel; }
+        uint8_t       GetRTCPChannelNum()         { return fRTCPChannel; }
         RTPPacketResender* GetResender()        { return &fResender; }
         QTSS_RTPTransportType GetTransportType() { return fTransportType; }
         UInt32      GetStalePacketsDropped()    { return fStalePacketsDropped; }
@@ -98,7 +98,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
                                         UInt32* outLenWritten, QTSS_WriteFlags inFlags);
         
         
-        //UTILITY FUNCTIONS:
+        //UTILITY uint8_t_t:
         //These are not necessary to call and do not manipulate the state of the
         //stream. They may, however, be useful services exported by the server
         
@@ -116,7 +116,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         //
         // When we get an incoming Interleaved Packet for this stream, this
         // function should be called
-        void ProcessIncomingInterleavedData(UInt8 inChannelNum, RTSPSessionInterface* inRTSPSession, StrPtrLen* inPacket);
+        void ProcessIncomingInterleavedData(uint8_t inChannelNum, RTSPSessionInterface* inRTSPSession, StrPtrLen* inPacket);
 
         //When we get a new RTCP packet, we can directly invoke the RTP session and tell it
         //to process the packet right now!
@@ -325,8 +325,8 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         
         // If we are interleaving RTP data over the TCP connection,
         // these are channel numbers to use for RTP & RTCP
-        UInt8   fRTPChannel;
-        UInt8   fRTCPChannel;
+        uint8_t   fRTPChannel;
+        uint8_t   fRTCPChannel;
         
         QTSS_RTPNetworkMode     fNetworkMode;
         

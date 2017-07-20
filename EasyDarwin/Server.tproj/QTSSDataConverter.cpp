@@ -64,7 +64,7 @@ static char* kDataTypeStrings[] =
 
 static const char* kHEXChars = { "0123456789ABCDEF" };
 
-static const UInt8 sCharToNums[] =
+static const uint8_t sCharToNums[] =
 {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //0-9 
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //10-19 
@@ -262,13 +262,13 @@ QTSS_Error QTSSDataConverter::ConvertCHexStringToBytes(char* inValueAsString,
 		return QTSS_NotEnoughSpace;
 	}
 
-	UInt8* dataPtr = (UInt8*)ioBuffer;
-	UInt8 char1, char2;
+	uint8_t* dataPtr = (uint8_t*)ioBuffer;
+	uint8_t char1, char2;
 	while (*inValueAsString)
 	{
-		char1 = sCharToNums[(UInt8)(*inValueAsString++)] * 16;
+		char1 = sCharToNums[(uint8_t)(*inValueAsString++)] * 16;
 		if (*inValueAsString != 0)
-			char2 = sCharToNums[(UInt8)(*inValueAsString++)];
+			char2 = sCharToNums[(uint8_t)(*inValueAsString++)];
 		else
 			char2 = 0;
 		*dataPtr++ = char1 + char2;
@@ -280,14 +280,14 @@ QTSS_Error QTSSDataConverter::ConvertCHexStringToBytes(char* inValueAsString,
 
 char* QTSSDataConverter::ConvertBytesToCHexString(void* inValue, const UInt32 inValueLen)
 {
-	UInt8* theDataPtr = (UInt8*)inValue;
+	uint8_t* theDataPtr = (uint8_t*)inValue;
 	UInt32 len = inValueLen * 2;
 
 	char *theString = new char[len + 1];
 	char *resultStr = theString;
 	if (theString != NULL)
 	{
-		UInt8 temp;
+		uint8_t temp;
 		UInt32 count = 0;
 		for (count = 0; count < inValueLen; count++)
 		{

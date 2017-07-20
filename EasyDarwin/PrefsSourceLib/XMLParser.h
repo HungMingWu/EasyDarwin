@@ -82,7 +82,7 @@ private:
 
 	OSQueueElem fElem;
 
-	static UInt8 sNonNameMask[];        // stop when you hit a word
+	static uint8_t sNonNameMask[];        // stop when you hit a word
 };
 
 class XMLAttribute

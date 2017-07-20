@@ -46,10 +46,10 @@ public:
 	virtual ~RTCPCompressedQTSSPacket() {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
-	virtual bool ParseAPPData(UInt8* inPacketBuffer, UInt32 inPacketLength);
+	virtual bool ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength);
 
 	// Call to parse if you don't know what kind of packet this is
-	bool ParseCompressedQTSSPacket(UInt8* inPacketBuffer, UInt32 inPacketLength);
+	bool ParseCompressedQTSSPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength);
 	inline UInt32 GetQTSSReportSourceID();
 	inline UInt16 GetQTSSPacketVersion();
 	inline UInt16 GetQTSSPacketLength(); //In 'UInt32's
@@ -198,10 +198,10 @@ public:
 	virtual ~RTCPqtssPacket() {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
-	virtual bool ParseAPPData(UInt8* inPacketBuffer, UInt32 inPacketLength);
+	virtual bool ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength);
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
-	bool ParseQTSSPacket(UInt8* inPacketBuffer, UInt32 inPacketLength);
+	bool ParseQTSSPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength);
 
 
 	inline UInt32 GetReceiverBitRate() { return fReceiverBitRate; }

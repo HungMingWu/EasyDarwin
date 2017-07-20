@@ -119,7 +119,7 @@ private:
 	void	ParseRandomDataSizeHeader();
 	void    ParseBandwidthHeader();
 
-	static UInt8    sURLStopConditions[];
+	static uint8_t    sURLStopConditions[];
 };
 #endif // __RTSPREQUEST_H__
 

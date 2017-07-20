@@ -109,14 +109,14 @@ public:
 	// Pass in an array of FieldIDs, make sure it is kNumFields in length.
 	// This function will use the array as a guide to tell which field IDs in the
 	// packet refer to which fields.
-	bool  ParsePacket(UInt8* inPacketBuffer, UInt32 inPacketLen, FieldID* inFieldIDArray);
+	bool  ParsePacket(uint8_t* inPacketBuffer, UInt32 inPacketLen, FieldID* inFieldIDArray);
 
 	//
 	// Call this if you would like to rewrite the Meta-Info packet
 	// as a normal RTP packet (strip off the extensions). Note that
 	// this will overwrite data in the buffer!
 	// Returns a pointer to the new RTP packet, and its length
-	UInt8*          MakeRTPPacket(UInt32* outPacketLen);
+	uint8_t*          MakeRTPPacket(UInt32* outPacketLen);
 
 	//
 	// Field Accessors
@@ -124,20 +124,20 @@ public:
 	FrameTypeField  GetFrameType() { return fFrameType; }
 	UInt64          GetPacketNumber() { return fPacketNumber; }
 	UInt64          GetPacketPosition() { return fPacketPosition; }
-	UInt8*          GetMediaDataP() { return fMediaDataP; }
+	uint8_t*          GetMediaDataP() { return fMediaDataP; }
 	UInt32          GetMediaDataLen() { return fMediaDataLen; }
 	UInt16          GetSeqNum() { return fSeqNum; }
 
 private:
 
-	UInt8*          fPacketBuffer;
+	uint8_t*          fPacketBuffer;
 	UInt32          fPacketLen;
 
 	SInt64          fTransmitTime;
 	FrameTypeField  fFrameType;
 	UInt64          fPacketNumber;
 	UInt64          fPacketPosition;
-	UInt8*          fMediaDataP;
+	uint8_t*          fMediaDataP;
 	UInt32          fMediaDataLen;
 	UInt16          fSeqNum;
 

@@ -98,7 +98,7 @@ bool QTAtom_stss::Initialize()
 	//
 	// Parse this atom's fields.
 	initSucceeds = ReadInt32(stssPos_VersionFlags, &tempInt32);
-	fVersion = (UInt8)((tempInt32 >> 24) & 0x000000ff);
+	fVersion = (uint8_t)((tempInt32 >> 24) & 0x000000ff);
 	fFlags = tempInt32 & 0x00ffffff;
 
 	if (initSucceeds)

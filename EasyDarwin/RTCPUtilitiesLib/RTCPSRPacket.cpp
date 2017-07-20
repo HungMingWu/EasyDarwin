@@ -98,7 +98,7 @@ UInt32 RTCPSRPacket::GetACName(char* ioCNameBuffer)
 	qtss_sprintf(&ioCNameBuffer[1], " %s%" _64BITARG_ "d", sCNameBase, OS::Milliseconds() / 1000);
 	UInt32 cNameLen = ::strlen(ioCNameBuffer);
 	//2nd byte of CName should be length
-	ioCNameBuffer[1] = (UInt8)(cNameLen - 2);//don't count indicator or length byte
+	ioCNameBuffer[1] = (uint8_t)(cNameLen - 2);//don't count indicator or length byte
 
 	// This function assumes that the cName is the only item in this SDES chunk
 	// (see RTP rfc for details).

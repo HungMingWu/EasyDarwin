@@ -55,7 +55,7 @@
 char* QTAccessFile::sAccessValidUser = "require valid-user\n";
 char* QTAccessFile::sAccessAnyUser = "require any-user\n";
 
-UInt8 QTAccessFile::sWhitespaceAndGreaterThanMask[] =
+uint8_t QTAccessFile::sWhitespaceAndGreaterThanMask[] =
 {
     0, 0, 0, 0, 0, 0, 0, 0, 0, 1, //0-9     // \t is a stop
     1, 1, 1, 1, 0, 0, 0, 0, 0, 0, //10-19    //'\r' & '\n' are stop conditions

@@ -130,7 +130,7 @@ bool QTAtom_stts::Initialize()
 	//
 	// Parse this atom's fields.
 	ReadInt32(sttsPos_VersionFlags, &tempInt32);
-	fVersion = (UInt8)((tempInt32 >> 24) & 0x000000ff);
+	fVersion = (uint8_t)((tempInt32 >> 24) & 0x000000ff);
 	fFlags = tempInt32 & 0x00ffffff;
 
 	ReadInt32(sttsPos_NumEntries, &fNumEntries);
@@ -397,7 +397,7 @@ bool QTAtom_ctts::Initialize()
 	//
 	// Parse this atom's fields.
 	ReadInt32(cttsPos_VersionFlags, &tempInt32);
-	fVersion = (UInt8)((tempInt32 >> 24) & 0x000000ff);
+	fVersion = (uint8_t)((tempInt32 >> 24) & 0x000000ff);
 	fFlags = tempInt32 & 0x00ffffff;
 
 	ReadInt32(cttsPos_NumEntries, &fNumEntries);

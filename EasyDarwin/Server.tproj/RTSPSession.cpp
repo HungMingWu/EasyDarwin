@@ -2132,7 +2132,7 @@ void RTSPSession::HandleIncomingDataPacket()
 {
 
 	// Attempt to find the RTP session for this request.
-	UInt8   packetChannel = (UInt8)fInputStream.GetRequestBuffer()->Ptr[1];
+	uint8_t   packetChannel = (uint8_t)fInputStream.GetRequestBuffer()->Ptr[1];
 	StrPtrLen* theSessionID = this->GetSessionIDForChannelNum(packetChannel);
 
 	if (theSessionID == nullptr)

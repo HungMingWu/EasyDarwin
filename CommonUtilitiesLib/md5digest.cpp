@@ -41,7 +41,7 @@ static StrPtrLen sQopAuthInt("auth-int", 8);
 // allocates memory for hashStr->Ptr
 void HashToString(unsigned char aHash[kHashLen], StrPtrLen* hashStr) {
 	UInt16 i;
-	UInt8 hexDigit;
+	uint8_t hexDigit;
 	// Allocating memory
 	char* str = new char[kHashHexLen + 1];
 	str[kHashHexLen] = 0;

@@ -137,7 +137,7 @@ RTSPSessionInterface::~RTSPSessionInterface()
 
 	delete[] fTCPCoalesceBuffer;
 
-	for (UInt8 x = 0; x < (fCurChannelNum >> 1); x++)
+	for (uint8_t x = 0; x < (fCurChannelNum >> 1); x++)
 		delete[] fChNumToSessIDMap[x].Ptr;
 	delete[] fChNumToSessIDMap;
 }
@@ -211,7 +211,7 @@ QTSS_Error RTSPSessionInterface::RequestEvent(QTSS_EventType inEventMask)
 	return QTSS_NoErr;
 }
 
-UInt8 RTSPSessionInterface::GetTwoChannelNumbers(StrPtrLen* inRTSPSessionID)
+uint8_t RTSPSessionInterface::GetTwoChannelNumbers(StrPtrLen* inRTSPSessionID)
 {
 	//
 	// Allocate a TCP coalesce buffer if still needed
@@ -220,7 +220,7 @@ UInt8 RTSPSessionInterface::GetTwoChannelNumbers(StrPtrLen* inRTSPSessionID)
 
 	//
 	// Allocate 2 channel numbers
-	UInt8 theChannelNum = fCurChannelNum;
+	uint8_t theChannelNum = fCurChannelNum;
 	fCurChannelNum += 2;
 
 	//
@@ -242,7 +242,7 @@ UInt8 RTSPSessionInterface::GetTwoChannelNumbers(StrPtrLen* inRTSPSessionID)
 	return theChannelNum;
 }
 
-StrPtrLen*  RTSPSessionInterface::GetSessionIDForChannelNum(UInt8 inChannelNum)
+StrPtrLen*  RTSPSessionInterface::GetSessionIDForChannelNum(uint8_t inChannelNum)
 {
 	if (inChannelNum < fCurChannelNum)
 		return &fChNumToSessIDMap[inChannelNum >> 1];

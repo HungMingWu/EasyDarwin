@@ -1499,11 +1499,11 @@ void QTHintTrack::WriteMetaInfoField(RTPMetaInfoPacket::FieldIndex inFieldIndex,
 	{
 		//
 		// Write a compressed field
-		UInt8 theID = (UInt8)inFieldID;
+		uint8_t theID = (uint8_t)inFieldID;
 		theID |= 0x80;
 		COPY_BYTE(*ioBuffer, &theID);
 		(*ioBuffer) += 1;
-		UInt8 theLenByte = (UInt8)inFieldLen;
+		uint8_t theLenByte = (uint8_t)inFieldLen;
 		COPY_BYTE(*ioBuffer, &theLenByte);
 		(*ioBuffer) += 1;
 	}

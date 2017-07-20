@@ -69,9 +69,9 @@ public:
 	// Call to parse if you don't know what kind of packet this is
 	// Returns true if this is an Ack packet, false otherwise.
 	// Assumes that inPacketBuffer is a pointer to a valid RTCP packet header.
-	bool  ParseAckPacket(UInt8* inPacketBuffer, UInt32 inPacketLength);
+	bool  ParseAckPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength);
 
-	virtual bool ParseAPPData(UInt8* inPacketBuffer, UInt32 inPacketLength);
+	virtual bool ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength);
 
 	inline UInt16 GetAckSeqNum();
 	inline UInt32 GetAckMaskSizeInBits() { return fAckMaskSize * 8; }
@@ -87,7 +87,7 @@ public:
 	};
 private:
 
-	UInt8* fRTCPAckBuffer;
+	uint8_t* fRTCPAckBuffer;
 	UInt32 fAckMaskSize;
 
 	bool IsAckPacketType();
@@ -109,7 +109,7 @@ private:
 bool RTCPAckPacket::IsNthBitEnabled(UInt32 inBitNumber)
 {
 	// Don't need to do endian conversion because we're dealing with 8-bit numbers
-	UInt8 bitMask = 128;
+	uint8_t bitMask = 128;
 	return *(fRTCPAckBuffer + kAckMaskOffset + (inBitNumber >> 3)) & (bitMask >>= inBitNumber & 7);
 }
 

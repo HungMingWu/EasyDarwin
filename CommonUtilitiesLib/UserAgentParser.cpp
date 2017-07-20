@@ -46,7 +46,7 @@ UserAgentParser::UserAgentFields UserAgentParser::sFieldIDs[] =
 };
 
 
-UInt8 UserAgentParser::sEOLWhitespaceEqualMask[] =
+uint8_t UserAgentParser::sEOLWhitespaceEqualMask[] =
 {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 1, //0-9     // \t is a stop
 	1, 0, 0, 1, 0, 0, 0, 0, 0, 0, //10-19    //'\r' & '\n' are stop conditions
@@ -76,7 +76,7 @@ UInt8 UserAgentParser::sEOLWhitespaceEqualMask[] =
 	0, 0, 0, 0, 0, 0             //250-255
 };
 
-UInt8 UserAgentParser::sEOLSemicolonCloseParenMask[] =
+uint8_t UserAgentParser::sEOLSemicolonCloseParenMask[] =
 {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 1, //0-9     // \t is a stop
 	1, 0, 0, 1, 0, 0, 0, 0, 0, 0, //10-19    //'\r' & '\n' are stop conditions

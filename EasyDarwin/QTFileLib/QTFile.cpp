@@ -736,7 +736,7 @@ bool QTFile::GenerateAtomTOC()
 			if (AtomType == FOUR_CHARS_TO_INT('u', 'u', 'i', 'd'))
 			{
 				static const int sExtendedTypeSize = 16;
-				UInt8 usertype[sExtendedTypeSize + 1]; //sExtendedTypeSize for the type + 1 for 0 terminator.
+				uint8_t usertype[sExtendedTypeSize + 1]; //sExtendedTypeSize for the type + 1 for 0 terminator.
 				usertype[sExtendedTypeSize] = 0;
 				if (!Read(CurPos, (char *)usertype, 16)) // read and just throw it away we don't need to store
 					return false;

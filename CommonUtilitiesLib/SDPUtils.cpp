@@ -136,7 +136,7 @@ void SDPContainer::Parse()
 		if (firstChar == '\0')
 			continue; //skip over blank lines
 
-		fFieldStr[(UInt8)firstChar] = firstChar;
+		fFieldStr[(uint8_t)firstChar] = firstChar;
 		switch (firstChar)
 		{
 		case 'v': fReqLines |= kV;

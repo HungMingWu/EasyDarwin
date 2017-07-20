@@ -39,7 +39,7 @@
 #include "OS.h"
 
 
-UInt8 StrPtrLen::sCaseInsensitiveMask[] =
+uint8_t StrPtrLen::sCaseInsensitiveMask[] =
 {
 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, //0-9 
 	10, 11, 12, 13, 14, 15, 16, 17, 18, 19, //10-19 
@@ -56,7 +56,7 @@ UInt8 StrPtrLen::sCaseInsensitiveMask[] =
 	120, 121, 122, 123, 124, 125, 126, 127, 128, 129 //120-129
 };
 
-UInt8 StrPtrLen::sNonPrintChars[] =
+uint8_t StrPtrLen::sNonPrintChars[] =
 {
 	0, 1, 1, 1, 1, 1, 1, 1, 1, 1, //0-9     // stop
 	0, 1, 1, 0, 1, 1, 1, 1, 1, 1, //10-19    //'\r' & '\n' are not stop conditions
@@ -139,7 +139,7 @@ bool StrPtrLen::NumEqualIgnoreCase(const char* compare, const UInt32 len) const
 	if (len <= Len)
 	{
 		for (UInt32 x = 0; x < len; x++)
-			if (sCaseInsensitiveMask[(UInt8)Ptr[x]] != sCaseInsensitiveMask[(UInt8)compare[x]])
+			if (sCaseInsensitiveMask[(uint8_t)Ptr[x]] != sCaseInsensitiveMask[(uint8_t)compare[x]])
 				return false;
 		return true;
 	}
@@ -152,7 +152,7 @@ bool StrPtrLen::EqualIgnoreCase(const char* compare, const UInt32 len) const
 	if (len == Len)
 	{
 		for (UInt32 x = 0; x < len; x++)
-			if (sCaseInsensitiveMask[(UInt8)Ptr[x]] != sCaseInsensitiveMask[(UInt8)compare[x]])
+			if (sCaseInsensitiveMask[(uint8_t)Ptr[x]] != sCaseInsensitiveMask[(uint8_t)compare[x]])
 				return false;
 		return true;
 	}
@@ -307,7 +307,7 @@ void StrPtrLen::PrintStr()
 	UInt32 i = 0;
 	for (; i < Len; i++)
 	{
-		if (StrPtrLen::sNonPrintChars[(UInt8)Ptr[i]])
+		if (StrPtrLen::sNonPrintChars[(uint8_t)Ptr[i]])
 		{
 			thestr[i] = 0;
 			break;
@@ -350,7 +350,7 @@ void StrPtrLen::PrintStrEOL(char* stopStr, char* appendStr)
 	SInt32 i = 0;
 	for (; i < (SInt32)Len; i++)
 	{
-		if (StrPtrLen::sNonPrintChars[(UInt8)Ptr[i]])
+		if (StrPtrLen::sNonPrintChars[(uint8_t)Ptr[i]])
 		{
 			thestr[i] = 0;
 			break;

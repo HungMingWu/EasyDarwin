@@ -60,7 +60,7 @@ RTCPCompressedQTSSPacket::RTCPCompressedQTSSPacket(bool debug) :
 }
 
 // use if you don't know what kind of packet this is
-bool RTCPCompressedQTSSPacket::ParseCompressedQTSSPacket(UInt8* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPCompressedQTSSPacket::ParseCompressedQTSSPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength)
 {
 	if (!this->ParseAPPPacket(inPacketBuffer, inPacketLength))
 		return false;
@@ -93,7 +93,7 @@ bool RTCPCompressedQTSSPacket::ParseCompressedQTSSPacket(UInt8* inPacketBuffer, 
 
 
 // You know the packet type and just want to parse it now
-bool RTCPCompressedQTSSPacket::ParseAPPData(UInt8* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength)
 {
 
 	if (!this->ParseCompressedQTSSPacket(inPacketBuffer, inPacketLength))
@@ -109,7 +109,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(UInt8* inPacketBuffer, UInt32 inPack
 	APPEND_TO_DUMP_ARRAY("H_vers=%d, ", this->GetQTSSPacketVersion());
 	APPEND_TO_DUMP_ARRAY("H_packt_len=%d", this->GetQTSSPacketLength());
 
-	UInt8* qtssDataBuffer = this->GetPacketBuffer() + kQTSSDataOffset;
+	uint8_t* qtssDataBuffer = this->GetPacketBuffer() + kQTSSDataOffset;
 
 	//packet length is given in words
 	UInt32 bytesRemaining = this->GetQTSSPacketLength() * 4;
@@ -120,14 +120,14 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(UInt8* inPacketBuffer, UInt32 inPack
 		// use the 4-byte align protection functions. Sparc and MIPS processors will crash otherwise
 		UInt32 theHeader = ntohl(OS::GetUInt32FromMemory((UInt32*)&qtssDataBuffer[kQTSSItemTypeOffset]));
 		UInt16 itemType = (UInt16)((theHeader & kQTSSItemTypeMask) >> kQTSSItemTypeShift);
-		UInt8 itemVersion = (UInt8)((theHeader & kQTSSItemVersionMask) >> kQTSSItemVersionShift);
-		UInt8 itemLengthInBytes = (UInt8)(theHeader & kQTSSItemLengthMask);
+		uint8_t itemVersion = (uint8_t)((theHeader & kQTSSItemVersionMask) >> kQTSSItemVersionShift);
+		uint8_t itemLengthInBytes = (uint8_t)(theHeader & kQTSSItemLengthMask);
 
 		APPEND_TO_DUMP_ARRAY("\n       h_type=%.2s(", (char*)&itemType);
 		APPEND_TO_DUMP_ARRAY(", h_vers=%u", itemVersion);
 		APPEND_TO_DUMP_ARRAY(", h_size=%u", itemLengthInBytes);
 
-		qtssDataBuffer += sizeof(UInt32);   //advance past the above UInt16's & UInt8's (point it at the actual item data)
+		qtssDataBuffer += sizeof(UInt32);   //advance past the above UInt16's & uint8_t's (point it at the actual item data)
 
 		//Update bytesRemaining (move it past current item)
 		//This itemLengthInBytes is part of the packet and could therefore be bogus.

@@ -77,7 +77,6 @@
 
 #if 0 // old defs we are now using MacTypes.h
     /* Typedefs */
-    typedef unsigned char       UInt8;
     typedef signed char         SInt8;
     typedef unsigned short      UInt16;
     typedef signed short        SInt16;
@@ -142,7 +141,6 @@
     /* Typedefs */
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef uint8_t             UInt8;
     typedef int8_t              SInt8;
     typedef uint16_t            UInt16;
     typedef int16_t             SInt16;
@@ -244,7 +242,6 @@
     /* Typedefs */
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned char       UInt8;
     typedef signed char         SInt8;
     typedef unsigned short      UInt16;
     typedef signed short        SInt16;
@@ -297,13 +294,9 @@
     #define QT_PATH_SEPARATOR       '/'
 
     /* Typedefs */
-    typedef unsigned char       boolean;
-    #define true                1
-    #define false               0
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned char       UInt8;
     typedef signed char         SInt8;
     typedef unsigned short      UInt16;
     typedef signed short        SInt16;
@@ -366,7 +359,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned char       UInt8;
     typedef signed char         SInt8;
     typedef unsigned short      UInt16;
     typedef signed short        SInt16;
@@ -422,7 +414,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned char       UInt8;
     typedef signed char         SInt8;
     typedef unsigned short      UInt16;
     typedef signed short        SInt16;
@@ -476,7 +467,6 @@
 
     /* Typedefs */
     typedef unsigned long       PointerSizedInt;
-    typedef unsigned char       UInt8;
     typedef signed char         SInt8;
     typedef unsigned short      UInt16;
     typedef signed short        SInt16;

@@ -64,7 +64,7 @@ public:
 	QTSSModule* GetPacketSendingModule() { return fModule; }
 	bool      HasAnRTPStream() { return fHasAnRTPStream; }
 
-	RTPStream*  FindRTPStreamForChannelNum(UInt8 inChannelNum);
+	RTPStream*  FindRTPStreamForChannelNum(uint8_t inChannelNum);
 
 	//
 	// MODIFIERS

@@ -112,10 +112,10 @@ void RTPMetaInfoPacket::ConstructFieldIDArrayFromHeader(StrPtrLen* inHeader, Fie
 }
 
 
-bool RTPMetaInfoPacket::ParsePacket(UInt8* inPacketBuffer, UInt32 inPacketLen, FieldID* inFieldIDArray)
+bool RTPMetaInfoPacket::ParsePacket(uint8_t* inPacketBuffer, UInt32 inPacketLen, FieldID* inFieldIDArray)
 {
-	UInt8* theFieldP = inPacketBuffer + 12; // skip RTP header
-	UInt8* theEndP = inPacketBuffer + inPacketLen;
+	uint8_t* theFieldP = inPacketBuffer + 12; // skip RTP header
+	uint8_t* theEndP = inPacketBuffer + inPacketLen;
 
 	SInt64 sInt64Val = 0;
 	UInt16 uInt16Val = 0;
@@ -131,7 +131,7 @@ bool RTPMetaInfoPacket::ParsePacket(UInt8* inPacketBuffer, UInt32 inPacketLen, F
 			Assert(inFieldIDArray != NULL);
 
 			// If this is a compressed field, find to which field the ID maps
-			UInt8 theFieldID = *theFieldP & 0x7F;
+			uint8_t theFieldID = *theFieldP & 0x7F;
 
 			for (int x = 0; x < kNumFields; x++)
 			{
@@ -221,7 +221,7 @@ bool RTPMetaInfoPacket::ParsePacket(UInt8* inPacketBuffer, UInt32 inPacketLen, F
 	return true;
 }
 
-UInt8* RTPMetaInfoPacket::MakeRTPPacket(UInt32* outPacketLen)
+uint8_t* RTPMetaInfoPacket::MakeRTPPacket(UInt32* outPacketLen)
 {
 	if (fMediaDataP == NULL)
 		return NULL;

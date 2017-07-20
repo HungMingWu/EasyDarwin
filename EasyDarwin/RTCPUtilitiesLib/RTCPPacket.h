@@ -37,6 +37,7 @@
 #define _RTCPPACKET_H_
 
 #include <stdlib.h>
+#include <stdint.h>
 #ifndef __Win32__
 #include <sys/types.h>
 #include <netinet/in.h>
@@ -61,16 +62,16 @@ public:
 	virtual ~RTCPPacket() {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
-	bool ParsePacket(UInt8* inPacketBuffer, UInt32 inPacketLen);
+	bool ParsePacket(uint8_t* inPacketBuffer, UInt32 inPacketLen);
 
 	inline int GetVersion();
 	inline bool GetHasPadding();
 	inline int GetReportCount();
-	inline UInt8 GetPacketType();
+	inline uint8_t GetPacketType();
 	inline UInt16 GetPacketLength();    //in 32-bit words
 	inline UInt32 GetPacketSSRC();
 	inline SInt16 GetHeader();
-	UInt8* GetPacketBuffer() { return fReceiverPacketBuffer; }
+	uint8_t* GetPacketBuffer() { return fReceiverPacketBuffer; }
 
 	//bool IsValidPacket();
 
@@ -84,7 +85,7 @@ public:
 
 protected:
 
-	UInt8* fReceiverPacketBuffer;
+	uint8_t* fReceiverPacketBuffer;
 
 	enum
 	{
@@ -119,7 +120,7 @@ public:
 
 	SourceDescriptionPacket() : RTCPPacket() {}
 
-	bool ParseSourceDescription(UInt8* inPacketBuffer, UInt32 inPacketLength)
+	bool ParseSourceDescription(uint8_t* inPacketBuffer, UInt32 inPacketLength)
 	{
 		return ParsePacket(inPacketBuffer, inPacketLength);
 	}
@@ -137,10 +138,10 @@ public:
 	RTCPReceiverPacket() : RTCPPacket(), fRTCPReceiverReportArray(NULL) {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
-	virtual bool ParseReport(UInt8* inPacketBuffer, UInt32 inPacketLength);
+	virtual bool ParseReport(uint8_t* inPacketBuffer, UInt32 inPacketLength);
 
 	inline UInt32 GetReportSourceID(int inReportNum);
-	UInt8 GetFractionLostPackets(int inReportNum);
+	uint8_t GetFractionLostPackets(int inReportNum);
 	UInt32 GetTotalLostPackets(int inReportNum);
 	inline UInt32 GetHighestSeqNumReceived(int inReportNum);
 	inline UInt32 GetJitter(int inReportNum);
@@ -158,7 +159,7 @@ public:
 protected:
 	inline int RecordOffset(int inReportNum);
 
-	UInt8* fRTCPReceiverReportArray;    //points into fReceiverPacketBuffer
+	uint8_t* fRTCPReceiverReportArray;    //points into fReceiverPacketBuffer
 
 	enum
 	{
@@ -182,7 +183,7 @@ protected:
 class RTCPSenderReportPacket : public RTCPReceiverPacket
 {
 public:
-	bool ParseReport(UInt8* inPacketBuffer, UInt32 inPacketLength);
+	bool ParseReport(uint8_t* inPacketBuffer, UInt32 inPacketLength);
 	SInt64 GetNTPTimeStamp()
 	{
 		UInt32* fieldPtr = (UInt32*)&fReceiverPacketBuffer[kSRPacketNTPTimeStampMSW];
@@ -228,11 +229,11 @@ inline int RTCPPacket::GetReportCount()
 	return (int)((theReportCount & kReportCountMask) >> kReportCountShift);
 }
 
-inline UInt8 RTCPPacket::GetPacketType()
+inline uint8_t RTCPPacket::GetPacketType()
 {
 	UInt32* thePacketTypePtr = (UInt32*)&fReceiverPacketBuffer[kPacketTypeOffset];
 	UInt32 thePacketType = ntohl(*thePacketTypePtr);
-	return (UInt8)((thePacketType & kPacketTypeMask) >> kPacketTypeShift);
+	return (uint8_t)((thePacketType & kPacketTypeMask) >> kPacketTypeShift);
 }
 
 inline UInt16 RTCPPacket::GetPacketLength()
@@ -263,9 +264,9 @@ inline UInt32 RTCPReceiverPacket::GetReportSourceID(int inReportNum)
 	return (UInt32)ntohl(*(UInt32*)&fRTCPReceiverReportArray[this->RecordOffset(inReportNum) + kReportSourceIDOffset]);
 }
 
-inline UInt8 RTCPReceiverPacket::GetFractionLostPackets(int inReportNum)
+inline uint8_t RTCPReceiverPacket::GetFractionLostPackets(int inReportNum)
 {
-	return (UInt8)((ntohl(*(UInt32*)&fRTCPReceiverReportArray[this->RecordOffset(inReportNum) + kFractionLostOffset]) & kFractionLostMask) >> kFractionLostShift);
+	return (uint8_t)((ntohl(*(UInt32*)&fRTCPReceiverReportArray[this->RecordOffset(inReportNum) + kFractionLostOffset]) & kFractionLostMask) >> kFractionLostShift);
 }
 
 

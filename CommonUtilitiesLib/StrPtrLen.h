@@ -40,6 +40,7 @@
 #define __STRPTRLEN_H__
 
 #include <string.h>
+#include <stdint.h>
 #include "OSHeaders.h"
 #include <ctype.h> 
 #include "MyAssert.h"
@@ -140,8 +141,8 @@ public:
 
 private:
 
-	static UInt8    sCaseInsensitiveMask[];
-	static UInt8    sNonPrintChars[];
+	static uint8_t    sCaseInsensitiveMask[];
+	static uint8_t    sNonPrintChars[];
 };
 
 

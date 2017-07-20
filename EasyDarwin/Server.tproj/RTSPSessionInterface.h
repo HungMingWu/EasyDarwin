@@ -75,11 +75,11 @@ public:
 	//
 	// Pass in the RTSP Session ID of the Client session to which these channel numbers will
 	// belong.
-	UInt8               GetTwoChannelNumbers(StrPtrLen* inRTSPSessionID);
+	uint8_t               GetTwoChannelNumbers(StrPtrLen* inRTSPSessionID);
 
 	//
 	// Given a channel number, returns the RTSP Session ID to which this channel number refers
-	StrPtrLen*  GetSessionIDForChannelNum(UInt8 inChannelNum);
+	StrPtrLen*  GetSessionIDForChannelNum(uint8_t inChannelNum);
 
 	//Two main things are persistent through the course of a session, not
 	//associated with any one request. The RequestStream (which can be used for
@@ -184,7 +184,7 @@ protected:
 	bool              fLiveSession;
 	unsigned int        fObjectHolders;
 
-	UInt8               fCurChannelNum;
+	uint8_t               fCurChannelNum;
 	StrPtrLen*          fChNumToSessIDMap;
 
 	QTSS_StreamRef      fStreamRef;

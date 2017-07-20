@@ -1306,7 +1306,7 @@ void RTPStream::SendRTCPSR(const SInt64& inTime, bool inAppendBye)
 }
 
 
-void RTPStream::ProcessIncomingInterleavedData(UInt8 inChannelNum, RTSPSessionInterface* inRTSPSession, StrPtrLen* inPacket)
+void RTPStream::ProcessIncomingInterleavedData(uint8_t inChannelNum, RTSPSessionInterface* inRTSPSession, StrPtrLen* inPacket)
 {
 	if (inChannelNum == fRTPChannel)
 	{
@@ -1322,12 +1322,12 @@ void RTPStream::ProcessIncomingInterleavedData(UInt8 inChannelNum, RTSPSessionIn
 bool RTPStream::ProcessNADUPacket(RTCPPacket &rtcpPacket, SInt64 &curTime, StrPtrLen &currentPtr, UInt32 highestSeqNum)
 {
 	RTCPNaduPacket naduPacket(false);
-	UInt8* packetBuffer = rtcpPacket.GetPacketBuffer();
+	uint8_t* packetBuffer = rtcpPacket.GetPacketBuffer();
 	UInt32 packetLen = (rtcpPacket.GetPacketLength() * 4) + RTCPPacket::kRTCPHeaderSizeInBytes;
 
 	this->PrintPacketPrefEnabled((char*)packetBuffer, packetLen, RTPStream::rtcpAPP);
 
-	if (!naduPacket.ParseAPPData((UInt8*)currentPtr.Ptr, currentPtr.Len))
+	if (!naduPacket.ParseAPPData((uint8_t*)currentPtr.Ptr, currentPtr.Len))
 		return false;//abort if we discover a malformed app packet
 
 	return true;
@@ -1336,12 +1336,12 @@ bool RTPStream::ProcessNADUPacket(RTCPPacket &rtcpPacket, SInt64 &curTime, StrPt
 bool RTPStream::ProcessCompressedQTSSPacket(RTCPPacket &rtcpPacket, SInt64 &curTime, StrPtrLen &currentPtr)
 {
 	RTCPCompressedQTSSPacket compressedQTSSPacket;
-	UInt8* packetBuffer = rtcpPacket.GetPacketBuffer();
+	uint8_t* packetBuffer = rtcpPacket.GetPacketBuffer();
 	UInt32 packetLen = (rtcpPacket.GetPacketLength() * 4) + RTCPPacket::kRTCPHeaderSizeInBytes;
 
 	this->PrintPacketPrefEnabled((char*)packetBuffer, packetLen, RTPStream::rtcpAPP);
 
-	if (!compressedQTSSPacket.ParseAPPData((UInt8*)currentPtr.Ptr, currentPtr.Len))
+	if (!compressedQTSSPacket.ParseAPPData((uint8_t*)currentPtr.Ptr, currentPtr.Len))
 		return false;//abort if we discover a malformed app packet
 
 
@@ -1383,7 +1383,7 @@ bool RTPStream::ProcessCompressedQTSSPacket(RTCPPacket &rtcpPacket, SInt64 &curT
 bool RTPStream::ProcessAckPacket(RTCPPacket &rtcpPacket, SInt64 &curTime)
 {
 	RTCPAckPacket theAckPacket;
-	UInt8* packetBuffer = rtcpPacket.GetPacketBuffer();
+	uint8_t* packetBuffer = rtcpPacket.GetPacketBuffer();
 	UInt32 packetLen = (rtcpPacket.GetPacketLength() * 4) + RTCPPacket::kRTCPHeaderSizeInBytes;
 
 	if (!theAckPacket.ParseAPPData(packetBuffer, packetLen))
@@ -1498,7 +1498,7 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 			actual packet type.  Once that is figgered out, we treat it as its' actual packet type
 		*/
 		RTCPPacket rtcpPacket;
-		if (!rtcpPacket.ParsePacket((UInt8*)currentPtr.Ptr, currentPtr.Len))
+		if (!rtcpPacket.ParsePacket((uint8_t*)currentPtr.Ptr, currentPtr.Len))
 		{
 			fSession->GetSessionMutex()->Unlock();
 			DEBUG_RTCP_PRINTF(("malformed rtcp packet\n"));
@@ -1514,7 +1514,7 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 		case RTCPPacket::kReceiverPacketType:
 			{   DEBUG_RTCP_PRINTF(("RTPStream::ProcessIncomingRTCPPacket kReceiverPacketType\n"));
 			RTCPReceiverPacket receiverPacket;
-			if (!receiverPacket.ParseReport((UInt8*)currentPtr.Ptr, currentPtr.Len))
+			if (!receiverPacket.ParseReport((uint8_t*)currentPtr.Ptr, currentPtr.Len))
 			{
 				fSession->GetSessionMutex()->Unlock();
 				return;//abort if we discover a malformed receiver report
@@ -1588,7 +1588,7 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 				DEBUG_RTCP_PRINTF(("RTPStream::ProcessIncomingRTCPPacket kAPPPacketType\n"));
 				bool packetOK = false;
 				RTCPAPPPacket theAPPPacket;
-				if (!theAPPPacket.ParseAPPPacket((UInt8*)currentPtr.Ptr, currentPtr.Len))
+				if (!theAPPPacket.ParseAPPPacket((uint8_t*)currentPtr.Ptr, currentPtr.Len))
 				{
 					fSession->GetSessionMutex()->Unlock();
 					return;//abort if we discover a malformed receiver report
@@ -1639,7 +1639,7 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 				DEBUG_RTCP_PRINTF(("RTPStream::ProcessIncomingRTCPPacket kSDESPacketType\n"));
 #ifdef DEBUG_RTCP_PACKETS
 				SourceDescriptionPacket sdesPacket;
-				if (!sdesPacket.ParsePacket((UInt8*)currentPtr.Ptr, currentPtr.Len))
+				if (!sdesPacket.ParsePacket((uint8_t*)currentPtr.Ptr, currentPtr.Len))
 				{
 					fSession->GetSessionMutex()->Unlock();
 					return;//abort if we discover a malformed app packet
@@ -1811,7 +1811,7 @@ void RTPStream::PrintPacket(char *inBuffer, UInt32 inLen, SInt32 inType)
 		if (QTSServerInterface::GetServer()->GetPrefs()->PrintRRHeaders())
 		{
 			RTCPReceiverPacket rtcpRR;
-			if (rtcpRR.ParseReport((UInt8*)inBuffer, inLen))
+			if (rtcpRR.ParseReport((uint8_t*)inBuffer, inLen))
 			{
 				qtss_printf("\n");
 				qtss_printf(">recv sess=%"   _U32BITARG_   ": RTCP %s recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), rr, this->GetStreamStartTimeSecs(), theType, inLen);
@@ -1826,7 +1826,7 @@ void RTPStream::PrintPacket(char *inBuffer, UInt32 inLen, SInt32 inType)
 			bool debug = true;
 
 			RTCPAPPPacket appPacket;
-			if (!appPacket.ParseAPPPacket((UInt8*)inBuffer, inLen))
+			if (!appPacket.ParseAPPPacket((uint8_t*)inBuffer, inLen))
 				break;
 
 			UInt32 itemName = appPacket.GetAppPacketName();
@@ -1835,7 +1835,7 @@ void RTPStream::PrintPacket(char *inBuffer, UInt32 inLen, SInt32 inType)
 			{
 				qtss_printf(">recv sess=%"   _U32BITARG_   ": RTCP APP QTSS recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), this->GetStreamStartTimeSecs(), theType, inLen);
 				RTCPCompressedQTSSPacket compressedQTSSPacket(debug);
-				if (compressedQTSSPacket.ParseAPPData((UInt8*)inBuffer, inLen))
+				if (compressedQTSSPacket.ParseAPPData((uint8_t*)inBuffer, inLen))
 				{
 					compressedQTSSPacket.Dump();
 				}
@@ -1846,7 +1846,7 @@ void RTPStream::PrintPacket(char *inBuffer, UInt32 inLen, SInt32 inType)
 			{
 				qtss_printf(">recv sess=%"   _U32BITARG_   ": RTCP APP NADU recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), this->GetStreamStartTimeSecs(), theType, inLen);
 				RTCPNaduPacket naduPacket(debug);
-				if (naduPacket.ParseAPPData((UInt8*)inBuffer, inLen))
+				if (naduPacket.ParseAPPData((uint8_t*)inBuffer, inLen))
 				{
 					naduPacket.Dump();
 
@@ -1856,7 +1856,7 @@ void RTPStream::PrintPacket(char *inBuffer, UInt32 inLen, SInt32 inType)
 			}
 
 			//unknown app packet
-			qtss_printf(">recv sess=%"   _U32BITARG_   ": RTCP APP %c%c%c%c recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), ((UInt8*)&itemName)[0], (char)((UInt8*)&itemName)[1], (char)((UInt8*)&itemName)[2], (char)((UInt8*)&itemName)[3], this->GetStreamStartTimeSecs(), theType, inLen);
+			qtss_printf(">recv sess=%"   _U32BITARG_   ": RTCP APP %c%c%c%c recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), ((uint8_t*)&itemName)[0], (char)((uint8_t*)&itemName)[1], (char)((uint8_t*)&itemName)[2], (char)((uint8_t*)&itemName)[3], this->GetStreamStartTimeSecs(), theType, inLen);
 			qtss_printf("unknown APP packet: ");
 			appPacket.Dump();
 
@@ -1868,7 +1868,7 @@ void RTPStream::PrintPacket(char *inBuffer, UInt32 inLen, SInt32 inType)
 		if (QTSServerInterface::GetServer()->GetPrefs()->PrintACKHeaders())
 		{
 			RTCPAckPacket rtcpAck;
-			if (rtcpAck.ParseAPPData((UInt8*)inBuffer, inLen))
+			if (rtcpAck.ParseAPPData((uint8_t*)inBuffer, inLen))
 			{
 				qtss_printf(">recv sess=%"   _U32BITARG_   ": RTCP %s recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), ack, this->GetStreamStartTimeSecs(), theType, inLen);
 				rtcpAck.Dump();

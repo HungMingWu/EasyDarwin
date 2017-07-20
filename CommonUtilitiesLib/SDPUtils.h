@@ -88,7 +88,7 @@ public:
 	bool      SetSDPBuffer(StrPtrLen *sdpBufferPtr);
 	bool      IsSDPBufferValid() { return fValid; }
 	bool      HasReqLines() { return (bool)(fReqLines == kAllReq); }
-	bool      HasLineType(char lineType) { return (bool)(lineType == fFieldStr[(UInt8)lineType]); }
+	bool      HasLineType(char lineType) { return (bool)(lineType == fFieldStr[(uint8_t)lineType]); }
 	char*       GetReqLinesArray;
 	void        PrintLine(SInt32 lineIndex);
 	void        PrintAllLines();

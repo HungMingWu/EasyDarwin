@@ -44,7 +44,7 @@
 #include "DateTranslator.h"
 #include "SocketUtils.h"
 
-UInt8
+uint8_t
 RTSPRequest::sURLStopConditions[] =
 {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 1, //0-9      //'\t' is a stop condition

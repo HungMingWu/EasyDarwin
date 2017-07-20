@@ -37,7 +37,7 @@
 #define RTCP_PACKET_DEBUG 0
 
 //returns true if successful, false otherwise
-bool RTCPPacket::ParsePacket(UInt8* inPacketBuffer, UInt32 inPacketLen)
+bool RTCPPacket::ParsePacket(uint8_t* inPacketBuffer, UInt32 inPacketLen)
 {
     if (inPacketLen < kRTCPPacketSizeInBytes)
         return false;
@@ -83,7 +83,7 @@ void RTCPReceiverPacket::Dump()//Override
 }
 
 
-bool RTCPReceiverPacket::ParseReport(UInt8* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPReceiverPacket::ParseReport(uint8_t* inPacketBuffer, UInt32 inPacketLength)
 {
     bool ok = this->ParsePacket(inPacketBuffer, inPacketLength);
     if (!ok)
@@ -141,7 +141,7 @@ UInt32 RTCPReceiverPacket::GetCumulativeTotalLostPackets()
 }
 
 
-bool RTCPSenderReportPacket::ParseReport(UInt8* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPSenderReportPacket::ParseReport(uint8_t* inPacketBuffer, UInt32 inPacketLength)
 {
     bool ok = this->ParsePacket(inPacketBuffer, inPacketLength);
     if (!ok)

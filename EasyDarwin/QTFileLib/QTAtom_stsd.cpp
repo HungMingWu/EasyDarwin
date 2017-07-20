@@ -103,7 +103,7 @@ bool QTAtom_stsd::Initialize()
 	//
 	// Parse this atom's fields.
 	ReadInt32(stsdPos_VersionFlags, &tempInt32);
-	fVersion = (UInt8)((tempInt32 >> 24) & 0x000000ff);
+	fVersion = (uint8_t)((tempInt32 >> 24) & 0x000000ff);
 	fFlags = tempInt32 & 0x00ffffff;
 
 	ReadInt32(stsdPos_NumEntries, &fNumEntries);

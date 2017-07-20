@@ -55,13 +55,13 @@ public:
 	~StringParser() {}
 
 	// Built-in masks for common stop conditions
-	static UInt8 sDigitMask[];      // stop when you hit a digit
-	static UInt8 sWordMask[];       // stop when you hit a word
-	static UInt8 sEOLMask[];        // stop when you hit an eol
-	static UInt8 sEOLWhitespaceMask[]; // stop when you hit an EOL or whitespace
-	static UInt8 sEOLWhitespaceQueryMask[]; // stop when you hit an EOL, ? or whitespace
+	static uint8_t sDigitMask[];      // stop when you hit a digit
+	static uint8_t sWordMask[];       // stop when you hit a word
+	static uint8_t sEOLMask[];        // stop when you hit an eol
+	static uint8_t sEOLWhitespaceMask[]; // stop when you hit an EOL or whitespace
+	static uint8_t sEOLWhitespaceQueryMask[]; // stop when you hit an EOL, ? or whitespace
 
-	static UInt8 sWhitespaceMask[]; // skip over whitespace
+	static uint8_t sWhitespaceMask[]; // skip over whitespace
 
 
 	//GetBuffer:
@@ -100,7 +100,7 @@ public:
 	//Assumes 'stop' is a 255-char array of booleans. Set this array
 	//to a mask of what the stop characters are. true means stop character.
 	//You may also pass in one of the many prepackaged masks defined above.
-	void            ConsumeUntil(StrPtrLen* spl, UInt8* stop);
+	void            ConsumeUntil(StrPtrLen* spl, uint8_t* stop);
 
 
 	//+ rt 8.19.99
@@ -162,7 +162,7 @@ private:
 	void        advanceMark();
 
 	//built in masks for some common stop conditions
-	static UInt8 sNonWordMask[];
+	static uint8_t sNonWordMask[];
 
 	char*       fStartGet;
 	char*       fEndGet;

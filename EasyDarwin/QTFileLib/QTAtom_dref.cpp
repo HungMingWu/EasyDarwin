@@ -137,7 +137,7 @@ bool QTAtom_dref::Initialize()
 	//
 	// Parse this atom's fields.
 	ReadInt32(drefPos_VersionFlags, &tempInt32);
-	fVersion = (UInt8)((tempInt32 >> 24) & 0x000000ff);
+	fVersion = (uint8_t)((tempInt32 >> 24) & 0x000000ff);
 	fFlags = tempInt32 & 0x00ffffff;
 
 	ReadInt32(drefPos_NumRefs, &fNumRefs);

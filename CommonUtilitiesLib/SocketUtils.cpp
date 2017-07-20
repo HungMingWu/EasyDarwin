@@ -108,7 +108,7 @@ void SocketUtils::Initialize(bool lookupDNSName)
 
 	//allocate the IPAddrInfo array. Unfortunately we can't allocate this
 	//array the proper way due to a GCC bug
-	UInt8* addrInfoMem = new UInt8[sizeof(IPAddrInfo) * sNumIPAddrs];
+	uint8_t* addrInfoMem = new uint8_t[sizeof(IPAddrInfo) * sNumIPAddrs];
 	::memset(addrInfoMem, 0, sizeof(IPAddrInfo) * sNumIPAddrs);
 	sIPAddrInfoArray = (IPAddrInfo*)addrInfoMem;
 
@@ -223,7 +223,7 @@ void SocketUtils::Initialize(bool lookupDNSName)
 
 	//allocate the IPAddrInfo array. Unfortunately we can't allocate this
 	//array the proper way due to a GCC bug
-	UInt8* addrInfoMem = new UInt8[sizeof(IPAddrInfo) * sNumIPAddrs];
+	uint8_t* addrInfoMem = new uint8_t[sizeof(IPAddrInfo) * sNumIPAddrs];
 	::memset(addrInfoMem, 0, sizeof(IPAddrInfo) * sNumIPAddrs);
 	sIPAddrInfoArray = (IPAddrInfo*)addrInfoMem;
 
@@ -419,7 +419,7 @@ void SocketUtils::Initialize(bool lookupDNSName)
 
 	//allocate the IPAddrInfo array. Unfortunately we can't allocate this
 	//array the proper way due to a GCC bug
-	UInt8* addrInfoMem = new UInt8[sizeof(IPAddrInfo) * sNumIPAddrs];
+	uint8_t* addrInfoMem = new uint8_t[sizeof(IPAddrInfo) * sNumIPAddrs];
 	::memset(addrInfoMem, 0, sizeof(IPAddrInfo) * sNumIPAddrs);
 	sIPAddrInfoArray = (IPAddrInfo*)addrInfoMem;
 

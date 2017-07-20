@@ -47,13 +47,13 @@ public:
 	RTCPAPPPacket(bool debug = false);
 	virtual ~RTCPAPPPacket() {};
 	virtual void Dump();
-	virtual bool ParseAPPPacket(UInt8* inPacketBuffer, UInt32 inPacketLength); //default app header check
-	virtual bool ParseAPPData(UInt8* inPacketBuffer, UInt32 inPacketLength) { return false; }; //derived class implements
+	virtual bool ParseAPPPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength); //default app header check
+	virtual bool ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength) { return false; }; //derived class implements
 	inline FourCharCode GetAppPacketName(char *outName = NULL, UInt32 len = 0);
 	inline UInt32 GetAppPacketSSRC();
 
 
-	UInt8* fRTCPAPPDataBuffer;  //points into RTCPPacket::fReceiverPacketBuffer should be set past the app header
+	uint8_t* fRTCPAPPDataBuffer;  //points into RTCPPacket::fReceiverPacketBuffer should be set past the app header
 	UInt32 fAPPDataBufferSize;
 
 	enum
@@ -71,7 +71,7 @@ public:
 	bool fDebug;
 
 private:
-	virtual bool ParseAPPPacketHeader(UInt8* inPacketBuffer, UInt32 inPacketLength);
+	virtual bool ParseAPPPacketHeader(uint8_t* inPacketBuffer, UInt32 inPacketLength);
 
 };
 

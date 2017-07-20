@@ -99,7 +99,7 @@ public:
 protected:
 	//
 	// Protected member variables.
-	UInt8       fVersion;
+	uint8_t       fVersion;
 	UInt32      fFlags; // 24 bits in the low 3 bytes
 
 	UInt32      fNumEntries;
@@ -170,7 +170,7 @@ public:
 protected:
 	//
 	// Protected member variables.
-	UInt8       fVersion;
+	uint8_t       fVersion;
 	UInt32      fFlags; // 24 bits in the low 3 bytes
 
 	UInt32      fNumEntries;

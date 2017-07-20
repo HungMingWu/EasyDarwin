@@ -281,7 +281,7 @@ void RTCPNaduPacket::GetTestPacket(StrPtrLen* resultPtr)
 
 
 // use if you don't know what kind of packet this is
-bool RTCPNaduPacket::ParseNaduPacket(UInt8* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPNaduPacket::ParseNaduPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength)
 {
 
 	if (!this->ParseAPPPacket(inPacketBuffer, inPacketLength))
@@ -294,7 +294,7 @@ bool RTCPNaduPacket::ParseNaduPacket(UInt8* inPacketBuffer, UInt32 inPacketLengt
 }
 
 
-bool RTCPNaduPacket::ParseAPPData(UInt8* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPNaduPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength)
 {
 
 	if (!this->ParseNaduPacket(inPacketBuffer, inPacketLength))
@@ -474,9 +474,9 @@ void   RTCPNaduPacket::Dump()
 }
 
 /* class NaduReport */
-NaduReport::NaduReport(UInt8* inPacketBuffer, UInt32 inPacketLength, UInt32 id)
+NaduReport::NaduReport(uint8_t* inPacketBuffer, UInt32 inPacketLength, UInt32 id)
 {
-	fPacketBuffer = new UInt8[inPacketLength + 1];
+	fPacketBuffer = new uint8_t[inPacketLength + 1];
 	fPacketBuffer[inPacketLength] = 0;
 	fLength = inPacketLength;
 	::memcpy(fPacketBuffer, inPacketBuffer, inPacketLength);
@@ -564,7 +564,7 @@ NaduReport* NaduList::GetEarliestReport()
 }
 
 
-bool NaduList::AddReport(UInt8* inPacketBuffer, UInt32 inPacketLength, UInt32 *outID)
+bool NaduList::AddReport(uint8_t* inPacketBuffer, UInt32 inPacketLength, UInt32 *outID)
 {
 	if (NULL == fNaduReportList)
 		return false;

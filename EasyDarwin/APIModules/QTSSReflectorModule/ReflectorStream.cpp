@@ -1455,9 +1455,9 @@ bool ReflectorSender::IsKeyFrameFirstPacket(ReflectorPacket* thePacket)
 	Assert(thePacket);
 	if ((thePacket->fPacketPtr.Ptr != NULL) && (thePacket->fPacketPtr.Len >= 20))
 	{
-		UInt8 csrc_count = thePacket->fPacketPtr.Ptr[0] & 0x0f;
+		uint8_t csrc_count = thePacket->fPacketPtr.Ptr[0] & 0x0f;
 		UInt32 rtp_head_size = /*sizeof(struct RTPHeader)*/12 + csrc_count * sizeof(UInt32);
-		UInt8 nal_unit_type = thePacket->fPacketPtr.Ptr[rtp_head_size + 0] & 0x1F;
+		uint8_t nal_unit_type = thePacket->fPacketPtr.Ptr[rtp_head_size + 0] & 0x1F;
 		//printf("[geyijun] IsKeyFrameFirstPacket 111--->nal_unit_type[%d]\n",nal_unit_type);
 		if ((nal_unit_type >= 1) && (nal_unit_type <= 23))	//单一包
 		{
@@ -1489,7 +1489,7 @@ bool ReflectorSender::IsKeyFrameFirstPacket(ReflectorPacket* thePacket)
 			if (thePacket->fPacketPtr.Len > rtp_head_size + 1)
 			{
 
-				UInt8 startBit = thePacket->fPacketPtr.Ptr[rtp_head_size + 1] & 0x80;
+				uint8_t startBit = thePacket->fPacketPtr.Ptr[rtp_head_size + 1] & 0x80;
 				if (startBit)
 				{
 					//printf("[geyijun] IsKeyFrameFirstPacket AAA--->[%x:%x:%x:%x:]\n",
@@ -1518,9 +1518,9 @@ bool ReflectorSender::IsFrameFirstPacket(ReflectorPacket* thePacket)
 	Assert(thePacket);
 	if ((thePacket->fPacketPtr.Ptr != NULL) && (thePacket->fPacketPtr.Len >= 20))
 	{
-		UInt8 csrc_count = thePacket->fPacketPtr.Ptr[0] & 0x0f;
+		uint8_t csrc_count = thePacket->fPacketPtr.Ptr[0] & 0x0f;
 		UInt32 rtp_head_size = /*sizeof(struct RTPHeader)*/12 + csrc_count * sizeof(UInt32);
-		UInt8 nal_unit_type = thePacket->fPacketPtr.Ptr[rtp_head_size + 0] & 0x1F;
+		uint8_t nal_unit_type = thePacket->fPacketPtr.Ptr[rtp_head_size + 0] & 0x1F;
 		if ((nal_unit_type >= 1) && (nal_unit_type <= 23))	//单一包
 		{
 			return true;
@@ -1545,7 +1545,7 @@ bool ReflectorSender::IsFrameFirstPacket(ReflectorPacket* thePacket)
 		{
 			if (thePacket->fPacketPtr.Len > rtp_head_size + 1)
 			{
-				UInt8 startBit = thePacket->fPacketPtr.Ptr[rtp_head_size + 1] & 0x80;
+				uint8_t startBit = thePacket->fPacketPtr.Ptr[rtp_head_size + 1] & 0x80;
 				if (startBit)
 				{
 					return true;
@@ -1562,7 +1562,7 @@ bool ReflectorSender::IsFrameLastPacket(ReflectorPacket* thePacket)
 	Assert(thePacket);
 	if ((thePacket->fPacketPtr.Ptr != NULL) && (thePacket->fPacketPtr.Len >= 20))
 	{
-		UInt8 markBit = thePacket->fPacketPtr.Ptr[1] & 0x80;
+		uint8_t markBit = thePacket->fPacketPtr.Ptr[1] & 0x80;
 		if (markBit)
 		{
 			//printf("[geyijun] IsFrameLastPacket --->OK\n");	
@@ -1804,7 +1804,7 @@ bool ReflectorSocket::ProcessPacket(const SInt64& inMilliseconds, ReflectorPacke
 			//compound RTCP packet, all we have to do to determine this is look at the
 			//packet type of the first packet in the compound packet.
 			RTCPPacket theRTCPPacket;
-			if ((!theRTCPPacket.ParsePacket((UInt8*)thePacket->fPacketPtr.Ptr, thePacket->fPacketPtr.Len)) ||
+			if ((!theRTCPPacket.ParsePacket((uint8_t*)thePacket->fPacketPtr.Ptr, thePacket->fPacketPtr.Len)) ||
 				(theRTCPPacket.GetPacketType() != RTCPSRPacket::kSRPacketType))
 			{
 				//pretend as if we never got this packet

@@ -175,7 +175,7 @@ void XMLParser::WriteToFile(char** fileHeader)
 #endif
 }
 
-UInt8 XMLTag::sNonNameMask[] =
+uint8_t XMLTag::sNonNameMask[] =
 {
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, //0-9 
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, //10-19 

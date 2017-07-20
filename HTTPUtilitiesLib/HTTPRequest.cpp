@@ -37,7 +37,7 @@ static StrPtrLen sCloseString("close", 5);
 static StrPtrLen sAllString("*", 1);
 static StrPtrLen sKeepAliveString("keep-alive", 10);
 static StrPtrLen sDefaultRealm("Streaming Server", 19);
-UInt8 HTTPRequest::sURLStopConditions[] =
+uint8_t HTTPRequest::sURLStopConditions[] =
 {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 1, //0-9      //'\t' is a stop condition
 	1, 0, 0, 1, 0, 0, 0, 0, 0, 0, //10-19    //'\r' & '\n' are stop conditions

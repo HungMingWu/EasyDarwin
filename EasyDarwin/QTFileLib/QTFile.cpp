@@ -573,7 +573,7 @@ bool QTFile::IsHintTrack(QTTrack *Track)
 
 //
 // Accessors
-Float64 QTFile::GetTimeScale()
+double QTFile::GetTimeScale()
 {
 	if (fMovieHeaderAtom == NULL)
 		return 0.0;
@@ -581,7 +581,7 @@ Float64 QTFile::GetTimeScale()
 	return fMovieHeaderAtom->GetTimeScale();
 }
 
-Float64 QTFile::GetDurationInSeconds()
+double QTFile::GetDurationInSeconds()
 {
 	if (fMovieHeaderAtom == NULL)
 		return 0.0;

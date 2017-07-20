@@ -384,7 +384,7 @@ QTSS_Error  RTPSessionOutput::TrackRTCPBaseTime(QTSS_RTPStreamObject *theStreamP
 				return QTSS_NoErr;
 
 			SInt64 arrivalTimeDiffMSecs = (firstStreamArrivalTime - fBaseArrivalTime);// + fBufferDelayMSecs;//add the buffer delay !! not sure about faster than real time arrival times....
-			UInt32 timeDiffStreamTime = (UInt32)(((Float64)arrivalTimeDiffMSecs / (Float64) 1000.0) * (Float64)streamTimeScale);
+			UInt32 timeDiffStreamTime = (UInt32)(((double)arrivalTimeDiffMSecs / (double) 1000.0) * (double)streamTimeScale);
 			baseTimeStamp = firstStreamTime - timeDiffStreamTime;
 			if (QTSS_NoErr == QTSS_SetValue(*theStreamPtr, sBaseRTPTimeStampAttr, 0, (void*)&baseTimeStamp, sizeof(baseTimeStamp)))
 				haveBaseTime = true;
@@ -436,8 +436,8 @@ QTSS_Error  RTPSessionOutput::RewriteRTCP(QTSS_RTPStreamObject *theStreamPtr, St
 	if (packetOffset < 0)
 		packetOffset = 0;
 
-	Float64 rtpTimeFromStart = (Float64)packetOffset / (Float64) 1000.0;
-	UInt32 rtpTimeFromStartInScale = (UInt32)(Float64)((Float64)streamTimeScale * rtpTimeFromStart);
+	double rtpTimeFromStart = (double)packetOffset / (double) 1000.0;
+	UInt32 rtpTimeFromStartInScale = (UInt32)(double)((double)streamTimeScale * rtpTimeFromStart);
 	//printf("rtptime offset time =%f in scale =%"   _U32BITARG_   "\n", rtpTimeFromStart, rtpTimeFromStartInScale );
 
 	theReport += 2; // point to the rtp time stamp of "now" synched and scaled in stream time

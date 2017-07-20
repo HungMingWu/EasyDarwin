@@ -517,13 +517,13 @@ void  RTSPRequest::ParseRangeHeader()
 
 	theRangeParser.GetThru(NULL, '=');//consume "npt="
 	theRangeParser.ConsumeWhitespace();
-	fStartTime = (Float64)theRangeParser.ConsumeNPT();
+	fStartTime = (double)theRangeParser.ConsumeNPT();
 	//see if there is a stop time as well.
 	if (theRangeParser.GetDataRemaining() > 1)
 	{
 		theRangeParser.GetThru(NULL, '-');
 		theRangeParser.ConsumeWhitespace();
-		fStopTime = (Float64)theRangeParser.ConsumeNPT();
+		fStopTime = (double)theRangeParser.ConsumeNPT();
 	}
 }
 

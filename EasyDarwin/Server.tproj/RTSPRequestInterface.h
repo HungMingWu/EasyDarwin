@@ -137,8 +137,8 @@ public:
 	void                        SetResponseKeepAlive(bool keepAlive) { fResponseKeepAlive = keepAlive; }
 
 	//will be -1 unless there was a Range header. May have one or two values
-	Float64                     GetStartTime() { return fStartTime; }
-	Float64                     GetStopTime() { return fStopTime; }
+	double                     GetStartTime() { return fStartTime; }
+	double                     GetStopTime() { return fStopTime; }
 
 	//
 	// Value of Speed: header in request
@@ -229,8 +229,8 @@ protected:
 	bool                      fResponseKeepAlive; //Are we going to keep-alive?
 	RTSPProtocol::RTSPVersion   fVersion;
 
-	Float64                     fStartTime;         //Range header info: start time
-	Float64                     fStopTime;          //Range header info: stop time
+	double                     fStartTime;         //Range header info: start time
+	double                     fStopTime;          //Range header info: stop time
 
 	UInt16                      fClientPortA;       //This is all info that comes out
 	UInt16                      fClientPortB;       //of the Transport: header

@@ -89,9 +89,9 @@ public:
 	inline  UInt64      GetCreationTime() { return fTrackHeaderAtom->GetCreationTime(); }
 	inline  UInt64      GetModificationTime() { return fTrackHeaderAtom->GetModificationTime(); }
 	inline  SInt64      GetDuration() { return (SInt64)fTrackHeaderAtom->GetDuration(); }
-	inline  Float64     GetTimeScale() { return fMediaHeaderAtom->GetTimeScale(); }
-	inline  Float64     GetTimeScaleRecip() { return fMediaHeaderAtom->GetTimeScaleRecip(); }
-	inline  Float64     GetDurationInSeconds() { return GetDuration() / (Float64)GetTimeScale(); }
+	inline  double     GetTimeScale() { return fMediaHeaderAtom->GetTimeScale(); }
+	inline  double     GetTimeScaleRecip() { return fMediaHeaderAtom->GetTimeScaleRecip(); }
+	inline  double     GetDurationInSeconds() { return GetDuration() / (double)GetTimeScale(); }
 	inline  UInt64      GetFirstEditMovieTime(void)
 	{
 		if (fEditListAtom != NULL) return fEditListAtom->FirstEditMovieTime();

@@ -512,7 +512,7 @@ QTRTPFile::ErrorCode QTRTPFile::Initialize(const char * filePath)
 // -------------------------------------
 // Accessors
 //
-Float64 QTRTPFile::GetMovieDuration()
+double QTRTPFile::GetMovieDuration()
 {
 	return fFile->GetDurationInSeconds();
 }
@@ -727,7 +727,7 @@ QTRTPFile::ErrorCode QTRTPFile::AddTrack(UInt32 trackID, bool useRandomOffset)
 	return errNoError;
 }
 
-Float64 QTRTPFile::GetTrackDuration(UInt32 trackID)
+double QTRTPFile::GetTrackDuration(UInt32 trackID)
 {
 	// General vars
 	RTPTrackListEntry   *trackEntry = NULL;
@@ -836,13 +836,13 @@ UInt32 QTRTPFile::GetBytesPerSecond()
 {
 	if (NULL == fFile)
 		return 0;
-	// Must be a SInt64 bc Win32 doesn't implement UInt64 -> Float64
+	// Must be a SInt64 bc Win32 doesn't implement UInt64 -> double
 	SInt64  totalBytes = (SInt64)QTRTPFile::GetAddedTracksRTPBytes();
 
 #ifdef USE_RTP_TRACK_DURATION
-	Float64 duration = 0;
+	double duration = 0;
 	RTPTrackListEntry* curEntry = NULL;
-	Float64 maxDuration = 0;
+	double maxDuration = 0;
 
 	//
 	// Go through all of the tracks, getting duration
@@ -864,12 +864,12 @@ UInt32 QTRTPFile::GetBytesPerSecond()
 
 	duration = maxDuration;
 #else
-	Float64 duration = fFile->GetDurationInSeconds();
+	double duration = fFile->GetDurationInSeconds();
 #endif  
 
 	UInt32  bytesPerSecond = 0;
 	if (duration > 0)
-		bytesPerSecond = (UInt32)((Float64)totalBytes / (Float64)duration);
+		bytesPerSecond = (UInt32)((double)totalBytes / (double)duration);
 
 	return bytesPerSecond;
 }
@@ -888,12 +888,12 @@ void QTRTPFile::AllocatePrivateBuffers(UInt32 inUnitSizeInK, UInt32 inNumBuffSiz
 // -------------------------------------
 // Packet functions
 //
-QTRTPFile::ErrorCode QTRTPFile::Seek(Float64 seekToTime, Float64 maxBackupTime)
+QTRTPFile::ErrorCode QTRTPFile::Seek(double seekToTime, double maxBackupTime)
 {
 	//fHasRTPMetaInfoFieldArray = true;
 	// General vars
 	RTPTrackListEntry   *listEntry = NULL;
-	Float64             syncToTime = seekToTime;
+	double             syncToTime = seekToTime;
 
 	if (fErr == errCallAgain)
 	{
@@ -916,7 +916,7 @@ QTRTPFile::ErrorCode QTRTPFile::Seek(Float64 seekToTime, Float64 maxBackupTime)
 		UInt32          newSampleNumber;
 		UInt32          newSyncSampleNumber;
 		UInt32          newSampleMediaTime;
-		Float64         newSampleTime;
+		double         newSampleTime;
 
 
 		//
@@ -946,7 +946,7 @@ QTRTPFile::ErrorCode QTRTPFile::Seek(Float64 seekToTime, Float64 maxBackupTime)
 			return errInvalidQuickTimeFile;
 
 		newSampleMediaTime += listEntry->HintTrack->GetFirstEditMediaTime();
-		newSampleTime = (Float64)newSampleMediaTime * listEntry->HintTrack->GetTimeScaleRecip();
+		newSampleTime = (double)newSampleMediaTime * listEntry->HintTrack->GetTimeScaleRecip();
 
 		//
 		// Figure out if this is the time that we need to sync to.
@@ -1149,7 +1149,7 @@ QTRTPFile::ErrorCode    QTRTPFile::ScanToCorrectPacketNumber(UInt32 inTrackID, U
 				return errInvalidQuickTimeFile;
 
 			newSampleMediaTime += fLastPacketTrack->HintTrack->GetFirstEditMediaTime();
-			fRequestedSeekTime = (Float64)newSampleMediaTime * fLastPacketTrack->HintTrack->GetTimeScaleRecip();
+			fRequestedSeekTime = (double)newSampleMediaTime * fLastPacketTrack->HintTrack->GetTimeScaleRecip();
 			//fLastPacketTrack = NULL; // So that when we next call GetNextPacket, we actually get the same packet
 			return errNoError;
 		}
@@ -1207,11 +1207,11 @@ UInt32 QTRTPFile::GetSeekTimestamp(UInt32 trackID)
 	return rtpTimestamp;
 }
 
-Float64 QTRTPFile::GetFirstPacketTransmitTime()
+double QTRTPFile::GetFirstPacketTransmitTime()
 {
 	RTPTrackListEntry   *listEntry = NULL;
 	bool              haveFirstPacketTime = false;
-	Float64             firstPacketTime = 0;
+	double             firstPacketTime = 0;
 
 	//
 	// Figure out which track is going to produce the next packet.
@@ -1252,13 +1252,13 @@ UInt16 QTRTPFile::GetNextTrackSequenceNumber(UInt32 trackID)
 	return ntohs(rtpSequenceNumber);
 }
 
-Float64 QTRTPFile::GetNextPacket(char ** outPacket, int * outPacketLength)
+double QTRTPFile::GetNextPacket(char ** outPacket, int * outPacketLength)
 {
 	// General vars
 	RTPTrackListEntry   *listEntry = NULL;
 
 	bool              haveFirstPacketTime = false;
-	Float64             firstPacketTime = 0.0;
+	double             firstPacketTime = 0.0;
 	RTPTrackListEntry   *firstPacket = NULL;
 
 

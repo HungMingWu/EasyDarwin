@@ -85,7 +85,6 @@
     typedef signed int          SInt32;
     typedef signed long long	SInt64;
     typedef unsigned long long	UInt64;
-    typedef double              Float64;
     typedef UInt32              FourCharCode;
     typedef FourCharCode        OSType;
 #endif
@@ -153,7 +152,6 @@
     typedef int32_t   		SInt32;
     typedef int64_t         	SInt64;
     typedef uint64_t          	UInt64;
-    typedef double              Float64;
     typedef UInt16              Bool16;
     typedef UInt8               Bool8;
     
@@ -258,7 +256,6 @@
     typedef signed long         SInt32;
     typedef LONGLONG            SInt64;
     typedef ULONGLONG           UInt64;
-    typedef double              Float64;
     typedef UInt16              Bool16;
     typedef UInt8               Bool8;
     
@@ -320,7 +317,6 @@
     typedef signed long         SInt32;
     typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
-    typedef double              Float64;
 	
 	typedef UInt16				Bool16;
 
@@ -389,7 +385,6 @@
     typedef signed long         SInt32;
     typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
-    typedef double              Float64;
     typedef UInt16              Bool16;
     typedef UInt8               Bool8;
     
@@ -451,7 +446,6 @@
     typedef signed long         SInt32;
     typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
-    typedef double              Float64;
     typedef UInt16              Bool16;
     typedef UInt8               Bool8;
 
@@ -508,7 +502,6 @@
     typedef signed int          SInt32;
     typedef signed long         SInt64;
     typedef unsigned long       UInt64;
-    typedef double              Float64;
     typedef UInt16              Bool16;
     typedef UInt8               Bool8;
     

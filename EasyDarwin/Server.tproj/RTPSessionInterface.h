@@ -313,7 +313,7 @@ private:
 	// Movie size & movie duration. It may not be so good to associate these
 	// statistics with the movie, for a session MAY have multiple movies...
 	// however, the 1 movie assumption is in too many subsystems at this point
-	Float64     fMovieDuration;
+	double     fMovieDuration;
 	UInt64      fMovieSizeInBytes;
 	UInt32      fMovieAverageBitRate;
 

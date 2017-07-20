@@ -180,7 +180,7 @@ public:
 	// Supported fields: tt, md, ft, pp, pn, sq
 	ErrorCode   GetPacket(UInt32 SampleNumber, UInt16 PacketNumber,
 		char * Buffer, UInt32 * Length,
-		Float64 * TransmitTime,
+		double * TransmitTime,
 		bool dropBFrames,
 		bool dropRepeatPackets = false,
 		UInt32 SSRC = 0,
@@ -229,7 +229,7 @@ protected:
 	UInt16              fSequenceNumberRandomOffset;
 	bool              fHintTrackInitialized;
 	SInt16              fHintType;
-	Float64  			fFirstTransmitTime;
+	double  			fFirstTransmitTime;
 	bool              fAllowInvalidHintRefs;
 	//
 	// Used by GetPacket for RTP-Meta-Info payload stuff

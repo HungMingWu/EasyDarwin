@@ -422,7 +422,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	// the last byte of each array is untouched.
 
 	float* packetLossPercent = NULL;
-	Float64* movieDuration = NULL;
+	double* movieDuration = NULL;
 	UInt64* movieSizeInBytes = NULL;
 	UInt32* movieAverageBitRatePtr = 0;
 	UInt32 clientPacketsReceived = 0;

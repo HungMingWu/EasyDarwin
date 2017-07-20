@@ -65,7 +65,7 @@ public:
 	static SInt64   NetworkToHostSInt64(SInt64 networkOrdered);
 
 	static SInt64	TimeMilli_To_Fixed64Secs(SInt64 inMilliseconds); //new CISCO provided implementation
-	//disable: calculates integer value only                { return (SInt64) ( (Float64) inMilliseconds / 1000) * ((SInt64) 1 << 32 ) ; }
+	//disable: calculates integer value only                { return (SInt64) ( (double) inMilliseconds / 1000) * ((SInt64) 1 << 32 ) ; }
 	static SInt64	Fixed64Secs_To_TimeMilli(SInt64 inFixed64Secs)
 	{
 		UInt64 value = (UInt64)inFixed64Secs; return (value >> 32) * 1000 + (((value % ((UInt64)1 << 32)) * 1000) >> 32);
@@ -99,7 +99,7 @@ public:
 
 	static SInt64   Time1900Fixed64Secs_To_TimeMilli(SInt64 in1900Fixed64Secs)
 	{
-		return   ((SInt64)((Float64)((SInt64)in1900Fixed64Secs - (SInt64)TimeMilli_To_Fixed64Secs(sMsecSince1900)) / (Float64)((SInt64)1 << 32)) * 1000);
+		return   ((SInt64)((double)((SInt64)in1900Fixed64Secs - (SInt64)TimeMilli_To_Fixed64Secs(sMsecSince1900)) / (double)((SInt64)1 << 32)) * 1000);
 	}
 
 	// Returns the offset in hours between local time and GMT (or UTC) time.
@@ -121,7 +121,7 @@ public:
 	static OSMutex* GetStdLibMutex() { return &sStdLibOSMutex; }
 
 	static SInt64   InitialMSec() { return sInitialMsec; }
-	static float  StartTimeMilli_Float() { return (float)((Float64)((SInt64)OS::Milliseconds() - (SInt64)OS::InitialMSec()) / (Float64) 1000.0); }
+	static float  StartTimeMilli_Float() { return (float)((double)((SInt64)OS::Milliseconds() - (SInt64)OS::InitialMSec()) / (double) 1000.0); }
 	static SInt64   StartTimeMilli_Int() { return (OS::Milliseconds() - OS::InitialMSec()); }
 
 	static bool 	ThreadSafe();

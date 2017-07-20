@@ -136,7 +136,7 @@ bool QTAtom_mdhd::Initialize()
 
     //
     // Compute the reciprocal of the timescale.
-    fTimeScaleRecip = 1 / (Float64)fTimeScale;
+    fTimeScaleRecip = 1 / (double)fTimeScale;
     
     //
     // This atom has been successfully read in.

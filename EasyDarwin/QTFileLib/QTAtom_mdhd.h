@@ -56,8 +56,8 @@ public:
 
 	//
 	// Accessors.
-	inline  Float64     GetTimeScale() { return (Float64)fTimeScale; }
-	inline  Float64     GetTimeScaleRecip() { return fTimeScaleRecip; }
+	inline  double     GetTimeScale() { return (double)fTimeScale; }
+	inline  double     GetTimeScaleRecip() { return fTimeScaleRecip; }
 
 	inline  UInt64      GetDuration() { return fDuration; }
 
@@ -77,7 +77,7 @@ protected:
 	UInt16      fLanguage;
 	UInt16      fQuality;
 
-	Float64     fTimeScaleRecip;
+	double     fTimeScaleRecip;
 };
 
 #endif // QTAtom_mdhd_H

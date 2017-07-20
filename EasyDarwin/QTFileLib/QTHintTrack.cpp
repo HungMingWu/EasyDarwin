@@ -920,7 +920,7 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 		if (isCompressed)
 		{   // Media track sample compressed
 
-			UInt32  compressionBlocksToSkip = (UInt32)((Float64)readOffset / (Float64)bytesPerCompressionBlock);
+			UInt32  compressionBlocksToSkip = (UInt32)((double)readOffset / (double)bytesPerCompressionBlock);
 			mediaSampleNumber += compressionBlocksToSkip * samplesPerCompressionBlock;
 			readOffset -= compressionBlocksToSkip * bytesPerCompressionBlock; // readoffset should always be 0 after this 
 			// start gathering chunk info to check sample length against chunk length
@@ -930,12 +930,12 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 			if (!track->ChunkOffset(chunkNumber, &chunkOffset))
 				return (errInvalidQuickTimeFile);
 
-			dataOffset = (UInt64)chunkOffset + (UInt64)((Float64)sampleOffsetInChunk * ((Float64)bytesPerCompressionBlock / (Float64)samplesPerCompressionBlock));
+			dataOffset = (UInt64)chunkOffset + (UInt64)((double)sampleOffsetInChunk * ((double)bytesPerCompressionBlock / (double)samplesPerCompressionBlock));
 
 			if (!track->GetSizeOfSamplesInChunk(chunkNumber, (UInt32 *)&sizeOfSamplesInChunk, NULL, NULL, mediaTrackSTSC_STCBPtr))
 				return (errInvalidQuickTimeFile);
 
-			sizeOfSamplesInChunk = (UInt32)((Float64)sizeOfSamplesInChunk * ((Float64)bytesPerCompressionBlock / (Float64)samplesPerCompressionBlock));
+			sizeOfSamplesInChunk = (UInt32)((double)sizeOfSamplesInChunk * ((double)bytesPerCompressionBlock / (double)samplesPerCompressionBlock));
 
 			endOfSampleInChunk = sizeOfSamplesInChunk + chunkOffset;
 			sampleFirstPartLength = endOfSampleInChunk - dataOffset; // the first piece length = maxlen - start
@@ -952,7 +952,7 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 //              qtss_printf("chunkOffset = %" _S32BITARG_ "  ",chunkOffset);
 //              qtss_printf("old dataOffset = %qd ",dataOffset);
 				remainingLength = 0;
-				dataOffset = chunkOffset + readOffset + (UInt64)(sampleOffsetInChunk * ((Float64)bytesPerCompressionBlock / (Float64)samplesPerCompressionBlock));
+				dataOffset = chunkOffset + readOffset + (UInt64)(sampleOffsetInChunk * ((double)bytesPerCompressionBlock / (double)samplesPerCompressionBlock));
 				//              qtss_printf("new dataOffset = %qd \n", dataOffset);
 			}
 
@@ -1012,7 +1012,7 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 				if (!track->GetSizeOfSamplesInChunk(chunkNumber, (UInt32 *)&sizeOfSamplesInChunk, NULL, NULL, mediaTrackSTSC_STCBPtr))
 					return (errInvalidQuickTimeFile);
 
-				sizeOfSamplesInChunk = (UInt32)((Float64)sizeOfSamplesInChunk * ((Float64)bytesPerCompressionBlock / (Float64)samplesPerCompressionBlock));
+				sizeOfSamplesInChunk = (UInt32)((double)sizeOfSamplesInChunk * ((double)bytesPerCompressionBlock / (double)samplesPerCompressionBlock));
 
 				if (sizeOfSamplesInChunk < remainingLength) // read in the whole chunk and keep going
 				{
@@ -1155,7 +1155,7 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 
 
 QTTrack::ErrorCode QTHintTrack::GetPacket(UInt32 sampleNumber, UInt16 packetNumber, char * buffer, UInt32 * length
-	, Float64 * transmitTime, bool dropBFrames, bool dropRepeatPackets, UInt32 ssrc, QTHintTrack_HintTrackControlBlock * htcb)
+	, double * transmitTime, bool dropBFrames, bool dropRepeatPackets, UInt32 ssrc, QTHintTrack_HintTrackControlBlock * htcb)
 {
 	// Temporary vars
 	UInt16      tempInt16;
@@ -1180,7 +1180,7 @@ QTTrack::ErrorCode QTHintTrack::GetPacket(UInt32 sampleNumber, UInt16 packetNumb
 	UInt32      packetSize;
 	QTTrack::ErrorCode  err = errNoError;
 
-	Float64 timeScale = 1.0;
+	double timeScale = 1.0;
 
 	Assert(htcb != NULL);
 
@@ -1192,9 +1192,9 @@ QTTrack::ErrorCode QTHintTrack::GetPacket(UInt32 sampleNumber, UInt16 packetNumb
 		return errInvalidQuickTimeFile;
 
 	if (fRTPTimescale != this->GetTimeScale())
-		timeScale = (Float64)fRTPTimescale * (Float64)GetTimeScaleRecip();
+		timeScale = (double)fRTPTimescale * (double)GetTimeScaleRecip();
 
-	rtpTimestamp = (UInt32)((Float64)mediaTime * timeScale);
+	rtpTimestamp = (UInt32)((double)mediaTime * timeScale);
 	rtpTimestamp += fFirstRTPTimestamp;
 
 	//

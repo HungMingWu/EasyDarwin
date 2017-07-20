@@ -123,7 +123,7 @@ public:
 		UInt32          NextSyncSampleNumber;
 		UInt16          NumPacketsInThisSample, CurPacketNumber;
 
-		Float64         CurPacketTime;
+		double         CurPacketTime;
 		char            CurPacket[QTRTPFILE_MAX_PACKET_LENGTH];
 		UInt32          CurPacketLength;
 
@@ -163,7 +163,7 @@ public:
 
 	//
 	// Accessors
-	Float64     GetMovieDuration();
+	double     GetMovieDuration();
 	UInt64      GetAddedTracksRTPBytes();
 	char *      GetSDPFile(int * SDPFileLength);
 	UInt32      GetBytesPerSecond();
@@ -182,7 +182,7 @@ public:
 	ErrorCode   AddTrack(UInt32 TrackID, bool UseRandomOffset = true);
 
 
-	Float64     GetTrackDuration(UInt32 TrackID);
+	double     GetTrackDuration(UInt32 TrackID);
 	UInt32      GetTrackTimeScale(UInt32 TrackID);
 
 	void        SetTrackSSRC(UInt32 TrackID, UInt32 SSRC);
@@ -213,18 +213,18 @@ public:
 	void SetTrackQualityLevel(RTPTrackListEntry* inEntry, UInt32 inNewLevel);
 	//
 	// Packet functions
-	ErrorCode   Seek(Float64 Time, Float64 MaxBackupTime = 3.0);
+	ErrorCode   Seek(double Time, double MaxBackupTime = 3.0);
 	ErrorCode   SeekToPacketNumber(UInt32 inTrackID, UInt64 inPacketNumber);
 
 	UInt32      GetSeekTimestamp(UInt32 TrackID);
-	Float64     GetRequestedSeekTime() { return fRequestedSeekTime; }
-	Float64     GetActualSeekTime() { return fSeekTime; }
-	Float64     GetFirstPacketTransmitTime();
+	double     GetRequestedSeekTime() { return fRequestedSeekTime; }
+	double     GetActualSeekTime() { return fSeekTime; }
+	double     GetFirstPacketTransmitTime();
 	RTPTrackListEntry* GetLastPacketTrack() { return fLastPacketTrack; }
 	UInt32      GetNumSkippedSamples() { return fNumSkippedSamples; }
 
 	UInt16      GetNextTrackSequenceNumber(UInt32 TrackID);
-	Float64     GetNextPacket(char ** Packet, int * PacketLength);
+	double     GetNextPacket(char ** Packet, int * PacketLength);
 
 	SInt32      GetMovieHintType();
 	bool      DropRepeatPackets() { return fDropRepeatPackets; }
@@ -265,7 +265,7 @@ protected:
 	UInt32              fSDPFileLength;
 	UInt32              fNumSkippedSamples;
 
-	Float64             fRequestedSeekTime, fSeekTime;
+	double             fRequestedSeekTime, fSeekTime;
 
 	RTPTrackListEntry   *fLastPacketTrack;
 

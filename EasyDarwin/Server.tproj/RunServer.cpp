@@ -522,7 +522,7 @@ void FormattedTotalBytesBuffer(char *outBuffer, int outBufferLen, UInt64 totalBy
 
 	if (totalBytes > 1073741824) //GBytes
 	{
-		displayBytes = (float)((Float64)(SInt64)totalBytes / (Float64)(SInt64)1073741824);
+		displayBytes = (float)((double)(SInt64)totalBytes / (double)(SInt64)1073741824);
 		sizeStr[0] = 'G';
 		format = "%.4f%s ";
 	}

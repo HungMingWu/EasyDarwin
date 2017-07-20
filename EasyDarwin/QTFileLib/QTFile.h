@@ -125,8 +125,8 @@ public:
 	//
 	// Accessors
 	inline  char *      GetMoviePath() { return fMoviePath; }
-	Float64     GetTimeScale(void);
-	Float64     GetDurationInSeconds();
+	double     GetTimeScale(void);
+	double     GetDurationInSeconds();
 	SInt64      GetModDate();
 	// Returns the mod date as a RFC 1123 formatted string
 	char*       GetModDateStr();

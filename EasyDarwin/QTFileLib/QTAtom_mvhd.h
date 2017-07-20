@@ -54,16 +54,16 @@ public:
 
 	//
 	// Accessors.
-	inline  Float64     GetTimeScale() { return (Float64)fTimeScale; }
+	inline  double     GetTimeScale() { return (double)fTimeScale; }
 #if __Win32__
 
-	// Win compiler can't convert UInt64 to Float64. It does support SInt64 to Float64 though.
+	// Win compiler can't convert UInt64 to double. It does support SInt64 to double though.
 
-	inline  Float64     GetDurationInSeconds() { if (fTimeScale != 0) { return (Float64)((SInt64)fDuration) / (Float64)((SInt64)fTimeScale); } else { return (Float64) 0.0; } }
+	inline  double     GetDurationInSeconds() { if (fTimeScale != 0) { return (double)((SInt64)fDuration) / (double)((SInt64)fTimeScale); } else { return (double) 0.0; } }
 
 #else
 
-	inline  Float64     GetDurationInSeconds() { if (fTimeScale != 0) { return fDuration / (Float64)fTimeScale; } else { return (Float64) 0.0; } }
+	inline  double     GetDurationInSeconds() { if (fTimeScale != 0) { return fDuration / (double)fTimeScale; } else { return (double) 0.0; } }
 #endif
 
 	//

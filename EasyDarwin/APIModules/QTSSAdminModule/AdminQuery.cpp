@@ -263,7 +263,7 @@ void QueryURI::SetCommand()
 {
 	StrPtrLen commandDef;
 	StrPtrLen *queryCommandPtr;
-	SInt16 commandIndex;
+	int16_t commandIndex;
 
 	queryCommandPtr = this->GetCommand();
 	if (queryCommandPtr == NULL || queryCommandPtr->Len == 0) // Default command
@@ -286,7 +286,7 @@ void QueryURI::SetAccessFlags()
 {
 
 	StrPtrLen tempStr;
-	SInt16 theChar;
+	int16_t theChar;
 	StringParser parser(GetAccess());
 	fAccessFlags = 0;
 	while (parser.GetDataRemaining() != 0)
@@ -318,7 +318,7 @@ void QueryURI::SetAccessFlags()
 void QueryURI::SetParamBits(UInt32 forcebits)
 {
 	StrPtrLen tempStr;
-	SInt16 theChar;
+	int16_t theChar;
 
 	StringParser parser(GetParameters());
 	fParamBits = forcebits;
@@ -425,7 +425,7 @@ UInt32 QueryURI::CheckInvalidRecurseParam(char* evalMessageBuff)
 UInt32  QueryURI::EvalQuery(UInt32 *forceResultPtr, char *forceMessagePtr)
 {
 	UInt32 result = 0;
-	const SInt16 messageLen = 512;
+	const int16_t messageLen = 512;
 	char evalMessageBuff[messageLen] = { 0 };
 	StrPtrLen evalMessage;
 	evalMessage.Set(evalMessageBuff, messageLen);

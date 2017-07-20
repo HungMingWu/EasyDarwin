@@ -171,7 +171,7 @@ public:
 
 	char        fQueryMessageBuff[1024];
 	bool      fIsPref;
-	SInt16      fNumFilters;
+	int16_t      fNumFilters;
 	bool      fHasQuery;
 private:
 	char        fURIBuffer[QueryURI::eMaxBufferSize];

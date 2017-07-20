@@ -124,7 +124,7 @@ void ElementNode_RemovePtr(void *ptr, char * src)
 	if (ptr == NULL)
 		return;
 
-	SInt16 foundCount = 0;
+	int16_t foundCount = 0;
 	for (SInt32 index = 0; index < sMaxPtrs; index++)
 	{
 		if (sPtrArray[index] == ptr)

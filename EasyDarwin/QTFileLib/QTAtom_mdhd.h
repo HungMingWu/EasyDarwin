@@ -74,8 +74,8 @@ protected:
 	UInt64      fCreationTime, fModificationTime;
 	UInt32      fTimeScale;
 	UInt64      fDuration;
-	UInt16      fLanguage;
-	UInt16      fQuality;
+	uint16_t      fLanguage;
+	uint16_t      fQuality;
 
 	double     fTimeScaleRecip;
 };

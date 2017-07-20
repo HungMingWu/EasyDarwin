@@ -32,8 +32,8 @@
 
 #include "UDPSocketPool.h"
 
-UDPSocketPair* UDPSocketPool::GetUDPSocketPair(UInt32 inIPAddr, UInt16 inPort,
-	UInt32 inSrcIPAddr, UInt16 inSrcPort)
+UDPSocketPair* UDPSocketPool::GetUDPSocketPair(UInt32 inIPAddr, uint16_t inPort,
+	UInt32 inSrcIPAddr, uint16_t inSrcPort)
 {
 	OSMutexLocker locker(&fMutex);
 	if ((inSrcIPAddr != 0) || (inSrcPort != 0))
@@ -78,15 +78,15 @@ void UDPSocketPool::ReleaseUDPSocketPair(UDPSocketPair* inPair)
 	}
 }
 
-UDPSocketPair*  UDPSocketPool::CreateUDPSocketPair(UInt32 inAddr, UInt16 inPort)
+UDPSocketPair*  UDPSocketPool::CreateUDPSocketPair(UInt32 inAddr, uint16_t inPort)
 {
 	//try to find an open pair of ports to bind these suckers tooo
 	OSMutexLocker locker(&fMutex);
 	UDPSocketPair* theElem = NULL;
 	bool foundPair = false;
-	UInt16 curPort = kLowestUDPPort;
-	UInt16 stopPort = kHighestUDPPort - 1; // prevent roll over when iterating over port nums
-	UInt16 socketBPort = kLowestUDPPort + 1;
+	uint16_t curPort = kLowestUDPPort;
+	uint16_t stopPort = kHighestUDPPort - 1; // prevent roll over when iterating over port nums
+	uint16_t socketBPort = kLowestUDPPort + 1;
 
 	//If port is 0, then the caller doesn't care what port # we bind this socket to.
 	//Otherwise, ONLY attempt to bind this socket to the specified port

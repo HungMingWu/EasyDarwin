@@ -37,6 +37,7 @@
 #define _SEQUENCE_NUMBER_MAP_H_
 
 #include "OSHeaders.h"
+#include <stdint.h>
 
 #define SEQUENCENUMBERMAPTESTING 1
 
@@ -53,7 +54,7 @@ public:
 	~SequenceNumberMap() { delete[] fSlidingWindow; }
 
 	// Returns whether this sequence number was already added or not.
-	bool  AddSequenceNumber(UInt16 inSeqNumber);
+	bool  AddSequenceNumber(uint16_t inSeqNumber);
 
 #if SEQUENCENUMBERMAPTESTING
 	static void Test();
@@ -66,8 +67,8 @@ private:
 	const SInt32    fWindowSize;
 	const SInt32    fNegativeWindowSize;
 
-	UInt16          fHighestSeqIndex;
-	UInt16          fHighestSeqNumber;
+	uint16_t          fHighestSeqIndex;
+	uint16_t          fHighestSeqNumber;
 };
 
 

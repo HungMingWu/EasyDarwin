@@ -80,7 +80,7 @@ protected:
 	UInt32      fTimeScale;
 	UInt64      fDuration;
 	UInt32      fPreferredRate;
-	UInt16      fPreferredVolume;
+	uint16_t      fPreferredVolume;
 	UInt32      fa, fb, fu, fc, fd, fv, fx, fy, fw;
 	UInt32      fPreviewTime, fPreviewDuration, fPosterTime;
 	UInt32      fSelectionTime, fSelectionDuration;

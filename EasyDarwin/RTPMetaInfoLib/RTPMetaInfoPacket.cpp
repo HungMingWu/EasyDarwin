@@ -78,7 +78,7 @@ void RTPMetaInfoPacket::ConstructFieldIDArrayFromHeader(StrPtrLen* inHeader, Fie
 	// Walk through the fields in this header
 	StringParser theParser(inHeader);
 
-	UInt16 fieldNameValue = 0;
+	uint16_t fieldNameValue = 0;
 
 	while (theParser.GetDataRemaining() > 0)
 	{
@@ -92,9 +92,9 @@ void RTPMetaInfoPacket::ConstructFieldIDArrayFromHeader(StrPtrLen* inHeader, Fie
 
 		//
 		// Extract the Field Name and convert it to a Field Index
-		::memcpy(&fieldNameValue, theFieldP.Ptr, sizeof(UInt16));
+		::memcpy(&fieldNameValue, theFieldP.Ptr, sizeof(uint16_t));
 		FieldIndex theIndex = RTPMetaInfoPacket::GetFieldIndexForName(ntohs(fieldNameValue));
-		//      FieldIndex theIndex = RTPMetaInfoPacket::GetFieldIndexForName(ntohs(*(UInt16*)theFieldP.Ptr));
+		//      FieldIndex theIndex = RTPMetaInfoPacket::GetFieldIndexForName(ntohs(*(uint16_t*)theFieldP.Ptr));
 
 				//
 				// Get the Field ID if there is one.
@@ -118,7 +118,7 @@ bool RTPMetaInfoPacket::ParsePacket(uint8_t* inPacketBuffer, UInt32 inPacketLen,
 	uint8_t* theEndP = inPacketBuffer + inPacketLen;
 
 	SInt64 sInt64Val = 0;
-	UInt16 uInt16Val = 0;
+	uint16_t uint16_tVal = 0;
 
 	while (theFieldP < (theEndP - 2))
 	{
@@ -152,11 +152,11 @@ bool RTPMetaInfoPacket::ParsePacket(uint8_t* inPacketBuffer, UInt32 inPacketLen,
 			if (theFieldP >= (theEndP - 4))
 				break;
 
-			::memcpy(&uInt16Val, theFieldP, sizeof(uInt16Val));
-			theFieldIndex = this->GetFieldIndexForName(ntohs(uInt16Val));
+			::memcpy(&uint16_tVal, theFieldP, sizeof(uint16_tVal));
+			theFieldIndex = this->GetFieldIndexForName(ntohs(uint16_tVal));
 
-			::memcpy(&uInt16Val, theFieldP + 2, sizeof(uInt16Val));
-			theFieldLen = ntohs(uInt16Val);
+			::memcpy(&uint16_tVal, theFieldP + 2, sizeof(uint16_tVal));
+			theFieldLen = ntohs(uint16_tVal);
 			theFieldP += 4;
 		}
 
@@ -200,8 +200,8 @@ bool RTPMetaInfoPacket::ParsePacket(uint8_t* inPacketBuffer, UInt32 inPacketLen,
 		case kSeqNumField:
 			{
 
-				::memcpy(&uInt16Val, theFieldP, sizeof(uInt16Val));
-				fSeqNum = ntohs(uInt16Val);
+				::memcpy(&uint16_tVal, theFieldP, sizeof(uint16_tVal));
+				fSeqNum = ntohs(uint16_tVal);
 				break;
 			}
 		case kMediaDataField:

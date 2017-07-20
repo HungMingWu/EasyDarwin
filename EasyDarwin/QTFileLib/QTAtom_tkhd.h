@@ -88,9 +88,9 @@ protected:
 	UInt32      freserved1;
 	UInt64      fDuration;
 	UInt32      freserved2, freserved3;
-	UInt16      fLayer, fAlternateGroup;
-	UInt16      fVolume;
-	UInt16      freserved4;
+	uint16_t      fLayer, fAlternateGroup;
+	uint16_t      fVolume;
+	uint16_t      freserved4;
 	UInt32      fa, fb, fu, fc, fd, fv, fx, fy, fw;
 	UInt32      fTrackWidth, fTrackHeight;
 };

@@ -58,7 +58,7 @@ public:
 	SInt64              fAddedTime;
 	SInt64              fOrigRetransTimeout;
 	UInt32              fNumResends;
-	UInt16              fSeqNum;
+	uint16_t              fSeqNum;
 #if RTP_PACKET_RESENDER_DEBUGGING
 	UInt32              fPacketArraySizeWhenAdded;
 #endif
@@ -74,7 +74,7 @@ public:
 
 	//
 	// These must be called before using the object
-	void                SetDestination(UDPSocket* inOutputSocket, UInt32 inDestAddr, UInt16 inDestPort);
+	void                SetDestination(UDPSocket* inOutputSocket, UInt32 inDestAddr, uint16_t inDestPort);
 	void                SetBandwidthTracker(RTPBandwidthTracker* inTracker) { fBandwidthTracker = inTracker; }
 
 	//
@@ -84,7 +84,7 @@ public:
 
 	//
 	// Acks a packet. Also not thread safe.
-	void                AckPacket(UInt16 sequenceNumber, SInt64& inCurTimeInMsec);
+	void                AckPacket(uint16_t sequenceNumber, SInt64& inCurTimeInMsec);
 
 	//
 	// Resends outstanding packets in the queue. Guess what. Not thread safe.
@@ -106,7 +106,7 @@ public:
 	static UInt32       GetWastedBufferBytes() { return sNumWastedBytes; }
 
 #if RTP_PACKET_RESENDER_DEBUGGING
-	void                SetDebugInfo(UInt32 trackID, UInt16 remoteRTCPPort, UInt32 curPacketDelay);
+	void                SetDebugInfo(UInt32 trackID, uint16_t remoteRTCPPort, UInt32 curPacketDelay);
 	void                SetLog(StrPtrLen *logname);
 	UInt32              SpillGuts(UInt32 inBytesSentThisInterval);
 	void                LogClose(SInt64 inTimeSpentInFlowControl);
@@ -124,7 +124,7 @@ private:
 	// Who to send to
 	UDPSocket*          fSocket;
 	UInt32              fDestAddr;
-	UInt16              fDestPort;
+	uint16_t              fDestPort;
 
 	UInt32              fMaxPacketsInList;
 	UInt32              fPacketsInList;
@@ -137,23 +137,23 @@ private:
 	MyAckListLog        *fLogger;
 
 	UInt32              fTrackID;
-	UInt16              fRemoteRTCPPort;
+	uint16_t              fRemoteRTCPPort;
 	UInt32              fCurrentPacketDelay;
 	DssDurationTimer    fInfoDisplayTimer;
 #endif
 
 	RTPResenderEntry*   fPacketArray;
-	UInt16              fStartSeqNum;
+	uint16_t              fStartSeqNum;
 	UInt32              fPacketArraySize;
 	UInt32              fPacketArrayMask;
-	UInt16              fHighestSeqNum;
+	uint16_t              fHighestSeqNum;
 	UInt32              fLastUsed;
 	OSMutex             fPacketQMutex;
 
-	RTPResenderEntry*   GetEntryByIndex(UInt16 inIndex);
-	RTPResenderEntry*   GetEntryBySeqNum(UInt16 inSeqNum);
+	RTPResenderEntry*   GetEntryByIndex(uint16_t inIndex);
+	RTPResenderEntry*   GetEntryBySeqNum(uint16_t inSeqNum);
 
-	RTPResenderEntry*   GetEmptyEntry(UInt16 inSeqNum, UInt32 inPacketSize);
+	RTPResenderEntry*   GetEmptyEntry(uint16_t inSeqNum, UInt32 inPacketSize);
 	void ReallocatePacketArray();
 	void RemovePacket(UInt32 packetIndex, bool reuse = true);
 	void RemovePacket(RTPResenderEntry* inEntry);

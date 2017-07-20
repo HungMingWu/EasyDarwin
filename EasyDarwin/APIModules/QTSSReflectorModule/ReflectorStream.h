@@ -115,7 +115,7 @@ public:
 
 	bool  IsRTCP() { return fIsRTCP; }
 	inline  UInt32  GetPacketRTPTime();
-	inline  UInt16  GetPacketRTPSeqNum();
+	inline  uint16_t  GetPacketRTPSeqNum();
 	inline  UInt32  GetSSRC(bool isRTCP);
 	inline  SInt64  GetPacketNTPTime();
 
@@ -177,14 +177,14 @@ UInt32 ReflectorPacket::GetPacketRTPTime()
 	return timestamp;
 }
 
-UInt16 ReflectorPacket::GetPacketRTPSeqNum()
+uint16_t ReflectorPacket::GetPacketRTPSeqNum()
 {
 	Assert(!fIsRTCP); // not a supported type
 
 	if (fPacketPtr.Ptr == NULL || fPacketPtr.Len < 4 || fIsRTCP)
 		return 0;
 
-	UInt16 sequence = ntohs(((UInt16*)fPacketPtr.Ptr)[1]); //The RTP sequenc number is the second short of the packet
+	uint16_t sequence = ntohs(((uint16_t*)fPacketPtr.Ptr)[1]); //The RTP sequenc number is the second short of the packet
 	return sequence;
 }
 
@@ -218,7 +218,7 @@ public:
 	void    AddSender(ReflectorSender* inSender);
 	void    RemoveSender(ReflectorSender* inStreamElem);
 	bool  HasSender() { return (this->GetDemuxer()->GetHashTable()->GetNumEntries() > 0); }
-	bool  ProcessPacket(const SInt64& inMilliseconds, ReflectorPacket* thePacket, UInt32 theRemoteAddr, UInt16 theRemotePort);
+	bool  ProcessPacket(const SInt64& inMilliseconds, ReflectorPacket* thePacket, UInt32 theRemoteAddr, uint16_t theRemotePort);
 	ReflectorPacket*    GetPacket();
 	virtual SInt64      Run();
 	void    SetSSRCFilter(bool state, UInt32 timeoutSecs) { fFilterSSRCs = state; fTimeoutSecs = timeoutSecs; }
@@ -281,8 +281,8 @@ public:
 	SInt64  fSleepTime;
 
 	//Used for adjusting sequence numbers in light of thinning
-	UInt16      GetPacketSeqNumber(const StrPtrLen& inPacket);
-	void        SetPacketSeqNumber(const StrPtrLen& inPacket, UInt16 inSeqNumber);
+	uint16_t      GetPacketSeqNumber(const StrPtrLen& inPacket);
+	void        SetPacketSeqNumber(const StrPtrLen& inPacket, uint16_t inSeqNumber);
 	bool      PacketShouldBeThinned(QTSS_RTPStreamObject inStream, const StrPtrLen& inPacket);
 
 	//We want to make sure that ReflectPackets only gets invoked when there
@@ -299,11 +299,11 @@ public:
 	OSQueueElem*    SendPacketsToOutput(ReflectorOutput* theOutput, OSQueueElem* currentPacket, SInt64 currentTime, SInt64  bucketDelay, bool firstPacket);
 
 	UInt32      GetOldestPacketRTPTime(bool *foundPtr);
-	UInt16      GetFirstPacketRTPSeqNum(bool *foundPtr);
-	bool      GetFirstPacketInfo(UInt16* outSeqNumPtr, UInt32* outRTPTimePtr, SInt64* outArrivalTimePtr);
+	uint16_t      GetFirstPacketRTPSeqNum(bool *foundPtr);
+	bool      GetFirstPacketInfo(uint16_t* outSeqNumPtr, UInt32* outRTPTimePtr, SInt64* outArrivalTimePtr);
 
 	OSQueueElem*GetClientBufferNextPacketTime(UInt32 inRTPTime);
-	bool      GetFirstRTPTimePacket(UInt16* outSeqNumPtr, UInt32* outRTPTimePtr, SInt64* outArrivalTimePtr);
+	bool      GetFirstRTPTimePacket(uint16_t* outSeqNumPtr, UInt32* outRTPTimePtr, SInt64* outArrivalTimePtr);
 
 	void        RemoveOldPackets(OSQueue* inFreeQueue);
 	OSQueueElem* GetClientBufferStartPacketOffset(SInt64 offsetMsec, bool needKeyFrameFirstPacket = false);
@@ -363,7 +363,7 @@ public:
 		// A unicast broadcast can also be identified by source IP address. If
 		// you are attempting to demux by source IP, this ID will not guarentee
 		// uniqueness and special care should be used.
-		kStreamIDSize = sizeof(UInt32) + sizeof(UInt16)
+		kStreamIDSize = sizeof(UInt32) + sizeof(uint16_t)
 	};
 
 	// Uses a StreamInfo to generate a unique ID
@@ -496,7 +496,7 @@ private:
 	// This is the destination address & port for RTCP
 	// receiver reports.
 	UInt32      fDestRTCPAddr;
-	UInt16      fDestRTCPPort;
+	uint16_t      fDestRTCPPort;
 
 	// Used for calculating average bit rate
 	UInt32              fCurrentBitRate;

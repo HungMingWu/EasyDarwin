@@ -68,7 +68,7 @@ public:
 	inline bool GetHasPadding();
 	inline int GetReportCount();
 	inline uint8_t GetPacketType();
-	inline UInt16 GetPacketLength();    //in 32-bit words
+	inline uint16_t GetPacketLength();    //in 32-bit words
 	inline UInt32 GetPacketSSRC();
 	inline SInt16 GetHeader();
 	uint8_t* GetPacketBuffer() { return fReceiverPacketBuffer; }
@@ -236,11 +236,11 @@ inline uint8_t RTCPPacket::GetPacketType()
 	return (uint8_t)((thePacketType & kPacketTypeMask) >> kPacketTypeShift);
 }
 
-inline UInt16 RTCPPacket::GetPacketLength()
+inline uint16_t RTCPPacket::GetPacketLength()
 {
 	UInt32* fieldPtr = (UInt32*)&fReceiverPacketBuffer[kPacketLengthOffset];
 	UInt32 field = ntohl(*fieldPtr);
-	return (UInt16)(field & kPacketLengthMask);
+	return (uint16_t)(field & kPacketLengthMask);
 }
 
 inline UInt32 RTCPPacket::GetPacketSSRC()

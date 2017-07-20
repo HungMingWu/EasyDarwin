@@ -73,7 +73,7 @@ class RTSPSession;
 //	}
 //
 //	bool  IsData() { return fIsData; }
-//	inline  UInt16  GetPacketSeqNum();
+//	inline  uint16_t  GetPacketSeqNum();
 //
 //private:
 //
@@ -93,7 +93,7 @@ class RTSPSession;
 //	friend class RTSPSessionHandler;
 //};
 //
-//UInt16 RTSPMsg::GetPacketSeqNum()
+//uint16_t RTSPMsg::GetPacketSeqNum()
 //{
 //	return 0;
 //}
@@ -185,7 +185,7 @@ private:
 		, kHTTPMethodPost
 	};
 
-	UInt16      fHTTPMethod;
+	uint16_t      fHTTPMethod;
 	bool      fWasHTTPRequest;
 	bool      fFoundValidAccept;
 	bool      fDoReportHTTPConnectionAddress; // true if we need to report our IP adress in reponse to the clients GET request (necessary for servers behind DNS round robin)

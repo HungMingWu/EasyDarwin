@@ -47,7 +47,7 @@ public:
 	//
 	// Constructors and destructor.
 	QTAtom_stco(QTFile * File, QTFile::AtomTOCEntry * Atom,
-		UInt16 offSetSize = 4, bool Debug = false, bool DeepDebug = false);
+		uint16_t offSetSize = 4, bool Debug = false, bool DeepDebug = false);
 	virtual             ~QTAtom_stco();
 
 
@@ -87,7 +87,7 @@ protected:
 	UInt32      fFlags; // 24 bits in the low 3 bytes
 
 	UInt32      fNumEntries;
-	UInt16      fOffSetSize;
+	uint16_t      fOffSetSize;
 	char        *fChunkOffsetTable;
 	void        *fTable; // longword-aligned version of the above
 };

@@ -60,7 +60,7 @@ public:
 	// because one of its actions is to change the server to the right UID / GID.
 	// Threads will only inherit these if they are created afterwards.
 	bool Initialize(XMLPrefsParser* inPrefsSource, PrefsSource* inMessagesSource,
-		UInt16 inPortOverride, bool createListeners, const char*inAbsolutePath);
+		uint16_t inPortOverride, bool createListeners, const char*inAbsolutePath);
 
 	//
 	// InitModules
@@ -96,7 +96,7 @@ public:
 	// This function may be called multiple times & at any time.
 	// It updates the server's listeners to reflect what the preferences say.
 	// Returns false if server couldn't listen on one or more of the ports, true otherwise
-	bool                  CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs, UInt16 inPortOverride);
+	bool                  CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs, uint16_t inPortOverride);
 
 	//
 	// SetDefaultIPAddr
@@ -141,7 +141,7 @@ private:
 	void                    DoInitRole();
 	void                    SetupPublicHeader();
 	UInt32*                 GetRTSPIPAddrs(QTSServerPrefs* inPrefs, UInt32* outNumAddrsPtr);
-	UInt16*                 GetRTSPPorts(QTSServerPrefs* inPrefs, UInt32* outNumPortsPtr);
+	uint16_t*                 GetRTSPPorts(QTSServerPrefs* inPrefs, UInt32* outNumPortsPtr);
 
 	// Build & destroy the optimized role / module arrays for invoking modules
 	void                    BuildModuleRoleArrays();

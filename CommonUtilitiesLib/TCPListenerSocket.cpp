@@ -60,7 +60,7 @@ OS_Error TCPListenerSocket::listen(UInt32 queueLength)
 	return OS_NoErr;
 }
 
-OS_Error TCPListenerSocket::Initialize(UInt32 addr, UInt16 port)
+OS_Error TCPListenerSocket::Initialize(UInt32 addr, uint16_t port)
 {
 	OS_Error err = this->TCPSocket::Open();
 	if (0 == err) do

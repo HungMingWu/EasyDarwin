@@ -136,7 +136,7 @@ QTSS_Error HTTPClientRequestStream::ReadRequest()
 		{
 			if (fRequest.Len < 4)
 				continue;
-			UInt16* dataLenP = (UInt16*)fRequest.Ptr;
+			uint16_t* dataLenP = (uint16_t*)fRequest.Ptr;
 			UInt32 interleavedPacketLen = ntohs(dataLenP[1]) + 4;
 			if (interleavedPacketLen > fRequest.Len)
 				continue;
@@ -159,8 +159,8 @@ QTSS_Error HTTPClientRequestStream::ReadRequest()
 
 		//          if (fSocket != NULL)    
 		//          {
-		//              UInt16 serverPort = fSocket->GetLocalPort();
-		//              UInt16 clientPort = fSocket->GetRemotePort();    
+		//              uint16_t serverPort = fSocket->GetLocalPort();
+		//              uint16_t clientPort = fSocket->GetRemotePort();    
 		//              StrPtrLen* theLocalAddrStr = fSocket->GetLocalAddrStr();
 		//              StrPtrLen* theRemoteAddrStr = fSocket->GetRemoteAddrStr();
 		//              if (theLocalAddrStr != NULL)
@@ -188,7 +188,7 @@ QTSS_Error HTTPClientRequestStream::ReadRequest()
 		bool weAreDone = false;
 		StringParser headerParser(&fRequest);
 
-		UInt16 lcount = 0;
+		uint16_t lcount = 0;
 		while (headerParser.GetThruEOL(NULL))
 		{
 			lcount++;
@@ -208,8 +208,8 @@ QTSS_Error HTTPClientRequestStream::ReadRequest()
 				// in the form of "xxxxxx\r" where "xxxxx" is the password.
 				// If we get a 1st request line ending in \r with no blanks we will
 				// assume that this is the end of the request.
-				UInt16 flag = 0;
-				UInt16 i = 0;
+				uint16_t flag = 0;
+				uint16_t i = 0;
 				for (i = 0; i < fRequest.Len; i++)
 				{
 					if (fRequest.Ptr[i] == ' ')

@@ -78,7 +78,7 @@ void RCFSourceInfo::Parse(XMLTag* relayTag)
 	fNumStreams = 0;
 	UInt32 destIPAddr = 0;
 	UInt32 srcIPAddr = 0;
-	UInt16 ttl = 0;
+	uint16_t ttl = 0;
 
 	XMLTag* prefTag;
 
@@ -202,8 +202,8 @@ void RCFSourceInfo::ParseDestination(XMLTag* destTag, UInt32 index)
 	{
 		fOutputArray[index].fNumPorts = prefTag->GetNumEmbeddedTags();
 
-		fOutputArray[index].fPortArray = new UInt16[fOutputArray[index].fNumPorts];
-		::memset(fOutputArray[index].fPortArray, 0, fOutputArray[index].fNumPorts * sizeof(UInt16));
+		fOutputArray[index].fPortArray = new uint16_t[fOutputArray[index].fNumPorts];
+		::memset(fOutputArray[index].fPortArray, 0, fOutputArray[index].fNumPorts * sizeof(uint16_t));
 
 		for (UInt32 x = 0; x < fOutputArray[index].fNumPorts; x++)
 		{

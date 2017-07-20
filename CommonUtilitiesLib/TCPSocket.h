@@ -68,7 +68,7 @@ public:
 	// CheckAsyncConnect at any time, which will return OS_NoErr if the connect
 	// has completed, EINPROGRESS if it is still in progress, or an appropriate error
 	// if the connect failed.
-	OS_Error    Connect(UInt32 inRemoteAddr, UInt16 inRemotePort);
+	OS_Error    Connect(UInt32 inRemoteAddr, uint16_t inRemotePort);
 	//OS_Error  CheckAsyncConnect();
 
 	// Basically a copy constructor for this object, also NULLs out the data
@@ -80,7 +80,7 @@ public:
 
 	UInt32      GetRemoteAddr() const
 	{ return ntohl(fRemoteAddr.sin_addr.s_addr); }
-	UInt16      GetRemotePort() const
+	uint16_t      GetRemotePort() const
 	{ return ntohs(fRemoteAddr.sin_port); }
 	//This function is NOT thread safe!
 	StrPtrLen*  GetRemoteAddrStr();

@@ -191,7 +191,7 @@ public:
 	// Used by RTPStream to increment the RTCP packet and byte counts.
 	void            IncrTotalRTCPPacketsRecv() { fTotalRTCPPacketsRecv++; }
 	UInt32          GetTotalRTCPPacketsRecv() { return fTotalRTCPPacketsRecv; }
-	void            IncrTotalRTCPBytesRecv(UInt16 cnt) { fTotalRTCPBytesRecv += cnt; }
+	void            IncrTotalRTCPBytesRecv(uint16_t cnt) { fTotalRTCPBytesRecv += cnt; }
 	UInt32          GetTotalRTCPBytesRecv() { return fTotalRTCPBytesRecv; }
 
 	UInt32          GetLastRTSPBandwithBits() { return fLastRTSPBandwidthHeaderBits; }

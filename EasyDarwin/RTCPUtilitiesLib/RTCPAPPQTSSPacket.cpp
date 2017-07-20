@@ -119,7 +119,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 		// individual APP packet fields can be 6 bytes or 4 bytes or 8 bytes. So we have to
 		// use the 4-byte align protection functions. Sparc and MIPS processors will crash otherwise
 		UInt32 theHeader = ntohl(OS::GetUInt32FromMemory((UInt32*)&qtssDataBuffer[kQTSSItemTypeOffset]));
-		UInt16 itemType = (UInt16)((theHeader & kQTSSItemTypeMask) >> kQTSSItemTypeShift);
+		uint16_t itemType = (uint16_t)((theHeader & kQTSSItemTypeMask) >> kQTSSItemTypeShift);
 		uint8_t itemVersion = (uint8_t)((theHeader & kQTSSItemVersionMask) >> kQTSSItemVersionShift);
 		uint8_t itemLengthInBytes = (uint8_t)(theHeader & kQTSSItemLengthMask);
 
@@ -127,7 +127,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 		APPEND_TO_DUMP_ARRAY(", h_vers=%u", itemVersion);
 		APPEND_TO_DUMP_ARRAY(", h_size=%u", itemLengthInBytes);
 
-		qtssDataBuffer += sizeof(UInt32);   //advance past the above UInt16's & uint8_t's (point it at the actual item data)
+		qtssDataBuffer += sizeof(UInt32);   //advance past the above uint16_t's & uint8_t's (point it at the actual item data)
 
 		//Update bytesRemaining (move it past current item)
 		//This itemLengthInBytes is part of the packet and could therefore be bogus.
@@ -150,7 +150,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 
 		case TW0_CHARS_TO_INT('l', 't'): //'lt':    //'late':
 			{
-				fAverageLateMilliseconds = ntohs(*(UInt16*)qtssDataBuffer);
+				fAverageLateMilliseconds = ntohs(*(uint16_t*)qtssDataBuffer);
 				qtssDataBuffer += sizeof(fAverageLateMilliseconds);
 				APPEND_TO_DUMP_ARRAY(", avg_late=%u", fAverageLateMilliseconds);
 			}
@@ -158,7 +158,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 
 		case TW0_CHARS_TO_INT('l', 's'): // 'ls':   //'loss':
 			{
-				fPercentPacketsLost = ntohs(*(UInt16*)qtssDataBuffer);
+				fPercentPacketsLost = ntohs(*(uint16_t*)qtssDataBuffer);
 				qtssDataBuffer += sizeof(fPercentPacketsLost);
 				APPEND_TO_DUMP_ARRAY(", percent_loss=%u", fPercentPacketsLost);
 			}
@@ -166,7 +166,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 
 		case TW0_CHARS_TO_INT('d', 'l'): //'dl':    //'bdly':
 			{
-				fAverageBufferDelayMilliseconds = ntohs(*(UInt16*)qtssDataBuffer);
+				fAverageBufferDelayMilliseconds = ntohs(*(uint16_t*)qtssDataBuffer);
 				qtssDataBuffer += sizeof(fAverageBufferDelayMilliseconds);
 				APPEND_TO_DUMP_ARRAY(", avg_buf_delay=%u", fAverageBufferDelayMilliseconds);
 			}
@@ -223,7 +223,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 
 		case TW0_CHARS_TO_INT('p', 'd'): //'pd':    //'pdrp':
 			{
-				fTotalPacketsDropped = ntohs(*(UInt16*)qtssDataBuffer);
+				fTotalPacketsDropped = ntohs(*(uint16_t*)qtssDataBuffer);
 				qtssDataBuffer += sizeof(fTotalPacketsDropped);
 				APPEND_TO_DUMP_ARRAY(", pckts_drppd=%u", fTotalPacketsDropped);
 			}
@@ -231,7 +231,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 
 		case TW0_CHARS_TO_INT('p', 'l'): //'pl':    //'p???':
 			{
-				fTotalPacketsLost = ntohs(*(UInt16*)qtssDataBuffer);
+				fTotalPacketsLost = ntohs(*(uint16_t*)qtssDataBuffer);
 				qtssDataBuffer += sizeof(fTotalPacketsLost);
 				APPEND_TO_DUMP_ARRAY(", ttl_pckts_lost=%u", fTotalPacketsLost);
 			}
@@ -240,7 +240,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 
 		case TW0_CHARS_TO_INT('b', 'l'): //'bl':    //'bufl':
 			{
-				fClientBufferFill = ntohs(*(UInt16*)qtssDataBuffer);
+				fClientBufferFill = ntohs(*(uint16_t*)qtssDataBuffer);
 				qtssDataBuffer += sizeof(fClientBufferFill);
 				APPEND_TO_DUMP_ARRAY(", buffr_fill=%u", fClientBufferFill);
 			}
@@ -249,7 +249,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 
 		case TW0_CHARS_TO_INT('f', 'r'): //'fr':    //'frat':
 			{
-				fFrameRate = ntohs(*(UInt16*)qtssDataBuffer);
+				fFrameRate = ntohs(*(uint16_t*)qtssDataBuffer);
 				qtssDataBuffer += sizeof(fFrameRate);
 				APPEND_TO_DUMP_ARRAY(", frame_rate=%u", fFrameRate);
 			}
@@ -258,7 +258,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 
 		case TW0_CHARS_TO_INT('x', 'r'): //'xr':    //'xrat':
 			{
-				fExpectedFrameRate = ntohs(*(UInt16*)qtssDataBuffer);
+				fExpectedFrameRate = ntohs(*(uint16_t*)qtssDataBuffer);
 				qtssDataBuffer += sizeof(fExpectedFrameRate);
 				APPEND_TO_DUMP_ARRAY(", xpectd_frame_rate=%u", fExpectedFrameRate);
 			}
@@ -267,7 +267,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 
 		case TW0_CHARS_TO_INT('d', '#'): //'d#':    //'dry#':
 			{
-				fAudioDryCount = ntohs(*(UInt16*)qtssDataBuffer);
+				fAudioDryCount = ntohs(*(uint16_t*)qtssDataBuffer);
 				qtssDataBuffer += sizeof(fAudioDryCount);
 				APPEND_TO_DUMP_ARRAY(", aud_dry_count=%u", fAudioDryCount);
 			}

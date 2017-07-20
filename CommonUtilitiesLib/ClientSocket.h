@@ -43,7 +43,7 @@ public:
 	ClientSocket();
 	virtual ~ClientSocket() {}
 
-	void    Set(UInt32 hostAddr, UInt16 hostPort)
+	void    Set(UInt32 hostAddr, uint16_t hostPort)
 	{
 		fHostAddr = hostAddr; fHostPort = hostPort;
 	}
@@ -92,7 +92,7 @@ protected:
 	OS_Error    SendSendBuffer(TCPSocket* inSocket);
 
 	UInt32      fHostAddr;
-	UInt16      fHostPort;
+	uint16_t      fHostPort;
 
 	UInt32      fEventMask;
 	Socket*     fSocketP;
@@ -124,7 +124,7 @@ public:
 	virtual void    SetRcvSockBufSize(UInt32 inSize) { fSocket.SetSocketRcvBufSize(inSize); }
 	virtual void    SetOptions(int sndBufSize = 8192, int rcvBufSize = 1024);
 
-	virtual UInt16  GetLocalPort() { return fSocket.GetLocalPort(); }
+	virtual uint16_t  GetLocalPort() { return fSocket.GetLocalPort(); }
 
 private:
 

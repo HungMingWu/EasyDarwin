@@ -54,7 +54,7 @@ SInt64 RTCPTask::Run()
 			!iter.IsDone(); iter.Next())
 		{
 			UInt32 theRemoteAddr = 0;
-			UInt16 theRemotePort = 0;
+			uint16_t theRemotePort = 0;
 
 			UDPSocketPair* thePair = (UDPSocketPair*)iter.GetCurrent()->GetEnclosingObject();
 			Assert(thePair != NULL);

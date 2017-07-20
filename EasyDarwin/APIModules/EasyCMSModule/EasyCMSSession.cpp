@@ -408,7 +408,7 @@ QTSS_Error EasyCMSSession::FreeStream(const char * streamName, UInt32 streamChan
 		//2.根据Serial查询到设备所在的EasyCMS信息
 		char chCMSIP[20] = { 0 };
 		char chCMSPort[6] = { 0 };
-		UInt16 uCMSPort;
+		uint16_t uCMSPort;
 
 		//if(!QTSServerInterface::GetServer()->RedisGetAssociatedCMS(chSerial,chCMSIP,uCMSPort))
 

@@ -67,7 +67,7 @@ UDPSocket::UDPSocket(Task* inTask, UInt32 inSocketType)
 
 
 OS_Error
-UDPSocket::SendTo(UInt32 inRemoteAddr, UInt16 inRemotePort, void* inBuffer, UInt32 inLength)
+UDPSocket::SendTo(UInt32 inRemoteAddr, uint16_t inRemotePort, void* inBuffer, UInt32 inLength)
 {
 	Assert(inBuffer != NULL);
 
@@ -88,7 +88,7 @@ UDPSocket::SendTo(UInt32 inRemoteAddr, UInt16 inRemotePort, void* inBuffer, UInt
 	return OS_NoErr;
 }
 
-OS_Error UDPSocket::RecvFrom(UInt32* outRemoteAddr, UInt16* outRemotePort,
+OS_Error UDPSocket::RecvFrom(UInt32* outRemoteAddr, uint16_t* outRemotePort,
 	void* ioBuffer, UInt32 inBufLen, UInt32* outRecvLen)
 {
 	Assert(outRecvLen != NULL);
@@ -137,7 +137,7 @@ OS_Error UDPSocket::JoinMulticast(UInt32 inRemoteAddr)
 		return OS_NoErr;
 }
 
-OS_Error UDPSocket::SetTtl(UInt16 timeToLive)
+OS_Error UDPSocket::SetTtl(uint16_t timeToLive)
 {
 	// set the ttl
 	u_char  nOptVal = (u_char)timeToLive;//cms - stevens pp. 496. bsd implementations barf

@@ -736,10 +736,10 @@ void RTSPRequest::ParseClientPortSubHeader(StrPtrLen* inClientPortSubHeader)
 
 	// Store the two client ports as integers
 	theSubHeaderParser.ConsumeWhitespace();
-	fClientPortA = (UInt16)theSubHeaderParser.ConsumeInteger(NULL);
+	fClientPortA = (uint16_t)theSubHeaderParser.ConsumeInteger(NULL);
 	theSubHeaderParser.GetThru(NULL, '-');
 	theSubHeaderParser.ConsumeWhitespace();
-	fClientPortB = (UInt16)theSubHeaderParser.ConsumeInteger(NULL);
+	fClientPortB = (uint16_t)theSubHeaderParser.ConsumeInteger(NULL);
 	if (fClientPortB != fClientPortA + 1) // an error in the port values
 	{
 		// The following to setup and log the error as a message level 2.
@@ -775,7 +775,7 @@ void RTSPRequest::ParseTimeToLiveSubHeader(StrPtrLen* inTimeToLiveSubHeader)
 
 	// Parse out the time to live...
 	theSubHeaderParser.ConsumeWhitespace();
-	fTtl = (UInt16)theSubHeaderParser.ConsumeInteger(NULL);
+	fTtl = (uint16_t)theSubHeaderParser.ConsumeInteger(NULL);
 }
 
 // DJM PROTOTYPE

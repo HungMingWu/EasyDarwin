@@ -51,14 +51,14 @@ public:
 	// Call to parse if you don't know what kind of packet this is
 	bool ParseCompressedQTSSPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength);
 	inline UInt32 GetQTSSReportSourceID();
-	inline UInt16 GetQTSSPacketVersion();
-	inline UInt16 GetQTSSPacketLength(); //In 'UInt32's
+	inline uint16_t GetQTSSPacketVersion();
+	inline uint16_t GetQTSSPacketLength(); //In 'UInt32's
 
 
 	inline UInt32 GetReceiverBitRate() { return fReceiverBitRate; }
-	inline UInt16 GetAverageLateMilliseconds() { return fAverageLateMilliseconds; }
-	inline UInt16 GetPercentPacketsLost() { return fPercentPacketsLost; }
-	inline UInt16 GetAverageBufferDelayMilliseconds() { return fAverageBufferDelayMilliseconds; }
+	inline uint16_t GetAverageLateMilliseconds() { return fAverageLateMilliseconds; }
+	inline uint16_t GetPercentPacketsLost() { return fPercentPacketsLost; }
+	inline uint16_t GetAverageBufferDelayMilliseconds() { return fAverageBufferDelayMilliseconds; }
 	inline bool GetIsGettingBetter() { return fIsGettingBetter; }
 	inline bool GetIsGettingWorse() { return fIsGettingWorse; }
 	inline UInt32 GetNumEyes() { return fNumEyes; }
@@ -68,21 +68,21 @@ public:
 
 	//Proposed - are these there yet?
 	inline UInt32 GetTotalPacketReceived() { return fTotalPacketsReceived; }
-	inline UInt16 GetTotalPacketsDropped() { return fTotalPacketsDropped; }
-	inline UInt16 GetTotalPacketsLost() { return fTotalPacketsLost; }
-	inline UInt16 GetClientBufferFill() { return fClientBufferFill; }
-	inline UInt16 GetFrameRate() { return fFrameRate; }
-	inline UInt16 GetExpectedFrameRate() { return fExpectedFrameRate; }
-	inline UInt16 GetAudioDryCount() { return fAudioDryCount; }
+	inline uint16_t GetTotalPacketsDropped() { return fTotalPacketsDropped; }
+	inline uint16_t GetTotalPacketsLost() { return fTotalPacketsLost; }
+	inline uint16_t GetClientBufferFill() { return fClientBufferFill; }
+	inline uint16_t GetFrameRate() { return fFrameRate; }
+	inline uint16_t GetExpectedFrameRate() { return fExpectedFrameRate; }
+	inline uint16_t GetAudioDryCount() { return fAudioDryCount; }
 
 	virtual void Dump(); //Override
 
 	static void GetTestPacket(StrPtrLen* resultPtr) {}
 
 	UInt32 fReceiverBitRate;
-	UInt16 fAverageLateMilliseconds;
-	UInt16 fPercentPacketsLost;
-	UInt16 fAverageBufferDelayMilliseconds;
+	uint16_t fAverageLateMilliseconds;
+	uint16_t fPercentPacketsLost;
+	uint16_t fAverageBufferDelayMilliseconds;
 	bool fIsGettingBetter;
 	bool fIsGettingWorse;
 	UInt32 fNumEyes;
@@ -92,12 +92,12 @@ public:
 
 	//Proposed - are these there yet?
 	UInt32 fTotalPacketsReceived;
-	UInt16 fTotalPacketsDropped;
-	UInt16 fTotalPacketsLost;
-	UInt16 fClientBufferFill;
-	UInt16 fFrameRate;
-	UInt16 fExpectedFrameRate;
-	UInt16 fAudioDryCount;
+	uint16_t fTotalPacketsDropped;
+	uint16_t fTotalPacketsLost;
+	uint16_t fClientBufferFill;
+	uint16_t fFrameRate;
+	uint16_t fExpectedFrameRate;
+	uint16_t fAudioDryCount;
 
 	enum // QTSS App Header offsets
 	{
@@ -147,17 +147,17 @@ inline UInt32 RTCPCompressedQTSSPacket::GetQTSSReportSourceID()
 }
 
 
-inline UInt16 RTCPCompressedQTSSPacket::GetQTSSPacketVersion()
+inline uint16_t RTCPCompressedQTSSPacket::GetQTSSPacketVersion()
 {
 	UInt32 field = ((UInt32*)this->GetPacketBuffer())[kQTSSPacketVersionOffset];
-	UInt16 vers = (UInt16)((ntohl(field) & kQTSSPacketVersionMask) >> kQTSSPacketVersionShift);
+	uint16_t vers = (uint16_t)((ntohl(field) & kQTSSPacketVersionMask) >> kQTSSPacketVersionShift);
 	return vers;
 }
 
-inline UInt16 RTCPCompressedQTSSPacket::GetQTSSPacketLength()
+inline uint16_t RTCPCompressedQTSSPacket::GetQTSSPacketLength()
 {
 	UInt32  field = ((UInt32*)this->GetPacketBuffer())[kQTSSPacketLengthOffset];
-	return (UInt16)((UInt32)ntohl(field)  & kQTSSPacketLengthMask);
+	return (uint16_t)((UInt32)ntohl(field)  & kQTSSPacketLengthMask);
 }
 
 /*
@@ -229,8 +229,8 @@ private:
 	void ParseAndStore();
 
 	UInt32 fReportSourceID;
-	UInt16 fAppPacketVersion;
-	UInt16 fAppPacketLength;    //In 'UInt32's
+	uint16_t fAppPacketVersion;
+	uint16_t fAppPacketLength;    //In 'UInt32's
 
 	UInt32 fReceiverBitRate;
 	UInt32 fAverageLateMilliseconds;

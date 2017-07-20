@@ -193,10 +193,10 @@ bool QTAtom_stsd::FindSampleDescription(OSType DataFormat, char ** Buffer, UInt3
 	return false;
 }
 
-UInt16 QTAtom_stsd::SampleDescriptionToDataReference(UInt32 SampleDescriptionID)
+uint16_t QTAtom_stsd::SampleDescriptionToDataReference(UInt32 SampleDescriptionID)
 {
 	// Temporary vars
-	UInt16      tempInt16;
+	uint16_t      tempInt16;
 
 
 	//

@@ -96,7 +96,7 @@ StrPtrLen* TCPSocket::GetRemoteAddrStr()
 	return &fRemoteStr;
 }
 
-OS_Error TCPSocket::Connect(UInt32 inRemoteAddr, UInt16 inRemotePort)
+OS_Error TCPSocket::Connect(UInt32 inRemoteAddr, uint16_t inRemotePort)
 {
 	::memset(&fRemoteAddr, 0, sizeof(fRemoteAddr));
 	fRemoteAddr.sin_family = AF_INET;        /* host byte order */

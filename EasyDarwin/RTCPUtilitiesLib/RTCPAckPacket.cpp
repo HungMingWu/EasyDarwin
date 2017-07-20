@@ -88,15 +88,15 @@ bool RTCPAckPacket::IsAckPacketType()
 
 void   RTCPAckPacket::Dump()
 {
-	UInt16 theSeqNum = this->GetAckSeqNum();
-	UInt16 thePacketLen = this->GetPacketLength();
+	uint16_t theSeqNum = this->GetAckSeqNum();
+	uint16_t thePacketLen = this->GetPacketLength();
 	UInt32 theAckMaskSizeInBits = this->GetAckMaskSizeInBits();
 
 	char name[5];
 	name[4] = 0;
 
 	::memcpy(name, &fRTCPAckBuffer[kAppPacketTypeOffset], 4);
-	UInt16 numBufferBytes = (UInt16)((7 * theAckMaskSizeInBits) + 1);
+	uint16_t numBufferBytes = (uint16_t)((7 * theAckMaskSizeInBits) + 1);
 	char *maskBytesBuffer = new char[numBufferBytes];
 	OSCharArrayDeleter deleter(maskBytesBuffer);
 	maskBytesBuffer[0] = 0;

@@ -260,8 +260,8 @@ bool  RTPSessionOutput::FilterPacket(QTSS_RTPStreamObject *theStreamPtr, StrPtrL
 	Assert(theStreamPtr);
 	Assert(inPacket);
 
-	UInt16 seqnum = this->GetPacketSeqNumber(inPacket);
-	UInt16 firstSeqNum = 0;
+	uint16_t seqnum = this->GetPacketSeqNumber(inPacket);
+	uint16_t firstSeqNum = 0;
 	theLen = sizeof(firstSeqNum);
 
 	if (QTSS_NoErr != QTSS_GetValue(*theStreamPtr, qtssRTPStrFirstSeqNumber, 0, &firstSeqNum, &theLen))
@@ -661,23 +661,23 @@ QTSS_Error  RTPSessionOutput::WritePacket(StrPtrLen* inPacket, void* inStreamCoo
 	return writeErr;
 }
 
-UInt16 RTPSessionOutput::GetPacketSeqNumber(StrPtrLen* inPacket)
+uint16_t RTPSessionOutput::GetPacketSeqNumber(StrPtrLen* inPacket)
 {
 	if (inPacket->Len < 4)
 		return 0;
 
 	//The RTP seq number is the second short of the packet
-	UInt16* seqNumPtr = (UInt16*)inPacket->Ptr;
+	uint16_t* seqNumPtr = (uint16_t*)inPacket->Ptr;
 	return ntohs(seqNumPtr[1]);
 }
 
-void RTPSessionOutput::SetPacketSeqNumber(StrPtrLen* inPacket, UInt16 inSeqNumber)
+void RTPSessionOutput::SetPacketSeqNumber(StrPtrLen* inPacket, uint16_t inSeqNumber)
 {
 	if (inPacket->Len < 4)
 		return;
 
 	//The RTP seq number is the second short of the packet
-	UInt16* seqNumPtr = (UInt16*)inPacket->Ptr;
+	uint16_t* seqNumPtr = (uint16_t*)inPacket->Ptr;
 	seqNumPtr[1] = htons(inSeqNumber);
 }
 
@@ -686,17 +686,17 @@ bool RTPSessionOutput::PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrP
 {
 	return false; // function is disabled.
 
-	static UInt16 sZero = 0;
+	static uint16_t sZero = 0;
 	//This function determines whether the packet should be dropped.
 	//It also adjusts the sequence number if necessary
 
 	if (inPacket->Len < 4)
 		return false;
 
-	UInt16 curSeqNum = this->GetPacketSeqNumber(inPacket);
+	uint16_t curSeqNum = this->GetPacketSeqNumber(inPacket);
 	UInt32* curQualityLevel = NULL;
-	UInt16* nextSeqNum = NULL;
-	UInt16* theSeqNumOffset = NULL;
+	uint16_t* nextSeqNum = NULL;
+	uint16_t* theSeqNumOffset = NULL;
 	SInt64* lastChangeTime = NULL;
 
 	UInt32 theLen = 0;
@@ -704,18 +704,18 @@ bool RTPSessionOutput::PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrP
 	if ((curQualityLevel == NULL) || (theLen != sizeof(UInt32)))
 		return false;
 	(void)QTSS_GetValuePtr(inStream, sNextSeqNumAttr, 0, (void**)&nextSeqNum, &theLen);
-	if ((nextSeqNum == NULL) || (theLen != sizeof(UInt16)))
+	if ((nextSeqNum == NULL) || (theLen != sizeof(uint16_t)))
 	{
 		nextSeqNum = &sZero;
-		(void)QTSS_SetValue(inStream, sNextSeqNumAttr, 0, nextSeqNum, sizeof(UInt16));
+		(void)QTSS_SetValue(inStream, sNextSeqNumAttr, 0, nextSeqNum, sizeof(uint16_t));
 	}
 	(void)QTSS_GetValuePtr(inStream, sSeqNumOffsetAttr, 0, (void**)&theSeqNumOffset, &theLen);
-	if ((theSeqNumOffset == NULL) || (theLen != sizeof(UInt16)))
+	if ((theSeqNumOffset == NULL) || (theLen != sizeof(uint16_t)))
 	{
 		theSeqNumOffset = &sZero;
-		(void)QTSS_SetValue(inStream, sSeqNumOffsetAttr, 0, theSeqNumOffset, sizeof(UInt16));
+		(void)QTSS_SetValue(inStream, sSeqNumOffsetAttr, 0, theSeqNumOffset, sizeof(uint16_t));
 	}
-	UInt16 newSeqNumOffset = *theSeqNumOffset;
+	uint16_t newSeqNumOffset = *theSeqNumOffset;
 
 	(void)QTSS_GetValuePtr(inStream, sLastQualityChangeAttr, 0, (void**)&lastChangeTime, &theLen);
 	if ((lastChangeTime == NULL) || (theLen != sizeof(SInt64)))
@@ -744,7 +744,7 @@ bool RTPSessionOutput::PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrP
 		qtss_printf(" *** Reflector Dropping to audio only *** \n");
 #endif
 		//All we need to do in this case is mark the sequence number of the first dropped packet
-		(void)QTSS_SetValue(inStream, sNextSeqNumAttr, 0, &curSeqNum, sizeof(UInt16));
+		(void)QTSS_SetValue(inStream, sNextSeqNumAttr, 0, &curSeqNum, sizeof(uint16_t));
 		*lastChangeTime = timeNow;
 	}
 
@@ -756,8 +756,8 @@ bool RTPSessionOutput::PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrP
 		//alter the sequence numbers so that they increment normally (providing the illusion to the
 		//client that there are no missing packets)
 		newSeqNumOffset = (*theSeqNumOffset) + (curSeqNum - (*nextSeqNum));
-		(void)QTSS_SetValue(inStream, sSeqNumOffsetAttr, 0, &newSeqNumOffset, sizeof(UInt16));
-		(void)QTSS_SetValue(inStream, sNextSeqNumAttr, 0, &sZero, sizeof(UInt16));
+		(void)QTSS_SetValue(inStream, sSeqNumOffsetAttr, 0, &newSeqNumOffset, sizeof(uint16_t));
+		(void)QTSS_SetValue(inStream, sNextSeqNumAttr, 0, &sZero, sizeof(uint16_t));
 	}
 
 	//tell the caller whether to drop this packet or not.

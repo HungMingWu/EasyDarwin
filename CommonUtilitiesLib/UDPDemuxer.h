@@ -50,7 +50,7 @@ class UDPDemuxerUtils
 {
 private:
 
-	static UInt32 ComputeHashValue(UInt32 inRemoteAddr, UInt16 inRemotePort)
+	static UInt32 ComputeHashValue(UInt32 inRemoteAddr, uint16_t inRemotePort)
 	{
 		return ((inRemoteAddr << 16) + inRemotePort);
 	}
@@ -72,7 +72,7 @@ public:
 
 private:
 
-	void set(UInt32 inRemoteAddr, UInt16 inRemotePort)
+	void set(UInt32 inRemoteAddr, uint16_t inRemotePort)
 	{
 		fRemoteAddr = inRemoteAddr; fRemotePort = inRemotePort;
 		fHashValue = UDPDemuxerUtils::ComputeHashValue(fRemoteAddr, fRemotePort);
@@ -80,7 +80,7 @@ private:
 
 	//key values
 	UInt32 fRemoteAddr;
-	UInt16 fRemotePort;
+	uint16_t fRemotePort;
 
 	//precomputed for performance
 	UInt32 fHashValue;
@@ -99,7 +99,7 @@ class UDPDemuxerKey
 private:
 
 	//CONSTRUCTOR / DESTRUCTOR:
-	UDPDemuxerKey(UInt32 inRemoteAddr, UInt16 inRemotePort)
+	UDPDemuxerKey(UInt32 inRemoteAddr, uint16_t inRemotePort)
 		: fRemoteAddr(inRemoteAddr), fRemotePort(inRemotePort)
 	{
 		fHashValue = UDPDemuxerUtils::ComputeHashValue(inRemoteAddr, inRemotePort);
@@ -128,7 +128,7 @@ private:
 
 	//data:
 	UInt32 fRemoteAddr;
-	UInt16 fRemotePort;
+	uint16_t fRemotePort;
 	UInt32  fHashValue;
 
 	friend class OSHashTable<UDPDemuxerTask, UDPDemuxerKey>;
@@ -149,18 +149,18 @@ public:
 
 	// Return values: OS_NoErr, or EPERM if there is already a task registered
 	// with this address combination
-	OS_Error RegisterTask(UInt32 inRemoteAddr, UInt16 inRemotePort,
+	OS_Error RegisterTask(UInt32 inRemoteAddr, uint16_t inRemotePort,
 		UDPDemuxerTask *inTaskP);
 
 	// Return values: OS_NoErr, or EPERM if this task / address combination
 	// is not registered
-	OS_Error UnregisterTask(UInt32 inRemoteAddr, UInt16 inRemotePort,
+	OS_Error UnregisterTask(UInt32 inRemoteAddr, uint16_t inRemotePort,
 		UDPDemuxerTask *inTaskP);
 
 	//Assumes that parent has grabbed the mutex!
-	UDPDemuxerTask* GetTask(UInt32 inRemoteAddr, UInt16 inRemotePort);
+	UDPDemuxerTask* GetTask(UInt32 inRemoteAddr, uint16_t inRemotePort);
 
-	bool  AddrInMap(UInt32 inRemoteAddr, UInt16 inRemotePort)
+	bool  AddrInMap(UInt32 inRemoteAddr, uint16_t inRemotePort)
 	{
 		return (this->GetTask(inRemoteAddr, inRemotePort) != NULL);
 	}

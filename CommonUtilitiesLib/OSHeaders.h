@@ -77,7 +77,6 @@
 
 #if 0 // old defs we are now using MacTypes.h
     /* Typedefs */
-    typedef unsigned short      UInt16;
     typedef signed short        SInt16;
     typedef unsigned int        UInt32;
     typedef signed int          SInt32;
@@ -140,7 +139,6 @@
     /* Typedefs */
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef uint16_t            UInt16;
     typedef int16_t             SInt16;
     typedef uint32_t    	UInt32;
     typedef int32_t   		SInt32;
@@ -240,7 +238,6 @@
     /* Typedefs */
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned short      UInt16;
     typedef signed short        SInt16;
     typedef unsigned long       UInt32;
     typedef signed long         SInt32;
@@ -294,7 +291,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned short      UInt16;
     typedef signed short        SInt16;
     typedef unsigned long       UInt32;
     typedef signed long         SInt32;
@@ -355,7 +351,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned short      UInt16;
     typedef signed short        SInt16;
     typedef unsigned long       UInt32;
     typedef signed long         SInt32;
@@ -409,7 +404,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned short      UInt16;
     typedef signed short        SInt16;
     typedef unsigned long       UInt32;
     typedef signed long         SInt32;
@@ -461,7 +455,6 @@
 
     /* Typedefs */
     typedef unsigned long       PointerSizedInt;
-    typedef unsigned short      UInt16;
     typedef signed short        SInt16;
     typedef unsigned int        UInt32;
     typedef signed int          SInt32;

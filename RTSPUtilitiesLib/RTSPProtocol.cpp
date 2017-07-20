@@ -374,7 +374,7 @@ static void copyUsernameOrPasswordStringFromURL(char* dest, char const* src, uns
 }
 
 // Parse the URL as "rtsp://[<username>[:<password>]@]<server-address-or-name>[:<port>][/<stream-name>]"
-bool RTSPProtocol::ParseRTSPURL(char const* url, char* username, char* password, char* ip, UInt16* port, char const** urlSuffix)
+bool RTSPProtocol::ParseRTSPURL(char const* url, char* username, char* password, char* ip, uint16_t* port, char const** urlSuffix)
 {
 	do {
 		

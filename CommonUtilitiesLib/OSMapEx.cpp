@@ -14,28 +14,28 @@ string OSMapEx::GenerateSessionId()//生成32位的SessionId
 {
 	SInt64 theMicroseconds = OS::Microseconds();//Windows下1ms内多次执行会造成产生的随机数时一样的，因为Windows下微秒的获取也是靠毫秒*1000来进行的
 	::srand((unsigned int)theMicroseconds);
-	UInt16 the1Random = ::rand();
+	uint16_t the1Random = ::rand();
 
 	::srand((unsigned int)the1Random);
-	UInt16 the2Random = ::rand();
+	uint16_t the2Random = ::rand();
 
 	::srand((unsigned int)the2Random);
-	UInt16 the3Random = ::rand();
+	uint16_t the3Random = ::rand();
 
 	::srand((unsigned int)the3Random);
-	UInt16 the4Random = ::rand();
+	uint16_t the4Random = ::rand();
 
 	::srand((unsigned int)the4Random);
-	UInt16 the5Random = ::rand();
+	uint16_t the5Random = ::rand();
 
 	::srand((unsigned int)the5Random);
-	UInt16 the6Random = ::rand();
+	uint16_t the6Random = ::rand();
 
 	::srand((unsigned int)the6Random);
-	UInt16 the7Random = ::rand();
+	uint16_t the7Random = ::rand();
 
 	::srand((unsigned int)the7Random);
-	UInt16 the8Random = ::rand();
+	uint16_t the8Random = ::rand();
 
 	char chTemp[33] = { 0 };
 	sprintf(chTemp, "%04X%04X%04X%04X%04X%04X%04X%04X", the1Random, the2Random, the3Random, the4Random, the5Random, the6Random, the7Random, the8Random);
@@ -107,23 +107,23 @@ void OSMapEx::CheckTimeoutAndDelete()//遍历map里的SessionID,删除失效的SessionID
 }
 //for redis
 
-string OSMapEx::GenerateSessionIdForRedis(const string& strIP, UInt16 uPort)
+string OSMapEx::GenerateSessionIdForRedis(const string& strIP, uint16_t uPort)
 {
 	SInt64 theMicroseconds = OS::Microseconds();//Windows下1ms内多次执行会造成产生的随机数时一样的，因为Windows下微秒的获取也是靠毫秒*1000来进行的
 	::srand((unsigned int)theMicroseconds);
-	UInt16 the1Random = ::rand();
+	uint16_t the1Random = ::rand();
 
 	::srand((unsigned int)the1Random);
-	UInt16 the2Random = ::rand();
+	uint16_t the2Random = ::rand();
 
 	::srand((unsigned int)the2Random);
-	UInt16 the3Random = ::rand();
+	uint16_t the3Random = ::rand();
 
 	::srand((unsigned int)the3Random);
-	UInt16 the4Random = ::rand();
+	uint16_t the4Random = ::rand();
 
 	::srand((unsigned int)the4Random);
-	UInt16 the5Random = ::rand();
+	uint16_t the5Random = ::rand();
 
 	UInt32 uIP = inet_addr(strIP.c_str());
 

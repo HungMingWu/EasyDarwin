@@ -237,7 +237,7 @@ QTTrack::ErrorCode QTTrack::Initialize()
 		return errInvalidQuickTimeFile;
 
 
-	UInt16 offSetSize = 0;
+	uint16_t offSetSize = 0;
 	bool coFound = false;
 
 	if (fFile->FindTOCEntry(":mdia:minf:stbl:stco", &tempTOCEntry, &fTOCEntry))

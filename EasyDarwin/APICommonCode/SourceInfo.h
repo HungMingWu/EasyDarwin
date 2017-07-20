@@ -74,8 +74,8 @@ class SourceInfo
             
             UInt32 fSrcIPAddr;  // Src IP address of content (this may be 0 if not known for sure)
             UInt32 fDestIPAddr; // Dest IP address of content (destination IP addr for source broadcast!)
-            UInt16 fPort;       // Dest (RTP) port of source content
-            UInt16 fTimeToLive; // Ttl for this stream
+            uint16_t fPort;       // Dest (RTP) port of source content
+            uint16_t fTimeToLive; // Ttl for this stream
             QTSS_RTPPayloadType fPayloadType;   // Payload type of this stream
             StrPtrLen fPayloadName; // Payload name of this stream
             UInt32 fTrackID;    // ID of this stream
@@ -108,10 +108,10 @@ class SourceInfo
 
             UInt32 fDestAddr;       // Destination address to forward the input onto
             UInt32 fLocalAddr;      // Address of local interface to send out on (may be 0)
-            UInt16 fTimeToLive;     // Time to live for resulting output (if multicast)
-            UInt16* fPortArray;     // 1 destination RTP port for each Stream.
+            uint16_t fTimeToLive;     // Time to live for resulting output (if multicast)
+            uint16_t* fPortArray;     // 1 destination RTP port for each Stream.
             UInt32 fNumPorts;       // Size of the fPortArray (usually equal to fNumStreams)
-            UInt16 fBasePort;       // The base destination RTP port - for i=1 to fNumStreams fPortArray[i] = fPortArray[i-1] + 2
+            uint16_t fBasePort;       // The base destination RTP port - for i=1 to fNumStreams fPortArray[i] = fPortArray[i-1] + 2
             bool  fAlreadySetup;  // A flag used in QTSSReflectorModule.cpp
         };
 

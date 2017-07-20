@@ -73,10 +73,10 @@ public:
 
 	virtual bool ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength);
 
-	inline UInt16 GetAckSeqNum();
+	inline uint16_t GetAckSeqNum();
 	inline UInt32 GetAckMaskSizeInBits() { return fAckMaskSize * 8; }
 	inline bool IsNthBitEnabled(UInt32 inBitNumber);
-	inline UInt16 GetPacketLength();
+	inline uint16_t GetPacketLength();
 	void   Dump();
 	static void GetTestPacket(StrPtrLen* resultPtr) {} //todo
 
@@ -113,14 +113,14 @@ bool RTCPAckPacket::IsNthBitEnabled(UInt32 inBitNumber)
 	return *(fRTCPAckBuffer + kAckMaskOffset + (inBitNumber >> 3)) & (bitMask >>= inBitNumber & 7);
 }
 
-UInt16 RTCPAckPacket::GetAckSeqNum()
+uint16_t RTCPAckPacket::GetAckSeqNum()
 {
-	return (UInt16)(ntohl(*(UInt32*)&fRTCPAckBuffer[kAckSeqNumOffset]));
+	return (uint16_t)(ntohl(*(UInt32*)&fRTCPAckBuffer[kAckSeqNumOffset]));
 }
 
-inline UInt16 RTCPAckPacket::GetPacketLength()
+inline uint16_t RTCPAckPacket::GetPacketLength()
 {
-	return (UInt16)(ntohl(*(UInt32*)fRTCPAckBuffer) & kPacketLengthMask);
+	return (uint16_t)(ntohl(*(UInt32*)fRTCPAckBuffer) & kPacketLengthMask);
 }
 
 

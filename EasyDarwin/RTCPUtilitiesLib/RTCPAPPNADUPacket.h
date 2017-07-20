@@ -56,13 +56,13 @@ public:
 
 	UInt32 GetSSRC(SInt32 index);
 
-	UInt16 GetPlayOutDelay(SInt32 index);
+	uint16_t GetPlayOutDelay(SInt32 index);
 
-	UInt16 GetNSN(SInt32 index);
+	uint16_t GetNSN(SInt32 index);
 
-	UInt16 GetNUN(SInt32 index);
+	uint16_t GetNUN(SInt32 index);
 
-	UInt16 GetFBS(SInt32 index);
+	uint16_t GetFBS(SInt32 index);
 
 	void DumpNaduPacket();
 
@@ -216,7 +216,7 @@ public:
 	NaduReport*     GetNextReport(NaduReport* theReport);
 	UInt32          LastReportedFreeBuffSizeBytes();
 	UInt32          LastReportedTimeDelayMilli();
-	UInt16			GetLastReportedNSN();
+	uint16_t			GetLastReportedNSN();
 
 	void DumpList();
 

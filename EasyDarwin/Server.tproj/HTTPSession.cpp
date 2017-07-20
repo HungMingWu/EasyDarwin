@@ -921,8 +921,8 @@ QTSS_Error HTTPSession::execNetMsgCSGetBaseConfigReqRESTful(const char* queryStr
 	header[EASY_TAG_ERROR_NUM] = EASY_ERROR_SUCCESS_OK;
 	header[EASY_TAG_ERROR_STRING] = EasyProtocol::GetErrorString(EASY_ERROR_SUCCESS_OK);
 
-	UInt16 port;
-	UInt32 len = sizeof(UInt16);
+	uint16_t port;
+	UInt32 len = sizeof(uint16_t);
 	(void)QTSS_GetValue(QTSServerInterface::GetServer()->GetPrefs(), qtssPrefsRTSPPorts, 0, static_cast<void*>(&port), &len);
 	body[EASY_TAG_CONFIG_RTSP_LAN_PORT] = EasyUtil::ToString(port);
 
@@ -975,7 +975,7 @@ QTSS_Error HTTPSession::execNetMsgCSSetBaseConfigReqRESTful(const char* queryStr
 	const char* chRTSPLanPort = parList.DoFindCGIValueForParam(EASY_TAG_CONFIG_RTSP_LAN_PORT);
 	if (chRTSPLanPort)
 	{
-		UInt16 uRTSPLanPort = stoi(chRTSPLanPort);
+		uint16_t uRTSPLanPort = stoi(chRTSPLanPort);
 		(void)QTSS_SetValue(QTSServerInterface::GetServer()->GetPrefs(), qtssPrefsRTSPPorts, 0, &uRTSPLanPort, sizeof(uRTSPLanPort));
 	}
 
@@ -983,7 +983,7 @@ QTSS_Error HTTPSession::execNetMsgCSSetBaseConfigReqRESTful(const char* queryStr
 	const char*	chRTSPWanPort = parList.DoFindCGIValueForParam(EASY_TAG_CONFIG_RTSP_WAN_PORT);
 	if (chRTSPWanPort)
 	{
-		UInt16 uRTSPWanPort = stoi(chRTSPWanPort);
+		uint16_t uRTSPWanPort = stoi(chRTSPWanPort);
 		(void)QTSS_SetValue(QTSServerInterface::GetServer()->GetPrefs(), easyPrefsRTSPWANPort, 0, &uRTSPWanPort, sizeof(uRTSPWanPort));
 	}
 
@@ -1002,7 +1002,7 @@ QTSS_Error HTTPSession::execNetMsgCSSetBaseConfigReqRESTful(const char* queryStr
 	const char* chHTTPLanPort = parList.DoFindCGIValueForParam(EASY_TAG_CONFIG_SERVICE_LAN_PORT);
 	if (chHTTPLanPort)
 	{
-		UInt16 uHTTPLanPort = stoi(chHTTPLanPort);
+		uint16_t uHTTPLanPort = stoi(chHTTPLanPort);
 		(void)QTSS_SetValue(QTSServerInterface::GetServer()->GetPrefs(), easyPrefsHTTPServiceLanPort, 0, &uHTTPLanPort, sizeof(uHTTPLanPort));
 	}
 
@@ -1010,7 +1010,7 @@ QTSS_Error HTTPSession::execNetMsgCSSetBaseConfigReqRESTful(const char* queryStr
 	const char*	chHTTPWanPort = parList.DoFindCGIValueForParam(EASY_TAG_CONFIG_SERVICE_WAN_PORT);
 	if (chHTTPWanPort)
 	{
-		UInt16 uHTTPWanPort = stoi(chHTTPWanPort);
+		uint16_t uHTTPWanPort = stoi(chHTTPWanPort);
 		(void)QTSS_SetValue(QTSServerInterface::GetServer()->GetPrefs(), easyPrefsHTTPServiceWanPort, 0, &uHTTPWanPort, sizeof(uHTTPWanPort));
 	}
 

@@ -210,10 +210,10 @@ public:
 
 	bool  GetDisableThinning() { return fDisableThinning; }
 
-	UInt16  GetDefaultStreamQuality() { return fDefaultStreamQuality; }
+	uint16_t  GetDefaultStreamQuality() { return fDefaultStreamQuality; }
 	bool  GetUDPMonitorEnabled() { return fUDPMonitorEnabled; }
-	UInt16  GetUDPMonitorVideoPort() { return fUDPMonitorVideoPort; }
-	UInt16  GetUDPMonitorAudioPort() { return fUDPMonitorAudioPort; }
+	uint16_t  GetUDPMonitorVideoPort() { return fUDPMonitorVideoPort; }
+	uint16_t  GetUDPMonitorAudioPort() { return fUDPMonitorAudioPort; }
 
 	char* GetMonitorDestIP() { return this->GetStringPref(qtssPrefsUDPMonitorDestIPAddr); }
 
@@ -221,11 +221,11 @@ public:
 
 	bool GetAllowGuestDefault() { return fAllowGuestAuthorizeDefault; }
 
-	UInt16 GetServiceLanPort() { return fServiceLANPort; }
-	UInt16 GetServiceWanPort() { return fServiceWANPort; }
+	uint16_t GetServiceLanPort() { return fServiceLANPort; }
+	uint16_t GetServiceWanPort() { return fServiceWANPort; }
 
 	char* GetServiceWANIP() { return this->GetStringPref(easyPrefsServiceWANIPAddr); }
-	UInt16 GetRTSPWANPort() const {	return fRTSPWANPort; }
+	uint16_t GetRTSPWANPort() const {	return fRTSPWANPort; }
 
 	char* GetMovieFolder() { return this->GetStringPref(qtssPrefsMovieFolder); }
 
@@ -295,8 +295,8 @@ private:
 	UInt32  fNumThreads;
 	UInt32  fNumRTSPThreads;
 
-	UInt16	fServiceLANPort;
-	UInt16	fServiceWANPort;
+	uint16_t	fServiceLANPort;
+	uint16_t	fServiceWANPort;
 
 	bool  fEnableMonitorStatsFile;
 	UInt32  fStatsFileIntervalSeconds;
@@ -308,16 +308,16 @@ private:
 	bool   fCloseLogsOnWrite;
 
 	bool   fDisableThinning;
-	UInt16 fDefaultStreamQuality;
+	uint16_t fDefaultStreamQuality;
 	bool   fUDPMonitorEnabled;
-	UInt16 fUDPMonitorVideoPort;
-	UInt16 fUDPMonitorAudioPort;
+	uint16_t fUDPMonitorVideoPort;
+	uint16_t fUDPMonitorAudioPort;
 	char   fUDPMonitorDestAddr[20];
 	char   fUDPMonitorSrcAddr[20];
 	bool   fAllowGuestAuthorizeDefault;
 
 	char   fRTSPWANAddr[20];
-	UInt16 fRTSPWANPort;
+	uint16_t fRTSPWANPort;
 
 	enum //fPacketHeaderPrintfOptions
 	{

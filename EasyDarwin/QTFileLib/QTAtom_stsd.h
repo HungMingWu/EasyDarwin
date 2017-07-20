@@ -56,7 +56,7 @@ public:
 	//
 	// Accessors.
 	bool      FindSampleDescription(OSType DataFormat, char ** Buffer, UInt32 * Length);
-	UInt16      SampleDescriptionToDataReference(UInt32 SampleDescriptionID);
+	uint16_t      SampleDescriptionToDataReference(UInt32 SampleDescriptionID);
 
 
 	//

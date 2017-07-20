@@ -155,7 +155,7 @@ void UserAgentParser::Parse(StrPtrLen *inStream)
 	// (e.g. 'os=Mac%209.2.2' or 'os=Windows%20NT%204.0'.)
 	if (fFieldData[eOs].fFound && !fFieldData[eOsver].fFound)
 	{
-		UInt16 len = (UInt16)fFieldData[eOs].fData.Len;
+		uint16_t len = (uint16_t)fFieldData[eOs].fData.Len;
 		char* cp = (char*)fFieldData[eOs].fData.Ptr;
 		// skip up to the blank space if it exists.
 		// (i.e. the blank is URL encoded as '%20')

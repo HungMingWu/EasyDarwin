@@ -282,7 +282,7 @@ void SDPSourceInfo::Parse(char* sdpData, UInt32 sdpLen)
                 mParser.ConsumeUntil(NULL, StringParser::sDigitMask);
                 SInt32 tempPort = mParser.ConsumeInteger(NULL);
                 if ((tempPort > 0) && (tempPort < 65536))
-                    fStreamArray[theStreamIndex].fPort = (UInt16) tempPort;
+                    fStreamArray[theStreamIndex].fPort = (uint16_t) tempPort;
                     
                 // find out whether this is TCP or UDP
                 mParser.ConsumeWhitespace();
@@ -402,10 +402,10 @@ void SDPSourceInfo::Parse(char* sdpData, UInt32 sdpLen)
                     //if this c= line is part of a stream, it overrides the
                     //global stream information
                     fStreamArray[theStreamIndex - 1].fDestIPAddr = tempIPAddr;
-                    fStreamArray[theStreamIndex - 1].fTimeToLive = (UInt16) tempTtl;
+                    fStreamArray[theStreamIndex - 1].fTimeToLive = (uint16_t) tempTtl;
                 } else {
                     theGlobalStreamInfo.fDestIPAddr = tempIPAddr;
-                    theGlobalStreamInfo.fTimeToLive = (UInt16) tempTtl;
+                    theGlobalStreamInfo.fTimeToLive = (uint16_t) tempTtl;
                     hasGlobalStreamInfo = true;
                 }
             }

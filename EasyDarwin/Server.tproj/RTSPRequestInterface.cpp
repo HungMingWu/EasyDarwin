@@ -408,8 +408,8 @@ void RTSPRequestInterface::AppendTransportHeader(StrPtrLen* serverPortA,
 	if (stripClientPortStr.Len != 0)
 	{
 		fOutputStream->Put(sClientPortString);
-		UInt16 portA = this->GetClientPortA();
-		UInt16 portB = this->GetClientPortB();
+		uint16_t portA = this->GetClientPortA();
+		uint16_t portB = this->GetClientPortB();
 		StrPtrLenDel clientPortA(QTSSDataConverter::ValueToString(&portA, sizeof(portA), qtssAttrDataTypeUInt16));
 		StrPtrLenDel clientPortB(QTSSDataConverter::ValueToString(&portB, sizeof(portB), qtssAttrDataTypeUInt16));
 

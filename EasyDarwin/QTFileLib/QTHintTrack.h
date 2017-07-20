@@ -49,11 +49,11 @@ class QTAtom_stts_SampleTableControlBlock;
 class QTHintTrackRTPHeaderData {
 
 public:
-	UInt16      rtpHeaderBits;
-	UInt16      rtpSequenceNumber;
+	uint16_t      rtpHeaderBits;
+	uint16_t      rtpSequenceNumber;
 	SInt32      relativePacketTransmissionTime;
-	UInt16      hintFlags;
-	UInt16      dataEntryCount;
+	uint16_t      hintFlags;
+	uint16_t      dataEntryCount;
 	UInt32      tlvSize;
 	SInt32      tlvTimestampOffset; //'rtpo' TLV which is the timestamp offset for this packet
 };
@@ -105,7 +105,7 @@ public:
 	UInt32              fCachedHintTrackSampleLength;
 	UInt32              fCachedHintTrackBufferLength;
 
-	UInt16              fLastPacketNumberFetched;   // for optimizing Getting a packet from a cached sample
+	uint16_t              fLastPacketNumberFetched;   // for optimizing Getting a packet from a cached sample
 	char*               fPointerToNextPacket;       // after we get one, we point the next at this...
 
 	//
@@ -162,9 +162,9 @@ public:
 
 	inline  UInt32      GetRTPTimestampRandomOffset() { return fTimestampRandomOffset; }
 
-	inline  UInt16      GetRTPSequenceNumberRandomOffset() { return fSequenceNumberRandomOffset; }
+	inline  uint16_t      GetRTPSequenceNumberRandomOffset() { return fSequenceNumberRandomOffset; }
 
-	ErrorCode   GetNumPackets(UInt32 SampleNumber, UInt16 * NumPackets,
+	ErrorCode   GetNumPackets(UInt32 SampleNumber, uint16_t * NumPackets,
 		QTHintTrack_HintTrackControlBlock * HTCB = NULL);
 
 	//
@@ -178,7 +178,7 @@ public:
 	//      is a compressed field ID.
 	//
 	// Supported fields: tt, md, ft, pp, pn, sq
-	ErrorCode   GetPacket(UInt32 SampleNumber, UInt16 PacketNumber,
+	ErrorCode   GetPacket(UInt32 SampleNumber, uint16_t PacketNumber,
 		char * Buffer, UInt32 * Length,
 		double * TransmitTime,
 		bool dropBFrames,
@@ -186,7 +186,7 @@ public:
 		UInt32 SSRC = 0,
 		QTHintTrack_HintTrackControlBlock * HTCB = NULL);
 
-	inline ErrorCode    GetSampleData(QTHintTrack_HintTrackControlBlock * htcb, char **buffPtr, char **ppPacketBufOut, UInt32 sampleNumber, UInt16 packetNumber, UInt32 buffOutLen);
+	inline ErrorCode    GetSampleData(QTHintTrack_HintTrackControlBlock * htcb, char **buffPtr, char **ppPacketBufOut, UInt32 sampleNumber, uint16_t packetNumber, UInt32 buffOutLen);
 
 	//
 	// Debugging functions.
@@ -226,7 +226,7 @@ protected:
 	UInt32              fMaxPacketSize;
 	UInt32              fRTPTimescale, fFirstRTPTimestamp;
 	UInt32              fTimestampRandomOffset;
-	UInt16              fSequenceNumberRandomOffset;
+	uint16_t              fSequenceNumberRandomOffset;
 	bool              fHintTrackInitialized;
 	SInt16              fHintType;
 	double  			fFirstTransmitTime;
@@ -237,7 +237,7 @@ protected:
 		RTPMetaInfoPacket::FieldID inFieldID,
 		void* inFieldData, UInt32 inFieldLen, char** ioBuffer);
 
-	inline QTTrack::ErrorCode   GetSamplePacketPtr(char ** samplePacketPtr, UInt32 sampleNumber, UInt16 packetNumber, QTHintTrackRTPHeaderData &hdrData, QTHintTrack_HintTrackControlBlock & htcb);
+	inline QTTrack::ErrorCode   GetSamplePacketPtr(char ** samplePacketPtr, UInt32 sampleNumber, uint16_t packetNumber, QTHintTrackRTPHeaderData &hdrData, QTHintTrack_HintTrackControlBlock & htcb);
 	inline void         GetSamplePacketHeaderVars(char *samplePacketPtr, char *maxBuffPtr, QTHintTrackRTPHeaderData &hdrData);
 };
 

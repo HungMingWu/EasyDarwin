@@ -302,12 +302,12 @@ QTSS_Error  QTSSModuleUtils::AppendRTPMetaInfoHeader(   QTSS_RTSPRequestObject i
     ::memset(foundFieldArray, 0, sizeof(bool) * RTPMetaInfoPacket::kNumFields);
     
     char* theEndP = theHeader.Ptr + theHeader.Len;
-    UInt16 fieldNameValue = 0;
+    uint16_t fieldNameValue = 0;
     
     while (theHeader.Ptr <= (theEndP - sizeof(RTPMetaInfoPacket::FieldName)))
     {
         RTPMetaInfoPacket::FieldName* theFieldName = (RTPMetaInfoPacket::FieldName*)theHeader.Ptr;
-        ::memcpy (&fieldNameValue, theFieldName, sizeof(UInt16));
+        ::memcpy (&fieldNameValue, theFieldName, sizeof(uint16_t));
 
         RTPMetaInfoPacket::FieldIndex theFieldIndex = RTPMetaInfoPacket::GetFieldIndexForName(ntohs(fieldNameValue));
         
@@ -1120,7 +1120,7 @@ bool IPComponentStr::Equal(IPComponentStr *testAddressPtr)
     if ( !this->Valid() || !testAddressPtr->Valid() )
         return false;
 
-    for (UInt16 component= 0 ; component < IPComponentStr::kNumComponents ; component ++)
+    for (uint16_t component= 0 ; component < IPComponentStr::kNumComponents ; component ++)
     {
         StrPtrLen *allowedPtr = this->GetComponent(component);
         StrPtrLen *testPtr = testAddressPtr->GetComponent(component);

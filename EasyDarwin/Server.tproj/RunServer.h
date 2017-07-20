@@ -57,7 +57,7 @@ inline bool DebugLogOn(QTSServer* server) { return (server->GetDebugOptions() & 
 // should just die.
 QTSS_ServerState StartServer(XMLPrefsParser* inPrefsSource,
 	PrefsSource* inMessagesSource,
-	UInt16 inPortOverride,
+	uint16_t inPortOverride,
 	int statsUpdateInterval,
 	QTSS_ServerState inInitialState,
 	bool inDontFork,

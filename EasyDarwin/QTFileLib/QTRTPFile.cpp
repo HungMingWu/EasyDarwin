@@ -701,7 +701,7 @@ QTRTPFile::ErrorCode QTRTPFile::AddTrack(UInt32 trackID, bool useRandomOffset)
 	//
 	// Set up the sequence number and timestamp offsets.
 	if (useRandomOffset) {
-		trackEntry->BaseSequenceNumberRandomOffset = (UInt16)rand();
+		trackEntry->BaseSequenceNumberRandomOffset = (uint16_t)rand();
 		trackEntry->BaseTimestampRandomOffset = (UInt32)rand();
 	}
 	else {
@@ -1233,11 +1233,11 @@ double QTRTPFile::GetFirstPacketTransmitTime()
 	return firstPacketTime;
 }
 
-UInt16 QTRTPFile::GetNextTrackSequenceNumber(UInt32 trackID)
+uint16_t QTRTPFile::GetNextTrackSequenceNumber(UInt32 trackID)
 {
 	// General vars
 	RTPTrackListEntry   *trackEntry = NULL;
-	UInt16              rtpSequenceNumber;
+	uint16_t              rtpSequenceNumber;
 
 
 	//
@@ -1302,8 +1302,8 @@ double QTRTPFile::GetNextPacket(char ** outPacket, int * outPacketLength)
 
 	//
 	// Remember the sequence number of this packet.
-	firstPacket->LastSequenceNumber = ntohs(*(UInt16 *)((char *)firstPacket->CurPacket + 2));
-	firstPacket->LastSequenceNumber -= (UInt16)(firstPacket->BaseSequenceNumberRandomOffset + firstPacket->FileSequenceNumberRandomOffset + firstPacket->SequenceNumberAdditive);
+	firstPacket->LastSequenceNumber = ntohs(*(uint16_t *)((char *)firstPacket->CurPacket + 2));
+	firstPacket->LastSequenceNumber -= (uint16_t)(firstPacket->BaseSequenceNumberRandomOffset + firstPacket->FileSequenceNumberRandomOffset + firstPacket->SequenceNumberAdditive);
 
 	//
 	// Return this packet.
@@ -1373,7 +1373,7 @@ SInt32  QTRTPFile::GetMovieHintType()
 bool QTRTPFile::PrefetchNextPacket(RTPTrackListEntry * trackEntry, bool doSeek)
 {
 	// General vars
-	UInt16          *pSequenceNumber;
+	uint16_t          *pSequenceNumber;
 	UInt32          *pTimestamp;
 	bool          skipThisSample = false;
 
@@ -1537,7 +1537,7 @@ bool QTRTPFile::PrefetchNextPacket(RTPTrackListEntry * trackEntry, bool doSeek)
 	// Update our sequence number and timestamp.  If we seeked to get here,
 	// then we need to adjust the additive to account for the shift in
 	// sequence numbers.
-	pSequenceNumber = (UInt16 *)((char *)trackEntry->CurPacket + 2);
+	pSequenceNumber = (uint16_t *)((char *)trackEntry->CurPacket + 2);
 	pTimestamp = (UInt32 *)((char *)trackEntry->CurPacket + 4);
 
 	if (doSeek || (trackEntry->QualityLevel > kAllPackets))

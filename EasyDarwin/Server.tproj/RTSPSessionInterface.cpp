@@ -283,7 +283,7 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, UInt32 inLen, 
 	{
 		unsigned char header;
 		unsigned char channel;
-		UInt16      len;
+		uint16_t      len;
 	};
 
 	struct  iovec               iov[3];
@@ -324,7 +324,7 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, UInt32 inLen, 
 			// write direct to stream
 			rih.header = '$';
 			rih.channel = channel;
-			rih.len = htons((UInt16)inLen);
+			rih.len = htons((uint16_t)inLen);
 
 			iov[1].iov_base = (char*)&rih;
 			iov[1].iov_len = sizeof(rih);
@@ -353,7 +353,7 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, UInt32 inLen, 
 			// if we ever turn TCPCoalesce back on, this should be optimized
 			// for processors w/o alignment restrictions as above.
 
-			SInt16  pcketLen = htons((UInt16)inLen);
+			SInt16  pcketLen = htons((uint16_t)inLen);
 			::memcpy(&fTCPCoalesceBuffer[fNumInCoalesceBuffer], &pcketLen, 2);
 			fNumInCoalesceBuffer += 2;
 

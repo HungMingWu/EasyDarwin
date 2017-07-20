@@ -109,10 +109,10 @@ static bool   sDefaultAllowDuplicateBroadcasts = false;
 
 static UInt32   sMaxBroadcastAnnounceDuration = 0;
 static UInt32   sDefaultMaxBroadcastAnnounceDuration = 0;
-static UInt16   sMinimumStaticSDPPort = 0;
-static UInt16   sDefaultMinimumStaticSDPPort = 20000;
-static UInt16   sMaximumStaticSDPPort = 0;
-static UInt16   sDefaultMaximumStaticSDPPort = 65535;
+static uint16_t   sMinimumStaticSDPPort = 0;
+static uint16_t   sDefaultMinimumStaticSDPPort = 20000;
+static uint16_t   sMaximumStaticSDPPort = 0;
+static uint16_t   sDefaultMaximumStaticSDPPort = 65535;
 
 static bool   sTearDownClientsOnDisconnect = false;
 static bool   sDefaultTearDownClientsOnDisconnect = false;
@@ -127,8 +127,8 @@ static UInt32   sBroadcasterSessionTimeoutSecs = 30;
 static UInt32   sDefaultBroadcasterSessionTimeoutSecs = 30;
 static UInt32   sBroadcasterSessionTimeoutMilliSecs = sBroadcasterSessionTimeoutSecs * 1000;
 
-static UInt16 sLastMax = 0;
-static UInt16 sLastMin = 0;
+static uint16_t sLastMax = 0;
+static uint16_t sLastMin = 0;
 
 static bool   sEnforceStaticSDPPortRange = false;
 static bool   sDefaultEnforceStaticSDPPortRange = false;
@@ -557,8 +557,8 @@ QTSS_Error RereadPrefs()
 
 		if (reportErrors)
 		{
-			UInt16 minServerPort = 6970;
-			UInt16 maxServerPort = 9999;
+			uint16_t minServerPort = 6970;
+			uint16_t maxServerPort = 9999;
 			char min[32];
 			char max[32];
 
@@ -640,14 +640,14 @@ QTSS_Error ProcessRTPData(QTSS_IncomingData_Params* inParams)
 		uint8_t   packetChannel;
 		packetChannel = (uint8_t)packetData[1];
 
-		UInt16  packetDataLen;
+		uint16_t  packetDataLen;
 		memcpy(&packetDataLen, &packetData[2], 2);
 		packetDataLen = ntohs(packetDataLen);
 
 		char*   rtpPacket = &packetData[4];
 
 		//UInt32    packetLen = inParams->inPacketLen;
-		//qtss_printf("QTSSReflectorModule.cpp:ProcessRTPData channel=%u theSoureInfo=%"   _U32BITARG_   " packetLen=%"   _U32BITARG_   " packetDatalen=%u\n",(UInt16) packetChannel,theSoureInfo,inParams->inPacketLen,packetDataLen);
+		//qtss_printf("QTSSReflectorModule.cpp:ProcessRTPData channel=%u theSoureInfo=%"   _U32BITARG_   " packetLen=%"   _U32BITARG_   " packetDatalen=%u\n",(uint16_t) packetChannel,theSoureInfo,inParams->inPacketLen,packetDataLen);
 
 		if (1)
 		{
@@ -658,7 +658,7 @@ QTSS_Error ProcessRTPData(QTSS_IncomingData_Params* inParams)
 				if (theStream == NULL) return QTSS_Unimplemented;
 
 				SourceInfo::StreamInfo* theStreamInfo = theStream->GetStreamInfo();
-				UInt16 serverReceivePort = theStreamInfo->fPort;
+				uint16_t serverReceivePort = theStreamInfo->fPort;
 
 				bool isRTCP = false;
 				if (theStream != NULL)
@@ -669,7 +669,7 @@ QTSS_Error ProcessRTPData(QTSS_IncomingData_Params* inParams)
 						isRTCP = true;
 					}
 					theStream->PushPacket(rtpPacket, packetDataLen, isRTCP);
-					//qtss_printf("QTSSReflectorModule.cpp:ProcessRTPData Send RTSP packet channel=%u to UDP localServerAddr=%"   _U32BITARG_   " serverReceivePort=%"   _U32BITARG_   " packetDataLen=%u \n", (UInt16) packetChannel, localServerAddr, serverReceivePort,packetDataLen);
+					//qtss_printf("QTSSReflectorModule.cpp:ProcessRTPData Send RTSP packet channel=%u to UDP localServerAddr=%"   _U32BITARG_   " serverReceivePort=%"   _U32BITARG_   " packetDataLen=%u \n", (uint16_t) packetChannel, localServerAddr, serverReceivePort,packetDataLen);
 				}
 			}
 		}
@@ -1341,7 +1341,7 @@ bool InfoPortsOK(QTSS_StandardRTSP_Params* inParams, SDPSourceInfo* theInfo, Str
 	{
 		for (UInt32 x = 0; x < theInfo->GetNumStreams(); x++)
 		{
-			UInt16 theInfoPort = theInfo->GetStreamInfo(x)->fPort;
+			uint16_t theInfoPort = theInfo->GetStreamInfo(x)->fPort;
 			QTSS_AttributeID theErrorMessageID = qtssIllegalAttrID;
 			if (theInfoPort != 0)
 			{
@@ -1685,7 +1685,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssPreconditionFailed, sDuplicateBroadcastStreamErr);
 		}
 
-		UInt16 theReceiveBroadcastStreamPort = theStreamInfo->fPort;
+		uint16_t theReceiveBroadcastStreamPort = theStreamInfo->fPort;
 		theErr = QTSS_SetValue(inParams->inRTSPRequest, qtssRTSPReqSetUpServerPort, 0, &theReceiveBroadcastStreamPort, sizeof(theReceiveBroadcastStreamPort));
 		Assert(theErr == QTSS_NoErr);
 
@@ -1837,7 +1837,7 @@ bool HaveStreamBuffers(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inS
 			break;
 		}
 
-		UInt16 firstSeqNum = 0;
+		uint16_t firstSeqNum = 0;
 		UInt32 firstTimeStamp = 0;
 		ReflectorSender* theSender = theReflectorStream->GetRTPSender();
 		haveBufferedStreams = theSender->GetFirstPacketInfo(&firstSeqNum, &firstTimeStamp, &packetArrivalTime);

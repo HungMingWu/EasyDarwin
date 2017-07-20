@@ -194,8 +194,8 @@ protected:
 	UInt32              fRemoteAddr;
 	SInt32              fRequestBodyLen;
 
-	UInt16              fLocalPort;
-	UInt16              fRemotePort;
+	uint16_t              fLocalPort;
+	uint16_t              fRemotePort;
 
 	// For OPTIONS request
 	StrPtrLen				fOldOutputStreamBuffer;

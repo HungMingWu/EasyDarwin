@@ -100,7 +100,7 @@ public:
 	SDPLine*    fSDPLineArray;
 	bool      fValid;
 	StrPtrLen   fSDPBuffer;
-	UInt16      fReqLines;
+	uint16_t      fReqLines;
 
 	char        fFieldStr[kLineTypeArraySize]; // 
 	char*       fLineSearchTypeArray;

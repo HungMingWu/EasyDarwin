@@ -55,7 +55,7 @@ public:
 
 	//addr = listening address. port = listening port. Automatically
 	//starts listening
-	OS_Error        Initialize(UInt32 addr, UInt16 port);
+	OS_Error        Initialize(UInt32 addr, uint16_t port);
 
 	//You can query the listener to see if it is failing to accept
 	//connections because the OS is out of descriptors.
@@ -80,7 +80,7 @@ private:
 	OS_Error    listen(UInt32 queueLength);
 
 	UInt32          fAddr;
-	UInt16          fPort;
+	uint16_t          fPort;
 
 	bool          fOutOfDescriptors;
 	bool          fSleepBetweenAccepts;

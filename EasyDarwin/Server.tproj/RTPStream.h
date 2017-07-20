@@ -209,9 +209,9 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         
         //who am i sending to?
         UInt32      fRemoteAddr;
-        UInt16      fRemoteRTPPort;
-        UInt16      fRemoteRTCPPort;
-        UInt16      fLocalRTPPort;
+        uint16_t      fRemoteRTPPort;
+        uint16_t      fRemoteRTCPPort;
+        uint16_t      fLocalRTPPort;
 		UInt32	    fMonitorAddr;
 		int         fMonitorSocket;
 		UInt32      fPlayerToMonitorAddr;
@@ -239,7 +239,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         QTSS_RTPPayloadType fPayloadType;
 
         //Media information.
-        UInt16      fFirstSeqNumber;//used in sending the play response
+        uint16_t      fFirstSeqNumber;//used in sending the play response
         UInt32      fFirstTimeStamp;//RTP time
         UInt32      fTimescale;
         
@@ -259,23 +259,23 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         UInt32      fTotalLostPackets;
         UInt32      fJitter;
         UInt32      fReceiverBitRate;
-        UInt16      fAvgLateMsec;
-        UInt16      fPercentPacketsLost;
-        UInt16      fAvgBufDelayMsec;
-        UInt16      fIsGettingBetter;
-        UInt16      fIsGettingWorse;
+        uint16_t      fAvgLateMsec;
+        uint16_t      fPercentPacketsLost;
+        uint16_t      fAvgBufDelayMsec;
+        uint16_t      fIsGettingBetter;
+        uint16_t      fIsGettingWorse;
         UInt32      fNumEyes;
         UInt32      fNumEyesActive;
         UInt32      fNumEyesPaused;
         UInt32      fTotalPacketsRecv;
         UInt32      fPriorTotalPacketsRecv;
-        UInt16      fTotalPacketsDropped;
-        UInt16      fTotalPacketsLost;
+        uint16_t      fTotalPacketsDropped;
+        uint16_t      fTotalPacketsLost;
         UInt32      fCurPacketsLostInRTCPInterval;
-        UInt16      fClientBufferFill;
-        UInt16      fFrameRate;
-        UInt16      fExpectedFrameRate;
-        UInt16      fAudioDryCount;
+        uint16_t      fClientBufferFill;
+        uint16_t      fFrameRate;
+        uint16_t      fExpectedFrameRate;
+        uint16_t      fAudioDryCount;
         UInt32      fClientSSRC;
         
         bool      fIsTCP;
@@ -341,8 +341,8 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         SInt32 fMaxQualityLevel;
 		bool fInitialMaxQualityLevelIsSet;
 		bool fUDPMonitorEnabled;
-		UInt16 fMonitorVideoDestPort;
-		UInt16 fMonitorAudioDestPort;
+		uint16_t fMonitorVideoDestPort;
+		uint16_t fMonitorAudioDestPort;
         
         //-----------------------------------------------------------
         // acutally write the data out that way

@@ -28,8 +28,8 @@ static QTSS_ServerObject		sServer = nullptr;
 static char*            sRedis_IP = nullptr;
 static char*            sDefaultRedis_IP_Addr = "127.0.0.1";
 // Redis Port
-static UInt16			sRedisPort = 6379;
-static UInt16			sDefaultRedisPort = 6379;
+static uint16_t			sRedisPort = 6379;
+static uint16_t			sDefaultRedisPort = 6379;
 // Redis password
 static char*            sRedisPassword = nullptr;
 static char*            sDefaultRedisPassword = "EasyDSSEasyDarwinEasyCMSEasyCamera";

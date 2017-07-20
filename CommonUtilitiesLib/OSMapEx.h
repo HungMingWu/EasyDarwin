@@ -34,7 +34,7 @@ typedef unordered_map<string, strMapData> MapType;
 class OSMapEx
 {
 public:
-	static string GenerateSessionIdForRedis(const string& strIP, UInt16 uPort);//生成sessionid，可重入，不保证生成的唯一性
+	static string GenerateSessionIdForRedis(const string& strIP, uint16_t uPort);//生成sessionid，可重入，不保证生成的唯一性
 	static string GenerateSessionId();//生成sessionid,可重入，不保证生成的唯一性
 	bool Insert(const string& strSessionID, SInt64 lastingTime = sLastingTimeOneYear);//插入，线程安全，返回true成功插入，否则重复插入,用于一些长期存在的SessionID
 	//bool Delete(string&strSessionID);//删除,线程安全，成功删除返回true,否则false

@@ -45,7 +45,7 @@ SequenceNumberMap::SequenceNumberMap(UInt32 inSlidingWindowSize)
 
 }
 
-bool SequenceNumberMap::AddSequenceNumber(UInt16 inSeqNumber)
+bool SequenceNumberMap::AddSequenceNumber(uint16_t inSeqNumber)
 {
 	// Returns whether sequence number has already been added.
 

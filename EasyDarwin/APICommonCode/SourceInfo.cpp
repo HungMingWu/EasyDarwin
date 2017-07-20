@@ -306,8 +306,8 @@ void SourceInfo::OutputInfo::Copy(const OutputInfo& copy)
     fNumPorts = copy.fNumPorts;
     if(fNumPorts != 0)
     {
-        fPortArray = new UInt16[fNumPorts];
-        ::memcpy(fPortArray, copy.fPortArray, fNumPorts * sizeof(UInt16));
+        fPortArray = new uint16_t[fNumPorts];
+        ::memcpy(fPortArray, copy.fPortArray, fNumPorts * sizeof(uint16_t));
     }
     fBasePort = copy.fBasePort;
     fAlreadySetup = copy.fAlreadySetup;

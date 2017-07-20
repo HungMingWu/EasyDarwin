@@ -258,7 +258,7 @@ class IPComponentStr
     IPComponentStr(char *theAddress);
     IPComponentStr(StrPtrLen *sourceStrPtr);
     
-inline  StrPtrLen*  GetComponent(UInt16 which);
+inline  StrPtrLen*  GetComponent(uint16_t which);
         bool      Equal(IPComponentStr *testAddressPtr);
         bool      Set(StrPtrLen *theAddressStrPtr);
         bool      Valid() { return fIsValid; }
@@ -275,7 +275,7 @@ bool  IPComponentStr::IsLocal()
     return false;
 }
 
-StrPtrLen* IPComponentStr::GetComponent(UInt16 which) 
+StrPtrLen* IPComponentStr::GetComponent(uint16_t which) 
 {
    if (which < IPComponentStr::kNumComponents) 
         return &fAddressComponent[which]; 

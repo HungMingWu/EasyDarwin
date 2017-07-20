@@ -80,8 +80,8 @@ private:
 	bool                  fMustSynch;
 	bool                  fPreFilter;
 
-	UInt16 GetPacketSeqNumber(StrPtrLen* inPacket);
-	void SetPacketSeqNumber(StrPtrLen* inPacket, UInt16 inSeqNumber);
+	uint16_t GetPacketSeqNumber(StrPtrLen* inPacket);
+	void SetPacketSeqNumber(StrPtrLen* inPacket, uint16_t inSeqNumber);
 	bool PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrPtrLen* inPacket);
 	bool  FilterPacket(QTSS_RTPStreamObject *theStreamPtr, StrPtrLen* inPacket);
 

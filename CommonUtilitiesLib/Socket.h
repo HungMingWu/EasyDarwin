@@ -63,7 +63,7 @@ public:
 
 	//Binds the socket to the following address.
 	//Returns: QTSS_FileNotOpen, QTSS_NoErr, or POSIX errorcode.
-	OS_Error    Bind(UInt32 addr, UInt16 port, bool test = false);
+	OS_Error    Bind(UInt32 addr, uint16_t port, bool test = false);
 	//The same. but in reverse
 	void            Unbind();
 
@@ -95,7 +95,7 @@ public:
 
 	//If the socket is bound, you may find out to which addr it is bound
 	UInt32  GetLocalAddr() { return ntohl(fLocalAddr.sin_addr.s_addr); }
-	UInt16  GetLocalPort() { return ntohs(fLocalAddr.sin_port); }
+	uint16_t  GetLocalPort() { return ntohs(fLocalAddr.sin_port); }
 
 	StrPtrLen*  GetLocalAddrStr();
 	StrPtrLen*  GetLocalPortStr();

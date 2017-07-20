@@ -731,7 +731,7 @@ void RTPStream::UDPMonitorWrite(void* thePacketData, UInt32 inLen, bool isRTCP)
 	if ((0 != fPlayerToMonitorAddr) && (this->fRemoteAddr != fPlayerToMonitorAddr))
 		return;
 
-	UInt16 RTCPportOffset = (TRUE == isRTCP) ? 1 : 0;
+	uint16_t RTCPportOffset = (TRUE == isRTCP) ? 1 : 0;
 
 
 	struct sockaddr_in sin;
@@ -1149,8 +1149,8 @@ QTSS_Error  RTPStream::Write(void* inBuffer, UInt32 inLen, UInt32* outLenWritten
 			if (err == QTSS_NoErr)
 				this->PrintPacketPrefEnabled((char*)thePacket->packetData, inLen, (SInt32)RTPStream::rtp);
 
-			UInt16* theSeqNumP = (UInt16*)thePacket->packetData;
-			UInt16 theSeqNum = ntohs(theSeqNumP[1]);
+			uint16_t* theSeqNumP = (uint16_t*)thePacket->packetData;
+			uint16_t theSeqNum = ntohs(theSeqNumP[1]);
 
 #if 0 // testing
 			{
@@ -1350,8 +1350,8 @@ bool RTPStream::ProcessCompressedQTSSPacket(RTCPPacket &rtcpPacket, SInt64 &curT
 
 	fPercentPacketsLost = compressedQTSSPacket.GetPercentPacketsLost();
 	fAvgBufDelayMsec = compressedQTSSPacket.GetAverageBufferDelayMilliseconds();
-	fIsGettingBetter = (UInt16)compressedQTSSPacket.GetIsGettingBetter();
-	fIsGettingWorse = (UInt16)compressedQTSSPacket.GetIsGettingWorse();
+	fIsGettingBetter = (uint16_t)compressedQTSSPacket.GetIsGettingBetter();
+	fIsGettingWorse = (uint16_t)compressedQTSSPacket.GetIsGettingWorse();
 	fNumEyes = compressedQTSSPacket.GetNumEyes();
 	fNumEyesActive = compressedQTSSPacket.GetNumEyesActive();
 	fNumEyesPaused = compressedQTSSPacket.GetNumEyesPaused();
@@ -1397,11 +1397,11 @@ bool RTPStream::ProcessAckPacket(RTCPPacket &rtcpPacket, SInt64 &curTime)
 	// Only check for ack packets if we are using Reliable UDP
 	if (fTransportType == qtssRTPTransportTypeReliableUDP)
 	{
-		UInt16 theSeqNum = theAckPacket.GetAckSeqNum();
+		uint16_t theSeqNum = theAckPacket.GetAckSeqNum();
 		fResender.AckPacket(theSeqNum, curTime);
 		//qtss_printf("Got ack: %d\n",theSeqNum);
 
-		for (UInt16 maskCount = 0; maskCount < theAckPacket.GetAckMaskSizeInBits(); maskCount++)
+		for (uint16_t maskCount = 0; maskCount < theAckPacket.GetAckMaskSizeInBits(); maskCount++)
 		{
 			if (theAckPacket.IsNthBitEnabled(maskCount))
 			{
@@ -1706,7 +1706,7 @@ char* RTPStream::GetStreamTypeStr()
 void RTPStream::PrintRTP(char* packetBuff, UInt32 inLen)
 {
 
-	UInt16 sequence = ntohs(((UInt16*)packetBuff)[1]);
+	uint16_t sequence = ntohs(((uint16_t*)packetBuff)[1]);
 	UInt32 timestamp = ntohl(((UInt32*)packetBuff)[1]);
 	UInt32 ssrc = ntohl(((UInt32*)packetBuff)[2]);
 

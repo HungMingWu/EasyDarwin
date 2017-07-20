@@ -114,10 +114,10 @@ bool QTAtom::ReadInt8(UInt64 Offset, uint8_t * Datum)
 	return ReadBytes(Offset, (char *)Datum, 1);
 }
 
-bool QTAtom::ReadInt16(UInt64 Offset, UInt16 * Datum)
+bool QTAtom::ReadInt16(UInt64 Offset, uint16_t * Datum)
 {
 	// General vars
-	UInt16      tempDatum;
+	uint16_t      tempDatum;
 
 
 	//
@@ -221,10 +221,10 @@ bool QTAtom::ReadSubAtomInt8(const char * AtomPath, uint8_t * Datum)
 	return ReadSubAtomBytes(AtomPath, (char *)Datum, 1);
 }
 
-bool QTAtom::ReadSubAtomInt16(const char * AtomPath, UInt16 * Datum)
+bool QTAtom::ReadSubAtomInt16(const char * AtomPath, uint16_t * Datum)
 {
 	// General vars
-	UInt16      tempDatum;
+	uint16_t      tempDatum;
 
 
 	//

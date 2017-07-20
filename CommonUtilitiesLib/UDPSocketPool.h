@@ -58,15 +58,15 @@ public:
 	//inSrcIPAddr = srcIP address of incoming packets for the demuxer.
 	//inSrcPort = src port of incoming packets for the demuxer.
 	//This may return NULL if no pair is available that meets the criteria.
-	UDPSocketPair*  GetUDPSocketPair(UInt32 inIPAddr, UInt16 inPort,
-		UInt32 inSrcIPAddr, UInt16 inSrcPort);
+	UDPSocketPair*  GetUDPSocketPair(UInt32 inIPAddr, uint16_t inPort,
+		UInt32 inSrcIPAddr, uint16_t inSrcPort);
 
 	//When done using a UDP socket pair retrieved via GetUDPSocketPair, you must
 	//call this function. Doing so tells the pool which UDP sockets are in use,
 	//keeping the number of UDP sockets allocated at a minimum.
 	void ReleaseUDPSocketPair(UDPSocketPair* inPair);
 
-	UDPSocketPair*  CreateUDPSocketPair(UInt32 inAddr, UInt16 inPort);
+	UDPSocketPair*  CreateUDPSocketPair(UInt32 inAddr, uint16_t inPort);
 
 protected:
 
@@ -82,8 +82,8 @@ private:
 
 	enum
 	{
-		kLowestUDPPort = 6970,  //UInt16
-		kHighestUDPPort = 65535 //UInt16
+		kLowestUDPPort = 6970,  //uint16_t
+		kHighestUDPPort = 65535 //uint16_t
 	};
 
 	OSQueue fUDPQueue;

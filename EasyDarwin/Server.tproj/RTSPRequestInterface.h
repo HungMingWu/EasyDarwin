@@ -150,11 +150,11 @@ public:
 	StrPtrLen*                  GetLateToleranceStr() { return &fLateToleranceStr; }
 
 	// these get set if there is a transport header
-	UInt16                      GetClientPortA() { return fClientPortA; }
-	UInt16                      GetClientPortB() { return fClientPortB; }
+	uint16_t                      GetClientPortA() { return fClientPortA; }
+	uint16_t                      GetClientPortB() { return fClientPortB; }
 	UInt32                      GetDestAddr() { return fDestinationAddr; }
 	UInt32                      GetSourceAddr() { return fSourceAddr; }
-	UInt16                      GetTtl() { return fTtl; }
+	uint16_t                      GetTtl() { return fTtl; }
 	QTSS_RTPTransportType       GetTransportType() { return fTransportType; }
 	QTSS_RTPNetworkMode         GetNetworkMode() { return fNetworkMode; }
 	UInt32                      GetWindowSize() { return fWindowSize; }
@@ -181,7 +181,7 @@ public:
 	void                        SetAction(QTSS_ActionFlags action) { fAction = action; }
 
 	bool						IsPushRequest() { return (fTransportMode == qtssRTPTransportModeRecord) ? true : false; }
-	UInt16                      GetSetUpServerPort() { return fSetUpServerPort; }
+	uint16_t                      GetSetUpServerPort() { return fSetUpServerPort; }
 	QTSS_RTPTransportMode       GetTransportMode() { return fTransportMode; }
 
 	QTSS_AuthScheme             GetAuthScheme() { return fAuthScheme; }
@@ -232,9 +232,9 @@ protected:
 	double                     fStartTime;         //Range header info: start time
 	double                     fStopTime;          //Range header info: stop time
 
-	UInt16                      fClientPortA;       //This is all info that comes out
-	UInt16                      fClientPortB;       //of the Transport: header
-	UInt16                      fTtl;
+	uint16_t                      fClientPortA;       //This is all info that comes out
+	uint16_t                      fClientPortB;       //of the Transport: header
+	uint16_t                      fTtl;
 	UInt32                      fDestinationAddr;
 	UInt32                      fSourceAddr;
 	QTSS_RTPTransportType       fTransportType;
@@ -269,7 +269,7 @@ protected:
 	bool                      fAuthHandled;
 
 	QTSS_RTPTransportMode       fTransportMode;
-	UInt16                      fSetUpServerPort;           //send this back as the server_port if is SETUP request
+	uint16_t                      fSetUpServerPort;           //send this back as the server_port if is SETUP request
 
 	QTSS_ActionFlags            fAction;    // The action that will be performed for this request
 											// Set to a combination of QTSS_ActionFlags 

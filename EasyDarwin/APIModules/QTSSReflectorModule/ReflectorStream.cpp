@@ -636,12 +636,12 @@ UInt32 ReflectorSender::GetOldestPacketRTPTime(bool *foundPtr)
 	return thePacket->GetPacketRTPTime();
 }
 
-UInt16 ReflectorSender::GetFirstPacketRTPSeqNum(bool *foundPtr)
+uint16_t ReflectorSender::GetFirstPacketRTPSeqNum(bool *foundPtr)
 {
 	if (foundPtr != NULL)
 		*foundPtr = false;
 
-	UInt16 resultSeqNum = 0;
+	uint16_t resultSeqNum = 0;
 	OSMutexLocker locker(&fStream->fBucketMutex);
 	OSQueueElem* packetElem = this->GetClientBufferStartPacket();
 
@@ -693,7 +693,7 @@ OSQueueElem*    ReflectorSender::GetClientBufferNextPacketTime(UInt32 inRTPTime)
 	return requestedPacket;
 }
 
-bool ReflectorSender::GetFirstRTPTimePacket(UInt16* outSeqNumPtr, UInt32* outRTPTimePtr, SInt64* outArrivalTimePtr)
+bool ReflectorSender::GetFirstRTPTimePacket(uint16_t* outSeqNumPtr, UInt32* outRTPTimePtr, SInt64* outArrivalTimePtr)
 {
 	OSMutexLocker locker(&fStream->fBucketMutex);
 	OSQueueElem* packetElem = this->GetClientBufferStartPacketOffset(ReflectorStream::sFirstPacketOffsetMsec);
@@ -725,7 +725,7 @@ bool ReflectorSender::GetFirstRTPTimePacket(UInt16* outSeqNumPtr, UInt32* outRTP
 	return true;
 }
 
-bool ReflectorSender::GetFirstPacketInfo(UInt16* outSeqNumPtr, UInt32* outRTPTimePtr, SInt64* outArrivalTimePtr)
+bool ReflectorSender::GetFirstPacketInfo(uint16_t* outSeqNumPtr, UInt32* outRTPTimePtr, SInt64* outArrivalTimePtr)
 {
 	OSMutexLocker locker(&fStream->fBucketMutex);
 	OSQueueElem* packetElem = this->GetClientBufferStartPacketOffset(ReflectorStream::sFirstPacketOffsetMsec);
@@ -754,13 +754,13 @@ bool ReflectorSender::GetFirstPacketInfo(UInt16* outSeqNumPtr, UInt32* outRTPTim
 
 
 #if REFLECTOR_STREAM_DEBUGGING
-static UInt16 DGetPacketSeqNumber(StrPtrLen* inPacket)
+static uint16_t DGetPacketSeqNumber(StrPtrLen* inPacket)
 {
 	if (inPacket->Len < 4)
 		return 0;
 
 	//The RTP seq number is the second short of the packet
-	UInt16* seqNumPtr = (UInt16*)inPacket->Ptr;
+	uint16_t* seqNumPtr = (uint16_t*)inPacket->Ptr;
 	return ntohs(seqNumPtr[1]);
 }
 
@@ -1444,8 +1444,8 @@ bool ReflectorSender::IsKeyFrameFirstPacket(ReflectorPacket* thePacket)
 		//unsigned int cc:4;               /* CSRC count */
 		//unsigned int m:1;                /* marker bit */
 		//unsigned int pt:7;               /* payload type */
-		UInt16 rtpheader;
-		UInt16 seq;				        /* sequence number */
+		uint16_t rtpheader;
+		uint16_t seq;				        /* sequence number */
 		UInt32 ts;                       /* timestamp */
 		UInt32 ssrc;                     /* synchronization source */
 		//UInt32 csrc[1];                /* optional CSRC list */
@@ -1766,7 +1766,7 @@ void ReflectorSocket::FilterInvalidSSRCs(ReflectorPacket* thePacket, bool isRTCP
 	} while (false);
 }
 
-bool ReflectorSocket::ProcessPacket(const SInt64& inMilliseconds, ReflectorPacket* thePacket, UInt32 theRemoteAddr, UInt16 theRemotePort)
+bool ReflectorSocket::ProcessPacket(const SInt64& inMilliseconds, ReflectorPacket* thePacket, UInt32 theRemoteAddr, uint16_t theRemotePort)
 {
 	bool done = false; // stop when result is true
 	if (thePacket != NULL) do
@@ -1827,7 +1827,7 @@ bool ReflectorSocket::ProcessPacket(const SInt64& inMilliseconds, ReflectorPacke
 
 		if (theSender == NULL)
 		{
-			//UInt16* theSeqNumberP = (UInt16*)thePacket->fPacketPtr.Ptr;
+			//uint16_t* theSeqNumberP = (uint16_t*)thePacket->fPacketPtr.Ptr;
 			//qtss_printf("ReflectorSocket::ProcessPacket no sender found for packet! sequence number=%d\n",ntohs(theSeqNumberP[1]));
 			fFreeQueue.EnQueue(&thePacket->fQueueElem); // don't process the packet
 			done = true;
@@ -2014,7 +2014,7 @@ void ReflectorSocket::GetIncomingData(const SInt64& inMilliseconds)
 {
 	OSMutexLocker locker(this->GetDemuxer()->GetMutex());
 	UInt32 theRemoteAddr = 0;
-	UInt16 theRemotePort = 0;
+	uint16_t theRemotePort = 0;
 	//get all the outstanding packets for this socket
 	while (true)
 	{

@@ -184,7 +184,7 @@ QTSServer::~QTSServer()
 	delete fSrvrPrefs;
 }
 
-bool QTSServer::Initialize(XMLPrefsParser* inPrefsSource, PrefsSource* inMessagesSource, UInt16 inPortOverride, bool createListeners, const char*inAbsolutePath)
+bool QTSServer::Initialize(XMLPrefsParser* inPrefsSource, PrefsSource* inMessagesSource, uint16_t inPortOverride, bool createListeners, const char*inAbsolutePath)
 {
 	static const UInt32 kRTPSessionMapSize = 2000;
 	static const UInt32 kReflectorSessionMapSize = 2000;
@@ -379,13 +379,13 @@ bool QTSServer::SetDefaultIPAddr()
 *	Date:		2015/11/22
 *
 */
-bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs, UInt16 inPortOverride)
+bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs, uint16_t inPortOverride)
 {
 	struct PortTracking
 	{
 		PortTracking() : fPort(0), fIPAddr(0), fNeedsCreating(true) {}
 
-		UInt16 fPort;
+		uint16_t fPort;
 		UInt32 fIPAddr;
 		bool fNeedsCreating;
 	};
@@ -415,7 +415,7 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 	else
 	{
 		UInt32 theNumPorts = 0;
-		UInt16* thePorts = GetRTSPPorts(inPrefs, &theNumPorts);
+		uint16_t* thePorts = GetRTSPPorts(inPrefs, &theNumPorts);
 		theTotalRTSPPortTrackers = theNumAddrs * theNumPorts;
 		theRTSPPortTrackers = new PortTracking[theTotalRTSPPortTrackers];
 
@@ -440,7 +440,7 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 		theTotalHTTPPortTrackers = theNumAddrs;
 		theHTTPPortTrackers = new PortTracking[theTotalHTTPPortTrackers];
 
-		UInt16 theHTTPPort = inPrefs->GetServiceLanPort();
+		uint16_t theHTTPPort = inPrefs->GetServiceLanPort();
 		UInt32 currentIndex = 0;
 
 		for (index = 0; index < theNumAddrs; index++)
@@ -582,7 +582,7 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 	{
 		if (fListeners[count6]->GetLocalAddr() != INADDR_LOOPBACK)
 		{
-			UInt16 thePort = fListeners[count6]->GetLocalPort();
+			uint16_t thePort = fListeners[count6]->GetLocalPort();
 			(void)this->SetValue(qtssSvrRTSPPorts, portIndex, &thePort, sizeof(thePort), QTSSDictionary::kDontObeyReadOnly);
 			portIndex++;
 		}
@@ -646,19 +646,19 @@ UInt32* QTSServer::GetRTSPIPAddrs(QTSServerPrefs* inPrefs, UInt32* outNumAddrsPt
 	return theIPAddrArray;
 }
 
-UInt16* QTSServer::GetRTSPPorts(QTSServerPrefs* inPrefs, UInt32* outNumPortsPtr)
+uint16_t* QTSServer::GetRTSPPorts(QTSServerPrefs* inPrefs, UInt32* outNumPortsPtr)
 {
 	*outNumPortsPtr = inPrefs->GetNumValues(qtssPrefsRTSPPorts);
 
 	if (*outNumPortsPtr == 0)
 		return nullptr;
 
-	UInt16* thePortArray = new UInt16[*outNumPortsPtr];
+	uint16_t* thePortArray = new uint16_t[*outNumPortsPtr];
 
 	for (UInt32 theIndex = 0; theIndex < *outNumPortsPtr; theIndex++)
 	{
 		// Get the ip addr out of the prefs dictionary
-		UInt32 theLen = sizeof(UInt16);
+		UInt32 theLen = sizeof(uint16_t);
 		QTSS_Error theErr = QTSS_NoErr;
 		theErr = inPrefs->GetValue(qtssPrefsRTSPPorts, theIndex, &thePortArray[theIndex], &theLen);
 		Assert(theErr == QTSS_NoErr);

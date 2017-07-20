@@ -229,7 +229,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	bool clearPercentLossThickCount = true;
 
 	UInt32* uint32Ptr = NULL;
-	UInt16* uint16Ptr = NULL;
+	uint16_t* uint16_tPtr = NULL;
 	theLen = 0;
 
 	UInt32 theNumLossesAboveTol = 0;
@@ -252,10 +252,10 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 
 
 	//First take any action necessitated by the loss percent
-	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrPercentPacketsLost, 0, (void**)&uint16Ptr, &theLen);
-	if ((uint16Ptr != NULL) && (theLen == sizeof(UInt16)))
+	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrPercentPacketsLost, 0, (void**)&uint16_tPtr, &theLen);
+	if ((uint16_tPtr != NULL) && (theLen == sizeof(uint16_t)))
 	{
-		UInt16 thePercentLoss = *uint16Ptr;
+		uint16_t thePercentLoss = *uint16_tPtr;
 		thePercentLoss /= 256; //Hmmm... looks like the client reports loss percent in multiples of 256
 #if FLOW_CONTROL_DEBUGGING
 		qtss_printf("Percent loss: %d\n", thePercentLoss);
@@ -307,10 +307,10 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	}
 
 	//Now take a look at the getting worse heuristic
-	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrGettingWorse, 0, (void**)&uint16Ptr, &theLen);
-	if ((uint16Ptr != NULL) && (theLen == sizeof(UInt16)))
+	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrGettingWorse, 0, (void**)&uint16_tPtr, &theLen);
+	if ((uint16_tPtr != NULL) && (theLen == sizeof(uint16_t)))
 	{
-		UInt16 isGettingWorse = *uint16Ptr;
+		uint16_t isGettingWorse = *uint16_tPtr;
 		if (isGettingWorse != 0)
 		{
 			theNumWorses++;//we must count this getting worse
@@ -335,8 +335,8 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	}
 
 	//Finally, if we get a getting better, automatically ratchet up
-	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrGettingBetter, 0, (void**)&uint16Ptr, &theLen);
-	if ((uint16Ptr != NULL) && (theLen == sizeof(UInt16)) && (*uint16Ptr > 0))
+	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrGettingBetter, 0, (void**)&uint16_tPtr, &theLen);
+	if ((uint16_tPtr != NULL) && (theLen == sizeof(uint16_t)) && (*uint16_tPtr > 0))
 		ratchetMore = true;
 
 	//For clearing out counts below

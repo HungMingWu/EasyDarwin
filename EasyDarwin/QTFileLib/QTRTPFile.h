@@ -108,7 +108,7 @@ public:
 		void            *Cookie1;
 		UInt32          Cookie2;
 		UInt32          SSRC;
-		UInt16          FileSequenceNumberRandomOffset, BaseSequenceNumberRandomOffset,
+		uint16_t          FileSequenceNumberRandomOffset, BaseSequenceNumberRandomOffset,
 			LastSequenceNumber;
 		SInt32          SequenceNumberAdditive;
 		UInt32          FileTimestampRandomOffset, BaseTimestampRandomOffset;
@@ -121,7 +121,7 @@ public:
 		UInt32          SampleToSeekTo;
 		UInt32          LastSyncSampleNumber;
 		UInt32          NextSyncSampleNumber;
-		UInt16          NumPacketsInThisSample, CurPacketNumber;
+		uint16_t          NumPacketsInThisSample, CurPacketNumber;
 
 		double         CurPacketTime;
 		char            CurPacket[QTRTPFILE_MAX_PACKET_LENGTH];
@@ -223,7 +223,7 @@ public:
 	RTPTrackListEntry* GetLastPacketTrack() { return fLastPacketTrack; }
 	UInt32      GetNumSkippedSamples() { return fNumSkippedSamples; }
 
-	UInt16      GetNextTrackSequenceNumber(UInt32 TrackID);
+	uint16_t      GetNextTrackSequenceNumber(UInt32 TrackID);
 	double     GetNextPacket(char ** Packet, int * PacketLength);
 
 	SInt32      GetMovieHintType();

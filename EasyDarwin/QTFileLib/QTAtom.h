@@ -69,7 +69,7 @@ public:
 	// Read functions.
 	bool      ReadBytes(UInt64 Offset, char* Buffer, UInt32 Length);
 	bool      ReadInt8(UInt64 Offset, uint8_t* Datum);
-	bool      ReadInt16(UInt64 Offset, UInt16* Datum);
+	bool      ReadInt16(UInt64 Offset, uint16_t* Datum);
 	bool      ReadInt32(UInt64 Offset, UInt32* Datum);
 	bool      ReadInt64(UInt64 Offset, UInt64* Datum);
 	bool      ReadInt32To64(UInt64 Offset, UInt64* Datum);
@@ -77,7 +77,7 @@ public:
 
 	bool      ReadSubAtomBytes(const char* AtomPath, char* Buffer, UInt32 Length);
 	bool      ReadSubAtomInt8(const char* AtomPath, uint8_t* Datum);
-	bool      ReadSubAtomInt16(const char* AtomPath, UInt16* Datum);
+	bool      ReadSubAtomInt16(const char* AtomPath, uint16_t* Datum);
 	bool      ReadSubAtomInt32(const char* AtomPath, UInt32* Datum);
 	bool      ReadSubAtomInt64(const char* AtomPath, UInt64* Datum);
 

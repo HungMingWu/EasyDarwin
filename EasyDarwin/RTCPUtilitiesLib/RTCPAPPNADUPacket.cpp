@@ -161,8 +161,8 @@ void RTCPNaduPacket::GetTestPacket(StrPtrLen* resultPtr)
 	*(theWriter++) = htonl(0x2B6756CE); //delay | nsn = 11111 | 22222
 	*(theWriter++) = htonl(0xFFFFAD9C); //nun | fbs= 31 | 44444
 
-	UInt16 *packetLenOffsetPtr = &((UInt16*)theWriterStart)[29];
-	UInt16  packetLenInWords = htons(((UInt32*)theWriter - (UInt32*)appPacketLenStart));
+	uint16_t *packetLenOffsetPtr = &((uint16_t*)theWriterStart)[29];
+	uint16_t  packetLenInWords = htons(((UInt32*)theWriter - (UInt32*)appPacketLenStart));
 
 	*packetLenOffsetPtr = packetLenInWords;
 	qtss_printf("packetLenInWords =%lu\n", ntohs(packetLenInWords));
@@ -204,8 +204,8 @@ void RTCPNaduPacket::GetTestPacket(StrPtrLen* resultPtr)
 	*(theWriter++) = htonl(0x2B6756CE); //delay | nsn = 11111 | 22222
 	*(theWriter++) = htonl(0xFFFFAD9C); //nun | fbs= 31 | 44444
 
-	UInt16 *packetLenOffsetPtr = &((UInt16*)theWriterStart)[17];
-	UInt16  packetLenInWords = htons((UInt32*)theWriter - (UInt32*)appPacketLenStart);
+	uint16_t *packetLenOffsetPtr = &((uint16_t*)theWriterStart)[17];
+	uint16_t  packetLenInWords = htons((UInt32*)theWriter - (UInt32*)appPacketLenStart);
 
 	*packetLenOffsetPtr = packetLenInWords;
 
@@ -238,8 +238,8 @@ void RTCPNaduPacket::GetTestPacket(StrPtrLen* resultPtr)
 	*(theWriter++) = htonl(0x2B6756CE); //delay | nsn = 11111 | 22222
 	*(theWriter++) = htonl(0xFFFFAD9C); //nun | fbs= 31 | 44444
 
-	UInt16 *packetLenOffsetPtr = &((UInt16*)theWriterStart)[3];
-	UInt16  packetLenInWords = htons((UInt32*)theWriter - (UInt32*)appPacketLenStart);
+	uint16_t *packetLenOffsetPtr = &((uint16_t*)theWriterStart)[3];
+	uint16_t  packetLenInWords = htons((UInt32*)theWriter - (UInt32*)appPacketLenStart);
 
 	*packetLenOffsetPtr = packetLenInWords;
 
@@ -339,10 +339,10 @@ void RTCPNaduPacket::DumpNaduPacket()
 
 		UInt32 ssrc = this->GetSSRC(count);
 		UInt32 ssrcIndex = this->GetSSRCBlockIndex(ssrc);
-		UInt16 playoutDelay = this->GetPlayOutDelay(count);
-		UInt16 nsn = this->GetNSN(count);
-		UInt16 nun = this->GetNUN(count);
-		UInt16 fbs = this->GetFBS(count);
+		uint16_t playoutDelay = this->GetPlayOutDelay(count);
+		uint16_t nsn = this->GetNSN(count);
+		uint16_t nun = this->GetNUN(count);
+		uint16_t fbs = this->GetFBS(count);
 		qtss_printf("              ");
 		qtss_printf("RTCP APP NADU Report[%"   _U32BITARG_   "] ", ssrcIndex);
 		qtss_printf("h_ssrc = %"   _U32BITARG_, ssrc);
@@ -399,7 +399,7 @@ UInt32 RTCPNaduPacket::GetSSRC(SInt32 index)
 
 }
 
-UInt16 RTCPNaduPacket::GetPlayOutDelay(SInt32 index)
+uint16_t RTCPNaduPacket::GetPlayOutDelay(SInt32 index)
 {
 	if (index < 0)
 		return 0;
@@ -411,12 +411,12 @@ UInt16 RTCPNaduPacket::GetPlayOutDelay(SInt32 index)
 		return 0;
 
 	UInt32 *blockBufferPtr = fNaduDataBuffer + (index * 3);
-	UInt16 delay = (UInt16)((ntohl(*(UInt32*)&blockBufferPtr[kOffsetNaduPlayoutDelay])  & kPlayoutMask) >> 16);
+	uint16_t delay = (uint16_t)((ntohl(*(UInt32*)&blockBufferPtr[kOffsetNaduPlayoutDelay])  & kPlayoutMask) >> 16);
 
 	return delay;
 }
 
-UInt16 RTCPNaduPacket::GetNSN(SInt32 index)
+uint16_t RTCPNaduPacket::GetNSN(SInt32 index)
 {
 	if (index < 0)
 		return 0;
@@ -428,12 +428,12 @@ UInt16 RTCPNaduPacket::GetNSN(SInt32 index)
 		return 0;
 
 	UInt32 *blockBufferPtr = fNaduDataBuffer + (index * 3);
-	UInt16 nsn = (UInt16)(ntohl(blockBufferPtr[kOffsetNSN]) & kNSNMask);
+	uint16_t nsn = (uint16_t)(ntohl(blockBufferPtr[kOffsetNSN]) & kNSNMask);
 
 	return nsn;
 }
 
-UInt16 RTCPNaduPacket::GetNUN(SInt32 index)
+uint16_t RTCPNaduPacket::GetNUN(SInt32 index)
 {
 	if (index < 0)
 		return 0;
@@ -445,12 +445,12 @@ UInt16 RTCPNaduPacket::GetNUN(SInt32 index)
 		return 0;
 
 	UInt32 *blockBufferPtr = fNaduDataBuffer + (index * 3);
-	UInt16 nun = (UInt16)((ntohl(blockBufferPtr[kOffsetNUN]) & kNUNMask) >> 16);
+	uint16_t nun = (uint16_t)((ntohl(blockBufferPtr[kOffsetNUN]) & kNUNMask) >> 16);
 
 	return nun;
 }
 
-UInt16 RTCPNaduPacket::GetFBS(SInt32 index)
+uint16_t RTCPNaduPacket::GetFBS(SInt32 index)
 {
 	if (index < 0)
 		return 0;
@@ -462,7 +462,7 @@ UInt16 RTCPNaduPacket::GetFBS(SInt32 index)
 		return 0;
 
 	UInt32 *blockBufferPtr = fNaduDataBuffer + (index * 3);
-	UInt16 fbs = (UInt16)ntohl(blockBufferPtr[kOffsetFBS]) & kFBSMask;
+	uint16_t fbs = (uint16_t)ntohl(blockBufferPtr[kOffsetFBS]) & kFBSMask;
 
 	return fbs;
 }
@@ -612,7 +612,7 @@ UInt32 NaduList::LastReportedTimeDelayMilli()
 	return theNADUPacketData->GetPlayOutDelay(0);
 }
 
-UInt16 NaduList::GetLastReportedNSN()
+uint16_t NaduList::GetLastReportedNSN()
 {
 	NaduReport* currentReportPtr = this->GetLastReport();
 	if (NULL == currentReportPtr)

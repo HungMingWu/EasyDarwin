@@ -64,14 +64,14 @@ public:
 
 	OS_Error    JoinMulticast(UInt32 inRemoteAddr);
 	OS_Error    LeaveMulticast(UInt32 inRemoteAddr);
-	OS_Error    SetTtl(UInt16 timeToLive);
+	OS_Error    SetTtl(uint16_t timeToLive);
 	OS_Error    SetMulticastInterface(UInt32 inLocalAddr);
 
 	//returns an ERRNO
-	OS_Error        SendTo(UInt32 inRemoteAddr, UInt16 inRemotePort,
+	OS_Error        SendTo(UInt32 inRemoteAddr, uint16_t inRemotePort,
 		void* inBuffer, UInt32 inLength);
 
-	OS_Error        RecvFrom(UInt32* outRemoteAddr, UInt16* outRemotePort,
+	OS_Error        RecvFrom(UInt32* outRemoteAddr, uint16_t* outRemotePort,
 		void* ioBuffer, UInt32 inBufLen, UInt32* outRecvLen);
 
 	//A UDP socket may or may not have a demuxer associated with it. The demuxer

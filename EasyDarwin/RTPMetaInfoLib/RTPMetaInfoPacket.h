@@ -53,12 +53,12 @@ public:
 		kIllegalField = 6,
 		kNumFields = 6
 	};
-	typedef UInt16 FieldIndex;
+	typedef uint16_t FieldIndex;
 
 	//
 	// Types
 
-	typedef UInt16 FieldName;
+	typedef uint16_t FieldName;
 	typedef SInt32 FieldID;
 
 	//
@@ -87,7 +87,7 @@ public:
 		kBFrameType = 2,
 		kPFrameType = 3
 	};
-	typedef UInt16 FrameTypeField;
+	typedef uint16_t FrameTypeField;
 
 
 	//
@@ -126,7 +126,7 @@ public:
 	UInt64          GetPacketPosition() { return fPacketPosition; }
 	uint8_t*          GetMediaDataP() { return fMediaDataP; }
 	UInt32          GetMediaDataLen() { return fMediaDataLen; }
-	UInt16          GetSeqNum() { return fSeqNum; }
+	uint16_t          GetSeqNum() { return fSeqNum; }
 
 private:
 
@@ -139,7 +139,7 @@ private:
 	UInt64          fPacketPosition;
 	uint8_t*          fMediaDataP;
 	UInt32          fMediaDataLen;
-	UInt16          fSeqNum;
+	uint16_t          fSeqNum;
 
 	static const FieldName kFieldNameMap[];
 	static const UInt32 kFieldLengthValidator[];

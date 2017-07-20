@@ -488,7 +488,7 @@ void QTHintTrack::GetSamplePacketHeaderVars(char *samplePacketPtr, char *maxBuff
 }
 
 
-QTTrack::ErrorCode QTHintTrack::GetSamplePacketPtr(char ** samplePacketPtr, UInt32 sampleNumber, UInt16 packetNumber
+QTTrack::ErrorCode QTHintTrack::GetSamplePacketPtr(char ** samplePacketPtr, UInt32 sampleNumber, uint16_t packetNumber
 	, QTHintTrackRTPHeaderData  &hdrData, QTHintTrack_HintTrackControlBlock& htcb)
 {
 	// get a pointer to the packetNumber # in sampleNumber #, from the QTHintTrack_HintTrackControlBlock htcb
@@ -539,7 +539,7 @@ QTTrack::ErrorCode QTHintTrack::GetSamplePacketPtr(char ** samplePacketPtr, UInt
 		pSampleBuffer += 4;
 
 		// Loop through the sample until we find the packet that we want.       
-		for (UInt16 curPacket = 0; curPacket != packetNumber; curPacket++)
+		for (uint16_t curPacket = 0; curPacket != packetNumber; curPacket++)
 		{
 
 			this->GetSamplePacketHeaderVars(pSampleBuffer, pSampleBufferEnd, hdrData);
@@ -656,11 +656,11 @@ bool QTHintTrack::GetSamplePtr(UInt32 sampleNumber, char ** samplePtr, UInt32 * 
 // -------------------------------------
 // Packet functions
 //
-QTTrack::ErrorCode QTHintTrack::GetNumPackets(UInt32 sampleNumber, UInt16 * numPackets, QTHintTrack_HintTrackControlBlock * htcb)
+QTTrack::ErrorCode QTHintTrack::GetNumPackets(UInt32 sampleNumber, uint16_t * numPackets, QTHintTrack_HintTrackControlBlock * htcb)
 {
 	char        *buf;
 	UInt32      bufLen;
-	UInt16      entryCount;
+	uint16_t      entryCount;
 
 
 	//
@@ -677,17 +677,17 @@ QTTrack::ErrorCode QTHintTrack::GetNumPackets(UInt32 sampleNumber, UInt16 * numP
 }
 
 
-QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock * htcb, char **buffPtr, char **ppPacketBufOut, UInt32 sampleNumber, UInt16 packetNumber, UInt32 buffOutLen)
+QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock * htcb, char **buffPtr, char **ppPacketBufOut, UInt32 sampleNumber, uint16_t packetNumber, UInt32 buffOutLen)
 {
 
 	//  qtss_printf("GetSampleData sampleNumber = %"   _U32BITARG_   " packetNumber = %"   _U32BITARG_   " buffOutLen = %"   _U32BITARG_   " \n",sampleNumber, packetNumber, buffOutLen);
 		// General vars
 	int8_t      trackRefIndex = 0;
-	UInt16      readLength = 0;
+	uint16_t      readLength = 0;
 	UInt32      mediaSampleNumber = 0;
 	UInt32      readOffset = 0;
-	UInt16      bytesPerCompressionBlock = 0;
-	UInt16      samplesPerCompressionBlock = 0;  // inititialization eliminates a stupid compiler warning :(
+	uint16_t      bytesPerCompressionBlock = 0;
+	uint16_t      samplesPerCompressionBlock = 0;  // inititialization eliminates a stupid compiler warning :(
 	UInt32      sampleDescriptionIndex;
 	UInt64      dataOffset;
 	char*       pBuf = NULL;
@@ -944,7 +944,7 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 			if ((remainingLength > 0) && (sampleFirstPartLength > 0)) // this packet is split across chunks
 			{
 				//              qtss_printf("mediaSampleNumber = %" _S32BITARG_ " is compressed and split across chunks first part = %" _S32BITARG_ " remaining = %" _S32BITARG_ "\n",mediaSampleNumber, readLength, remainingLength);
-				readLength = (UInt16)sampleFirstPartLength;
+				readLength = (uint16_t)sampleFirstPartLength;
 			}
 			else
 			{   // this is still needed. For some movies the compressed split packet calculation doesn't match the simple dataOffset calc below --a problem with sampleOffsetInChunk
@@ -996,7 +996,7 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 			{
 				//              qtss_printf("mediaSampleNumber = %" _S32BITARG_ " remaining read  = %" _S32BITARG_ "\n",mediaSampleNumber, remainingLength);
 
-				readLength = (UInt16)remainingLength; // set the read to what is left           
+				readLength = (uint16_t)remainingLength; // set the read to what is left           
 				chunkNumber++; // The rest of the sample is in the next N chunks 
 				if (!track->ChunkOffset(chunkNumber, &chunkOffset)) // Get the Next chunk location
 				{
@@ -1017,7 +1017,7 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 				if (sizeOfSamplesInChunk < remainingLength) // read in the whole chunk and keep going
 				{
 					remainingLength -= sizeOfSamplesInChunk;
-					readLength = (UInt16)sizeOfSamplesInChunk;
+					readLength = (uint16_t)sizeOfSamplesInChunk;
 				}
 				else
 				{
@@ -1154,14 +1154,14 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 }
 
 
-QTTrack::ErrorCode QTHintTrack::GetPacket(UInt32 sampleNumber, UInt16 packetNumber, char * buffer, UInt32 * length
+QTTrack::ErrorCode QTHintTrack::GetPacket(UInt32 sampleNumber, uint16_t packetNumber, char * buffer, UInt32 * length
 	, double * transmitTime, bool dropBFrames, bool dropRepeatPackets, UInt32 ssrc, QTHintTrack_HintTrackControlBlock * htcb)
 {
 	// Temporary vars
-	UInt16      tempInt16;
+	uint16_t      tempInt16;
 	UInt32      tempInt32;
 
-	UInt16      curEntry;
+	uint16_t      curEntry;
 
 	// General vars
 	UInt32      mediaTime;
@@ -1172,7 +1172,7 @@ QTTrack::ErrorCode QTHintTrack::GetPacket(UInt32 sampleNumber, UInt16 packetNumb
 	char*       pSampleBuffer;
 	char        *pDataTableStart;
 
-	UInt16      entryCount;
+	uint16_t      entryCount;
 	UInt32      rtpTimestamp;
 
 	QTHintTrackRTPHeaderData    hdrData;
@@ -1329,7 +1329,7 @@ QTTrack::ErrorCode QTHintTrack::GetPacket(UInt32 sampleNumber, UInt16 packetNumb
 
 		case RTPMetaInfoPacket::kFrameTypeField:
 			{
-				UInt16 theFrameType = RTPMetaInfoPacket::kUnknownFrameType;
+				uint16_t theFrameType = RTPMetaInfoPacket::kUnknownFrameType;
 
 				if (!htcb->fIsVideo)
 					theFrameType = RTPMetaInfoPacket::kUnknownFrameType;
@@ -1401,7 +1401,7 @@ QTTrack::ErrorCode QTHintTrack::GetPacket(UInt32 sampleNumber, UInt16 packetNumb
 		else if (*pSampleBuffer == 0x01)
 		{
 			// Immediate Data Mode
-			DEEP_DEBUG_PRINT(("QTHintTrack::GetPacket - ....Immediate entry found (size=%u)\n", (UInt16)*(pSampleBuffer + 1)));
+			DEEP_DEBUG_PRINT(("QTHintTrack::GetPacket - ....Immediate entry found (size=%u)\n", (uint16_t)*(pSampleBuffer + 1)));
 			packetSize += *(pSampleBuffer + 1);
 
 			if (*length < packetSize)
@@ -1454,7 +1454,7 @@ QTTrack::ErrorCode QTHintTrack::GetPacket(UInt32 sampleNumber, UInt16 packetNumb
 
 	//
 	// Always track packet number and packet position.
-	UInt16 thePacketDataLen = pPacketOutBuf - endOfMetaInfo;
+	uint16_t thePacketDataLen = pPacketOutBuf - endOfMetaInfo;
 	htcb->fCurrentPacketNumber++;
 	htcb->fCurrentPacketPosition += thePacketDataLen;
 
@@ -1491,7 +1491,7 @@ void QTHintTrack::WriteMetaInfoField(RTPMetaInfoPacket::FieldIndex inFieldIndex,
 		RTPMetaInfoPacket::FieldName theName = htons(RTPMetaInfoPacket::GetFieldNameForIndex(inFieldIndex));
 		COPY_WORD(*ioBuffer, &theName);
 		(*ioBuffer) += 2;
-		UInt16 theLen = htons((UInt16)inFieldLen);
+		uint16_t theLen = htons((uint16_t)inFieldLen);
 		COPY_WORD(*ioBuffer, &theLen);
 		(*ioBuffer) += 2;
 	}

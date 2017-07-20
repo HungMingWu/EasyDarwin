@@ -166,7 +166,7 @@ bool QTAtom_hinf::Initialize()
 	ReadSubAtomInt32(hinfAtom_PayloadType, &fPayloadID);
 	if (fPayloadID != 0)
 	{
-		SInt8 len = 0;
+		int8_t len = 0;
 		ReadSubAtomBytes(hinfAtom_PayloadType, (char*)fPayloadStr, 5);
 		len = fPayloadStr[4];
 		if (len > 0)

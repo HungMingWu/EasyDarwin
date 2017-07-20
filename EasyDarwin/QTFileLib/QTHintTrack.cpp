@@ -682,7 +682,7 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 
 	//  qtss_printf("GetSampleData sampleNumber = %"   _U32BITARG_   " packetNumber = %"   _U32BITARG_   " buffOutLen = %"   _U32BITARG_   " \n",sampleNumber, packetNumber, buffOutLen);
 		// General vars
-	SInt8       trackRefIndex = 0;
+	int8_t      trackRefIndex = 0;
 	UInt16      readLength = 0;
 	UInt32      mediaSampleNumber = 0;
 	UInt32      readOffset = 0;
@@ -726,7 +726,7 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 	cacheHintSampleLen = buffOutLen;
 	//
 	// Get the information about this sample
-	trackRefIndex = (SInt8)*(pBuf + 1);
+	trackRefIndex = (int8_t)*(pBuf + 1);
 
 	MOVE_WORD(readLength, pBuf + 2);
 	cacheHintSampleLen = hintMaxRead = readLength = ntohs(readLength);

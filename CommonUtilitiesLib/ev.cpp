@@ -371,8 +371,8 @@ int select_waitevent(struct eventreq *req, void* /*onlyForMacOSX*/)
             ::memcpy(&sReturnedWriteSet, &sWriteSet, sizeof(fd_set));
         }
 
-        SInt64  yieldDur = 0;
-        SInt64  yieldStart;
+        int64_t  yieldDur = 0;
+        int64_t  yieldStart;
         
         //Periodically time out the select call just in case we
         //are deaf for some reason
@@ -402,11 +402,11 @@ int select_waitevent(struct eventreq *req, void* /*onlyForMacOSX*/)
         
  //       yieldDur = OS::Milliseconds() - yieldStart;
 #if EV_DEBUGGING
-        static SInt64   numZeroYields;
+        static int64_t   numZeroYields;
         
         if ( yieldDur > 1 )
         {
-            qtss_printf( "select_waitevent time in OSThread::Yield() %i, numZeroYields %i\n", (SInt32)yieldDur, (SInt32)numZeroYields );
+            qtss_printf( "select_waitevent time in OSThread::Yield() %i, numZeroYields %i\n", (int32_t)yieldDur, (int32_t)numZeroYields );
             numZeroYields = 0;
         }
         else

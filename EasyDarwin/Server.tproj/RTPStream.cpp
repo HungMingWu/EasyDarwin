@@ -725,13 +725,13 @@ void    RTPStream::AppendRTPInfo(QTSS_RTSPHeader inHeader, RTSPRequestInterface*
 //UDP Monitor reflected  write
 void RTPStream::UDPMonitorWrite(void* thePacketData, uint32_t inLen, bool isRTCP)
 {
-	if (FALSE == fUDPMonitorEnabled || 0 == fMonitorSocket || NULL == thePacketData)
+	if (false == fUDPMonitorEnabled || 0 == fMonitorSocket || NULL == thePacketData)
 		return;
 
 	if ((0 != fPlayerToMonitorAddr) && (this->fRemoteAddr != fPlayerToMonitorAddr))
 		return;
 
-	uint16_t RTCPportOffset = (TRUE == isRTCP) ? 1 : 0;
+	uint16_t RTCPportOffset = (true == isRTCP) ? 1 : 0;
 
 
 	struct sockaddr_in sin;

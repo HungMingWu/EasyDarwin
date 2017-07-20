@@ -115,34 +115,34 @@ void SequenceNumberMap::Test()
 	Assert(retval == false);
 
 	retval = theMap1.AddSequenceNumber(64582);
-	Assert(retval == TRUE);
+	Assert(retval == true);
 
 	retval = theMap1.AddSequenceNumber(64674);
-	Assert(retval == TRUE);
+	Assert(retval == true);
 
 	retval = theMap1.AddSequenceNumber(1);
-	Assert(retval == FALSE);
+	Assert(retval == false);
 
 	retval = theMap1.AddSequenceNumber(65500);
-	Assert(retval == FALSE);
+	Assert(retval == false);
 
 	retval = theMap1.AddSequenceNumber(65500);
-	Assert(retval == FALSE);
+	Assert(retval == false);
 
 	retval = theMap1.AddSequenceNumber(32768);
-	Assert(retval == FALSE);
+	Assert(retval == false);
 
 	retval = theMap1.AddSequenceNumber(1024);
-	Assert(retval == FALSE);
+	Assert(retval == false);
 
 	retval = theMap1.AddSequenceNumber(32757);
-	Assert(retval == FALSE);
+	Assert(retval == false);
 
 	retval = theMap1.AddSequenceNumber(32799);
-	Assert(retval == FALSE);
+	Assert(retval == false);
 
 	retval = theMap1.AddSequenceNumber(32768);
-	Assert(retval == FALSE);
+	Assert(retval == false);
 
 }
 #endif

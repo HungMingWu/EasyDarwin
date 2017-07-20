@@ -184,8 +184,8 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
             kSenderReportIntervalInSecs = 7,
             kNumPrebuiltChNums          = 10,
             kMaxQualityLevel            = 0,
-            kIsRTCPPacket                 = TRUE,
-            kIsRTPPacket                  = FALSE
+            kIsRTCPPacket                 = true,
+            kIsRTPPacket                  = false
         };
     
         int64_t fLastQualityChange;

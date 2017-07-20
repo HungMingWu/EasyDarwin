@@ -83,7 +83,7 @@ StrPtrLen * QueryURI::NextSegment(StrPtrLen *currentPathPtr, StrPtrLen *outNextP
 
 			StringParser URLparser(&tempPath);
 			URLparser.ConsumeLength(NULL, 1);
-			URLparser.ConsumeUntil(outNextPtr, (UInt8*)sNotQueryData);
+			URLparser.ConsumeUntil(outNextPtr, (uint8_t*)sNotQueryData);
 			result = outNextPtr;
 
 			//qtss_printf("QueryURI::NextSegment nextPathPtr=");PRINT_STR(outNextPtr);
@@ -130,7 +130,7 @@ char *QueryURI::sCommandDefs[] =
 };
 
 
-UInt8 QueryURI::sNotQueryData[] = // query stops
+uint8_t QueryURI::sNotQueryData[] = // query stops
 {
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, //0-9     
 	1, 1, 1, 1, 1, 1, 1, 1, 1, 1, //10-19    
@@ -161,7 +161,7 @@ UInt8 QueryURI::sNotQueryData[] = // query stops
 };
 
 
-UInt8 QueryURI::sWhiteQuoteOrEOL[] =
+uint8_t QueryURI::sWhiteQuoteOrEOL[] =
 {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 1, //0-9     // \t is a stop
 	1, 0, 0, 1, 0, 0, 0, 0, 0, 0, //10-19    //'\r' & '\n' are stop conditions
@@ -191,7 +191,7 @@ UInt8 QueryURI::sWhiteQuoteOrEOL[] =
 	0, 0, 0, 0, 0, 0             //250-255
 };
 
-UInt8 QueryURI::sWhitespaceOrQuoteMask[] =
+uint8_t QueryURI::sWhitespaceOrQuoteMask[] =
 {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 1, //0-9     // \t is a stop
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //10-19   
@@ -776,7 +776,7 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 				{
 					tempData.Set(NULL, 0);
 					if (queryParser.GetDataRemaining())queryParser.ConsumeWhitespace();
-					if (queryParser.GetDataRemaining())queryParser.ConsumeUntil(&tempStr, (UInt8*)sNotQueryData);
+					if (queryParser.GetDataRemaining())queryParser.ConsumeUntil(&tempStr, (uint8_t*)sNotQueryData);
 					if (tempStr.Len == 0)
 					{
 						//qtss_printf("no query name\n");
@@ -800,7 +800,7 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 					}
 					else
 					{
-						if (queryParser.GetDataRemaining())queryParser.ConsumeUntil(&tempData, (UInt8*)sNotQueryData);
+						if (queryParser.GetDataRemaining())queryParser.ConsumeUntil(&tempData, (uint8_t*)sNotQueryData);
 					}
 
 					if (tempData.Len == 0)

@@ -112,9 +112,9 @@ public:
 		kIndexParam = 1 << 7
 	};
 
-	static UInt8 sNotQueryData[];
-	static UInt8 sWhiteQuoteOrEOL[];
-	static UInt8 sWhitespaceOrQuoteMask[];
+	static uint8_t sNotQueryData[];
+	static uint8_t sWhiteQuoteOrEOL[];
+	static uint8_t sWhitespaceOrQuoteMask[];
 
 	static URIField sURIFields[];
 	static char *sCommandDefs[];

@@ -77,7 +77,7 @@
 // STATIC DATA
 //**************************************************
 #if DEBUG_ADMIN_MODULE
-static UInt32	sRequestCount = 0;
+static uint32_t	sRequestCount = 0;
 #endif
 
 static QTSS_Initialize_Params sQTSSparams;
@@ -108,12 +108,12 @@ static QTSS_PrefsObject         sServerPrefs = NULL;
 static AdminClass               *sAdminPtr = NULL;
 static QueryURI                 *sQueryPtr = NULL;
 static OSMutex*                 sAdminMutex = NULL;//admin module isn't reentrant
-static UInt32                   sVersion = 20030306;
+static uint32_t                   sVersion = 20030306;
 static char *sDesc = "Implements HTTP based Admin Protocol for accessing server attributes";
 static char decodedLine[kAuthNameAndPasswordBuffSize] = { 0 };
 static char codedLine[kAuthNameAndPasswordBuffSize] = { 0 };
 static QTSS_TimeVal             sLastRequestTime = 0;
-static UInt32                   sSessID = 0;
+static uint32_t                   sSessID = 0;
 
 static StrPtrLen            sAuthRef("AuthRef");
 #if __MacOSX__
@@ -130,8 +130,8 @@ enum
 	kMaxRequestTimeIntervalMilli = 1000,
 	kDefaultRequestTimeIntervalMilli = 50
 };
-static UInt32 sDefaultRequestTimeIntervalMilli = kDefaultRequestTimeIntervalMilli;
-static UInt32 sRequestTimeIntervalMilli = kDefaultRequestTimeIntervalMilli;
+static uint32_t sDefaultRequestTimeIntervalMilli = kDefaultRequestTimeIntervalMilli;
+static uint32_t sRequestTimeIntervalMilli = kDefaultRequestTimeIntervalMilli;
 
 static bool sAuthenticationEnabled = true;
 static bool sDefaultAuthenticationEnabled = true;
@@ -152,7 +152,7 @@ static char*            sDefaultAdministratorGroup = "admin";
 static bool           sFlushing = false;
 static QTSS_AttributeID sFlushingID = qtssIllegalAttrID;
 static char*            sFlushingName = "QTSSAdminModuleFlushingState";
-static UInt32           sFlushingLen = sizeof(sFlushing);
+static uint32_t           sFlushingLen = sizeof(sFlushing);
 
 static QTSS_AttributeID sAuthenticatedID = qtssIllegalAttrID;
 static char*            sAuthenticatedName = "QTSSAdminModuleAuthenticatedState";
@@ -217,15 +217,15 @@ void APITests_DEBUG()
 			qtss_printf(" GET VALUE PTR TEST \n");
 
 			QTSS_Object *sessionsPtr = NULL;
-			UInt32      paramLen = sizeof(sessionsPtr);
-			UInt32      numValues = 0;
+			uint32_t      paramLen = sizeof(sessionsPtr);
+			uint32_t      numValues = 0;
 			QTSS_Error  err = 0;
 
 			err = QTSS_GetNumValues(sServer, qtssSvrClientSessions, &numValues);
 			err = QTSS_GetValuePtr(sServer, qtssSvrClientSessions, 0, (void**)&sessionsPtr, &paramLen);
 			qtss_printf("Admin Module Num Sessions = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ " err = %" _S32BITARG_ " paramLen =%"   _U32BITARG_   "\n", numValues, (SInt32)*sessionsPtr, err, paramLen);
 
-			UInt32      numAttr = 0;
+			uint32_t      numAttr = 0;
 			if (sessionsPtr)
 			{
 				err = QTSS_GetNumAttributes(*sessionsPtr, &numAttr);
@@ -233,8 +233,8 @@ void APITests_DEBUG()
 
 				QTSS_Object theAttributeInfo;
 				char nameBuff[128];
-				UInt32 len = 127;
-				for (UInt32 i = 0; i < numAttr; i++)
+				uint32_t len = 127;
+				for (uint32_t i = 0; i < numAttr; i++)
 				{
 					err = QTSS_GetAttrInfoByIndex(*sessionsPtr, i, &theAttributeInfo);
 					nameBuff[0] = 0; len = 127;
@@ -250,8 +250,8 @@ void APITests_DEBUG()
 			qtss_printf(" GET VALUE TEST \n");
 
 			QTSS_Object sessions = NULL;
-			UInt32      paramLen = sizeof(sessions);
-			UInt32      numValues = 0;
+			uint32_t      paramLen = sizeof(sessions);
+			uint32_t      numValues = 0;
 			QTSS_Error  err = 0;
 
 			err = QTSS_GetNumValues(sServer, qtssSvrClientSessions, &numValues);
@@ -260,14 +260,14 @@ void APITests_DEBUG()
 
 			if (sessions)
 			{
-				UInt32      numAttr = 0;
+				uint32_t      numAttr = 0;
 				err = QTSS_GetNumAttributes(sessions, &numAttr);
 				qtss_printf("Admin Module Num attributes = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ "  err = %" _S32BITARG_ "\n", numAttr, (SInt32)sessions, err);
 
 				QTSS_Object theAttributeInfo;
 				char nameBuff[128];
-				UInt32 len = 127;
-				for (UInt32 i = 0; i < numAttr; i++)
+				uint32_t len = 127;
+				for (uint32_t i = 0; i < numAttr; i++)
 				{
 					err = QTSS_GetAttrInfoByIndex(sessions, i, &theAttributeInfo);
 					nameBuff[0] = 0; len = 127;
@@ -286,7 +286,7 @@ void APITests_DEBUG()
 
 			QTSS_Error  err = 0;
 
-			UInt32      numAttr = 1;
+			uint32_t      numAttr = 1;
 			err = QTSS_GetNumAttributes(sAdminPrefs, &numAttr);
 			qtss_printf("Admin Module Num preference attributes = %"   _U32BITARG_   " err = %" _S32BITARG_ "\n", numAttr, err);
 
@@ -294,8 +294,8 @@ void APITests_DEBUG()
 			char valueBuff[512];
 			char nameBuff[128];
 			QTSS_AttributeID theID;
-			UInt32 len = 127;
-			UInt32 i = 0;
+			uint32_t len = 127;
+			uint32_t i = 0;
 			qtss_printf("first pass over preferences\n");
 			for (i = 0; i < numAttr; i++)
 			{
@@ -453,7 +453,7 @@ QTSS_Error Initialize(QTSS_Initialize_Params* inParams)
 	return QTSS_NoErr;
 }
 
-void ReportErr(QTSS_Filter_Params* inParams, UInt32 err)
+void ReportErr(QTSS_Filter_Params* inParams, uint32_t err)
 {
 	StrPtrLen* urlPtr = sQueryPtr->GetURL();
 	StrPtrLen* evalMessagePtr = sQueryPtr->GetEvalMsg();
@@ -664,7 +664,7 @@ bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen
 
 	// Get the user profile object from the request object that was created in the authenticate callback
 	QTSS_UserProfileObject theUserProfile = NULL;
-	UInt32 len = sizeof(QTSS_UserProfileObject);
+	uint32_t len = sizeof(QTSS_UserProfileObject);
 	err = QTSS_GetValue(request, qtssRTSPReqUserProfile, 0, (void*)&theUserProfile, &len);
 	Assert(len == sizeof(QTSS_UserProfileObject));
 	if (err != QTSS_NoErr)
@@ -741,12 +741,12 @@ QTSS_Error AuthorizeAdminRequest(QTSS_RTSPRequestObject request)
 	(void)QTSS_SetValue(request, qtssRTSPReqURLRealm, 0, sAuthRealm, ::strlen(sAuthRealm));
 
 	// Authorize the user if the user belongs to the AdministratorGroup (this is an admin module pref)
-	UInt32 numGroups = 0;
+	uint32_t numGroups = 0;
 	char** groupsArray = QTSSModuleUtils::GetGroupsArray_Copy(theUserProfile, &numGroups);
 
 	if ((groupsArray != NULL) && (numGroups != 0))
 	{
-		UInt32 index = 0;
+		uint32_t index = 0;
 		for (index = 0; index < numGroups; index++)
 		{
 			if (strcmp(sAdministratorGroup, groupsArray[index]) == 0)
@@ -906,7 +906,7 @@ inline void SendResult(QTSS_StreamRef inStream)
 inline bool GetRequestAuthenticatedState(QTSS_Filter_Params* inParams)
 {
 	bool result = false;
-	UInt32 paramLen = sizeof(result);
+	uint32_t paramLen = sizeof(result);
 	QTSS_Error err = QTSS_GetValue(inParams->inRTSPRequest, sAuthenticatedID, 0, (void*)&result, &paramLen);
 	if (err != QTSS_NoErr)
 	{
@@ -920,7 +920,7 @@ inline bool GetRequestAuthenticatedState(QTSS_Filter_Params* inParams)
 inline bool GetRequestFlushState(QTSS_Filter_Params* inParams)
 {
 	bool result = false;
-	UInt32 paramLen = sizeof(result);
+	uint32_t paramLen = sizeof(result);
 	QTSS_Error err = QTSS_GetValue(inParams->inRTSPRequest, sFlushingID, 0, (void*)&result, &paramLen);
 	if (err != QTSS_NoErr)
 	{
@@ -947,7 +947,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 
 	QTSS_RTSPRequestObject theRequest = inParams->inRTSPRequest;
 
-	UInt32 paramLen = sizeof(sSessID);
+	uint32_t paramLen = sizeof(sSessID);
 	QTSS_Error err = QTSS_GetValue(inParams->inRTSPSession, qtssRTSPSesID, 0, (void*)&sSessID, &paramLen);
 	if (err != QTSS_NoErr)
 		return QTSS_NoErr;
@@ -1021,7 +1021,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 		delete sAdminPtr;
 		sAdminPtr = NULL;
 	}
-	UInt32 result = sQueryPtr->EvalQuery(NULL, NULL);
+	uint32_t result = sQueryPtr->EvalQuery(NULL, NULL);
 	if (result == 0) do
 	{
 		if (ElementNode_CountPtrs() > 0)
@@ -1038,7 +1038,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 
 		if (sQueryPtr && !sQueryPtr->QueryHasReponse())
 		{
-			UInt32 err = 404;
+			uint32_t err = 404;
 			(void)sQueryPtr->EvalQuery(&err, NULL);
 			ReportErr(inParams, err);
 			break;

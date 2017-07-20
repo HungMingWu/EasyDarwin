@@ -86,7 +86,7 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 
 QTSS_Error Filter(QTSS_Filter_Params* inParams)
 {
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 	char* theFullRequest = NULL;
 	(void)QTSS_GetValuePtr(inParams->inRTSPRequest, qtssRTSPReqFullRequest, 0, (void**)&theFullRequest, &theLen);
 
@@ -96,9 +96,9 @@ QTSS_Error Filter(QTSS_Filter_Params* inParams)
 		return QTSS_NoErr;
 
 #if MEMORY_DEBUGGING
-	UInt32* theStateVal = NULL;
+	uint32_t* theStateVal = NULL;
 	(void)QTSS_GetValuePtr(inParams->inRTSPRequest, sStateAttr, 0, (void**)&theStateVal, &theLen);
-	//if ((theStateVal == NULL) || (theLen != sizeof(UInt32)))
+	//if ((theStateVal == NULL) || (theLen != sizeof(uint32_t)))
 	//{
 	bool theFalse = false;
 	(void)QTSS_SetValue(inParams->inRTSPRequest, qtssRTSPReqRespKeepAlive, 0, &theFalse, sizeof(theFalse));
@@ -114,7 +114,7 @@ QTSS_Error Filter(QTSS_Filter_Params* inParams)
 
 	//(void)QTSS_RequestEvent(*theContext, EV_WR);
 
-//  UInt32 theValue = 4;
+//  uint32_t theValue = 4;
 //  (void)QTSS_SetValue(inParams->inRTSPRequest, sStateAttr, 0, &theValue, sizeof(theValue));
 //  return QTSS_NoErr;
 //}

@@ -76,7 +76,7 @@ StrPtrLen * QueryURI::NextSegment(StrPtrLen *currentPathPtr, StrPtrLen *outNextP
 			//qtss_printf("theURLPtr="); PRINT_STR(theURLPtr);
 			//qtss_printf("QueryURI::NextSegment currentPathPtr="); PRINT_STR(currentPathPtr);
 
-			UInt32 len = (PointerSizedInt)&(theURLPtr->Ptr[theURLPtr->Len - 1]) - ((PointerSizedInt)currentPathPtr->Ptr + (currentPathPtr->Len - 1));
+			uint32_t len = (PointerSizedInt)&(theURLPtr->Ptr[theURLPtr->Len - 1]) - ((PointerSizedInt)currentPathPtr->Ptr + (currentPathPtr->Len - 1));
 			char *startPtr = (char *)((PointerSizedInt)currentPathPtr->Ptr + currentPathPtr->Len);
 			StrPtrLen tempPath(startPtr, len);
 
@@ -315,7 +315,7 @@ void QueryURI::SetAccessFlags()
 	}
 }
 
-void QueryURI::SetParamBits(UInt32 forcebits)
+void QueryURI::SetParamBits(uint32_t forcebits)
 {
 	StrPtrLen tempStr;
 	int16_t theChar;
@@ -372,9 +372,9 @@ QueryURI::~QueryURI()
 	*/
 }
 
-UInt32 QueryURI::CheckInvalidIterator(char* evalMessageBuff)
+uint32_t QueryURI::CheckInvalidIterator(char* evalMessageBuff)
 {
-	UInt32 result = 0;
+	uint32_t result = 0;
 
 	StringParser parser(GetURL());
 	parser.ConsumeUntil(NULL, '*');
@@ -389,9 +389,9 @@ UInt32 QueryURI::CheckInvalidIterator(char* evalMessageBuff)
 
 }
 
-UInt32 QueryURI::CheckInvalidArrayIterator(char* evalMessageBuff)
+uint32_t QueryURI::CheckInvalidArrayIterator(char* evalMessageBuff)
 {
-	UInt32 result = 0;
+	uint32_t result = 0;
 
 	StringParser parser(GetURL());
 	parser.ConsumeUntil(NULL, ':');
@@ -406,9 +406,9 @@ UInt32 QueryURI::CheckInvalidArrayIterator(char* evalMessageBuff)
 
 }
 
-UInt32 QueryURI::CheckInvalidRecurseParam(char* evalMessageBuff)
+uint32_t QueryURI::CheckInvalidRecurseParam(char* evalMessageBuff)
 {
-	UInt32 result = 0;
+	uint32_t result = 0;
 
 	if (RecurseParam())
 	{
@@ -422,9 +422,9 @@ UInt32 QueryURI::CheckInvalidRecurseParam(char* evalMessageBuff)
 }
 
 
-UInt32  QueryURI::EvalQuery(UInt32 *forceResultPtr, char *forceMessagePtr)
+uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 {
-	UInt32 result = 0;
+	uint32_t result = 0;
 	const int16_t messageLen = 512;
 	char evalMessageBuff[messageLen] = { 0 };
 	StrPtrLen evalMessage;
@@ -629,7 +629,7 @@ void QueryURI::ParseQueryString(StringParser *parserPtr, StrPtrLen *urlStreamPtr
 
 		}
 	}
-	UInt32 len = (UInt32)((PointerSizedInt)stopCharPtr - (PointerSizedInt)startCharPtr);
+	uint32_t len = (uint32_t)((PointerSizedInt)stopCharPtr - (PointerSizedInt)startCharPtr);
 	if (len < QueryURI::eMaxBufferSize)
 	{
 		if (len > 0)
@@ -818,7 +818,7 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 					//qtss_printf("set data =%s\n", tempData.Ptr);
 
 					StrPtrLen   definedID;
-					UInt32      fieldID;
+					uint32_t      fieldID;
 					for (short testField = 0; testField < eNumAttributes; testField++)
 					{
 						definedID.Set(fURIFieldsPtr[testField].fFieldName, fURIFieldsPtr[testField].fFieldLen);
@@ -827,7 +827,7 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 						{   // set the field value always takes the last appearance of the name=value pair
 							if (fieldID >= eFilter1)
 							{
-								UInt32 emptyId = eFilter1 + fNumFilters;
+								uint32_t emptyId = eFilter1 + fNumFilters;
 								if (tempData.Len > 0)
 								{
 									fNumFilters++;

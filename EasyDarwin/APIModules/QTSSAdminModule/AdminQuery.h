@@ -58,7 +58,7 @@ public:
 	struct URIField
 	{
 		char                    fFieldName[eMaxAttributeSize + 1];
-		UInt32                  fFieldLen;
+		uint32_t                  fFieldLen;
 		SInt32                  fID;
 		StrPtrLen*              fData;
 	};
@@ -137,13 +137,13 @@ public:
 	StrPtrLen*  GetType() { return    fURIFieldsPtr[eType].fData; };
 	StrPtrLen*  GetAccess() { return    fURIFieldsPtr[eAccess].fData; };
 	StrPtrLen*  GetName() { return    fURIFieldsPtr[eName].fData; };
-	StrPtrLen*  GetFilter(UInt32 index) { return fURIFieldsPtr[eFilter1 + index].fData; };
+	StrPtrLen*  GetFilter(uint32_t index) { return fURIFieldsPtr[eFilter1 + index].fData; };
 
 	StrPtrLen*  GetEvalMsg() { return    &fQueryEvalMessage; };
 
-	UInt32      GetAccessFlags() { return    fAccessFlags; };
-	UInt32      GetSnapshotID() { return    fSnapshotID; };
-	UInt32      GetParamBits() { return    fParamBits; };
+	uint32_t      GetAccessFlags() { return    fAccessFlags; };
+	uint32_t      GetSnapshotID() { return    fSnapshotID; };
+	uint32_t      GetParamBits() { return    fParamBits; };
 	bool      IsAdminQuery() { return    fIsAdminQuery; };
 	bool      UseSnapShot() { return    fUseSnapShot; };
 
@@ -157,17 +157,17 @@ public:
 	bool      IndexParam() { return    (bool)((fParamBits & kIndexParam) != 0); };
 	void        SetQueryHasResponse() { fQueryHasResponse = true; };
 	bool      QueryHasReponse() { if (fQueryEvalResult > 0) return true; else return fQueryHasResponse; };
-	UInt32      GetEvaluResult() { return fQueryEvalResult; };
+	uint32_t      GetEvaluResult() { return fQueryEvalResult; };
 	StrPtrLen*  NextSegment(StrPtrLen *currentPathPtr, StrPtrLen *outNextPtr);
 	void        SetAccessFlags();
-	void        SetParamBits(UInt32 forcebits);
+	void        SetParamBits(uint32_t forcebits);
 	void        SetSnapShot();
 	SInt32      GetCommandID() { return    fTheCommand; };
 
 	char        fLastPath[1024];
 	QueryURI(StrPtrLen *inStream);
 	~QueryURI();
-	UInt32      EvalQuery(UInt32 *forceResultPtr, char *forceMessagePtr);
+	uint32_t      EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr);
 
 	char        fQueryMessageBuff[1024];
 	bool      fIsPref;
@@ -178,24 +178,24 @@ private:
 	char        fQueryBuffer[QueryURI::eMaxBufferSize];
 	StrPtrLen   fURIFieldSPL[QueryURI::eNumAttributes];
 	StrPtrLen   fAdminFullURI;
-	UInt32      fParamBits;
-	UInt32      fSnapshotID;
-	UInt32      fAccessFlags;
+	uint32_t      fParamBits;
+	uint32_t      fSnapshotID;
+	uint32_t      fAccessFlags;
 	bool      fIsAdminQuery;
 	bool      fUseSnapShot;
 	StrPtrLen   fCurrentPath;
 	StrPtrLen   fNext;
 	bool      fQueryHasResponse;
-	UInt32      fQueryEvalResult;
+	uint32_t      fQueryEvalResult;
 	StrPtrLen   fQueryEvalMessage;
 	SInt32      fTheCommand;
 	void        SetCommand();
 	void        ParseURLString(StringParser *parserPtr, StrPtrLen *urlPtr);
 	void        ParseQueryString(StringParser *parserPtr, StrPtrLen *urlPtr);
 
-	UInt32      CheckInvalidIterator(char* evalMessageBuff);
-	UInt32      CheckInvalidArrayIterator(char* evalMessageBuff);
-	UInt32      CheckInvalidRecurseParam(char* evalMessageBuff);
+	uint32_t      CheckInvalidIterator(char* evalMessageBuff);
+	uint32_t      CheckInvalidArrayIterator(char* evalMessageBuff);
+	uint32_t      CheckInvalidRecurseParam(char* evalMessageBuff);
 };
 
 

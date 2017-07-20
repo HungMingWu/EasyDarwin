@@ -57,10 +57,10 @@ class ClientSession {
 public:
 	ClientSession(void) : fRTSPSessionID(0), fBitrate(0), fPacketLossPercent(0), fBytesSent(0), fTimeConnected(0) {};
 	~ClientSession() { };
-	UInt32 fRTSPSessionID;
+	uint32_t fRTSPSessionID;
 	char fIPAddressStr[32];
 	char fURLBuffer[512];
-	UInt32 fBitrate;
+	uint32_t fBitrate;
 	float fPacketLossPercent;
 	UInt64 fBytesSent;
 	UInt64 fTimeConnected;
@@ -71,7 +71,7 @@ public:
 class ElementNode
 {
 public:
-	enum { eMaxAccessSize = 32, eMaxAttributeNameSize = 63, eMaxAPITypeSize = 63, eMaxAttrIDSize = sizeof(UInt32) };
+	enum { eMaxAccessSize = 32, eMaxAttributeNameSize = 63, eMaxAPITypeSize = 63, eMaxAttrIDSize = sizeof(uint32_t) };
 
 	enum { eData = 0, eArrayNode, eNode };
 
@@ -91,19 +91,19 @@ public:
 
 	struct ElementDataFields
 	{
-		UInt32                  fKey;
-		UInt32                  fAPI_ID;
-		UInt32                  fIndex;
+		uint32_t                  fKey;
+		uint32_t                  fAPI_ID;
+		uint32_t                  fIndex;
 
 		char                    fFieldName[eMaxAttributeNameSize + 1];
-		UInt32                  fFieldLen;
+		uint32_t                  fFieldLen;
 
 		QTSS_AttrPermission     fAccessPermissions;
 		char                    fAccessData[eMaxAccessSize + 1];
-		UInt32                  fAccessLen;
+		uint32_t                  fAccessLen;
 
-		UInt32                  fAPI_Type;
-		UInt32                  fFieldType;
+		uint32_t                  fAPI_Type;
+		uint32_t                  fFieldType;
 
 		QTSS_Object             fAPISource;
 
@@ -111,22 +111,22 @@ public:
 
 	SInt32                  fDataFieldsStop;
 
-	UInt32  CountElements();
+	uint32_t  CountElements();
 
 	SInt32  GetMyStopItem() { Assert(fSelfPtr); return fDataFieldsStop; };
-	UInt32  GetMyKey() { Assert(fSelfPtr); return fSelfPtr->fKey; };
+	uint32_t  GetMyKey() { Assert(fSelfPtr); return fSelfPtr->fKey; };
 	char*   GetMyName() { Assert(fSelfPtr); return fSelfPtr->fFieldName; };
-	UInt32  GetMyNameLen() { Assert(fSelfPtr); return fSelfPtr->fFieldLen; };
-	UInt32  GetMyAPI_ID() { Assert(fSelfPtr); return fSelfPtr->fAPI_ID; };
-	UInt32  GetMyIndex() { Assert(fSelfPtr); return fSelfPtr->fIndex; };
+	uint32_t  GetMyNameLen() { Assert(fSelfPtr); return fSelfPtr->fFieldLen; };
+	uint32_t  GetMyAPI_ID() { Assert(fSelfPtr); return fSelfPtr->fAPI_ID; };
+	uint32_t  GetMyIndex() { Assert(fSelfPtr); return fSelfPtr->fIndex; };
 
-	UInt32  GetMyAPI_Type() { Assert(fSelfPtr); return fSelfPtr->fAPI_Type; };
+	uint32_t  GetMyAPI_Type() { Assert(fSelfPtr); return fSelfPtr->fAPI_Type; };
 	char*   GetMyAPI_TypeStr() { Assert(fSelfPtr); char* theTypeString = NULL; (void)QTSS_TypeToTypeString(GetMyAPI_Type(), &theTypeString); return theTypeString; };
-	UInt32  GetMyFieldType() { Assert(fSelfPtr); return fSelfPtr->fFieldType; };
+	uint32_t  GetMyFieldType() { Assert(fSelfPtr); return fSelfPtr->fFieldType; };
 
 	char*   GetMyAccessData() { Assert(fSelfPtr); return fSelfPtr->fAccessData; };
-	UInt32  GetMyAccessLen() { Assert(fSelfPtr); return fSelfPtr->fAccessLen; };
-	UInt32  GetMyAccessPermissions() { Assert(fSelfPtr); return fSelfPtr->fAccessPermissions; };
+	uint32_t  GetMyAccessLen() { Assert(fSelfPtr); return fSelfPtr->fAccessLen; };
+	uint32_t  GetMyAccessPermissions() { Assert(fSelfPtr); return fSelfPtr->fAccessPermissions; };
 
 	void    GetMyNameSPL(StrPtrLen* str) { Assert(str); if (str != NULL) str->Set(fSelfPtr->fFieldName, fSelfPtr->fFieldLen); };
 	void    GetMyAccess(StrPtrLen* str) { Assert(str); if (str != NULL) str->Set(fSelfPtr->fAccessData, fSelfPtr->fAccessLen); };
@@ -140,17 +140,17 @@ public:
 
 
 	bool  IsStopItem(SInt32 index) { return index == GetMyStopItem(); };
-	UInt32  GetKey(SInt32 index) { return fFieldIDs[index].fKey; };
+	uint32_t  GetKey(SInt32 index) { return fFieldIDs[index].fKey; };
 	char*   GetName(SInt32 index) { return fFieldIDs[index].fFieldName; };
-	UInt32  GetNameLen(SInt32 index) { return fFieldIDs[index].fFieldLen; };
-	UInt32  GetAPI_ID(SInt32 index) { return fFieldIDs[index].fAPI_ID; };
-	UInt32  GetAttributeIndex(SInt32 index) { return fFieldIDs[index].fIndex; };
-	UInt32  GetAPI_Type(SInt32 index) { return fFieldIDs[index].fAPI_Type; };
+	uint32_t  GetNameLen(SInt32 index) { return fFieldIDs[index].fFieldLen; };
+	uint32_t  GetAPI_ID(SInt32 index) { return fFieldIDs[index].fAPI_ID; };
+	uint32_t  GetAttributeIndex(SInt32 index) { return fFieldIDs[index].fIndex; };
+	uint32_t  GetAPI_Type(SInt32 index) { return fFieldIDs[index].fAPI_Type; };
 	char*   GetAPI_TypeStr(SInt32 index) { char* theTypeStr = NULL; (void)QTSS_TypeToTypeString(GetAPI_Type(index), &theTypeStr); return theTypeStr; };
-	UInt32  GetFieldType(SInt32 index) { return fFieldIDs[index].fFieldType; };
+	uint32_t  GetFieldType(SInt32 index) { return fFieldIDs[index].fFieldType; };
 	char*   GetAccessData(SInt32 index) { return fFieldIDs[index].fAccessData; };
-	UInt32  GetAccessLen(SInt32 index) { return fFieldIDs[index].fAccessLen; };
-	UInt32  GetAccessPermissions(SInt32 index) { return fFieldIDs[index].fAccessPermissions; };
+	uint32_t  GetAccessLen(SInt32 index) { return fFieldIDs[index].fAccessLen; };
+	uint32_t  GetAccessPermissions(SInt32 index) { return fFieldIDs[index].fAccessPermissions; };
 	void    GetNameSPL(SInt32 index, StrPtrLen* str) { if (str != NULL) str->Set(fFieldIDs[index].fFieldName, fFieldIDs[index].fFieldLen); };
 	void    GetAccess(SInt32 index, StrPtrLen* str) { if (str != NULL) str->Set(fFieldIDs[index].fAccessData, fFieldIDs[index].fAccessLen); };
 	QTSS_Object GetAPISource(SInt32 index) { return fFieldIDs[index].fAPISource; };
@@ -172,7 +172,7 @@ public:
 
 	void            SetNodeName(char *namePtr);
 	char *          GetNodeName() { return fNodeNameSPL.Ptr; };
-	UInt32          GetNodeNameLen() { return fNodeNameSPL.Len; };
+	uint32_t          GetNodeNameLen() { return fNodeNameSPL.Len; };
 	StrPtrLen*      GetNodeNameSPL() { return &fNodeNameSPL; };
 
 	void            SetParentNode(ElementNode *parentPtr) { fParentNodePtr = parentPtr; };
@@ -182,7 +182,7 @@ public:
 	OSRef*  GetOSRef(SInt32 index);
 	void    SetOSRef(SInt32 index, OSRef* refPtr);
 	SInt32  ResolveSPLKeyToIndex(StrPtrLen *keyPtr);
-	virtual bool  SetUpOneDataField(UInt32 index);
+	virtual bool  SetUpOneDataField(uint32_t index);
 
 	ElementDataFields   *GetElementFieldPtr(SInt32 index);
 	char                *GetElementDataPtr(SInt32 index);
@@ -227,19 +227,19 @@ public:
 	void    RespondWithAllNodes(QTSS_StreamRef inStream, QueryURI *queryPtr, StrPtrLen *currentSegmentPtr);
 	void    RespondToQuery(QTSS_StreamRef inStream, QueryURI *queryPtr, StrPtrLen *currentPathPtr);
 
-	UInt32  CountAttributes(QTSS_Object source);
-	UInt32  CountValues(QTSS_Object source, UInt32 apiID);
+	uint32_t  CountAttributes(QTSS_Object source);
+	uint32_t  CountValues(QTSS_Object source, uint32_t apiID);
 
-	QTSS_Error      AllocateFields(UInt32 numFields);
+	QTSS_Error      AllocateFields(uint32_t numFields);
 	void            InitializeAllFields(bool allocateFields, QTSS_Object defaultAttributeInfo, QTSS_Object source, QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, bool forceAll);
 	void            InitializeSingleField(StrPtrLen *currentSegmentPtr);
-	void            SetFields(UInt32 i, QTSS_Object attrInfoObject);
-	ElementNode*    CreateArrayAttributeNode(UInt32 index, QTSS_Object source, QTSS_Object attributeInfo, UInt32 arraySize);
+	void            SetFields(uint32_t i, QTSS_Object attrInfoObject);
+	ElementNode*    CreateArrayAttributeNode(uint32_t index, QTSS_Object source, QTSS_Object attributeInfo, uint32_t arraySize);
 
-	QTSS_Error      GetAttributeSize(QTSS_Object inObject, QTSS_AttributeID inID, UInt32 inIndex, UInt32* outLenPtr);
-	char*           NewIndexElement(QTSS_Object inObject, QTSS_AttributeID inID, UInt32 inIndex);
-	UInt32          GetNumFields() { return fNumFields; };
-	void            SetNumFields(UInt32 numFields) { fNumFields = numFields; fDataFieldsStop = numFields; };
+	QTSS_Error      GetAttributeSize(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex, uint32_t* outLenPtr);
+	char*           NewIndexElement(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex);
+	uint32_t          GetNumFields() { return fNumFields; };
+	void            SetNumFields(uint32_t numFields) { fNumFields = numFields; fDataFieldsStop = numFields; };
 
 	ElementDataFields*  GetFields() { return fFieldIDs; };
 	void                SetFields(ElementDataFields *fieldsPtr) { fFieldIDs = fieldsPtr; };

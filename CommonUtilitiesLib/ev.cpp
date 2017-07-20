@@ -82,7 +82,7 @@ static int sCurrentFDPos = 0;
 static int sMaxFDPos = 0;
 static bool sInReadSet = true;
 static int sNumFDsBackFromSelect = 0;
-static UInt32 sNumFDsProcessed = 0;
+static uint32_t sNumFDsProcessed = 0;
 static OSMutex sMaxFDPosMutex;
 
 
@@ -159,7 +159,7 @@ int select_removeevent(int which)
             
         //put this fd into the fd's to close array, so that when select wakes up, it will
         //close the fd
-        UInt32 theIndex = 0;
+        uint32_t theIndex = 0;
         while ((sFDsToCloseArray[theIndex] != -1) && (theIndex < sizeof(fd_set) * 8))
             theIndex++;
         Assert(sFDsToCloseArray[theIndex] == -1);
@@ -475,7 +475,7 @@ bool selecthasdata()
         {
             //Check the fds to close array, and if there are any in it, close those descriptors
             OSMutexLocker locker(&sMaxFDPosMutex);
-            for (UInt32 theIndex = 0; ((sFDsToCloseArray[theIndex] != -1) && (theIndex < sizeof(fd_set) * 8)); theIndex++)
+            for (uint32_t theIndex = 0; ((sFDsToCloseArray[theIndex] != -1) && (theIndex < sizeof(fd_set) * 8)); theIndex++)
             {
                 (void)::close(sFDsToCloseArray[theIndex]);
                 sFDsToCloseArray[theIndex] = -1;

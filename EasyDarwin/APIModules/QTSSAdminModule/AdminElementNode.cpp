@@ -290,7 +290,7 @@ ElementNode::~ElementNode()
 
 	fElementMap = NULL;
 
-	UInt32 i = 0;
+	uint32_t i = 0;
 	for (i = 0; i < GetNumFields(); i++)
 	{
 		SetElementDataPtr(i, NULL, IsNodeElement(i));
@@ -317,7 +317,7 @@ ElementNode::~ElementNode()
 
 };
 
-QTSS_Error ElementNode::AllocateFields(UInt32 numFields)
+QTSS_Error ElementNode::AllocateFields(uint32_t numFields)
 {
 	//qtss_printf("-------- ElementNode::AllocateFields ----------\n");
 	//qtss_printf("ElementNode::AllocateFields numFields=%"   _U32BITARG_   "\n",numFields);
@@ -361,11 +361,11 @@ QTSS_Error ElementNode::AllocateFields(UInt32 numFields)
 
 
 
-void ElementNode::SetFields(UInt32 i, QTSS_Object attrInfoObject)
+void ElementNode::SetFields(uint32_t i, QTSS_Object attrInfoObject)
 {
 	//qtss_printf("------- ElementNode::SetFields -------- \n");
 
-	UInt32 ioLen = 0;
+	uint32_t ioLen = 0;
 	QTSS_Error err = QTSS_NoErr;
 	if (fFieldIDs[i].fFieldName[0] != 0)
 		return;
@@ -388,7 +388,7 @@ void ElementNode::SetFields(UInt32 i, QTSS_Object attrInfoObject)
 	Assert(err == QTSS_NoErr);
 	if (fFieldIDs[i].fAPI_Type == 0 || err != QTSS_NoErr)
 	{
-		//qtss_printf("QTSS_GetValue err = %" _S32BITARG_ " attrInfoObject=%"   _U32BITARG_   " qtssAttrDataType = %"   _U32BITARG_   " \n",err, (UInt32)  attrInfoObject, (UInt32) fFieldIDs[i].fAPI_Type);
+		//qtss_printf("QTSS_GetValue err = %" _S32BITARG_ " attrInfoObject=%"   _U32BITARG_   " qtssAttrDataType = %"   _U32BITARG_   " \n",err, (uint32_t)  attrInfoObject, (uint32_t) fFieldIDs[i].fAPI_Type);
 	}
 
 	if (fFieldIDs[i].fAPI_Type == qtssAttrDataTypeQTSS_Object)
@@ -436,7 +436,7 @@ void ElementNode::SetFields(UInt32 i, QTSS_Object attrInfoObject)
 };
 
 
-ElementNode* ElementNode::CreateArrayAttributeNode(UInt32 index, QTSS_Object source, QTSS_Object attributeInfo, UInt32 arraySize)
+ElementNode* ElementNode::CreateArrayAttributeNode(uint32_t index, QTSS_Object source, QTSS_Object attributeInfo, uint32_t arraySize)
 {
 	//qtss_printf("------- ElementNode::CreateArrayAttributeNode --------\n");
 	//qtss_printf("ElementNode::CreateArrayAttributeNode name = %s index = %"   _U32BITARG_   " arraySize =%"   _U32BITARG_   " \n",fFieldIDs[index].fFieldName, index,arraySize);
@@ -458,7 +458,7 @@ ElementNode* ElementNode::CreateArrayAttributeNode(UInt32 index, QTSS_Object sou
 	}
 	nodePtr->SetNodeInfo(this->GetNodeInfoPtr(index));
 
-	for (UInt32 i = 0; !nodePtr->IsStopItem(i); i++)
+	for (uint32_t i = 0; !nodePtr->IsStopItem(i); i++)
 	{
 		fieldPtr = nodePtr->GetElementFieldPtr(i);
 		Assert(fieldPtr != NULL);
@@ -474,14 +474,14 @@ ElementNode* ElementNode::CreateArrayAttributeNode(UInt32 index, QTSS_Object sou
 
 		if (fieldPtr->fAPI_Type != qtssAttrDataTypeQTSS_Object)
 		{
-			//qtss_printf("ElementNode::CreateArrayAttributeNode array field index = %"   _U32BITARG_   " name = %s api Source = %"   _U32BITARG_   " \n", (UInt32)  i,fieldPtr->fFieldName, (UInt32) source);
+			//qtss_printf("ElementNode::CreateArrayAttributeNode array field index = %"   _U32BITARG_   " name = %s api Source = %"   _U32BITARG_   " \n", (uint32_t)  i,fieldPtr->fFieldName, (uint32_t) source);
 			fieldPtr->fAPISource = source; // the attribute's source is the same as node source
 		}
 		else
 		{
 			fieldPtr->fFieldType = eNode;
 			// this is an array of objects so record each object as the source for a new node
-			UInt32 sourceLen = sizeof(fieldPtr->fAPISource);
+			uint32_t sourceLen = sizeof(fieldPtr->fAPISource);
 			QTSS_Error err = QTSS_GetValue(source, fieldPtr->fAPI_ID, fieldPtr->fIndex, &fieldPtr->fAPISource, &sourceLen);
 			Warn(err == QTSS_NoErr);
 			if (err != QTSS_NoErr)
@@ -496,7 +496,7 @@ ElementNode* ElementNode::CreateArrayAttributeNode(UInt32 index, QTSS_Object sou
 				GetFilteredAttributeName(fieldPtr, id);
 			}
 
-			//qtss_printf("ElementNode::CreateArrayAttributeNode array field index = %"   _U32BITARG_   " name = %s api Source = %"   _U32BITARG_   " \n", i,fieldPtr->fFieldName, (UInt32) fieldPtr->fAPISource);
+			//qtss_printf("ElementNode::CreateArrayAttributeNode array field index = %"   _U32BITARG_   " name = %s api Source = %"   _U32BITARG_   " \n", i,fieldPtr->fFieldName, (uint32_t) fieldPtr->fAPISource);
 		}
 
 		nodePtr->fElementMap->Register(nodePtr->GetOSRef(i));
@@ -519,16 +519,16 @@ void ElementNode::InitializeAllFields(bool allocateFields, QTSS_Object defaultAt
 
 	if (allocateFields)
 	{
-		UInt32 numFields = this->CountAttributes(source);
+		uint32_t numFields = this->CountAttributes(source);
 		err = AllocateFields(numFields);
 		//qtss_printf("ElementNode::InitializeAllFields AllocateFields numFields =  %"   _U32BITARG_   " error = %" _S32BITARG_ " \n",numFields, err);
 	}
 
 	if (err == QTSS_NoErr)
 	{
-		UInt32 numValues = 0;
+		uint32_t numValues = 0;
 
-		for (UInt32 i = 0; !IsStopItem(i); i++)
+		for (uint32_t i = 0; !IsStopItem(i); i++)
 		{
 			if (defaultAttributeInfo == NULL)
 			{
@@ -566,14 +566,14 @@ void ElementNode::InitializeAllFields(bool allocateFields, QTSS_Object defaultAt
 				{   //qtss_printf("ElementNode::InitializeAllFields(NULL == CreateArrayAttributeNode  nodePtr\n");
 				}
 				if (NULL == GetElementDataPtr(i))
-				{   //qtss_printf("ElementNode::InitializeAllFields(NULL == GetElementDataPtr (i=%"   _U32BITARG_   ") nodePtr=%"   _U32BITARG_   " \n",i, (UInt32) nodePtr);
+				{   //qtss_printf("ElementNode::InitializeAllFields(NULL == GetElementDataPtr (i=%"   _U32BITARG_   ") nodePtr=%"   _U32BITARG_   " \n",i, (uint32_t) nodePtr);
 				}
 				*/
 
 			}
 			else
 			{
-				//qtss_printf("ElementNode::InitializeAllFields field index = %"   _U32BITARG_   " name = %s api Source = %"   _U32BITARG_   " \n", i,fFieldIDs[i].fFieldName, (UInt32) source);
+				//qtss_printf("ElementNode::InitializeAllFields field index = %"   _U32BITARG_   " name = %s api Source = %"   _U32BITARG_   " \n", i,fFieldIDs[i].fFieldName, (uint32_t) source);
 			}
 
 			err = fElementMap->Register(GetOSRef(i));
@@ -749,12 +749,12 @@ void ElementNode::SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentP
 			if (!nodePtr->fInitialized)
 			{
 				//qtss_printf("ElementNode::SetUpSingleNode Node !fInitialized -- Initialize %s\n",GetName(index));
-				//qtss_printf("ElementNode::SetUpSingleNode GetValue source = %"   _U32BITARG_   " name = %s id = %"   _U32BITARG_   " \n",(UInt32)  GetSource(),(UInt32)  GetName(index),(UInt32) GetAPI_ID(index));
+				//qtss_printf("ElementNode::SetUpSingleNode GetValue source = %"   _U32BITARG_   " name = %s id = %"   _U32BITARG_   " \n",(uint32_t)  GetSource(),(uint32_t)  GetName(index),(uint32_t) GetAPI_ID(index));
 
 				ElementDataFields* fieldPtr = GetElementFieldPtr(index);
 				if (fieldPtr != NULL && fieldPtr->fAPI_Type == qtssAttrDataTypeQTSS_Object)
 				{
-					UInt32 sourceLen = sizeof(fieldPtr->fAPISource);
+					uint32_t sourceLen = sizeof(fieldPtr->fAPISource);
 					(void)QTSS_GetValue(GetSource(), fieldPtr->fAPI_ID, fieldPtr->fIndex, &fieldPtr->fAPISource, &sourceLen);
 				}
 
@@ -779,7 +779,7 @@ void ElementNode::SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentP
 	return;
 }
 
-bool ElementNode::SetUpOneDataField(UInt32 index)
+bool ElementNode::SetUpOneDataField(uint32_t index)
 {
 	//qtss_printf("----ElementNode::SetUpOneDataField----\n");       
 	//qtss_printf(" ElementNode::SetUpOneDataField parent = %s field name=%s\n",GetNodeName(), GetName(index));  
@@ -800,8 +800,8 @@ bool ElementNode::SetUpOneDataField(UInt32 index)
 	}
 	else
 	{
-		//qtss_printf("ElementNode::SetUpOneDataField %s Source=%"   _U32BITARG_   " Field index=%"   _U32BITARG_   " API_ID=%"   _U32BITARG_   " value index=%"   _U32BITARG_   "\n",GetName(index),(UInt32) GetSource(),(UInt32)  index,(UInt32) inID,(UInt32) GetAttributeIndex(index));  
-		//qtss_printf("ElementNode::SetUpOneDataField %s IsNodeElement index = %"   _U32BITARG_   "\n",GetName(index),(UInt32)  index);   
+		//qtss_printf("ElementNode::SetUpOneDataField %s Source=%"   _U32BITARG_   " Field index=%"   _U32BITARG_   " API_ID=%"   _U32BITARG_   " value index=%"   _U32BITARG_   "\n",GetName(index),(uint32_t) GetSource(),(uint32_t)  index,(uint32_t) inID,(uint32_t) GetAttributeIndex(index));  
+		//qtss_printf("ElementNode::SetUpOneDataField %s IsNodeElement index = %"   _U32BITARG_   "\n",GetName(index),(uint32_t)  index);   
 		//DebugShowFieldDataType(index);
 	}
 
@@ -834,7 +834,7 @@ void ElementNode::SetUpSingleElement(QueryURI *queryPtr, StrPtrLen *currentSegme
 		) // filter unnecessary elements        
 	{
 
-		bool isNode = SetUpOneDataField((UInt32)index);
+		bool isNode = SetUpOneDataField((uint32_t)index);
 		if (isNode)
 		{
 			//qtss_printf("ElementNode::SetUpSingleElement isNode=true calling SetUpSingleNode \n");
@@ -873,12 +873,12 @@ void ElementNode::SetUpAllNodes(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr
 	}
 }
 
-QTSS_Error ElementNode::GetAttributeSize(QTSS_Object inObject, QTSS_AttributeID inID, UInt32 inIndex, UInt32* outLenPtr)
+QTSS_Error ElementNode::GetAttributeSize(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex, uint32_t* outLenPtr)
 {
 	return QTSS_GetValue(inObject, inID, inIndex, NULL, outLenPtr);
 }
 
-char *ElementNode::NewIndexElement(QTSS_Object inObject, QTSS_AttributeID inID, UInt32 inIndex)
+char *ElementNode::NewIndexElement(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex)
 {
 	char *resultPtr = NULL;
 
@@ -914,12 +914,12 @@ inline  SInt32 ElementNode::ResolveSPLKeyToIndex(StrPtrLen *keyPtr)
 }
 
 
-UInt32 ElementNode::CountAttributes(QTSS_Object source)
+uint32_t ElementNode::CountAttributes(QTSS_Object source)
 {
 	//qtss_printf("------ElementNode::CountAttributes-------\n");
-	//qtss_printf("ElementNode::CountAttributes SOURCE = %"   _U32BITARG_   " \n", (UInt32) source);
+	//qtss_printf("ElementNode::CountAttributes SOURCE = %"   _U32BITARG_   " \n", (uint32_t) source);
 
-	UInt32 numFields = 0;
+	uint32_t numFields = 0;
 
 	(void)QTSS_GetNumAttributes(source, &numFields);
 
@@ -928,10 +928,10 @@ UInt32 ElementNode::CountAttributes(QTSS_Object source)
 	return numFields;
 }
 
-UInt32 ElementNode::CountValues(QTSS_Object source, UInt32 apiID)
+uint32_t ElementNode::CountValues(QTSS_Object source, uint32_t apiID)
 {
 	//qtss_printf("------ElementNode::CountValues-------\n");
-	UInt32 numFields = 0;
+	uint32_t numFields = 0;
 
 	(void)QTSS_GetNumValues(source, apiID, &numFields);
 
@@ -992,7 +992,7 @@ void ElementNode::GetFullPath(StrPtrLen *resultPtr)
 		fPathSPL.Len = parentPath.Len;
 	}
 
-	UInt32 nodeNameLen = GetNodeNameLen();
+	uint32_t nodeNameLen = GetNodeNameLen();
 	if (nodeNameLen > 0)
 	{
 		fPathSPL.Len += nodeNameLen + 1;
@@ -1049,7 +1049,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 		StrPtrLen *accessParamsPtr=queryPtr->GetAccess();
 		if (accessParamsPtr == NULL)
 		{
-				UInt32 result = 400;
+				uint32_t result = 400;
 				qtss_sprintf(messageBuffer,  "Attribute Access is required");
 				(void) queryPtr->EvalQuery(&result, messageBuffer);
 				return;
@@ -1058,7 +1058,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 		accessFlags = queryPtr->GetAccessFlags();
 		if (0 == (accessFlags & qtssAttrModeWrite))
 		{
-				UInt32 result = 400;
+				uint32_t result = 400;
 				qtss_sprintf(messageBuffer,  "Attribute must have write access");
 				(void) queryPtr->EvalQuery(&result, messageBuffer);
 				return;
@@ -1071,7 +1071,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 	OSCharArrayDeleter value(NewCharArrayCopy(valuePtr));
 	if (!valuePtr || !valuePtr->Ptr)
 	{
-		UInt32 result = 400;
+		uint32_t result = 400;
 		qtss_sprintf(messageBuffer, "Attribute value is required");
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		return;
@@ -1082,7 +1082,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 	OSCharArrayDeleter dataType(NewCharArrayCopy(typePtr));
 	if (!typePtr || !typePtr->Ptr)
 	{
-		UInt32 result = 400;
+		uint32_t result = 400;
 		qtss_sprintf(messageBuffer, "Attribute type is required");
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		return;
@@ -1098,11 +1098,11 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 
 	//qtss_printf("ElementNode::RespondWithSelfAdd theValue= %s theType=%s typeID=%"   _U32BITARG_   " \n",value.GetObject(), typePtr->Ptr, attrDataType);
 	char valueBuff[2048] = "";
-	UInt32 len = 2048;
+	uint32_t len = 2048;
 	err = QTSS_StringToValue(value.GetObject(), attrDataType, valueBuff, &len);
 	if (err)
 	{
-		UInt32 result = 400;
+		uint32_t result = 400;
 		qtss_sprintf(messageBuffer, "QTSS_Error=%" _S32BITARG_ " from ElementNode::RespondWithSelfAdd QTSS_ConvertStringToType", err);
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		return;
@@ -1110,7 +1110,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 
 	if (GetMyFieldType() != eNode)
 	{
-		UInt32 result = 500;
+		uint32_t result = 500;
 		qtss_sprintf(messageBuffer, "Internal error");
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		return;
@@ -1120,7 +1120,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 	OSCharArrayDeleter nameDeleter(NewCharArrayCopy(namePtr));
 	if (!namePtr || !namePtr->Ptr || namePtr->Len == 0)
 	{
-		UInt32 result = 400;
+		uint32_t result = 400;
 		qtss_sprintf(messageBuffer, "Missing name for attribute");
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		return;
@@ -1130,7 +1130,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 	//qtss_printf("QTSS_AddInstanceAttribute(source=%"   _U32BITARG_   ", name=%s, NULL, %d, %"   _U32BITARG_   ")\n",GetSource(),nameDeleter.GetObject(),attrDataType,accessFlags);
 	if (err)
 	{
-		UInt32 result = 400;
+		uint32_t result = 400;
 		if (err == QTSS_AttrNameExists)
 		{
 			qtss_sprintf(messageBuffer, "The name %s already exists QTSS_Error=%" _S32BITARG_ " from QTSS_AddInstanceAttribute", nameDeleter.GetObject(), err);
@@ -1146,17 +1146,17 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 	err = QTSS_GetAttrInfoByName(GetSource(), nameDeleter.GetObject(), &attrInfoObject);
 	if (err)
 	{
-		UInt32 result = 400;
+		uint32_t result = 400;
 		qtss_sprintf(messageBuffer, "QTSS_Error=%" _S32BITARG_ " from QTSS_GetAttrInfoByName", err);
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		return;
 	}
 	QTSS_AttributeID attributeID = 0;
-	UInt32 attributeLen = sizeof(attributeID);
+	uint32_t attributeLen = sizeof(attributeID);
 	err = QTSS_GetValue(attrInfoObject, qtssAttrID, 0, &attributeID, &attributeLen);
 	if (err)
 	{
-		UInt32 result = 400;
+		uint32_t result = 400;
 		qtss_sprintf(messageBuffer, "QTSS_Error=%" _S32BITARG_ " from QTSS_GetValue", err);
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		return;
@@ -1165,7 +1165,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 	err = QTSS_SetValue(GetSource(), attributeID, 0, valueBuff, len);
 	if (err)
 	{
-		UInt32 result = 400;
+		uint32_t result = 400;
 		qtss_sprintf(messageBuffer, "QTSS_Error=%" _S32BITARG_ " from QTSS_SetValue", err);
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		return;
@@ -1234,7 +1234,7 @@ void ElementNode::RespondWithSelf(QTSS_StreamRef inStream, QueryURI *queryPtr)
 
 	StrPtrLen bufferSPL;
 
-	UInt32 parameters = queryPtr->GetParamBits();
+	uint32_t parameters = queryPtr->GetParamBits();
 	parameters &= ~QueryURI::kRecurseParam; // clear recurse flag
 	parameters &= ~QueryURI::kDebugParam; // clear verbose flag
 	parameters &= ~QueryURI::kIndexParam; // clear index flag
@@ -1334,7 +1334,7 @@ void    ElementNode::RespondToAdd(QTSS_StreamRef inStream, SInt32 index, QueryUR
 	//qtss_printf("ElementNode::RespondToAdd NODE = %s index = %" _S32BITARG_ " \n",GetNodeName(), (SInt32) index);
 	if (GetNumFields() == 0)
 	{
-		UInt32 result = 405;
+		uint32_t result = 405;
 		qtss_sprintf(messageBuffer, "Attribute does not allow adding. Action not allowed");
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		//qtss_printf("ElementNode::RespondToAdd error = %s \n",messageBuffer);
@@ -1378,7 +1378,7 @@ void    ElementNode::RespondToAdd(QTSS_StreamRef inStream, SInt32 index, QueryUR
 	queryPtr->SetQueryHasResponse();
 
 
-	UInt32 accessFlags = 0;
+	uint32_t accessFlags = 0;
 	StrPtrLen *accessParamsPtr = queryPtr->GetAccess();
 	if (accessParamsPtr != NULL)
 		accessFlags = queryPtr->GetAccessFlags();
@@ -1391,7 +1391,7 @@ void    ElementNode::RespondToAdd(QTSS_StreamRef inStream, SInt32 index, QueryUR
 	OSCharArrayDeleter value(NewCharArrayCopy(valuePtr));
 	if (!valuePtr || !valuePtr->Ptr)
 	{
-		UInt32 result = 400;
+		uint32_t result = 400;
 		qtss_sprintf(messageBuffer, "No value found");
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		return;
@@ -1399,11 +1399,11 @@ void    ElementNode::RespondToAdd(QTSS_StreamRef inStream, SInt32 index, QueryUR
 
 	//qtss_printf("ElementNode::RespondToAdd theValue= %s theType=%s typeID=%"   _U32BITARG_   " \n",value.GetObject(), GetAPI_TypeStr(index), GetAPI_Type(index));
 	char valueBuff[2048] = "";
-	UInt32 len = 2048;
+	uint32_t len = 2048;
 	err = QTSS_StringToValue(value.GetObject(), GetAPI_Type(index), valueBuff, &len);
 	if (err)
 	{
-		UInt32 result = 400;
+		uint32_t result = 400;
 		qtss_sprintf(messageBuffer, "QTSS_Error=%" _S32BITARG_ " from QTSS_ConvertStringToType", err);
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		return;
@@ -1419,7 +1419,7 @@ void    ElementNode::RespondToAdd(QTSS_StreamRef inStream, SInt32 index, QueryUR
 			StrPtrLen attributeString(GetAPI_TypeStr(index));
 			if (!attributeString.Equal(theQueryType))
 			{
-				UInt32 result = 400;
+				uint32_t result = 400;
 				qtss_sprintf(messageBuffer, "Type %s does not match attribute type %s", typeDeleter.GetObject(), attributeString.Ptr);
 				(void)queryPtr->EvalQuery(&result, messageBuffer);
 				return;
@@ -1428,23 +1428,23 @@ void    ElementNode::RespondToAdd(QTSS_StreamRef inStream, SInt32 index, QueryUR
 
 		QTSS_Object source = GetSource();
 
-		UInt32 tempBuff;
-		UInt32 attributeLen = sizeof(tempBuff);
+		uint32_t tempBuff;
+		uint32_t attributeLen = sizeof(tempBuff);
 		(void)QTSS_GetValue(source, GetAPI_ID(index), 0, &tempBuff, &attributeLen);
 		if (attributeLen != len)
 		{
-			UInt32 result = 400;
+			uint32_t result = 400;
 			qtss_sprintf(messageBuffer, "Data length %"   _U32BITARG_   " does not match attribute len %"   _U32BITARG_   "", len, attributeLen);
 			(void)queryPtr->EvalQuery(&result, messageBuffer);
 			return;
 		}
 
 
-		UInt32 numValues = 0;
+		uint32_t numValues = 0;
 		err = QTSS_GetNumValues(source, GetAPI_ID(index), &numValues);
 		if (err)
 		{
-			UInt32 result = 400;
+			uint32_t result = 400;
 			qtss_sprintf(messageBuffer, "QTSS_Error=%" _S32BITARG_ " from QTSS_GetNumValues", err);
 			(void)queryPtr->EvalQuery(&result, messageBuffer);
 			return;
@@ -1454,7 +1454,7 @@ void    ElementNode::RespondToAdd(QTSS_StreamRef inStream, SInt32 index, QueryUR
 		err = QTSS_SetValue(source, GetAPI_ID(index), numValues, valueBuff, len);
 		if (err)
 		{
-			UInt32 result = 400;
+			uint32_t result = 400;
 			qtss_sprintf(messageBuffer, "QTSS_Error=%" _S32BITARG_ " from QTSS_SetValue", err);
 			(void)queryPtr->EvalQuery(&result, messageBuffer);
 			return;
@@ -1506,7 +1506,7 @@ void    ElementNode::RespondToSet(QTSS_StreamRef inStream, SInt32 index, QueryUR
 		StrPtrLen attributeString(GetAPI_TypeStr(index));
 		if (!attributeString.Equal(theQueryType))
 		{
-			UInt32 result = 400;
+			uint32_t result = 400;
 			qtss_sprintf(messageBuffer, "Type %s does not match attribute type %s", typeDeleter.GetObject(), attributeString.Ptr);
 			(void)queryPtr->EvalQuery(&result, messageBuffer);
 			return;
@@ -1515,7 +1515,7 @@ void    ElementNode::RespondToSet(QTSS_StreamRef inStream, SInt32 index, QueryUR
 
 	if (0 == (GetAccessPermissions(index) & qtssAttrModeWrite))
 	{
-		UInt32 result = 400;
+		uint32_t result = 400;
 		qtss_sprintf(messageBuffer, "Attribute is read only. Action not allowed");
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		return;
@@ -1523,7 +1523,7 @@ void    ElementNode::RespondToSet(QTSS_StreamRef inStream, SInt32 index, QueryUR
 
 	if (GetFieldType(index) == eNode)
 	{
-		UInt32 result = 400;
+		uint32_t result = 400;
 		qtss_sprintf(messageBuffer, "Set of type %s not allowed", typeDeleter.GetObject());
 		//qtss_printf("ElementNode::RespondToSet (GetFieldType(index) == eNode) %s\n",messageBuffer);
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
@@ -1536,7 +1536,7 @@ void    ElementNode::RespondToSet(QTSS_StreamRef inStream, SInt32 index, QueryUR
 		if (!valuePtr || !valuePtr->Ptr) break;
 
 		char valueBuff[2048] = "";
-		UInt32 len = 2048;
+		uint32_t len = 2048;
 		OSCharArrayDeleter value(NewCharArrayCopy(valuePtr));
 
 		//qtss_printf("ElementNode::RespondToSet valuePtr->Ptr= %s\n",value.GetObject());
@@ -1558,7 +1558,7 @@ void    ElementNode::RespondToSet(QTSS_StreamRef inStream, SInt32 index, QueryUR
 
 	if (err != QTSS_NoErr)
 	{
-		UInt32 result = 400;
+		uint32_t result = 400;
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		//qtss_printf("ElementNode::RespondToSet %s len = %"   _U32BITARG_   " ",messageBuffer, result);
 		return;
@@ -1596,7 +1596,7 @@ void    ElementNode::RespondToDel(QTSS_StreamRef inStream, SInt32 index, QueryUR
 		|| (0 == (GetAccessPermissions(index) & qtssAttrModeDelete) && GetMyFieldType() != eArrayNode)
 		)
 	{
-		UInt32 result = 405;
+		uint32_t result = 405;
 		qtss_sprintf(messageBuffer, "Attribute does not allow deleting. Action not allowed");
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		//qtss_printf("ElementNode::RespondToDel error = %s \n",messageBuffer);
@@ -1617,7 +1617,7 @@ void    ElementNode::RespondToDel(QTSS_StreamRef inStream, SInt32 index, QueryUR
 	//
 	//if (GetMyFieldType() != eArrayNode && 0 == (GetAccessPermissions(index) & qtssAttrModeRemoveable)) 
 	//{
-	//  UInt32 result = 405;
+	//  uint32_t result = 405;
 	//  qtss_sprintf(messageBuffer,  "Attribute is not removable. Action not allowed");
 	//  (void) queryPtr->EvalQuery(&result, messageBuffer);
 	//  return;
@@ -1625,7 +1625,7 @@ void    ElementNode::RespondToDel(QTSS_StreamRef inStream, SInt32 index, QueryUR
 
 	if (GetMyFieldType() == eArrayNode && !delAttribute)
 	{
-		UInt32 result = 500;
+		uint32_t result = 500;
 		err = QTSS_RemoveValue(GetSource(), GetAPI_ID(index), GetAttributeIndex(index));
 		qtss_sprintf(messageBuffer, "QTSS_Error=%" _S32BITARG_ " from QTSS_RemoveValue", err);
 		//qtss_printf("ElementNode::RespondToDel QTSS_RemoveValue object=%"   _U32BITARG_   " attrID=%"   _U32BITARG_   " index=%"   _U32BITARG_   " %s\n",GetSource(),GetAPI_ID(index),GetAttributeIndex(index),messageBuffer);
@@ -1647,7 +1647,7 @@ void    ElementNode::RespondToDel(QTSS_StreamRef inStream, SInt32 index, QueryUR
 
 	if (err != QTSS_NoErr)
 	{
-		UInt32 result = 400;
+		uint32_t result = 400;
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		//qtss_printf("ElementNode::RespondToDel %s len = %"   _U32BITARG_   " ",messageBuffer, result);
 		return;
@@ -1702,7 +1702,7 @@ void ElementNode::RespondToGet(QTSS_StreamRef inStream, SInt32 index, QueryURI *
 
 	StrPtrLen bufferSPL;
 
-	UInt32 parameters = queryPtr->GetParamBits();
+	uint32_t parameters = queryPtr->GetParamBits();
 	parameters &= ~QueryURI::kRecurseParam; // clear verbose flag
 	parameters &= ~QueryURI::kDebugParam; // clear debug flag
 	parameters &= ~QueryURI::kIndexParam; // clear index flag
@@ -1720,7 +1720,7 @@ void ElementNode::RespondToGet(QTSS_StreamRef inStream, SInt32 index, QueryURI *
 
 
 	(void)QTSS_Write(inStream, GetName(index), GetNameLen(index), NULL, 0);
-	//qtss_printf("ElementNode::RespondToGet %s:len = %"   _U32BITARG_   "",GetName(index),(UInt32) GetNameLen(index));
+	//qtss_printf("ElementNode::RespondToGet %s:len = %"   _U32BITARG_   "",GetName(index),(uint32_t) GetNameLen(index));
 
 	if (IsNodeElement(index))
 	{
@@ -1978,7 +1978,7 @@ void ElementNode::RespondWithAllElements(QTSS_StreamRef inStream, QueryURI *quer
 	}
 	else
 	{
-		UInt32 index = 0;
+		uint32_t index = 0;
 		for (index = 0; !IsStopItem(index); index++)
 		{
 			//qtss_printf("RespondWithAllElements = %d \n",index);
@@ -1993,7 +1993,7 @@ void ElementNode::RespondWithAllElements(QTSS_StreamRef inStream, QueryURI *quer
 		}
 	}
 
-	UInt32 index = 0;
+	uint32_t index = 0;
 	for (index = 0; !IsStopItem(index); index++)
 	{
 
@@ -2216,7 +2216,7 @@ void ElementNode::GetFilteredAttributeName(ElementDataFields* fieldPtr, QTSS_Att
 	OSCharArrayDeleter nameDeleter(theName);
 	if (theName != NULL)
 	{
-		UInt32 len = strlen(theName);
+		uint32_t len = strlen(theName);
 		if (len < eMaxAttributeNameSize)
 		{
 			memcpy(fieldPtr->fFieldName, theName, len);
@@ -2292,7 +2292,7 @@ void AdminClass::Initialize(QTSS_Initialize_Params *initParams, QueryURI *queryP
 	SetNodeName(GetMyName());
 	SetSource(NULL);
 	StrPtrLen *currentPathPtr = queryPtr->GetRootID();
-	UInt32 numFields = 1;
+	uint32_t numFields = 1;
 	SetNumFields(numFields);
 	fFieldIDs = sAdminFieldIDs;
 	fDataFieldsType = eStatic;

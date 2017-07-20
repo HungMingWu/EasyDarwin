@@ -1507,7 +1507,7 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 		// Increment our RTCP Packet and byte counters for the session.
 
 		fSession->IncrTotalRTCPPacketsRecv();
-		fSession->IncrTotalRTCPBytesRecv((SInt16)currentPtr.Len);
+		fSession->IncrTotalRTCPBytesRecv((int16_t)currentPtr.Len);
 
 		switch (rtcpPacket.GetPacketType())
 		{

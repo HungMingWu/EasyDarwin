@@ -70,7 +70,7 @@ public:
 	inline uint8_t GetPacketType();
 	inline uint16_t GetPacketLength();    //in 32-bit words
 	inline UInt32 GetPacketSSRC();
-	inline SInt16 GetHeader();
+	inline int16_t GetHeader();
 	uint8_t* GetPacketBuffer() { return fReceiverPacketBuffer; }
 
 	//bool IsValidPacket();
@@ -250,7 +250,7 @@ inline UInt32 RTCPPacket::GetPacketSSRC()
 	return field;
 }
 
-inline SInt16 RTCPPacket::GetHeader() { return (SInt16)ntohs(*(SInt16*)&fReceiverPacketBuffer[0]); }
+inline int16_t RTCPPacket::GetHeader() { return (int16_t)ntohs(*(int16_t*)&fReceiverPacketBuffer[0]); }
 
 /**************  RTCPReceiverPacket  inlines **************/
 inline int RTCPReceiverPacket::RecordOffset(int inReportNum)

@@ -403,8 +403,8 @@ public:
 
 	// If the incoming data is RTSP interleaved, packets for this stream are identified
 	// by channel numbers
-	void	SetRTPChannelNum(SInt16 inChannel) { fRTPChannel = inChannel; }
-	void	SetRTCPChannelNum(SInt16 inChannel) { fRTCPChannel = inChannel; }
+	void	SetRTPChannelNum(int16_t inChannel) { fRTPChannel = inChannel; }
+	void	SetRTCPChannelNum(int16_t inChannel) { fRTCPChannel = inChannel; }
 	void	PushPacket(char *packet, UInt32 packetLen, bool isRTCP);
 
 	//
@@ -413,8 +413,8 @@ public:
 	SourceInfo::StreamInfo* GetStreamInfo() { return &fStreamInfo; }
 	OSMutex*                GetMutex() { return &fBucketMutex; }
 	void*                   GetStreamCookie() { return this; }
-	SInt16                  GetRTPChannel() { return fRTPChannel; }
-	SInt16                  GetRTCPChannel() { return fRTCPChannel; }
+	int16_t                  GetRTPChannel() { return fRTPChannel; }
+	int16_t                  GetRTCPChannel() { return fRTCPChannel; }
 	UDPSocketPair*          GetSocketPair() { return fSockets; }
 	ReflectorSender*        GetRTPSender() { return &fRTPSender; }
 	ReflectorSender*        GetRTCPSender() { return &fRTCPSender; }
@@ -505,8 +505,8 @@ private:
 	unsigned int        fBytesSentInThisInterval;// unsigned int because we need to atomic_add 
 
 	// If incoming data is RTSP interleaved
-	SInt16              fRTPChannel; //These will be -1 if not set to anything
-	SInt16              fRTCPChannel;
+	int16_t              fRTPChannel; //These will be -1 if not set to anything
+	int16_t              fRTCPChannel;
 
 	bool              fHasFirstRTCPPacket;
 	bool              fHasFirstRTPPacket;

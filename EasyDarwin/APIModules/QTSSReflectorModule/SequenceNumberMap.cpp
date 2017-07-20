@@ -61,7 +61,7 @@ bool SequenceNumberMap::AddSequenceNumber(uint16_t inSeqNumber)
 	// First check to see if this sequence number is so far below the highest sequence number
 	// we can't even put it in the sliding window.
 
-	SInt16 theWindowOffset = inSeqNumber - fHighestSeqNumber;
+	int16_t theWindowOffset = inSeqNumber - fHighestSeqNumber;
 
 	if (theWindowOffset < fNegativeWindowSize)
 		return false;//We don't know, but for safety, assume we haven't seen it.

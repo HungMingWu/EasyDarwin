@@ -353,7 +353,7 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, UInt32 inLen, 
 			// if we ever turn TCPCoalesce back on, this should be optimized
 			// for processors w/o alignment restrictions as above.
 
-			SInt16  pcketLen = htons((uint16_t)inLen);
+			int16_t  pcketLen = htons((uint16_t)inLen);
 			::memcpy(&fTCPCoalesceBuffer[fNumInCoalesceBuffer], &pcketLen, 2);
 			fNumInCoalesceBuffer += 2;
 

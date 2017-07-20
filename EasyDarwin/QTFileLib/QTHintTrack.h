@@ -194,7 +194,7 @@ public:
 
 	// only reliable after all of the packets have been played
 	// any hint packet may reference another media track and we don't know until all have been played.
-	inline SInt16 GetHintTrackType() { return fHintType; }
+	inline int16_t GetHintTrackType() { return fHintType; }
 
 protected:
 
@@ -228,7 +228,7 @@ protected:
 	UInt32              fTimestampRandomOffset;
 	uint16_t              fSequenceNumberRandomOffset;
 	bool              fHintTrackInitialized;
-	SInt16              fHintType;
+	int16_t              fHintType;
 	double  			fFirstTransmitTime;
 	bool              fAllowInvalidHintRefs;
 	//

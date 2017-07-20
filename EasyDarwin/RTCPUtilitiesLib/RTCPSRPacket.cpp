@@ -63,8 +63,8 @@ RTCPSRPacket::RTCPSRPacket()
 		UInt32          ssrc;       // ssrc of rtcp originator
 		OSType          name;
 		UInt32          senderSSRC;
-		SInt16          reserved;
-		SInt16          length;     // bytes of data (atoms) / 4
+		int16_t          reserved;
+		int16_t          length;     // bytes of data (atoms) / 4
 		// qtsi_rtcp_atom structures follow
 	};
 	*/

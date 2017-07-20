@@ -201,7 +201,7 @@ void RTPSessionOutput::InitializeStreams()
 	QTSS_RTPStreamObject*   theStreamPtr = NULL;
 	UInt32                  packetCountInitValue = 0;
 
-	for (SInt16 z = 0; QTSS_GetValuePtr(fClientSession, qtssCliSesStreamObjects, z, (void**)&theStreamPtr, &theLen) == QTSS_NoErr; z++)
+	for (int16_t z = 0; QTSS_GetValuePtr(fClientSession, qtssCliSesStreamObjects, z, (void**)&theStreamPtr, &theLen) == QTSS_NoErr; z++)
 	{
 		(void)QTSS_SetValue(*theStreamPtr, sStreamPacketCountAttr, 0, &packetCountInitValue, sizeof(UInt32));
 	}
@@ -224,7 +224,7 @@ bool RTPSessionOutput::IsUDP()
 
 	QTSS_RTPStreamObject *theStreamPtr = NULL;
 	QTSS_RTPTransportType *theTransportTypePtr = NULL;
-	for (SInt16 z = 0; QTSS_GetValuePtr(fClientSession, qtssCliSesStreamObjects, z, (void**)&theStreamPtr, &theLen) == QTSS_NoErr; z++)
+	for (int16_t z = 0; QTSS_GetValuePtr(fClientSession, qtssCliSesStreamObjects, z, (void**)&theStreamPtr, &theLen) == QTSS_NoErr; z++)
 	{
 		(void)QTSS_GetValuePtr(*theStreamPtr, qtssRTPStrTransportType, 0, (void**)&theTransportTypePtr, &theLen);
 		if (theTransportTypePtr && *theTransportTypePtr == qtssRTPTransportTypeUDP)

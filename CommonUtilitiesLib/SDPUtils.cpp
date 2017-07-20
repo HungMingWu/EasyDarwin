@@ -331,14 +331,14 @@ SDPLineSorter::SDPLineSorter(SDPContainer *rawSDPContainerPtr, float adjustMedia
 		fSessionLineCount = rawSDPContainerPtr->GetNumLines();
 	}
 
-	for (SInt16 sessionLineIndex = 0; sessionLineIndex < fSessionLineCount; sessionLineIndex++)
+	for (int16_t sessionLineIndex = 0; sessionLineIndex < fSessionLineCount; sessionLineIndex++)
 		fSessionSDPContainer.AddHeaderLine((StrPtrLen *)rawSDPContainerPtr->GetLine(sessionLineIndex));
 
 	//qtss_printf("\nSession raw Lines:\n"); fSessionSDPContainer.PrintAllLines();
 
-	SInt16 numHeaderTypes = sizeof(SDPLineSorter::sSessionOrderedLines) - 1;
+	int16_t numHeaderTypes = sizeof(SDPLineSorter::sSessionOrderedLines) - 1;
 	bool addLine = true;
-	for (SInt16 fieldTypeIndex = 0; fieldTypeIndex < numHeaderTypes; fieldTypeIndex++)
+	for (int16_t fieldTypeIndex = 0; fieldTypeIndex < numHeaderTypes; fieldTypeIndex++)
 	{
 		SInt32 lineIndex = fSessionSDPContainer.FindHeaderLineType(SDPLineSorter::sSessionOrderedLines[fieldTypeIndex], 0);
 		StrPtrLen *theHeaderLinePtr = fSessionSDPContainer.GetLine(lineIndex);

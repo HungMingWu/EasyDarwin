@@ -94,8 +94,8 @@ void usage()
     qtss_printf("-h: Prints usage\n");
 }
 
-Bool16 sendtochild(int sig, pid_t myPID);
-Bool16 sendtochild(int sig, pid_t myPID)
+bool sendtochild(int sig, pid_t myPID);
+bool sendtochild(int sig, pid_t myPID)
 {
     if (sChildPID != 0 && sChildPID != myPID) // this is the parent
     {   // Send signal to child
@@ -172,8 +172,8 @@ extern "C" {
 typedef int (*EntryFunction)(int input);
 }
 
-Bool16 RunInForeground();
-Bool16 RunInForeground()
+bool RunInForeground();
+bool RunInForeground()
 {
 
     #if __linux__ || __MacOSX__
@@ -185,9 +185,9 @@ Bool16 RunInForeground()
 }
 
 
-Bool16 RestartServer(char* theXMLFilePath)
+bool RestartServer(char* theXMLFilePath)
 {
-	Bool16 autoRestart = true;
+	bool autoRestart = true;
 	XMLPrefsParser theXMLParser(theXMLFilePath);
 	theXMLParser.Parse();
 	
@@ -311,8 +311,8 @@ int main(int argc, char * argv[])
     int statsUpdateInterval = 0;
     QTSS_ServerState theInitialState = qtssRunningState;
     
-    Bool16 dontFork = false;
-    Bool16 theXMLPrefsExist = true;
+    bool dontFork = false;
+    bool theXMLPrefsExist = true;
     UInt32 debugLevel = 0;
     UInt32 debugOptions = kRunServerDebug_Off;
 	static char* sDefaultConfigFilePath = DEFAULTPATHS_ETC_DIR_OLD "easydarwin.conf";

@@ -280,7 +280,7 @@ void SDPSourceInfo::Parse(char* sdpData, uint32_t sdpLen)
                     
                 //find the port for this stream
                 mParser.ConsumeUntil(NULL, StringParser::sDigitMask);
-                SInt32 tempPort = mParser.ConsumeInteger(NULL);
+                int32_t tempPort = mParser.ConsumeInteger(NULL);
                 if ((tempPort > 0) && (tempPort < 65536))
                     fStreamArray[theStreamIndex].fPort = (uint16_t) tempPort;
                     
@@ -389,7 +389,7 @@ void SDPSourceInfo::Parse(char* sdpData, uint32_t sdpLen)
                 uint32_t tempIPAddr = SDPSourceInfo::GetIPAddr(&cParser, '/');
                                 
                 //grab the ttl
-                SInt32 tempTtl = kDefaultTTL;
+                int32_t tempTtl = kDefaultTTL;
                 if (cParser.GetThru(NULL, '/'))
                 {
                     tempTtl = cParser.ConsumeInteger(NULL);

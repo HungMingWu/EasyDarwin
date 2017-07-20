@@ -38,7 +38,7 @@
 #include "MyAssert.h"
 #include "SafeStdLib.h"
 
-SInt32 StringTranslator::DecodeURL(const char* inSrc, SInt32 inSrcLen, char* ioDest, SInt32 inDestLen)
+int32_t StringTranslator::DecodeURL(const char* inSrc, int32_t inSrcLen, char* ioDest, int32_t inDestLen)
 {
 	// return the number of chars written to ioDest
 	// or OS_BadURLFormat in the case of any error.
@@ -49,7 +49,7 @@ SInt32 StringTranslator::DecodeURL(const char* inSrc, SInt32 inSrcLen, char* ioD
 
 	//Assert(*inSrc == '/'); //For the purposes of '..' stripping, we assume first char is a /
 
-	SInt32 theLengthWritten = 0;
+	int32_t theLengthWritten = 0;
 	int tempChar = 0;
 	int numDotChars = 0;
 	bool inQuery = false;
@@ -145,11 +145,11 @@ SInt32 StringTranslator::DecodeURL(const char* inSrc, SInt32 inSrcLen, char* ioD
 	return theLengthWritten;
 }
 
-SInt32 StringTranslator::EncodeURL(const char* inSrc, SInt32 inSrcLen, char* ioDest, SInt32 inDestLen)
+int32_t StringTranslator::EncodeURL(const char* inSrc, int32_t inSrcLen, char* ioDest, int32_t inDestLen)
 {
 	// return the number of chars written to ioDest
 
-	SInt32 theLengthWritten = 0;
+	int32_t theLengthWritten = 0;
 
 	while (inSrcLen > 0)
 	{
@@ -240,7 +240,7 @@ bool StringTranslator::Test()
 	//static char* test1 = "/%5D%3f%7eAveryweird%7C/and/long/path/ya/%5d%3F%7eAveryweird%7C/and/long/p%40/ya/%5D%3F%7EAveryweird%7C/and/long/path/ya/%5D%3F%7EAveryweird%7C/and/long/path/ya/%2560%2526a%20strange%3B%23%3D%25filename"
 	static char dest[1000];
 	static char* test1 = "/Hello%23%20 I want%28don't%29";
-	SInt32 err = DecodeURL(test1, strlen(test1), dest, 1000);
+	int32_t err = DecodeURL(test1, strlen(test1), dest, 1000);
 	if (err != 22)
 		return false;
 	if (strcmp(dest, "/Hello#  I want(don't)") != 0)

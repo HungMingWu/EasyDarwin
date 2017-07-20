@@ -325,7 +325,7 @@ void EventThread::Entry()
 
 		if (yieldDur > 1)
 		{
-			qtss_printf("EventThread time in OSTHread::Yield %i, numZeroYields %i\n", (SInt32)yieldDur, (SInt32)numZeroYields);
+			qtss_printf("EventThread time in OSTHread::Yield %i, numZeroYields %i\n", (int32_t)yieldDur, (int32_t)numZeroYields);
 			numZeroYields = 0;
 		}
 		else

@@ -44,7 +44,7 @@ void MyAssert(char* inMessage)
 #if __Win32__
 		DebugBreak();
 #else
-		(*(SInt32*)0) = 0;
+		(*(int32_t*)0) = 0;
 #endif
 	}
 }

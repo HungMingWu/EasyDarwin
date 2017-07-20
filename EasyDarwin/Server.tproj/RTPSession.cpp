@@ -67,8 +67,8 @@ RTPSession::~RTPSession()
 
 	if (QTSServerInterface::GetServer()->GetPrefs()->GetReliableUDPPrintfsEnabled())
 	{
-		SInt32 theNumLatePacketsDropped = 0;
-		SInt32 theNumResends = 0;
+		int32_t theNumLatePacketsDropped = 0;
+		int32_t theNumResends = 0;
 
 		for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
 		{
@@ -207,7 +207,7 @@ QTSS_Error RTPSession::AddStream(RTSPRequestInterface* request, RTPStream** outS
 	uint32_t theSSRC = 0;
 	while (theSSRC == 0)
 	{
-		theSSRC = (SInt32)::rand();
+		theSSRC = (int32_t)::rand();
 
 		RTPStream** theStream = NULL;
 		uint32_t theLen = 0;
@@ -331,7 +331,7 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 	uint32_t theBufferSize = thePrefs->GetMaxTCPBufferSizeInBytes();
 
 #if RTPSESSION_DEBUGGING
-	qtss_printf("RTPSession GetMovieAvgBitrate %li\n", (SInt32)this->GetMovieAvgBitrate());
+	qtss_printf("RTPSession GetMovieAvgBitrate %li\n", (int32_t)this->GetMovieAvgBitrate());
 #endif
 
 	if (this->GetMovieAvgBitrate() > 0)
@@ -361,7 +361,7 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 
 
 #if RTPSESSION_DEBUGGING
-	qtss_printf("RTPSession %" _S32BITARG_ ": In Play, about to call Signal\n", (SInt32)this);
+	qtss_printf("RTPSession %" _S32BITARG_ ": In Play, about to call Signal\n", (int32_t)this);
 #endif
 	this->Signal(Task::kStartEvent);
 
@@ -486,7 +486,7 @@ SInt64 RTPSession::Run()
 													//as the first parameter
 
 #if RTPSESSION_DEBUGGING
-	qtss_printf("RTPSession %" _S32BITARG_ ": In Run. Events %" _S32BITARG_ "\n", (SInt32)this, (SInt32)events);
+	qtss_printf("RTPSession %" _S32BITARG_ ": In Run. Events %" _S32BITARG_ "\n", (int32_t)this, (int32_t)events);
 #endif
 	// Some callbacks look for this struct in the thread object
 	OSThreadDataSetter theSetter(&fModuleState, NULL);
@@ -506,7 +506,7 @@ SInt64 RTPSession::Run()
 			//threads). We do this by first removing the session from the session map.
 
 #if RTPSESSION_DEBUGGING
-			qtss_printf("RTPSession %" _S32BITARG_ ": about to be killed. Eventmask = %" _S32BITARG_ "\n", (SInt32)this, (SInt32)events);
+			qtss_printf("RTPSession %" _S32BITARG_ ": about to be killed. Eventmask = %" _S32BITARG_ "\n", (int32_t)this, (int32_t)events);
 #endif
 			// We cannot block waiting to UnRegister, because we have to
 			// give the RTSPSessionTask a chance to release the RTPSession.
@@ -593,7 +593,7 @@ SInt64 RTPSession::Run()
 		else
 		{
 #if RTPSESSION_DEBUGGING
-			qtss_printf("RTPSession %" _S32BITARG_ ": about to call SendPackets\n", (SInt32)this);
+			qtss_printf("RTPSession %" _S32BITARG_ ": about to call SendPackets\n", (int32_t)this);
 #endif
 			if ((theParams.rtpSendPacketsParams.inCurrentTime - fLastBandwidthTrackerStatsUpdate) > 1000)
 				this->GetBandwidthTracker()->UpdateStats();
@@ -604,7 +604,7 @@ SInt64 RTPSession::Run()
 			Assert(fModule != NULL);
 			(void)fModule->CallDispatch(QTSS_RTPSendPackets_Role, &theParams);
 #if RTPSESSION_DEBUGGING
-			qtss_printf("RTPSession %" _S32BITARG_ ": back from sendPackets, nextPacketTime = %" _64BITARG_ "d\n", (SInt32)this, theParams.rtpSendPacketsParams.outNextPacketTime);
+			qtss_printf("RTPSession %" _S32BITARG_ ": back from sendPackets, nextPacketTime = %" _64BITARG_ "d\n", (int32_t)this, theParams.rtpSendPacketsParams.outNextPacketTime);
 #endif
 			//make sure not to get deleted accidently!
 			if (theParams.rtpSendPacketsParams.outNextPacketTime < 0)

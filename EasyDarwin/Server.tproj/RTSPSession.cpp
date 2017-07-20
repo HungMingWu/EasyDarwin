@@ -497,7 +497,7 @@ SInt64 RTSPSession::Run()
 
 				if (fSentOptionsRequest && this->ParseOptionsResponse())
 				{
-					fRoundTripTime = (SInt32)(OS::Milliseconds() - fOptionsRequestSendTime);
+					fRoundTripTime = (int32_t)(OS::Milliseconds() - fOptionsRequestSendTime);
 					//qtss_printf("RTSPSession::Run RTT time = %" _S32BITARG_ " msec\n", fRoundTripTime);
 					fState = kSendingResponse;
 					break;
@@ -2027,7 +2027,7 @@ uint32_t RTSPSession::GenerateNewSessionID(char* ioBuffer)
 bool RTSPSession::OverMaxConnections(uint32_t buffer)
 {
 	QTSServerInterface* theServer = QTSServerInterface::GetServer();
-	SInt32 maxConns = theServer->GetPrefs()->GetMaxConnections();
+	int32_t maxConns = theServer->GetPrefs()->GetMaxConnections();
 	bool overLimit = false;
 
 	if (maxConns > -1) // limit connections
@@ -2066,7 +2066,7 @@ QTSS_Error RTSPSession::IsOkToAddNewRTPSession()
 			qtssMsgTooManyClients);
 
 	//if the max bandwidth limit has been hit
-	SInt32 maxKBits = theServer->GetPrefs()->GetMaxKBitsBandwidth();
+	int32_t maxKBits = theServer->GetPrefs()->GetMaxKBitsBandwidth();
 	if ((maxKBits > -1) && (theServer->GetCurBandwidthInBits() >= ((uint32_t)maxKBits * 1024)))
 		return QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientNotEnoughBandwidth,
 			qtssMsgTooMuchThruput);

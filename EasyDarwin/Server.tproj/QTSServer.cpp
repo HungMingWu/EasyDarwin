@@ -1202,7 +1202,7 @@ Task*   RTSPListenerSocket::GetSessionTask(TCPSocket** outSocket)
 bool RTSPListenerSocket::OverMaxConnections(uint32_t buffer)
 {
 	QTSServerInterface* theServer = QTSServerInterface::GetServer();
-	SInt32 maxConns = theServer->GetPrefs()->GetMaxConnections();
+	int32_t maxConns = theServer->GetPrefs()->GetMaxConnections();
 	bool overLimit = false;
 
 	if (maxConns > -1) // limit connections
@@ -1239,7 +1239,7 @@ Task*   HTTPListenerSocket::GetSessionTask(TCPSocket** outSocket)
 bool HTTPListenerSocket::OverMaxConnections(uint32_t buffer)
 {
 	QTSServerInterface* theServer = QTSServerInterface::GetServer();
-	SInt32 maxConns = theServer->GetPrefs()->GetMaxConnections();
+	int32_t maxConns = theServer->GetPrefs()->GetMaxConnections();
 	bool overLimit = false;
 
 	if (maxConns > -1) // limit connections

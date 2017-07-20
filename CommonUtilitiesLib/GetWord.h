@@ -26,14 +26,16 @@
 #ifndef __getword__
 #define __getword__
 
+#include <stdint.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "OSHeaders.h"
 
-	char* GetWord(char* toWordPtr, char* fromStrPtr, SInt32 limit);
-	char* GetQuotedWord(char* toWordPtr, char* fromStrPtr, SInt32 limit);
+	char* GetWord(char* toWordPtr, char* fromStrPtr, int32_t limit);
+	char* GetQuotedWord(char* toWordPtr, char* fromStrPtr, int32_t limit);
 
 #ifdef __cplusplus
 }

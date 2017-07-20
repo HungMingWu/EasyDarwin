@@ -148,7 +148,7 @@ QTTrack::ErrorCode QTTrack::Initialize()
 	//
 	// See if this track has a name and load it in.
 	if (fFile->FindTOCEntry(":udta:name", &tempTOCEntry, &fTOCEntry)) {
-		fTrackName = new char[(SInt32)(tempTOCEntry->AtomDataLength + 1)];
+		fTrackName = new char[(int32_t)(tempTOCEntry->AtomDataLength + 1)];
 		if (fTrackName != NULL)
 			fFile->Read(tempTOCEntry->AtomDataPos, fTrackName, (uint32_t)tempTOCEntry->AtomDataLength);
 	}

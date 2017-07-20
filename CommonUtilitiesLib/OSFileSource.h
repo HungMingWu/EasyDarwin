@@ -115,9 +115,9 @@ public:
 	~FileMap() { fFileMapArray = nullptr; }
 	void    AllocateBufferMap(uint32_t inUnitSizeInK, uint32_t inNumBuffSizeUnits, uint32_t inBufferIncCount, uint32_t inMaxBitRateBuffSizeInBlocks, UInt64 fileLen, uint32_t inBitRate);
 	char*   GetBuffer(SInt64 bufIndex, bool* outIsEmptyBuff);
-	void    TestBuffer(SInt32 bufIndex) const
+	void    TestBuffer(int32_t bufIndex) const
 	{ Assert(bufIndex >= 0); fFileMapArray[bufIndex]->TestBuffer(); };
-	void    SetIndexBuffFillSize(SInt32 bufIndex, uint32_t fillSize) const
+	void    SetIndexBuffFillSize(int32_t bufIndex, uint32_t fillSize) const
 	{ Assert(bufIndex >= 0); fFileMapArray[bufIndex]->SetFillSize(fillSize); }
 	uint32_t  GetMaxBufSize() const
 	{ return fDataBufferSize; }
@@ -208,7 +208,7 @@ public:
 	void        IncMaxBuffers() { OSMutexLocker locker(&fMutex); fFileMap.IncMaxBuffers(); }
 	void        DecMaxBuffers() { OSMutexLocker locker(&fMutex); fFileMap.DecMaxBuffers(); }
 
-	OS_Error    FillBuffer(char* ioBuffer, char* buffStart, SInt32 bufIndex);
+	OS_Error    FillBuffer(char* ioBuffer, char* buffStart, int32_t bufIndex);
 
 	void            Close();
 	time_t          GetModDate() const

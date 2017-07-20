@@ -171,7 +171,7 @@ bool QTAtom::ReadInt32To64Signed(UInt64 Offset, SInt64 * Datum)
 		return false;
 
 	tempDatum = ntohl(tempDatum);
-	*Datum = (SInt64)(SInt32)tempDatum;
+	*Datum = (SInt64)(int32_t)tempDatum;
 	return true;
 }
 

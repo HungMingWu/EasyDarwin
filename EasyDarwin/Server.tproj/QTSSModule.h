@@ -90,13 +90,13 @@ public:
 	OSMutex*        GetAttributesMutex() { return &fAttributesMutex; }
 
 	//convert QTSS.h 4 char id roles to private role index
-	SInt32 GetPrivateRoleIndex(QTSS_Role apiRole);
+	int32_t GetPrivateRoleIndex(QTSS_Role apiRole);
 
 
 	// This calls into the module.
 	QTSS_Error  CallDispatch(QTSS_Role inRole, QTSS_RoleParamPtr inParams)
 	{
-		SInt32 theRoleIndex = -1;
+		int32_t theRoleIndex = -1;
 
 		if (MODULE_DEBUG)
 		{

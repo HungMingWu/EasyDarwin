@@ -211,8 +211,8 @@ void    ReflectorSession::AddOutput(ReflectorOutput* inOutput, bool isClient)
 	Assert(fSourceInfo->GetNumStreams() > 0);
 
 	// We need to make sure that this output goes into the same bucket for each ReflectorStream.
-	SInt32 bucket = -1;
-	SInt32 lastBucket = -1;
+	int32_t bucket = -1;
+	int32_t lastBucket = -1;
 
 	while (true)
 	{

@@ -166,7 +166,7 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 			this->SetPrefValuesFromFile(container, x, theAttrID, 0);
 
 			// Mark this pref as found.
-			SInt32 theIndex = this->GetInstanceDictMap()->ConvertAttrIDToArrayIndex(theAttrID);
+			int32_t theIndex = this->GetInstanceDictMap()->ConvertAttrIDToArrayIndex(theAttrID);
 			Assert(theIndex >= 0);
 		}
 	}

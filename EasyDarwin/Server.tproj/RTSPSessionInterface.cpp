@@ -186,7 +186,7 @@ QTSS_Error RTSPSessionInterface::Read(void* ioBuffer, uint32_t inLength, uint32_
 	if (fRequestBodyLen == 0)
 		return QTSS_NoMoreData;
 
-	if ((fRequestBodyLen > 0) && ((SInt32)inLength > fRequestBodyLen))
+	if ((fRequestBodyLen > 0) && ((int32_t)inLength > fRequestBodyLen))
 		inLength = fRequestBodyLen;
 
 	uint32_t theLenRead = 0;

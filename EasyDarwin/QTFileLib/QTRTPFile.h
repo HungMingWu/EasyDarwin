@@ -110,7 +110,7 @@ public:
 		uint32_t          SSRC;
 		uint16_t          FileSequenceNumberRandomOffset, BaseSequenceNumberRandomOffset,
 			LastSequenceNumber;
-		SInt32          SequenceNumberAdditive;
+		int32_t          SequenceNumberAdditive;
 		uint32_t          FileTimestampRandomOffset, BaseTimestampRandomOffset;
 
 		//
@@ -226,7 +226,7 @@ public:
 	uint16_t      GetNextTrackSequenceNumber(uint32_t TrackID);
 	double     GetNextPacket(char ** Packet, int * PacketLength);
 
-	SInt32      GetMovieHintType();
+	int32_t      GetMovieHintType();
 	bool      DropRepeatPackets() { return fDropRepeatPackets; }
 	bool      SetDropRepeatPackets(bool allowRepeatPackets) { (!fHasRTPMetaInfoFieldArray) ? fDropRepeatPackets = allowRepeatPackets : fDropRepeatPackets = false; return fDropRepeatPackets; }
 

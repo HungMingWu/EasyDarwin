@@ -279,7 +279,7 @@ void StringParser::ConsumeUntil(StrPtrLen* outString, uint8_t* inMask)
 	}
 }
 
-void StringParser::ConsumeLength(StrPtrLen* spl, SInt32 inLength)
+void StringParser::ConsumeLength(StrPtrLen* spl, int32_t inLength)
 {
 	if (this->ParserIsEmpty(spl))
 		return;
@@ -495,7 +495,7 @@ bool StringParser::Test()
 	StringParser victim(&theString);
 
 	StrPtrLen rtsp;
-	SInt32 theInt = victim.ConsumeInteger();
+	int32_t theInt = victim.ConsumeInteger();
 	if (theInt != 0)
 		return false;
 	victim.ConsumeWord(&rtsp);

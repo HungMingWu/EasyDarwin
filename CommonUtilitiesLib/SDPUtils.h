@@ -78,11 +78,11 @@ public:
 
 	~SDPContainer() { delete[] fSDPLineArray; }
 	void		Initialize();
-	SInt32      AddHeaderLine(StrPtrLen *theLinePtr);
-	SInt32      FindHeaderLineType(char id, SInt32 start);
+	int32_t      AddHeaderLine(StrPtrLen *theLinePtr);
+	int32_t      FindHeaderLineType(char id, int32_t start);
 	SDPLine*    GetNextLine();
-	SDPLine*    GetLine(SInt32 lineIndex);
-	void        SetLine(SInt32 index);
+	SDPLine*    GetLine(int32_t lineIndex);
+	void        SetLine(int32_t index);
 	void        Parse();
 	bool      SetSDPBuffer(char *sdpBuffer);
 	bool      SetSDPBuffer(StrPtrLen *sdpBufferPtr);
@@ -90,13 +90,13 @@ public:
 	bool      HasReqLines() { return (bool)(fReqLines == kAllReq); }
 	bool      HasLineType(char lineType) { return (bool)(lineType == fFieldStr[(uint8_t)lineType]); }
 	char*       GetReqLinesArray;
-	void        PrintLine(SInt32 lineIndex);
+	void        PrintLine(int32_t lineIndex);
 	void        PrintAllLines();
-	SInt32      GetNumLines() { return  fNumUsedLines; }
+	int32_t      GetNumLines() { return  fNumUsedLines; }
 
-	SInt32      fCurrentLine;
-	SInt32      fNumSDPLines;
-	SInt32      fNumUsedLines;
+	int32_t      fCurrentLine;
+	int32_t      fNumSDPLines;
+	int32_t      fNumUsedLines;
 	SDPLine*    fSDPLineArray;
 	bool      fValid;
 	StrPtrLen   fSDPBuffer;
@@ -121,7 +121,7 @@ public:
 
 
 	StrPtrLen fullSDPBuffSPL;
-	SInt32 fSessionLineCount;
+	int32_t fSessionLineCount;
 	SDPContainer fSessionSDPContainer;
 	ResizeableStringFormatter fSDPSessionHeaders;
 	ResizeableStringFormatter fSDPMediaHeaders;

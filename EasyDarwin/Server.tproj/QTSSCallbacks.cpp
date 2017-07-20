@@ -518,7 +518,7 @@ QTSS_Error  QTSSCallbacks::QTSS_DoService(QTSS_ServiceID inID, QTSS_ServiceFunct
 	// Make sure that the service ID is in fact valid
 
 	QTSSDictionaryMap* theMap = QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kServiceDictIndex);
-	SInt32 theIndex = theMap->ConvertAttrIDToArrayIndex(inID);
+	int32_t theIndex = theMap->ConvertAttrIDToArrayIndex(inID);
 	if (theIndex < 0)
 		return QTSS_IllegalService;
 

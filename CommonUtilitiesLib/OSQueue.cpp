@@ -232,7 +232,7 @@ void OSQueueIter::Next()
 }
 
 
-OSQueueElem* OSQueue_Blocking::DeQueueBlocking(OSThread* inCurThread, SInt32 inTimeoutInMilSecs)
+OSQueueElem* OSQueue_Blocking::DeQueueBlocking(OSThread* inCurThread, int32_t inTimeoutInMilSecs)
 {
 	OSMutexLocker theLocker(&fMutex);
 #ifdef __Win32_

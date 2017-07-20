@@ -25,7 +25,7 @@
 
 #include "GetWord.h"
 
-char* GetWord(char* toWordPtr, char* fromStrPtr, SInt32 limit)
+char* GetWord(char* toWordPtr, char* fromStrPtr, int32_t limit)
 {
 	// get a word from a string
 	// copy result into toWordPtr, return one past end of the 
@@ -48,7 +48,7 @@ char* GetWord(char* toWordPtr, char* fromStrPtr, SInt32 limit)
 	return (char *)fromStrPtr;
 }
 
-char* GetQuotedWord(char* toWordPtr, char* fromStrPtr, SInt32 limit)
+char* GetQuotedWord(char* toWordPtr, char* fromStrPtr, int32_t limit)
 {
 	// get a quote encoded word from a string
 	// make include white space

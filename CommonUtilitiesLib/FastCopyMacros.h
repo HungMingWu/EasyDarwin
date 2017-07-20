@@ -27,12 +27,12 @@
 
 #define     COPY_BYTE( dest, src ) ( *((char*)(dest)) = *((char*)(src)) )
 #define     COPY_WORD( dest, src ) ( *((int16_t*)(dest)) =  *((int16_t*)(src)) )
-#define     COPY_LONG_WORD( dest, src ) ( *((SInt32*)(dest)) =  *((SInt32*)(src)) )
+#define     COPY_LONG_WORD( dest, src ) ( *((int32_t*)(dest)) =  *((int32_t*)(src)) )
 #define     COPY_LONG_LONG_WORD( dest, src ) ( *((SInt64*)(dest)) =  *((SInt64**)(src)) )
 
 #define     MOVE_BYTE( dest, src ) ( dest = *((char*)(src)) )
 #define     MOVE_WORD( dest, src ) ( dest =  *((int16_t*)(src)) )
-#define     MOVE_LONG_WORD( dest, src ) ( dest =  *((SInt32*)(src)) )
+#define     MOVE_LONG_WORD( dest, src ) ( dest =  *((int32_t*)(src)) )
 #define     MOVE_LONG_LONG_WORD( dest, src ) ( dest =  *((SInt64**)(src)) )
 
 

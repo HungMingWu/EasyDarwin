@@ -59,7 +59,7 @@ public:
 	// Types
 
 	typedef uint16_t FieldName;
-	typedef SInt32 FieldID;
+	typedef int32_t FieldID;
 
 	//
 	// Special field IDs

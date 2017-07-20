@@ -41,8 +41,8 @@ public:
 
 	uint32_t              GetSessionIndex() { return fSessionIndex; }
 
-	void                SetRequestBodyLength(SInt32 inLength) { fRequestBodyLen = inLength; }
-	SInt32              GetRemainingReqBodyLen() { return fRequestBodyLen; }
+	void                SetRequestBodyLength(int32_t inLength) { fRequestBodyLen = inLength; }
+	int32_t              GetRemainingReqBodyLen() { return fRequestBodyLen; }
 
 	// QTSS STREAM FUNCTIONS
 
@@ -96,7 +96,7 @@ protected:
 	uint32_t              fSessionIndex;
 	uint32_t              fLocalAddr;
 	uint32_t              fRemoteAddr;
-	SInt32              fRequestBodyLen;
+	int32_t              fRequestBodyLen;
 
 	uint16_t              fLocalPort;
 	uint16_t              fRemotePort;

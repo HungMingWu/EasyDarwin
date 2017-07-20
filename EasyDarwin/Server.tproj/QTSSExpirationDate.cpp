@@ -62,7 +62,7 @@ bool QTSSExpirationDate::IsSoftwareExpired()
 	if (!sIsExpirationEnabled)
 		return false;
 
-	SInt32 expMonth, expDay, expYear;
+	int32_t expMonth, expDay, expYear;
 	if (EOF == ::sscanf(sExpirationDate, "%" _S32BITARG_ "/%" _S32BITARG_ "/%" _S32BITARG_ "", &expMonth, &expDay, &expYear))
 	{
 		Assert(false);

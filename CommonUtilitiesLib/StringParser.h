@@ -115,7 +115,7 @@ public:
 		ConsumeUntil(spl, sDigitMask);
 	}
 
-	void			ConsumeLength(StrPtrLen* spl, SInt32 numBytes);
+	void			ConsumeLength(StrPtrLen* spl, int32_t numBytes);
 
 	void			ConsumeEOL(StrPtrLen* outString);
 

@@ -292,7 +292,7 @@ QTSS_Error HTTPRequest::parseURI(StringParser* parser)
 	//char* relativeURIDecoded = new char[len];
 	char relativeURIDecoded[512] = { 0 };
 
-	SInt32 theBytesWritten = StringTranslator::DecodeURL(fRelativeURI.Ptr, fRelativeURI.Len,
+	int32_t theBytesWritten = StringTranslator::DecodeURL(fRelativeURI.Ptr, fRelativeURI.Len,
 		relativeURIDecoded, len);
 
 	//if negative, an error occurred, reported as an QTSS_Error

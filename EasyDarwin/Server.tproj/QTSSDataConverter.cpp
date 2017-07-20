@@ -50,7 +50,7 @@ static char* kDataTypeStrings[] =
 	"bool",
 	"int16_t",
 	"uint16_t",
-	"SInt32",
+	"int32_t",
 	"uint32_t",
 	"SInt64",
 	"UInt64",
@@ -184,9 +184,9 @@ QTSS_Error QTSSDataConverter::StringToValue(char* inValueAsString,
 		}
 		break;
 
-	case qtssAttrDataTypeSInt32:
+	case qtssAttrDataTypeint32_t:
 		{
-			theBufSize = sizeof(SInt32);
+			theBufSize = sizeof(int32_t);
 			theFormat = "%d";
 		}
 		break;
@@ -338,8 +338,8 @@ char* QTSSDataConverter::ValueToString(void* inValue,
 		qtss_sprintf(theString, "%hd", *(int16_t*)inValue);
 		break;
 
-	case qtssAttrDataTypeSInt32:
-		qtss_sprintf(theString, "%" _S32BITARG_, *(SInt32*)inValue);
+	case qtssAttrDataTypeint32_t:
+		qtss_sprintf(theString, "%" _S32BITARG_, *(int32_t*)inValue);
 		break;
 
 	case qtssAttrDataTypeUInt32:

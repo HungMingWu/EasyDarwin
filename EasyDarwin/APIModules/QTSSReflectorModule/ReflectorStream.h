@@ -394,7 +394,7 @@ public:
 	// Pass in -1 if you don't care. AddOutput returns the bucket index this output was
 	// placed into, or -1 on an error.
 
-	SInt32  AddOutput(ReflectorOutput* inOutput, SInt32 putInThisBucket);
+	int32_t  AddOutput(ReflectorOutput* inOutput, int32_t putInThisBucket);
 
 	// Removes the specified output from this ReflectorStream.
 	void    RemoveOutput(ReflectorOutput* inOutput); // Removes this output from all tracks
@@ -453,7 +453,7 @@ private:
 	//Sends an RTCP receiver report to the broadcast source
 	void    SendReceiverReport();
 	void    AllocateBucketArray(uint32_t inNumBuckets);
-	SInt32  FindBucket();
+	int32_t  FindBucket();
 
 	// Reflector sockets, retrieved from the socket pool
 	UDPSocketPair*      fSockets;

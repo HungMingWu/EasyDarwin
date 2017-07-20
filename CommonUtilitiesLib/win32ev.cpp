@@ -77,7 +77,7 @@ int select_modwatch(struct eventreq* req, int which)
 	// Convert EV_RE and EV_WR to the proper WSA event codes.
 	// WSA event codes are more specific than what POSIX provides, so
 	// just wait on any kind of read related event for EV_RE, same for EV_WR
-	SInt32 theEvent = 0;
+	int32_t theEvent = 0;
 
 	if (which & EV_RE)
 		theEvent |= FD_READ | FD_ACCEPT | FD_CLOSE;

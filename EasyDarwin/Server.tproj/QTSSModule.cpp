@@ -214,7 +214,7 @@ QTSS_Error QTSSModule::LoadFromDisk(QTSS_MainEntryPointPtr* outEntrypoint)
 }
 
 
-SInt32 QTSSModule::GetPrivateRoleIndex(QTSS_Role apiRole)
+int32_t QTSSModule::GetPrivateRoleIndex(QTSS_Role apiRole)
 {
 
 	switch (apiRole)
@@ -275,7 +275,7 @@ QTSS_Error  QTSSModule::AddRole(QTSS_Role inRole)
 #endif
 
 
-	SInt32 arrayID = GetPrivateRoleIndex(inRole);
+	int32_t arrayID = GetPrivateRoleIndex(inRole);
 	if (arrayID < 0)
 		return QTSS_BadArgument;
 

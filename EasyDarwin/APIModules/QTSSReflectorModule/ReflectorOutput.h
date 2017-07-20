@@ -64,7 +64,7 @@ class ReflectorOutput
         // possibly one for each ReflectorSender that sends data to this ReflectorOutput        
         OSQueueElem         **fBookmarkedPacketsElemsArray;
         uint32_t              fNumBookmarks;
-        SInt32              fAvailPosition;
+        int32_t              fAvailPosition;
         QTSS_TimeVal        fLastIntervalMilliSec;
         QTSS_TimeVal        fLastPacketTransmitTime;
 		OSMutex             fMutex;

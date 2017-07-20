@@ -34,6 +34,7 @@
 #define _MD5DIGEST_H_
 
 #include "StrPtrLen.h"
+#include <stdint.h>
 
 enum {
 	kHashHexLen = 32,
@@ -71,7 +72,7 @@ void CalcRequestDigest(StrPtrLen* hA1,
 	StrPtrLen* requestDigest
 );
 
-void to64(register char* s, register SInt32 v, register int n);
+void to64(register char* s, register int32_t v, register int n);
 
 // Doesn't allocate any memory. The size of the result buffer should be nbytes
 void MD5Encode(char* pw, char* salt, char* result, int nbytes);

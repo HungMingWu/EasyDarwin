@@ -52,17 +52,17 @@ public:
 
 	uint32_t GetNumReportBlocks() { return fNumBlocks; };
 
-	SInt32 GetSSRCBlockIndex(uint32_t inSSRC);
+	int32_t GetSSRCBlockIndex(uint32_t inSSRC);
 
-	uint32_t GetSSRC(SInt32 index);
+	uint32_t GetSSRC(int32_t index);
 
-	uint16_t GetPlayOutDelay(SInt32 index);
+	uint16_t GetPlayOutDelay(int32_t index);
 
-	uint16_t GetNSN(SInt32 index);
+	uint16_t GetNSN(int32_t index);
 
-	uint16_t GetNUN(SInt32 index);
+	uint16_t GetNUN(int32_t index);
 
-	uint16_t GetFBS(SInt32 index);
+	uint16_t GetFBS(int32_t index);
 
 	void DumpNaduPacket();
 
@@ -101,7 +101,7 @@ public:
 private:
 	void ParseAndStore();
 	uint32_t* fNaduDataBuffer;
-	SInt32 fNumBlocks;
+	int32_t fNumBlocks;
 	static char sRTCPTestBuffer[256];
 
 };

@@ -449,21 +449,21 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 
 	::qtss_snprintf(numStr, sizeof(numStr) - 1, "%s", "0");
 	if (deltaPackets > 0)
-		qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (SInt32)((SInt64)totalLate / (SInt64)deltaPackets));
+		qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)((SInt64)totalLate / (SInt64)deltaPackets));
 	print_status(statusFile, stdOut, "%11s", numStr);
 
-	qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (SInt32)currentMaxLate);
+	qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)currentMaxLate);
 	print_status(statusFile, stdOut, "%11s", numStr);
 
-	qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (SInt32)sServer->GetMaxLate());
+	qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)sServer->GetMaxLate());
 	print_status(statusFile, stdOut, "%11s", numStr);
 
 	::qtss_snprintf(numStr, sizeof(numStr) - 1, "%s", "0");
 	if (deltaPackets > 0)
-		qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (SInt32)((SInt64)deltaQuality / (SInt64)deltaPackets));
+		qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)((SInt64)deltaQuality / (SInt64)deltaPackets));
 	print_status(statusFile, stdOut, "%11s", numStr);
 
-	qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (SInt32)sServer->GetNumThinned());
+	qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)sServer->GetNumThinned());
 	print_status(statusFile, stdOut, "%11s", numStr);
 
 
@@ -528,19 +528,19 @@ void FormattedTotalBytesBuffer(char *outBuffer, int outBufferLen, UInt64 totalBy
 	}
 	else if (totalBytes > 1048576) //MBytes
 	{
-		displayBytes = (float)(SInt32)totalBytes / (float)(SInt32)1048576;
+		displayBytes = (float)(int32_t)totalBytes / (float)(int32_t)1048576;
 		sizeStr[0] = 'M';
 		format = "%.3f%s ";
 	}
 	else if (totalBytes > 1024) //KBytes
 	{
-		displayBytes = (float)(SInt32)totalBytes / (float)(SInt32)1024;
+		displayBytes = (float)(int32_t)totalBytes / (float)(int32_t)1024;
 		sizeStr[0] = 'K';
 		format = "%.2f%s ";
 	}
 	else
 	{
-		displayBytes = (float)(SInt32)totalBytes;  //Bytes
+		displayBytes = (float)(int32_t)totalBytes;  //Bytes
 		sizeStr[0] = 'B';
 		format = "%4.0f%s ";
 	}

@@ -265,7 +265,7 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 
 	//decode the URL, put the result in the separate buffer for the file path,
 	//set the file path StrPtrLen to the proper value
-	SInt32 theBytesWritten = StringTranslator::DecodeURL(theURLParam->Ptr, theURLParam->Len,
+	int32_t theBytesWritten = StringTranslator::DecodeURL(theURLParam->Ptr, theURLParam->Len,
 		fFilePath, RTSPRequestInterface::kMaxFilePathSizeInBytes);
 	//if negative, an error occurred, reported as an QTSS_Error
 	//we also need to leave room for a terminator.
@@ -608,7 +608,7 @@ void  RTSPRequest::ParseDynamicRateHeader()
 {
 	StringParser theParser(fHeaderDictionary.GetValue(qtssXDynamicRateHeader));
 	theParser.ConsumeWhitespace();
-	SInt32 value = theParser.ConsumeInteger(NULL);
+	int32_t value = theParser.ConsumeInteger(NULL);
 
 	// fEnableDynamicRate: < 0 undefined, 0 disable, > 0 enable
 	if (value > 0)

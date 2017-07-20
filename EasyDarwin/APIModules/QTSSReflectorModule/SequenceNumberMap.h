@@ -64,8 +64,8 @@ private:
 
 	bool*         fSlidingWindow;
 
-	const SInt32    fWindowSize;
-	const SInt32    fNegativeWindowSize;
+	const int32_t    fWindowSize;
+	const int32_t    fNegativeWindowSize;
 
 	uint16_t          fHighestSeqIndex;
 	uint16_t          fHighestSeqNumber;

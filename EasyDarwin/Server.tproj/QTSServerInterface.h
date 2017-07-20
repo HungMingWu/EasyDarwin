@@ -91,11 +91,11 @@ public:
 	// STATISTICS MANIPULATION
 	// These functions are how the server keeps its statistics current
 
-	void                AlterCurrentRTSPSessionCount(SInt32 inDifference)
+	void                AlterCurrentRTSPSessionCount(int32_t inDifference)
 	{
 		OSMutexLocker locker(&fMutex); fNumRTSPSessions += inDifference;
 	}
-	void                AlterCurrentRTSPHTTPSessionCount(SInt32 inDifference)
+	void                AlterCurrentRTSPHTTPSessionCount(int32_t inDifference)
 	{
 		OSMutexLocker locker(&fMutex); fNumRTSPHTTPSessions += inDifference;
 	}
@@ -132,7 +132,7 @@ public:
 			(void)theModule->CallDispatch(Easy_RedisSetRTSPLoad_Role, NULL);
 		}
 	}
-	void            AlterCurrentRTPSessionCount(SInt32 inDifference)
+	void            AlterCurrentRTPSessionCount(int32_t inDifference)
 	{
 		OSMutexLocker locker(&fMutex); fNumRTPSessions += inDifference;
 		uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRedisSetRTSPLoadRole);
@@ -145,7 +145,7 @@ public:
 
 
 	//track how many sessions are playing
-	void            AlterRTPPlayingSessions(SInt32 inDifference)
+	void            AlterRTPPlayingSessions(int32_t inDifference)
 	{
 		OSMutexLocker locker(&fMutex); fNumRTPPlayingSessions += inDifference;
 	}
@@ -159,13 +159,13 @@ public:
 		if (milliseconds > fMaxLate) fMaxLate = milliseconds;
 	}
 
-	void            IncrementTotalQuality(SInt32 level)
+	void            IncrementTotalQuality(int32_t level)
 	{
 		OSMutexLocker locker(&fMutex); fTotalQuality += level;
 	}
 
 
-	void            IncrementNumThinned(SInt32 inDifference)
+	void            IncrementNumThinned(int32_t inDifference)
 	{
 		OSMutexLocker locker(&fMutex); fNumThinned += inDifference;
 	}
@@ -215,7 +215,7 @@ public:
 	SInt64				GetTotalLate() { return fTotalLate; };
 	SInt64				GetCurrentMaxLate() { return fCurrentMaxLate; };
 	SInt64				GetTotalQuality() { return fTotalQuality; };
-	SInt32				GetNumThinned() { return fNumThinned; };
+	int32_t				GetNumThinned() { return fNumThinned; };
 	uint32_t				GetNumThreads() { return fNumThreads; };
 
 	//
@@ -345,7 +345,7 @@ protected:
 
 	// startup time
 	SInt64						fStartupTime_UnixMilli;
-	SInt32						fGMTOffset;
+	int32_t						fGMTOffset;
 
 	static ResizeableStringFormatter    sPublicHeaderFormatter;
 	static StrPtrLen                    sPublicHeaderStr;
@@ -440,7 +440,7 @@ private:
 	SInt64          fTotalLate;
 	SInt64          fCurrentMaxLate;
 	SInt64          fTotalQuality;
-	SInt32          fNumThinned;
+	int32_t          fNumThinned;
 	uint32_t          fNumThreads;
 
 	// Param retrieval functions

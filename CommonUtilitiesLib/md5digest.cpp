@@ -246,7 +246,7 @@ void CalcRequestDigest(StrPtrLen* hA1,
 static unsigned char itoa64[] = /* 0 ... 63 => ascii - 64 */
 "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
-void to64(register char* s, register SInt32 v, register int n)
+void to64(register char* s, register int32_t v, register int n)
 {
 	while (--n >= 0) {
 		*s++ = itoa64[v & 0x3f];

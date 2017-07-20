@@ -65,7 +65,7 @@ RTPOverbufferWindow::RTPOverbufferWindow(uint32_t inSendInterval, uint32_t inIni
 
 }
 
-SInt64 RTPOverbufferWindow::CheckTransmitTime(const SInt64& inTransmitTime, const SInt64& inCurrentTime, SInt32 inPacketSize)
+SInt64 RTPOverbufferWindow::CheckTransmitTime(const SInt64& inTransmitTime, const SInt64& inCurrentTime, int32_t inPacketSize)
 {
 	// if this is the beginning of a bucket interval, roll over figures from last time.
 	// accumulate statistics over the period of a second
@@ -120,9 +120,9 @@ SInt64 RTPOverbufferWindow::CheckTransmitTime(const SInt64& inTransmitTime, cons
 	// First we scale up bitrate slowly, so we should only try and send a little more than we
 	// sent recently (averaged over a second or two).  However, we always try and send at
 	// least the current bitrate and never more than double.
-//    SInt32 currentBitRate = fBytesDuringBucket * 1000 / (inCurrentTime - fPreviousBucketBegin);
-//  SInt32 averageBitRate = (fBytesDuringPreviousSecond + fBytesDuringLastSecond) * 1000 / (inCurrentTime - fPreviousSecondStart);
-//    SInt32 averageBitRate = fBytesDuringPreviousSecond * 1000 / (fLastSecondStart - fPreviousSecondStart);
+//    int32_t currentBitRate = fBytesDuringBucket * 1000 / (inCurrentTime - fPreviousBucketBegin);
+//  int32_t averageBitRate = (fBytesDuringPreviousSecond + fBytesDuringLastSecond) * 1000 / (inCurrentTime - fPreviousSecondStart);
+//    int32_t averageBitRate = fBytesDuringPreviousSecond * 1000 / (fLastSecondStart - fPreviousSecondStart);
 	fBucketTimeAhead = inTransmitTime - inCurrentTime;
 	//	printf("Current br = %d, average br = %d (cta = %qd, pta = %qd)\n", currentBitRate, averageBitRate, currentTimeAhead, fPreviousBucketTimeAhead);
 
@@ -159,7 +159,7 @@ void RTPOverbufferWindow::ResetOverBufferWindow()
 	fOverbufferWindowBegin = -1;
 }
 
-void RTPOverbufferWindow::AddPacketToWindow(SInt32 inPacketSize)
+void RTPOverbufferWindow::AddPacketToWindow(int32_t inPacketSize)
 {
 	fBytesDuringBucket += inPacketSize;
 	fBytesDuringLastSecond += inPacketSize;

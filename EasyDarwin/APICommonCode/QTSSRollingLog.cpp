@@ -262,10 +262,10 @@ bool QTSSRollingLog::CheckRollLog()
         if (-1 != calendarTime)
         {
             double theExactInterval = ::difftime(calendarTime, logCreateTimeMidnight);
-            SInt32 theCurInterval = (SInt32)::floor(theExactInterval);
+            int32_t theCurInterval = (int32_t)::floor(theExactInterval);
             
             //transfer_roll_interval is in days, theCurInterval is in seconds
-            SInt32 theRollInterval = this->GetRollIntervalInDays() * 60 * 60 * 24;
+            int32_t theRollInterval = this->GetRollIntervalInDays() * 60 * 60 * 24;
             if (theCurInterval > theRollInterval)
                 return this->RollLog();
         }
@@ -319,13 +319,13 @@ bool QTSSRollingLog::RenameLogFile(const char* inFileName)
     qtss_strftime(timeString,  10, ".%y%m%d", theLocalTime);
     ::strcat(theNewNameBuffer, timeString);
     
-    SInt32 theBaseNameLength = ::strlen(theNewNameBuffer);
+    int32_t theBaseNameLength = ::strlen(theNewNameBuffer);
 
 
     //loop until we find a unique name to rename this file
     //and append the log number and suffix
-    SInt32 theErr = 0;
-    for (SInt32 x = 0; (theErr == 0) && (x<=1000); x++)
+    int32_t theErr = 0;
+    for (int32_t x = 0; (theErr == 0) && (x<=1000); x++)
     {
         if (x  == 1000) //we don't have any digits left, so just reuse the "---" until tomorrow...
         {
@@ -349,7 +349,7 @@ bool QTSSRollingLog::RenameLogFile(const char* inFileName)
     //rename the file. Use posix rename function
     int result = ::rename(inFileName, theNewNameBuffer);
     if (result == -1)
-        theErr = (SInt32)OSThread::GetErrno();
+        theErr = (int32_t)OSThread::GetErrno();
     else
         theErr = 0;
         
@@ -419,7 +419,7 @@ time_t QTSSRollingLog::ReadLogHeader(FILE* inFile)
     //Returns -1 if the header is bogus. In that case, just ignore time based log rolling
 
     //first seek to the beginning of the file
-    SInt32 theCurrentPos = ::ftell(inFile);
+    int32_t theCurrentPos = ::ftell(inFile);
     if (theCurrentPos == -1)
         return -1;
     (void)::rewind(inFile);

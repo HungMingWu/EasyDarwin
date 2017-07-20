@@ -155,21 +155,21 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
 				
         void            SetMinQuality() { SetQualityLevel(fNumQualityLevels); }
         void            SetMaxQuality() { SetQualityLevel(kMaxQualityLevel); }
-        SInt32          GetQualityLevel();
-        void            SetQualityLevel(SInt32 level);
+        int32_t          GetQualityLevel();
+        void            SetQualityLevel(int32_t level);
 		void			HalveQualityLevel()
 		{
 			uint32_t minLevel = fNumQualityLevels - 1;
 			SetQualityLevel(minLevel - (minLevel - GetQualityLevel()) / 2);
 		}
-		void			SetMaxQualityLevelLimit(SInt32 newMaxLimit) //Changes what is the best quality level possible
+		void			SetMaxQualityLevelLimit(int32_t newMaxLimit) //Changes what is the best quality level possible
 		{
-			SInt32 minLevel = MAX(0, (SInt32) fNumQualityLevels - 2); //do not drop down  to key frames
+			int32_t minLevel = MAX(0, (int32_t) fNumQualityLevels - 2); //do not drop down  to key frames
 			fMaxQualityLevel = MAX(MIN(minLevel, newMaxLimit), 0);
 			SetQualityLevel(GetQualityLevel());
 		}
 
-		SInt32			GetMaxQualityLevelLimit() { return fMaxQualityLevel; }
+		int32_t			GetMaxQualityLevelLimit() { return fMaxQualityLevel; }
 		
 		uint32_t          GetNumQualityLevels() { return fNumQualityLevels; } 
 		QTSS_RTPPayloadType GetPayLoadType() { return fPayloadType; }
@@ -189,7 +189,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         };
     
         SInt64 fLastQualityChange;
-        SInt32 fQualityInterval;
+        int32_t fQualityInterval;
 
         //either pointers to the statically allocated sockets (maintained by the server)
         //or fresh ones (only fresh in extreme special cases)
@@ -198,8 +198,8 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
 
         // info for kinda reliable UDP
         //DssDurationTimer      fInfoDisplayTimer;
-        SInt32                  fBytesSentThisInterval;
-        SInt32                  fDisplayCount;
+        int32_t                  fBytesSentThisInterval;
+        int32_t                  fDisplayCount;
         bool                  fSawFirstPacket;
         SInt64                  fStreamCumDuration;
         // manages UDP retransmits
@@ -247,7 +247,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         char        fStreamURL[kMaxStreamURLSizeInBytes];
         StrPtrLen   fStreamURLPtr;
         
-        SInt32      fQualityLevel;
+        int32_t      fQualityLevel;
         uint32_t      fNumQualityLevels;
         
         uint32_t      fLastRTPTimestamp;
@@ -286,9 +286,9 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         // that are dependent on prefs and parameters in the SETUP.
         // These params, as well as the current packet delay determine
         // whether a packet gets dropped.
-        SInt32      fTurnThinningOffDelay_TCP;
-        SInt32      fIncreaseThinningDelay_TCP;
-        SInt32      fDropAllPacketsForThisStreamDelay_TCP;
+        int32_t      fTurnThinningOffDelay_TCP;
+        int32_t      fIncreaseThinningDelay_TCP;
+        int32_t      fDropAllPacketsForThisStreamDelay_TCP;
         uint32_t      fStalePacketsDropped_TCP;
         SInt64      fTimeStreamCaughtUp_TCP;
         SInt64      fLastQualityLevelIncreaseTime_TCP;
@@ -297,13 +297,13 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         // that are dependent on prefs and parameters in the SETUP.
         // These params, as well as the current packet delay determine
         // whether a packet gets dropped.
-        SInt32      fThinAllTheWayDelay;
-        SInt32      fAlwaysThinDelay;
-        SInt32      fStartThinningDelay;
-        SInt32      fStartThickingDelay;
-        SInt32      fThickAllTheWayDelay;
-        SInt32      fQualityCheckInterval;
-        SInt32      fDropAllPacketsForThisStreamDelay;
+        int32_t      fThinAllTheWayDelay;
+        int32_t      fAlwaysThinDelay;
+        int32_t      fStartThinningDelay;
+        int32_t      fStartThickingDelay;
+        int32_t      fThickAllTheWayDelay;
+        int32_t      fQualityCheckInterval;
+        int32_t      fDropAllPacketsForThisStreamDelay;
         uint32_t      fStalePacketsDropped;
         SInt64      fLastCurrentPacketDelay;
         bool      fWaitOnLevelAdjustment;
@@ -315,7 +315,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         QTSS_StreamRef  fStreamRef;
         
         uint32_t      fCurrentAckTimeout;
-        SInt32      fMaxSendAheadTimeMSec;
+        int32_t      fMaxSendAheadTimeMSec;
         
 #if DEBUG
         uint32_t      fNumPacketsDroppedOnTCPFlowControl;
@@ -332,13 +332,13 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         
         SInt64  fStreamStartTimeOSms;
                 
-        SInt32 fLastQualityLevel;
-        SInt32 fLastRateLevel;
+        int32_t fLastQualityLevel;
+        int32_t fLastRateLevel;
        
         bool fDisableThinning;
         SInt64 fLastQualityUpdate;
         uint32_t fDefaultQualityLevel;
-        SInt32 fMaxQualityLevel;
+        int32_t fMaxQualityLevel;
 		bool fInitialMaxQualityLevelIsSet;
 		bool fUDPMonitorEnabled;
 		uint16_t fMonitorVideoDestPort;
@@ -373,10 +373,10 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         char *GetStreamTypeStr();
         enum { rtp = 0, rtcpSR = 1, rtcpRR = 2, rtcpACK = 3, rtcpAPP = 4 };
         float GetStreamStartTimeSecs() { return (float) ((OS::Milliseconds() - this->fSession->GetSessionCreateTime())/1000.0); }
-        void PrintPacket(char *inBuffer, uint32_t inLen, SInt32 inType); 
+        void PrintPacket(char *inBuffer, uint32_t inLen, int32_t inType); 
         void PrintRTP(char* packetBuff, uint32_t inLen);
         void PrintRTCPSenderReport(char* packetBuff, uint32_t inLen);
-inline  void PrintPacketPrefEnabled(char *inBuffer,uint32_t inLen, SInt32 inType) { if (QTSServerInterface::GetServer()->GetPrefs()->PacketHeaderPrintfsEnabled() ) this->PrintPacket(inBuffer,inLen, inType); }
+inline  void PrintPacketPrefEnabled(char *inBuffer,uint32_t inLen, int32_t inType) { if (QTSServerInterface::GetServer()->GetPrefs()->PacketHeaderPrintfsEnabled() ) this->PrintPacket(inBuffer,inLen, inType); }
 
         void SetOverBufferState(RTSPRequestInterface* request);
         

@@ -52,7 +52,7 @@ static bool SampleConfigSetter(const char* paramName, const char* paramValue[], 
 
 	while (paramValue[x])
 	{
-		qtss_printf(" value(%" _S32BITARG_ "): %s ", (SInt32)x, (char *)paramValue[x]);
+		qtss_printf(" value(%" _S32BITARG_ "): %s ", (int32_t)x, (char *)paramValue[x]);
 		x++;
 	}
 
@@ -101,8 +101,8 @@ int ParseConfigFile(
 
 	if (configFile)
 	{
-		SInt32    lineBuffSize = kConfParserMaxLineSize;
-		SInt32    wordBuffSize = kConfParserMaxParamSize;
+		int32_t    lineBuffSize = kConfParserMaxLineSize;
+		int32_t    wordBuffSize = kConfParserMaxParamSize;
 
 		char    lineBuff[kConfParserMaxLineSize];
 		char    wordBuff[kConfParserMaxParamSize];

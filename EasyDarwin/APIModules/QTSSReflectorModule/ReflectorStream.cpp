@@ -278,7 +278,7 @@ void ReflectorStream::AllocateBucketArray(uint32_t inNumBuckets)
 }
 
 
-SInt32 ReflectorStream::AddOutput(ReflectorOutput* inOutput, SInt32 putInThisBucket)
+int32_t ReflectorStream::AddOutput(ReflectorOutput* inOutput, int32_t putInThisBucket)
 {
 	OSMutexLocker locker(&fBucketMutex);
 
@@ -308,7 +308,7 @@ SInt32 ReflectorStream::AddOutput(ReflectorOutput* inOutput, SInt32 putInThisBuc
 		{
 			fOutputArray[putInThisBucket][y] = inOutput;
 #if REFLECTOR_STREAM_DEBUGGING 
-			qtss_printf("Adding new output (0x%lx) to bucket %" _S32BITARG_ ", index %" _S32BITARG_ ",\nnum buckets %li bucketSize: %li \n", (SInt32)inOutput, putInThisBucket, y, (SInt32)fNumBuckets, (SInt32)sBucketSize);
+			qtss_printf("Adding new output (0x%lx) to bucket %" _S32BITARG_ ", index %" _S32BITARG_ ",\nnum buckets %li bucketSize: %li \n", (int32_t)inOutput, putInThisBucket, y, (int32_t)fNumBuckets, (int32_t)sBucketSize);
 #endif
 			fNumElements++;
 			return putInThisBucket;
@@ -318,14 +318,14 @@ SInt32 ReflectorStream::AddOutput(ReflectorOutput* inOutput, SInt32 putInThisBuc
 	return -1;
 }
 
-SInt32 ReflectorStream::FindBucket()
+int32_t ReflectorStream::FindBucket()
 {
 	// If we need more buckets, allocate them.
 	if (fNumElements == (sBucketSize * fNumBuckets))
 		this->AllocateBucketArray(fNumBuckets * 2);
 
 	//find the first open spot in the array
-	for (SInt32 putInThisBucket = 0; (uint32_t)putInThisBucket < fNumBuckets; putInThisBucket++)
+	for (int32_t putInThisBucket = 0; (uint32_t)putInThisBucket < fNumBuckets; putInThisBucket++)
 	{
 		for (uint32_t y = 0; y < sBucketSize; y++)
 			if (fOutputArray[putInThisBucket][y] == NULL)
@@ -794,7 +794,7 @@ void ReflectorSender::ReflectRelayPackets(SInt64* ioWakeupTime, OSQueue* inFreeQ
 		fStream->SendReceiverReport();
 #if REFLECTOR_STREAM_DEBUGGING > 2
 		printQueueLenOnExit = true;
-		printf("fPacketQueue len %li\n", (SInt32)fPacketQueue.GetLength());
+		printf("fPacketQueue len %li\n", (int32_t)fPacketQueue.GetLength());
 #endif	
 	}
 
@@ -826,7 +826,7 @@ void ReflectorSender::ReflectRelayPackets(SInt64* ioWakeupTime, OSQueue* inFreeQ
 
 			if (theOutput != NULL)
 			{
-				SInt32			availBookmarksPosition = -1;	// -1 == invalid position
+				int32_t			availBookmarksPosition = -1;	// -1 == invalid position
 				OSQueueElem*	packetElem = NULL;
 				uint32_t			curBookmark = 0;
 
@@ -866,7 +866,7 @@ void ReflectorSender::ReflectRelayPackets(SInt64* ioWakeupTime, OSQueue* inFreeQ
 				if (packetElem)	// show 'em what we got johnny
 				{
 					ReflectorPacket* 	thePacket = (ReflectorPacket*)packetElem->GetEnclosingObject();
-					printf("Bookmarked packet time: %li, packetSeq %i\n", (SInt32)thePacket->fTimeArrived, DGetPacketSeqNumber(&thePacket->fPacketPtr));
+					printf("Bookmarked packet time: %li, packetSeq %i\n", (int32_t)thePacket->fTimeArrived, DGetPacketSeqNumber(&thePacket->fPacketPtr));
 				}
 #endif
 
@@ -882,7 +882,7 @@ void ReflectorSender::ReflectRelayPackets(SInt64* ioWakeupTime, OSQueue* inFreeQ
 					if (packetElem)	// show 'em what we got johnny
 					{
 						ReflectorPacket* 	thePacket = (ReflectorPacket*)packetElem->GetEnclosingObject();
-						printf("1st new packet from Sender sess 0x%lx time: %li, packetSeq %i\n", (SInt32)theOutput, (SInt32)thePacket->fTimeArrived, DGetPacketSeqNumber(&thePacket->fPacketPtr));
+						printf("1st new packet from Sender sess 0x%lx time: %li, packetSeq %i\n", (int32_t)theOutput, (int32_t)thePacket->fTimeArrived, DGetPacketSeqNumber(&thePacket->fPacketPtr));
 					}
 					else
 						printf("no new packets\n");
@@ -901,7 +901,7 @@ void ReflectorSender::ReflectRelayPackets(SInt64* ioWakeupTime, OSQueue* inFreeQ
 					QTSS_Error			err = QTSS_NoErr;
 
 #if REFLECTOR_STREAM_DEBUGGING > 2
-					printf("packet time: %li, packetSeq %i\n", (SInt32)thePacket->fTimeArrived, DGetPacketSeqNumber(&thePacket->fPacketPtr));
+					printf("packet time: %li, packetSeq %i\n", (int32_t)thePacket->fTimeArrived, DGetPacketSeqNumber(&thePacket->fPacketPtr));
 #endif
 
 					// once we see a packet we cant' send, we need to stop trying
@@ -912,7 +912,7 @@ void ReflectorSender::ReflectRelayPackets(SInt64* ioWakeupTime, OSQueue* inFreeQ
 						// packetLateness measures how late this packet it after being corrected for the bucket delay
 
 #if REFLECTOR_STREAM_DEBUGGING > 2
-						printf("packetLateness %li, seq# %li\n", (SInt32)packetLateness, (SInt32)DGetPacketSeqNumber(&thePacket->fPacketPtr));
+						printf("packetLateness %li, seq# %li\n", (int32_t)packetLateness, (int32_t)DGetPacketSeqNumber(&thePacket->fPacketPtr));
 #endif
 
 						SInt64 timeToSendPacket = -1;
@@ -921,7 +921,7 @@ void ReflectorSender::ReflectRelayPackets(SInt64* ioWakeupTime, OSQueue* inFreeQ
 						if (err == QTSS_WouldBlock)
 						{
 #if REFLECTOR_STREAM_DEBUGGING > 2
-							printf("EAGAIN bookmark: %li, packetSeq %i\n", (SInt32)packetLateness, DGetPacketSeqNumber(&thePacket->fPacketPtr));
+							printf("EAGAIN bookmark: %li, packetSeq %i\n", (int32_t)packetLateness, DGetPacketSeqNumber(&thePacket->fPacketPtr));
 #endif
 							// tag it and bookmark it
 							thePacket->fNeededByOutput = true;
@@ -995,7 +995,7 @@ void ReflectorSender::ReflectRelayPackets(SInt64* ioWakeupTime, OSQueue* inFreeQ
 
 #if REFLECTOR_STREAM_DEBUGGING > 2
 	if (printQueueLenOnExit)
-		printf("EXIT fPacketQueue len %li\n", (SInt32)fPacketQueue.GetLength());
+		printf("EXIT fPacketQueue len %li\n", (int32_t)fPacketQueue.GetLength());
 #endif
 }
 
@@ -1151,7 +1151,7 @@ OSQueueElem*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOutput,
 		SInt64  packetLateness = bucketDelay;
 		SInt64 timeToSendPacket = -1;
 
-		//printf("packetLateness %qd, seq# %li\n", packetLateness, (SInt32) DGetPacketSeqNumber( &thePacket->fPacketPtr ) );          
+		//printf("packetLateness %qd, seq# %li\n", packetLateness, (int32_t) DGetPacketSeqNumber( &thePacket->fPacketPtr ) );          
 
 		err = theOutput->WritePacket(&thePacket->fPacketPtr, fStream, fWriteFlag, packetLateness, &timeToSendPacket, &thePacket->fStreamCountID, &thePacket->fTimeArrived, firstPacket);
 
@@ -1697,7 +1697,7 @@ SInt64 ReflectorSocket::Run()
 	//anything up, but it would waste CPU.
 	if (theEvents & Task::kIdleEvent)
 	{
-		SInt32 temp = (SInt32)(fSleepTime - theMilliseconds);
+		int32_t temp = (int32_t)(fSleepTime - theMilliseconds);
 		char tempBuf[20];
 		qtss_sprintf(tempBuf, "%" _S32BITARG_ "", temp);
 		WarnV(fSleepTime <= theMilliseconds, tempBuf);

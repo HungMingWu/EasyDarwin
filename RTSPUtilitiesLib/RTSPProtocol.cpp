@@ -65,7 +65,7 @@ QTSS_RTSPMethod RTSPProtocol::GetMethod(const StrPtrLen &inMethodStr)
 		(inMethodStr.EqualIgnoreCase(sMethods[theMethod].Ptr, sMethods[theMethod].Len)))
 		return theMethod;
 
-	for (SInt32 x = qtssNumVIPMethods; x < qtssIllegalMethod; x++)
+	for (int32_t x = qtssNumVIPMethods; x < qtssIllegalMethod; x++)
 		if (inMethodStr.EqualIgnoreCase(sMethods[x].Ptr, sMethods[x].Len))
 			return x;
 	return qtssIllegalMethod;
@@ -155,7 +155,7 @@ QTSS_RTSPHeader RTSPProtocol::GetRequestHeader(const StrPtrLen &inHeaderStr)
 	// are very likely to appear in requests.
 	if (theHeader == qtssExtensionHeaders)
 	{
-		for (SInt32 y = qtssExtensionHeaders; y < qtssNumHeaders; y++)
+		for (int32_t y = qtssExtensionHeaders; y < qtssNumHeaders; y++)
 		{
 			if (inHeaderStr.EqualIgnoreCase(sHeaders[y].Ptr, sHeaders[y].Len))
 				return y;
@@ -172,7 +172,7 @@ QTSS_RTSPHeader RTSPProtocol::GetRequestHeader(const StrPtrLen &inHeaderStr)
 	//
 	//If this isn't one of our VIP headers, go through the remaining request headers, trying
 	//to find the right one.
-	for (SInt32 x = qtssNumVIPHeaders; x < qtssNumHeaders; x++)
+	for (int32_t x = qtssNumVIPHeaders; x < qtssNumHeaders; x++)
 	{
 		if (inHeaderStr.EqualIgnoreCase(sHeaders[x].Ptr, sHeaders[x].Len))
 			return x;
@@ -234,7 +234,7 @@ StrPtrLen RTSPProtocol::sStatusCodeStrings[] =
 	StrPtrLen("Option Not Supported")                   //kServerOptionNotSupported
 };
 
-SInt32 RTSPProtocol::sStatusCodes[] =
+int32_t RTSPProtocol::sStatusCodes[] =
 {
 	100,        //kContinue
 	200,        //kSuccessOK

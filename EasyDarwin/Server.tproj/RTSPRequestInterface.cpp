@@ -95,7 +95,7 @@ QTSSAttrInfoDict::AttrInfo  RTSPRequestInterface::sAttributes[] =
 	/* 34 */ { "qtssRTSPReqAuthScheme",         NULL,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
 	/* 35 */ { "qtssRTSPReqSkipAuthorization",  NULL,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
 	/* 36 */ { "qtssRTSPReqNetworkMode",		NULL,					qtssAttrDataTypeUInt32,		qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 37 */ { "qtssRTSPReqDynamicRateValue",	NULL,					qtssAttrDataTypeSInt32,		qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 37 */ { "qtssRTSPReqDynamicRateValue",	NULL,					qtssAttrDataTypeint32_t,		qtssAttrModeRead | qtssAttrModePreempSafe },
 
 	/* 39 */ { "qtssRTSPReqBandwidthBits",	    NULL,					qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 39 */ { "qtssRTSPReqUserFound",          NULL,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
@@ -698,7 +698,7 @@ void* RTSPRequestInterface::GetFileName(QTSSDictionary* inRequest, uint32_t* /*o
 	}
 
 	//walk back in the file name until we hit a /
-	SInt32 x = 0;
+	int32_t x = 0;
 	int i = 0;
 	for (; x < theFileNameParam->Len; x++ )
 		if (theFileNameParam->Ptr[x] == kPathDelimiterChar)

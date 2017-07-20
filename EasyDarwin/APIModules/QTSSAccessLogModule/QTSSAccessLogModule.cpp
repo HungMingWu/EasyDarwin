@@ -728,7 +728,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	StrPtrLen theRespMsg;
 	(void)QTSS_GetValuePtr(inClientSession, qtssCliRTSPReqRespMsg, 0, (void**)&theRespMsg.Ptr, &theRespMsg.Len);
 	StrPtrLen respMsgEncoded(respMsgBuffer, 1024 - 1);
-	SInt32 theErr = StringTranslator::EncodeURL(theRespMsg.Ptr, theRespMsg.Len, respMsgEncoded.Ptr, respMsgEncoded.Len);
+	int32_t theErr = StringTranslator::EncodeURL(theRespMsg.Ptr, theRespMsg.Len, respMsgEncoded.Ptr, respMsgEncoded.Len);
 	if (theErr <= 0)
 		respMsgEncoded.Ptr[0] = '\0';
 	else

@@ -51,11 +51,11 @@ class QTHintTrackRTPHeaderData {
 public:
 	uint16_t      rtpHeaderBits;
 	uint16_t      rtpSequenceNumber;
-	SInt32      relativePacketTransmissionTime;
+	int32_t      relativePacketTransmissionTime;
 	uint16_t      hintFlags;
 	uint16_t      dataEntryCount;
 	uint32_t      tlvSize;
-	SInt32      tlvTimestampOffset; //'rtpo' TLV which is the timestamp offset for this packet
+	int32_t      tlvTimestampOffset; //'rtpo' TLV which is the timestamp offset for this packet
 };
 
 //
@@ -116,7 +116,7 @@ public:
 	UInt64              fCurrentPacketNumber;
 	UInt64              fCurrentPacketPosition;
 
-	SInt32              fMediaTrackRefIndex;
+	int32_t              fMediaTrackRefIndex;
 	QTAtom_stsc_SampleTableControlBlock * fMediaTrackSTSC_STCB;
 
 };

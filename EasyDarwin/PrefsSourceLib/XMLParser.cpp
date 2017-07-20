@@ -66,7 +66,7 @@ bool XMLParser::ParseFile(char* errorBuffer, int errorBufferSize)
 		return false;   // we don't have a valid file;
 	}
 
-	char* fileData = new char[(SInt32)(fFile.GetLength() + 1)];
+	char* fileData = new char[(int32_t)(fFile.GetLength() + 1)];
 	uint32_t theLengthRead = 0;
 	fFile.Read(0, fileData, (uint32_t)fFile.GetLength(), &theLengthRead);
 

@@ -176,7 +176,7 @@ static StrPtrLen sBroadcasterGroup;
 
 static QTSS_AttributeID sBroadcastDirListID = qtssIllegalAttrID;
 
-static SInt32   sWaitTimeLoopCount = 10;
+static int32_t   sWaitTimeLoopCount = 10;
 
 // Important strings
 static StrPtrLen    sSDPKillSuffix(".kill");
@@ -324,7 +324,7 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 	static char*        sKillClientsEnabledName = "QTSSReflectorModuleTearDownClients";
 
 	static char*        sRTPInfoWaitTime = "QTSSReflectorModuleRTPInfoWaitTime";
-	(void)QTSS_AddStaticAttribute(qtssClientSessionObjectType, sRTPInfoWaitTime, NULL, qtssAttrDataTypeSInt32);
+	(void)QTSS_AddStaticAttribute(qtssClientSessionObjectType, sRTPInfoWaitTime, NULL, qtssAttrDataTypeint32_t);
 	(void)QTSS_IDForAttr(qtssClientSessionObjectType, sRTPInfoWaitTime, &sRTPInfoWaitTimeAttr);
 
 	(void)QTSS_AddStaticAttribute(qtssClientSessionObjectType, sOutputName, NULL, qtssAttrDataTypeVoidPointer);
@@ -1770,7 +1770,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	Assert(theErr == QTSS_NoErr);
 
 	// We only want to allow over buffering to dynamic rate clients   
-	SInt32  canDynamicRate = -1;
+	int32_t  canDynamicRate = -1;
 	theLen = sizeof(canDynamicRate);
 	(void)QTSS_GetValue(inParams->inRTSPRequest, qtssRTSPReqDynamicRateState, 0, (void*)&canDynamicRate, &theLen);
 	if (canDynamicRate < 1) // -1 no rate field, 0 off
@@ -1982,7 +1982,7 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 			}
 			else
 			{
-				SInt32 waitTimeLoopCount = 0;
+				int32_t waitTimeLoopCount = 0;
 				theLen = sizeof(waitTimeLoopCount);
 				theErr = QTSS_GetValue(inParams->inClientSession, sRTPInfoWaitTimeAttr, 0, &waitTimeLoopCount, &theLen);
 				if (theErr != QTSS_NoErr)

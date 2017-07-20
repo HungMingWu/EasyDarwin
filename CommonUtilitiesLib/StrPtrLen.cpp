@@ -347,8 +347,8 @@ void StrPtrLen::PrintStrEOL(char* stopStr, char* appendStr)
 
 	char *thestr = GetAsCString();
 
-	SInt32 i = 0;
-	for (; i < (SInt32)Len; i++)
+	int32_t i = 0;
+	for (; i < (int32_t)Len; i++)
 	{
 		if (StrPtrLen::sNonPrintChars[(uint8_t)Ptr[i]])
 		{
@@ -366,7 +366,7 @@ void StrPtrLen::PrintStrEOL(char* stopStr, char* appendStr)
 		}
 	}
 
-	SInt32 stopLen = 0;
+	int32_t stopLen = 0;
 	if (stopStr != NULL)
 		stopLen = ::strlen(stopStr);
 
@@ -386,7 +386,7 @@ void StrPtrLen::PrintStrEOL(char* stopStr, char* appendStr)
 	char * theChar = NULL;
 	static char *cr = "\\r";
 	static char *lf = "\\n\n";
-	SInt32 tempLen = i;
+	int32_t tempLen = i;
 	for (i = 0; i < tempLen; i++)
 	{
 		if (theStrLine[i] == '\r')

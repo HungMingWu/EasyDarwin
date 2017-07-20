@@ -124,8 +124,8 @@ QTSS_Error QTSSModuleUtils::ReadEntireFile(char* inPath, StrPtrLen* outData, QTS
 				break;
 	
 			// Allocate memory for the file data
-			outData->Ptr = new char[ (SInt32) (*theLength + 1) ];
-			outData->Len = (SInt32) *theLength;
+			outData->Ptr = new char[ (int32_t) (*theLength + 1) ];
+			outData->Len = (int32_t) *theLength;
 			outData->Ptr[outData->Len] = 0;
 		
 			// Read the data

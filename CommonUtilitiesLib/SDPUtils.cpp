@@ -30,7 +30,7 @@
 #include "ResizeableStringFormatter.h"
 #include "StringParser.h"
 
-SInt32 SDPContainer::AddHeaderLine(StrPtrLen *theLinePtr)
+int32_t SDPContainer::AddHeaderLine(StrPtrLen *theLinePtr)
 {
 	Assert(theLinePtr);
 	uint32_t thisLine = fNumUsedLines;
@@ -52,9 +52,9 @@ SInt32 SDPContainer::AddHeaderLine(StrPtrLen *theLinePtr)
 	return thisLine;
 }
 
-SInt32 SDPContainer::FindHeaderLineType(char id, SInt32 start)
+int32_t SDPContainer::FindHeaderLineType(char id, int32_t start)
 {
-	SInt32 theIndex = -1;
+	int32_t theIndex = -1;
 
 	if (start >= fNumUsedLines || start < 0)
 		return -1;
@@ -84,7 +84,7 @@ SDPLine* SDPContainer::GetNextLine()
 
 }
 
-SDPLine* SDPContainer::GetLine(SInt32 lineIndex)
+SDPLine* SDPContainer::GetLine(int32_t lineIndex)
 {
 
 	if (lineIndex > -1 && lineIndex < fNumUsedLines)
@@ -95,7 +95,7 @@ SDPLine* SDPContainer::GetLine(SInt32 lineIndex)
 	return NULL;
 }
 
-void SDPContainer::SetLine(SInt32 index)
+void SDPContainer::SetLine(int32_t index)
 {
 	if (index > -1 && index < fNumUsedLines)
 	{
@@ -221,7 +221,7 @@ bool SDPContainer::SetSDPBuffer(StrPtrLen *sdpBufferPtr)
 }
 
 
-void  SDPContainer::PrintLine(SInt32 lineIndex)
+void  SDPContainer::PrintLine(int32_t lineIndex)
 {
 	StrPtrLen *printLinePtr = GetLine(lineIndex);
 	if (printLinePtr)
@@ -340,7 +340,7 @@ SDPLineSorter::SDPLineSorter(SDPContainer *rawSDPContainerPtr, float adjustMedia
 	bool addLine = true;
 	for (int16_t fieldTypeIndex = 0; fieldTypeIndex < numHeaderTypes; fieldTypeIndex++)
 	{
-		SInt32 lineIndex = fSessionSDPContainer.FindHeaderLineType(SDPLineSorter::sSessionOrderedLines[fieldTypeIndex], 0);
+		int32_t lineIndex = fSessionSDPContainer.FindHeaderLineType(SDPLineSorter::sSessionOrderedLines[fieldTypeIndex], 0);
 		StrPtrLen *theHeaderLinePtr = fSessionSDPContainer.GetLine(lineIndex);
 
 		while (theHeaderLinePtr != NULL)
@@ -366,7 +366,7 @@ SDPLineSorter::SDPLineSorter(SDPContainer *rawSDPContainerPtr, float adjustMedia
 char* SDPLineSorter::GetSortedSDPCopy()
 {
 	char* fullbuffCopy = new char[fSessionHeaders.Len + fMediaHeaders.Len + 2];
-	SInt32 buffPos = 0;
+	int32_t buffPos = 0;
 	memcpy(&fullbuffCopy[buffPos], fSessionHeaders.Ptr, fSessionHeaders.Len);
 	buffPos += fSessionHeaders.Len;
 	memcpy(&fullbuffCopy[buffPos], fMediaHeaders.Ptr, fMediaHeaders.Len);

@@ -54,7 +54,7 @@ public:
 	~OSCond();
 
 	inline void     Signal();
-	inline void     Wait(OSMutex* inMutex, SInt32 inTimeoutInMilSecs = 0);
+	inline void     Wait(OSMutex* inMutex, int32_t inTimeoutInMilSecs = 0);
 	inline void     Broadcast();
 
 private:
@@ -64,13 +64,13 @@ private:
 	uint32_t              fWaitCount;
 #elif __PTHREADS_MUTEXES__
 	pthread_cond_t      fCondition;
-	void                TimedWait(OSMutex* inMutex, SInt32 inTimeoutInMilSecs);
+	void                TimedWait(OSMutex* inMutex, int32_t inTimeoutInMilSecs);
 #else
 	mycondition_t       fCondition;
 #endif
 };
 
-inline void OSCond::Wait(OSMutex* inMutex, SInt32 inTimeoutInMilSecs)
+inline void OSCond::Wait(OSMutex* inMutex, int32_t inTimeoutInMilSecs)
 {
 #ifdef __Win32__
 	DWORD theTimeout = INFINITE;

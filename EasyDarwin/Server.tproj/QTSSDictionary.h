@@ -315,7 +315,7 @@ public:
 
 	//
 	// CONVERTING attribute IDs to array indexes. Returns -1 if inAttrID doesn't exist
-	inline SInt32                   ConvertAttrIDToArrayIndex(QTSS_AttributeID inAttrID);
+	inline int32_t                   ConvertAttrIDToArrayIndex(QTSS_AttributeID inAttrID);
 
 	static bool           IsInstanceAttrID(QTSS_AttributeID inAttrID)
 	{
@@ -451,10 +451,10 @@ private:
 	friend class QTSSDictionary;
 };
 
-inline SInt32   QTSSDictionaryMap::ConvertAttrIDToArrayIndex(QTSS_AttributeID inAttrID)
+inline int32_t   QTSSDictionaryMap::ConvertAttrIDToArrayIndex(QTSS_AttributeID inAttrID)
 {
-	SInt32 theIndex = inAttrID & 0x7FFFFFFF;
-	if ((theIndex < 0) || (theIndex >= (SInt32)fNextAvailableID))
+	int32_t theIndex = inAttrID & 0x7FFFFFFF;
+	if ((theIndex < 0) || (theIndex >= (int32_t)fNextAvailableID))
 		return -1;
 	else
 		return theIndex;

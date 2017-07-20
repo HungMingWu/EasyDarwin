@@ -40,7 +40,7 @@
 char*   StringFormatter::sEOL = "\r\n";
 uint32_t  StringFormatter::sEOLLen = 2;
 
-void StringFormatter::Put(const SInt32 num)
+void StringFormatter::Put(const int32_t num)
 {
 	char buff[32];
 	qtss_sprintf(buff, "%" _S32BITARG_ "", num);

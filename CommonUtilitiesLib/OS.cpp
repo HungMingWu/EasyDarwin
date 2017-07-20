@@ -153,7 +153,7 @@ SInt64 OS::Milliseconds()
 
 	// For debugging purposes
 	//SInt64 tempCurMsec = (curTimeMilli - sInitialMsec) + sMsecSince1970;
-	//SInt32 tempCurSec = tempCurMsec / 1000;
+	//int32_t tempCurSec = tempCurMsec / 1000;
 	//char buffer[kTimeStrSize];
 	//qtss_printf("OS::MilliSeconds current time = %s\n", qtss_ctime(&tempCurSec, buffer, sizeof(buffer)));
 
@@ -211,7 +211,7 @@ SInt64 OS::Microseconds()
 #endif
 }
 
-SInt32 OS::GetGMTOffset()
+int32_t OS::GetGMTOffset()
 {
 #ifdef __Win32__
 	TIME_ZONE_INFORMATION tzInfo;

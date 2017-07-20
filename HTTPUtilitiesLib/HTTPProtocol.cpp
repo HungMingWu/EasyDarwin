@@ -165,7 +165,7 @@ HTTPHeader HTTPProtocol::GetHeader(const StrPtrLen* inHeaderStr)
 
 	//If this isn't one of our VIP headers, go through the remaining request headers, trying
 	//to find the right one.
-	for (SInt32 x = httpNumVIPHeaders; x < httpNumHeaders; x++)
+	for (int32_t x = httpNumVIPHeaders; x < httpNumHeaders; x++)
 		if (inHeaderStr->EqualIgnoreCase(sHeaders[x].Ptr, sHeaders[x].Len))
 			return x;
 	return httpIllegalHeader;
@@ -215,7 +215,7 @@ StrPtrLen HTTPProtocol::sStatusCodeStrings[] =
 	StrPtrLen("HTTP Version not supported")     //kHTTPVersionNotSupported
 };
 
-SInt32 HTTPProtocol::sStatusCodes[] =
+int32_t HTTPProtocol::sStatusCodes[] =
 {
 	100,            //kContinue
 	101,            //kSwitchingProtocols
@@ -314,8 +314,8 @@ HTTPVersion HTTPProtocol::GetVersion(StrPtrLen* versionStr)
 {
 	if (versionStr->Len != 8)
 		return httpIllegalVersion;
-	SInt32 limit = httpNumVersions;
-	for (SInt32 x = 0; x < limit; x++)
+	int32_t limit = httpNumVersions;
+	for (int32_t x = 0; x < limit; x++)
 	{
 		if (versionStr->EqualIgnoreCase(sVersionStrings[x].Ptr, sVersionStrings[x].Len))
 			return x;
@@ -324,10 +324,10 @@ HTTPVersion HTTPProtocol::GetVersion(StrPtrLen* versionStr)
 	return httpIllegalVersion;
 }
 
-HTTPStatusCode	HTTPProtocol::GetStatusCodeEnum(SInt32 inCode)
+HTTPStatusCode	HTTPProtocol::GetStatusCodeEnum(int32_t inCode)
 {
 	HTTPStatusCode statusCode = httpInternalServerError;
-	for (SInt32 x = 0; x < httpNumStatusCodes; x++)
+	for (int32_t x = 0; x < httpNumStatusCodes; x++)
 		if (GetStatusCode(x) == inCode)
 			return x;
 	return statusCode;
@@ -338,8 +338,8 @@ EasyStreamType HTTPProtocol::GetStreamType(StrPtrLen* streamTypeStr)
 	if (streamTypeStr->Len < 3 || streamTypeStr->Len > 4)
 		return easyIllegalStreamType;
 
-	SInt32 limit = easyNumStreamTypes;
-	for (SInt32 x = 0; x < limit; x++)
+	int32_t limit = easyNumStreamTypes;
+	for (int32_t x = 0; x < limit; x++)
 	{
 		if (streamTypeStr->EqualIgnoreCase(sStreamTypes[x].Ptr, sStreamTypes[x].Len))
 			return x;

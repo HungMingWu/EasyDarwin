@@ -201,7 +201,7 @@ public:
 
 	bool                      SkipAuthorization() { return fSkipAuthorization; }
 
-	SInt32                      GetDynamicRateState() { return fEnableDynamicRateState; }
+	int32_t                      GetDynamicRateState() { return fEnableDynamicRateState; }
 
 	// DJM PROTOTYPE
 	uint32_t						GetRandomDataSize() { return fRandomDataSize; }
@@ -289,7 +289,7 @@ protected:
 
 	bool                      fSkipAuthorization;
 
-	SInt32                      fEnableDynamicRateState;
+	int32_t                      fEnableDynamicRateState;
 
 	// DJM PROTOTYPE
 	uint32_t						fRandomDataSize;

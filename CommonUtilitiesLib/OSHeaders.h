@@ -77,7 +77,6 @@
 
 #if 0 // old defs we are now using MacTypes.h
     /* Typedefs */
-    typedef signed int          SInt32;
     typedef signed long long	SInt64;
     typedef unsigned long long	UInt64;
     typedef UInt32              FourCharCode;
@@ -137,7 +136,6 @@
     /* Typedefs */
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef int32_t   		SInt32;
     typedef int64_t         	SInt64;
     typedef uint64_t          	UInt64;
     
@@ -234,7 +232,6 @@
     /* Typedefs */
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef signed long         SInt32;
     typedef LONGLONG            SInt64;
     typedef ULONGLONG           UInt64;
     
@@ -285,7 +282,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef signed long         SInt32;
     typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
 	
@@ -343,7 +339,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef signed long         SInt32;
     typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
     
@@ -394,7 +389,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef signed long         SInt32;
     typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
 
@@ -443,7 +437,6 @@
 
     /* Typedefs */
     typedef unsigned long       PointerSizedInt;
-    typedef signed int          SInt32;
     typedef signed long         SInt64;
     typedef unsigned long       UInt64;
     
@@ -465,7 +458,8 @@
 
 #endif
 
-typedef SInt32 OS_Error;
+#include <stdint.h>
+typedef int32_t OS_Error;
 
 enum
 {

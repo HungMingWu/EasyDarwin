@@ -80,7 +80,7 @@ public:
 	//
 	// AddPacket adds a new packet to the resend queue. This will not send the packet.
 	// AddPacket itself is not thread safe.
-	void                AddPacket(void * rtpPacket, uint32_t packetSize, SInt32 ageLimitInMsec);
+	void                AddPacket(void * rtpPacket, uint32_t packetSize, int32_t ageLimitInMsec);
 
 	//
 	// Acks a packet. Also not thread safe.
@@ -98,9 +98,9 @@ public:
 	//
 	// ACCESSORS
 	bool              IsFlowControlled() { return fBandwidthTracker->IsFlowControlled(); }
-	SInt32              GetMaxPacketsInList() { return fMaxPacketsInList; }
-	SInt32              GetNumPacketsInList() { return fPacketsInList; }
-	SInt32              GetNumResends() { return fNumResends; }
+	int32_t              GetMaxPacketsInList() { return fMaxPacketsInList; }
+	int32_t              GetNumPacketsInList() { return fPacketsInList; }
+	int32_t              GetNumResends() { return fNumResends; }
 
 	static uint32_t       GetNumRetransmitBuffers() { return sBufferPool.GetTotalNumBuffers(); }
 	static uint32_t       GetWastedBufferBytes() { return sNumWastedBytes; }
@@ -161,7 +161,7 @@ private:
 	static OSBufferPool sBufferPool;
 	static unsigned int sNumWastedBytes;
 
-	void            UpdateCongestionWindow(SInt32 bytesToOpenBy);
+	void            UpdateCongestionWindow(int32_t bytesToOpenBy);
 };
 
 #endif //__RTP_PACKET_RESENDER_H__

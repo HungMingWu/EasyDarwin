@@ -373,7 +373,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 
 
 		bool *startedThinningPtr = NULL;
-		SInt32 numThinned = 0;
+		int32_t numThinned = 0;
 		(void)QTSS_GetValuePtr(inParams->inClientSession, qtssCliSesStartedThinning, 0, (void**)&startedThinningPtr, &theLen);
 		if (false == *startedThinningPtr)
 		{

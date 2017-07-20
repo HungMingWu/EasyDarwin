@@ -112,8 +112,8 @@ public:
 		request->SetKeepAlive(false); request->SendHeader();
 	}
 
-	SInt32          GetQualityLevel();
-	void            SetQualityLevel(SInt32 level);
+	int32_t          GetQualityLevel();
+	void            SetQualityLevel(int32_t level);
 
 private:
 
@@ -134,7 +134,7 @@ private:
 
 	QTSSModule*         fModule;
 	bool              fHasAnRTPStream;
-	SInt32              fSessionQualityLevel;
+	int32_t              fSessionQualityLevel;
 
 	char        fRTPStreamArray[kRTPStreamArraySize];
 

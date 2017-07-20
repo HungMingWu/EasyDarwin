@@ -537,7 +537,7 @@ void HTTPSession::CleanupRequest()
 bool HTTPSession::OverMaxConnections(uint32_t buffer)
 {
 	QTSServerInterface* theServer = QTSServerInterface::GetServer();
-	SInt32 maxConns = theServer->GetPrefs()->GetMaxConnections();
+	int32_t maxConns = theServer->GetPrefs()->GetMaxConnections();
 	bool overLimit = false;
 
 	if (maxConns > -1) // limit connections

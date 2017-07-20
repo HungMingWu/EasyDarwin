@@ -912,7 +912,7 @@ QTRTPFile::ErrorCode QTRTPFile::Seek(double seekToTime, double maxBackupTime)
 	for (listEntry = fFirstTrack; listEntry != NULL; listEntry = listEntry->NextTrack)
 	{
 		// General vars
-		SInt32          mediaTime;
+		int32_t          mediaTime;
 		uint32_t          newSampleNumber;
 		uint32_t          newSyncSampleNumber;
 		uint32_t          newSampleMediaTime;
@@ -926,7 +926,7 @@ QTRTPFile::ErrorCode QTRTPFile::Seek(double seekToTime, double maxBackupTime)
 
 		//
 		// Compute the media time and get the sample at that time.
-		mediaTime = (SInt32)(seekToTime * listEntry->HintTrack->GetTimeScale());
+		mediaTime = (int32_t)(seekToTime * listEntry->HintTrack->GetTimeScale());
 		mediaTime -= listEntry->HintTrack->GetFirstEditMediaTime();
 		if (mediaTime < 0)
 			mediaTime = 0;
@@ -1002,7 +1002,7 @@ QTRTPFile::ErrorCode QTRTPFile::Seek(double seekToTime, double maxBackupTime)
 
 		//
 		// Compute the media time and get the sample at that time.
-		SInt32 mediaTime = (SInt32)(fSeekTime * listEntry->HintTrack->GetTimeScale());
+		int32_t mediaTime = (int32_t)(fSeekTime * listEntry->HintTrack->GetTimeScale());
 		mediaTime -= listEntry->HintTrack->GetFirstEditMediaTime();
 		if (mediaTime < 0)
 			mediaTime = 0;
@@ -1110,7 +1110,7 @@ QTRTPFile::ErrorCode QTRTPFile::SeekToPacketNumber(uint32_t inTrackID, UInt64 in
 
 		//
 		// Jump to the beginning of each track
-		SInt32 mediaTime = 0;
+		int32_t mediaTime = 0;
 		mediaTime -= listEntry->HintTrack->GetFirstEditMediaTime();
 		if (mediaTime < 0)
 			mediaTime = 0;
@@ -1344,10 +1344,10 @@ bool QTRTPFile::FindTrackEntry(uint32_t trackID, RTPTrackListEntry **trackEntry)
 	return false;
 }
 
-SInt32  QTRTPFile::GetMovieHintType()
+int32_t  QTRTPFile::GetMovieHintType()
 {
-	SInt32 movieHintType = 0;
-	SInt32 trackHintType = 0;
+	int32_t movieHintType = 0;
+	int32_t trackHintType = 0;
 	for (RTPTrackListEntry *listEntry = fFirstTrack; listEntry != NULL; listEntry = listEntry->NextTrack)
 	{
 		//
@@ -1516,7 +1516,7 @@ bool QTRTPFile::PrefetchNextPacket(RTPTrackListEntry * trackEntry, bool doSeek)
 #if QT_PROFILE
 		packetTimer.Stop();
 		qtss_printf("GetPacket sample time %li NumPackets: %li Packet fetched %li. len: %li\n",
-			(SInt32)packetTimer.Duration(), (SInt32)trackEntry->NumPacketsInThisSample, (SInt32)trackEntry->CurPacketNumber, (SInt32)trackEntry->CurPacketLength);
+			(int32_t)packetTimer.Duration(), (int32_t)trackEntry->NumPacketsInThisSample, (int32_t)trackEntry->CurPacketNumber, (int32_t)trackEntry->CurPacketLength);
 #endif
 
 		//
@@ -1543,7 +1543,7 @@ bool QTRTPFile::PrefetchNextPacket(RTPTrackListEntry * trackEntry, bool doSeek)
 	if (doSeek || (trackEntry->QualityLevel > kAllPackets))
 		trackEntry->SequenceNumberAdditive += (trackEntry->LastSequenceNumber + 1) - ntohs(*pSequenceNumber);
 
-	*pSequenceNumber = htons((int16_t)(((SInt32)ntohs(*pSequenceNumber)) + trackEntry->BaseSequenceNumberRandomOffset + trackEntry->FileSequenceNumberRandomOffset + trackEntry->SequenceNumberAdditive));
+	*pSequenceNumber = htons((int16_t)(((int32_t)ntohs(*pSequenceNumber)) + trackEntry->BaseSequenceNumberRandomOffset + trackEntry->FileSequenceNumberRandomOffset + trackEntry->SequenceNumberAdditive));
 	*pTimestamp = htonl(ntohl(*pTimestamp) + trackEntry->BaseTimestampRandomOffset + trackEntry->FileTimestampRandomOffset);
 
 	//

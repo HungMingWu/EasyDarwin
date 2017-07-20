@@ -45,7 +45,7 @@ public:
 	//call this before calling anything else
 	static void Initialize();
 
-	static SInt32 Min(SInt32 a, SInt32 b) { if (a < b) return a; return b; }
+	static int32_t Min(int32_t a, int32_t b) { if (a < b) return a; return b; }
 
 	//
 	// Milliseconds always returns milliseconds since Jan 1, 1970 GMT.
@@ -103,7 +103,7 @@ public:
 	}
 
 	// Returns the offset in hours between local time and GMT (or UTC) time.
-	static SInt32   GetGMTOffset();
+	static int32_t   GetGMTOffset();
 
 	//Both these functions return QTSS_NoErr, QTSS_FileExists, or POSIX errorcode
 	//Makes whatever directories in this path that don't exist yet 
@@ -134,7 +134,7 @@ private:
 	static SInt64 sMsecSince1900;
 	static SInt64 sMsecSince1970;
 	static SInt64 sInitialMsec;
-	static SInt32 sMemoryErr;
+	static int32_t sMemoryErr;
 	static SInt64 sWrapTime;
 	static SInt64 sCompareWrap;
 	static SInt64 sLastTimeMilli;

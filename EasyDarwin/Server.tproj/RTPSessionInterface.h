@@ -175,9 +175,9 @@ public:
 
 	float* GetPacketLossPercent() { uint32_t outLen; return  (float*) this->PacketLossPercent(this, &outLen); }
 
-	SInt32          GetQualityLevel() { return fSessionQualityLevel; }
-	SInt32*         GetQualityLevelPtr() { return &fSessionQualityLevel; }
-	void            SetQualityLevel(SInt32 level) {
+	int32_t          GetQualityLevel() { return fSessionQualityLevel; }
+	int32_t*         GetQualityLevelPtr() { return &fSessionQualityLevel; }
+	void            SetQualityLevel(int32_t level) {
 		if (fSessionQualityLevel == 0 && level != 0)
 			QTSServerInterface::GetServer()->IncrementNumThinned(1);
 		else if (fSessionQualityLevel != 0 && level == 0)
@@ -212,7 +212,7 @@ protected:
 	SInt64      fNTPPlayTime;
 	SInt64      fNextSendPacketsTime;
 
-	SInt32      fSessionQualityLevel;
+	int32_t      fSessionQualityLevel;
 
 	//keeps track of whether we are playing or not
 	QTSS_RTPSessionState fState;

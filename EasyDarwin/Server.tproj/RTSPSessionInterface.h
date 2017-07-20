@@ -96,8 +96,8 @@ public:
 	// of Read() from overrunning the request body and going into the next request.
 	// -1 is an unknown request body length. If the body length is unknown,
 	// this object will do no length enforcement. 
-	void                SetRequestBodyLength(SInt32 inLength) { fRequestBodyLen = inLength; }
-	SInt32              GetRemainingReqBodyLen() { return fRequestBodyLen; }
+	void                SetRequestBodyLength(int32_t inLength) { fRequestBodyLen = inLength; }
+	int32_t              GetRemainingReqBodyLen() { return fRequestBodyLen; }
 
 	// QTSS STREAM FUNCTIONS
 
@@ -118,7 +118,7 @@ public:
 	void		ResetOutputStream() { fOutputStream.Reset(); fOutputStream.ResetBytesWritten(); }
 	void		SendOptionsRequest();
 	bool		SentOptionsRequest() { return fSentOptionsRequest; }
-	SInt32		RoundTripTime() { return fRoundTripTime; }
+	int32_t		RoundTripTime() { return fRoundTripTime; }
 
 	enum
 	{
@@ -169,7 +169,7 @@ protected:
 		, kInteleaveHeaderSize = 4  // '$ '+ 1 byte ch ID + 2 bytes length
 	};
 	char*       fTCPCoalesceBuffer;
-	SInt32      fNumInCoalesceBuffer;
+	int32_t      fNumInCoalesceBuffer;
 
 
 	//+rt  socket we get from "accept()"
@@ -192,7 +192,7 @@ protected:
 	uint32_t              fSessionID;
 	uint32_t              fLocalAddr;
 	uint32_t              fRemoteAddr;
-	SInt32              fRequestBodyLen;
+	int32_t              fRequestBodyLen;
 
 	uint16_t              fLocalPort;
 	uint16_t              fRemotePort;
@@ -201,7 +201,7 @@ protected:
 	StrPtrLen				fOldOutputStreamBuffer;
 	bool					fSentOptionsRequest;
 	SInt64					fOptionsRequestSendTime;
-	SInt32					fRoundTripTime;
+	int32_t					fRoundTripTime;
 	bool					fRoundTripTimeCalculation;
 
 	static unsigned int sSessionIDCounter;

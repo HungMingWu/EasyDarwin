@@ -93,7 +93,7 @@ QTSS_Error QTSSDictionary::GetValuePtr(QTSS_AttributeID inAttrID, uint32_t inInd
 	if (theMap == NULL)
 		return QTSS_AttrDoesntExist;
 
-	SInt32 theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
+	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
 
 	if (theMapIndex < 0)
 		return QTSS_AttrDoesntExist;
@@ -212,7 +212,7 @@ QTSS_Error QTSSDictionary::GetValueAsString(QTSS_AttributeID inAttrID, uint32_t 
 	if (theMap == NULL)
 		return QTSS_AttrDoesntExist;
 
-	SInt32 theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
+	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
 	Assert(theMapIndex >= 0);
 
 	*outString = QTSSDataConverter::ValueToString(tempValueBuffer, tempValueLen, theMap->GetAttrType(theMapIndex));
@@ -236,7 +236,7 @@ QTSS_Error QTSSDictionary::CreateObjectValue(QTSS_AttributeID inAttrID, uint32_t
 	if (theMap == NULL)
 		return QTSS_AttrDoesntExist;
 
-	SInt32 theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
+	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
 
 	// If there is a mutex, make this action atomic.
 	OSMutexLocker locker(fMutexP);
@@ -298,7 +298,7 @@ QTSS_Error QTSSDictionary::SetValue(QTSS_AttributeID inAttrID, uint32_t inIndex,
 	if (theMap == NULL)
 		return QTSS_AttrDoesntExist;
 
-	SInt32 theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
+	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
 
 	// If there is a mutex, make this action atomic.
 	OSMutexLocker locker(fMutexP);
@@ -451,7 +451,7 @@ QTSS_Error QTSSDictionary::SetValuePtr(QTSS_AttributeID inAttrID,
 	if (theMap == NULL)
 		return QTSS_AttrDoesntExist;
 
-	SInt32 theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
+	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
 
 	// If there is a mutex, make this action atomic.
 	OSMutexLocker locker(fMutexP);
@@ -493,7 +493,7 @@ QTSS_Error QTSSDictionary::RemoveValue(QTSS_AttributeID inAttrID, uint32_t inInd
 	if (theMap == NULL)
 		return QTSS_AttrDoesntExist;
 
-	SInt32 theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
+	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
 
 	// If there is a mutex, make this action atomic.
 	OSMutexLocker locker(fMutexP);
@@ -574,7 +574,7 @@ uint32_t  QTSSDictionary::GetNumValues(QTSS_AttributeID inAttrID)
 	if (theMap == NULL)
 		return 0;
 
-	SInt32 theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
+	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
 	if (theMapIndex < 0)
 		return 0;
 
@@ -595,7 +595,7 @@ void    QTSSDictionary::SetNumValues(QTSS_AttributeID inAttrID, uint32_t inNumVa
 	if (theMap == NULL)
 		return;
 
-	SInt32 theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
+	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
 	if (theMapIndex < 0)
 		return;
 
@@ -730,7 +730,7 @@ QTSS_Error  QTSSDictionary::RemoveInstanceAttribute(QTSS_AttributeID inAttr)
 
 	//
 	// Call the completion routine
-	SInt32 theMapIndex = fInstanceMap->ConvertAttrIDToArrayIndex(inAttr);
+	int32_t theMapIndex = fInstanceMap->ConvertAttrIDToArrayIndex(inAttr);
 	this->RemoveInstanceAttrComplete(theMapIndex, fInstanceMap);
 
 	return QTSS_NoErr;
@@ -972,7 +972,7 @@ void QTSSDictionaryMap::SetAttribute(QTSS_AttributeID inID,
 
 QTSS_Error  QTSSDictionaryMap::CheckRemovePermission(QTSS_AttributeID inAttrID)
 {
-	SInt32 theIndex = this->ConvertAttrIDToArrayIndex(inAttrID);
+	int32_t theIndex = this->ConvertAttrIDToArrayIndex(inAttrID);
 	if (theIndex < 0)
 		return QTSS_AttrDoesntExist;
 
@@ -987,7 +987,7 @@ QTSS_Error  QTSSDictionaryMap::CheckRemovePermission(QTSS_AttributeID inAttrID)
 
 QTSS_Error  QTSSDictionaryMap::RemoveAttribute(QTSS_AttributeID inAttrID)
 {
-	SInt32 theIndex = this->ConvertAttrIDToArrayIndex(inAttrID);
+	int32_t theIndex = this->ConvertAttrIDToArrayIndex(inAttrID);
 	if (theIndex < 0)
 		return QTSS_AttrDoesntExist;
 
@@ -1010,7 +1010,7 @@ QTSS_Error  QTSSDictionaryMap::UnRemoveAttribute(QTSS_AttributeID inAttrID)
 	if (this->ConvertAttrIDToArrayIndex(inAttrID) == -1)
 		return QTSS_AttrDoesntExist;
 
-	SInt32 theIndex = this->ConvertAttrIDToArrayIndex(inAttrID);
+	int32_t theIndex = this->ConvertAttrIDToArrayIndex(inAttrID);
 	if (theIndex < 0)
 		return QTSS_AttrDoesntExist;
 
@@ -1045,7 +1045,7 @@ QTSS_Error  QTSSDictionaryMap::GetAttrInfoByID(QTSS_AttributeID inID, QTSSAttrIn
 	if (outAttrInfoObject == NULL)
 		return QTSS_BadArgument;
 
-	SInt32 theIndex = this->ConvertAttrIDToArrayIndex(inID);
+	int32_t theIndex = this->ConvertAttrIDToArrayIndex(inID);
 	if (theIndex < 0)
 		return QTSS_AttrDoesntExist;
 

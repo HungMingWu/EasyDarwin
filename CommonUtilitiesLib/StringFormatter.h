@@ -73,7 +73,7 @@ public:
 
 	//Object does no bounds checking on the buffer. That is your responsibility!
 	//Put truncates to the buffer size
-	void        Put(const SInt32 num);
+	void        Put(const int32_t num);
 	void        Put(char* buffer, uint32_t bufferSize);
 	void        Put(char* str) { Put(str, strlen(str)); }
 	void        Put(const StrPtrLen& str) { Put(str.Ptr, str.Len); }

@@ -55,7 +55,7 @@ public:
 	uint32_t  GetSendInterval() { return fSendInterval; }
 
 	// This may be negative!
-	SInt32  AvailableSpaceInWindow() { return fWindowSize - fBytesSentSinceLastReport; }
+	int32_t  AvailableSpaceInWindow() { return fWindowSize - fBytesSentSinceLastReport; }
 
 
 	//
@@ -75,11 +75,11 @@ public:
 	//
 	// The overbuffer window is full if the byte count is filled up, or if the
 	// bitrate is above the max play rate.
-	SInt64 CheckTransmitTime(const SInt64& inTransmitTime, const SInt64& inCurrentTime, SInt32 inPacketSize);
+	SInt64 CheckTransmitTime(const SInt64& inTransmitTime, const SInt64& inCurrentTime, int32_t inPacketSize);
 
 	//
 	// Remembers that this packet has been sent
-	void AddPacketToWindow(SInt32 inPacketSize);
+	void AddPacketToWindow(int32_t inPacketSize);
 
 	//
 	// As time passes, transmit times that were in the future become transmit
@@ -96,17 +96,17 @@ public:
 
 private:
 
-	SInt32 fWindowSize;
-	SInt32 fBytesSentSinceLastReport;
-	SInt32 fSendInterval;
+	int32_t fWindowSize;
+	int32_t fBytesSentSinceLastReport;
+	int32_t fSendInterval;
 
-	SInt32 fBytesDuringLastSecond;
+	int32_t fBytesDuringLastSecond;
 	SInt64 fLastSecondStart;
 
-	SInt32 fBytesDuringPreviousSecond;
+	int32_t fBytesDuringPreviousSecond;
 	SInt64 fPreviousSecondStart;
 
-	SInt32 fBytesDuringBucket;
+	int32_t fBytesDuringBucket;
 	SInt64 fBucketBegin;
 	SInt64 fPreviousBucketBegin;
 

@@ -33,7 +33,7 @@
 #include "MyAssert.h"
 #include "OS.h"
 
-void RTPBandwidthTracker::SetWindowSize(SInt32 clientWindowSize)
+void RTPBandwidthTracker::SetWindowSize(int32_t clientWindowSize)
 {
 	//
 	// Currently we only allow this info to be set once
@@ -166,7 +166,7 @@ void RTPBandwidthTracker::AdjustWindowForRetransmit()
 	fIsRetransmitting = true;
 }
 
-void RTPBandwidthTracker::AddToRTTEstimate(SInt32 rttSampleMSecs)
+void RTPBandwidthTracker::AddToRTTEstimate(int32_t rttSampleMSecs)
 {
 	//  qtss_printf("%d ", rttSampleMSecs);
 	//  static int count = 0;
@@ -178,7 +178,7 @@ void RTPBandwidthTracker::AddToRTTEstimate(SInt32 rttSampleMSecs)
 	if (fRunningAverageMSecs == 0)
 		fRunningAverageMSecs = rttSampleMSecs * 8;  // init avg to cur sample, scaled by 2**3 
 
-	SInt32 delta = rttSampleMSecs - fRunningAverageMSecs / 8; // scale average back to get cur delta from sample
+	int32_t delta = rttSampleMSecs - fRunningAverageMSecs / 8; // scale average back to get cur delta from sample
 
 	// add 1/8 the delta back to the smooth running average
 	fRunningAverageMSecs = fRunningAverageMSecs + delta; // same as: rt avg = rt avg + delta / 8, but scaled

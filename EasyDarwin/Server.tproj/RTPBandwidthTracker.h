@@ -71,12 +71,12 @@ public:
 
 	//
 	// Initialization - give the client's window size.
-	void    SetWindowSize(SInt32 clientWindowSize);
+	void    SetWindowSize(int32_t clientWindowSize);
 
 	//
 	// Each RTT sample you get, let the tracker know what it is
 	// so it can keep a good running average.
-	void AddToRTTEstimate(SInt32 rttSampleMSecs);
+	void AddToRTTEstimate(int32_t rttSampleMSecs);
 
 	//
 	// Before sending new data, let the tracker know
@@ -99,15 +99,15 @@ public:
 	//
 	// ACCESSORS
 	const bool ReadyForAckProcessing() { return (fClientWindow > 0 && fCongestionWindow > 0); } // see RTPBandwidthTracker::EmptyWindow for requirements
-	const bool IsFlowControlled() { return ((SInt32)fBytesInList >= fCongestionWindow); }
-	const SInt32 ClientWindowSize() { return fClientWindow; }
+	const bool IsFlowControlled() { return ((int32_t)fBytesInList >= fCongestionWindow); }
+	const int32_t ClientWindowSize() { return fClientWindow; }
 	const uint32_t BytesInList() { return fBytesInList; }
-	const SInt32 CongestionWindow() { return fCongestionWindow; }
-	const SInt32 SlowStartThreshold() { return fSlowStartThreshold; }
-	const SInt32 RunningAverageMSecs() { return fRunningAverageMSecs / 8; }  // fRunningAverageMSecs is stored scaled up 8x
-	const SInt32 RunningMeanDevationMSecs() { return fRunningMeanDevationMSecs / 4; } // fRunningMeanDevationMSecs is stored scaled up 4x
-	const SInt32 CurRetransmitTimeout() { return fCurRetransmitTimeout; }
-	const SInt32 GetCurrentBandwidthInBps()
+	const int32_t CongestionWindow() { return fCongestionWindow; }
+	const int32_t SlowStartThreshold() { return fSlowStartThreshold; }
+	const int32_t RunningAverageMSecs() { return fRunningAverageMSecs / 8; }  // fRunningAverageMSecs is stored scaled up 8x
+	const int32_t RunningMeanDevationMSecs() { return fRunningMeanDevationMSecs / 4; } // fRunningMeanDevationMSecs is stored scaled up 4x
+	const int32_t CurRetransmitTimeout() { return fCurRetransmitTimeout; }
+	const int32_t GetCurrentBandwidthInBps()
 	{
 		return (fUnadjustedRTO > 0) ? (fCongestionWindow * 1000) / fUnadjustedRTO : 0;
 	}
@@ -117,12 +117,12 @@ public:
 
 	//
 	// Stats
-	SInt32              GetMaxCongestionWindowSize() { return fMaxCongestionWindowSize; }
-	SInt32              GetMinCongestionWindowSize() { return fMinCongestionWindowSize; }
-	SInt32              GetAvgCongestionWindowSize() { return (SInt32)(fTotalCongestionWindowSize / (SInt64)fNumStatsSamples); }
-	SInt32              GetMaxRTO() { return fMaxRTO; }
-	SInt32              GetMinRTO() { return fMinRTO; }
-	SInt32              GetAvgRTO() { return (SInt32)(fTotalRTO / (SInt64)fNumStatsSamples); }
+	int32_t              GetMaxCongestionWindowSize() { return fMaxCongestionWindowSize; }
+	int32_t              GetMinCongestionWindowSize() { return fMinCongestionWindowSize; }
+	int32_t              GetAvgCongestionWindowSize() { return (int32_t)(fTotalCongestionWindowSize / (SInt64)fNumStatsSamples); }
+	int32_t              GetMaxRTO() { return fMaxRTO; }
+	int32_t              GetMinRTO() { return fMinRTO; }
+	int32_t              GetAvgRTO() { return (int32_t)(fTotalRTO / (SInt64)fNumStatsSamples); }
 
 	enum
 	{
@@ -140,18 +140,18 @@ private:
 
 	//
 	// For computing the round-trip estimate using Karn's algorithm
-	SInt32  fRunningAverageMSecs;
-	SInt32  fRunningMeanDevationMSecs;
-	SInt32  fCurRetransmitTimeout;
-	SInt32  fUnadjustedRTO;
+	int32_t  fRunningAverageMSecs;
+	int32_t  fRunningMeanDevationMSecs;
+	int32_t  fCurRetransmitTimeout;
+	int32_t  fUnadjustedRTO;
 
 	//
 	// Tracking our window sizes
 	SInt64              fLastCongestionAdjust;
-	SInt32              fCongestionWindow;      // implentation of VJ congestion avoidance
-	SInt32              fSlowStartThreshold;    // point at which we stop adding to the window for each ack, and add to the window for each window full of acks
-	SInt32              fSlowStartByteCount;            // counts window a full of acks when past ss thresh
-	SInt32              fClientWindow;          // max window size based on client UDP buffer
+	int32_t              fCongestionWindow;      // implentation of VJ congestion avoidance
+	int32_t              fSlowStartThreshold;    // point at which we stop adding to the window for each ack, and add to the window for each window full of acks
+	int32_t              fSlowStartByteCount;            // counts window a full of acks when past ss thresh
+	int32_t              fClientWindow;          // max window size based on client UDP buffer
 	uint32_t              fBytesInList;               // how many unacked bytes on this stream
 	uint32_t              fAckTimeout;
 
@@ -160,13 +160,13 @@ private:
 
 	//
 	// Stats
-	SInt32              fMaxCongestionWindowSize;
-	SInt32              fMinCongestionWindowSize;
-	SInt32              fMaxRTO;
-	SInt32              fMinRTO;
+	int32_t              fMaxCongestionWindowSize;
+	int32_t              fMinCongestionWindowSize;
+	int32_t              fMaxRTO;
+	int32_t              fMinRTO;
 	SInt64              fTotalCongestionWindowSize;
 	SInt64              fTotalRTO;
-	SInt32              fNumStatsSamples;
+	int32_t              fNumStatsSamples;
 
 	enum
 	{

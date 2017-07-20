@@ -35,8 +35,8 @@
 
 SequenceNumberMap::SequenceNumberMap(uint32_t inSlidingWindowSize)
 	: fSlidingWindow(NULL),
-	fWindowSize((SInt32)inSlidingWindowSize),
-	fNegativeWindowSize((SInt32)inSlidingWindowSize - (SInt32)(2 * inSlidingWindowSize)),
+	fWindowSize((int32_t)inSlidingWindowSize),
+	fNegativeWindowSize((int32_t)inSlidingWindowSize - (int32_t)(2 * inSlidingWindowSize)),
 	fHighestSeqIndex(0),
 	fHighestSeqNumber(0)
 {
@@ -84,7 +84,7 @@ bool SequenceNumberMap::AddSequenceNumber(uint16_t inSeqNumber)
 	// Find the right entry in the sliding window for this sequence number, taking
 	// into account that we may need to wrap.
 
-	SInt32 theWindowIndex = fHighestSeqIndex + theWindowOffset;
+	int32_t theWindowIndex = fHighestSeqIndex + theWindowOffset;
 	if (theWindowIndex < 0)
 		theWindowIndex += fWindowSize;
 

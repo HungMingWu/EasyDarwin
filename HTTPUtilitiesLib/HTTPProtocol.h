@@ -211,9 +211,9 @@ public:
 	static StrPtrLen*                   GetHeaderString(HTTPHeader inHeader) { return &sHeaders[inHeader]; }
 	// Status codes
 	static StrPtrLen*                   GetStatusCodeString(HTTPStatusCode inStat) { return &sStatusCodeStrings[inStat]; }
-	static SInt32                       GetStatusCode(HTTPStatusCode inStat) { return sStatusCodes[inStat]; }
+	static int32_t                       GetStatusCode(HTTPStatusCode inStat) { return sStatusCodes[inStat]; }
 	static StrPtrLen*                   GetStatusCodeAsString(HTTPStatusCode inStat) { return &sStatusCodeAsStrings[inStat]; }
-	static HTTPStatusCode				GetStatusCodeEnum(SInt32 inCode);
+	static HTTPStatusCode				GetStatusCodeEnum(int32_t inCode);
 	// Versions
 	static HTTPVersion                  GetVersion(StrPtrLen* versionStr);
 	static StrPtrLen*                   GetVersionString(HTTPVersion version) { return &sVersionStrings[version]; }
@@ -227,7 +227,7 @@ private:
 	static StrPtrLen					sHeaders[];
 	static StrPtrLen					sStatusCodeStrings[];
 	static StrPtrLen					sStatusCodeAsStrings[];
-	static SInt32						sStatusCodes[];
+	static int32_t						sStatusCodes[];
 	static StrPtrLen					sVersionStrings[];
 
 	static StrPtrLen					sStreamTypes[];

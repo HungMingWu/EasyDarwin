@@ -333,7 +333,7 @@ void RTCPNaduPacket::DumpNaduPacket()
 	qtss_printf(" H_app_packet_name = %s, ", printName);
 
 	qtss_printf("\n");
-	SInt32 count = 0;
+	int32_t count = 0;
 	for (; count < fNumBlocks; count++)
 	{
 
@@ -358,10 +358,10 @@ void RTCPNaduPacket::DumpNaduPacket()
 
 
 
-SInt32 RTCPNaduPacket::GetSSRCBlockIndex(uint32_t inSSRC)
+int32_t RTCPNaduPacket::GetSSRCBlockIndex(uint32_t inSSRC)
 {
 	uint32_t *blockBuffer = NULL;
-	SInt32 count = 0;
+	int32_t count = 0;
 	uint32_t ssrc = 0;
 
 	if (NULL == fNaduDataBuffer)
@@ -380,7 +380,7 @@ SInt32 RTCPNaduPacket::GetSSRCBlockIndex(uint32_t inSSRC)
 	return -1;
 }
 
-uint32_t RTCPNaduPacket::GetSSRC(SInt32 index)
+uint32_t RTCPNaduPacket::GetSSRC(int32_t index)
 {
 
 	if (index < 0)
@@ -399,7 +399,7 @@ uint32_t RTCPNaduPacket::GetSSRC(SInt32 index)
 
 }
 
-uint16_t RTCPNaduPacket::GetPlayOutDelay(SInt32 index)
+uint16_t RTCPNaduPacket::GetPlayOutDelay(int32_t index)
 {
 	if (index < 0)
 		return 0;
@@ -416,7 +416,7 @@ uint16_t RTCPNaduPacket::GetPlayOutDelay(SInt32 index)
 	return delay;
 }
 
-uint16_t RTCPNaduPacket::GetNSN(SInt32 index)
+uint16_t RTCPNaduPacket::GetNSN(int32_t index)
 {
 	if (index < 0)
 		return 0;
@@ -433,7 +433,7 @@ uint16_t RTCPNaduPacket::GetNSN(SInt32 index)
 	return nsn;
 }
 
-uint16_t RTCPNaduPacket::GetNUN(SInt32 index)
+uint16_t RTCPNaduPacket::GetNUN(int32_t index)
 {
 	if (index < 0)
 		return 0;
@@ -450,7 +450,7 @@ uint16_t RTCPNaduPacket::GetNUN(SInt32 index)
 	return nun;
 }
 
-uint16_t RTCPNaduPacket::GetFBS(SInt32 index)
+uint16_t RTCPNaduPacket::GetFBS(int32_t index)
 {
 	if (index < 0)
 		return 0;

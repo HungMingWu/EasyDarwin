@@ -77,8 +77,8 @@ QTSSAttrInfoDict::AttrInfo  RTPStream::sAttributes[] =
 	/* 2  */ { "qtssRTPStrPayloadName",             NULL,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
 	/* 3  */ { "qtssRTPStrPayloadType",             NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
 	/* 4  */ { "qtssRTPStrFirstSeqNumber",          NULL,   qtssAttrDataTypeSInt16, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
-	/* 5  */ { "qtssRTPStrFirstTimestamp",          NULL,   qtssAttrDataTypeSInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
-	/* 6  */ { "qtssRTPStrTimescale",               NULL,   qtssAttrDataTypeSInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
+	/* 5  */ { "qtssRTPStrFirstTimestamp",          NULL,   qtssAttrDataTypeint32_t, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
+	/* 6  */ { "qtssRTPStrTimescale",               NULL,   qtssAttrDataTypeint32_t, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
 	/* 7  */ { "qtssRTPStrQualityLevel",            NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
 	/* 8  */ { "qtssRTPStrNumQualityLevels",        NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
 	/* 9  */ { "qtssRTPStrBufferDelayInSecs",       NULL,   qtssAttrDataTypeFloat32,    qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
@@ -338,7 +338,7 @@ RTPStream::~RTPStream()
 
 #if RTP_TCP_STREAM_DEBUG
 	if (fIsTCP)
-		qtss_printf("DEBUG: ~RTPStream %li sends got EAGAIN'd.\n", (SInt32)fNumPacketsDroppedOnTCPFlowControl);
+		qtss_printf("DEBUG: ~RTPStream %li sends got EAGAIN'd.\n", (int32_t)fNumPacketsDroppedOnTCPFlowControl);
 #endif
 
 	if (fMonitorSocket != 0)
@@ -352,20 +352,20 @@ RTPStream::~RTPStream()
 
 }
 
-SInt32 RTPStream::GetQualityLevel()
+int32_t RTPStream::GetQualityLevel()
 {
 	if (fTransportType == qtssRTPTransportTypeUDP)
-		return MIN(fQualityLevel, (SInt32)fNumQualityLevels - 1);
+		return MIN(fQualityLevel, (int32_t)fNumQualityLevels - 1);
 	else
 		return fSession->GetQualityLevel();
 }
 
-void RTPStream::SetQualityLevel(SInt32 level)
+void RTPStream::SetQualityLevel(int32_t level)
 {
 	if (fDisableThinning)
 		return;
 
-	SInt32 minLevel = MAX(0, (SInt32)fNumQualityLevels - 1);
+	int32_t minLevel = MAX(0, (int32_t)fNumQualityLevels - 1);
 	level = MIN(MAX(level, fMaxQualityLevel), minLevel);
 
 	if (level == minLevel) //Instead of going down to key-frames only, go down to key-frames plus 1 P frame instead.
@@ -384,7 +384,7 @@ void RTPStream::SetQualityLevel(SInt32 level)
 
 void  RTPStream::SetOverBufferState(RTSPRequestInterface* request)
 {
-	SInt32 requestedOverBufferState = request->GetDynamicRateState();
+	int32_t requestedOverBufferState = request->GetDynamicRateState();
 	bool enableOverBuffer = false;
 
 	switch (fTransportType)
@@ -616,7 +616,7 @@ void RTPStream::SendSetupResponse(RTSPRequestInterface* inRequest)
 		inRequest->AppendHeader(qtssXRetransmitHeader, theRetrHdr);
 
 	// Append the dynamic rate header if the client sent it
-	SInt32 theRequestedRate = inRequest->GetDynamicRateState();
+	int32_t theRequestedRate = inRequest->GetDynamicRateState();
 	static StrPtrLen sHeaderOn("1", 1);
 	static StrPtrLen sHeaderOff("0", 1);
 	if (theRequestedRate > 0)	// the client sent the header and wants a dynamic rate
@@ -804,7 +804,7 @@ QTSS_Error  RTPStream::InterleavedWrite(void* inBuffer, uint32_t inLen, uint32_t
 		fSession->RefreshTimeout(); // RTSP session gets refreshed internally in WriteV
 
 #if RTP_TCP_STREAM_DEBUG
-//qtss_printf( "DEBUG: RTPStream fCurrentPacketDelay %li, fQualityLevel %i\n", (SInt32)fCurrentPacketDelay, (int)fQualityLevel );
+//qtss_printf( "DEBUG: RTPStream fCurrentPacketDelay %li, fQualityLevel %i\n", (int32_t)fCurrentPacketDelay, (int)fQualityLevel );
 #endif
 
 	return err;
@@ -884,7 +884,7 @@ QTSS_Error RTPStream::ReliableRTPWrite(void* inBuffer, uint32_t inLen, const SIn
 		// Assign a lifetime to the packet using the current delay of the packet and
 		// the time until this packet becomes stale.
 		fBytesSentThisInterval += inLen;
-		fResender.AddPacket(inBuffer, inLen, (SInt32)(fDropAllPacketsForThisStreamDelay - curPacketDelay));
+		fResender.AddPacket(inBuffer, inLen, (int32_t)(fDropAllPacketsForThisStreamDelay - curPacketDelay));
 
 		(void)fSockets->GetSocketA()->SendTo(fRemoteAddr, fRemoteRTPPort, inBuffer, inLen);
 	}
@@ -895,7 +895,7 @@ QTSS_Error RTPStream::ReliableRTPWrite(void* inBuffer, uint32_t inLen, const SIn
 
 void RTPStream::SetThinningParams()
 {
-	SInt32 toleranceAdjust = 1500 - (SInt32(fLateToleranceInSec * 1000));
+	int32_t toleranceAdjust = 1500 - (int32_t(fLateToleranceInSec * 1000));
 
 	QTSServerPrefs* thePrefs = QTSServerInterface::GetServer()->GetPrefs();
 
@@ -926,7 +926,7 @@ void RTPStream::SetInitialMaxQualityLevel()
 		double ratio = movieBitRate / static_cast<double>(bandwidth);
 
 		//interpolate between ratio and fNumQualityLevels such that 0.90 maps to 0 and 3.0 maps to fNumQualityLevels
-		SetMaxQualityLevelLimit(static_cast<SInt32>(fNumQualityLevels * (ratio / 2.1 - 0.43)));
+		SetMaxQualityLevelLimit(static_cast<int32_t>(fNumQualityLevels * (ratio / 2.1 - 0.43)));
 		SetQualityLevel(GetQualityLevel());
 	}
 }
@@ -1008,11 +1008,11 @@ bool RTPStream::UpdateQualityLevel(const SInt64& inTransmitTime, const SInt64& i
 	if (((inCurrentTime - fSession->fLastQualityCheckTime) > fQualityCheckInterval) ||
 		((inTransmitTime - fSession->fLastQualityCheckMediaTime) > fQualityCheckInterval))
 	{
-		if ((inCurrentPacketDelay > fAlwaysThinDelay) && (GetQualityLevel() < (SInt32)fNumQualityLevels))
+		if ((inCurrentPacketDelay > fAlwaysThinDelay) && (GetQualityLevel() < (int32_t)fNumQualityLevels))
 			SetQualityLevel(GetQualityLevel() + 1);
 		else if ((inCurrentPacketDelay > fStartThinningDelay) && (inCurrentPacketDelay > fLastCurrentPacketDelay))
 		{
-			if (!fWaitOnLevelAdjustment && (GetQualityLevel() < (SInt32)fNumQualityLevels))
+			if (!fWaitOnLevelAdjustment && (GetQualityLevel() < (int32_t)fNumQualityLevels))
 			{
 				SetQualityLevel(GetQualityLevel() + 1);
 				fWaitOnLevelAdjustment = true;
@@ -1109,7 +1109,7 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 
 
 		if (err == QTSS_NoErr)
-			this->PrintPacketPrefEnabled((char*)thePacket->packetData, inLen, (SInt32)RTPStream::rtcpSR);
+			this->PrintPacketPrefEnabled((char*)thePacket->packetData, inLen, (int32_t)RTPStream::rtcpSR);
 	}
 	else if (inFlags & qtssWriteFlagsIsRTP)
 	{
@@ -1147,7 +1147,7 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 			}
 
 			if (err == QTSS_NoErr)
-				this->PrintPacketPrefEnabled((char*)thePacket->packetData, inLen, (SInt32)RTPStream::rtp);
+				this->PrintPacketPrefEnabled((char*)thePacket->packetData, inLen, (int32_t)RTPStream::rtp);
 
 			uint16_t* theSeqNumP = (uint16_t*)thePacket->packetData;
 			uint16_t theSeqNum = ntohs(theSeqNumP[1]);
@@ -1302,7 +1302,7 @@ void RTPStream::SendRTCPSR(const SInt64& inTime, bool inAppendBye)
 
 
 	if (err == QTSS_NoErr)
-		this->PrintPacketPrefEnabled((char *)theSR->GetSRPacket(), thePacketLen, (SInt32)RTPStream::rtcpSR); // if we are flow controlled this packet is not sent
+		this->PrintPacketPrefEnabled((char *)theSR->GetSRPacket(), thePacketLen, (int32_t)RTPStream::rtcpSR); // if we are flow controlled this packet is not sent
 }
 
 
@@ -1773,7 +1773,7 @@ void RTPStream::PrintRTCPSenderReport(char* packetBuff, uint32_t inLen)
 		ssrc, bytecount, timestamp, packetcount, theTimeInSecs, ::qtss_ctime(&theTime, timebuffer, sizeof(timebuffer)));
 }
 
-void RTPStream::PrintPacket(char *inBuffer, uint32_t inLen, SInt32 inType)
+void RTPStream::PrintPacket(char *inBuffer, uint32_t inLen, int32_t inType)
 {
 	static char* rr = "RR";
 	static char* ack = "ACK";

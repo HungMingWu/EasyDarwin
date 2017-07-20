@@ -116,7 +116,7 @@ QTSSAttrInfoDict::AttrInfo  QTSServerInterface::sAttributes[] =
 	/* 20 */ { "qtssSvrHandledMethods",         NULL,   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe  },
 	/* 21 */ { "qtssSvrModuleObjects",          NULL,   qtssAttrDataTypeQTSS_Object,qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 22 */ { "qtssSvrStartupTime",            NULL,   qtssAttrDataTypeTimeVal,    qtssAttrModeRead },
-	/* 23 */ { "qtssSvrGMTOffsetInHrs",         NULL,   qtssAttrDataTypeSInt32,     qtssAttrModeRead },
+	/* 23 */ { "qtssSvrGMTOffsetInHrs",         NULL,   qtssAttrDataTypeint32_t,     qtssAttrModeRead },
 	/* 24 */ { "qtssSvrDefaultIPAddrStr",       NULL,   qtssAttrDataTypeCharArray,  qtssAttrModeRead },
 	/* 25 */ { "qtssSvrPreferences",            NULL,   qtssAttrDataTypeQTSS_Object,qtssAttrModeRead | qtssAttrModeInstanceAttrAllowed},
 	/* 26 */ { "qtssSvrMessages",               NULL,   qtssAttrDataTypeQTSS_Object,qtssAttrModeRead },
@@ -129,7 +129,7 @@ QTSSAttrInfoDict::AttrInfo  QTSServerInterface::sAttributes[] =
 	/* 33  */ { "qtssSvrServerBuild",           NULL,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 34  */ { "qtssSvrServerPlatform",        NULL,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 35  */ { "qtssSvrRTSPServerComment",     NULL,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 36  */ { "qtssSvrNumThinned",            NULL,   qtssAttrDataTypeSInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 36  */ { "qtssSvrNumThinned",            NULL,   qtssAttrDataTypeint32_t,     qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 37  */ { "qtssSvrNumThreads",            NULL,   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe }
 };
 
@@ -458,7 +458,7 @@ SInt64 RTPStatsUpdaterTask::Run()
 
 		//if the bandwidth is above the bandwidth setting, disconnect 1 user by sending them
 		//a BYE RTCP packet.
-		SInt32 maxKBits = theServer->GetPrefs()->GetMaxKBitsBandwidth();
+		int32_t maxKBits = theServer->GetPrefs()->GetMaxKBitsBandwidth();
 		if ((maxKBits > -1) && (theServer->fAvgRTPBandwidthInBits > ((uint32_t)maxKBits * 1024)))
 		{
 			//we need to make sure that all of this happens atomically wrt the session map

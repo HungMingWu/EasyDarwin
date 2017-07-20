@@ -69,17 +69,17 @@ public:
 	uint32_t  GetRTSPSessionTimeoutInSecs() { return fRTSPSessionTimeoutInSecs; }
 
 	//-1 means unlimited
-	SInt32  GetMaxConnections() { return fMaximumConnections; }
-	SInt32  GetMaxKBitsBandwidth() { return fMaxBandwidthInKBits; }
+	int32_t  GetMaxConnections() { return fMaximumConnections; }
+	int32_t  GetMaxKBitsBandwidth() { return fMaxBandwidthInKBits; }
 
 	// Thinning algorithm parameters
-	SInt32  GetDropAllPacketsTimeInMsec() { return fDropAllPacketsTimeInMsec; }
-	SInt32  GetDropAllVideoPacketsTimeInMsec() { return fDropAllVideoPacketsTimeInMsec; }
-	SInt32  GetThinAllTheWayTimeInMsec() { return fThinAllTheWayTimeInMsec; }
-	SInt32  GetAlwaysThinTimeInMsec() { return fAlwaysThinTimeInMsec; }
-	SInt32  GetStartThinningTimeInMsec() { return fStartThinningTimeInMsec; }
-	SInt32  GetStartThickingTimeInMsec() { return fStartThickingTimeInMsec; }
-	SInt32  GetThickAllTheWayTimeInMsec() { return fThickAllTheWayTimeInMsec; }
+	int32_t  GetDropAllPacketsTimeInMsec() { return fDropAllPacketsTimeInMsec; }
+	int32_t  GetDropAllVideoPacketsTimeInMsec() { return fDropAllVideoPacketsTimeInMsec; }
+	int32_t  GetThinAllTheWayTimeInMsec() { return fThinAllTheWayTimeInMsec; }
+	int32_t  GetAlwaysThinTimeInMsec() { return fAlwaysThinTimeInMsec; }
+	int32_t  GetStartThinningTimeInMsec() { return fStartThinningTimeInMsec; }
+	int32_t  GetStartThickingTimeInMsec() { return fStartThickingTimeInMsec; }
+	int32_t  GetThickAllTheWayTimeInMsec() { return fThickAllTheWayTimeInMsec; }
 	uint32_t  GetQualityCheckIntervalInMsec() { return fQualityCheckIntervalInMsec; }
 
 	// for tcp buffer size scaling
@@ -237,8 +237,8 @@ private:
 	uint32_t      fRTSPSessionTimeoutInSecs;
 	uint32_t      fRTPSessionTimeoutInSecs;
 
-	SInt32  fMaximumConnections;
-	SInt32  fMaxBandwidthInKBits;
+	int32_t  fMaximumConnections;
+	int32_t  fMaxBandwidthInKBits;
 
 	bool  fBreakOnAssert;
 	bool  fAutoRestart;
@@ -252,13 +252,13 @@ private:
 	bool  fScreenLoggingEnabled;
 	bool  fErrorLogEnabled;
 
-	SInt32  fDropAllPacketsTimeInMsec;
-	SInt32  fDropAllVideoPacketsTimeInMsec;
-	SInt32  fThinAllTheWayTimeInMsec;
-	SInt32  fAlwaysThinTimeInMsec;
-	SInt32  fStartThinningTimeInMsec;
-	SInt32  fStartThickingTimeInMsec;
-	SInt32  fThickAllTheWayTimeInMsec;
+	int32_t  fDropAllPacketsTimeInMsec;
+	int32_t  fDropAllVideoPacketsTimeInMsec;
+	int32_t  fThinAllTheWayTimeInMsec;
+	int32_t  fAlwaysThinTimeInMsec;
+	int32_t  fStartThinningTimeInMsec;
+	int32_t  fStartThickingTimeInMsec;
+	int32_t  fThickAllTheWayTimeInMsec;
 	uint32_t  fQualityCheckIntervalInMsec;
 
 	uint32_t  fMinTCPBufferSizeInBytes;

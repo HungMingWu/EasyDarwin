@@ -141,7 +141,7 @@ public:
 private:
 
 	//PRIVATE ACCESSORS:    
-	SInt32      GetHashKey() { return fHashValue; }
+	int32_t      GetHashKey() { return fHashValue; }
 
 	//these functions are only used by the hash table itself. This constructor
 	//will break the "Set" functions.

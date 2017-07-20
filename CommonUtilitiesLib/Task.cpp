@@ -335,7 +335,7 @@ Task* TaskThread::WaitForTask()
 			theTimeout = 10;
 
 		//wait...
-		OSQueueElem* theElem = fTaskQueue.DeQueueBlocking(this, (SInt32)theTimeout);
+		OSQueueElem* theElem = fTaskQueue.DeQueueBlocking(this, (int32_t)theTimeout);
 		if (theElem != NULL)
 		{
 			if (TASK_DEBUG) qtss_printf("TaskThread::WaitForTask found signal-task=%s thread %p fTaskQueue.GetLength(%"   _U32BITARG_   ") taskElem = %p enclose=%p\n", ((Task*)theElem->GetEnclosingObject())->fTaskName, (void *) this, fTaskQueue.GetQueue()->GetLength(), (void *)theElem, (void *)theElem->GetEnclosingObject());

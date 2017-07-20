@@ -56,8 +56,8 @@
 #if TEST_TIME
 static SInt64 startTime = 0;
 static SInt64 durationTime = 0;
-static SInt32 sReadCount = 0;
-static SInt32 sByteCount = 0;
+static int32_t sReadCount = 0;
+static int32_t sByteCount = 0;
 static bool sMovie = false;
 
 #endif
@@ -243,7 +243,7 @@ void FileMap::AllocateBufferMap(uint32_t inUnitSizeInK, uint32_t inNumBuffSizeUn
 	fBlockPool.SetBuffIncValue(inBufferIncCount);
 
 	fMapArraySize = (fileLen / fDataBufferSize) + 1;
-	fFileMapArray = new FileBlockBuffer *[(SInt32)(fMapArraySize + 1)];
+	fFileMapArray = new FileBlockBuffer *[(int32_t)(fMapArraySize + 1)];
 
 	this->Clean(); // required because fFileMapArray's array is used to store buffer pointers.
 #if FILE_SOURCE_DEBUG
@@ -269,7 +269,7 @@ char* FileMap::GetBuffer(SInt64 buffIndex, bool* outFillBuff)
 	*outFillBuff = true; // we are re-using or just created a buff
 
 	this->DeleteOldBuffs();
-	Assert(buffIndex < (SInt32)fMapArraySize);
+	Assert(buffIndex < (int32_t)fMapArraySize);
 
 	FileBlockBuffer *theElem = fFileMapArray[buffIndex];
 	if (NULL == theElem)
@@ -312,7 +312,7 @@ char* FileMap::GetBuffer(SInt64 buffIndex, bool* outFillBuff)
 void FileMap::Clean()
 {
 	if (fFileMapArray != NULL)
-		::memset((char *)fFileMapArray, 0, (SInt32)(sizeof(FileBlockBuffer *) * fMapArraySize));
+		::memset((char *)fFileMapArray, 0, (int32_t)(sizeof(FileBlockBuffer *) * fMapArraySize));
 }
 
 void FileMap::DeleteMap()
@@ -369,7 +369,7 @@ void OSFileSource::Advise(UInt64, uint32_t)
 	// does nothing on platforms other than MacOSXServer
 }
 
-OS_Error OSFileSource::FillBuffer(char* ioBuffer, char* buffStart, SInt32 buffIndex)
+OS_Error OSFileSource::FillBuffer(char* ioBuffer, char* buffStart, int32_t buffIndex)
 {
 	uint32_t buffSize = fFileMap.GetMaxBufSize();
 	UInt64 startPos = (UInt64)buffIndex * (UInt64)buffSize;
@@ -384,7 +384,7 @@ OS_Error OSFileSource::FillBuffer(char* ioBuffer, char* buffStart, SInt32 buffIn
 }
 
 #if FILE_SOURCE_BUFFTEST
-static SInt32 sBuffCount = 1;
+static int32_t sBuffCount = 1;
 #endif
 
 OS_Error OSFileSource::Read(UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen)
@@ -458,7 +458,7 @@ OS_Error OSFileSource::ReadFromCache(UInt64 inPosition, void* inBuffer, uint32_t
 
 		if (fillBuff)
 		{
-			OS_Error theErr = this->FillBuffer((char *)inBuffer, (char *)buffStart, (SInt32)buffIndex);
+			OS_Error theErr = this->FillBuffer((char *)inBuffer, (char *)buffStart, (int32_t)buffIndex);
 			if (theErr != OS_NoErr)
 				return theErr;
 

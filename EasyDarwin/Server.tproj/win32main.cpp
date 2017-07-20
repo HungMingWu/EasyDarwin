@@ -467,9 +467,9 @@ void RunAsService(char* inServiceName)
 
 	if (theService)
 	{
-		const SInt32 kNotRunning = 1062;
+		const int32_t kNotRunning = 1062;
 		bool stopped = ::ControlService(theService, SERVICE_CONTROL_STOP, &lpServiceStatus);
-		if (!stopped && ((SInt32) ::GetLastError() != kNotRunning))
+		if (!stopped && ((int32_t) ::GetLastError() != kNotRunning))
 			qtss_printf("Stopping Service Error: %d\n", ::GetLastError());
 
 		bool started = ::StartService(theService, 0, NULL);

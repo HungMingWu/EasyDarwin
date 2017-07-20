@@ -130,7 +130,7 @@ public:
 	OSQueue_Blocking() {}
 	~OSQueue_Blocking() {}
 
-	OSQueueElem*    DeQueueBlocking(OSThread* inCurThread, SInt32 inTimeoutInMilSecs);
+	OSQueueElem*    DeQueueBlocking(OSThread* inCurThread, int32_t inTimeoutInMilSecs);
 	OSQueueElem*    DeQueue();//will not block
 	void            EnQueue(OSQueueElem* obj);
 

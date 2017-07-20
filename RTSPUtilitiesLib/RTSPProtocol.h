@@ -75,7 +75,7 @@ public:
 		return sStatusCodeStrings[inStat];
 	}
 	//returns error number for this error
-	static SInt32           GetStatusCode(QTSS_RTSPStatusCode inStat)
+	static int32_t           GetStatusCode(QTSS_RTSPStatusCode inStat)
 	{
 		return sStatusCodes[inStat];
 	}
@@ -111,7 +111,7 @@ private:
 	static StrPtrLen            sHeaders[];
 	static StrPtrLen            sStatusCodeStrings[];
 	static StrPtrLen            sStatusCodeAsStrings[];
-	static SInt32               sStatusCodes[];
+	static int32_t               sStatusCodes[];
 	static StrPtrLen            sVersionString[];
 
 	static StrPtrLen            sRetrProtName;

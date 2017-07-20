@@ -76,7 +76,7 @@ OSCond::~OSCond()
 }
 
 #if __PTHREADS_MUTEXES__
-void OSCond::TimedWait(OSMutex* inMutex, SInt32 inTimeoutInMilSecs)
+void OSCond::TimedWait(OSMutex* inMutex, int32_t inTimeoutInMilSecs)
 {
 	struct timespec ts;
 	struct timeval tv;

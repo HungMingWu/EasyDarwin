@@ -104,10 +104,10 @@ static SInt64 totalMediaSampleReadTime = 0;
 static SInt64 totalHintSampleReadTime = 0;
 enum { eMicro = 1000000, eMilli = 1000 };
 #define kMaxPacketCount 10000
-static SInt32 mediaPacketCount = 0;
-static SInt32 hintPacketCount = 0;
-static SInt32 totalMediaLength = 0;
-static SInt32 totalHintLength = 0;
+static int32_t mediaPacketCount = 0;
+static int32_t hintPacketCount = 0;
+static int32_t totalMediaLength = 0;
+static int32_t totalHintLength = 0;
 static SInt64 totalMediaReadTime = 0;
 static SInt64 totalHintReadTime = 0;
 
@@ -700,7 +700,7 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 	uint32_t      sampleOffsetInChunk = 0;
 	uint32_t      sampleLength = 0;
 	UInt64      cacheHintSampleLen = 0;
-	SInt32      hintMaxRead = 0;
+	int32_t      hintMaxRead = 0;
 	SInt64      sizeOfSamplesInChunk = 0;
 	SInt64      endOfSampleInChunk = 0;
 	SInt64      sampleFirstPartLength = 0;
@@ -876,7 +876,7 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 		// Initialize this track if we haven't done so yet.
 		if (!track->IsInitialized())
 		{
-			TEMP_PRINT_ONE("QTHintTrack::GetPacket trackRefIndex %li, not initialized,\n", (SInt32)trackRefIndex);
+			TEMP_PRINT_ONE("QTHintTrack::GetPacket trackRefIndex %li, not initialized,\n", (int32_t)trackRefIndex);
 			OSMutexLocker theLocker(fFile->GetMutex());
 
 			TEMP_PRINT("Initializing media track\n");
@@ -1088,8 +1088,8 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 		if (htcb->fCachedHintTrackSample == NULL)
 		{
 			//          qtss_printf("create a cache buffer for %" _S32BITARG_ " of size %" _S32BITARG_ "\n",mediaSampleNumber,cacheHintSampleLen); 
-			htcb->fCachedHintTrackSample = new char[(SInt32)cacheHintSampleLen];
-			htcb->fCachedHintTrackBufferLength = (SInt32)cacheHintSampleLen;
+			htcb->fCachedHintTrackSample = new char[(int32_t)cacheHintSampleLen];
+			htcb->fCachedHintTrackBufferLength = (int32_t)cacheHintSampleLen;
 
 		}
 		else if (htcb->fCachedHintTrackBufferLength < cacheHintSampleLen)
@@ -1099,8 +1099,8 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 			htcb->fCachedHintTrackSampleOffset = 0;
 			delete[] htcb->fCachedHintTrackSample;
 
-			htcb->fCachedHintTrackSample = new char[(SInt32)cacheHintSampleLen];
-			htcb->fCachedHintTrackBufferLength = (SInt32)cacheHintSampleLen;
+			htcb->fCachedHintTrackSample = new char[(int32_t)cacheHintSampleLen];
+			htcb->fCachedHintTrackBufferLength = (int32_t)cacheHintSampleLen;
 		}
 
 		if (htcb->fCachedHintTrackSampleNumber != mediaSampleNumber)
@@ -1238,7 +1238,7 @@ QTTrack::ErrorCode QTHintTrack::GetPacket(uint32_t sampleNumber, uint16_t packet
 
 
 	if (hdrData.hintFlags)
-	{   //qtss_printf( "QTHintTrack::GetPacket hintFlags %lx\n", (SInt32)hdrData.hintFlags );      
+	{   //qtss_printf( "QTHintTrack::GetPacket hintFlags %lx\n", (int32_t)hdrData.hintFlags );      
 	}
 
 	if (hdrData.hintFlags & kRepeatPacketMask && (dropRepeatPackets))
@@ -1279,7 +1279,7 @@ QTTrack::ErrorCode QTHintTrack::GetPacket(uint32_t sampleNumber, uint16_t packet
 	tempInt16 = hdrData.rtpHeaderBits | ntohs(0x8000) /* v2 RTP header */;
 	COPY_WORD(pPacketOutBuf, &tempInt16);
 
-	//TEMP_PRINT_ONE( "QTHintTrack::GetPacket rtpHeaderBits %li.\n", (SInt32)rtpHeaderBits );
+	//TEMP_PRINT_ONE( "QTHintTrack::GetPacket rtpHeaderBits %li.\n", (int32_t)rtpHeaderBits );
 	pPacketOutBuf += 2;
 
 	tempInt16 = htons(hdrData.rtpSequenceNumber);
@@ -1374,7 +1374,7 @@ QTTrack::ErrorCode QTHintTrack::GetPacket(uint32_t sampleNumber, uint16_t packet
 	packetSize = endOfMetaInfo - buffer;
 
 	DEEP_DEBUG_PRINT(("QTHintTrack::GetPacket - ..Building packet.\n"));
-	TEMP_PRINT_TWO("QTHintTrack::GetPacket Building packet %li ; hdrData.dataEntryCount %li .\n", (SInt32)packetNumber, (SInt32)hdrData.dataEntryCount);
+	TEMP_PRINT_TWO("QTHintTrack::GetPacket Building packet %li ; hdrData.dataEntryCount %li .\n", (int32_t)packetNumber, (int32_t)hdrData.dataEntryCount);
 
 	for (curEntry = 0; curEntry < hdrData.dataEntryCount; curEntry++)
 	{

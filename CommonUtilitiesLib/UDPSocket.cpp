@@ -102,10 +102,10 @@ OS_Error UDPSocket::RecvFrom(uint32_t* outRemoteAddr, uint16_t* outRemotePort,
 #endif
 
 #ifdef __sgi__
-	SInt32 theRecvLen = ::recvfrom(fFileDesc, ioBuffer, inBufLen, 0, (sockaddr*)&fMsgAddr, &addrLen);
+	int32_t theRecvLen = ::recvfrom(fFileDesc, ioBuffer, inBufLen, 0, (sockaddr*)&fMsgAddr, &addrLen);
 #else
 	// Win32 says that ioBuffer is a char*
-	SInt32 theRecvLen = ::recvfrom(fFileDesc, (char*)ioBuffer, inBufLen, 0, (sockaddr*)&fMsgAddr, &addrLen);
+	int32_t theRecvLen = ::recvfrom(fFileDesc, (char*)ioBuffer, inBufLen, 0, (sockaddr*)&fMsgAddr, &addrLen);
 #endif
 
 	if (theRecvLen == -1)

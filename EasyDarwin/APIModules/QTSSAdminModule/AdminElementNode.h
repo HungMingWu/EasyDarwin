@@ -50,7 +50,7 @@ void COPYBUFFER(char *dest, char *src, int8_t size);
 void ElementNode_InitPtrArray();
 void ElementNode_InsertPtr(void *ptr, char * src);
 void ElementNode_RemovePtr(void *ptr, char * src);
-SInt32 ElementNode_CountPtrs();
+int32_t ElementNode_CountPtrs();
 void ElementNode_ShowPtrs();
 
 class ClientSession {
@@ -109,11 +109,11 @@ public:
 
 	};
 
-	SInt32                  fDataFieldsStop;
+	int32_t                  fDataFieldsStop;
 
 	uint32_t  CountElements();
 
-	SInt32  GetMyStopItem() { Assert(fSelfPtr); return fDataFieldsStop; };
+	int32_t  GetMyStopItem() { Assert(fSelfPtr); return fDataFieldsStop; };
 	uint32_t  GetMyKey() { Assert(fSelfPtr); return fSelfPtr->fKey; };
 	char*   GetMyName() { Assert(fSelfPtr); return fSelfPtr->fFieldName; };
 	uint32_t  GetMyNameLen() { Assert(fSelfPtr); return fSelfPtr->fFieldLen; };
@@ -139,22 +139,22 @@ public:
 	bool  IsNodeElement() { Assert(this); return (this->GetMyFieldType() == eNode || this->GetMyFieldType() == eArrayNode); }
 
 
-	bool  IsStopItem(SInt32 index) { return index == GetMyStopItem(); };
-	uint32_t  GetKey(SInt32 index) { return fFieldIDs[index].fKey; };
-	char*   GetName(SInt32 index) { return fFieldIDs[index].fFieldName; };
-	uint32_t  GetNameLen(SInt32 index) { return fFieldIDs[index].fFieldLen; };
-	uint32_t  GetAPI_ID(SInt32 index) { return fFieldIDs[index].fAPI_ID; };
-	uint32_t  GetAttributeIndex(SInt32 index) { return fFieldIDs[index].fIndex; };
-	uint32_t  GetAPI_Type(SInt32 index) { return fFieldIDs[index].fAPI_Type; };
-	char*   GetAPI_TypeStr(SInt32 index) { char* theTypeStr = NULL; (void)QTSS_TypeToTypeString(GetAPI_Type(index), &theTypeStr); return theTypeStr; };
-	uint32_t  GetFieldType(SInt32 index) { return fFieldIDs[index].fFieldType; };
-	char*   GetAccessData(SInt32 index) { return fFieldIDs[index].fAccessData; };
-	uint32_t  GetAccessLen(SInt32 index) { return fFieldIDs[index].fAccessLen; };
-	uint32_t  GetAccessPermissions(SInt32 index) { return fFieldIDs[index].fAccessPermissions; };
-	void    GetNameSPL(SInt32 index, StrPtrLen* str) { if (str != NULL) str->Set(fFieldIDs[index].fFieldName, fFieldIDs[index].fFieldLen); };
-	void    GetAccess(SInt32 index, StrPtrLen* str) { if (str != NULL) str->Set(fFieldIDs[index].fAccessData, fFieldIDs[index].fAccessLen); };
-	QTSS_Object GetAPISource(SInt32 index) { return fFieldIDs[index].fAPISource; };
-	bool  IsNodeElement(SInt32 index) { return (GetFieldType(index) == eNode || GetFieldType(index) == eArrayNode); }
+	bool  IsStopItem(int32_t index) { return index == GetMyStopItem(); };
+	uint32_t  GetKey(int32_t index) { return fFieldIDs[index].fKey; };
+	char*   GetName(int32_t index) { return fFieldIDs[index].fFieldName; };
+	uint32_t  GetNameLen(int32_t index) { return fFieldIDs[index].fFieldLen; };
+	uint32_t  GetAPI_ID(int32_t index) { return fFieldIDs[index].fAPI_ID; };
+	uint32_t  GetAttributeIndex(int32_t index) { return fFieldIDs[index].fIndex; };
+	uint32_t  GetAPI_Type(int32_t index) { return fFieldIDs[index].fAPI_Type; };
+	char*   GetAPI_TypeStr(int32_t index) { char* theTypeStr = NULL; (void)QTSS_TypeToTypeString(GetAPI_Type(index), &theTypeStr); return theTypeStr; };
+	uint32_t  GetFieldType(int32_t index) { return fFieldIDs[index].fFieldType; };
+	char*   GetAccessData(int32_t index) { return fFieldIDs[index].fAccessData; };
+	uint32_t  GetAccessLen(int32_t index) { return fFieldIDs[index].fAccessLen; };
+	uint32_t  GetAccessPermissions(int32_t index) { return fFieldIDs[index].fAccessPermissions; };
+	void    GetNameSPL(int32_t index, StrPtrLen* str) { if (str != NULL) str->Set(fFieldIDs[index].fFieldName, fFieldIDs[index].fFieldLen); };
+	void    GetAccess(int32_t index, StrPtrLen* str) { if (str != NULL) str->Set(fFieldIDs[index].fAccessData, fFieldIDs[index].fAccessLen); };
+	QTSS_Object GetAPISource(int32_t index) { return fFieldIDs[index].fAPISource; };
+	bool  IsNodeElement(int32_t index) { return (GetFieldType(index) == eNode || GetFieldType(index) == eArrayNode); }
 
 	enum
 	{
@@ -167,7 +167,7 @@ public:
 	};
 
 	ElementNode();
-	void Initialize(SInt32 index, ElementNode *parentPtr, QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, QTSS_Initialize_Params *initParams, QTSS_Object nodeSource, DataFieldsType dataFieldsType);
+	void Initialize(int32_t index, ElementNode *parentPtr, QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, QTSS_Initialize_Params *initParams, QTSS_Object nodeSource, DataFieldsType dataFieldsType);
 	virtual ~ElementNode();
 
 	void            SetNodeName(char *namePtr);
@@ -179,19 +179,19 @@ public:
 	ElementNode*    GetParentNode() { return fParentNodePtr; };
 	void            GetFullPath(StrPtrLen *resultPtr);
 
-	OSRef*  GetOSRef(SInt32 index);
-	void    SetOSRef(SInt32 index, OSRef* refPtr);
-	SInt32  ResolveSPLKeyToIndex(StrPtrLen *keyPtr);
+	OSRef*  GetOSRef(int32_t index);
+	void    SetOSRef(int32_t index, OSRef* refPtr);
+	int32_t  ResolveSPLKeyToIndex(StrPtrLen *keyPtr);
 	virtual bool  SetUpOneDataField(uint32_t index);
 
-	ElementDataFields   *GetElementFieldPtr(SInt32 index);
-	char                *GetElementDataPtr(SInt32 index);
-	void                SetElementDataPtr(SInt32 index, char * data, bool isNode);
+	ElementDataFields   *GetElementFieldPtr(int32_t index);
+	char                *GetElementDataPtr(int32_t index);
+	void                SetElementDataPtr(int32_t index, char * data, bool isNode);
 	void                SetMyElementDataPtr(char * data) { fSelfDataPtr = data; }
 	char*               GetMyElementDataPtr() { return fSelfDataPtr; }
-	bool              IsFiltered(SInt32 index, QueryURI *queryPtr);
+	bool              IsFiltered(int32_t index, QueryURI *queryPtr);
 
-	ElementDataFields   *GetNodeInfoPtr(SInt32 index);
+	ElementDataFields   *GetNodeInfoPtr(int32_t index);
 
 	void    SetNodeInfo(ElementDataFields *nodeInfo);
 	void    SetSource(void * dataSource) { fDataSource = dataSource; };
@@ -205,20 +205,20 @@ public:
 		}
 	};
 
-	virtual void    SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, SInt32 index, QTSS_Initialize_Params *initParams);
+	virtual void    SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, int32_t index, QTSS_Initialize_Params *initParams);
 	virtual void    SetUpAllNodes(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, QTSS_Initialize_Params *initParams);
 
-	virtual void    SetUpSingleElement(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, SInt32 index, QTSS_Initialize_Params *initParams);
+	virtual void    SetUpSingleElement(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, int32_t index, QTSS_Initialize_Params *initParams);
 	virtual void    SetUpAllElements(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, QTSS_Initialize_Params *initParams);
 	virtual void    SetupNodes(QueryURI *queryPtr, StrPtrLen *currentPathPtr, QTSS_Initialize_Params *initParams);
 
 
 	void    RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr);
-	void    RespondToAdd(QTSS_StreamRef inStream, SInt32 index, QueryURI *queryPtr);
-	void    RespondToSet(QTSS_StreamRef inStream, SInt32 index, QueryURI *queryPtr);
-	void    RespondToGet(QTSS_StreamRef inStream, SInt32 index, QueryURI *queryPtr);
-	void    RespondToDel(QTSS_StreamRef inStream, SInt32 index, QueryURI *queryPtr, bool delAttribute);
-	void    RespondToKey(QTSS_StreamRef inStream, SInt32 index, QueryURI *queryPtr);
+	void    RespondToAdd(QTSS_StreamRef inStream, int32_t index, QueryURI *queryPtr);
+	void    RespondToSet(QTSS_StreamRef inStream, int32_t index, QueryURI *queryPtr);
+	void    RespondToGet(QTSS_StreamRef inStream, int32_t index, QueryURI *queryPtr);
+	void    RespondToDel(QTSS_StreamRef inStream, int32_t index, QueryURI *queryPtr, bool delAttribute);
+	void    RespondToKey(QTSS_StreamRef inStream, int32_t index, QueryURI *queryPtr);
 
 	void    RespondWithNodeName(QTSS_StreamRef inStream, QueryURI *queryPtr);
 	void    RespondWithSelf(QTSS_StreamRef inStream, QueryURI *queryPtr);
@@ -255,8 +255,8 @@ public:
 	StrPtrLen           fNodeNameSPL;
 
 	QTSS_Object         fDataSource;
-	SInt32              fNumFields;
-	SInt32              fPathLen;
+	int32_t              fNumFields;
+	int32_t              fPathLen;
 	bool              fInitialized;
 
 	ElementDataFields*  fFieldIDs;
@@ -274,8 +274,8 @@ public:
 
 private:
 
-	inline void DebugShowFieldDataType(SInt32 index);
-	inline void DebugShowFieldValue(SInt32 index);
+	inline void DebugShowFieldDataType(int32_t index);
+	inline void DebugShowFieldValue(int32_t index);
 
 
 };
@@ -286,8 +286,8 @@ public:
 	QueryURI *fQueryPtr;
 	ElementNode *fNodePtr;
 
-	void SetUpSingleElement(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, SInt32 index, QTSS_Initialize_Params *initParams);
-	void SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, SInt32 index, QTSS_Initialize_Params *initParams);
+	void SetUpSingleElement(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, int32_t index, QTSS_Initialize_Params *initParams);
+	void SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, int32_t index, QTSS_Initialize_Params *initParams);
 	void Initialize(QTSS_Initialize_Params *initParams, QueryURI *queryPtr);
 	AdminClass() :fQueryPtr(NULL), fNodePtr(NULL) {};
 	~AdminClass();

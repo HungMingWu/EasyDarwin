@@ -59,7 +59,7 @@ public:
 	{
 		char                    fFieldName[eMaxAttributeSize + 1];
 		uint32_t                  fFieldLen;
-		SInt32                  fID;
+		int32_t                  fID;
 		StrPtrLen*              fData;
 	};
 
@@ -162,7 +162,7 @@ public:
 	void        SetAccessFlags();
 	void        SetParamBits(uint32_t forcebits);
 	void        SetSnapShot();
-	SInt32      GetCommandID() { return    fTheCommand; };
+	int32_t      GetCommandID() { return    fTheCommand; };
 
 	char        fLastPath[1024];
 	QueryURI(StrPtrLen *inStream);
@@ -188,7 +188,7 @@ private:
 	bool      fQueryHasResponse;
 	uint32_t      fQueryEvalResult;
 	StrPtrLen   fQueryEvalMessage;
-	SInt32      fTheCommand;
+	int32_t      fTheCommand;
 	void        SetCommand();
 	void        ParseURLString(StringParser *parserPtr, StrPtrLen *urlPtr);
 	void        ParseQueryString(StringParser *parserPtr, StrPtrLen *urlPtr);

@@ -223,13 +223,13 @@ void APITests_DEBUG()
 
 			err = QTSS_GetNumValues(sServer, qtssSvrClientSessions, &numValues);
 			err = QTSS_GetValuePtr(sServer, qtssSvrClientSessions, 0, (void**)&sessionsPtr, &paramLen);
-			qtss_printf("Admin Module Num Sessions = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ " err = %" _S32BITARG_ " paramLen =%"   _U32BITARG_   "\n", numValues, (SInt32)*sessionsPtr, err, paramLen);
+			qtss_printf("Admin Module Num Sessions = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ " err = %" _S32BITARG_ " paramLen =%"   _U32BITARG_   "\n", numValues, (int32_t)*sessionsPtr, err, paramLen);
 
 			uint32_t      numAttr = 0;
 			if (sessionsPtr)
 			{
 				err = QTSS_GetNumAttributes(*sessionsPtr, &numAttr);
-				qtss_printf("Admin Module Num attributes = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ "  err = %" _S32BITARG_ "\n", numAttr, (SInt32)*sessionsPtr, err);
+				qtss_printf("Admin Module Num attributes = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ "  err = %" _S32BITARG_ "\n", numAttr, (int32_t)*sessionsPtr, err);
 
 				QTSS_Object theAttributeInfo;
 				char nameBuff[128];
@@ -256,13 +256,13 @@ void APITests_DEBUG()
 
 			err = QTSS_GetNumValues(sServer, qtssSvrClientSessions, &numValues);
 			err = QTSS_GetValue(sServer, qtssSvrClientSessions, 0, (void*)&sessions, &paramLen);
-			qtss_printf("Admin Module Num Sessions = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ " err = %" _S32BITARG_ " paramLen = %"   _U32BITARG_   "\n", numValues, (SInt32)sessions, err, paramLen);
+			qtss_printf("Admin Module Num Sessions = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ " err = %" _S32BITARG_ " paramLen = %"   _U32BITARG_   "\n", numValues, (int32_t)sessions, err, paramLen);
 
 			if (sessions)
 			{
 				uint32_t      numAttr = 0;
 				err = QTSS_GetNumAttributes(sessions, &numAttr);
-				qtss_printf("Admin Module Num attributes = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ "  err = %" _S32BITARG_ "\n", numAttr, (SInt32)sessions, err);
+				qtss_printf("Admin Module Num attributes = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ "  err = %" _S32BITARG_ "\n", numAttr, (int32_t)sessions, err);
 
 				QTSS_Object theAttributeInfo;
 				char nameBuff[128];
@@ -856,7 +856,7 @@ inline bool InWaitInterval(QTSS_Filter_Params* inParams)
 	QTSS_TimeVal currentTime = QTSS_Milliseconds();
 	if (currentTime < nextExecuteTime)
 	{
-		SInt32 waitTime = (SInt32)(nextExecuteTime - currentTime) + 1;
+		int32_t waitTime = (int32_t)(nextExecuteTime - currentTime) + 1;
 		//qtss_printf("(currentTime < nextExecuteTime) sSessID = %"   _U32BITARG_   " waitTime =%" _S32BITARG_ " currentTime = %qd nextExecute = %qd interval=%"   _U32BITARG_   "\n",sSessID, waitTime, currentTime, nextExecuteTime,sRequestTimeIntervalMilli);
 		(void)QTSS_SetIdleTimer(waitTime);
 		KeepSession(inParams->inRTSPRequest, true);

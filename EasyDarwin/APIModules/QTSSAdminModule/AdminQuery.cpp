@@ -440,7 +440,7 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 			break;
 
 		default:
-			{   SInt32 theID = GetCommandID();
+			{   int32_t theID = GetCommandID();
 			StrPtrLen *commandPtr = GetCommand();
 			if (theID < 0)
 			{
@@ -567,7 +567,7 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 
 		if (result != 0)
 		{
-			SInt32 theID = GetCommandID();
+			int32_t theID = GetCommandID();
 			StrPtrLen *commandPtr = GetCommand();
 			if (theID < 0)
 			{
@@ -674,7 +674,7 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 
 		StringParser tempParser(inStream);
 		StrPtrLen URLToParse;
-		SInt32 URLoffset = 0;
+		int32_t URLoffset = 0;
 
 		if (inStream->Len > 0)
 		{   // skip past the HTTP command for the StringTranslator::DecodeURL but keep it in our decoded Request buffer
@@ -686,7 +686,7 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 			memcpy(decodedRequest, inStream->Ptr, URLoffset);
 		}
 
-		SInt32 decodedLen = StringTranslator::DecodeURL(URLToParse.Ptr, URLToParse.Len, &decodedRequest[URLoffset], inStream->Len);
+		int32_t decodedLen = StringTranslator::DecodeURL(URLToParse.Ptr, URLToParse.Len, &decodedRequest[URLoffset], inStream->Len);
 		StrPtrLen decodedRequestStr(decodedRequest, decodedLen);
 
 		StringParser parser(&decodedRequestStr);

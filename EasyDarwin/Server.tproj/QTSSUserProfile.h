@@ -65,7 +65,7 @@ protected:
 	char    fUserNameBuf[kMaxUserProfileNameLen];       // Set by RTSPRequest object
 	char    fUserPasswordBuf[kMaxUserProfilePasswordLen];// Set by authentication module through API
 
-	UInt32  fUserRights;  //Set by authorization module.
+	uint32_t  fUserRights;  //Set by authorization module.
 	//Dictionary support
 	static QTSSAttrInfoDict::AttrInfo   sAttributes[];
 };

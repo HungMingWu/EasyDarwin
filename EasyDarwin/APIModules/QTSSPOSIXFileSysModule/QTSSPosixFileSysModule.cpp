@@ -171,7 +171,7 @@ QTSS_Error  OpenFile(QTSS_OpenFile_Params* inParams)
 QTSS_Error  AdviseFile(QTSS_AdviseFile_Params* inParams)
 {
 	OSFileSource** theFile = NULL;
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 
 	(void)QTSS_GetValuePtr(inParams->inFileObject, sOSFileSourceAttr, 0, (void**)&theFile, &theLen);
 	Assert(theLen == sizeof(OSFileSource*));
@@ -183,7 +183,7 @@ QTSS_Error  AdviseFile(QTSS_AdviseFile_Params* inParams)
 QTSS_Error  ReadFile(QTSS_ReadFile_Params* inParams)
 {
 	OSFileSource** theFile = NULL;
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 
 	(void)QTSS_GetValuePtr(inParams->inFileObject, sOSFileSourceAttr, 0, (void**)&theFile, &theLen);
 	Assert(theLen == sizeof(OSFileSource*));
@@ -201,7 +201,7 @@ QTSS_Error  CloseFile(QTSS_CloseFile_Params* inParams)
 {
 	OSFileSource** theFile = NULL;
 	EventContext** theContext = NULL;
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 
 	QTSS_Error theErr = QTSS_GetValuePtr(inParams->inFileObject, sOSFileSourceAttr, 0, (void**)&theFile, &theLen);
 	Assert(theErr == QTSS_NoErr);
@@ -229,7 +229,7 @@ QTSS_Error  RequestEventFile(QTSS_RequestEventFile_Params* inParams)
 	Assert(theState->curTask != NULL);
 
 	EventContext** theContext = NULL;
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 
 	QTSS_Error theErr = QTSS_GetValuePtr(inParams->inFileObject, sEventContextAttr, 0, (void**)&theContext, &theLen);
 	if (theErr == QTSS_NoErr)

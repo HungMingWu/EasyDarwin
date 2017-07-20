@@ -66,12 +66,12 @@ SDPSourceInfo::~SDPSourceInfo()
     fSDPData.Delete();
 }
 
-char* SDPSourceInfo::GetLocalSDP(UInt32* newSDPLen)
+char* SDPSourceInfo::GetLocalSDP(uint32_t* newSDPLen)
 {
     Assert(fSDPData.Ptr != NULL);
 
     bool appendCLine = true;
-    UInt32 trackIndex = 0;
+    uint32_t trackIndex = 0;
     
     char *localSDP = new char[fSDPData.Len * 2];
     OSCharArrayDeleter charArrayPathDeleter(localSDP);
@@ -171,7 +171,7 @@ char* SDPSourceInfo::GetLocalSDP(UInt32* newSDPLen)
         qtss_sprintf(trackIndexBuffer, "a=control:trackID=%" _S32BITARG_ "\r\n",trackIndex);
         localSDPFormatter.Put(trackIndexBuffer, ::strlen(trackIndexBuffer));
     }
-    *newSDPLen = (UInt32)localSDPFormatter.GetCurrentOffset();
+    *newSDPLen = (uint32_t)localSDPFormatter.GetCurrentOffset();
     
     StrPtrLen theSDPStr(localSDP, *newSDPLen);//localSDP is not 0 terminated so initialize theSDPStr with the len.
     SDPContainer rawSDPContainer; 
@@ -182,7 +182,7 @@ char* SDPSourceInfo::GetLocalSDP(UInt32* newSDPLen)
 }
 
 
-void SDPSourceInfo::Parse(char* sdpData, UInt32 sdpLen)
+void SDPSourceInfo::Parse(char* sdpData, uint32_t sdpLen)
 {
     //
     // There are some situations in which Parse can be called twice.
@@ -200,7 +200,7 @@ void SDPSourceInfo::Parse(char* sdpData, UInt32 sdpLen)
 
     // If there is no trackID information in this SDP, we make the track IDs start
     // at 1 -> N
-    UInt32 currentTrack = 1;
+    uint32_t currentTrack = 1;
     
     bool hasGlobalStreamInfo = false;
     StreamInfo theGlobalStreamInfo; //needed if there is one c= header independent of
@@ -209,7 +209,7 @@ void SDPSourceInfo::Parse(char* sdpData, UInt32 sdpLen)
     StrPtrLen sdpLine;
     StringParser trackCounter(&fSDPData);
     StringParser sdpParser(&fSDPData);
-    UInt32 theStreamIndex = 0;
+    uint32_t theStreamIndex = 0;
 
     //walk through the SDP, counting up the number of tracks
     // Repeat until there's no more data in the SDP
@@ -248,10 +248,10 @@ void SDPSourceInfo::Parse(char* sdpData, UInt32 sdpLen)
                 StringParser mParser(&sdpLine);
                                 
                 mParser.ConsumeUntil(NULL, StringParser::sDigitMask);
-                UInt32 ntpStart = mParser.ConsumeInteger(NULL);
+                uint32_t ntpStart = mParser.ConsumeInteger(NULL);
                 
                 mParser.ConsumeUntil(NULL, StringParser::sDigitMask);               
-                UInt32 ntpEnd = mParser.ConsumeInteger(NULL);
+                uint32_t ntpEnd = mParser.ConsumeInteger(NULL);
                 
                 SetActiveNTPTimes(ntpStart,ntpEnd);
             }
@@ -386,7 +386,7 @@ void SDPSourceInfo::Parse(char* sdpData, UInt32 sdpLen)
                 //get the IP address off this header
                 StringParser cParser(&sdpLine);
                 cParser.ConsumeLength(NULL, 9);//strip off "c=in ip4 "
-                UInt32 tempIPAddr = SDPSourceInfo::GetIPAddr(&cParser, '/');
+                uint32_t tempIPAddr = SDPSourceInfo::GetIPAddr(&cParser, '/');
                                 
                 //grab the ttl
                 SInt32 tempTtl = kDefaultTTL;
@@ -417,7 +417,7 @@ void SDPSourceInfo::Parse(char* sdpData, UInt32 sdpLen)
     if (theGlobalStreamInfo.fBufferDelay != (float) eDefaultBufferDelay)
         bufferDelay = theGlobalStreamInfo.fBufferDelay;
     
-    UInt32 count = 0;
+    uint32_t count = 0;
     while (count < fNumStreams)
     {   fStreamArray[count].fBufferDelay = bufferDelay;
         count ++;
@@ -425,7 +425,7 @@ void SDPSourceInfo::Parse(char* sdpData, UInt32 sdpLen)
         
 }
 
-UInt32 SDPSourceInfo::GetIPAddr(StringParser* inParser, char inStopChar)
+uint32_t SDPSourceInfo::GetIPAddr(StringParser* inParser, char inStopChar)
 {
     StrPtrLen ipAddrStr;
 
@@ -441,7 +441,7 @@ UInt32 SDPSourceInfo::GetIPAddr(StringParser* inParser, char inStopChar)
     
     //inet_addr returns numeric IP addr in network byte order, make
     //sure to convert to host order.
-    UInt32 ipAddr = SocketUtils::ConvertStringToAddr(ipAddrStr.Ptr);
+    uint32_t ipAddr = SocketUtils::ConvertStringToAddr(ipAddrStr.Ptr);
     
     // Make sure to put the old char back!
     ipAddrStr.Ptr[ipAddrStr.Len] = endChar;

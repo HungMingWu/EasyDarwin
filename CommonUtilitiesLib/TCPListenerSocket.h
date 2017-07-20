@@ -55,7 +55,7 @@ public:
 
 	//addr = listening address. port = listening port. Automatically
 	//starts listening
-	OS_Error        Initialize(UInt32 addr, uint16_t port);
+	OS_Error        Initialize(uint32_t addr, uint16_t port);
 
 	//You can query the listener to see if it is failing to accept
 	//connections because the OS is out of descriptors.
@@ -72,14 +72,14 @@ private:
 
 	enum
 	{
-		kTimeBetweenAcceptsInMsec = 1000,   //UInt32
-		kListenQueueLength = 128            //UInt32
+		kTimeBetweenAcceptsInMsec = 1000,   //uint32_t
+		kListenQueueLength = 128            //uint32_t
 	};
 
 	virtual void ProcessEvent(int eventBits);
-	OS_Error    listen(UInt32 queueLength);
+	OS_Error    listen(uint32_t queueLength);
 
-	UInt32          fAddr;
+	uint32_t          fAddr;
 	uint16_t          fPort;
 
 	bool          fOutOfDescriptors;

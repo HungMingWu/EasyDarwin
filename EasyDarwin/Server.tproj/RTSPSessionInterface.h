@@ -89,7 +89,7 @@ public:
 	TCPSocket*          GetSocket() { return &fSocket; }
 	OSMutex*            GetSessionMutex() { return &fSessionMutex; }
 
-	UInt32              GetSessionID() { return fSessionID; }
+	uint32_t              GetSessionID() { return fSessionID; }
 
 	// Request Body Length
 	// This object can enforce a length of the request body to prevent callers
@@ -104,13 +104,13 @@ public:
 	// Allows non-buffered writes to the client. These will flow control.
 
 	// THE FIRST ENTRY OF THE IOVEC MUST BE BLANK!!!
-	virtual QTSS_Error WriteV(iovec* inVec, UInt32 inNumVectors, UInt32 inTotalLength, UInt32* outLenWritten);
-	virtual QTSS_Error Write(void* inBuffer, UInt32 inLength, UInt32* outLenWritten, UInt32 inFlags);
-	virtual QTSS_Error Read(void* ioBuffer, UInt32 inLength, UInt32* outLenRead);
+	virtual QTSS_Error WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten);
+	virtual QTSS_Error Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t inFlags);
+	virtual QTSS_Error Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead);
 	virtual QTSS_Error RequestEvent(QTSS_EventType inEventMask);
 
 	// performs RTP over RTSP
-	QTSS_Error  InterleavedWrite(void* inBuffer, UInt32 inLen, UInt32* outLenWritten, unsigned char channel);
+	QTSS_Error  InterleavedWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, unsigned char channel);
 
 	// OPTIONS request
 	void		SaveOutputStream();
@@ -143,7 +143,7 @@ public:
 protected:
 	enum
 	{
-		kFirstRTSPSessionID = 1,    //UInt32
+		kFirstRTSPSessionID = 1,    //uint32_t
 	};
 
 	//Each RTSP session has a unique number that identifies it.
@@ -189,9 +189,9 @@ protected:
 
 	QTSS_StreamRef      fStreamRef;
 
-	UInt32              fSessionID;
-	UInt32              fLocalAddr;
-	UInt32              fRemoteAddr;
+	uint32_t              fSessionID;
+	uint32_t              fLocalAddr;
+	uint32_t              fRemoteAddr;
 	SInt32              fRequestBodyLen;
 
 	uint16_t              fLocalPort;
@@ -208,12 +208,12 @@ protected:
 
 	static bool           sDoBase64Decoding;
 
-	static 	UInt32			sOptionsRequestBody[kMaxRandomDataSize / sizeof(UInt32)];
+	static 	uint32_t			sOptionsRequestBody[kMaxRandomDataSize / sizeof(uint32_t)];
 
 	//Dictionary support
 
 	// Param retrieval function
-	static void*        SetupParams(QTSSDictionary* inSession, UInt32* outLen);
+	static void*        SetupParams(QTSSDictionary* inSession, uint32_t* outLen);
 
 	static QTSSAttrInfoDict::AttrInfo   sAttributes[];
 };

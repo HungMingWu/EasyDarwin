@@ -164,7 +164,7 @@ public:
 
 		kNumRoles = 34
 	};
-	typedef UInt32 RoleIndex;
+	typedef uint32_t RoleIndex;
 
 	// Call this to activate this module in the specified role.
 	QTSS_Error  AddRole(QTSS_Role inRole);

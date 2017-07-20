@@ -58,12 +58,12 @@ public:
 	//
 	// Accessors.
 
-	inline  bool      ChunkOffset(UInt32 ChunkNumber, UInt64 *Offset = NULL)
+	inline  bool      ChunkOffset(uint32_t ChunkNumber, UInt64 *Offset = NULL)
 	{
 		if (Offset && ChunkNumber && (ChunkNumber <= fNumEntries))
 		{
 			if (4 == fOffSetSize)
-				*Offset = (UInt64)ntohl(((UInt32 *)fTable)[ChunkNumber - 1]);
+				*Offset = (UInt64)ntohl(((uint32_t *)fTable)[ChunkNumber - 1]);
 			else
 				*Offset = (UInt64)QTAtom::NTOH64(((UInt64 *)fTable)[ChunkNumber - 1]);
 
@@ -84,9 +84,9 @@ protected:
 	//
 	// Protected member variables.
 	uint8_t       fVersion;
-	UInt32      fFlags; // 24 bits in the low 3 bytes
+	uint32_t      fFlags; // 24 bits in the low 3 bytes
 
-	UInt32      fNumEntries;
+	uint32_t      fNumEntries;
 	uint16_t      fOffSetSize;
 	char        *fChunkOffsetTable;
 	void        *fTable; // longword-aligned version of the above

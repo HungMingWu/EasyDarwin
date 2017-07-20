@@ -48,20 +48,20 @@ class FileBlockBuffer
 public:
 	FileBlockBuffer() : fArrayIndex(-1), fBufferSize(0), fBufferFillSize(0), fDataBuffer(nullptr), fDummy(0) {}
 	~FileBlockBuffer();
-	void AllocateBuffer(UInt32 buffSize);
+	void AllocateBuffer(uint32_t buffSize);
 	void TestBuffer();
 	void CleanBuffer() const
 	{ ::memset(fDataBuffer, 0, fBufferSize); }
-	void SetFillSize(UInt32 fillSize) { fBufferFillSize = fillSize; }
-	UInt32 GetFillSize() const
+	void SetFillSize(uint32_t fillSize) { fBufferFillSize = fillSize; }
+	uint32_t GetFillSize() const
 	{ return fBufferFillSize; }
 	OSQueueElem* GetQElem() { return &fQElem; }
 	SInt64              fArrayIndex;
-	UInt32              fBufferSize;
-	UInt32              fBufferFillSize;
+	uint32_t              fBufferSize;
+	uint32_t              fBufferFillSize;
 	char*				fDataBuffer;
 	OSQueueElem         fQElem;
-	UInt32              fDummy;
+	uint32_t              fDummy;
 };
 
 class FileBlockPool
@@ -77,33 +77,33 @@ public:
 	{}
 	~FileBlockPool();
 
-	void SetMaxBuffers(UInt32 maxBuffers) { if (maxBuffers > 0) fMaxBuffers = maxBuffers; }
+	void SetMaxBuffers(uint32_t maxBuffers) { if (maxBuffers > 0) fMaxBuffers = maxBuffers; }
 
-	void SetBuffIncValue(UInt32 bufferInc) { if (bufferInc > 0) fBufferInc = bufferInc; }
+	void SetBuffIncValue(uint32_t bufferInc) { if (bufferInc > 0) fBufferInc = bufferInc; }
 	void IncMaxBuffers() { fMaxBuffers += fBufferInc; }
 	void DecMaxBuffers() { if (fMaxBuffers > fBufferInc) fMaxBuffers -= fBufferInc; }
 	void DecCurBuffers() { if (fNumCurrentBuffers > 0) fNumCurrentBuffers--; }
 
-	void SetBufferUnitSize(UInt32 inUnitSizeInK) { fBufferUnitSizeBytes = inUnitSizeInK * 1024; }
-	UInt32 GetBufferUnitSizeBytes() const
+	void SetBufferUnitSize(uint32_t inUnitSizeInK) { fBufferUnitSizeBytes = inUnitSizeInK * 1024; }
+	uint32_t GetBufferUnitSizeBytes() const
 	{ return fBufferUnitSizeBytes; }
-	UInt32 GetMaxBuffers() const
+	uint32_t GetMaxBuffers() const
 	{ return fMaxBuffers; }
-	UInt32 GetIncBuffers() const
+	uint32_t GetIncBuffers() const
 	{ return fBufferInc; }
-	UInt32 GetNumCurrentBuffers() const
+	uint32_t GetNumCurrentBuffers() const
 	{ return fNumCurrentBuffers; }
 	void DeleteBlockPool();
-	FileBlockBuffer* GetBufferElement(UInt32 bufferSizeBytes);
+	FileBlockBuffer* GetBufferElement(uint32_t bufferSizeBytes);
 	void MarkUsed(FileBlockBuffer* inBuffPtr);
 
 private:
 	OSQueue fQueue;
-	UInt32  fMaxBuffers;
-	UInt32  fNumCurrentBuffers;
-	UInt32  fBufferInc;
-	UInt32  fBufferUnitSizeBytes;
-	UInt32  fBufferDataSizeBytes;
+	uint32_t  fMaxBuffers;
+	uint32_t  fNumCurrentBuffers;
+	uint32_t  fBufferInc;
+	uint32_t  fBufferUnitSizeBytes;
+	uint32_t  fBufferDataSizeBytes;
 
 };
 
@@ -113,17 +113,17 @@ class FileMap
 public:
 	FileMap() :fFileMapArray(nullptr), fDataBufferSize(0), fMapArraySize(0), fNumBuffSizeUnits(0) {}
 	~FileMap() { fFileMapArray = nullptr; }
-	void    AllocateBufferMap(UInt32 inUnitSizeInK, UInt32 inNumBuffSizeUnits, UInt32 inBufferIncCount, UInt32 inMaxBitRateBuffSizeInBlocks, UInt64 fileLen, UInt32 inBitRate);
+	void    AllocateBufferMap(uint32_t inUnitSizeInK, uint32_t inNumBuffSizeUnits, uint32_t inBufferIncCount, uint32_t inMaxBitRateBuffSizeInBlocks, UInt64 fileLen, uint32_t inBitRate);
 	char*   GetBuffer(SInt64 bufIndex, bool* outIsEmptyBuff);
 	void    TestBuffer(SInt32 bufIndex) const
 	{ Assert(bufIndex >= 0); fFileMapArray[bufIndex]->TestBuffer(); };
-	void    SetIndexBuffFillSize(SInt32 bufIndex, UInt32 fillSize) const
+	void    SetIndexBuffFillSize(SInt32 bufIndex, uint32_t fillSize) const
 	{ Assert(bufIndex >= 0); fFileMapArray[bufIndex]->SetFillSize(fillSize); }
-	UInt32  GetMaxBufSize() const
+	uint32_t  GetMaxBufSize() const
 	{ return fDataBufferSize; }
-	UInt32  GetBuffSize(SInt64 bufIndex) const
+	uint32_t  GetBuffSize(SInt64 bufIndex) const
 	{ Assert(bufIndex >= 0); return fFileMapArray[bufIndex]->GetFillSize(); }
-	UInt32  GetIncBuffers() const
+	uint32_t  GetIncBuffers() const
 	{ return fBlockPool.GetIncBuffers(); }
 	void    IncMaxBuffers() { fBlockPool.IncMaxBuffers(); }
 	void    DecMaxBuffers() { fBlockPool.DecMaxBuffers(); }
@@ -144,9 +144,9 @@ public:
 
 private:
 
-	UInt32              fDataBufferSize;
+	uint32_t              fDataBufferSize;
 	SInt64              fMapArraySize;
-	UInt32              fNumBuffSizeUnits;
+	uint32_t              fNumBuffSizeUnits;
 
 };
 
@@ -187,21 +187,21 @@ public:
 
 	//Advise: this advises the OS that we are going to be reading soon from the
 	//following position in the file
-	void            Advise(UInt64 advisePos, UInt32 adviseAmt);
+	void            Advise(UInt64 advisePos, uint32_t adviseAmt);
 
-	OS_Error    Read(void* inBuffer, UInt32 inLength, UInt32* outRcvLen = nullptr)
+	OS_Error    Read(void* inBuffer, uint32_t inLength, uint32_t* outRcvLen = nullptr)
 	{
 		return ReadFromDisk(inBuffer, inLength, outRcvLen);
 	}
 
-	OS_Error    Read(UInt64 inPosition, void* inBuffer, UInt32 inLength, UInt32* outRcvLen = nullptr);
-	OS_Error    ReadFromDisk(void* inBuffer, UInt32 inLength, UInt32* outRcvLen = nullptr);
-	OS_Error    ReadFromCache(UInt64 inPosition, void* inBuffer, UInt32 inLength, UInt32* outRcvLen = nullptr);
-	OS_Error    ReadFromPos(UInt64 inPosition, void* inBuffer, UInt32 inLength, UInt32* outRcvLen = nullptr);
+	OS_Error    Read(UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen = nullptr);
+	OS_Error    ReadFromDisk(void* inBuffer, uint32_t inLength, uint32_t* outRcvLen = nullptr);
+	OS_Error    ReadFromCache(UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen = nullptr);
+	OS_Error    ReadFromPos(UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen = nullptr);
 	void        EnableFileCache(bool enabled) { OSMutexLocker locker(&fMutex); fCacheEnabled = enabled; }
 	bool      GetCacheEnabled() const
 	{ return fCacheEnabled; }
-	void        AllocateFileCache(UInt32 inUnitSizeInK = 32, UInt32 bufferSizeUnits = 0, UInt32 incBuffers = 1, UInt32 inMaxBitRateBuffSizeInBlocks = 8, UInt32 inBitRate = 32768)
+	void        AllocateFileCache(uint32_t inUnitSizeInK = 32, uint32_t bufferSizeUnits = 0, uint32_t incBuffers = 1, uint32_t inMaxBitRateBuffSizeInBlocks = 8, uint32_t inBitRate = 32768)
 	{
 		fFileMap.AllocateBufferMap(inUnitSizeInK, bufferSizeUnits, incBuffers, inMaxBitRateBuffSizeInBlocks, fLength, inBitRate);
 	}
@@ -226,7 +226,7 @@ public:
 	// For async I/O purposes
 	int             GetFD() const
 	{ return fFile; }
-	void            SetTrackID(UInt32 trackID);
+	void            SetTrackID(uint32_t trackID);
 	// So that close won't do anything
 	void ResetFD() { fFile = -1; }
 
@@ -249,7 +249,7 @@ private:
 #if READ_LOG
 	FILE*               fFileLog;
 	char                fFilePath[1024];
-	UInt32              fTrackID;
+	uint32_t              fTrackID;
 #endif
 
 };

@@ -75,9 +75,9 @@ protected:
 	//
 	// Specify inNumValues if you wish to restrict the number of values retrieved
 	// from the text file to a certain number, otherwise specify 0.
-	void SetPrefValuesFromFile(ContainerRef container, UInt32 inPrefIndex, QTSS_AttributeID inAttrID, UInt32 inNumValues = 0);
-	void SetPrefValuesFromFileWithRef(ContainerRef pref, QTSS_AttributeID inAttrID, UInt32 inNumValues = 0);
-	void SetObjectValuesFromFile(ContainerRef pref, QTSS_AttributeID inAttrID, UInt32 inNumValues, char* prefName);
+	void SetPrefValuesFromFile(ContainerRef container, uint32_t inPrefIndex, QTSS_AttributeID inAttrID, uint32_t inNumValues = 0);
+	void SetPrefValuesFromFileWithRef(ContainerRef pref, QTSS_AttributeID inAttrID, uint32_t inNumValues = 0);
+	void SetObjectValuesFromFile(ContainerRef pref, QTSS_AttributeID inAttrID, uint32_t inNumValues, char* prefName);
 
 	//
 	// SET PREF VALUE
@@ -86,21 +86,21 @@ protected:
 	// index. This function does the conversion, and uses the converted size of the
 	// value when setting the value. If you wish to override this size, specify inValueSize,
 	// otherwise it can be 0.
-	void SetPrefValue(QTSS_AttributeID inAttrID, UInt32 inAttrIndex,
-		char* inPrefValue, QTSS_AttrDataType inPrefType, UInt32 inValueSize = 0);
+	void SetPrefValue(QTSS_AttributeID inAttrID, uint32_t inAttrIndex,
+		char* inPrefValue, QTSS_AttrDataType inPrefType, uint32_t inValueSize = 0);
 
 
 protected:
 
 	//
 	// Completion routines for SetValue and RemoveValue write back to the config source
-	virtual void    RemoveValueComplete(UInt32 inAttrIndex, QTSSDictionaryMap* inMap,
-		UInt32 inValueIndex);
+	virtual void    RemoveValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
+		uint32_t inValueIndex);
 
-	virtual void    SetValueComplete(UInt32 inAttrIndex, QTSSDictionaryMap* inMap,
-		UInt32 inValueIndex, void* inNewValue, UInt32 inNewValueLen);
+	virtual void    SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
+		uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen);
 
-	virtual void    RemoveInstanceAttrComplete(UInt32 inAttrindex, QTSSDictionaryMap* inMap);
+	virtual void    RemoveInstanceAttrComplete(uint32_t inAttrindex, QTSSDictionaryMap* inMap);
 
 	virtual QTSSDictionary* CreateNewDictionary(QTSSDictionaryMap* inMap, OSMutex* inMutex);
 

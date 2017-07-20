@@ -97,35 +97,35 @@ public:
 
 		//
 		// Track information
-		UInt32          TrackID;
+		uint32_t          TrackID;
 		QTHintTrack     *HintTrack;
 		QTHintTrack_HintTrackControlBlock   *HTCB;
 		bool          IsTrackActive, IsPacketAvailable;
-		UInt32          QualityLevel;
+		uint32_t          QualityLevel;
 
 		//
 		// Server information
 		void            *Cookie1;
-		UInt32          Cookie2;
-		UInt32          SSRC;
+		uint32_t          Cookie2;
+		uint32_t          SSRC;
 		uint16_t          FileSequenceNumberRandomOffset, BaseSequenceNumberRandomOffset,
 			LastSequenceNumber;
 		SInt32          SequenceNumberAdditive;
-		UInt32          FileTimestampRandomOffset, BaseTimestampRandomOffset;
+		uint32_t          FileTimestampRandomOffset, BaseTimestampRandomOffset;
 
 		//
 		// Sample/Packet information
-		UInt32          CurSampleNumber;
-		UInt32          ConsecutivePFramesSent;
-		UInt32          TargetPercentage;
-		UInt32          SampleToSeekTo;
-		UInt32          LastSyncSampleNumber;
-		UInt32          NextSyncSampleNumber;
+		uint32_t          CurSampleNumber;
+		uint32_t          ConsecutivePFramesSent;
+		uint32_t          TargetPercentage;
+		uint32_t          SampleToSeekTo;
+		uint32_t          LastSyncSampleNumber;
+		uint32_t          NextSyncSampleNumber;
 		uint16_t          NumPacketsInThisSample, CurPacketNumber;
 
 		double         CurPacketTime;
 		char            CurPacket[QTRTPFILE_MAX_PACKET_LENGTH];
-		UInt32          CurPacketLength;
+		uint32_t          CurPacketLength;
 
 		//
 		// List pointers
@@ -154,19 +154,19 @@ public:
 	// Initialization functions.
 	virtual ErrorCode   Initialize(const char * FilePath);
 
-	void AllocateSharedBuffers(UInt32 inUnitSizeInK, UInt32 inBufferInc, UInt32 inBufferSizeUnits, UInt32 inMaxBitRateBuffSizeInBlocks)
+	void AllocateSharedBuffers(uint32_t inUnitSizeInK, uint32_t inBufferInc, uint32_t inBufferSizeUnits, uint32_t inMaxBitRateBuffSizeInBlocks)
 	{
 		fFile->AllocateBuffers(inUnitSizeInK, inBufferInc, inBufferSizeUnits, inMaxBitRateBuffSizeInBlocks, this->GetBytesPerSecond() * 8);
 	}
 
-	void AllocatePrivateBuffers(UInt32 inUnitSizeInK, UInt32 inNumBuffSizeUnits, UInt32 inMaxBitRateBuffSizeInBlocks);
+	void AllocatePrivateBuffers(uint32_t inUnitSizeInK, uint32_t inNumBuffSizeUnits, uint32_t inMaxBitRateBuffSizeInBlocks);
 
 	//
 	// Accessors
 	double     GetMovieDuration();
 	UInt64      GetAddedTracksRTPBytes();
 	char *      GetSDPFile(int * SDPFileLength);
-	UInt32      GetBytesPerSecond();
+	uint32_t      GetBytesPerSecond();
 
 	char*       GetMoviePath();
 	QTFile*     GetQTFile() { return fFile; }
@@ -179,14 +179,14 @@ public:
 			//
 			// If you would like this track to be an RTP-Meta-Info stream, pass in
 			// the field names you would like to see
-	ErrorCode   AddTrack(UInt32 TrackID, bool UseRandomOffset = true);
+	ErrorCode   AddTrack(uint32_t TrackID, bool UseRandomOffset = true);
 
 
-	double     GetTrackDuration(UInt32 TrackID);
-	UInt32      GetTrackTimeScale(UInt32 TrackID);
+	double     GetTrackDuration(uint32_t TrackID);
+	uint32_t      GetTrackTimeScale(uint32_t TrackID);
 
-	void        SetTrackSSRC(UInt32 TrackID, UInt32 SSRC);
-	void        SetTrackCookies(UInt32 TrackID, void * Cookie1, UInt32 Cookie2);
+	void        SetTrackSSRC(uint32_t TrackID, uint32_t SSRC);
+	void        SetTrackCookies(uint32_t TrackID, void * Cookie1, uint32_t Cookie2);
 	void        SetAllowInvalidHintRefs(bool inAllowInvalidHintRefs) { fAllowInvalidHintRefs = inAllowInvalidHintRefs; }
 
 	//
@@ -195,7 +195,7 @@ public:
 	// pass in a proper Field ID array (see RTPMetaInfoPacket.h) to
 	// tell QTRTPFile which fields to include and which IDs to use with the fields.
 	// You have to let this function know whether this is a video track or not.
-	void        SetTrackRTPMetaInfo(UInt32 TrackID, RTPMetaInfoPacket::FieldID* inFieldArray, bool isVideo);
+	void        SetTrackRTPMetaInfo(uint32_t TrackID, RTPMetaInfoPacket::FieldID* inFieldArray, bool isVideo);
 
 	//
 	// What sort of packets do you want?
@@ -210,20 +210,20 @@ public:
 		kKeyFramesPlusOneP = 6			//Special quality level with Key frames followed by 1 P frame
 	};
 
-	void SetTrackQualityLevel(RTPTrackListEntry* inEntry, UInt32 inNewLevel);
+	void SetTrackQualityLevel(RTPTrackListEntry* inEntry, uint32_t inNewLevel);
 	//
 	// Packet functions
 	ErrorCode   Seek(double Time, double MaxBackupTime = 3.0);
-	ErrorCode   SeekToPacketNumber(UInt32 inTrackID, UInt64 inPacketNumber);
+	ErrorCode   SeekToPacketNumber(uint32_t inTrackID, UInt64 inPacketNumber);
 
-	UInt32      GetSeekTimestamp(UInt32 TrackID);
+	uint32_t      GetSeekTimestamp(uint32_t TrackID);
 	double     GetRequestedSeekTime() { return fRequestedSeekTime; }
 	double     GetActualSeekTime() { return fSeekTime; }
 	double     GetFirstPacketTransmitTime();
 	RTPTrackListEntry* GetLastPacketTrack() { return fLastPacketTrack; }
-	UInt32      GetNumSkippedSamples() { return fNumSkippedSamples; }
+	uint32_t      GetNumSkippedSamples() { return fNumSkippedSamples; }
 
-	uint16_t      GetNextTrackSequenceNumber(UInt32 TrackID);
+	uint16_t      GetNextTrackSequenceNumber(uint32_t TrackID);
 	double     GetNextPacket(char ** Packet, int * PacketLength);
 
 	SInt32      GetMovieHintType();
@@ -232,7 +232,7 @@ public:
 
 	ErrorCode   Error() { return fErr; };
 
-	bool      FindTrackEntry(UInt32 TrackID, RTPTrackListEntry **TrackEntry);
+	bool      FindTrackEntry(uint32_t TrackID, RTPTrackListEntry **TrackEntry);
 protected:
 	//
 	// Protected cache functions and variables.
@@ -249,7 +249,7 @@ protected:
 	// Protected member functions.
 	bool      PrefetchNextPacket(RTPTrackListEntry * TrackEntry, bool doSeek = false);
 	ErrorCode   ScanToCorrectSample();
-	ErrorCode   ScanToCorrectPacketNumber(UInt32 inTrackID, UInt64 inPacketNumber);
+	ErrorCode   ScanToCorrectPacketNumber(uint32_t inTrackID, UInt64 inPacketNumber);
 
 	//
 	// Protected member variables.
@@ -258,18 +258,18 @@ protected:
 	QTFile              *fFile;
 	QTFile_FileControlBlock *fFCB;
 
-	UInt32              fNumHintTracks;
+	uint32_t              fNumHintTracks;
 	RTPTrackListEntry   *fFirstTrack, *fLastTrack, *fCurSeekTrack;
 
 	char                *fSDPFile;
-	UInt32              fSDPFileLength;
-	UInt32              fNumSkippedSamples;
+	uint32_t              fSDPFileLength;
+	uint32_t              fNumSkippedSamples;
 
 	double             fRequestedSeekTime, fSeekTime;
 
 	RTPTrackListEntry   *fLastPacketTrack;
 
-	UInt32              fBytesPerSecond;
+	uint32_t              fBytesPerSecond;
 
 	bool              fHasRTPMetaInfoFieldArray;
 	bool              fWasLastSeekASeekToPacketNumber;

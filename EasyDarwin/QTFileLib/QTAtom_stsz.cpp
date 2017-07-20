@@ -89,7 +89,7 @@ QTAtom_stsz::~QTAtom_stsz()
 bool QTAtom_stsz::Initialize()
 {
 	// Temporary vars
-	UInt32      tempInt32;
+	uint32_t      tempInt32;
 
 
 	//
@@ -113,7 +113,7 @@ bool QTAtom_stsz::Initialize()
 
 	//
 	// Validate the size of the sample table.
-	if ((UInt32)(fNumEntries * 4) != (fTOCEntry.AtomDataLength - 12))
+	if ((uint32_t)(fNumEntries * 4) != (fTOCEntry.AtomDataLength - 12))
 		return false;
 
 	//
@@ -123,9 +123,9 @@ bool QTAtom_stsz::Initialize()
 		return false;
 
 	if (((PointerSizedInt)fSampleSizeTable & (PointerSizedInt)0x3) == 0)
-		fTable = (UInt32 *)fSampleSizeTable;
+		fTable = (uint32_t *)fSampleSizeTable;
 	else
-		fTable = (UInt32 *)(((PointerSizedInt)fSampleSizeTable + 4) & ~((PointerSizedInt)0x3));
+		fTable = (uint32_t *)(((PointerSizedInt)fSampleSizeTable + 4) & ~((PointerSizedInt)0x3));
 
 	ReadBytes(stszPos_SampleTable, (char *)fTable, fNumEntries * 4);
 
@@ -134,7 +134,7 @@ bool QTAtom_stsz::Initialize()
 	return true;
 }
 
-bool QTAtom_stsz::SampleRangeSize(UInt32 firstSampleNumber, UInt32 lastSampleNumber, UInt32 *sizePtr)
+bool QTAtom_stsz::SampleRangeSize(uint32_t firstSampleNumber, uint32_t lastSampleNumber, uint32_t *sizePtr)
 {
 	bool result = false;
 
@@ -163,7 +163,7 @@ bool QTAtom_stsz::SampleRangeSize(UInt32 firstSampleNumber, UInt32 lastSampleNum
 			{
 				*sizePtr = 0;
 
-				for (UInt32 sampleNumber = firstSampleNumber; sampleNumber <= lastSampleNumber; sampleNumber++)
+				for (uint32_t sampleNumber = firstSampleNumber; sampleNumber <= lastSampleNumber; sampleNumber++)
 					*sizePtr += ntohl(fTable[sampleNumber - 1]);
 
 			}
@@ -196,7 +196,7 @@ void QTAtom_stsz::DumpTable()
 
 	//
 	// Print the table.
-	for (UInt32 CurEntry = 1; CurEntry <= fNumEntries; CurEntry++) {
+	for (uint32_t CurEntry = 1; CurEntry <= fNumEntries; CurEntry++) {
 		//
 		// Print out a listing.
 		qtss_printf("  %10" _U32BITARG_ " : %10" _U32BITARG_ "\n", CurEntry, fTable[CurEntry - 1]);

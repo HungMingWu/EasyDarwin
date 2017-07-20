@@ -34,6 +34,7 @@
 #define __STRINGTRANSLATOR_H__
 
 #include "OSHeaders.h"
+#include <stdint.h>
 
 #define STRINGTRANSLATORTESTING 0
 
@@ -69,7 +70,7 @@ public:
 	// This function converts "network" or "URL" path delimiters (the '/' char) to
 	// the path delimiter of the local file system. It does this conversion in place,
 	// so the old data will be overwritten
-	static void     DecodePath(char* inSrc, UInt32 inSrcLen);
+	static void     DecodePath(char* inSrc, uint32_t inSrcLen);
 
 #if STRINGTRANSLATORTESTING
 	static Bool16       Test();

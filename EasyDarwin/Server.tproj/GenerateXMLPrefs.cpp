@@ -82,7 +82,7 @@ static const PrefConversionInfo kPrefs[] =
 
 int GenerateAllXMLPrefs(FilePrefsSource* inPrefsSource, XMLPrefsParser* inXMLPrefs)
 {
-	for (UInt32 x = 0; x < inPrefsSource->GetNumKeys(); x++)
+	for (uint32_t x = 0; x < inPrefsSource->GetNumKeys(); x++)
 	{
 		//
 		// Get the name of this pref
@@ -90,7 +90,7 @@ int GenerateAllXMLPrefs(FilePrefsSource* inPrefsSource, XMLPrefsParser* inXMLPre
 
 		//
 		// Find the information corresponding to this pref in the above array
-		UInt32 y = 0;
+		uint32_t y = 0;
 		for (; kPrefs[y].fPrefName != NULL; y++)
 			if (::strcmp(thePrefName, kPrefs[y].fPrefName) == 0)
 				break;
@@ -124,13 +124,13 @@ int GenerateStandardXMLPrefs(PrefsSource* inPrefsSource, XMLPrefsParser* inXMLPr
 {
 	char thePrefBuf[1024];
 
-	for (UInt32 x = 0; kPrefs[x].fPrefName != NULL; x++)
+	for (uint32_t x = 0; kPrefs[x].fPrefName != NULL; x++)
 	{
 		char* theTypeString = (char*)QTSSDataConverter::TypeToTypeString(kPrefs[x].fPrefType);
 		ContainerRef module = inXMLPrefs->GetRefForModule(kPrefs[x].fModuleName);
 		ContainerRef pref = inXMLPrefs->AddPref(module, kPrefs[x].fPrefName, theTypeString);
 
-		for (UInt32 y = 0; true; y++)
+		for (uint32_t y = 0; true; y++)
 		{
 			if (inPrefsSource->GetValueByIndex(kPrefs[x].fPrefName, y, thePrefBuf) == 0)
 				break;

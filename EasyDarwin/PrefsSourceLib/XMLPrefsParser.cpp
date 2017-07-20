@@ -41,7 +41,7 @@
 #include "XMLPrefsParser.h"
 #include "OSHeaders.h"
 
-static const UInt32 kPrefArrayMinSize = 20;
+static const uint32_t kPrefArrayMinSize = 20;
 
 static char* kMainTag = "CONFIGURATION";
 static char* kServer = "SERVER";
@@ -68,12 +68,12 @@ static char* kFileHeader[] =
 	"<!ELEMENT PREF (#PCDATA)>",
 	"<!ATTLIST PREF",
 	"\tNAME CDATA #REQUIRED",
-	"\tTYPE (uint8_t|int8_t|uint16_t|int16_t|UInt32|SInt32|UInt64|SInt64|float|double|bool|Bool8|char) \"char\">",
+	"\tTYPE (uint8_t|int8_t|uint16_t|int16_t|uint32_t|SInt32|UInt64|SInt64|float|double|bool|Bool8|char) \"char\">",
 	"<!ELEMENT LIST-PREF (VALUE*)>",
 	"<!ELEMENT VALUE (#PCDATA)>",
 	"<!ATTLIST LIST-PREF",
 	"\tNAME CDATA #REQUIRED",
-	"\tTYPE  (uint8_t|int8_t|uint16_t|int16_t|UInt32|SInt32|UInt64|SInt64|float|double|bool|Bool8|char) \"char\">",
+	"\tTYPE  (uint8_t|int8_t|uint16_t|int16_t|uint32_t|SInt32|UInt64|SInt64|float|double|bool|Bool8|char) \"char\">",
 	"<!ELEMENT OBJECT (PREF|LIST-PREF|OBJECT|LIST-OBJECT)*>",
 	"<!ATTLIST OBJECT",
 	"\tNAME CDATA #REQUIRED>",
@@ -133,7 +133,7 @@ ContainerRef XMLPrefsParser::GetRefForServer()
 	return result;
 }
 
-UInt32 XMLPrefsParser::GetNumPrefValues(ContainerRef pref)
+uint32_t XMLPrefsParser::GetNumPrefValues(ContainerRef pref)
 {
 	if (!strcmp(pref->GetTagName(), kPref))
 	{
@@ -150,12 +150,12 @@ UInt32 XMLPrefsParser::GetNumPrefValues(ContainerRef pref)
 	return pref->GetNumEmbeddedTags();  // it must be a list
 }
 
-UInt32 XMLPrefsParser::GetNumPrefsByContainer(ContainerRef container)
+uint32_t XMLPrefsParser::GetNumPrefsByContainer(ContainerRef container)
 {
 	return container->GetNumEmbeddedTags();
 }
 
-char* XMLPrefsParser::GetPrefValueByIndex(ContainerRef container, const UInt32 inPrefsIndex, const UInt32 inValueIndex,
+char* XMLPrefsParser::GetPrefValueByIndex(ContainerRef container, const uint32_t inPrefsIndex, const uint32_t inValueIndex,
 	char** outPrefName, char** outDataType)
 {
 	if (outPrefName != NULL)
@@ -169,7 +169,7 @@ char* XMLPrefsParser::GetPrefValueByIndex(ContainerRef container, const UInt32 i
 	return GetPrefValueByRef(pref, inValueIndex, outPrefName, outDataType);
 }
 
-char* XMLPrefsParser::GetPrefValueByRef(ContainerRef pref, const UInt32 inValueIndex,
+char* XMLPrefsParser::GetPrefValueByRef(ContainerRef pref, const uint32_t inValueIndex,
 	char** outPrefName, char** outDataType)
 {
 	if (outPrefName != NULL)
@@ -202,7 +202,7 @@ char* XMLPrefsParser::GetPrefValueByRef(ContainerRef pref, const UInt32 inValueI
 	return NULL;
 }
 
-ContainerRef XMLPrefsParser::GetObjectValue(ContainerRef pref, const UInt32 inValueIndex)
+ContainerRef XMLPrefsParser::GetObjectValue(ContainerRef pref, const uint32_t inValueIndex)
 {
 	if (!strcmp(pref->GetTagName(), kObject) && (inValueIndex == 0))
 		return pref;
@@ -219,7 +219,7 @@ ContainerRef XMLPrefsParser::GetPrefRefByName(ContainerRef container,
 }
 
 ContainerRef XMLPrefsParser::GetPrefRefByIndex(ContainerRef container,
-	const UInt32 inPrefsIndex)
+	const uint32_t inPrefsIndex)
 {
 	return container->GetEmbeddedTag(inPrefsIndex);
 }
@@ -315,10 +315,10 @@ void XMLPrefsParser::ChangePrefType(ContainerRef pref, char* inNewPrefDataType)
 		pref->AddAttribute(kTypeAttr, inNewPrefDataType);
 }
 
-void XMLPrefsParser::SetPrefValue(ContainerRef pref, const UInt32 inValueIndex,
+void XMLPrefsParser::SetPrefValue(ContainerRef pref, const uint32_t inValueIndex,
 	char* inNewValue)
 {
-	UInt32 numValues = GetNumPrefValues(pref);
+	uint32_t numValues = GetNumPrefValues(pref);
 
 	if (((numValues == 0) || (numValues == 1)) && (inValueIndex == 0))
 	{
@@ -334,9 +334,9 @@ void XMLPrefsParser::SetPrefValue(ContainerRef pref, const UInt32 inValueIndex,
 	}
 }
 
-void XMLPrefsParser::RemovePrefValue(ContainerRef pref, const UInt32 inValueIndex)
+void XMLPrefsParser::RemovePrefValue(ContainerRef pref, const uint32_t inValueIndex)
 {
-	UInt32 numValues = GetNumPrefValues(pref);
+	uint32_t numValues = GetNumPrefValues(pref);
 	if (inValueIndex >= numValues)
 		return;
 

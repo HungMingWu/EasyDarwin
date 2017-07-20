@@ -90,11 +90,11 @@ bool QTAtom_tref::Initialize()
 		return false;
 
 	if (((PointerSizedInt)fTrackReferenceTable & (PointerSizedInt)0x3) == 0)
-		fTable = (UInt32 *)fTrackReferenceTable;
+		fTable = (uint32_t *)fTrackReferenceTable;
 	else
-		fTable = (UInt32 *)(((PointerSizedInt)fTrackReferenceTable + 4) & ~((PointerSizedInt)0x3));
+		fTable = (uint32_t *)(((PointerSizedInt)fTrackReferenceTable + 4) & ~((PointerSizedInt)0x3));
 
-	ReadBytes(trefPos_SampleTable, (char *)fTable, (UInt32)(fNumEntries * 4));
+	ReadBytes(trefPos_SampleTable, (char *)fTable, (uint32_t)(fNumEntries * 4));
 
 	//
 	// This atom has been successfully read in.
@@ -109,5 +109,5 @@ bool QTAtom_tref::Initialize()
 void QTAtom_tref::DumpAtom()
 {
 	DEBUG_PRINT(("QTAtom_tref::DumpAtom - Dumping atom.\n"));
-	DEBUG_PRINT(("QTAtom_tref::DumpAtom - ..Number of track reference entries: %"   _U32BITARG_   "\n", (UInt32)fNumEntries));
+	DEBUG_PRINT(("QTAtom_tref::DumpAtom - ..Number of track reference entries: %"   _U32BITARG_   "\n", (uint32_t)fNumEntries));
 }

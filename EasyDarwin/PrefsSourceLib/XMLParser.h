@@ -55,12 +55,12 @@ public:
 	char* GetValue() { return fValue; }
 	char* GetTagName() { return fTag; }
 
-	UInt32 GetNumEmbeddedTags() { return fEmbeddedTags.GetLength(); }
+	uint32_t GetNumEmbeddedTags() { return fEmbeddedTags.GetLength(); }
 
-	XMLTag* GetEmbeddedTag(const UInt32 index = 0);
-	XMLTag* GetEmbeddedTagByName(const char* tagName, const UInt32 index = 0);
-	XMLTag* GetEmbeddedTagByAttr(const char* attrName, const char* attrValue, const UInt32 index = 0);
-	XMLTag* GetEmbeddedTagByNameAndAttr(const char* tagName, const char* attrName, const char* attrValue, const UInt32 index = 0);
+	XMLTag* GetEmbeddedTag(const uint32_t index = 0);
+	XMLTag* GetEmbeddedTagByName(const char* tagName, const uint32_t index = 0);
+	XMLTag* GetEmbeddedTagByAttr(const char* attrName, const char* attrValue, const uint32_t index = 0);
+	XMLTag* GetEmbeddedTagByNameAndAttr(const char* tagName, const char* attrName, const char* attrValue, const uint32_t index = 0);
 
 	void AddAttribute(char* attrName, char* attrValue);
 	void RemoveAttribute(char* attrName);
@@ -70,7 +70,7 @@ public:
 	void SetTagName(char* name);
 	void SetValue(char* value);
 
-	void FormatData(ResizeableStringFormatter* formatter, UInt32 indent);
+	void FormatData(ResizeableStringFormatter* formatter, uint32_t indent);
 
 private:
 	void ConsumeIfComment(StringParser* parser);

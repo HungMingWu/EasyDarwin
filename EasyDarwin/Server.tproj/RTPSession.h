@@ -102,7 +102,7 @@ public:
 	//Utility functions. Modules aren't required to use these, but can be useful
 	void            SendDescribeResponse(RTSPRequestInterface* request);
 	void            SendAnnounceResponse(RTSPRequestInterface* request);
-	void            SendPlayResponse(RTSPRequestInterface* request, UInt32 inFlags);
+	void            SendPlayResponse(RTSPRequestInterface* request, uint32_t inFlags);
 	void            SendPauseResponse(RTSPRequestInterface* request)
 	{
 		request->SendHeader();
@@ -121,7 +121,7 @@ private:
 	virtual SInt64  Run();
 
 	// Utility function used by Play
-	UInt32 PowerOf2Floor(UInt32 inNumToFloor);
+	uint32_t PowerOf2Floor(uint32_t inNumToFloor);
 
 	//overbuffer logging function
 	void LogOverbufferStats();
@@ -147,13 +147,13 @@ private:
 		kSendingPackets = 1
 	};
 
-	UInt32 fCurrentModuleIndex;
-	UInt32 fCurrentState;
+	uint32_t fCurrentModuleIndex;
+	uint32_t fCurrentState;
 
 	QTSS_ModuleState    fModuleState;
 	QTSS_CliSesClosingReason fClosingReason;
 
-	UInt32              fCurrentModule;
+	uint32_t              fCurrentModule;
 	// This is here to give the ability to the ClientSessionClosing role to
 	// do asynchronous I/O
 	bool              fModuleDoingAsyncStuff;

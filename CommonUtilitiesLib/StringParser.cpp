@@ -304,12 +304,12 @@ void StringParser::ConsumeLength(StrPtrLen* spl, SInt32 inLength)
 }
 
 
-UInt32 StringParser::ConsumeInteger(StrPtrLen* outString)
+uint32_t StringParser::ConsumeInteger(StrPtrLen* outString)
 {
 	if (this->ParserIsEmpty(outString))
 		return 0;
 
-	UInt32 theValue = 0;
+	uint32_t theValue = 0;
 	char *originalStartGet = fStartGet;
 
 	while ((fStartGet < fEndGet) && (*fStartGet >= '0') && (*fStartGet <= '9'))
@@ -357,8 +357,8 @@ float StringParser::ConsumeNPT()
 
 	float valArray[4] = { 0, 0, 0, 0 };
 	float divArray[4] = { 1, 1, 1, 1 };
-	UInt32 valType = 0; // 0 == npt-sec, 1 == npt-hhmmss
-	UInt32 index;
+	uint32_t valType = 0; // 0 == npt-sec, 1 == npt-hhmmss
+	uint32_t index;
 
 	for (index = 0; index < 4; index++)
 	{

@@ -213,7 +213,7 @@ QTTrack::ErrorCode QTHintTrack::Initialize()
 {
 	// General vars
 	char        *sampleDescription, *pSampleDescription;
-	UInt32      sampleDescriptionLength;
+	uint32_t      sampleDescriptionLength;
 
 	QTFile::AtomTOCEntry    *hinfTOCEntry;
 
@@ -241,7 +241,7 @@ QTTrack::ErrorCode QTHintTrack::Initialize()
 		pSampleDescription < (sampleDescription + sampleDescriptionLength);
 		) {
 		// General vars
-		UInt32      entryLength, dataType;
+		uint32_t      entryLength, dataType;
 
 
 		//
@@ -305,7 +305,7 @@ QTTrack::ErrorCode QTHintTrack::Initialize()
 
 	//
 	// Allocate space for our track reference table.
-	UInt32 numTrackRefs = fHintTrackReferenceAtom->GetNumReferences();
+	uint32_t numTrackRefs = fHintTrackReferenceAtom->GetNumReferences();
 	if (numTrackRefs > QTHintTrack::kMaxHintTrackRefs)
 		return errInvalidQuickTimeFile;
 
@@ -318,10 +318,10 @@ QTTrack::ErrorCode QTHintTrack::Initialize()
 	//
 	// Locate all of the tracks that we use, but don't initialize them until we
 	// actually try to access them.
-	for (UInt32 CurRef = 0; CurRef < numTrackRefs; CurRef++)
+	for (uint32_t CurRef = 0; CurRef < numTrackRefs; CurRef++)
 	{
 		// General vars
-		UInt32      trackID = 0;
+		uint32_t      trackID = 0;
 
 		//
 		// Get the reference and make sure it's not empty.
@@ -347,7 +347,7 @@ QTTrack::ErrorCode QTHintTrack::Initialize()
 		if (fFile->GetTimeScale() > 0.0)
 			trackTime /= (UInt64)fFile->GetTimeScale();
 
-		fFirstRTPTimestamp = (UInt32)(trackTime & 0xffffffff);
+		fFirstRTPTimestamp = (uint32_t)(trackTime & 0xffffffff);
 
 	}
 	else
@@ -440,7 +440,7 @@ void QTHintTrack::GetSamplePacketHeaderVars(char *samplePacketPtr, char *maxBuff
 	bool tlvOK = false; // reset tlvSize to 0 if the size value or the tlv flag is invalid
 	if (hdrData.hintFlags & 0x4) do // Extra Information TLV is present
 	{
-		hdrData.tlvSize = ntohl(*(UInt32*)(samplePacketPtr + 12));
+		hdrData.tlvSize = ntohl(*(uint32_t*)(samplePacketPtr + 12));
 		char* tlvParser = samplePacketPtr + 16; // start of tlv data
 		char* tlvEnd = tlvParser + hdrData.tlvSize;// 1 past the end of tlv data
 
@@ -458,9 +458,9 @@ void QTHintTrack::GetSamplePacketHeaderVars(char *samplePacketPtr, char *maxBuff
 		// if there is a TLV, parse out the 1 field we currently know about, the 'rtpo' field
 		while (tlvParser + 12 < tlvEnd) // test for the minimum tlv size (size+type+smallest data size)
 		{
-			UInt32  fieldSize = ntohl(*(UInt32*)tlvParser);
-			UInt32  theType = ntohl(*(UInt32*)(tlvParser + 4));
-			UInt32  theData = ntohl(*(UInt32*)(tlvParser + 8)); //data can't be smaller 4 and we only know about rtpo data
+			uint32_t  fieldSize = ntohl(*(uint32_t*)tlvParser);
+			uint32_t  theType = ntohl(*(uint32_t*)(tlvParser + 4));
+			uint32_t  theData = ntohl(*(uint32_t*)(tlvParser + 8)); //data can't be smaller 4 and we only know about rtpo data
 
 			if (theType == FOUR_CHARS_TO_INT('r', 't', 'p', 'o')) //'rtpo'
 			{
@@ -488,7 +488,7 @@ void QTHintTrack::GetSamplePacketHeaderVars(char *samplePacketPtr, char *maxBuff
 }
 
 
-QTTrack::ErrorCode QTHintTrack::GetSamplePacketPtr(char ** samplePacketPtr, UInt32 sampleNumber, uint16_t packetNumber
+QTTrack::ErrorCode QTHintTrack::GetSamplePacketPtr(char ** samplePacketPtr, uint32_t sampleNumber, uint16_t packetNumber
 	, QTHintTrackRTPHeaderData  &hdrData, QTHintTrack_HintTrackControlBlock& htcb)
 {
 	// get a pointer to the packetNumber # in sampleNumber #, from the QTHintTrack_HintTrackControlBlock htcb
@@ -578,10 +578,10 @@ QTTrack::ErrorCode QTHintTrack::GetSamplePacketPtr(char ** samplePacketPtr, UInt
 }
 
 
-bool QTHintTrack::GetSamplePtr(UInt32 sampleNumber, char ** samplePtr, UInt32 * length, QTHintTrack_HintTrackControlBlock * htcb)
+bool QTHintTrack::GetSamplePtr(uint32_t sampleNumber, char ** samplePtr, uint32_t * length, QTHintTrack_HintTrackControlBlock * htcb)
 {
 	// General vars
-	UInt32      newSampleLength;
+	uint32_t      newSampleLength;
 	Assert(htcb != NULL);
 
 	// See if this sample is in our cache, returning it out of the cache if it
@@ -600,7 +600,7 @@ bool QTHintTrack::GetSamplePtr(UInt32 sampleNumber, char ** samplePtr, UInt32 * 
 
 	//
 	// Get the length of the new sample.
-	UInt32      sampleDescriptionIndex;
+	uint32_t      sampleDescriptionIndex;
 	UInt64      sampleOffset;
 
 	if (!this->GetSampleInfo(sampleNumber, &newSampleLength, &sampleOffset, &sampleDescriptionIndex, &htcb->fstscSTCB))
@@ -656,10 +656,10 @@ bool QTHintTrack::GetSamplePtr(UInt32 sampleNumber, char ** samplePtr, UInt32 * 
 // -------------------------------------
 // Packet functions
 //
-QTTrack::ErrorCode QTHintTrack::GetNumPackets(UInt32 sampleNumber, uint16_t * numPackets, QTHintTrack_HintTrackControlBlock * htcb)
+QTTrack::ErrorCode QTHintTrack::GetNumPackets(uint32_t sampleNumber, uint16_t * numPackets, QTHintTrack_HintTrackControlBlock * htcb)
 {
 	char        *buf;
-	UInt32      bufLen;
+	uint32_t      bufLen;
 	uint16_t      entryCount;
 
 
@@ -677,28 +677,28 @@ QTTrack::ErrorCode QTHintTrack::GetNumPackets(UInt32 sampleNumber, uint16_t * nu
 }
 
 
-QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock * htcb, char **buffPtr, char **ppPacketBufOut, UInt32 sampleNumber, uint16_t packetNumber, UInt32 buffOutLen)
+QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock * htcb, char **buffPtr, char **ppPacketBufOut, uint32_t sampleNumber, uint16_t packetNumber, uint32_t buffOutLen)
 {
 
 	//  qtss_printf("GetSampleData sampleNumber = %"   _U32BITARG_   " packetNumber = %"   _U32BITARG_   " buffOutLen = %"   _U32BITARG_   " \n",sampleNumber, packetNumber, buffOutLen);
 		// General vars
 	int8_t      trackRefIndex = 0;
 	uint16_t      readLength = 0;
-	UInt32      mediaSampleNumber = 0;
-	UInt32      readOffset = 0;
+	uint32_t      mediaSampleNumber = 0;
+	uint32_t      readOffset = 0;
 	uint16_t      bytesPerCompressionBlock = 0;
 	uint16_t      samplesPerCompressionBlock = 0;  // inititialization eliminates a stupid compiler warning :(
-	UInt32      sampleDescriptionIndex;
+	uint32_t      sampleDescriptionIndex;
 	UInt64      dataOffset;
 	char*       pBuf = NULL;
 	char*       maxBuffPtr = NULL;
 	char*       buffOutPtr = NULL;
 	QTTrack     *track = NULL;
-	UInt32      samplesPerChunk = 0;
-	UInt32      chunkNumber = 0;
+	uint32_t      samplesPerChunk = 0;
+	uint32_t      chunkNumber = 0;
 	UInt64      chunkOffset = 0;
-	UInt32      sampleOffsetInChunk = 0;
-	UInt32      sampleLength = 0;
+	uint32_t      sampleOffsetInChunk = 0;
+	uint32_t      sampleLength = 0;
 	UInt64      cacheHintSampleLen = 0;
 	SInt32      hintMaxRead = 0;
 	SInt64      sizeOfSamplesInChunk = 0;
@@ -920,7 +920,7 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 		if (isCompressed)
 		{   // Media track sample compressed
 
-			UInt32  compressionBlocksToSkip = (UInt32)((double)readOffset / (double)bytesPerCompressionBlock);
+			uint32_t  compressionBlocksToSkip = (uint32_t)((double)readOffset / (double)bytesPerCompressionBlock);
 			mediaSampleNumber += compressionBlocksToSkip * samplesPerCompressionBlock;
 			readOffset -= compressionBlocksToSkip * bytesPerCompressionBlock; // readoffset should always be 0 after this 
 			// start gathering chunk info to check sample length against chunk length
@@ -932,10 +932,10 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 
 			dataOffset = (UInt64)chunkOffset + (UInt64)((double)sampleOffsetInChunk * ((double)bytesPerCompressionBlock / (double)samplesPerCompressionBlock));
 
-			if (!track->GetSizeOfSamplesInChunk(chunkNumber, (UInt32 *)&sizeOfSamplesInChunk, NULL, NULL, mediaTrackSTSC_STCBPtr))
+			if (!track->GetSizeOfSamplesInChunk(chunkNumber, (uint32_t *)&sizeOfSamplesInChunk, NULL, NULL, mediaTrackSTSC_STCBPtr))
 				return (errInvalidQuickTimeFile);
 
-			sizeOfSamplesInChunk = (UInt32)((double)sizeOfSamplesInChunk * ((double)bytesPerCompressionBlock / (double)samplesPerCompressionBlock));
+			sizeOfSamplesInChunk = (uint32_t)((double)sizeOfSamplesInChunk * ((double)bytesPerCompressionBlock / (double)samplesPerCompressionBlock));
 
 			endOfSampleInChunk = sizeOfSamplesInChunk + chunkOffset;
 			sampleFirstPartLength = endOfSampleInChunk - dataOffset; // the first piece length = maxlen - start
@@ -1009,10 +1009,10 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 				}
 
 				dataOffset = chunkOffset;    // the location of the data starting at the beginning of the chunk             
-				if (!track->GetSizeOfSamplesInChunk(chunkNumber, (UInt32 *)&sizeOfSamplesInChunk, NULL, NULL, mediaTrackSTSC_STCBPtr))
+				if (!track->GetSizeOfSamplesInChunk(chunkNumber, (uint32_t *)&sizeOfSamplesInChunk, NULL, NULL, mediaTrackSTSC_STCBPtr))
 					return (errInvalidQuickTimeFile);
 
-				sizeOfSamplesInChunk = (UInt32)((double)sizeOfSamplesInChunk * ((double)bytesPerCompressionBlock / (double)samplesPerCompressionBlock));
+				sizeOfSamplesInChunk = (uint32_t)((double)sizeOfSamplesInChunk * ((double)bytesPerCompressionBlock / (double)samplesPerCompressionBlock));
 
 				if (sizeOfSamplesInChunk < remainingLength) // read in the whole chunk and keep going
 				{
@@ -1109,10 +1109,10 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 			if (htcb->fCachedHintTrackSample != NULL)
 			{
 				//              qtss_printf("cache a hint sample sampleNumber %" _S32BITARG_ " readLength = %" _S32BITARG_ "\n",mediaSampleNumber,cacheHintSampleLen); 
-				::memcpy(htcb->fCachedHintTrackSample, buffOutPtr, (UInt32)cacheHintSampleLen);
+				::memcpy(htcb->fCachedHintTrackSample, buffOutPtr, (uint32_t)cacheHintSampleLen);
 				htcb->fCachedHintTrackSampleNumber = mediaSampleNumber;
 				htcb->fCachedHintTrackSampleOffset = readOffset;
-				htcb->fCachedHintTrackSampleLength = (UInt32)cacheHintSampleLen;
+				htcb->fCachedHintTrackSampleLength = (uint32_t)cacheHintSampleLen;
 			}
 		}
 	}
@@ -1154,30 +1154,30 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 }
 
 
-QTTrack::ErrorCode QTHintTrack::GetPacket(UInt32 sampleNumber, uint16_t packetNumber, char * buffer, UInt32 * length
-	, double * transmitTime, bool dropBFrames, bool dropRepeatPackets, UInt32 ssrc, QTHintTrack_HintTrackControlBlock * htcb)
+QTTrack::ErrorCode QTHintTrack::GetPacket(uint32_t sampleNumber, uint16_t packetNumber, char * buffer, uint32_t * length
+	, double * transmitTime, bool dropBFrames, bool dropRepeatPackets, uint32_t ssrc, QTHintTrack_HintTrackControlBlock * htcb)
 {
 	// Temporary vars
 	uint16_t      tempInt16;
-	UInt32      tempInt32;
+	uint32_t      tempInt32;
 
 	uint16_t      curEntry;
 
 	// General vars
-	UInt32      mediaTime;
+	uint32_t      mediaTime;
 
 	char*       buf;
-	UInt32      bufLen;
+	uint32_t      bufLen;
 
 	char*       pSampleBuffer;
 	char        *pDataTableStart;
 
 	uint16_t      entryCount;
-	UInt32      rtpTimestamp;
+	uint32_t      rtpTimestamp;
 
 	QTHintTrackRTPHeaderData    hdrData;
 	char*       pPacketOutBuf;
-	UInt32      packetSize;
+	uint32_t      packetSize;
 	QTTrack::ErrorCode  err = errNoError;
 
 	double timeScale = 1.0;
@@ -1194,7 +1194,7 @@ QTTrack::ErrorCode QTHintTrack::GetPacket(UInt32 sampleNumber, uint16_t packetNu
 	if (fRTPTimescale != this->GetTimeScale())
 		timeScale = (double)fRTPTimescale * (double)GetTimeScaleRecip();
 
-	rtpTimestamp = (UInt32)((double)mediaTime * timeScale);
+	rtpTimestamp = (uint32_t)((double)mediaTime * timeScale);
 	rtpTimestamp += fFirstRTPTimestamp;
 
 	//
@@ -1300,7 +1300,7 @@ QTTrack::ErrorCode QTHintTrack::GetPacket(UInt32 sampleNumber, uint16_t packetNu
 	//
 	// Go through each possible field. For each one, see if caller
 	// wants the field appended. If so, append the field
-	for (UInt32 fieldCount = 0; fieldCount < RTPMetaInfoPacket::kNumFields; fieldCount++)
+	for (uint32_t fieldCount = 0; fieldCount < RTPMetaInfoPacket::kNumFields; fieldCount++)
 	{
 		//
 		// If there is no field array, don't generate a packet
@@ -1482,7 +1482,7 @@ QTTrack::ErrorCode QTHintTrack::GetPacket(UInt32 sampleNumber, uint16_t packetNu
 
 void QTHintTrack::WriteMetaInfoField(RTPMetaInfoPacket::FieldIndex inFieldIndex,
 	RTPMetaInfoPacket::FieldID inFieldID,
-	void* inFieldData, UInt32 inFieldLen, char** ioBuffer)
+	void* inFieldData, uint32_t inFieldLen, char** ioBuffer)
 {
 	if (inFieldID == RTPMetaInfoPacket::kUncompressed)
 	{

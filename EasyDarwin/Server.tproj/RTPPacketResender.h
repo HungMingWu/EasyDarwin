@@ -52,15 +52,15 @@ class RTPResenderEntry
 public:
 
 	void*               fPacketData;
-	UInt32              fPacketSize;
+	uint32_t              fPacketSize;
 	bool              fIsSpecialBuffer;
 	SInt64              fExpireTime;
 	SInt64              fAddedTime;
 	SInt64              fOrigRetransTimeout;
-	UInt32              fNumResends;
+	uint32_t              fNumResends;
 	uint16_t              fSeqNum;
 #if RTP_PACKET_RESENDER_DEBUGGING
-	UInt32              fPacketArraySizeWhenAdded;
+	uint32_t              fPacketArraySizeWhenAdded;
 #endif
 };
 
@@ -74,13 +74,13 @@ public:
 
 	//
 	// These must be called before using the object
-	void                SetDestination(UDPSocket* inOutputSocket, UInt32 inDestAddr, uint16_t inDestPort);
+	void                SetDestination(UDPSocket* inOutputSocket, uint32_t inDestAddr, uint16_t inDestPort);
 	void                SetBandwidthTracker(RTPBandwidthTracker* inTracker) { fBandwidthTracker = inTracker; }
 
 	//
 	// AddPacket adds a new packet to the resend queue. This will not send the packet.
 	// AddPacket itself is not thread safe.
-	void                AddPacket(void * rtpPacket, UInt32 packetSize, SInt32 ageLimitInMsec);
+	void                AddPacket(void * rtpPacket, uint32_t packetSize, SInt32 ageLimitInMsec);
 
 	//
 	// Acks a packet. Also not thread safe.
@@ -102,13 +102,13 @@ public:
 	SInt32              GetNumPacketsInList() { return fPacketsInList; }
 	SInt32              GetNumResends() { return fNumResends; }
 
-	static UInt32       GetNumRetransmitBuffers() { return sBufferPool.GetTotalNumBuffers(); }
-	static UInt32       GetWastedBufferBytes() { return sNumWastedBytes; }
+	static uint32_t       GetNumRetransmitBuffers() { return sBufferPool.GetTotalNumBuffers(); }
+	static uint32_t       GetWastedBufferBytes() { return sNumWastedBytes; }
 
 #if RTP_PACKET_RESENDER_DEBUGGING
-	void                SetDebugInfo(UInt32 trackID, uint16_t remoteRTCPPort, UInt32 curPacketDelay);
+	void                SetDebugInfo(uint32_t trackID, uint16_t remoteRTCPPort, uint32_t curPacketDelay);
 	void                SetLog(StrPtrLen *logname);
-	UInt32              SpillGuts(UInt32 inBytesSentThisInterval);
+	uint32_t              SpillGuts(uint32_t inBytesSentThisInterval);
 	void                LogClose(SInt64 inTimeSpentInFlowControl);
 	void                logprintf(const char * format, ...);
 
@@ -123,39 +123,39 @@ private:
 
 	// Who to send to
 	UDPSocket*          fSocket;
-	UInt32              fDestAddr;
+	uint32_t              fDestAddr;
 	uint16_t              fDestPort;
 
-	UInt32              fMaxPacketsInList;
-	UInt32              fPacketsInList;
-	UInt32              fNumResends;                // how many total retransmitted packets
-	UInt32              fNumExpired;                // how many total packets dropped
-	UInt32              fNumAcksForMissingPackets;  // how many acks received in the case where the packet was not in the list
-	UInt32              fNumSent;                   // how many packets sent
+	uint32_t              fMaxPacketsInList;
+	uint32_t              fPacketsInList;
+	uint32_t              fNumResends;                // how many total retransmitted packets
+	uint32_t              fNumExpired;                // how many total packets dropped
+	uint32_t              fNumAcksForMissingPackets;  // how many acks received in the case where the packet was not in the list
+	uint32_t              fNumSent;                   // how many packets sent
 
 #if RTP_PACKET_RESENDER_DEBUGGING
 	MyAckListLog        *fLogger;
 
-	UInt32              fTrackID;
+	uint32_t              fTrackID;
 	uint16_t              fRemoteRTCPPort;
-	UInt32              fCurrentPacketDelay;
+	uint32_t              fCurrentPacketDelay;
 	DssDurationTimer    fInfoDisplayTimer;
 #endif
 
 	RTPResenderEntry*   fPacketArray;
 	uint16_t              fStartSeqNum;
-	UInt32              fPacketArraySize;
-	UInt32              fPacketArrayMask;
+	uint32_t              fPacketArraySize;
+	uint32_t              fPacketArrayMask;
 	uint16_t              fHighestSeqNum;
-	UInt32              fLastUsed;
+	uint32_t              fLastUsed;
 	OSMutex             fPacketQMutex;
 
 	RTPResenderEntry*   GetEntryByIndex(uint16_t inIndex);
 	RTPResenderEntry*   GetEntryBySeqNum(uint16_t inSeqNum);
 
-	RTPResenderEntry*   GetEmptyEntry(uint16_t inSeqNum, UInt32 inPacketSize);
+	RTPResenderEntry*   GetEmptyEntry(uint16_t inSeqNum, uint32_t inPacketSize);
 	void ReallocatePacketArray();
-	void RemovePacket(UInt32 packetIndex, bool reuse = true);
+	void RemovePacket(uint32_t packetIndex, bool reuse = true);
 	void RemovePacket(RTPResenderEntry* inEntry);
 
 	static OSBufferPool sBufferPool;

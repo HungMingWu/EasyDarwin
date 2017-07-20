@@ -91,7 +91,7 @@ IdleTaskThread::Entry()
 			//because sleep takes a 32 bit number
 			timeoutTime -= msec;
 			Assert(timeoutTime > 0);
-			UInt32 smallTime = (UInt32)timeoutTime;
+			uint32_t smallTime = (uint32_t)timeoutTime;
 			fHeapCond.Wait(&fHeapMutex, smallTime);
 		}
 	}

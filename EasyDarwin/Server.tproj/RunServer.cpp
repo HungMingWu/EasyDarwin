@@ -62,7 +62,7 @@ SInt64 sLastDebugTotalQuality = 0;
 #include <sched.h>
 #endif
 
-QTSS_ServerState StartServer(XMLPrefsParser* inPrefsSource, PrefsSource* inMessagesSource, uint16_t inPortOverride, int statsUpdateInterval, QTSS_ServerState inInitialState, bool inDontFork, UInt32 debugLevel, UInt32 debugOptions, const char* sAbsolutePath)
+QTSS_ServerState StartServer(XMLPrefsParser* inPrefsSource, PrefsSource* inMessagesSource, uint16_t inPortOverride, int statsUpdateInterval, QTSS_ServerState inInitialState, bool inDontFork, uint32_t debugLevel, uint32_t debugOptions, const char* sAbsolutePath)
 {
 	//Mark when we are done starting up. If auto-restart is enabled, we want to make sure
 	//to always exit with a status of 0 if we encountered a problem WHILE STARTING UP. This
@@ -117,10 +117,10 @@ QTSS_ServerState StartServer(XMLPrefsParser* inPrefsSource, PrefsSource* inMessa
 
 	if (sServer->GetServerState() != qtssFatalErrorState)
 	{
-		UInt32 numShortTaskThreads = 0;
-		UInt32 numBlockingThreads = 0;
-		UInt32 numThreads = 0;
-		UInt32 numProcessors = 0;
+		uint32_t numShortTaskThreads = 0;
+		uint32_t numBlockingThreads = 0;
+		uint32_t numThreads = 0;
+		uint32_t numProcessors = 0;
 
 		if (OS::ThreadSafe())
 		{
@@ -306,7 +306,7 @@ void LogStatus(QTSS_ServerState theServerState)
 	if (false == sServer->GetPrefs()->ServerStatFileEnabled())
 		return;
 
-	UInt32 interval = sServer->GetPrefs()->GetStatFileIntervalSec();
+	uint32_t interval = sServer->GetPrefs()->GetStatFileIntervalSec();
 	if (interval == 0 || (OS::UnixTime_Secs() % interval) > 0)
 		return;
 
@@ -392,7 +392,7 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 	char*  thePrefStr = NULL;
 	static char numStr[12] = "";
 	static char dateStr[25] = "";
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 
 	if (printHeader)
 	{
@@ -414,7 +414,7 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 	print_status(statusFile, stdOut, "%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = NULL;
 
-	UInt32 curBandwidth = 0;
+	uint32_t curBandwidth = 0;
 	theLen = sizeof(curBandwidth);
 	(void)QTSS_GetValue(sServer, qtssRTPSvrCurBandwidth, 0, &curBandwidth, &theLen);
 	qtss_snprintf(numStr, 11, "%"   _U32BITARG_   "", curBandwidth / 1024);
@@ -425,7 +425,7 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 	delete[] thePrefStr; thePrefStr = NULL;
 
 
-	UInt32 currentPlaying = sServer->GetNumRTPPlayingSessions();
+	uint32_t currentPlaying = sServer->GetNumRTPPlayingSessions();
 	qtss_snprintf(numStr, sizeof(numStr) - 1, "%"   _U32BITARG_   "", currentPlaying);
 	print_status(statusFile, stdOut, "%14s", numStr);
 
@@ -501,7 +501,7 @@ FILE* DisplayDebugEnabled()
 }
 
 
-void DebugStatus(UInt32 debugLevel, bool printHeader)
+void DebugStatus(uint32_t debugLevel, bool printHeader)
 {
 
 	FILE*   statusFile = LogDebugEnabled();
@@ -552,7 +552,7 @@ void FormattedTotalBytesBuffer(char *outBuffer, int outBufferLen, UInt64 totalBy
 void PrintStatus(bool printHeader)
 {
 	char* thePrefStr = NULL;
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 
 	if (printHeader)
 	{
@@ -571,7 +571,7 @@ void PrintStatus(bool printHeader)
 	qtss_printf("%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = NULL;
 
-	UInt32 curBandwidth = 0;
+	uint32_t curBandwidth = 0;
 	theLen = sizeof(curBandwidth);
 	(void)QTSS_GetValue(sServer, qtssRTPSvrCurBandwidth, 0, &curBandwidth, &theLen);
 	qtss_printf("%11"   _U32BITARG_, curBandwidth / 1024);
@@ -599,12 +599,12 @@ void PrintStatus(bool printHeader)
 
 }
 
-bool PrintHeader(UInt32 loopCount)
+bool PrintHeader(uint32_t loopCount)
 {
 	return ((loopCount % (sStatusUpdateInterval * 10)) == 0) ? true : false;
 }
 
-bool PrintLine(UInt32 loopCount)
+bool PrintLine(uint32_t loopCount)
 {
 	return ((loopCount % sStatusUpdateInterval) == 0) ? true : false;
 }
@@ -613,11 +613,11 @@ bool PrintLine(UInt32 loopCount)
 void RunServer()
 {
 	bool restartServer = false;
-	UInt32 loopCount = 0;
-	UInt32 debugLevel = 0;
+	uint32_t loopCount = 0;
+	uint32_t debugLevel = 0;
 	bool printHeader = false;
 	bool printStatus = false;
-	UInt32 num = 0;
+	uint32_t num = 0;
 
 	//just wait until someone stops the server or a fatal error occurs.
 	QTSS_ServerState theServerState = sServer->GetServerState();
@@ -636,8 +636,8 @@ void RunServer()
 		{
 			num = 0;
 
-			UInt32 numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRedisTTLRole);
-			for (UInt32 currentModule = 0; currentModule < numModules; currentModule++)
+			uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRedisTTLRole);
+			for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
 			{
 				QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRedisTTLRole, currentModule);
 				(void)theModule->CallDispatch(Easy_RedisTTL_Role, NULL);
@@ -687,7 +687,7 @@ void RunServer()
 	// Kill all the sessions and wait for them to die,
 	// but don't wait more than 5 seconds
 	sServer->KillAllRTPSessions();
-	for (UInt32 shutdownWaitCount = 0; (sServer->GetNumRTPSessions() > 0) && (shutdownWaitCount < 5); shutdownWaitCount++)
+	for (uint32_t shutdownWaitCount = 0; (sServer->GetNumRTPSessions() > 0) && (shutdownWaitCount < 5); shutdownWaitCount++)
 		OSThread::Sleep(1000);
 
 	//Now, make sure that the server can't do any work

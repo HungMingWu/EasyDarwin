@@ -67,16 +67,16 @@ public:
 		StrPtrLen   cryptPassword;
 		StrPtrLen   digestPassword;
 		char**      groups;
-		UInt32      maxGroupNameLen;
-		UInt32      numGroups;
-		UInt32      groupsSize;
+		uint32_t      maxGroupNameLen;
+		uint32_t      numGroups;
+		uint32_t      groupsSize;
 	};
 
 	AccessChecker();
 	virtual ~AccessChecker();
 
 	void UpdateFilePaths(const char* inUsersFilePath, const char* inGroupsFilePath);
-	UInt32 UpdateUserProfiles();
+	uint32_t UpdateUserProfiles();
 
 	bool  HaveFilePathsChanged(const char* inUsersFilePath, const char* inGroupsFilePath);
 	UserProfile* RetrieveUserProfile(const StrPtrLen* inUserName);
@@ -103,8 +103,8 @@ protected:
 	StrPtrLen           fAuthRealm;
 
 	UserProfile**       fProfiles;
-	UInt32              fNumUsers;
-	UInt32              fCurrentSize;
+	uint32_t              fNumUsers;
+	uint32_t              fCurrentSize;
 
 	static const char*  kDefaultUsersFilePath;
 	static const char*  kDefaultGroupsFilePath;

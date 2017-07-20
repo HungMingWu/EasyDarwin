@@ -50,7 +50,7 @@ QTSSAttrInfoDict::AttrInfo  QTSSUserProfile::sAttributes[] =
 void  QTSSUserProfile::Initialize()
 {
 	//Setup all the dictionary stuff
-	for (UInt32 x = 0; x < qtssUserNumParams; x++)
+	for (uint32_t x = 0; x < qtssUserNumParams; x++)
 		QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kQTSSUserProfileDictIndex)->
 		SetAttribute(x, sAttributes[x].fAttrName, sAttributes[x].fFuncPtr,
 			sAttributes[x].fAttrDataType, sAttributes[x].fAttrPermission);

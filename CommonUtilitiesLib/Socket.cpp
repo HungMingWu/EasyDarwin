@@ -59,7 +59,7 @@ typedef int socklen_t; // missing from some platform includes
 
 EventThread* Socket::sEventThread = NULL;
 
-Socket::Socket(Task *notifytask, UInt32 inSocketType)
+Socket::Socket(Task *notifytask, uint32_t inSocketType)
 	: EventContext(EventContext::kInvalidFileDesc, sEventThread),
 	fState(inSocketType),
 	fLocalAddrStrPtr(NULL),
@@ -116,7 +116,7 @@ void Socket::KeepAlive()
 	Assert(err == 0);
 }
 
-void    Socket::SetSocketBufSize(UInt32 inNewSize)
+void    Socket::SetSocketBufSize(uint32_t inNewSize)
 {
 
 #if SOCKET_DEBUG
@@ -147,7 +147,7 @@ void    Socket::SetSocketBufSize(UInt32 inNewSize)
 
 }
 
-OS_Error    Socket::SetSocketRcvBufSize(UInt32 inNewSize)
+OS_Error    Socket::SetSocketRcvBufSize(uint32_t inNewSize)
 {
 #if SOCKET_DEBUG
 	int value;
@@ -182,7 +182,7 @@ OS_Error    Socket::SetSocketRcvBufSize(UInt32 inNewSize)
 }
 
 
-OS_Error Socket::Bind(UInt32 addr, uint16_t port, bool test)
+OS_Error Socket::Bind(uint32_t addr, uint16_t port, bool test)
 {
 	socklen_t len = sizeof(fLocalAddr);
 	::memset(&fLocalAddr, 0, sizeof(fLocalAddr));
@@ -228,7 +228,7 @@ StrPtrLen*  Socket::GetLocalAddrStr()
 	//of this IP address.
 	if (fLocalAddrStrPtr == NULL)
 	{
-		for (UInt32 x = 0; x < SocketUtils::GetNumIPAddrs(); x++)
+		for (uint32_t x = 0; x < SocketUtils::GetNumIPAddrs(); x++)
 		{
 			if (SocketUtils::GetIPAddr(x) == ntohl(fLocalAddr.sin_addr.s_addr))
 			{
@@ -249,7 +249,7 @@ StrPtrLen*  Socket::GetLocalAddrStr()
 		SocketUtils::ConvertAddrToString(theAddr, &fLocalAddrStr);
 
 		printf("Socket::GetLocalAddrStr Search IPs failed, numIPs=%d\n", SocketUtils::GetNumIPAddrs());
-		for (UInt32 x = 0; x < SocketUtils::GetNumIPAddrs(); x++)
+		for (uint32_t x = 0; x < SocketUtils::GetNumIPAddrs(); x++)
 		{
 			printf("ip[%"   _U32BITARG_   "]=", x); SocketUtils::GetIPAddrStr(x)->PrintStr("\n");
 		}
@@ -270,7 +270,7 @@ StrPtrLen*  Socket::GetLocalDNSStr()
 	Assert(fLocalAddr.sin_addr.s_addr != INADDR_ANY);
 	if (fLocalDNSStrPtr == NULL)
 	{
-		for (UInt32 x = 0; x < SocketUtils::GetNumIPAddrs(); x++)
+		for (uint32_t x = 0; x < SocketUtils::GetNumIPAddrs(); x++)
 		{
 			if (SocketUtils::GetIPAddr(x) == ntohl(fLocalAddr.sin_addr.s_addr))
 			{
@@ -299,7 +299,7 @@ StrPtrLen*  Socket::GetLocalPortStr()
 	return &fPortStr;
 }
 
-OS_Error Socket::Send(const char* inData, const UInt32 inLength, UInt32* outLengthSent)
+OS_Error Socket::Send(const char* inData, const uint32_t inLength, uint32_t* outLengthSent)
 {
 	Assert(inData != NULL);
 
@@ -324,7 +324,7 @@ OS_Error Socket::Send(const char* inData, const UInt32 inLength, UInt32* outLeng
 	return OS_NoErr;
 }
 
-OS_Error Socket::WriteV(const struct iovec* iov, const UInt32 numIOvecs, UInt32* outLenSent)
+OS_Error Socket::WriteV(const struct iovec* iov, const uint32_t numIOvecs, uint32_t* outLenSent)
 {
 	Assert(iov != NULL);
 
@@ -352,12 +352,12 @@ OS_Error Socket::WriteV(const struct iovec* iov, const UInt32 numIOvecs, UInt32*
 		return (OS_Error)theErr;
 	}
 	if (outLenSent != NULL)
-		*outLenSent = (UInt32)err;
+		*outLenSent = (uint32_t)err;
 
 	return OS_NoErr;
 }
 
-OS_Error Socket::Read(void *buffer, const UInt32 length, UInt32 *outRecvLenP)
+OS_Error Socket::Read(void *buffer, const uint32_t length, uint32_t *outRecvLenP)
 {
 	Assert(outRecvLenP != NULL);
 	Assert(buffer != NULL);
@@ -388,6 +388,6 @@ OS_Error Socket::Read(void *buffer, const UInt32 length, UInt32 *outRecvLenP)
 		return (OS_Error)ENOTCONN;
 	}
 	Assert(theRecvLen > 0);
-	*outRecvLenP = (UInt32)theRecvLen;
+	*outRecvLenP = (uint32_t)theRecvLen;
 	return OS_NoErr;
 }

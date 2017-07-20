@@ -64,7 +64,7 @@ static bool sMovie = false;
 
 
 #if READ_LOG
-extern UInt32 xTrackID;
+extern uint32_t xTrackID;
 void OSFileSource::SetLog(const char *inPath)
 {
 	fFilePath[0] = 0;
@@ -116,7 +116,7 @@ FileBlockBuffer::~FileBlockBuffer()
 		Assert(false);
 }
 
-void FileBlockBuffer::AllocateBuffer(UInt32 buffSize)
+void FileBlockBuffer::AllocateBuffer(uint32_t buffSize)
 {
 	fBufferSize = buffSize;
 	fDataBuffer = new char[buffSize + 1];
@@ -151,7 +151,7 @@ void FileBlockPool::MarkUsed(FileBlockBuffer* inBuffPtr)
 	}
 }
 
-FileBlockBuffer* FileBlockPool::GetBufferElement(UInt32 bufferSizeBytes)
+FileBlockBuffer* FileBlockPool::GetBufferElement(uint32_t bufferSizeBytes)
 {
 	FileBlockBuffer* theNewBuf = NULL;
 	if (fNumCurrentBuffers < fMaxBuffers)
@@ -206,7 +206,7 @@ FileBlockPool::~FileBlockPool()
 }
 
 
-void FileMap::AllocateBufferMap(UInt32 inUnitSizeInK, UInt32 inNumBuffSizeUnits, UInt32 inBufferIncCount, UInt32 inMaxBitRateBuffSizeInBlocks, UInt64 fileLen, UInt32 inBitRate)
+void FileMap::AllocateBufferMap(uint32_t inUnitSizeInK, uint32_t inNumBuffSizeUnits, uint32_t inBufferIncCount, uint32_t inMaxBitRateBuffSizeInBlocks, UInt64 fileLen, uint32_t inBitRate)
 {
 
 	if (fFileMapArray != NULL && fNumBuffSizeUnits == inNumBuffSizeUnits && inBufferIncCount == fBlockPool.GetMaxBuffers())
@@ -364,16 +364,16 @@ void OSFileSource::Set(const char* inPath)
 	}
 }
 
-void OSFileSource::Advise(UInt64, UInt32)
+void OSFileSource::Advise(UInt64, uint32_t)
 {
 	// does nothing on platforms other than MacOSXServer
 }
 
 OS_Error OSFileSource::FillBuffer(char* ioBuffer, char* buffStart, SInt32 buffIndex)
 {
-	UInt32 buffSize = fFileMap.GetMaxBufSize();
+	uint32_t buffSize = fFileMap.GetMaxBufSize();
 	UInt64 startPos = (UInt64)buffIndex * (UInt64)buffSize;
-	UInt32 readLen = 0;
+	uint32_t readLen = 0;
 
 	OS_Error theErr = this->ReadFromPos(startPos, buffStart, buffSize, &readLen);
 
@@ -387,7 +387,7 @@ OS_Error OSFileSource::FillBuffer(char* ioBuffer, char* buffStart, SInt32 buffIn
 static SInt32 sBuffCount = 1;
 #endif
 
-OS_Error OSFileSource::Read(UInt64 inPosition, void* inBuffer, UInt32 inLength, UInt32* outRcvLen)
+OS_Error OSFileSource::Read(UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen)
 {
 
 	if ((!fFileMap.Initialized())
@@ -400,7 +400,7 @@ OS_Error OSFileSource::Read(UInt64 inPosition, void* inBuffer, UInt32 inLength, 
 }
 
 
-OS_Error OSFileSource::ReadFromCache(UInt64 inPosition, void* inBuffer, UInt32 inLength, UInt32* outRcvLen)
+OS_Error OSFileSource::ReadFromCache(UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen)
 {
 	OSMutexLocker locker(&fMutex);
 
@@ -478,8 +478,8 @@ OS_Error OSFileSource::ReadFromCache(UInt64 inPosition, void* inBuffer, UInt32 i
 			qtss_printf("OSFileSource::ReadFromCache end of file reached buffIndex=%" _U32BITARG_ " buffSize = %" _S32BITARG_ " bytesToCopy=%"   _U32BITARG_   "\n", buffIndex, buffSize, bytesToCopy);
 #endif
 			Assert(buffSize <= (SInt64)UINT32_MAX);
-			::memcpy(buffOut, buffOffset, (UInt32)buffSize);
-			*outRcvLen += (UInt32)buffSize;
+			::memcpy(buffOut, buffOffset, (uint32_t)buffSize);
+			*outRcvLen += (uint32_t)buffSize;
 			break;
 		}
 
@@ -489,9 +489,9 @@ OS_Error OSFileSource::ReadFromCache(UInt64 inPosition, void* inBuffer, UInt32 i
 
 		Assert(buffCopyLen <= buffSize);
 
-		::memcpy(buffOut, buffOffset, (UInt32)buffCopyLen);
+		::memcpy(buffOut, buffOffset, (uint32_t)buffCopyLen);
 		buffOut += buffCopyLen;
-		*outRcvLen += (UInt32)buffCopyLen;
+		*outRcvLen += (uint32_t)buffCopyLen;
 		bytesToCopy -= buffCopyLen;
 		Assert(bytesToCopy >= 0);
 
@@ -506,7 +506,7 @@ OS_Error OSFileSource::ReadFromCache(UInt64 inPosition, void* inBuffer, UInt32 i
 #endif
 
 #if FILE_SOURCE_BUFFTEST    
-	{   UInt32 outLen = 0;
+	{   uint32_t outLen = 0;
 	OS_Error theErr = this->ReadFromPos(inPosition, inBuffer, inLength, &outLen);
 
 	Assert(*outRcvLen == outLen);
@@ -527,7 +527,7 @@ OS_Error OSFileSource::ReadFromCache(UInt64 inPosition, void* inBuffer, UInt32 i
 	return OS_NoErr;
 }
 
-OS_Error OSFileSource::ReadFromDisk(void* inBuffer, UInt32 inLength, UInt32* outRcvLen)
+OS_Error OSFileSource::ReadFromDisk(void* inBuffer, uint32_t inLength, uint32_t* outRcvLen)
 {
 #if FILE_SOURCE_BUFFTEST
 	qtss_printf("OSFileSource::Read inLength=%"   _U32BITARG_   " fFile=%d\n", inLength, fFile);
@@ -555,7 +555,7 @@ OS_Error OSFileSource::ReadFromDisk(void* inBuffer, UInt32 inLength, UInt32* out
 	return OS_NoErr;
 }
 
-OS_Error OSFileSource::ReadFromPos(UInt64 inPosition, void* inBuffer, UInt32 inLength, UInt32* outRcvLen)
+OS_Error OSFileSource::ReadFromPos(UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen)
 {
 #if TEST_TIME
 	{
@@ -592,11 +592,11 @@ OS_Error OSFileSource::ReadFromPos(UInt64 inPosition, void* inBuffer, UInt32 inL
 	return err;
 }
 
-void OSFileSource::SetTrackID(UInt32 trackID)
+void OSFileSource::SetTrackID(uint32_t trackID)
 {
 #if READ_LOG
 	fTrackID = trackID;
-	//  qtss_printf("OSFileSource::SetTrackID = %"   _U32BITARG_   " this=%"   _U32BITARG_   "\n",fTrackID,(UInt32) this);
+	//  qtss_printf("OSFileSource::SetTrackID = %"   _U32BITARG_   " this=%"   _U32BITARG_   "\n",fTrackID,(uint32_t) this);
 #endif
 }
 

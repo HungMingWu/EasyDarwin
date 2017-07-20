@@ -61,12 +61,12 @@ public:
 	//(stored in seconds)
 
 	//This is the value we advertise to clients (lower than the real one)
-	UInt32  GetRTSPTimeoutInSecs() { return fRTSPTimeoutInSecs; }
-	UInt32  GetRTPSessionTimeoutInSecs() { return fRTPSessionTimeoutInSecs; }
+	uint32_t  GetRTSPTimeoutInSecs() { return fRTSPTimeoutInSecs; }
+	uint32_t  GetRTPSessionTimeoutInSecs() { return fRTPSessionTimeoutInSecs; }
 	StrPtrLen*  GetRTSPTimeoutAsString() { return &fRTSPTimeoutString; }
 
 	//This is the real timeout
-	UInt32  GetRTSPSessionTimeoutInSecs() { return fRTSPSessionTimeoutInSecs; }
+	uint32_t  GetRTSPSessionTimeoutInSecs() { return fRTSPSessionTimeoutInSecs; }
 
 	//-1 means unlimited
 	SInt32  GetMaxConnections() { return fMaximumConnections; }
@@ -80,11 +80,11 @@ public:
 	SInt32  GetStartThinningTimeInMsec() { return fStartThinningTimeInMsec; }
 	SInt32  GetStartThickingTimeInMsec() { return fStartThickingTimeInMsec; }
 	SInt32  GetThickAllTheWayTimeInMsec() { return fThickAllTheWayTimeInMsec; }
-	UInt32  GetQualityCheckIntervalInMsec() { return fQualityCheckIntervalInMsec; }
+	uint32_t  GetQualityCheckIntervalInMsec() { return fQualityCheckIntervalInMsec; }
 
 	// for tcp buffer size scaling
-	UInt32  GetMinTCPBufferSizeInBytes() { return fMinTCPBufferSizeInBytes; }
-	UInt32  GetMaxTCPBufferSizeInBytes() { return fMaxTCPBufferSizeInBytes; }
+	uint32_t  GetMinTCPBufferSizeInBytes() { return fMinTCPBufferSizeInBytes; }
+	uint32_t  GetMaxTCPBufferSizeInBytes() { return fMaxTCPBufferSizeInBytes; }
 	float GetTCPSecondsToBuffer() { return fTCPSecondsToBuffer; }
 
 	//for joining HTTP sessions from behind a round-robin DNS
@@ -94,30 +94,30 @@ public:
 	bool      ShouldServerBreakOnAssert() { return fBreakOnAssert; }
 	bool      IsAutoRestartEnabled() { return fAutoRestart; }
 
-	UInt32      GetTotalBytesUpdateTimeInSecs() { return fTBUpdateTimeInSecs; }
-	UInt32      GetAvgBandwidthUpdateTimeInSecs() { return fABUpdateTimeInSecs; }
-	UInt32      GetSafePlayDurationInSecs() { return fSafePlayDurationInSecs; }
+	uint32_t      GetTotalBytesUpdateTimeInSecs() { return fTBUpdateTimeInSecs; }
+	uint32_t      GetAvgBandwidthUpdateTimeInSecs() { return fABUpdateTimeInSecs; }
+	uint32_t      GetSafePlayDurationInSecs() { return fSafePlayDurationInSecs; }
 
 	// For the compiled-in error logging module
 
 	bool  IsErrorLogEnabled() { return fErrorLogEnabled; }
 	bool  IsScreenLoggingEnabled() { return fScreenLoggingEnabled; }
 
-	UInt32  GetMaxErrorLogBytes() { return fErrorLogBytes; }
-	UInt32  GetErrorRollIntervalInDays() { return fErrorRollIntervalInDays; }
-	UInt32  GetErrorLogVerbosity() { return fErrorLogVerbosity; }
-	void    SetErrorLogVerbosity(UInt32 verbosity) { fErrorLogVerbosity = verbosity; }
+	uint32_t  GetMaxErrorLogBytes() { return fErrorLogBytes; }
+	uint32_t  GetErrorRollIntervalInDays() { return fErrorRollIntervalInDays; }
+	uint32_t  GetErrorLogVerbosity() { return fErrorLogVerbosity; }
+	void    SetErrorLogVerbosity(uint32_t verbosity) { fErrorLogVerbosity = verbosity; }
 	bool  GetAppendSrcAddrInTransport() { return fAppendSrcAddrInTransport; }
 
 	//
 	// For UDP retransmits
-	UInt32  IsReliableUDPEnabled() { return fReliableUDP; }
-	UInt32  GetMaxRetransmitDelayInMsec() { return fMaxRetransDelayInMsec; }
+	uint32_t  IsReliableUDPEnabled() { return fReliableUDP; }
+	uint32_t  GetMaxRetransmitDelayInMsec() { return fMaxRetransDelayInMsec; }
 	bool  IsAckLoggingEnabled() { return fIsAckLoggingEnabled; }
-	UInt32  GetRTCPPollIntervalInMsec() { return fRTCPPollIntervalInMsec; }
-	UInt32  GetRTCPSocketRcvBufSizeinK() { return fRTCPSocketRcvBufSizeInK; }
-	UInt32  GetSendIntervalInMsec() { return fSendIntervalInMsec; }
-	UInt32  GetMaxSendAheadTimeInSecs() { return fMaxSendAheadTimeInSecs; }
+	uint32_t  GetRTCPPollIntervalInMsec() { return fRTCPPollIntervalInMsec; }
+	uint32_t  GetRTCPSocketRcvBufSizeinK() { return fRTCPSocketRcvBufSizeInK; }
+	uint32_t  GetSendIntervalInMsec() { return fSendIntervalInMsec; }
+	uint32_t  GetMaxSendAheadTimeInSecs() { return fMaxSendAheadTimeInSecs; }
 	bool  IsSlowStartEnabled() { return fIsSlowStartEnabled; }
 	bool  GetReliableUDPPrintfsEnabled() { return fReliableUDPPrintfs; }
 	bool  GetRTSPDebugPrintfs() { return fEnableRTSPDebugPrintfs; }
@@ -126,11 +126,11 @@ public:
 	float    GetOverbufferRate() { return fOverbufferRate; }
 
 	// RUDP window size
-	UInt32  GetSmallWindowSizeInK() { return fSmallWindowSizeInK; }
-	UInt32    GetMediumWindowSizeInK() { return fMediumWindowSizeInK; }
-	UInt32  GetLargeWindowSizeInK() { return fLargeWindowSizeInK; }
-	UInt32  GetWindowSizeThreshold() { return fWindowSizeThreshold; }
-	UInt32    GetWindowSizeMaxThreshold() { return fWindowSizeMaxThreshold; }
+	uint32_t  GetSmallWindowSizeInK() { return fSmallWindowSizeInK; }
+	uint32_t    GetMediumWindowSizeInK() { return fMediumWindowSizeInK; }
+	uint32_t  GetLargeWindowSizeInK() { return fLargeWindowSizeInK; }
+	uint32_t  GetWindowSizeThreshold() { return fWindowSizeThreshold; }
+	uint32_t    GetWindowSizeMaxThreshold() { return fWindowSizeMaxThreshold; }
 
 	//
 	// force logs to close after each write (true or false)
@@ -144,7 +144,7 @@ public:
 	// Movie folder pref. If the path fits inside the buffer provided,
 	// the path is copied into that buffer. Otherwise, a new buffer is allocated
 	// and returned.
-	//char*   GetMovieFolder(char* inBuffer, UInt32* ioLen);
+	//char*   GetMovieFolder(char* inBuffer, uint32_t* ioLen);
 
 	//
 	// Transport addr pref. Caller must provide a buffer big enough for an IP addr
@@ -192,7 +192,7 @@ public:
 	}
 
 	bool ServerStatFileEnabled() { return fEnableMonitorStatsFile; }
-	UInt32 GetStatFileIntervalSec() { return fStatsFileIntervalSeconds; }
+	uint32_t GetStatFileIntervalSec() { return fStatsFileIntervalSeconds; }
 	bool CloudPlatformEnabled() { return fCloudPlatformEnabled; }
 	QTSS_AuthScheme GetAuthScheme() { return fAuthScheme; }
 
@@ -203,10 +203,10 @@ public:
 	bool PrintAPPHeaders() { return (bool)(fPacketHeaderPrintfOptions & kRTCPAPP); }
 	bool PrintACKHeaders() { return (bool)(fPacketHeaderPrintfOptions & kRTCPACK); }
 
-	UInt32 DeleteSDPFilesInterval() { return fsdp_file_delete_interval_seconds; }
+	uint32_t DeleteSDPFilesInterval() { return fsdp_file_delete_interval_seconds; }
 
-	UInt32  GetNumThreads() { return fNumThreads; } //short tasks threads
-	UInt32  GetNumBlockingThreads() { return fNumRTSPThreads; } //return the number of threads that long tasks will be scheduled on -- RTSP processing for example.
+	uint32_t  GetNumThreads() { return fNumThreads; } //short tasks threads
+	uint32_t  GetNumBlockingThreads() { return fNumRTSPThreads; } //return the number of threads that long tasks will be scheduled on -- RTSP processing for example.
 
 	bool  GetDisableThinning() { return fDisableThinning; }
 
@@ -231,24 +231,24 @@ public:
 
 private:
 
-	UInt32      fRTSPTimeoutInSecs;
+	uint32_t      fRTSPTimeoutInSecs;
 	char        fRTSPTimeoutBuf[20];
 	StrPtrLen   fRTSPTimeoutString;
-	UInt32      fRTSPSessionTimeoutInSecs;
-	UInt32      fRTPSessionTimeoutInSecs;
+	uint32_t      fRTSPSessionTimeoutInSecs;
+	uint32_t      fRTPSessionTimeoutInSecs;
 
 	SInt32  fMaximumConnections;
 	SInt32  fMaxBandwidthInKBits;
 
 	bool  fBreakOnAssert;
 	bool  fAutoRestart;
-	UInt32  fTBUpdateTimeInSecs;
-	UInt32  fABUpdateTimeInSecs;
-	UInt32  fSafePlayDurationInSecs;
+	uint32_t  fTBUpdateTimeInSecs;
+	uint32_t  fABUpdateTimeInSecs;
+	uint32_t  fSafePlayDurationInSecs;
 
-	UInt32  fErrorRollIntervalInDays;
-	UInt32  fErrorLogBytes;
-	UInt32  fErrorLogVerbosity;
+	uint32_t  fErrorRollIntervalInDays;
+	uint32_t  fErrorLogBytes;
+	uint32_t  fErrorLogVerbosity;
 	bool  fScreenLoggingEnabled;
 	bool  fErrorLogEnabled;
 
@@ -259,52 +259,52 @@ private:
 	SInt32  fStartThinningTimeInMsec;
 	SInt32  fStartThickingTimeInMsec;
 	SInt32  fThickAllTheWayTimeInMsec;
-	UInt32  fQualityCheckIntervalInMsec;
+	uint32_t  fQualityCheckIntervalInMsec;
 
-	UInt32  fMinTCPBufferSizeInBytes;
-	UInt32  fMaxTCPBufferSizeInBytes;
+	uint32_t  fMinTCPBufferSizeInBytes;
+	uint32_t  fMaxTCPBufferSizeInBytes;
 	float fTCPSecondsToBuffer;
 
 	bool  fDoReportHTTPConnectionAddress;
 	bool  fAppendSrcAddrInTransport;
 
-	UInt32  fSmallWindowSizeInK;
-	UInt32  fMediumWindowSizeInK;
-	UInt32  fLargeWindowSizeInK;
-	UInt32  fWindowSizeThreshold;
-	UInt32  fWindowSizeMaxThreshold;
+	uint32_t  fSmallWindowSizeInK;
+	uint32_t  fMediumWindowSizeInK;
+	uint32_t  fLargeWindowSizeInK;
+	uint32_t  fWindowSizeThreshold;
+	uint32_t  fWindowSizeMaxThreshold;
 
-	UInt32  fMaxRetransDelayInMsec;
+	uint32_t  fMaxRetransDelayInMsec;
 	bool  fIsAckLoggingEnabled;
-	UInt32  fRTCPPollIntervalInMsec;
-	UInt32  fRTCPSocketRcvBufSizeInK;
+	uint32_t  fRTCPPollIntervalInMsec;
+	uint32_t  fRTCPSocketRcvBufSizeInK;
 	bool  fIsSlowStartEnabled;
-	UInt32  fSendIntervalInMsec;
-	UInt32  fMaxSendAheadTimeInSecs;
+	uint32_t  fSendIntervalInMsec;
+	uint32_t  fMaxSendAheadTimeInSecs;
 
 	bool  fCloudPlatformEnabled;
 
 	QTSS_AuthScheme fAuthScheme;
-	UInt32  fsdp_file_delete_interval_seconds;
+	uint32_t  fsdp_file_delete_interval_seconds;
 	bool  fAutoStart;
 	bool  fReliableUDP;
 	bool  fReliableUDPPrintfs;
 	bool  fEnableRTSPErrMsg;
 	bool  fEnableRTSPDebugPrintfs;
 	bool  fEnableRTSPServerInfo;
-	UInt32  fNumThreads;
-	UInt32  fNumRTSPThreads;
+	uint32_t  fNumThreads;
+	uint32_t  fNumRTSPThreads;
 
 	uint16_t	fServiceLANPort;
 	uint16_t	fServiceWANPort;
 
 	bool  fEnableMonitorStatsFile;
-	UInt32  fStatsFileIntervalSeconds;
+	uint32_t  fStatsFileIntervalSeconds;
 
 	float	fOverbufferRate;
 
 	bool   fEnablePacketHeaderPrintfs;
-	UInt32 fPacketHeaderPrintfOptions;
+	uint32_t fPacketHeaderPrintfOptions;
 	bool   fCloseLogsOnWrite;
 
 	bool   fDisableThinning;
@@ -336,7 +336,7 @@ private:
 
 	struct PrefInfo
 	{
-		UInt32  fAllowMultipleValues;
+		uint32_t  fAllowMultipleValues;
 		char*   fDefaultValue;
 		char**  fAdditionalDefVals; // For prefs with multiple default values
 	};

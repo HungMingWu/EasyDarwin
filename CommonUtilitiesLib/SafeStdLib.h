@@ -34,13 +34,14 @@
 #define _INTERNAL_STDLIB_H_
 
 #include <time.h>
+#include <stdint.h>
 #include "OSHeaders.h"
 
 #define kTimeStrSize 32
 #define kErrorStrSize 256
 extern int qtss_maxprintf(const char *fmt, ...);
-extern void qtss_setmaxprintfcharsinK(UInt32 newMaxCharsInK);
-extern UInt32 qtss_getmaxprintfcharsinK();
+extern void qtss_setmaxprintfcharsinK(uint32_t newMaxCharsInK);
+extern uint32_t qtss_getmaxprintfcharsinK();
 
 #ifndef USE_DEFAULT_STD_LIB
 

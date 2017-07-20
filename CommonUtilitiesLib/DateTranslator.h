@@ -56,9 +56,9 @@ public:
 
 private:
 
-	static UInt32 convertCharToMonthTableIndex(int inChar)
+	static uint32_t convertCharToMonthTableIndex(int inChar)
 	{
-		return (UInt32)(toupper(inChar) - 'A'); // Convert to a value between 0 - 25
+		return (uint32_t)(toupper(inChar) - 'A'); // Convert to a value between 0 - 25
 	}
 };
 

@@ -267,7 +267,7 @@ QTSS_Error EasyCMSSession::ProcessMessage()
 	StrPtrLen* lengthPtr = fRequest->GetHeaderValue(httpContentLengthHeader);
 	StringParser theContentLenParser(lengthPtr);
 	theContentLenParser.ConsumeWhitespace();
-	UInt32 content_length = theContentLenParser.ConsumeInteger(nullptr);
+	uint32_t content_length = theContentLenParser.ConsumeInteger(nullptr);
 
 	if (content_length)
 	{
@@ -281,7 +281,7 @@ QTSS_Error EasyCMSSession::ProcessMessage()
 			fContentBufferOffset = 0;
 		}
 
-		UInt32 theLen = 0;
+		uint32_t theLen = 0;
 		// 读取HTTP Content报文数据
 		theErr = fInputStream.Read(fContentBuffer + fContentBufferOffset, content_length - fContentBufferOffset, &theLen);
 		Assert(theErr != QTSS_BadArgument);
@@ -387,7 +387,7 @@ QTSS_Error EasyCMSSession::CSFreeStream()
 	return QTSS_NoErr;
 }
 
-QTSS_Error EasyCMSSession::FreeStream(const char * streamName, UInt32 streamChannel)
+QTSS_Error EasyCMSSession::FreeStream(const char * streamName, uint32_t streamChannel)
 {
 	QTSS_Error theErr = QTSS_NoErr;
 
@@ -417,7 +417,7 @@ QTSS_Error EasyCMSSession::FreeStream(const char * streamName, UInt32 streamChan
 		theParams.GetAssociatedCMSParams.outCMSPort = chCMSPort;
 		theParams.GetAssociatedCMSParams.inSerial = fStreamName;
 		auto numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRedisGetAssociatedCMSRole);
-		for (UInt32 currentModule = 0; currentModule < numModules; currentModule++)
+		for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
 		{
 			auto theModule = QTSServerInterface::GetModule(QTSSModule::kRedisGetAssociatedCMSRole, currentModule);
 			(void)theModule->CallDispatch(Easy_RedisGetAssociatedCMS_Role, &theParams);

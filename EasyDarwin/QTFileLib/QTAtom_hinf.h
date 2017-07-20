@@ -64,11 +64,11 @@ public:
 	inline  UInt64      GetTotalImmediateBytes() { return  fTotalImmediateBytes64; }
 	inline  UInt64      GetRepeatBytes() { return  fTotalRepeatBytes64; }
 
-	inline  UInt32      GetMinTransTime() { return  fMinTransTime32; }
-	inline  UInt32      GetMaxTransTime() { return  fMaxTransTime32; }
-	inline  UInt32      GetMaxPacketSizeBytes() { return  fMaxPacketSizeBytes32; }
-	inline  UInt32      GetMaxPacketDuration() { return  fMaxPacketDuration32; }
-	inline  UInt32      GetPayLoadID() { return  fPayloadID; }
+	inline  uint32_t      GetMinTransTime() { return  fMinTransTime32; }
+	inline  uint32_t      GetMaxTransTime() { return  fMaxTransTime32; }
+	inline  uint32_t      GetMaxPacketSizeBytes() { return  fMaxPacketSizeBytes32; }
+	inline  uint32_t      GetMaxPacketDuration() { return  fMaxPacketDuration32; }
+	inline  uint32_t      GetPayLoadID() { return  fPayloadID; }
 	inline  char*       GetPayLoadStr() { return  (char*)fPayloadStr; }
 
 	//
@@ -79,24 +79,24 @@ public:
 protected:
 	//
 	// Protected member variables.
-	UInt32      fTotalRTPBytes32; //totl
+	uint32_t      fTotalRTPBytes32; //totl
 	UInt64      fTotalRTPBytes64; //trpy
 
-	UInt32      fTotalRTPPackets32; //nump
+	uint32_t      fTotalRTPPackets32; //nump
 	UInt64      fTotalRTPPackets64; //npck
 
-	UInt32      fTotalPayLoadBytes32; //tpay
+	uint32_t      fTotalPayLoadBytes32; //tpay
 	UInt64      fTotalPayLoadBytes64; //tpyl
 	UInt64      fMaxDataRate64; //maxr
 	UInt64      fTotalMediaBytes64; //dmed
 	UInt64      fTotalImmediateBytes64; //dimm  
 	UInt64      fTotalRepeatBytes64; //drep
 
-	UInt32      fMinTransTime32; //tmin
-	UInt32      fMaxTransTime32; //tmax
-	UInt32      fMaxPacketSizeBytes32; //pmax
-	UInt32      fMaxPacketDuration32; //dmax
-	UInt32      fPayloadID;//payt
+	uint32_t      fMinTransTime32; //tmin
+	uint32_t      fMaxTransTime32; //tmax
+	uint32_t      fMaxPacketSizeBytes32; //pmax
+	uint32_t      fMaxPacketDuration32; //dmax
+	uint32_t      fPayloadID;//payt
 	char        fPayloadStr[262];//payt
 };
 

@@ -38,7 +38,7 @@
 #include "MyAssert.h"
 
 char*   StringFormatter::sEOL = "\r\n";
-UInt32  StringFormatter::sEOLLen = 2;
+uint32_t  StringFormatter::sEOLLen = 2;
 
 void StringFormatter::Put(const SInt32 num)
 {
@@ -47,7 +47,7 @@ void StringFormatter::Put(const SInt32 num)
 	Put(buff);
 }
 
-void StringFormatter::Put(char* buffer, UInt32 bufferSize)
+void StringFormatter::Put(char* buffer, uint32_t bufferSize)
 {
 	//optimization for writing 1 character
 	if ((bufferSize == 1) && (fCurrentPut != fEndPut)) {
@@ -58,9 +58,9 @@ void StringFormatter::Put(char* buffer, UInt32 bufferSize)
 
 	//loop until the input buffer size is smaller than the space in the output
 	//buffer. Call BufferIsFull at each pass through the loop
-	UInt32 spaceLeft = this->GetSpaceLeft();
-	UInt32 spaceInBuffer = spaceLeft - 1;
-	UInt32 resizedSpaceLeft = 0;
+	uint32_t spaceLeft = this->GetSpaceLeft();
+	uint32_t spaceInBuffer = spaceLeft - 1;
+	uint32_t resizedSpaceLeft = 0;
 
 	while ((spaceInBuffer < bufferSize) || (spaceLeft == 0)) // too big for destination
 	{
@@ -105,12 +105,12 @@ bool StringFormatter::PutFmtStr(const char* fmt, ...)
 
 		if (length < 0)
 			return false;
-		if (static_cast<UInt32>(length) >= this->GetSpaceLeft()) //was not able to write all the output
+		if (static_cast<uint32_t>(length) >= this->GetSpaceLeft()) //was not able to write all the output
 		{
 			if (this->BufferIsFull(fStartPut, this->GetCurrentOffset()))
 				continue;
 			//can only output a portion of the string
-			UInt32 bytesWritten = fEndPut - fCurrentPut - 1; //We don't want to include the NUL terminator
+			uint32_t bytesWritten = fEndPut - fCurrentPut - 1; //We don't want to include the NUL terminator
 			fBytesWritten += bytesWritten;
 			fCurrentPut += bytesWritten;
 			return false;

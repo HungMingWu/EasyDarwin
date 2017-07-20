@@ -182,7 +182,7 @@ QTSS_Error HTTPRequest::parseRequestLine(StringParser* parser)
 	{
 		parser->ConsumeUntilWhitespace();//¹ýÂËµôHTTP/1.1
 		parser->ConsumeUntilDigit(NULL);
-		UInt32 statusCode = parser->ConsumeInteger(NULL);
+		uint32_t statusCode = parser->ConsumeInteger(NULL);
 		if (statusCode != 0)
 		{
 			fHTTPType = httpResponseType;
@@ -287,7 +287,7 @@ QTSS_Error HTTPRequest::parseURI(StringParser* parser)
 	fRelativeURI = relativeURI;
 
 	// Allocate memory for fRequestPath
-	UInt32 len = fRelativeURI.Len;
+	uint32_t len = fRelativeURI.Len;
 	len++;
 	//char* relativeURIDecoded = new char[len];
 	char relativeURIDecoded[512] = { 0 };
@@ -297,7 +297,7 @@ QTSS_Error HTTPRequest::parseURI(StringParser* parser)
 
 	//if negative, an error occurred, reported as an QTSS_Error
 	//we also need to leave room for a terminator.
-	if ((theBytesWritten < 0) || (static_cast<UInt32>(theBytesWritten) == len))
+	if ((theBytesWritten < 0) || (static_cast<uint32_t>(theBytesWritten) == len))
 	{
 		fStatusCode = httpBadRequest;
 		return QTSS_BadArgument;
@@ -496,7 +496,7 @@ void HTTPRequest::AppendContentLengthHeader(UInt64 length_64bit) const
 	AppendResponseHeader(httpContentLengthHeader, &contentLengthPtr);
 }
 
-void HTTPRequest::AppendContentLengthHeader(UInt32 length_32bit) const
+void HTTPRequest::AppendContentLengthHeader(uint32_t length_32bit) const
 {
 	//char* contentLength = new char[256];
 	char contentLength[256] = { 0 };

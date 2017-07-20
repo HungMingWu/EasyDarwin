@@ -43,7 +43,7 @@ public:
 	ClientSocket();
 	virtual ~ClientSocket() {}
 
-	void    Set(UInt32 hostAddr, uint16_t hostPort)
+	void    Set(uint32_t hostAddr, uint16_t hostPort)
 	{
 		fHostAddr = hostAddr; fHostPort = hostPort;
 	}
@@ -55,11 +55,11 @@ public:
 	//
 	// When this call returns EAGAIN or EINPROGRESS, caller should use GetEventMask
 	// and GetSocket to wait for a socket event.
-	OS_Error    Send(char* inData, const UInt32 inLength);
+	OS_Error    Send(char* inData, const uint32_t inLength);
 
 	//
 	// Sends an ioVec to the server. Same conditions apply as above function 
-	virtual OS_Error    SendV(iovec* inVec, UInt32 inNumVecs) = 0;
+	virtual OS_Error    SendV(iovec* inVec, uint32_t inNumVecs) = 0;
 
 	//
 	// Reads data from the server. If this returns EAGAIN or EINPROGRESS, call
@@ -68,19 +68,19 @@ public:
 	//
 	// When this call returns EAGAIN or EINPROGRESS, caller should use GetEventMask
 	// and GetSocket to wait for a socket event.
-	virtual OS_Error    Read(void* inBuffer, const UInt32 inLength, UInt32* outRcvLen) = 0;
+	virtual OS_Error    Read(void* inBuffer, const uint32_t inLength, uint32_t* outRcvLen) = 0;
 
 	//
 	// ACCESSORS
-	UInt32          GetHostAddr() { return fHostAddr; }
-	virtual UInt32  GetLocalAddr() = 0;
+	uint32_t          GetHostAddr() { return fHostAddr; }
+	virtual uint32_t  GetLocalAddr() = 0;
 
 	// If one of the above methods returns EWOULDBLOCK or EINPROGRESS, you
 	// can check this to see what events you should wait for on the socket
-	UInt32      GetEventMask() { return fEventMask; }
+	uint32_t      GetEventMask() { return fEventMask; }
 	Socket*     GetSocket() { return fSocketP; }
 
-	virtual void    SetRcvSockBufSize(UInt32 inSize) = 0;
+	virtual void    SetRcvSockBufSize(uint32_t inSize) = 0;
 
 protected:
 
@@ -91,10 +91,10 @@ protected:
 
 	OS_Error    SendSendBuffer(TCPSocket* inSocket);
 
-	UInt32      fHostAddr;
+	uint32_t      fHostAddr;
 	uint16_t      fHostPort;
 
-	UInt32      fEventMask;
+	uint32_t      fEventMask;
 	Socket*     fSocketP;
 
 	enum
@@ -105,23 +105,23 @@ protected:
 	// Buffer for sends.
 	char        fSendBuf[kSendBufferLen + 1];
 	StrPtrLen   fSendBuffer;
-	UInt32      fSentLength;
+	uint32_t      fSentLength;
 };
 
 class TCPClientSocket : public ClientSocket
 {
 public:
 
-	TCPClientSocket(UInt32 inSocketType);
+	TCPClientSocket(uint32_t inSocketType);
 	virtual ~TCPClientSocket() {}
 
 	//
 	// Implements the ClientSocket Send and Receive interface for a TCP connection
-	virtual OS_Error    SendV(iovec* inVec, UInt32 inNumVecs);
-	virtual OS_Error    Read(void* inBuffer, const UInt32 inLength, UInt32* outRcvLen);
+	virtual OS_Error    SendV(iovec* inVec, uint32_t inNumVecs);
+	virtual OS_Error    Read(void* inBuffer, const uint32_t inLength, uint32_t* outRcvLen);
 
-	virtual UInt32  GetLocalAddr() { return fSocket.GetLocalAddr(); }
-	virtual void    SetRcvSockBufSize(UInt32 inSize) { fSocket.SetSocketRcvBufSize(inSize); }
+	virtual uint32_t  GetLocalAddr() { return fSocket.GetLocalAddr(); }
+	virtual void    SetRcvSockBufSize(uint32_t inSize) { fSocket.SetSocketRcvBufSize(inSize); }
 	virtual void    SetOptions(int sndBufSize = 8192, int rcvBufSize = 1024);
 
 	virtual uint16_t  GetLocalPort() { return fSocket.GetLocalPort(); }
@@ -135,7 +135,7 @@ class HTTPClientSocket : public ClientSocket
 {
 public:
 
-	HTTPClientSocket(const StrPtrLen& inURL, UInt32 inCookie, UInt32 inSocketType);
+	HTTPClientSocket(const StrPtrLen& inURL, uint32_t inCookie, uint32_t inSocketType);
 	virtual ~HTTPClientSocket();
 
 	//
@@ -144,21 +144,21 @@ public:
 
 	//
 	// Implements the ClientSocket Send and Receive interface for an RTSP / HTTP connection
-	virtual OS_Error    SendV(iovec* inVec, UInt32 inNumVecs);
+	virtual OS_Error    SendV(iovec* inVec, uint32_t inNumVecs);
 	// Both SendV and Read use the fSendBuffer; so you cannot have both operations be running at the same time.
-	virtual OS_Error    Read(void* inBuffer, const UInt32 inLength, UInt32* outRcvLen);
+	virtual OS_Error    Read(void* inBuffer, const uint32_t inLength, uint32_t* outRcvLen);
 
-	virtual UInt32  GetLocalAddr() { return fGetSocket.GetLocalAddr(); }
-	virtual void    SetRcvSockBufSize(UInt32 inSize) { fGetSocket.SetSocketRcvBufSize(inSize); }
+	virtual uint32_t  GetLocalAddr() { return fGetSocket.GetLocalAddr(); }
+	virtual void    SetRcvSockBufSize(uint32_t inSize) { fGetSocket.SetSocketRcvBufSize(inSize); }
 
 private:
-	void        encodeVec(iovec* inVec, UInt32 inNumVecs);
+	void        encodeVec(iovec* inVec, uint32_t inNumVecs);
 
 	StrPtrLen   fURL;
-	UInt32      fCookie;
+	uint32_t      fCookie;
 
-	UInt32      fSocketType;
-	UInt32      fGetReceived;
+	uint32_t      fSocketType;
+	uint32_t      fGetReceived;
 	TCPSocket   fGetSocket;
 	TCPSocket*  fPostSocket;
 };

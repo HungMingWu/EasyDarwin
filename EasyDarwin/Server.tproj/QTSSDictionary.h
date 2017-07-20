@@ -55,7 +55,7 @@ class QTSSAttrInfoDict;
 
 //
 // Function prototype for attr functions
-typedef void* (*QTSS_AttrFunctionPtr)(QTSSDictionary*, UInt32*);
+typedef void* (*QTSS_AttrFunctionPtr)(QTSSDictionary*, uint32_t*);
 
 class QTSSDictionary : public QTSSStream
 {
@@ -81,14 +81,14 @@ public:
 	// This version of GetValue copies the element into a buffer provided by the caller
 	// Returns:     QTSS_BadArgument, QTSS_NotPreemptiveSafe (if attribute is not preemptive safe),
 	//              QTSS_BadIndex (if inIndex is bad)
-	QTSS_Error GetValue(QTSS_AttributeID inAttrID, UInt32 inIndex, void* ioValueBuffer, UInt32* ioValueLen);
+	QTSS_Error GetValue(QTSS_AttributeID inAttrID, uint32_t inIndex, void* ioValueBuffer, uint32_t* ioValueLen);
 
 
 	//This version of GetValue returns a pointer to the internal buffer for the attribute.
 	//Only usable if the attribute is preemptive safe.
 	//
 	// Returns:     Same as above, but also QTSS_NotEnoughSpace, if value is too big for buffer.
-	QTSS_Error GetValuePtr(QTSS_AttributeID inAttrID, UInt32 inIndex, void** outValueBuffer, UInt32* outValueLen)
+	QTSS_Error GetValuePtr(QTSS_AttributeID inAttrID, uint32_t inIndex, void** outValueBuffer, uint32_t* outValueLen)
 	{
 		return GetValuePtr(inAttrID, inIndex, outValueBuffer, outValueLen, false);
 	}
@@ -97,28 +97,28 @@ public:
 	// the string is allocated internally.
 	//
 	// Returns: QTSS_BadArgument, QTSS_BadIndex, QTSS_ValueNotFound
-	QTSS_Error GetValueAsString(QTSS_AttributeID inAttrID, UInt32 inIndex, char** outString);
+	QTSS_Error GetValueAsString(QTSS_AttributeID inAttrID, uint32_t inIndex, char** outString);
 
 	// Returns:     QTSS_BadArgument, QTSS_ReadOnly (if attribute is read only),
 	//              QTSS_BadIndex (attempt to set indexed parameter with param retrieval)
-	QTSS_Error SetValue(QTSS_AttributeID inAttrID, UInt32 inIndex,
-		const void* inBuffer, UInt32 inLen, UInt32 inFlags = kNoFlags);
+	QTSS_Error SetValue(QTSS_AttributeID inAttrID, uint32_t inIndex,
+		const void* inBuffer, uint32_t inLen, uint32_t inFlags = kNoFlags);
 
 	// Returns:     QTSS_BadArgument, QTSS_ReadOnly (if attribute is read only),
 	QTSS_Error SetValuePtr(QTSS_AttributeID inAttrID,
-		const void* inBuffer, UInt32 inLen, UInt32 inFlags = kNoFlags);
+		const void* inBuffer, uint32_t inLen, uint32_t inFlags = kNoFlags);
 
 	// Returns:     QTSS_BadArgument, QTSS_ReadOnly (if attribute is read only),
-	QTSS_Error CreateObjectValue(QTSS_AttributeID inAttrID, UInt32* outIndex,
+	QTSS_Error CreateObjectValue(QTSS_AttributeID inAttrID, uint32_t* outIndex,
 		QTSSDictionary** newObject, QTSSDictionaryMap* inMap = NULL,
-		UInt32 inFlags = kNoFlags);
+		uint32_t inFlags = kNoFlags);
 
 	// Returns:     QTSS_BadArgument, QTSS_ReadOnly, QTSS_BadIndex
-	QTSS_Error RemoveValue(QTSS_AttributeID inAttrID, UInt32 inIndex, UInt32 inFlags = kNoFlags);
+	QTSS_Error RemoveValue(QTSS_AttributeID inAttrID, uint32_t inIndex, uint32_t inFlags = kNoFlags);
 
 	// Utility routine used by the two external flavors of GetValue
-	QTSS_Error GetValuePtr(QTSS_AttributeID inAttrID, UInt32 inIndex,
-		void** outValueBuffer, UInt32* outValueLen,
+	QTSS_Error GetValuePtr(QTSS_AttributeID inAttrID, uint32_t inIndex,
+		void** outValueBuffer, uint32_t* outValueLen,
 		bool isInternal);
 
 	//
@@ -131,8 +131,8 @@ public:
 	QTSSDictionaryMap*  GetInstanceDictMap() { return fInstanceMap; }
 
 	// Returns the number of values associated with a given attribute
-	UInt32              GetNumValues(QTSS_AttributeID inAttrID);
-	void                SetNumValues(QTSS_AttributeID inAttrID, UInt32 inNumValues);
+	uint32_t              GetNumValues(QTSS_AttributeID inAttrID);
+	void                SetNumValues(QTSS_AttributeID inAttrID, uint32_t inNumValues);
 
 	// Meant only for internal server use. Does no error checking,
 	// doesn't invoke the param retrieval function.
@@ -148,7 +148,7 @@ public:
 
 	//
 	// GETTING ATTRIBUTE INFO
-	QTSS_Error GetAttrInfoByIndex(UInt32 inIndex, QTSSAttrInfoDict** outAttrInfoDict);
+	QTSS_Error GetAttrInfoByIndex(uint32_t inIndex, QTSSAttrInfoDict** outAttrInfoDict);
 	QTSS_Error GetAttrInfoByName(const char* inAttrName, QTSSAttrInfoDict** outAttrInfoDict);
 	QTSS_Error GetAttrInfoByID(QTSS_AttributeID inAttrID, QTSSAttrInfoDict** outAttrInfoDict);
 
@@ -169,14 +169,14 @@ public:
 	// dictionary attributes. They do no error checking.
 
 	// They don't set fNumAttributes & fAllocatedInternally.
-	void    SetVal(QTSS_AttributeID inAttrID, void* inValueBuffer, UInt32 inBufferLen);
+	void    SetVal(QTSS_AttributeID inAttrID, void* inValueBuffer, uint32_t inBufferLen);
 	void    SetVal(QTSS_AttributeID inAttrID, StrPtrLen* inNewValue)
 	{
 		this->SetVal(inAttrID, inNewValue->Ptr, inNewValue->Len);
 	}
 
 	// Call this if you want to assign empty storage to an attribute
-	void    SetEmptyVal(QTSS_AttributeID inAttrID, void* inBuf, UInt32 inBufLen);
+	void    SetEmptyVal(QTSS_AttributeID inAttrID, void* inBuf, uint32_t inBufLen);
 
 #if __DICTIONARY_TESTING__
 	static void Test(); // API test for these objects
@@ -185,11 +185,11 @@ public:
 protected:
 
 	// Derived classes can provide a completion routine for some dictionary functions
-	virtual void    RemoveValueComplete(UInt32 /*inAttrIndex*/, QTSSDictionaryMap* /*inMap*/, UInt32 /*inValueIndex*/) {}
+	virtual void    RemoveValueComplete(uint32_t /*inAttrIndex*/, QTSSDictionaryMap* /*inMap*/, uint32_t /*inValueIndex*/) {}
 
-	virtual void    SetValueComplete(UInt32 /*inAttrIndex*/, QTSSDictionaryMap* /*inMap*/,
-		UInt32 /*inValueIndex*/, void* /*inNewValue*/, UInt32 /*inNewValueLen*/) {}
-	virtual void    RemoveInstanceAttrComplete(UInt32 /*inAttrindex*/, QTSSDictionaryMap* /*inMap*/) {}
+	virtual void    SetValueComplete(uint32_t /*inAttrIndex*/, QTSSDictionaryMap* /*inMap*/,
+		uint32_t /*inValueIndex*/, void* /*inNewValue*/, uint32_t /*inNewValueLen*/) {}
+	virtual void    RemoveInstanceAttrComplete(uint32_t /*inAttrindex*/, QTSSDictionaryMap* /*inMap*/) {}
 
 	virtual QTSSDictionary* CreateNewDictionary(QTSSDictionaryMap* inMap, OSMutex* inMutex);
 
@@ -206,15 +206,15 @@ private:
 		~DictValueElement() {}
 
 		StrPtrLen   fAttributeData; // The data
-		UInt32      fAllocatedLen;  // How much space do we have allocated?
-		UInt32      fNumAttributes; // If this is an iterated attribute, how many?
+		uint32_t      fAllocatedLen;  // How much space do we have allocated?
+		uint32_t      fNumAttributes; // If this is an iterated attribute, how many?
 		bool      fAllocatedInternally; //Should we delete this memory?
 		bool      fIsDynamicDictionary; //is this a dictionary object?
 	};
 
 	DictValueElement    fAttributes[QTSS_MAX_ATTRIBUTE_NUMS];
 	DictValueElement*   fInstanceAttrs;
-	UInt32              fInstanceArraySize;
+	uint32_t              fInstanceArraySize;
 	QTSSDictionaryMap*  fMap;
 	QTSSDictionaryMap*  fInstanceMap;
 	OSMutex*            fMutexP;
@@ -222,7 +222,7 @@ private:
 	bool				fLocked;
 
 	void DeleteAttributeData(DictValueElement* inDictValues,
-		UInt32 inNumValues, QTSSDictionaryMap* theMap);
+		uint32_t inNumValues, QTSSDictionaryMap* theMap);
 };
 
 
@@ -277,9 +277,9 @@ public:
 	//
 	// CONSTRUCTOR / DESTRUCTOR
 
-	QTSSDictionaryMap(UInt32 inNumReservedAttrs, UInt32 inFlags = kNoFlags);
+	QTSSDictionaryMap(uint32_t inNumReservedAttrs, uint32_t inFlags = kNoFlags);
 	~QTSSDictionaryMap() {
-		for (UInt32 i = 0; i < fAttrArraySize; i++)
+		for (uint32_t i = 0; i < fAttrArraySize; i++)
 			delete fAttrArray[i];
 		delete[] fAttrArray;
 	}
@@ -303,7 +303,7 @@ public:
 	// Searching / Iteration. These never return removed attributes
 	QTSS_Error  GetAttrInfoByName(const char* inAttrName, QTSSAttrInfoDict** outAttrInfoDict, bool returnRemovedAttr = false);
 	QTSS_Error  GetAttrInfoByID(QTSS_AttributeID inID, QTSSAttrInfoDict** outAttrInfoDict);
-	QTSS_Error  GetAttrInfoByIndex(UInt32 inIndex, QTSSAttrInfoDict** outAttrInfoDict);
+	QTSS_Error  GetAttrInfoByIndex(uint32_t inIndex, QTSSAttrInfoDict** outAttrInfoDict);
 	QTSS_Error  GetAttrID(const char* inAttrName, QTSS_AttributeID* outID);
 
 	//
@@ -327,45 +327,45 @@ public:
 	// These functions do no error checking. Be careful.
 
 	// Includes removed attributes
-	UInt32          GetNumAttrs() { return fNextAvailableID; }
-	UInt32          GetNumNonRemovedAttrs() { return fNumValidAttrs; }
+	uint32_t          GetNumAttrs() { return fNextAvailableID; }
+	uint32_t          GetNumNonRemovedAttrs() { return fNumValidAttrs; }
 
-	bool                  IsPreemptiveSafe(UInt32 inIndex)
+	bool                  IsPreemptiveSafe(uint32_t inIndex)
 	{
 		Assert(inIndex < fNextAvailableID); return (bool)(fAttrArray[inIndex]->fAttrInfo.fAttrPermission & qtssAttrModePreempSafe);
 	}
 
-	bool                  IsWriteable(UInt32 inIndex)
+	bool                  IsWriteable(uint32_t inIndex)
 	{
 		Assert(inIndex < fNextAvailableID); return (bool)(fAttrArray[inIndex]->fAttrInfo.fAttrPermission & qtssAttrModeWrite);
 	}
 
-	bool                  IsCacheable(UInt32 inIndex)
+	bool                  IsCacheable(uint32_t inIndex)
 	{
 		Assert(inIndex < fNextAvailableID); return (bool)(fAttrArray[inIndex]->fAttrInfo.fAttrPermission & qtssAttrModeCacheable);
 	}
 
-	bool                  IsRemoved(UInt32 inIndex)
+	bool                  IsRemoved(uint32_t inIndex)
 	{
 		Assert(inIndex < fNextAvailableID); return (bool)(fAttrArray[inIndex]->fAttrInfo.fAttrPermission & qtssPrivateAttrModeRemoved);
 	}
 
-	QTSS_AttrFunctionPtr    GetAttrFunction(UInt32 inIndex)
+	QTSS_AttrFunctionPtr    GetAttrFunction(uint32_t inIndex)
 	{
 		Assert(inIndex < fNextAvailableID); return fAttrArray[inIndex]->fAttrInfo.fFuncPtr;
 	}
 
-	char*                   GetAttrName(UInt32 inIndex)
+	char*                   GetAttrName(uint32_t inIndex)
 	{
 		Assert(inIndex < fNextAvailableID); return fAttrArray[inIndex]->fAttrInfo.fAttrName;
 	}
 
-	QTSS_AttributeID        GetAttrID(UInt32 inIndex)
+	QTSS_AttributeID        GetAttrID(uint32_t inIndex)
 	{
 		Assert(inIndex < fNextAvailableID); return fAttrArray[inIndex]->fID;
 	}
 
-	QTSS_AttrDataType       GetAttrType(UInt32 inIndex)
+	QTSS_AttrDataType       GetAttrType(uint32_t inIndex)
 	{
 		Assert(inIndex < fNextAvailableID); return fAttrArray[inIndex]->fAttrInfo.fAttrDataType;
 	}
@@ -419,10 +419,10 @@ public:
 	};
 
 	// This function converts a QTSS_ObjectType to an index
-	static UInt32                   GetMapIndex(QTSS_ObjectType inType);
+	static uint32_t                   GetMapIndex(QTSS_ObjectType inType);
 
 	// Using one of the above predefined indexes, this returns the corresponding map
-	static QTSSDictionaryMap*       GetMap(UInt32 inIndex)
+	static QTSSDictionaryMap*       GetMap(uint32_t inIndex)
 	{
 		Assert(inIndex < kNumDynamicDictionaryTypes + kNumDictionaries); return sDictionaryMaps[inIndex];
 	}
@@ -435,18 +435,18 @@ private:
 	// Repository for dictionary maps
 
 	static QTSSDictionaryMap*       sDictionaryMaps[kNumDictionaries + kNumDynamicDictionaryTypes];
-	static UInt32                   sNextDynamicMap;
+	static uint32_t                   sNextDynamicMap;
 
 	enum
 	{
 		kMinArraySize = 20
 	};
 
-	UInt32                          fNextAvailableID;
-	UInt32                          fNumValidAttrs;
-	UInt32                          fAttrArraySize;
+	uint32_t                          fNextAvailableID;
+	uint32_t                          fNumValidAttrs;
+	uint32_t                          fAttrArraySize;
 	QTSSAttrInfoDict**              fAttrArray;
-	UInt32                          fFlags;
+	uint32_t                          fFlags;
 
 	friend class QTSSDictionary;
 };

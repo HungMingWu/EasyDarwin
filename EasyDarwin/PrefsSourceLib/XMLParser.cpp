@@ -67,8 +67,8 @@ bool XMLParser::ParseFile(char* errorBuffer, int errorBufferSize)
 	}
 
 	char* fileData = new char[(SInt32)(fFile.GetLength() + 1)];
-	UInt32 theLengthRead = 0;
-	fFile.Read(0, fileData, (UInt32)fFile.GetLength(), &theLengthRead);
+	uint32_t theLengthRead = 0;
+	fFile.Read(0, fileData, (uint32_t)fFile.GetLength(), &theLengthRead);
 
 	StrPtrLen theDataPtr(fileData, theLengthRead);
 	StringParser theParser(&theDataPtr);
@@ -147,7 +147,7 @@ void XMLParser::WriteToFile(char** fileHeader)
 
 	//
 	// Write the file header
-	for (UInt32 a = 0; fileHeader[a] != NULL; a++)
+	for (uint32_t a = 0; fileHeader[a] != NULL; a++)
 	{
 		formatter.Put(fileHeader[a]);
 		formatter.Put(kEOLString);
@@ -479,13 +479,13 @@ char* XMLTag::GetAttributeValue(const char* attrName)
 	return NULL;
 }
 
-XMLTag* XMLTag::GetEmbeddedTag(const UInt32 index)
+XMLTag* XMLTag::GetEmbeddedTag(const uint32_t index)
 {
 	if (fEmbeddedTags.GetLength() <= index)
 		return NULL;
 
 	OSQueueIter iter(&fEmbeddedTags);
-	for (UInt32 i = 0; i < index; i++)
+	for (uint32_t i = 0; i < index; i++)
 	{
 		iter.Next();
 	}
@@ -494,13 +494,13 @@ XMLTag* XMLTag::GetEmbeddedTag(const UInt32 index)
 	return (XMLTag*)result->GetEnclosingObject();
 }
 
-XMLTag* XMLTag::GetEmbeddedTagByName(const char* tagName, const UInt32 index)
+XMLTag* XMLTag::GetEmbeddedTagByName(const char* tagName, const uint32_t index)
 {
 	if (fEmbeddedTags.GetLength() <= index)
 		return NULL;
 
 	XMLTag* result = NULL;
-	UInt32 curIndex = 0;
+	uint32_t curIndex = 0;
 	for (OSQueueIter iter(&fEmbeddedTags); !iter.IsDone(); iter.Next())
 	{
 		XMLTag* temp = (XMLTag*)iter.GetCurrent()->GetEnclosingObject();
@@ -519,13 +519,13 @@ XMLTag* XMLTag::GetEmbeddedTagByName(const char* tagName, const UInt32 index)
 	return result;
 }
 
-XMLTag* XMLTag::GetEmbeddedTagByAttr(const char* attrName, const char* attrValue, const UInt32 index)
+XMLTag* XMLTag::GetEmbeddedTagByAttr(const char* attrName, const char* attrValue, const uint32_t index)
 {
 	if (fEmbeddedTags.GetLength() <= index)
 		return NULL;
 
 	XMLTag* result = NULL;
-	UInt32 curIndex = 0;
+	uint32_t curIndex = 0;
 	for (OSQueueIter iter(&fEmbeddedTags); !iter.IsDone(); iter.Next())
 	{
 		XMLTag* temp = (XMLTag*)iter.GetCurrent()->GetEnclosingObject();
@@ -544,13 +544,13 @@ XMLTag* XMLTag::GetEmbeddedTagByAttr(const char* attrName, const char* attrValue
 	return result;
 }
 
-XMLTag* XMLTag::GetEmbeddedTagByNameAndAttr(const char* tagName, const char* attrName, const char* attrValue, const UInt32 index)
+XMLTag* XMLTag::GetEmbeddedTagByNameAndAttr(const char* tagName, const char* attrName, const char* attrValue, const uint32_t index)
 {
 	if (fEmbeddedTags.GetLength() <= index)
 		return NULL;
 
 	XMLTag* result = NULL;
-	UInt32 curIndex = 0;
+	uint32_t curIndex = 0;
 	for (OSQueueIter iter(&fEmbeddedTags); !iter.IsDone(); iter.Next())
 	{
 		XMLTag* temp = (XMLTag*)iter.GetCurrent()->GetEnclosingObject();
@@ -633,9 +633,9 @@ void XMLTag::SetValue(char* value)
 	}
 }
 
-void XMLTag::FormatData(ResizeableStringFormatter* formatter, UInt32 indent)
+void XMLTag::FormatData(ResizeableStringFormatter* formatter, uint32_t indent)
 {
-	for (UInt32 i = 0; i < indent; i++) formatter->PutChar('\t');
+	for (uint32_t i = 0; i < indent; i++) formatter->PutChar('\t');
 
 	formatter->PutChar('<');
 	formatter->Put(fTag);
@@ -667,7 +667,7 @@ void XMLTag::FormatData(ResizeableStringFormatter* formatter, UInt32 indent)
 			current->FormatData(formatter, indent + 1);
 		}
 
-		for (UInt32 i = 0; i < indent; i++) formatter->PutChar('\t');
+		for (uint32_t i = 0; i < indent; i++) formatter->PutChar('\t');
 	}
 
 	formatter->Put("</");

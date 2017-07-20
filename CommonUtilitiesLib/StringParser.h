@@ -87,7 +87,7 @@ public:
 	void            ConsumeUntil(StrPtrLen* outString, char inStopChar);
 
 	//Returns whatever integer is currently in the stream
-	UInt32          ConsumeInteger(StrPtrLen* outString = nullptr);
+	uint32_t          ConsumeInteger(StrPtrLen* outString = nullptr);
 	float         ConsumeFloat();
 	float         ConsumeNPT();
 
@@ -130,17 +130,17 @@ public:
 	char operator[](int i) { Assert((fStartGet + i) < fEndGet); return fStartGet[i]; }
 
 	//Returns some info about the stream
-	UInt32          GetDataParsedLen()
+	uint32_t          GetDataParsedLen()
 	{
-		Assert(fStartGet >= fStream->Ptr); return (UInt32)(fStartGet - fStream->Ptr);
+		Assert(fStartGet >= fStream->Ptr); return (uint32_t)(fStartGet - fStream->Ptr);
 	}
-	UInt32          GetDataReceivedLen()
+	uint32_t          GetDataReceivedLen()
 	{
-		Assert(fEndGet >= fStream->Ptr); return (UInt32)(fEndGet - fStream->Ptr);
+		Assert(fEndGet >= fStream->Ptr); return (uint32_t)(fEndGet - fStream->Ptr);
 	}
-	UInt32          GetDataRemaining()
+	uint32_t          GetDataRemaining()
 	{
-		Assert(fEndGet >= fStartGet); return (UInt32)(fEndGet - fStartGet);
+		Assert(fEndGet >= fStartGet); return (uint32_t)(fEndGet - fStartGet);
 	}
 	char*           GetCurrentPosition() { return fStartGet; }
 	int         GetCurrentLineNumber() { return fCurLineNumber; }

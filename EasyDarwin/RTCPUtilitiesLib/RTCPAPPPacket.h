@@ -47,19 +47,19 @@ public:
 	RTCPAPPPacket(bool debug = false);
 	virtual ~RTCPAPPPacket() {};
 	virtual void Dump();
-	virtual bool ParseAPPPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength); //default app header check
-	virtual bool ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength) { return false; }; //derived class implements
-	inline FourCharCode GetAppPacketName(char *outName = NULL, UInt32 len = 0);
-	inline UInt32 GetAppPacketSSRC();
+	virtual bool ParseAPPPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength); //default app header check
+	virtual bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength) { return false; }; //derived class implements
+	inline FourCharCode GetAppPacketName(char *outName = NULL, uint32_t len = 0);
+	inline uint32_t GetAppPacketSSRC();
 
 
 	uint8_t* fRTCPAPPDataBuffer;  //points into RTCPPacket::fReceiverPacketBuffer should be set past the app header
-	UInt32 fAPPDataBufferSize;
+	uint32_t fAPPDataBufferSize;
 
 	enum
 	{
 		kAppSSRCOffset = 4,
-		kAppNameOffset = 8, //byte offset to four char App identifier               //All are UInt32
+		kAppNameOffset = 8, //byte offset to four char App identifier               //All are uint32_t
 
 		kRTCPAPPHeaderSizeInBytes = 4, //
 		kmDumpArraySize = 1024
@@ -71,7 +71,7 @@ public:
 	bool fDebug;
 
 private:
-	virtual bool ParseAPPPacketHeader(uint8_t* inPacketBuffer, UInt32 inPacketLength);
+	virtual bool ParseAPPPacketHeader(uint8_t* inPacketBuffer, uint32_t inPacketLength);
 
 };
 
@@ -79,16 +79,16 @@ private:
 
 /****************  RTCPAPPPacket inlines *******************************/
 
-inline FourCharCode RTCPAPPPacket::GetAppPacketName(char *outName, UInt32 len)
+inline FourCharCode RTCPAPPPacket::GetAppPacketName(char *outName, uint32_t len)
 {
 
-	UInt32 packetName = (UInt32)(*(UInt32*)&(GetPacketBuffer()[kAppNameOffset]));
+	uint32_t packetName = (uint32_t)(*(uint32_t*)&(GetPacketBuffer()[kAppNameOffset]));
 
 	if (outName)
 	{
 		if (len > 4)
 		{
-			*((UInt32*)outName) = packetName;
+			*((uint32_t*)outName) = packetName;
 			outName[4] = 0;
 		}
 		else if (len > 0)
@@ -99,9 +99,9 @@ inline FourCharCode RTCPAPPPacket::GetAppPacketName(char *outName, UInt32 len)
 }
 
 
-inline UInt32 RTCPAPPPacket::GetAppPacketSSRC()
+inline uint32_t RTCPAPPPacket::GetAppPacketSSRC()
 {
-	return (UInt32)ntohl(*(UInt32*)&(GetPacketBuffer()[kAppSSRCOffset]));
+	return (uint32_t)ntohl(*(uint32_t*)&(GetPacketBuffer()[kAppSSRCOffset]));
 }
 
 

@@ -53,20 +53,20 @@ class QTSSStream
         void    SetTask(Task* inTask)   { fTask = inTask; }
         Task*   GetTask()               { return fTask; }
 
-        virtual QTSS_Error  Read(void* /*ioBuffer*/, UInt32 /*inLen*/, UInt32* /*outLen*/)
+        virtual QTSS_Error  Read(void* /*ioBuffer*/, uint32_t /*inLen*/, uint32_t* /*outLen*/)
                                                             { return QTSS_Unimplemented; }
                                                             
-        virtual QTSS_Error  Write(void* /*inBuffer*/, UInt32 /*inLen*/, UInt32* /*outLenWritten*/, UInt32 /*inFlags*/)
+        virtual QTSS_Error  Write(void* /*inBuffer*/, uint32_t /*inLen*/, uint32_t* /*outLenWritten*/, uint32_t /*inFlags*/)
                                                             { return QTSS_Unimplemented; }
         
-        virtual QTSS_Error  WriteV(iovec* /*inVec*/, UInt32 /*inNumVectors*/, UInt32 /*inTotalLength*/, UInt32* /*outLenWritten*/)
+        virtual QTSS_Error  WriteV(iovec* /*inVec*/, uint32_t /*inNumVectors*/, uint32_t /*inTotalLength*/, uint32_t* /*outLenWritten*/)
                                                             { return QTSS_Unimplemented; }
                                                             
         virtual QTSS_Error  Flush()                         { return QTSS_Unimplemented; }
         
         virtual QTSS_Error  Seek(UInt64 /*inNewPosition*/)  { return QTSS_Unimplemented; }
         
-        virtual QTSS_Error  Advise(UInt64 /*inPosition*/, UInt32 /*inAdviseSize*/)
+        virtual QTSS_Error  Advise(UInt64 /*inPosition*/, uint32_t /*inAdviseSize*/)
                                                             { return QTSS_Unimplemented; }
                                                             
         virtual QTSS_Error  RequestEvent(QTSS_EventType /*inEventMask*/)

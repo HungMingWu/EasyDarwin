@@ -94,7 +94,7 @@ QTAtom_stsd::~QTAtom_stsd()
 bool QTAtom_stsd::Initialize()
 {
 	// Temporary vars
-	UInt32      tempInt32;
+	uint32_t      tempInt32;
 
 	// General vars
 	char        *pSampleDescriptionTable;
@@ -125,13 +125,13 @@ bool QTAtom_stsd::Initialize()
 
 		//
 		// Read in the sample description table.
-		ReadBytes(stsdPos_SampleTable, fSampleDescriptionTable, (UInt32)tableSize);
+		ReadBytes(stsdPos_SampleTable, fSampleDescriptionTable, (uint32_t)tableSize);
 
 		//
 		// Read them all in..
 		pSampleDescriptionTable = fSampleDescriptionTable;
 		char        *maxSampleDescriptionPtr = pSampleDescriptionTable + tableSize;
-		for (UInt32 CurDesc = 0; CurDesc < fNumEntries; CurDesc++) {
+		for (uint32_t CurDesc = 0; CurDesc < fNumEntries; CurDesc++) {
 			//
 			// Associate this entry in our Table with the actual location of
 			// this sample description.
@@ -158,16 +158,16 @@ bool QTAtom_stsd::Initialize()
 // -------------------------------------
 // Accessors
 //
-bool QTAtom_stsd::FindSampleDescription(OSType DataFormat, char ** Buffer, UInt32 * Length)
+bool QTAtom_stsd::FindSampleDescription(OSType DataFormat, char ** Buffer, uint32_t * Length)
 {
 	// Temporary vars
-	UInt32      tempInt32;
+	uint32_t      tempInt32;
 
 
 	//
 	// Go through all of the sample descriptions, looking for the requested
 	// entry.
-	for (UInt32 CurDesc = 0; CurDesc < fNumEntries; CurDesc++) {
+	for (uint32_t CurDesc = 0; CurDesc < fNumEntries; CurDesc++) {
 		//
 		// Get this entry's data format.
 		memcpy(&tempInt32, fTable[CurDesc] + stsdDescPos_DataFormat, 4);
@@ -193,7 +193,7 @@ bool QTAtom_stsd::FindSampleDescription(OSType DataFormat, char ** Buffer, UInt3
 	return false;
 }
 
-uint16_t QTAtom_stsd::SampleDescriptionToDataReference(UInt32 SampleDescriptionID)
+uint16_t QTAtom_stsd::SampleDescriptionToDataReference(uint32_t SampleDescriptionID)
 {
 	// Temporary vars
 	uint16_t      tempInt16;

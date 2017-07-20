@@ -47,7 +47,7 @@ const RTPMetaInfoPacket::FieldName RTPMetaInfoPacket::kFieldNameMap[] =
 	TW0_CHARS_TO_INT('m', 'd')
 };
 
-const UInt32 RTPMetaInfoPacket::kFieldLengthValidator[] =
+const uint32_t RTPMetaInfoPacket::kFieldLengthValidator[] =
 {
 	8,  //pp
 	8,  //tt
@@ -71,7 +71,7 @@ RTPMetaInfoPacket::FieldIndex RTPMetaInfoPacket::GetFieldIndexForName(FieldName 
 
 void RTPMetaInfoPacket::ConstructFieldIDArrayFromHeader(StrPtrLen* inHeader, FieldID* ioFieldIDArray)
 {
-	for (UInt32 x = 0; x < kNumFields; x++)
+	for (uint32_t x = 0; x < kNumFields; x++)
 		ioFieldIDArray[x] = kFieldNotUsed;
 
 	//
@@ -112,7 +112,7 @@ void RTPMetaInfoPacket::ConstructFieldIDArrayFromHeader(StrPtrLen* inHeader, Fie
 }
 
 
-bool RTPMetaInfoPacket::ParsePacket(uint8_t* inPacketBuffer, UInt32 inPacketLen, FieldID* inFieldIDArray)
+bool RTPMetaInfoPacket::ParsePacket(uint8_t* inPacketBuffer, uint32_t inPacketLen, FieldID* inFieldIDArray)
 {
 	uint8_t* theFieldP = inPacketBuffer + 12; // skip RTP header
 	uint8_t* theEndP = inPacketBuffer + inPacketLen;
@@ -123,7 +123,7 @@ bool RTPMetaInfoPacket::ParsePacket(uint8_t* inPacketBuffer, UInt32 inPacketLen,
 	while (theFieldP < (theEndP - 2))
 	{
 		FieldIndex theFieldIndex = kIllegalField;
-		UInt32 theFieldLen = 0;
+		uint32_t theFieldLen = 0;
 		FieldName* theFieldName = (FieldName*)theFieldP;
 
 		if (*theFieldName & 0x8000)
@@ -221,7 +221,7 @@ bool RTPMetaInfoPacket::ParsePacket(uint8_t* inPacketBuffer, UInt32 inPacketLen,
 	return true;
 }
 
-uint8_t* RTPMetaInfoPacket::MakeRTPPacket(UInt32* outPacketLen)
+uint8_t* RTPMetaInfoPacket::MakeRTPPacket(uint32_t* outPacketLen)
 {
 	if (fMediaDataP == NULL)
 		return NULL;

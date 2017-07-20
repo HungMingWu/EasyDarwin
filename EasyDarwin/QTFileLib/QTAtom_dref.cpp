@@ -108,7 +108,7 @@ QTAtom_dref::QTAtom_dref(QTFile * File, QTFile::AtomTOCEntry * TOCEntry, bool De
 QTAtom_dref::~QTAtom_dref()
 {
 	//+ 6.16.1999 rt fix memory leak
-	for (UInt32 curRef = 0; curRef < fNumRefs; curRef++)
+	for (uint32_t curRef = 0; curRef < fNumRefs; curRef++)
 	{
 		delete[] fRefs[curRef].Data;
 		delete fRefs[curRef].FCB;
@@ -128,7 +128,7 @@ QTAtom_dref::~QTAtom_dref()
 bool QTAtom_dref::Initialize()
 {
 	// Temporary vars
-	UInt32      tempInt32;
+	uint32_t      tempInt32;
 
 	// General vars
 	UInt64      refPos;
@@ -154,7 +154,7 @@ bool QTAtom_dref::Initialize()
 		//
 		// Read them all in..
 		refPos = drefPos_RefTable;
-		for (UInt32 CurRef = 0; CurRef < fNumRefs; CurRef++) {
+		for (uint32_t CurRef = 0; CurRef < fNumRefs; CurRef++) {
 			//
 			// Set up the entry.
 			fRefs[CurRef].Flags = 0x0;
@@ -226,7 +226,7 @@ bool QTAtom_dref::Initialize()
 // -------------------------------------
 // Read functions.
 //
-bool QTAtom_dref::Read(UInt32 RefID, UInt64 Offset, char * const Buffer, UInt32 Length, QTFile_FileControlBlock * FCB)
+bool QTAtom_dref::Read(uint32_t RefID, UInt64 Offset, char * const Buffer, uint32_t Length, QTFile_FileControlBlock * FCB)
 {
 	// General vars
 	DataRefEntry        *Entry;
@@ -316,7 +316,7 @@ bool QTAtom_dref::Read(UInt32 RefID, UInt64 Offset, char * const Buffer, UInt32 
 void QTAtom_dref::DumpAtom()
 {
 	DEBUG_PRINT(("QTAtom_dref::DumpAtom - Dumping atom.\n"));
-	for (UInt32 CurRef = 1; CurRef <= fNumRefs; CurRef++)
+	for (uint32_t CurRef = 1; CurRef <= fNumRefs; CurRef++)
 		DEBUG_PRINT(("QTAtom_dref::DumpAtom - ..Ref #%"   _U32BITARG_   " is in file: %s\n", CurRef, IsRefInThisFile(CurRef) ? "yes" : "no"));
 }
 
@@ -325,7 +325,7 @@ void QTAtom_dref::DumpAtom()
 // -------------------------------------
 // Protected member functions.
 //
-char * QTAtom_dref::ResolveAlias(char * const AliasData, UInt32 /* AliasDataLength */)
+char * QTAtom_dref::ResolveAlias(char * const AliasData, uint32_t /* AliasDataLength */)
 {
 	// General vars
 	AliasRecordPriv     *Alias = (AliasRecordPriv *)AliasData;

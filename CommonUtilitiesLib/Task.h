@@ -146,7 +146,7 @@ private:
 #if DEBUG
 	//The whole premise of a task is that the Run function cannot be re-entered.
 	//This debugging variable ensures that that is always the case
-	volatile UInt32 fInRunCount;
+	volatile uint32_t fInRunCount;
 #endif
 
 	//This could later be optimized by using a timing wheel instead of a heap,
@@ -178,7 +178,7 @@ private:
 
 	enum
 	{
-		kMinWaitTimeInMilSecs = 10  //UInt32
+		kMinWaitTimeInMilSecs = 10  //uint32_t
 	};
 
 	virtual void    Entry();
@@ -201,20 +201,20 @@ class TaskThreadPool {
 public:
 
 	//Adds some threads to the pool
-	static bool   AddThreads(UInt32 numToAdd); // creates the threads: takes NumShortTaskThreads + NumBLockingThreads,  sets num short task threads.
+	static bool   AddThreads(uint32_t numToAdd); // creates the threads: takes NumShortTaskThreads + NumBLockingThreads,  sets num short task threads.
 	static void     SwitchPersonality(char *user = NULL, char *group = NULL);
 	static void     RemoveThreads();
-	static TaskThread* GetThread(UInt32 index);
-	static UInt32  GetNumThreads() { return sNumTaskThreads; }
-	static void SetNumShortTaskThreads(UInt32 numToAdd) { sNumShortTaskThreads = numToAdd; }
-	static void SetNumBlockingTaskThreads(UInt32 numToAdd) { sNumBlockingTaskThreads = numToAdd; }
+	static TaskThread* GetThread(uint32_t index);
+	static uint32_t  GetNumThreads() { return sNumTaskThreads; }
+	static void SetNumShortTaskThreads(uint32_t numToAdd) { sNumShortTaskThreads = numToAdd; }
+	static void SetNumBlockingTaskThreads(uint32_t numToAdd) { sNumBlockingTaskThreads = numToAdd; }
 
 private:
 
 	static TaskThread**     sTaskThreadArray;
-	static UInt32           sNumTaskThreads;
-	static UInt32           sNumShortTaskThreads;
-	static UInt32           sNumBlockingTaskThreads;
+	static uint32_t           sNumTaskThreads;
+	static uint32_t           sNumShortTaskThreads;
+	static uint32_t           sNumBlockingTaskThreads;
 
 	static OSMutexRW        sMutexRW;// __attribute__((visibility("hidden")));
 

@@ -62,21 +62,21 @@ public:
 	static void Initialize(bool lookupDNSName = true);
 
 	//static utility routines
-	static bool   IsMulticastIPAddr(UInt32 inAddress);
-	static bool   IsLocalIPAddr(UInt32 inAddress);
+	static bool   IsMulticastIPAddr(uint32_t inAddress);
+	static bool   IsLocalIPAddr(uint32_t inAddress);
 
 	//This function converts an integer IP address to a dotted-decimal string.
 	//This function is NOT THREAD SAFE!!!
 	static void ConvertAddrToString(const struct in_addr& theAddr, StrPtrLen* outAddr);
 
-	// This function converts a dotted-decimal string IP address to a UInt32
-	static UInt32 ConvertStringToAddr(const char* inAddr);
+	// This function converts a dotted-decimal string IP address to a uint32_t
+	static uint32_t ConvertStringToAddr(const char* inAddr);
 
 	//You can get at all the IP addrs and DNS names on this machine this way
-	static UInt32       GetNumIPAddrs() { return sNumIPAddrs; }
-	static inline UInt32        GetIPAddr(UInt32 inAddrIndex);
-	static inline StrPtrLen*    GetIPAddrStr(UInt32 inAddrIndex);
-	static inline StrPtrLen*    GetDNSNameStr(UInt32 inDNSIndex);
+	static uint32_t       GetNumIPAddrs() { return sNumIPAddrs; }
+	static inline uint32_t        GetIPAddr(uint32_t inAddrIndex);
+	static inline StrPtrLen*    GetIPAddrStr(uint32_t inAddrIndex);
+	static inline StrPtrLen*    GetDNSNameStr(uint32_t inDNSIndex);
 
 private:
 
@@ -87,31 +87,31 @@ private:
 	//For storing relevent information about each IP interface
 	struct IPAddrInfo
 	{
-		UInt32      fIPAddr;
+		uint32_t      fIPAddr;
 		StrPtrLen   fIPAddrStr;
 		StrPtrLen   fDNSNameStr;
 	};
 
 	static IPAddrInfo*              sIPAddrInfoArray;
-	static UInt32                   sNumIPAddrs;
+	static uint32_t                   sNumIPAddrs;
 	static OSMutex                  sMutex;
 };
 
-inline UInt32 SocketUtils::GetIPAddr(UInt32 inAddrIndex)
+inline uint32_t SocketUtils::GetIPAddr(uint32_t inAddrIndex)
 {
 	Assert(sIPAddrInfoArray != nullptr);
 	Assert(inAddrIndex < sNumIPAddrs);
 	return sIPAddrInfoArray[inAddrIndex].fIPAddr;
 }
 
-inline StrPtrLen* SocketUtils::GetIPAddrStr(UInt32 inAddrIndex)
+inline StrPtrLen* SocketUtils::GetIPAddrStr(uint32_t inAddrIndex)
 {
 	Assert(sIPAddrInfoArray != nullptr);
 	Assert(inAddrIndex < sNumIPAddrs);
 	return &sIPAddrInfoArray[inAddrIndex].fIPAddrStr;
 }
 
-inline StrPtrLen* SocketUtils::GetDNSNameStr(UInt32 inDNSIndex)
+inline StrPtrLen* SocketUtils::GetDNSNameStr(uint32_t inDNSIndex)
 {
 	Assert(sIPAddrInfoArray != nullptr);
 	Assert(inDNSIndex < sNumIPAddrs);

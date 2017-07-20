@@ -50,7 +50,7 @@ class UDPDemuxerUtils
 {
 private:
 
-	static UInt32 ComputeHashValue(UInt32 inRemoteAddr, uint16_t inRemotePort)
+	static uint32_t ComputeHashValue(uint32_t inRemoteAddr, uint16_t inRemotePort)
 	{
 		return ((inRemoteAddr << 16) + inRemotePort);
 	}
@@ -68,22 +68,22 @@ public:
 		fHashValue(0), fNextHashEntry(NULL) {}
 	virtual ~UDPDemuxerTask() {}
 
-	UInt32  GetRemoteAddr() { return fRemoteAddr; }
+	uint32_t  GetRemoteAddr() { return fRemoteAddr; }
 
 private:
 
-	void set(UInt32 inRemoteAddr, uint16_t inRemotePort)
+	void set(uint32_t inRemoteAddr, uint16_t inRemotePort)
 	{
 		fRemoteAddr = inRemoteAddr; fRemotePort = inRemotePort;
 		fHashValue = UDPDemuxerUtils::ComputeHashValue(fRemoteAddr, fRemotePort);
 	}
 
 	//key values
-	UInt32 fRemoteAddr;
+	uint32_t fRemoteAddr;
 	uint16_t fRemotePort;
 
 	//precomputed for performance
-	UInt32 fHashValue;
+	uint32_t fHashValue;
 
 	UDPDemuxerTask  *fNextHashEntry;
 
@@ -99,7 +99,7 @@ class UDPDemuxerKey
 private:
 
 	//CONSTRUCTOR / DESTRUCTOR:
-	UDPDemuxerKey(UInt32 inRemoteAddr, uint16_t inRemotePort)
+	UDPDemuxerKey(uint32_t inRemoteAddr, uint16_t inRemotePort)
 		: fRemoteAddr(inRemoteAddr), fRemotePort(inRemotePort)
 	{
 		fHashValue = UDPDemuxerUtils::ComputeHashValue(inRemoteAddr, inRemotePort);
@@ -111,7 +111,7 @@ private:
 private:
 
 	//PRIVATE ACCESSORS:    
-	UInt32      GetHashKey() { return fHashValue; }
+	uint32_t      GetHashKey() { return fHashValue; }
 
 	//these functions are only used by the hash table itself. This constructor
 	//will break the "Set" functions.
@@ -127,9 +127,9 @@ private:
 	}
 
 	//data:
-	UInt32 fRemoteAddr;
+	uint32_t fRemoteAddr;
 	uint16_t fRemotePort;
-	UInt32  fHashValue;
+	uint32_t  fHashValue;
 
 	friend class OSHashTable<UDPDemuxerTask, UDPDemuxerKey>;
 	friend class UDPDemuxer;
@@ -149,18 +149,18 @@ public:
 
 	// Return values: OS_NoErr, or EPERM if there is already a task registered
 	// with this address combination
-	OS_Error RegisterTask(UInt32 inRemoteAddr, uint16_t inRemotePort,
+	OS_Error RegisterTask(uint32_t inRemoteAddr, uint16_t inRemotePort,
 		UDPDemuxerTask *inTaskP);
 
 	// Return values: OS_NoErr, or EPERM if this task / address combination
 	// is not registered
-	OS_Error UnregisterTask(UInt32 inRemoteAddr, uint16_t inRemotePort,
+	OS_Error UnregisterTask(uint32_t inRemoteAddr, uint16_t inRemotePort,
 		UDPDemuxerTask *inTaskP);
 
 	//Assumes that parent has grabbed the mutex!
-	UDPDemuxerTask* GetTask(UInt32 inRemoteAddr, uint16_t inRemotePort);
+	UDPDemuxerTask* GetTask(uint32_t inRemoteAddr, uint16_t inRemotePort);
 
-	bool  AddrInMap(UInt32 inRemoteAddr, uint16_t inRemotePort)
+	bool  AddrInMap(uint32_t inRemoteAddr, uint16_t inRemotePort)
 	{
 		return (this->GetTask(inRemoteAddr, inRemotePort) != NULL);
 	}
@@ -172,7 +172,7 @@ private:
 
 	enum
 	{
-		kMaxHashTableSize = 2747//is this prime? it should be... //UInt32
+		kMaxHashTableSize = 2747//is this prime? it should be... //uint32_t
 	};
 	UDPDemuxerHashTable fHashTable;
 	OSMutex             fMutex;//this data structure is shared!

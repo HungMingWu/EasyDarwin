@@ -58,7 +58,7 @@ public:
 	// Some processors (MIPS, Sparc) cannot handle non word aligned memory
 	// accesses. So, we need to provide functions to safely get at non-word
 	// aligned memory.
-	static inline UInt32    GetUInt32FromMemory(UInt32* inP);
+	static inline uint32_t    GetUInt32FromMemory(uint32_t* inP);
 
 	//because the OS doesn't seem to have these functions
 	static SInt64   HostToNetworkSInt64(SInt64 hostOrdered);
@@ -112,7 +112,7 @@ public:
 	static OS_Error MakeDir(char *inPath);
 
 	// Discovery of how many processors are on this machine
-	static UInt32   GetNumProcessors();
+	static uint32_t   GetNumProcessors();
 
 	// CPU Load
 	static float  GetCurrentCPULoadPercent();
@@ -141,14 +141,14 @@ private:
 	static OSMutex sStdLibOSMutex;
 };
 
-inline UInt32 OS::GetUInt32FromMemory(UInt32* inP)
+inline uint32_t OS::GetUInt32FromMemory(uint32_t* inP)
 {
 #if ALLOW_NON_WORD_ALIGN_ACCESS
 	return *inP;
 #else
 	char* tempPtr = (char*)inP;
-	UInt32 temp = 0;
-	::memcpy(&temp, tempPtr, sizeof(UInt32));
+	uint32_t temp = 0;
+	::memcpy(&temp, tempPtr, sizeof(uint32_t));
 	return temp;
 #endif
 }

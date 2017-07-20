@@ -92,7 +92,7 @@ QTAtom_stss::~QTAtom_stss()
 bool QTAtom_stss::Initialize()
 {
 	bool      initSucceeds = false;
-	UInt32      tempInt32;
+	uint32_t      tempInt32;
 
 
 	//
@@ -107,14 +107,14 @@ bool QTAtom_stss::Initialize()
 
 		//
 		// Validate the size of the sample table.
-		if ((UInt32)(fNumEntries * 4) != (fTOCEntry.AtomDataLength - 8))
+		if ((uint32_t)(fNumEntries * 4) != (fTOCEntry.AtomDataLength - 8))
 			return false;
 
 
 #if 0// MMAP_TABLES needs fixing should be page aligned and maybe on a 64bit system the whole file should be mapped.
 		fTableSize = (fNumEntries * 4);
 		fSyncSampleTable = this->MemMap(stssPos_SampleTable, fTableSize);
-		fTable = (UInt32 *)fSyncSampleTable;
+		fTable = (uint32_t *)fSyncSampleTable;
 		if (fSyncSampleTable == NULL)
 			return false;
 
@@ -126,9 +126,9 @@ bool QTAtom_stss::Initialize()
 			return false;
 
 		if (((PointerSizedInt)fSyncSampleTable & (PointerSizedInt)0x3) == 0)
-			fTable = (UInt32 *)fSyncSampleTable;
+			fTable = (uint32_t *)fSyncSampleTable;
 		else
-			fTable = (UInt32 *)(((PointerSizedInt)fSyncSampleTable + 4) & ~((PointerSizedInt)0x3));
+			fTable = (uint32_t *)(((PointerSizedInt)fSyncSampleTable + 4) & ~((PointerSizedInt)0x3));
 
 		initSucceeds = ReadBytes(stssPos_SampleTable, (char *)fTable, fNumEntries * 4);
 
@@ -138,7 +138,7 @@ bool QTAtom_stss::Initialize()
 		{
 			// This atom has been successfully read in.
 			// sample offsets are in network byte order on disk, convert them to host order
-			UInt32      sampleIndex = 0;
+			uint32_t      sampleIndex = 0;
 
 			// convert each sample to host order
 			// NOTE - most other Atoms handle byte order conversions in
@@ -165,7 +165,7 @@ bool QTAtom_stss::Initialize()
 // -------------------------------------
 // Accessors
 //
-void QTAtom_stss::PreviousSyncSample(UInt32 SampleNumber, UInt32 *SyncSampleNumber)
+void QTAtom_stss::PreviousSyncSample(uint32_t SampleNumber, uint32_t *SyncSampleNumber)
 {
 	//
 	// We assume that we won't find an answer
@@ -174,7 +174,7 @@ void QTAtom_stss::PreviousSyncSample(UInt32 SampleNumber, UInt32 *SyncSampleNumb
 	//
 	// Scan the table until we find a sample number greater than our current
 	// sample number; then return that.
-	for (UInt32 CurEntry = 0; CurEntry < fNumEntries; CurEntry++) {
+	for (uint32_t CurEntry = 0; CurEntry < fNumEntries; CurEntry++) {
 		//
 		// Take this entry if it is before (or equal to) our current entry.
 		if (fTable[CurEntry] <= SampleNumber)
@@ -182,7 +182,7 @@ void QTAtom_stss::PreviousSyncSample(UInt32 SampleNumber, UInt32 *SyncSampleNumb
 	}
 }
 
-void QTAtom_stss::NextSyncSample(UInt32 SampleNumber, UInt32 *SyncSampleNumber)
+void QTAtom_stss::NextSyncSample(uint32_t SampleNumber, uint32_t *SyncSampleNumber)
 {
 	//
 	// We assume that we won't find an answer
@@ -191,7 +191,7 @@ void QTAtom_stss::NextSyncSample(UInt32 SampleNumber, UInt32 *SyncSampleNumber)
 	//
 	// Scan the table until we find a sample number greater than our current
 	// sample number; then return that.
-	for (UInt32 CurEntry = 0; CurEntry < fNumEntries; CurEntry++) {
+	for (uint32_t CurEntry = 0; CurEntry < fNumEntries; CurEntry++) {
 		//
 		// Take this entry if it is greater than our current entry.
 		if (fTable[CurEntry] > SampleNumber) {
@@ -222,7 +222,7 @@ void QTAtom_stss::DumpTable()
 
 	//
 	// Print the table.
-	for (UInt32 CurEntry = 1; CurEntry <= fNumEntries; CurEntry++) {
+	for (uint32_t CurEntry = 1; CurEntry <= fNumEntries; CurEntry++) {
 		//
 		// Print out a listing.
 		qtss_printf("  %10"   _U32BITARG_   " : %10"   _U32BITARG_   "\n", CurEntry, fTable[CurEntry - 1]);

@@ -51,19 +51,19 @@ static QTSS_PrefsObject     sServerPrefs = NULL;
 static QTSS_ServerObject    sServer = NULL;
 
 // Default values for preferences
-static UInt32   sDefaultLossThinTolerance = 30;
-static UInt32   sDefaultNumLossesToThin = 3;
-static UInt32   sDefaultLossThickTolerance = 5;
-static UInt32   sDefaultLossesToThick = 6;
-static UInt32   sDefaultWorsesToThin = 2;
+static uint32_t   sDefaultLossThinTolerance = 30;
+static uint32_t   sDefaultNumLossesToThin = 3;
+static uint32_t   sDefaultLossThickTolerance = 5;
+static uint32_t   sDefaultLossesToThick = 6;
+static uint32_t   sDefaultWorsesToThin = 2;
 static bool   sDefaultModuleEnabled = true;
 
 // Current values for preferences
-static UInt32   sLossThinTolerance = 30;
-static UInt32   sNumLossesToThin = 3;
-static UInt32   sLossThickTolerance = 5;
-static UInt32   sLossesToThick = 6;
-static UInt32   sWorsesToThin = 2;
+static uint32_t   sLossThinTolerance = 30;
+static uint32_t   sNumLossesToThin = 3;
+static uint32_t   sLossThickTolerance = 5;
+static uint32_t   sLossesToThick = 6;
+static uint32_t   sWorsesToThin = 2;
 static bool   sModuleEnabled = true;
 
 // Server preference we respect
@@ -161,7 +161,7 @@ QTSS_Error RereadPrefs()
 	QTSSModuleUtils::GetAttribute(sPrefs, "flow_control_udp_thinning_module_enabled", qtssAttrDataTypeBool16,
 		&sModuleEnabled, &sDefaultModuleEnabled, sizeof(sDefaultModuleEnabled));
 
-	UInt32 len = sizeof(sDisableThinning);
+	uint32_t len = sizeof(sDisableThinning);
 	(void)QTSS_GetValue(sServerPrefs, qtssPrefsDisableThinning, 0, (void*)&sDisableThinning, &len);
 
 	return QTSS_NoErr;
@@ -176,7 +176,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 
 #if FLOW_CONTROL_DEBUGGING
 	QTSS_RTPPayloadType* thePayloadType = 0;
-	UInt32 thePayloadLen = 0;
+	uint32_t thePayloadLen = 0;
 	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrPayloadType, 0, (void**)&thePayloadType, &thePayloadLen);
 
 	if ((*thePayloadType != 0) && (*thePayloadType == qtssVideoPayloadType))
@@ -191,7 +191,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	// Find out if this is a qtssRTPTransportTypeUDP. This is the only type of
 	// transport we should monitor
 	QTSS_RTPTransportType theTransportType = qtssRTPTransportTypeUDP;
-	UInt32 theLen = sizeof(theTransportType);
+	uint32_t theLen = sizeof(theTransportType);
 	QTSS_Error theErr = QTSS_GetValue(inParams->inRTPStream, qtssRTPStrTransportType, 0, (void*)&theTransportType, &theLen);
 	Assert(theErr == QTSS_NoErr);
 
@@ -228,27 +228,27 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	bool clearPercentLossThinCount = true;
 	bool clearPercentLossThickCount = true;
 
-	UInt32* uint32Ptr = NULL;
+	uint32_t* uint32_tPtr = NULL;
 	uint16_t* uint16_tPtr = NULL;
 	theLen = 0;
 
-	UInt32 theNumLossesAboveTol = 0;
-	UInt32 theNumLossesBelowTol = 0;
-	UInt32 theNumWorses = 0;
+	uint32_t theNumLossesAboveTol = 0;
+	uint32_t theNumLossesBelowTol = 0;
+	uint32_t theNumWorses = 0;
 
 	// Get our current counts for this stream. If any of these aren't present, something is seriously wrong
 	// with this dictionary, so we should probably just abort
-	(void)QTSS_GetValuePtr(theStream, sNumLossesAboveTolAttr, 0, (void**)&uint32Ptr, &theLen);
-	if ((uint32Ptr != NULL) && (theLen == sizeof(UInt32)))
-		theNumLossesAboveTol = *uint32Ptr;
+	(void)QTSS_GetValuePtr(theStream, sNumLossesAboveTolAttr, 0, (void**)&uint32_tPtr, &theLen);
+	if ((uint32_tPtr != NULL) && (theLen == sizeof(uint32_t)))
+		theNumLossesAboveTol = *uint32_tPtr;
 
-	(void)QTSS_GetValuePtr(theStream, sNumLossesBelowTolAttr, 0, (void**)&uint32Ptr, &theLen);
-	if ((uint32Ptr != NULL) && (theLen == sizeof(UInt32)))
-		theNumLossesBelowTol = *uint32Ptr;
+	(void)QTSS_GetValuePtr(theStream, sNumLossesBelowTolAttr, 0, (void**)&uint32_tPtr, &theLen);
+	if ((uint32_tPtr != NULL) && (theLen == sizeof(uint32_t)))
+		theNumLossesBelowTol = *uint32_tPtr;
 
-	(void)QTSS_GetValuePtr(theStream, sNumWorsesAttr, 0, (void**)&uint32Ptr, &theLen);
-	if ((uint32Ptr != NULL) && (theLen == sizeof(UInt32)))
-		theNumWorses = *uint32Ptr;
+	(void)QTSS_GetValuePtr(theStream, sNumWorsesAttr, 0, (void**)&uint32_tPtr, &theLen);
+	if ((uint32_tPtr != NULL) && (theLen == sizeof(uint32_t)))
+		theNumWorses = *uint32_tPtr;
 
 
 	//First take any action necessitated by the loss percent
@@ -340,21 +340,21 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 		ratchetMore = true;
 
 	//For clearing out counts below
-	UInt32 zero = 0;
+	uint32_t zero = 0;
 
 	//Based on the ratchetMore / ratchetLess variables, adjust the stream
 	if (ratchetMore || ratchetLess)
 	{
 
-		UInt32 curQuality = 0;
-		(void)QTSS_GetValuePtr(theStream, qtssRTPStrQualityLevel, 0, (void**)&uint32Ptr, &theLen);
-		if ((uint32Ptr != NULL) && (theLen == sizeof(UInt32)))
-			curQuality = *uint32Ptr;
+		uint32_t curQuality = 0;
+		(void)QTSS_GetValuePtr(theStream, qtssRTPStrQualityLevel, 0, (void**)&uint32_tPtr, &theLen);
+		if ((uint32_tPtr != NULL) && (theLen == sizeof(uint32_t)))
+			curQuality = *uint32_tPtr;
 
-		UInt32 numQualityLevels = 0;
-		(void)QTSS_GetValuePtr(theStream, qtssRTPStrNumQualityLevels, 0, (void**)&uint32Ptr, &theLen);
-		if ((uint32Ptr != NULL) && (theLen == sizeof(UInt32)))
-			numQualityLevels = *uint32Ptr;
+		uint32_t numQualityLevels = 0;
+		(void)QTSS_GetValuePtr(theStream, qtssRTPStrNumQualityLevels, 0, (void**)&uint32_tPtr, &theLen);
+		if ((uint32_tPtr != NULL) && (theLen == sizeof(uint32_t)))
+			numQualityLevels = *uint32_tPtr;
 
 		if ((ratchetLess) && (curQuality < numQualityLevels))
 		{
@@ -426,8 +426,8 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 
 void    InitializeDictionaryItems(QTSS_RTPStreamObject inStream)
 {
-	UInt32* theValue = NULL;
-	UInt32 theValueLen = 0;
+	uint32_t* theValue = NULL;
+	uint32_t theValueLen = 0;
 
 	QTSS_Error theErr = QTSS_GetValuePtr(inStream, sNumLossesAboveTolAttr, 0, (void**)&theValue, &theValueLen);
 

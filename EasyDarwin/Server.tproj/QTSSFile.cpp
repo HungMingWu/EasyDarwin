@@ -42,7 +42,7 @@ QTSSAttrInfoDict::AttrInfo  QTSSFile::sAttributes[] =
 
 void    QTSSFile::Initialize()
 {
-	for (UInt32 x = 0; x < qtssFlObjNumParams; x++)
+	for (uint32_t x = 0; x < qtssFlObjNumParams; x++)
 		QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kFileDictIndex)->
 		SetAttribute(x, sAttributes[x].fAttrName, sAttributes[x].fFuncPtr, sAttributes[x].fAttrDataType, sAttributes[x].fAttrPermission);
 }
@@ -82,7 +82,7 @@ QTSS_Error  QTSSFile::Open(char* inPath, QTSS_OpenFileFlags inFlags)
 	theParams.openFileParams.inFileObject = this;
 
 	QTSS_Error theErr = QTSS_FileNotFound;
-	UInt32 x = 0;
+	uint32_t x = 0;
 
 	for (; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kOpenFilePreProcessRole); x++)
 	{
@@ -123,10 +123,10 @@ void    QTSSFile::Close()
 }
 
 
-QTSS_Error  QTSSFile::Read(void* ioBuffer, UInt32 inBufLen, UInt32* outLengthRead)
+QTSS_Error  QTSSFile::Read(void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead)
 {
 	Assert(fModule != NULL);
-	UInt32 theLenRead = 0;
+	uint32_t theLenRead = 0;
 
 	//
 	// Invoke the owning QTSS API module. Setup a param block to do so.
@@ -149,7 +149,7 @@ QTSS_Error  QTSSFile::Read(void* ioBuffer, UInt32 inBufLen, UInt32* outLengthRea
 QTSS_Error  QTSSFile::Seek(UInt64 inNewPosition)
 {
 	UInt64* theFileLength = NULL;
-	UInt32 theParamLength = 0;
+	uint32_t theParamLength = 0;
 
 	(void)this->GetValuePtr(qtssFlObjLength, 0, (void**)&theFileLength, &theParamLength);
 
@@ -163,7 +163,7 @@ QTSS_Error  QTSSFile::Seek(UInt64 inNewPosition)
 	return QTSS_NoErr;
 }
 
-QTSS_Error  QTSSFile::Advise(UInt64 inPosition, UInt32 inAdviseSize)
+QTSS_Error  QTSSFile::Advise(UInt64 inPosition, uint32_t inAdviseSize)
 {
 	Assert(fModule != NULL);
 

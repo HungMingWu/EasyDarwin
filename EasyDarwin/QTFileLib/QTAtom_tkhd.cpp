@@ -112,7 +112,7 @@ QTAtom_tkhd::~QTAtom_tkhd()
 bool QTAtom_tkhd::Initialize()
 {
 	// Temporary vars
-	UInt32      tempInt32;
+	uint32_t      tempInt32;
 
 	//
 	// Parse this atom's fields.

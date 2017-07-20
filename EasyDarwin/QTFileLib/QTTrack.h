@@ -85,7 +85,7 @@ public:
 	inline  bool      IsInitialized() { return fIsInitialized; }
 
 	inline  const char *GetTrackName() { return (fTrackName ? fTrackName : ""); }
-	inline  UInt32      GetTrackID() { return fTrackHeaderAtom->GetTrackID(); }
+	inline  uint32_t      GetTrackID() { return fTrackHeaderAtom->GetTrackID(); }
 	inline  UInt64      GetCreationTime() { return fTrackHeaderAtom->GetCreationTime(); }
 	inline  UInt64      GetModificationTime() { return fTrackHeaderAtom->GetModificationTime(); }
 	inline  SInt64      GetDuration() { return (SInt64)fTrackHeaderAtom->GetDuration(); }
@@ -97,98 +97,98 @@ public:
 		if (fEditListAtom != NULL) return fEditListAtom->FirstEditMovieTime();
 		else return 0;
 	}
-	inline  UInt32      GetFirstEditMediaTime() { return fFirstEditMediaTime; }
+	inline  uint32_t      GetFirstEditMediaTime() { return fFirstEditMediaTime; }
 
 	//
 	// Sample functions
-	bool              GetSizeOfSamplesInChunk(UInt32 chunkNumber, UInt32 * const sizePtr, UInt32 * const firstSampleNumPtr, UInt32 * const lastSampleNumPtr, QTAtom_stsc_SampleTableControlBlock * stcbPtr);
+	bool              GetSizeOfSamplesInChunk(uint32_t chunkNumber, uint32_t * const sizePtr, uint32_t * const firstSampleNumPtr, uint32_t * const lastSampleNumPtr, QTAtom_stsc_SampleTableControlBlock * stcbPtr);
 
-	inline  bool      GetChunkFirstLastSample(UInt32 chunkNumber, UInt32 *firstSample, UInt32 *lastSample,
+	inline  bool      GetChunkFirstLastSample(uint32_t chunkNumber, uint32_t *firstSample, uint32_t *lastSample,
 		QTAtom_stsc_SampleTableControlBlock *STCB)
 	{
 		return fSampleToChunkAtom->GetChunkFirstLastSample(chunkNumber, firstSample, lastSample, STCB);
 	}
 
 
-	inline  bool      SampleToChunkInfo(UInt32 SampleNumber, UInt32 *samplesPerChunk, UInt32 *ChunkNumber, UInt32 *SampleDescriptionIndex, UInt32 *SampleOffsetInChunk,
+	inline  bool      SampleToChunkInfo(uint32_t SampleNumber, uint32_t *samplesPerChunk, uint32_t *ChunkNumber, uint32_t *SampleDescriptionIndex, uint32_t *SampleOffsetInChunk,
 		QTAtom_stsc_SampleTableControlBlock * STCB)
 	{
 		return fSampleToChunkAtom->SampleToChunkInfo(SampleNumber, samplesPerChunk, ChunkNumber, SampleDescriptionIndex, SampleOffsetInChunk, STCB);
 	}
 
 
-	inline  bool      SampleNumberToChunkNumber(UInt32 SampleNumber, UInt32 *ChunkNumber, UInt32 *SampleDescriptionIndex, UInt32 *SampleOffsetInChunk,
+	inline  bool      SampleNumberToChunkNumber(uint32_t SampleNumber, uint32_t *ChunkNumber, uint32_t *SampleDescriptionIndex, uint32_t *SampleOffsetInChunk,
 		QTAtom_stsc_SampleTableControlBlock * STCB)
 	{
 		return fSampleToChunkAtom->SampleNumberToChunkNumber(SampleNumber, ChunkNumber, SampleDescriptionIndex, SampleOffsetInChunk, STCB);
 	}
 
 
-	inline  UInt32      GetChunkFirstSample(UInt32 chunkNumber)
+	inline  uint32_t      GetChunkFirstSample(uint32_t chunkNumber)
 	{
 		return fSampleToChunkAtom->GetChunkFirstSample(chunkNumber);
 	}
 
-	inline  bool      ChunkOffset(UInt32 ChunkNumber, UInt64 *Offset = NULL)
+	inline  bool      ChunkOffset(uint32_t ChunkNumber, UInt64 *Offset = NULL)
 	{
 		return fChunkOffsetAtom->ChunkOffset(ChunkNumber, Offset);
 	}
 
-	inline  bool      SampleSize(UInt32 SampleNumber, UInt32 *Size = NULL)
+	inline  bool      SampleSize(uint32_t SampleNumber, uint32_t *Size = NULL)
 	{
 		return fSampleSizeAtom->SampleSize(SampleNumber, Size);
 	}
 
-	inline  bool      SampleRangeSize(UInt32 firstSample, UInt32 lastSample, UInt32 *sizePtr = NULL)
+	inline  bool      SampleRangeSize(uint32_t firstSample, uint32_t lastSample, uint32_t *sizePtr = NULL)
 	{
 		return fSampleSizeAtom->SampleRangeSize(firstSample, lastSample, sizePtr);
 	}
 
-	bool      GetSampleInfo(UInt32 SampleNumber, UInt32 * const Length, UInt64 * const Offset, UInt32 * const SampleDescriptionIndex,
+	bool      GetSampleInfo(uint32_t SampleNumber, uint32_t * const Length, UInt64 * const Offset, uint32_t * const SampleDescriptionIndex,
 		QTAtom_stsc_SampleTableControlBlock * STCB);
 
-	bool      GetSample(UInt32 SampleNumber, char * Buffer, UInt32 * Length, QTFile_FileControlBlock * FCB,
+	bool      GetSample(uint32_t SampleNumber, char * Buffer, uint32_t * Length, QTFile_FileControlBlock * FCB,
 		QTAtom_stsc_SampleTableControlBlock * STCB);
 
-	inline  bool      GetSampleMediaTime(UInt32 SampleNumber, UInt32 * const MediaTime,
+	inline  bool      GetSampleMediaTime(uint32_t SampleNumber, uint32_t * const MediaTime,
 		QTAtom_stts_SampleTableControlBlock * STCB)
 	{
 		return fTimeToSampleAtom->SampleNumberToMediaTime(SampleNumber, MediaTime, STCB);
 	}
 
-	inline  bool      GetSampleNumberFromMediaTime(UInt32 MediaTime, UInt32 * const SampleNumber,
+	inline  bool      GetSampleNumberFromMediaTime(uint32_t MediaTime, uint32_t * const SampleNumber,
 		QTAtom_stts_SampleTableControlBlock * STCB)
 	{
 		return fTimeToSampleAtom->MediaTimeToSampleNumber(MediaTime, SampleNumber, STCB);
 	}
 
 
-	inline  void        GetPreviousSyncSample(UInt32 SampleNumber, UInt32 * SyncSampleNumber)
+	inline  void        GetPreviousSyncSample(uint32_t SampleNumber, uint32_t * SyncSampleNumber)
 	{
 		if (fSyncSampleAtom != NULL) fSyncSampleAtom->PreviousSyncSample(SampleNumber, SyncSampleNumber);
 		else *SyncSampleNumber = SampleNumber;
 	}
 
-	inline  void        GetNextSyncSample(UInt32 SampleNumber, UInt32 * SyncSampleNumber)
+	inline  void        GetNextSyncSample(uint32_t SampleNumber, uint32_t * SyncSampleNumber)
 	{
 		if (fSyncSampleAtom != NULL) fSyncSampleAtom->NextSyncSample(SampleNumber, SyncSampleNumber);
 		else *SyncSampleNumber = SampleNumber + 1;
 	}
 
-	inline bool           IsSyncSample(UInt32 SampleNumber, UInt32 SyncSampleCursor)
+	inline bool           IsSyncSample(uint32_t SampleNumber, uint32_t SyncSampleCursor)
 	{
 		if (fSyncSampleAtom != NULL) return fSyncSampleAtom->IsSyncSample(SampleNumber, SyncSampleCursor);
 		else return true;
 	}
 	//
 	// Read functions.
-	inline  bool      Read(UInt32 SampleDescriptionID, UInt64 Offset, char * const Buffer, UInt32 Length,
+	inline  bool      Read(uint32_t SampleDescriptionID, UInt64 Offset, char * const Buffer, uint32_t Length,
 		QTFile_FileControlBlock * FCB = NULL)
 	{
 		return fDataReferenceAtom->Read(fSampleDescriptionAtom->SampleDescriptionToDataReference(SampleDescriptionID), Offset, Buffer, Length, FCB);
 	}
 
-	inline bool       GetSampleMediaTimeOffset(UInt32 SampleNumber, UInt32 *mediaTimeOffset, QTAtom_ctts_SampleTableControlBlock * STCB)
+	inline bool       GetSampleMediaTimeOffset(uint32_t SampleNumber, uint32_t *mediaTimeOffset, QTAtom_ctts_SampleTableControlBlock * STCB)
 	{
 		if (fCompTimeToSampleAtom)
 			return fCompTimeToSampleAtom->SampleNumberToMediaTimeOffset(SampleNumber, mediaTimeOffset, STCB);
@@ -230,7 +230,7 @@ protected:
 	QTAtom_stsz         *fSampleSizeAtom;
 	QTAtom_stss         *fSyncSampleAtom;
 
-	UInt32              fFirstEditMediaTime;
+	uint32_t              fFirstEditMediaTime;
 };
 
 #endif // QTTrack_H

@@ -137,7 +137,7 @@ void UserAgentParser::Parse(StrPtrLen *inStream)
 		if (tempData.Len == 0) break;
 
 		StrPtrLen   testID;
-		UInt32      fieldID;
+		uint32_t      fieldID;
 		for (short testField = 0; testField < UserAgentParser::eNumAttributes; testField++)
 		{
 			testID.Set(sFieldIDs[testField].fFieldName, sFieldIDs[testField].fLen);

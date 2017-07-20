@@ -39,7 +39,7 @@ public:
 	TCPSocket*          GetSocket() { return &fSocket; }
 	OSMutex*            GetSessionMutex() { return &fSessionMutex; }
 
-	UInt32              GetSessionIndex() { return fSessionIndex; }
+	uint32_t              GetSessionIndex() { return fSessionIndex; }
 
 	void                SetRequestBodyLength(SInt32 inLength) { fRequestBodyLen = inLength; }
 	SInt32              GetRemainingReqBodyLen() { return fRequestBodyLen; }
@@ -49,9 +49,9 @@ public:
 	// Allows non-buffered writes to the client. These will flow control.
 
 	// THE FIRST ENTRY OF THE IOVEC MUST BE BLANK!!!
-	virtual QTSS_Error WriteV(iovec* inVec, UInt32 inNumVectors, UInt32 inTotalLength, UInt32* outLenWritten);
-	virtual QTSS_Error Write(void* inBuffer, UInt32 inLength, UInt32* outLenWritten, UInt32 inFlags);
-	virtual QTSS_Error Read(void* ioBuffer, UInt32 inLength, UInt32* outLenRead);
+	virtual QTSS_Error WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten);
+	virtual QTSS_Error Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t inFlags);
+	virtual QTSS_Error Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead);
 	virtual QTSS_Error RequestEvent(QTSS_EventType inEventMask);
 
 	virtual QTSS_Error SendHTTPPacket(StrPtrLen* contentXML, bool connectionClose, bool decrement);
@@ -65,7 +65,7 @@ public:
 protected:
 	enum
 	{
-		kFirstHTTPSessionID = 1,    //UInt32
+		kFirstHTTPSessionID = 1,    //uint32_t
 	};
 
 	//Each http session has a unique number that identifies it.
@@ -93,9 +93,9 @@ protected:
 	bool              fLiveSession;
 	unsigned int	fObjectHolders;
 
-	UInt32              fSessionIndex;
-	UInt32              fLocalAddr;
-	UInt32              fRemoteAddr;
+	uint32_t              fSessionIndex;
+	uint32_t              fLocalAddr;
+	uint32_t              fRemoteAddr;
 	SInt32              fRequestBodyLen;
 
 	uint16_t              fLocalPort;
@@ -106,7 +106,7 @@ protected:
 	static unsigned int	sSessionIndexCounter;
 
 	// Dictionary support Param retrieval function
-	static void*        SetupParams(QTSSDictionary* inSession, UInt32* outLen);
+	static void*        SetupParams(QTSSDictionary* inSession, uint32_t* outLen);
 
 	static QTSSAttrInfoDict::AttrInfo   sAttributes[];
 };

@@ -69,13 +69,13 @@ public:
 	// Call to parse if you don't know what kind of packet this is
 	// Returns true if this is an Ack packet, false otherwise.
 	// Assumes that inPacketBuffer is a pointer to a valid RTCP packet header.
-	bool  ParseAckPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength);
+	bool  ParseAckPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength);
 
-	virtual bool ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength);
+	virtual bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength);
 
 	inline uint16_t GetAckSeqNum();
-	inline UInt32 GetAckMaskSizeInBits() { return fAckMaskSize * 8; }
-	inline bool IsNthBitEnabled(UInt32 inBitNumber);
+	inline uint32_t GetAckMaskSizeInBits() { return fAckMaskSize * 8; }
+	inline bool IsNthBitEnabled(uint32_t inBitNumber);
 	inline uint16_t GetPacketLength();
 	void   Dump();
 	static void GetTestPacket(StrPtrLen* resultPtr) {} //todo
@@ -88,7 +88,7 @@ public:
 private:
 
 	uint8_t* fRTCPAckBuffer;
-	UInt32 fAckMaskSize;
+	uint32_t fAckMaskSize;
 
 	bool IsAckPacketType();
 
@@ -102,11 +102,11 @@ private:
 
 
 
-	inline bool IsAckType(UInt32 theAppType) { return ((theAppType == kAckPacketAlternateName) || (theAppType == kAckPacketName)); }
+	inline bool IsAckType(uint32_t theAppType) { return ((theAppType == kAckPacketAlternateName) || (theAppType == kAckPacketName)); }
 };
 
 
-bool RTCPAckPacket::IsNthBitEnabled(UInt32 inBitNumber)
+bool RTCPAckPacket::IsNthBitEnabled(uint32_t inBitNumber)
 {
 	// Don't need to do endian conversion because we're dealing with 8-bit numbers
 	uint8_t bitMask = 128;
@@ -115,12 +115,12 @@ bool RTCPAckPacket::IsNthBitEnabled(UInt32 inBitNumber)
 
 uint16_t RTCPAckPacket::GetAckSeqNum()
 {
-	return (uint16_t)(ntohl(*(UInt32*)&fRTCPAckBuffer[kAckSeqNumOffset]));
+	return (uint16_t)(ntohl(*(uint32_t*)&fRTCPAckBuffer[kAckSeqNumOffset]));
 }
 
 inline uint16_t RTCPAckPacket::GetPacketLength()
 {
-	return (uint16_t)(ntohl(*(UInt32*)fRTCPAckBuffer) & kPacketLengthMask);
+	return (uint16_t)(ntohl(*(uint32_t*)fRTCPAckBuffer) & kPacketLengthMask);
 }
 
 

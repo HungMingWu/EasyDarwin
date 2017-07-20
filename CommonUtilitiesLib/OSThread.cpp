@@ -143,7 +143,7 @@ void OSThread::Start()
 	int err = pthread_create((pthread_t*)&fThreadID, theAttrP, _Entry, (void*)this);
 	Assert(err == 0);
 #else
-	fThreadID = (UInt32)cthread_fork((cthread_fn_t)_Entry, (any_t)this);
+	fThreadID = (uint32_t)cthread_fork((cthread_fn_t)_Entry, (any_t)this);
 #endif
 }
 
@@ -186,7 +186,7 @@ void OSThread::ThreadYield()
 #endif
 }
 
-void OSThread::Sleep(UInt32 inMsec)
+void OSThread::Sleep(uint32_t inMsec)
 {
 
 #ifdef __Win32__
@@ -250,7 +250,7 @@ void* OSThread::_Entry(void *inThread)  //static
 	theThread->fThreadID = (pthread_t)pthread_self();
 	pthread_setspecific(OSThread::gMainKey, theThread);
 #else
-	theThread->fThreadID = (UInt32)cthread_self();
+	theThread->fThreadID = (uint32_t)cthread_self();
 	cthread_set_data(cthread_self(), (any_t)theThread);
 #endif
 	theThread->SwitchPersonality();
@@ -273,11 +273,11 @@ bool  OSThread::SwitchPersonality()
 		struct group* gr = ::getgrnam(sGroup);
 		if (gr == NULL || ::setgid(gr->gr_gid) == -1)
 		{
-			//qtss_printf("thread %"   _U32BITARG_   " setgid  to group=%s FAILED \n", (UInt32) this, sGroup);
+			//qtss_printf("thread %"   _U32BITARG_   " setgid  to group=%s FAILED \n", (uint32_t) this, sGroup);
 			return false;
 		}
 
-		//qtss_printf("thread %"   _U32BITARG_   " setgid  to group=%s \n", (UInt32) this, sGroup);
+		//qtss_printf("thread %"   _U32BITARG_   " setgid  to group=%s \n", (uint32_t) this, sGroup);
 	}
 
 
@@ -286,11 +286,11 @@ bool  OSThread::SwitchPersonality()
 		struct passwd* pw = ::getpwnam(sUser);
 		if (pw == NULL || ::setuid(pw->pw_uid) == -1)
 		{
-			//qtss_printf("thread %"   _U32BITARG_   " setuid  to user=%s FAILED \n", (UInt32) this, sUser);
+			//qtss_printf("thread %"   _U32BITARG_   " setuid  to user=%s FAILED \n", (uint32_t) this, sUser);
 			return false;
 		}
 
-		//qtss_printf("thread %"   _U32BITARG_   " setuid  to user=%s \n", (UInt32) this, sUser);
+		//qtss_printf("thread %"   _U32BITARG_   " setuid  to user=%s \n", (uint32_t) this, sUser);
 	}
 #endif
 

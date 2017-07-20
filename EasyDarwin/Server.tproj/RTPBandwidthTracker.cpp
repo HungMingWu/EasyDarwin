@@ -76,7 +76,7 @@ void RTPBandwidthTracker::SetWindowSize(SInt32 clientWindowSize)
 		fSlowStartThreshold = kMaximumSegmentSize;
 }
 
-void RTPBandwidthTracker::EmptyWindow(UInt32 bytesIncreased, bool updateBytesInList)
+void RTPBandwidthTracker::EmptyWindow(uint32_t bytesIncreased, bool updateBytesInList)
 {
 	if (bytesIncreased == 0)
 		return;
@@ -90,7 +90,7 @@ void RTPBandwidthTracker::EmptyWindow(UInt32 bytesIncreased, bool updateBytesInL
 		fBytesInList -= bytesIncreased;
 
 	// this assert hits
-	Assert(fBytesInList < ((UInt32)fClientWindow + 2000)); //mainly just to catch fBytesInList wrapping below 0
+	Assert(fBytesInList < ((uint32_t)fClientWindow + 2000)); //mainly just to catch fBytesInList wrapping below 0
 
 	// update the congestion window by the number of bytes just acknowledged.
 
@@ -118,7 +118,7 @@ void RTPBandwidthTracker::EmptyWindow(UInt32 bytesIncreased, bool updateBytesInL
 void RTPBandwidthTracker::AdjustWindowForRetransmit()
 {
 	// this assert hits
-	Assert(fBytesInList < ((UInt32)fClientWindow + 2000)); //mainly just to catch fBytesInList wrapping below 0
+	Assert(fBytesInList < ((uint32_t)fClientWindow + 2000)); //mainly just to catch fBytesInList wrapping below 0
 
 	// slow start says that we should reduce the new ss threshold to 1/2
 	// of where started getting errors ( the current congestion window size )
@@ -173,7 +173,7 @@ void RTPBandwidthTracker::AddToRTTEstimate(SInt32 rttSampleMSecs)
 	//  if ((count++ % 10) == 0) qtss_printf("\n");
 
 		// this assert hits
-	Assert(fBytesInList < ((UInt32)fClientWindow + 2000)); //mainly just to catch fBytesInList wrapping below 0
+	Assert(fBytesInList < ((uint32_t)fClientWindow + 2000)); //mainly just to catch fBytesInList wrapping below 0
 
 	if (fRunningAverageMSecs == 0)
 		fRunningAverageMSecs = rttSampleMSecs * 8;  // init avg to cur sample, scaled by 2**3 
@@ -229,22 +229,22 @@ void RTPBandwidthTracker::UpdateStats()
 	fTotalRTO += fUnadjustedRTO;
 }
 
-void RTPBandwidthTracker::UpdateAckTimeout(UInt32 bitsSentInInterval, SInt64 intervalLengthInMsec)
+void RTPBandwidthTracker::UpdateAckTimeout(uint32_t bitsSentInInterval, SInt64 intervalLengthInMsec)
 {
 	//
 	// First figure out how long it will take us to fill up our window, based on
 	// the movie's current bit rate
-	UInt32 unadjustedTimeout = 0;
+	uint32_t unadjustedTimeout = 0;
 	if (bitsSentInInterval > 0)
-		unadjustedTimeout = (UInt32)((intervalLengthInMsec * fCongestionWindow) / bitsSentInInterval);
+		unadjustedTimeout = (uint32_t)((intervalLengthInMsec * fCongestionWindow) / bitsSentInInterval);
 
 	//
 	// If we wait that long, that's too long because we need to actually wait for the ack to arrive.
 	// So, subtract 1/2 the rto - the last ack timeout
-	UInt32 rto = (UInt32)fUnadjustedRTO;
+	uint32_t rto = (uint32_t)fUnadjustedRTO;
 	if (rto < fAckTimeout)
 		rto = fAckTimeout;
-	UInt32 adjustment = (rto - fAckTimeout) / 2;
+	uint32_t adjustment = (rto - fAckTimeout) / 2;
 	//qtss_printf("UnadjustedTimeout = %"   _U32BITARG_   ". rto: %" _S32BITARG_ ". Last ack timeout: %"   _U32BITARG_   ". Adjustment = %"   _U32BITARG_   ".", unadjustedTimeout, fUnadjustedRTO, fAckTimeout, adjustment);
 	if (adjustment > unadjustedTimeout)
 		adjustment = unadjustedTimeout;

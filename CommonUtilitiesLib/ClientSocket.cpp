@@ -99,7 +99,7 @@ OS_Error ClientSocket::Connect(TCPSocket* inSocket)
 	return theErr;
 }
 
-OS_Error ClientSocket::Send(char* inData, const UInt32 inLength)
+OS_Error ClientSocket::Send(char* inData, const uint32_t inLength)
 {
 	iovec theVec[1];
 	theVec[0].iov_base = (char*)inData;
@@ -111,7 +111,7 @@ OS_Error ClientSocket::Send(char* inData, const UInt32 inLength)
 OS_Error ClientSocket::SendSendBuffer(TCPSocket* inSocket)
 {
 	OS_Error theErr = OS_NoErr;
-	UInt32 theLengthSent = 0;
+	uint32_t theLengthSent = 0;
 
 	if (fSendBuffer.Len == 0)
 		return OS_NoErr;
@@ -140,7 +140,7 @@ OS_Error ClientSocket::SendSendBuffer(TCPSocket* inSocket)
 }
 
 
-TCPClientSocket::TCPClientSocket(UInt32 inSocketType)
+TCPClientSocket::TCPClientSocket(uint32_t inSocketType)
 	: fSocket(NULL, inSocketType)
 {
 	//
@@ -176,11 +176,11 @@ void TCPClientSocket::SetOptions(int sndBufSize, int rcvBufSize)
 
 }
 
-OS_Error TCPClientSocket::SendV(iovec* inVec, UInt32 inNumVecs)
+OS_Error TCPClientSocket::SendV(iovec* inVec, uint32_t inNumVecs)
 {
 	if (fSendBuffer.Len == 0)
 	{
-		for (UInt32 count = 0; count < inNumVecs; count++)
+		for (uint32_t count = 0; count < inNumVecs; count++)
 		{
 			::memcpy(fSendBuffer.Ptr + fSendBuffer.Len, inVec[count].iov_base, inVec[count].iov_len);
 			fSendBuffer.Len += inVec[count].iov_len;
@@ -195,7 +195,7 @@ OS_Error TCPClientSocket::SendV(iovec* inVec, UInt32 inNumVecs)
 	return this->SendSendBuffer(&fSocket);
 }
 
-OS_Error TCPClientSocket::Read(void* inBuffer, const UInt32 inLength, UInt32* outRcvLen)
+OS_Error TCPClientSocket::Read(void* inBuffer, const uint32_t inLength, uint32_t* outRcvLen)
 {
 	this->Connect(&fSocket);
 	OS_Error theErr = fSocket.Read(inBuffer, inLength, outRcvLen);
@@ -205,7 +205,7 @@ OS_Error TCPClientSocket::Read(void* inBuffer, const UInt32 inLength, UInt32* ou
 }
 
 
-HTTPClientSocket::HTTPClientSocket(const StrPtrLen& inURL, UInt32 inCookie, UInt32 inSocketType)
+HTTPClientSocket::HTTPClientSocket(const StrPtrLen& inURL, uint32_t inCookie, uint32_t inSocketType)
 	: fCookie(inCookie),
 	fSocketType(inSocketType),
 	fGetReceived(0),
@@ -225,7 +225,7 @@ HTTPClientSocket::~HTTPClientSocket()
 	delete fPostSocket;
 }
 
-OS_Error HTTPClientSocket::Read(void* inBuffer, const UInt32 inLength, UInt32* outRcvLen)
+OS_Error HTTPClientSocket::Read(void* inBuffer, const uint32_t inLength, uint32_t* outRcvLen)
 {
 	//
 	// Bring up the GET connection if we need to
@@ -313,7 +313,7 @@ OS_Error HTTPClientSocket::Read(void* inBuffer, const UInt32 inLength, UInt32* o
 	return theErr;
 }
 
-OS_Error HTTPClientSocket::SendV(iovec* inVec, UInt32 inNumVecs)
+OS_Error HTTPClientSocket::SendV(iovec* inVec, uint32_t inNumVecs)
 {
 	//
 	// Bring up the POST connection if we need to
@@ -346,9 +346,9 @@ OS_Error HTTPClientSocket::SendV(iovec* inVec, UInt32 inNumVecs)
 	return this->SendSendBuffer(fPostSocket);
 }
 
-void HTTPClientSocket::encodeVec(iovec* inVec, UInt32 inNumVecs)
+void HTTPClientSocket::encodeVec(iovec* inVec, uint32_t inNumVecs)
 {
-	for (UInt32 count = 0; count < inNumVecs; count++)
+	for (uint32_t count = 0; count < inNumVecs; count++)
 	{
 		fSendBuffer.Len += ::Base64encode(fSendBuffer.Ptr + fSendBuffer.Len, (char*)inVec[count].iov_base, inVec[count].iov_len);
 		Assert(fSendBuffer.Len < ClientSocket::kSendBufferLen);

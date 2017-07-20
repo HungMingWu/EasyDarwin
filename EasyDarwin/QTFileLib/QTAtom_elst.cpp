@@ -92,7 +92,7 @@ QTAtom_elst::~QTAtom_elst()
 bool QTAtom_elst::Initialize()
 {
 	// Temporary vars
-	UInt32      tempInt32;
+	uint32_t      tempInt32;
 
 	//
 	// Parse this atom's fields.
@@ -121,7 +121,7 @@ bool QTAtom_elst::Initialize()
 
 		//
 		// Read them all in..
-		for (UInt32 CurEdit = 0; CurEdit < fNumEdits; CurEdit++)
+		for (uint32_t CurEdit = 0; CurEdit < fNumEdits; CurEdit++)
 		{
 
 			if (0 == fVersion)

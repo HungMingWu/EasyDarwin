@@ -50,7 +50,7 @@ public:
 	//
 	// This function reads data off of the stream, and places it into the buffer provided
 	// Returns: QTSS_NoErr, EAGAIN if it will block, or another socket error.
-	QTSS_Error			Read(void* ioBuffer, UInt32 inBufLen, UInt32* outLengthRead);
+	QTSS_Error			Read(void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead);
 
 	// Use a different TCPSocket to read request data 
 	// this will be used by RTSPSessionInterface::SnarfInputSocket
@@ -75,15 +75,15 @@ private:
 	//CONSTANTS:
 	// Base64 decodes into fRequest.Ptr, updates fRequest.Len, and returns the amount
 	// of data left undecoded in inSrcData
-	QTSS_Error              DecodeIncomingData(char* inSrcData, UInt32 inSrcDataLen);
+	QTSS_Error              DecodeIncomingData(char* inSrcData, uint32_t inSrcDataLen);
 
 	ClientSocket*			fSocket;
-	UInt32                  fRetreatBytes;
-	UInt32                  fRetreatBytesRead; // Used by Read() when it is reading RetreatBytes
+	uint32_t                  fRetreatBytes;
+	uint32_t                  fRetreatBytesRead; // Used by Read() when it is reading RetreatBytes
 
 	char                    fRequestBuffer[QTSS_MAX_REQUEST_BUFFER_SIZE];
-	UInt32                  fCurOffset; // tracks how much valid data is in the above buffer
-	UInt32                  fEncodedBytesRemaining; // If we are decoding, tracks how many encoded bytes are in the buffer
+	uint32_t                  fCurOffset; // tracks how much valid data is in the above buffer
+	uint32_t                  fEncodedBytesRemaining; // If we are decoding, tracks how many encoded bytes are in the buffer
 
 	StrPtrLen               fRequest;
 	StrPtrLen*              fRequestPtr;    // pointer to a request header

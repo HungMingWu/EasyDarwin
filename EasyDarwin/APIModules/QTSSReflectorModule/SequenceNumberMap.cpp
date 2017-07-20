@@ -33,7 +33,7 @@
 
 #include "SequenceNumberMap.h"
 
-SequenceNumberMap::SequenceNumberMap(UInt32 inSlidingWindowSize)
+SequenceNumberMap::SequenceNumberMap(uint32_t inSlidingWindowSize)
 	: fSlidingWindow(NULL),
 	fWindowSize((SInt32)inSlidingWindowSize),
 	fNegativeWindowSize((SInt32)inSlidingWindowSize - (SInt32)(2 * inSlidingWindowSize)),

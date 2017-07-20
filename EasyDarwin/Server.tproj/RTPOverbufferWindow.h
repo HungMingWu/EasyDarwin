@@ -37,12 +37,13 @@
 #define __RTP_OVERBUFFER_WINDOW_H__
 
 #include "OSHeaders.h"
+#include <stdint.h>
 
 class RTPOverbufferWindow
 {
 public:
 
-	RTPOverbufferWindow(UInt32 inSendInterval, UInt32 inInitialWindowSize, UInt32 inMaxSendAheadTimeInSec,
+	RTPOverbufferWindow(uint32_t inSendInterval, uint32_t inInitialWindowSize, uint32_t inMaxSendAheadTimeInSec,
 		float inOverbufferRate);
 	~RTPOverbufferWindow() { }
 
@@ -51,7 +52,7 @@ public:
 	//
 	// ACCESSORS
 
-	UInt32  GetSendInterval() { return fSendInterval; }
+	uint32_t  GetSendInterval() { return fSendInterval; }
 
 	// This may be negative!
 	SInt32  AvailableSpaceInWindow() { return fWindowSize - fBytesSentSinceLastReport; }
@@ -59,7 +60,7 @@ public:
 
 	//
 	// The window size may be changed at any time
-	void	SetWindowSize(UInt32 inWindowSizeInBytes);
+	void	SetWindowSize(uint32_t inWindowSizeInBytes);
 
 	//
 	// Without changing the window size, you can enable / disable all overbuffering
@@ -112,13 +113,13 @@ private:
 	SInt64 fBucketTimeAhead;
 	SInt64 fPreviousBucketTimeAhead;
 
-	UInt32 fMaxSendAheadTime;
+	uint32_t fMaxSendAheadTime;
 
 	bool fWriteBurstBeginning;
 	bool fOverbufferingEnabled;
 
 	float fOverbufferRate;
-	UInt32 fSendAheadDurationInMsec;
+	uint32_t fSendAheadDurationInMsec;
 
 	SInt64 fOverbufferWindowBegin;
 

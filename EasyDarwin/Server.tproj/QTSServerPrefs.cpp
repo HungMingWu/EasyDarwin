@@ -358,7 +358,7 @@ QTSServerPrefs::QTSServerPrefs(XMLPrefsParser* inPrefsSource, bool inWriteMissin
 
 void QTSServerPrefs::Initialize()
 {
-	for (UInt32 x = 0; x < qtssPrefsNumParams; x++)
+	for (uint32_t x = 0; x < qtssPrefsNumParams; x++)
 		QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kPrefsDictIndex)->
 		SetAttribute(x, sAttributes[x].fAttrName, sAttributes[x].fFuncPtr,
 			sAttributes[x].fAttrDataType, sAttributes[x].fAttrPermission);
@@ -453,7 +453,7 @@ void QTSServerPrefs::RereadServerPreferences(bool inWriteMissingPrefs)
 	OSMutexLocker locker(&fPrefsMutex);
 	QTSSDictionaryMap* theMap = QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kPrefsDictIndex);
 
-	for (UInt32 x = 0; x < theMap->GetNumAttrs(); x++)
+	for (uint32_t x = 0; x < theMap->GetNumAttrs(); x++)
 	{
 		//
 		// Look for a pref in the file that matches each pref in the dictionary
@@ -489,7 +489,7 @@ void QTSServerPrefs::RereadServerPreferences(bool inWriteMissingPrefs)
 			{
 				//
 				// Add additional default values if they exist
-				for (UInt32 y = 0; sPrefInfo[x].fAdditionalDefVals[y] != NULL; y++)
+				for (uint32_t y = 0; sPrefInfo[x].fAdditionalDefVals[y] != NULL; y++)
 					this->SetPrefValue(x, y + 1, sPrefInfo[x].fAdditionalDefVals[y], sAttributes[x].fAttrDataType);
 			}
 
@@ -502,7 +502,7 @@ void QTSServerPrefs::RereadServerPreferences(bool inWriteMissingPrefs)
 
 				if (sPrefInfo[x].fAdditionalDefVals != NULL)
 				{
-					for (UInt32 a = 0; sPrefInfo[x].fAdditionalDefVals[a] != NULL; a++)
+					for (uint32_t a = 0; sPrefInfo[x].fAdditionalDefVals[a] != NULL; a++)
 						fPrefsSource->AddPrefValue(pref, sPrefInfo[x].fAdditionalDefVals[a]);
 				}
 			}
@@ -534,7 +534,7 @@ void QTSServerPrefs::RereadServerPreferences(bool inWriteMissingPrefs)
 			{
 				//
 				// Add additional default values if they exist
-				for (UInt32 z = 0; sPrefInfo[x].fAdditionalDefVals[z] != NULL; z++)
+				for (uint32_t z = 0; sPrefInfo[x].fAdditionalDefVals[z] != NULL; z++)
 					this->SetPrefValue(x, z + 1, sPrefInfo[x].fAdditionalDefVals[z], sAttributes[x].fAttrDataType);
 			}
 
@@ -547,14 +547,14 @@ void QTSServerPrefs::RereadServerPreferences(bool inWriteMissingPrefs)
 				fPrefsSource->AddPrefValue(pref, sPrefInfo[x].fDefaultValue);
 				if (sPrefInfo[x].fAdditionalDefVals != NULL)
 				{
-					for (UInt32 b = 0; sPrefInfo[x].fAdditionalDefVals[b] != NULL; b++)
+					for (uint32_t b = 0; sPrefInfo[x].fAdditionalDefVals[b] != NULL; b++)
 						fPrefsSource->AddPrefValue(pref, sPrefInfo[x].fAdditionalDefVals[b]);
 				}
 			}
 			continue;
 		}
 
-		UInt32 theNumValues = 0;
+		uint32_t theNumValues = 0;
 		if ((x < qtssPrefsNumParams) && (!sPrefInfo[x].fAllowMultipleValues))
 			theNumValues = 1;
 
@@ -590,7 +590,7 @@ void    QTSServerPrefs::UpdateAuthScheme()
 		fAuthScheme = qtssAuthDigest;
 }
 
-//char*   QTSServerPrefs::GetMovieFolder(char* inBuffer, UInt32* ioLen)
+//char*   QTSServerPrefs::GetMovieFolder(char* inBuffer, uint32_t* ioLen)
 //{
 //	OSMutexLocker locker(&fPrefsMutex);
 //
@@ -616,7 +616,7 @@ bool QTSServerPrefs::IsPathInsideReliableUDPDir(StrPtrLen* inPath)
 	OSMutexLocker locker(&fPrefsMutex);
 
 	QTSS_Error theErr = QTSS_NoErr;
-	for (UInt32 x = 0; theErr == QTSS_NoErr; x++)
+	for (uint32_t x = 0; theErr == QTSS_NoErr; x++)
 	{
 		StrPtrLen theReliableUDPDir;
 		theErr = this->GetValuePtr(qtssPrefsReliableUDPDirs, x, (void**)&theReliableUDPDir.Ptr, &theReliableUDPDir.Len, true);

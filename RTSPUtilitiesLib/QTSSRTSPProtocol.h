@@ -34,6 +34,7 @@
 #ifndef QTSS_RTSPPROTOCOL_H
 #define QTSS_RTSPPROTOCOL_H
 #include "OSHeaders.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,7 +61,7 @@ enum
     qtssIllegalMethod       = 11
     
 };
-typedef UInt32 QTSS_RTSPMethod;
+typedef uint32_t QTSS_RTSPMethod;
 
 
 enum
@@ -137,7 +138,7 @@ enum
 	qtssIllegalHeader 			= 54
     
 };
-typedef UInt32 QTSS_RTSPHeader;
+typedef uint32_t QTSS_RTSPHeader;
 
 
 enum
@@ -193,7 +194,7 @@ enum
     qtssNumStatusCodes                  = 48
     
 };
-typedef UInt32 QTSS_RTSPStatusCode;
+typedef uint32_t QTSS_RTSPStatusCode;
 
 #ifdef __cplusplus
 }

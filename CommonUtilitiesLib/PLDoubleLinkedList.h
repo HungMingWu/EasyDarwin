@@ -290,7 +290,7 @@ template <class T> class PLDoubleLinkedList
                                     {
                                         return ForEachUntil( CompareIndexToZero, &nodeIndex );
                                     }
-        UInt32                  GetNumNodes() { return fNumNodes; }
+        uint32_t                  GetNumNodes() { return fNumNodes; }
         
     protected:
         static bool     CompareIndexToZero( PLDoubleLinkedListNode<T> *, void * nodeIndex ) // (node, nodeIndex)
@@ -316,7 +316,7 @@ template <class T> class PLDoubleLinkedList
                         }
         PLDoubleLinkedListNode<T> *fHead;
         PLDoubleLinkedListNode<T> *fTail;
-        UInt32                  fNumNodes;
+        uint32_t                  fNumNodes;
         
     
 

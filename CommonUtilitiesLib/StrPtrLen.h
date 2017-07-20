@@ -56,18 +56,18 @@ public:
 	//These are so tiny they can all be inlined
 	StrPtrLen() : Ptr(nullptr), Len(0) {}
 	StrPtrLen(char* sp) : Ptr(sp), Len(sp != nullptr ? strlen(sp) : 0) {}
-	StrPtrLen(char* sp, UInt32 len) : Ptr(sp), Len(len) {}
+	StrPtrLen(char* sp, uint32_t len) : Ptr(sp), Len(len) {}
 	virtual ~StrPtrLen() {}
 
 	//OPERATORS:
 	bool Equal(const StrPtrLen &compare) const;
-	bool EqualIgnoreCase(const char* compare, const UInt32 len) const;
+	bool EqualIgnoreCase(const char* compare, const uint32_t len) const;
 	bool EqualIgnoreCase(const StrPtrLen &compare) const { return EqualIgnoreCase(compare.Ptr, compare.Len); }
 	bool Equal(const char* compare) const;
-	bool NumEqualIgnoreCase(const char* compare, const UInt32 len) const;
+	bool NumEqualIgnoreCase(const char* compare, const uint32_t len) const;
 
 	void Delete() { delete[] Ptr; Ptr = nullptr; Len = 0; }
-	char* ToUpper() { for (UInt32 x = 0; x < Len; x++) Ptr[x] = toupper(Ptr[x]); return Ptr; }
+	char* ToUpper() { for (uint32_t x = 0; x < Len; x++) Ptr[x] = toupper(Ptr[x]); return Ptr; }
 
 	char* FindStringCase(char* queryCharStr, StrPtrLen* resultStr, bool caseSensitive) const;
 
@@ -112,13 +112,13 @@ public:
 	}
 	StrPtrLen(const StrPtrLen& newStr) { Ptr = newStr.Ptr; Len = newStr.Len; }
 	char operator[](int i) { /*Assert(i<Len);i*/ return Ptr[i]; }
-	void Set(char* inPtr, UInt32 inLen) { Ptr = inPtr; Len = inLen; }
+	void Set(char* inPtr, uint32_t inLen) { Ptr = inPtr; Len = inLen; }
 	void Set(char* inPtr) { Ptr = inPtr; Len = (inPtr) ? ::strlen(inPtr) : 0; }
 
 	//This is a non-encapsulating interface. The class allows you to access its
 	//data.
 	char*       Ptr;
-	UInt32      Len;
+	uint32_t      Len;
 
 	// convert to a "NEW'd" zero terminated char array
 	char*   GetAsCString() const;
@@ -129,10 +129,10 @@ public:
 	void    PrintStrEOL(char* stopStr = nullptr, char *appendStr = nullptr); //replace chars x0A and x0D with \r and \n
 
 	//Utility function
-	UInt32    TrimTrailingWhitespace();
-	UInt32    TrimLeadingWhitespace();
+	uint32_t    TrimTrailingWhitespace();
+	uint32_t    TrimLeadingWhitespace();
 
-	UInt32  RemoveWhitespace();
+	uint32_t  RemoveWhitespace();
 	void  TrimWhitespace() { TrimLeadingWhitespace(); TrimTrailingWhitespace(); }
 
 #if STRPTRLENTESTING
@@ -152,7 +152,7 @@ class StrPtrLenDel : public StrPtrLen
 public:
 	StrPtrLenDel() : StrPtrLen() {}
 	StrPtrLenDel(char* sp) : StrPtrLen(sp) {}
-	StrPtrLenDel(char* sp, UInt32 len) : StrPtrLen(sp, len) {}
+	StrPtrLenDel(char* sp, uint32_t len) : StrPtrLen(sp, len) {}
 	~StrPtrLenDel() { Delete(); }
 };
 

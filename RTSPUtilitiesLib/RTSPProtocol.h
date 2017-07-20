@@ -47,7 +47,7 @@ public:
 	//  Method enumerated type definition in QTSS_RTSPProtocol.h
 
 	//The lookup function. Very simple
-	static UInt32   GetMethod(const StrPtrLen &inMethodStr);
+	static uint32_t   GetMethod(const StrPtrLen &inMethodStr);
 
 	static StrPtrLen&   GetMethodString(QTSS_RTSPMethod inMethod)
 	{
@@ -59,10 +59,10 @@ public:
 	//  Header enumerated type definitions in QTSS_RTSPProtocol.h
 
 	//The lookup function. Very simple
-	static UInt32 GetRequestHeader(const StrPtrLen& inHeaderStr);
+	static uint32_t GetRequestHeader(const StrPtrLen& inHeaderStr);
 
 	//The lookup function. Very simple.
-	static StrPtrLen& GetHeaderString(UInt32 inHeader)
+	static StrPtrLen& GetHeaderString(uint32_t inHeader)
 	{
 		return sHeaders[inHeader];
 	}

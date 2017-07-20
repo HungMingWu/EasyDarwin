@@ -38,7 +38,7 @@ enum
 	httpNumVersions = 3,
 	httpIllegalVersion = 3
 };
-typedef UInt32 HTTPVersion;
+typedef uint32_t HTTPVersion;
 
 // Stream Types
 enum
@@ -50,7 +50,7 @@ enum
 	easyNumStreamTypes = 3,
 	easyIllegalStreamType = 3
 };
-typedef UInt32	EasyStreamType;
+typedef uint32_t	EasyStreamType;
 
 // Methods
 enum
@@ -67,7 +67,7 @@ enum
 	httpNumMethods = 8,
 	httpIllegalMethod = 8
 };
-typedef UInt32 HTTPMethod;
+typedef uint32_t HTTPMethod;
 
 // HTTPTypes
 enum
@@ -78,7 +78,7 @@ enum
 	httpNumTypes = 2,
 	httpIllegalType = 2
 };
-typedef UInt32 HTTPType;
+typedef uint32_t HTTPType;
 
 // Headers
 enum
@@ -150,7 +150,7 @@ enum
 	httpNumHeaders = 51,
 	httpIllegalHeader = 51
 };
-typedef UInt32 HTTPHeader;
+typedef uint32_t HTTPHeader;
 
 // Status codes
 enum
@@ -198,7 +198,7 @@ enum
 
 	httpNumStatusCodes = 40
 };
-typedef UInt32 HTTPStatusCode;
+typedef uint32_t HTTPStatusCode;
 
 class HTTPProtocol
 {

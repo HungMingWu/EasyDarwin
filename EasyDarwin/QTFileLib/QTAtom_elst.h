@@ -50,7 +50,7 @@ class QTAtom_elst : public QTAtom {
 		// Edit information
 		UInt64          EditDuration;
 		SInt64          StartingMediaTime;
-		UInt32          EditMediaRate;
+		uint32_t          EditMediaRate;
 	};
 
 
@@ -80,9 +80,9 @@ protected:
 	//
 	// Protected member variables.
 	uint8_t       fVersion;
-	UInt32      fFlags; // 24 bits in the low 3 bytes
+	uint32_t      fFlags; // 24 bits in the low 3 bytes
 
-	UInt32          fNumEdits;
+	uint32_t          fNumEdits;
 	EditListEntry   *fEdits;
 
 	UInt64      fFirstEditMovieTime;

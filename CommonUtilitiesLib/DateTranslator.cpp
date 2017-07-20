@@ -46,7 +46,7 @@
  // "Jul" = 9 + 20 + 11 = 40. The value of July in a C tm struct is 6, so position
  // 40 = 6 in this array.
 
-const UInt32 kMonthHashTable[] =
+const uint32_t kMonthHashTable[] =
 {
 	12, 12, 12, 12, 12, 12, 12, 12, 12, 11,     // 0 - 9
 	1,  12, 12, 12, 12, 12, 12, 12, 12, 12,     // 10 - 19
@@ -54,7 +54,7 @@ const UInt32 kMonthHashTable[] =
 	12, 12, 3,  12, 12, 9,  4,  8,  12, 12,     // 30 - 39
 	6,  12, 5,  12, 12, 12, 12, 12, 10, 12      // 40 - 49
 };
-const UInt32 kMonthHashTableSize = 49;
+const uint32_t kMonthHashTableSize = 49;
 
 
 SInt64  DateTranslator::ParseDate(StrPtrLen* inDateString)
@@ -84,7 +84,7 @@ SInt64  DateTranslator::ParseDate(StrPtrLen* inDateString)
 	if (theDateParser.GetDataRemaining() < 4)
 		return 0;
 
-	UInt32 theIndex = convertCharToMonthTableIndex(theDateParser.GetCurrentPosition()[0]) +
+	uint32_t theIndex = convertCharToMonthTableIndex(theDateParser.GetCurrentPosition()[0]) +
 		convertCharToMonthTableIndex(theDateParser.GetCurrentPosition()[1]) +
 		convertCharToMonthTableIndex(theDateParser.GetCurrentPosition()[2]);
 

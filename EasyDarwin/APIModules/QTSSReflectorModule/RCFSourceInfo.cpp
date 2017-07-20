@@ -55,7 +55,7 @@ RCFSourceInfo::~RCFSourceInfo()
 /*
 if (fOutputArray != NULL)
 {
-	for (UInt32 x = 0; x < fNumOutputs; x++)
+	for (uint32_t x = 0; x < fNumOutputs; x++)
 		delete [] fOutputArray[x].fPortArray;
 
 	char* theOutputArray = (char*)fOutputArray;
@@ -76,8 +76,8 @@ void RCFSourceInfo::Parse(XMLTag* relayTag)
 		return;
 
 	fNumStreams = 0;
-	UInt32 destIPAddr = 0;
-	UInt32 srcIPAddr = 0;
+	uint32_t destIPAddr = 0;
+	uint32_t srcIPAddr = 0;
 	uint16_t ttl = 0;
 
 	XMLTag* prefTag;
@@ -111,7 +111,7 @@ void RCFSourceInfo::Parse(XMLTag* relayTag)
 		// Allocate a proper sized stream array
 		fStreamArray = new StreamInfo[fNumStreams];
 
-		for (UInt32 x = 0; x < fNumStreams; x++)
+		for (uint32_t x = 0; x < fNumStreams; x++)
 		{
 			XMLTag* portTag = prefTag->GetEmbeddedTagByName("VALUE", x);
 			int port = 0;
@@ -147,13 +147,13 @@ void RCFSourceInfo::ParseRelayDestinations(XMLTag* relayTag)
 		::strcpy(fName, name);
 	}
 
-	UInt32 numTags = relayTag->GetNumEmbeddedTags();
+	uint32_t numTags = relayTag->GetNumEmbeddedTags();
 	AllocateOutputArray(numTags);   // not all these are relay tags, but most are
 
 	// Now actually go through and figure out what to put into these OutputInfo structures,
 	// based on what's on the relay_destination line
 	fNumOutputs = 0;
-	for (UInt32 y = 0; y < numTags; y++)
+	for (uint32_t y = 0; y < numTags; y++)
 	{
 		XMLTag* destTag = relayTag->GetEmbeddedTagByNameAndAttr("OBJECT", "CLASS", "destination", y);
 		if (destTag == NULL)
@@ -172,7 +172,7 @@ void RCFSourceInfo::ParseRelayDestinations(XMLTag* relayTag)
 	}
 }
 
-void RCFSourceInfo::ParseDestination(XMLTag* destTag, UInt32 index)
+void RCFSourceInfo::ParseDestination(XMLTag* destTag, uint32_t index)
 {
 	XMLTag* prefTag;
 
@@ -205,7 +205,7 @@ void RCFSourceInfo::ParseDestination(XMLTag* destTag, UInt32 index)
 		fOutputArray[index].fPortArray = new uint16_t[fOutputArray[index].fNumPorts];
 		::memset(fOutputArray[index].fPortArray, 0, fOutputArray[index].fNumPorts * sizeof(uint16_t));
 
-		for (UInt32 x = 0; x < fOutputArray[index].fNumPorts; x++)
+		for (uint32_t x = 0; x < fOutputArray[index].fNumPorts; x++)
 		{
 			XMLTag* portTag = prefTag->GetEmbeddedTagByName("VALUE", x);
 			if (portTag != NULL)
@@ -232,13 +232,13 @@ void RCFSourceInfo::ParseDestination(XMLTag* destTag, UInt32 index)
 	}
 }
 
-void RCFSourceInfo::ParseAnnouncedDestination(XMLTag* destTag, UInt32 index)
+void RCFSourceInfo::ParseAnnouncedDestination(XMLTag* destTag, uint32_t index)
 {
 	// should log some sort of error
 	// can't announce without an sdp
 }
 
-void RCFSourceInfo::AllocateOutputArray(UInt32 numOutputs)
+void RCFSourceInfo::AllocateOutputArray(uint32_t numOutputs)
 {
 	// Allocate the proper number of relay outputs
 	fOutputArray = new OutputInfo[numOutputs];

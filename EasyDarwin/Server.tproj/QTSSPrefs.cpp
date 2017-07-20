@@ -67,7 +67,7 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 	// Keep track of which pref attributes should remain. All others
 	// will be removed.
 	// This routine uses names because it adds and deletes attributes. This means attribute indexes,positions and counts are constantly changing.
-	UInt32 initialNumAttrs = 0;
+	uint32_t initialNumAttrs = 0;
 	if (this->GetInstanceDictMap() != NULL)
 	{
 		initialNumAttrs = this->GetInstanceDictMap()->GetNumAttrs();
@@ -85,16 +85,16 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 	}
 
 	OSMutexLocker locker(&fPrefsMutex);
-	UInt32 theNumPrefs = fPrefsSource->GetNumPrefsByContainer(container);
+	uint32_t theNumPrefs = fPrefsSource->GetNumPrefsByContainer(container);
 
-	for (UInt32 i = 0; i < initialNumAttrs; i++) // pull out all the names in the server 
+	for (uint32_t i = 0; i < initialNumAttrs; i++) // pull out all the names in the server 
 	{
 		QTSSAttrInfoDict* theAttrInfoPtr = NULL;
 		theErr = this->GetInstanceDictMap()->GetAttrInfoByIndex(i, &theAttrInfoPtr);
 		if (theErr != QTSS_NoErr)
 			continue;
 
-		UInt32 nameLen = 0;
+		uint32_t nameLen = 0;
 		theErr = theAttrInfoPtr->GetValuePtr(qtssAttrName, 0, (void **)&modulePrefInServer[i], &nameLen);
 		Assert(theErr == QTSS_NoErr);
 		//qtss_printf("QTSSPrefs::RereadPreferences modulePrefInServer in server=%s\n",modulePrefInServer[i]);
@@ -103,7 +103,7 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 	// Use the names of the attributes in the attribute map as the key values for
 	// finding preferences in the config file.
 
-	for (UInt32 x = 0; x < theNumPrefs; x++)
+	for (uint32_t x = 0; x < theNumPrefs; x++)
 	{
 		char* thePrefTypeStr = NULL;
 		char* thePrefName = NULL;
@@ -120,10 +120,10 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 			(void)this->GetInstanceDictMap()->GetAttrInfoByName(thePrefName,
 				&theAttrInfo,
 				false); // false=don't return info on deleted attributes
-		UInt32 theLen = sizeof(QTSS_AttrDataType);
+		uint32_t theLen = sizeof(QTSS_AttrDataType);
 		QTSS_AttributeID theAttrID = qtssIllegalAttrID;
 
-		for (UInt32 i = 0; i < initialNumAttrs; i++) // see if this name is in the server
+		for (uint32_t i = 0; i < initialNumAttrs; i++) // see if this name is in the server
 		{
 			if (modulePrefInServer[i] != NULL && thePrefName != NULL && 0 == ::strcmp(modulePrefInServer[i], thePrefName))
 			{
@@ -174,7 +174,7 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 	// Remove all attributes that no longer apply
 	if (this->GetInstanceDictMap() != NULL && initialNumAttrs > 0)
 	{
-		for (UInt32 a = 0; a < initialNumAttrs; a++)
+		for (uint32_t a = 0; a < initialNumAttrs; a++)
 		{
 			if (NULL != modulePrefInServer[a]) // found a pref in the server that wasn't in the file
 			{
@@ -184,7 +184,7 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 				if (theErr != QTSS_NoErr) continue;
 
 				QTSS_AttributeID theAttrID = qtssIllegalAttrID;
-				UInt32 theLen = sizeof(theAttrID);
+				uint32_t theLen = sizeof(theAttrID);
 				theErr = theAttrInfoPtr->GetValue(qtssAttrID, 0, &theAttrID, &theLen);
 				Assert(theErr == QTSS_NoErr);
 				if (theErr != QTSS_NoErr) continue;
@@ -192,7 +192,7 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 				if (0)
 				{
 					char* theName = NULL;
-					UInt32 nameLen = 0;
+					uint32_t nameLen = 0;
 					theAttrInfoPtr->GetValuePtr(qtssAttrName, 0, (void **)&theName, &nameLen);
 					qtss_printf("QTSSPrefs::RereadPreferences about to delete modulePrefInServer=%s attr=%s id=%"   _U32BITARG_   "\n", modulePrefInServer[a], theName, theAttrID);
 				}
@@ -207,13 +207,13 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 	delete modulePrefInServer;
 }
 
-void QTSSPrefs::SetPrefValuesFromFile(ContainerRef container, UInt32 inPrefIndex, QTSS_AttributeID inAttrID, UInt32 inNumValues)
+void QTSSPrefs::SetPrefValuesFromFile(ContainerRef container, uint32_t inPrefIndex, QTSS_AttributeID inAttrID, uint32_t inNumValues)
 {
 	ContainerRef pref = fPrefsSource->GetPrefRefByIndex(container, inPrefIndex);
 	SetPrefValuesFromFileWithRef(pref, inAttrID, inNumValues);
 }
 
-void QTSSPrefs::SetPrefValuesFromFileWithRef(ContainerRef pref, QTSS_AttributeID inAttrID, UInt32 inNumValues)
+void QTSSPrefs::SetPrefValuesFromFileWithRef(ContainerRef pref, QTSS_AttributeID inAttrID, uint32_t inNumValues)
 {
 	//
 	// We have an attribute ID for this pref, it is in the map and everything.
@@ -221,7 +221,7 @@ void QTSSPrefs::SetPrefValuesFromFileWithRef(ContainerRef pref, QTSS_AttributeID
 	if (pref == 0)
 		return;
 
-	UInt32 numPrefValues = inNumValues;
+	uint32_t numPrefValues = inNumValues;
 	if (inNumValues == 0)
 		numPrefValues = fPrefsSource->GetNumPrefValues(pref);
 
@@ -238,16 +238,16 @@ void QTSSPrefs::SetPrefValuesFromFileWithRef(ContainerRef pref, QTSS_AttributeID
 		return;
 	}
 
-	UInt32 maxPrefValueSize = 0;
+	uint32_t maxPrefValueSize = 0;
 	QTSS_Error theErr = QTSS_NoErr;
 
 	//
 	// We have to loop through all the values associated with this pref twice:
 	// first, to figure out the length (in bytes) of the longest value, secondly
 	// to actually copy these values into the dictionary.
-	for (UInt32 y = 0; y < numPrefValues; y++)
+	for (uint32_t y = 0; y < numPrefValues; y++)
 	{
-		UInt32 tempMaxPrefValueSize = 0;
+		uint32_t tempMaxPrefValueSize = 0;
 
 		thePrefValue = fPrefsSource->GetPrefValueByRef(pref, y, &thePrefName, &thePrefTypeStr);
 
@@ -260,7 +260,7 @@ void QTSSPrefs::SetPrefValuesFromFileWithRef(ContainerRef pref, QTSS_AttributeID
 	}
 
 
-	for (UInt32 z = 0; z < numPrefValues; z++)
+	for (uint32_t z = 0; z < numPrefValues; z++)
 	{
 		thePrefValue = fPrefsSource->GetPrefValueByRef(pref, z, &thePrefName, &thePrefTypeStr);
 		this->SetPrefValue(inAttrID, z, thePrefValue, thePrefType, maxPrefValueSize);
@@ -272,17 +272,17 @@ void QTSSPrefs::SetPrefValuesFromFileWithRef(ContainerRef pref, QTSS_AttributeID
 	this->SetNumValues(inAttrID, numPrefValues);
 }
 
-void QTSSPrefs::SetObjectValuesFromFile(ContainerRef pref, QTSS_AttributeID inAttrID, UInt32 inNumValues, char* prefName)
+void QTSSPrefs::SetObjectValuesFromFile(ContainerRef pref, QTSS_AttributeID inAttrID, uint32_t inNumValues, char* prefName)
 {
-	for (UInt32 z = 0; z < inNumValues; z++)
+	for (uint32_t z = 0; z < inNumValues; z++)
 	{
 		ContainerRef object = fPrefsSource->GetObjectValue(pref, z);
 		QTSSPrefs* prefObject;
-		UInt32 len = sizeof(QTSSPrefs*);
+		uint32_t len = sizeof(QTSSPrefs*);
 		QTSS_Error err = this->GetValue(inAttrID, z, &prefObject, &len);
 		if (err != QTSS_NoErr)
 		{
-			UInt32 tempIndex;
+			uint32_t tempIndex;
 			err = CreateObjectValue(inAttrID, &tempIndex, (QTSSDictionary**)&prefObject, NULL, QTSSDictionary::kDontObeyReadOnly | QTSSDictionary::kDontCallCompletionRoutine);
 			Assert(err == QTSS_NoErr);
 			Assert(tempIndex == z);
@@ -300,16 +300,16 @@ void QTSSPrefs::SetObjectValuesFromFile(ContainerRef pref, QTSS_AttributeID inAt
 	this->SetNumValues(inAttrID, inNumValues);
 }
 
-void    QTSSPrefs::SetPrefValue(QTSS_AttributeID inAttrID, UInt32 inAttrIndex,
-	char* inPrefValue, QTSS_AttrDataType inPrefType, UInt32 inValueSize)
+void    QTSSPrefs::SetPrefValue(QTSS_AttributeID inAttrID, uint32_t inAttrIndex,
+	char* inPrefValue, QTSS_AttrDataType inPrefType, uint32_t inValueSize)
 
 {
-	static const UInt32 kMaxPrefValueSize = 1024;
+	static const uint32_t kMaxPrefValueSize = 1024;
 	char convertedPrefValue[kMaxPrefValueSize];
 	::memset(convertedPrefValue, 0, kMaxPrefValueSize);
 	Assert(inValueSize < kMaxPrefValueSize);
 
-	UInt32 convertedBufSize = kMaxPrefValueSize;
+	uint32_t convertedBufSize = kMaxPrefValueSize;
 	QTSS_Error theErr = QTSSDataConverter::StringToValue
 	(inPrefValue, inPrefType, convertedPrefValue, &convertedBufSize);
 	Assert(theErr == QTSS_NoErr);
@@ -333,8 +333,8 @@ QTSS_AttributeID QTSSPrefs::addPrefAttribute(const char* inAttrName, QTSS_AttrDa
 	return theID;
 }
 
-void    QTSSPrefs::RemoveValueComplete(UInt32 inAttrIndex, QTSSDictionaryMap* inMap,
-	UInt32 inValueIndex)
+void    QTSSPrefs::RemoveValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
+	uint32_t inValueIndex)
 {
 	ContainerRef objectRef = GetContainerRef();
 	ContainerRef pref = fPrefsSource->GetPrefRefByName(objectRef, inMap->GetAttrName(inAttrIndex));
@@ -346,7 +346,7 @@ void    QTSSPrefs::RemoveValueComplete(UInt32 inAttrIndex, QTSSDictionaryMap* in
 		QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssMsgCantWriteFile, 0);
 }
 
-void    QTSSPrefs::RemoveInstanceAttrComplete(UInt32 inAttrIndex, QTSSDictionaryMap* inMap)
+void    QTSSPrefs::RemoveInstanceAttrComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap)
 {
 	ContainerRef objectRef = GetContainerRef();
 	ContainerRef pref = fPrefsSource->GetPrefRefByName(objectRef, inMap->GetAttrName(inAttrIndex));
@@ -360,8 +360,8 @@ void    QTSSPrefs::RemoveInstanceAttrComplete(UInt32 inAttrIndex, QTSSDictionary
 		QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssMsgCantWriteFile, 0);
 }
 
-void QTSSPrefs::SetValueComplete(UInt32 inAttrIndex, QTSSDictionaryMap* inMap,
-	UInt32 inValueIndex, void* inNewValue, UInt32 inNewValueLen)
+void QTSSPrefs::SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
+	uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen)
 {
 	ContainerRef objectRef = GetContainerRef();
 	ContainerRef pref = fPrefsSource->AddPref(objectRef, inMap->GetAttrName(inAttrIndex), QTSSDataConverter::TypeToTypeString(inMap->GetAttrType(inAttrIndex)));
@@ -398,12 +398,12 @@ ContainerRef QTSSPrefs::GetContainerRefForObject(QTSSPrefs* object)
 	Assert(theErr == QTSS_NoErr);
 	if (theErr != QTSS_NoErr) return NULL;
 	QTSS_AttributeID theAttrID = qtssIllegalAttrID;
-	UInt32 len = sizeof(theAttrID);
+	uint32_t len = sizeof(theAttrID);
 	theErr = theAttrInfoPtr->GetValue(qtssAttrID, 0, &theAttrID, &len);
 	Assert(theErr == QTSS_NoErr);
 	if (theErr != QTSS_NoErr) return NULL;
 
-	UInt32 index = 0;
+	uint32_t index = 0;
 	QTSSPrefs* prefObject;
 	len = sizeof(prefObject);
 	while (this->GetValue(theAttrID, index, &prefObject, &len) == QTSS_NoErr)

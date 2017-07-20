@@ -55,8 +55,8 @@ public:
 
 	//
 	// Accessors.
-	bool      FindSampleDescription(OSType DataFormat, char ** Buffer, UInt32 * Length);
-	uint16_t      SampleDescriptionToDataReference(UInt32 SampleDescriptionID);
+	bool      FindSampleDescription(OSType DataFormat, char ** Buffer, uint32_t * Length);
+	uint16_t      SampleDescriptionToDataReference(uint32_t SampleDescriptionID);
 
 
 	//
@@ -68,9 +68,9 @@ protected:
 	//
 	// Protected member variables.
 	uint8_t       fVersion;
-	UInt32      fFlags; // 24 bits in the low 3 bytes
+	uint32_t      fFlags; // 24 bits in the low 3 bytes
 
-	UInt32      fNumEntries;
+	uint32_t      fNumEntries;
 	char        *fSampleDescriptionTable;
 	char        **fTable; // each entry points to the start of a sample
 						  // description entry in the above memory area

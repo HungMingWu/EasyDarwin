@@ -44,16 +44,16 @@ class SDPSourceInfo : public SourceInfo
     public:
     
         // Uses the SDP Data to build up the StreamInfo structures
-        SDPSourceInfo(char* sdpData, UInt32 sdpLen) { Parse(sdpData, sdpLen); }
+        SDPSourceInfo(char* sdpData, uint32_t sdpLen) { Parse(sdpData, sdpLen); }
         SDPSourceInfo() {}
         virtual ~SDPSourceInfo();
         
         // Parses out the SDP file provided, sets up the StreamInfo structures
-        void    Parse(char* sdpData, UInt32 sdpLen);
+        void    Parse(char* sdpData, uint32_t sdpLen);
 
         // This function uses the Parsed SDP file, and strips out all the network information,
         // producing an SDP file that appears to be local.
-        virtual char*   GetLocalSDP(UInt32* newSDPLen);
+        virtual char*   GetLocalSDP(uint32_t* newSDPLen);
 
         // Returns the SDP data
         StrPtrLen*  GetSDPData()    { return &fSDPData; }
@@ -62,8 +62,8 @@ class SDPSourceInfo : public SourceInfo
         
         // Assuming the parser is currently pointing at the beginning of an dotted-
         // decimal IP address, this consumes it (stopping at inStopChar), and returns
-        // the IP address (host ordered) as a UInt32
-        static UInt32 GetIPAddr(StringParser* inParser, char inStopChar);
+        // the IP address (host ordered) as a uint32_t
+        static uint32_t GetIPAddr(StringParser* inParser, char inStopChar);
       
     private:
 

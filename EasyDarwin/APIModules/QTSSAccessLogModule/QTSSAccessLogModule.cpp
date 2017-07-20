@@ -56,8 +56,8 @@ static char*    sDefaultLogName = "StreamingServer";
 static char*    sDefaultLogDir = NULL;
 static QTSS_PrefsObject     sServerPrefs = NULL;
 
-static UInt32   sDefaultMaxLogBytes = 10240000;
-static UInt32   sDefaultRollInterval = 7;
+static uint32_t   sDefaultMaxLogBytes = 10240000;
+static uint32_t   sDefaultRollInterval = 7;
 static char*    sVoidField = "-";
 static bool   sStartedUp = false;
 static bool   sDefaultLogTimeInGMT = true;
@@ -66,8 +66,8 @@ static QTSS_AttributeID sLoggedAuthorizationAttrID = qtssIllegalAttrID;
 
 // Current values for preferences
 static bool   sLogEnabled = true;
-static UInt32   sMaxLogBytes = 51200000;
-static UInt32   sRollInterval = 7;
+static uint32_t   sMaxLogBytes = 51200000;
+static uint32_t   sRollInterval = 7;
 static bool   sLogTimeInGMT = true;
 
 static OSMutex*             sLogMutex = NULL;//Log module isn't reentrant
@@ -114,8 +114,8 @@ public:
 
 	virtual char* GetLogName() { return QTSSModuleUtils::GetStringAttribute(sPrefs, "request_logfile_name", sDefaultLogName); }
 	virtual char* GetLogDir() { return QTSSModuleUtils::GetStringAttribute(sPrefs, "request_logfile_dir", sDefaultLogDir); }
-	virtual UInt32 GetRollIntervalInDays() { return sRollInterval; }
-	virtual UInt32 GetMaxLogBytes() { return sMaxLogBytes; }
+	virtual uint32_t GetRollIntervalInDays() { return sRollInterval; }
+	virtual uint32_t GetMaxLogBytes() { return sMaxLogBytes; }
 	virtual time_t WriteLogHeader(FILE *inFile);
 
 };
@@ -258,10 +258,10 @@ QTSS_Error StateChange(QTSS_StateChange_Params* stateChangeParams)
 
 QTSS_Error PostProcess(QTSS_StandardRTSP_Params* inParams)
 {
-	static UInt32 sZero = 0;
+	static uint32_t sZero = 0;
 
-	UInt32* theStatus = NULL;
-	UInt32 theLen = 0;
+	uint32_t* theStatus = NULL;
+	uint32_t theLen = 0;
 	QTSS_Error theErr = QTSS_GetValuePtr(inParams->inRTSPRequest, qtssRTSPReqRealStatusCode, 0, (void**)&theStatus, &theLen);
 	if (theErr != QTSS_NoErr)
 		return theErr;
@@ -387,8 +387,8 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	// Check to see if this session is closing because authorization failed. If that's
 	// the case, we've logged that already, let's not log it twice
 
-	UInt32 theLen = 0;
-	UInt32* authorizationFailed = NULL;
+	uint32_t theLen = 0;
+	uint32_t* authorizationFailed = NULL;
 	(void)QTSS_GetValuePtr(inClientSession, sLoggedAuthorizationAttrID, 0, (void**)&authorizationFailed, &theLen);
 	if ((authorizationFailed != NULL) && (*authorizationFailed > 0))
 		return QTSS_NoErr;
@@ -424,14 +424,14 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	float* packetLossPercent = NULL;
 	double* movieDuration = NULL;
 	UInt64* movieSizeInBytes = NULL;
-	UInt32* movieAverageBitRatePtr = 0;
-	UInt32 clientPacketsReceived = 0;
-	UInt32 clientPacketsLost = 0;
+	uint32_t* movieAverageBitRatePtr = 0;
+	uint32_t clientPacketsReceived = 0;
+	uint32_t clientPacketsLost = 0;
 	StrPtrLen* theTransportType = &sUnknownStr;
 	SInt64* theCreateTime = NULL;
 	SInt64* thePlayTime = NULL;
 
-	UInt32 startPlayTimeInSecs = 0;
+	uint32_t startPlayTimeInSecs = 0;
 
 	char localIPAddrBuf[20] = { 0 };
 	StrPtrLen localIPAddr(localIPAddrBuf, 19);
@@ -455,9 +455,9 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	(void)QTSS_GetValue(inClientSession, qtssCliRTSPSessRemoteAddrStr, 0, remoteAddr.Ptr, &remoteAddr.Len);
 	(void)QTSS_GetValue(inClientSession, qtssCliRTSPSessRemoteAddrStr, 0, playerID.Ptr, &playerID.Len);
 
-	UInt32* rtpBytesSent = NULL;
-	UInt32* rtcpBytesRecv = NULL;
-	UInt32* rtpPacketsSent = NULL;
+	uint32_t* rtpBytesSent = NULL;
+	uint32_t* rtcpBytesRecv = NULL;
+	uint32_t* rtpPacketsSent = NULL;
 
 	// Second, get networking info from the Client's session.
 	// (Including the stats for incoming RTCP packets.)
@@ -475,7 +475,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	(void)QTSS_GetValuePtr(inClientSession, qtssCliSesRTCPBytesRecv, 0, (void**)&rtcpBytesRecv, &theLen);
 
 	if (theCreateTime != NULL && thePlayTime != NULL)
-		startPlayTimeInSecs = (UInt32)(((*theCreateTime - *thePlayTime) / 1000) + 0.5);
+		startPlayTimeInSecs = (uint32_t)(((*theCreateTime - *thePlayTime) / 1000) + 0.5);
 
 
 	// We need a value of 'c-bytes' to report as a log entry. This is supposed to be the total number
@@ -489,7 +489,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	// sent to the server from the client. If those values are accurate then the above formula will not 
 	// be exactly correct but it will be nearly correct.
 
-	UInt32 clientBytesRecv = (UInt32)((*rtpBytesSent * (100.0 - *packetLossPercent)) / 100.0);
+	uint32_t clientBytesRecv = (uint32_t)((*rtpBytesSent * (100.0 - *packetLossPercent)) / 100.0);
 
 	tempLogStr.Ptr[0] = 0; tempLogStr.Len = eUserAgentSize;
 	(void)QTSS_GetValue(inClientSession, qtssCliSesFirstUserAgent, 0, tempLogStr.Ptr, &tempLogStr.Len);
@@ -514,7 +514,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	char playerOSVersBuf[ePlayerOSVersSize] = { 0 };
 	char playerCPUBuf[ePlayerCPUSize] = { 0 };
 
-	UInt32 size;
+	uint32_t size;
 	//  (ePlayerIDSize < playerID->Len ) ? size = ePlayerIDSize -1 : size = playerID->Len;
 	//  if (playerID->Ptr != NULL) memcpy (playerIDBuf, playerID->Ptr, size);
 
@@ -544,19 +544,19 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	char audioPayloadNameBuf[32] = { 0 };
 	StrPtrLen audioPayloadName(audioPayloadNameBuf, 31);
 
-	UInt32 qualityLevel = 0;
-	UInt32 clientBufferTime = 0;
-	UInt32 theStreamIndex = 0;
+	uint32_t qualityLevel = 0;
+	uint32_t clientBufferTime = 0;
+	uint32_t theStreamIndex = 0;
 	bool* isTCPPtr = NULL;
 	QTSS_RTPStreamObject theRTPStreamObject = NULL;
 
-	for (UInt32 theStreamObjectLen = sizeof(theRTPStreamObject);
+	for (uint32_t theStreamObjectLen = sizeof(theRTPStreamObject);
 		QTSS_GetValue(inClientSession, qtssCliSesStreamObjects, theStreamIndex, (void*)&theRTPStreamObject, &theStreamObjectLen) == QTSS_NoErr;
 		theStreamIndex++, theStreamObjectLen = sizeof(theRTPStreamObject))
 	{
 
-		UInt32* streamPacketsReceived = NULL;
-		UInt32* streamPacketsLost = NULL;
+		uint32_t* streamPacketsReceived = NULL;
+		uint32_t* streamPacketsLost = NULL;
 		(void)QTSS_GetValuePtr(theRTPStreamObject, qtssRTPStrTotPacketsRecv, 0, (void**)&streamPacketsReceived, &theLen);
 		(void)QTSS_GetValuePtr(theRTPStreamObject, qtssRTPStrTotalLostPackets, 0, (void**)&streamPacketsLost, &theLen);
 
@@ -596,7 +596,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 		if ((clientBufferTimePtr != NULL) && (*clientBufferTimePtr != 0))
 		{
 			if (*clientBufferTimePtr > clientBufferTime)
-				clientBufferTime = (UInt32)(*clientBufferTimePtr + .5); // round up to full seconds
+				clientBufferTime = (uint32_t)(*clientBufferTimePtr + .5); // round up to full seconds
 		}
 
 	}
@@ -614,15 +614,15 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 		{
 			float qualityPercent = (float)clientPacketsReceived / (float)(clientPacketsReceived + clientPacketsLost);
 			qualityPercent += (float).005; // round up
-			qualityLevel = (UInt32)((float) 100.0 * qualityPercent); // average of sum of packet counts for all streams
+			qualityLevel = (uint32_t)((float) 100.0 * qualityPercent); // average of sum of packet counts for all streams
 		}
 	}
 
 	//we may not have an RTSP request. Assume that the status code is 504 timeout, if there is an RTSP
 	//request, though, we can find out what the real status code of the response is
-	static UInt32 sTimeoutCode = 504;
-	UInt32* theStatusCode = &sTimeoutCode;
-	theLen = sizeof(UInt32);
+	static uint32_t sTimeoutCode = 504;
+	uint32_t* theStatusCode = &sTimeoutCode;
+	theLen = sizeof(uint32_t);
 	(void)QTSS_GetValuePtr(inClientSession, qtssCliRTSPReqRealStatusCode, 0, (void **)&theStatusCode, &theLen);
 	//  qtss_printf("qtssCliRTSPReqRealStatusCode = %"   _U32BITARG_   " \n", *theStatusCode);
 
@@ -681,7 +681,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 		// Find out what time it is
 	SInt64 curTime = QTSS_Milliseconds();
 
-	UInt32 numCurClients = 0;
+	uint32_t numCurClients = 0;
 	theLen = sizeof(numCurClients);
 	(void)QTSS_GetValue(sServer, qtssRTPSvrCurConn, 0, &numCurClients, &theLen);
 
@@ -704,7 +704,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 
 	theLen = sizeof(fcpuUtilized);
 	(void)QTSS_GetValue(sServer, qtssSvrCPULoadPercent, 0, &fcpuUtilized, &theLen);
-	UInt32 cpuUtilized = (UInt32)fcpuUtilized;
+	uint32_t cpuUtilized = (uint32_t)fcpuUtilized;
 
 	char lastUserName[eTempLogItemSize] = { 0 };
 	StrPtrLen lastUserNameStr(lastUserName, eTempLogItemSize);
@@ -756,10 +756,10 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	::strcat(logBuffer, tempLogBuffer);
 	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", startPlayTimeInSecs);  //c-starttime 
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", theCreateTime == NULL ? (UInt32)0 : (UInt32)(QTSS_MilliSecsTo1970Secs(curTime)
+	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", theCreateTime == NULL ? (uint32_t)0 : (uint32_t)(QTSS_MilliSecsTo1970Secs(curTime)
 		- QTSS_MilliSecsTo1970Secs(*theCreateTime)));   //x-duration* 
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%" _S32BITARG_ " ", (UInt32)1);  //c-rate
+	qtss_sprintf(tempLogBuffer, "%" _S32BITARG_ " ", (uint32_t)1);  //c-rate
 	::strcat(logBuffer, tempLogBuffer);
 	qtss_sprintf(tempLogBuffer, "%" _S32BITARG_ " ", *theStatusCode);   //c-status*
 	::strcat(logBuffer, tempLogBuffer);
@@ -781,7 +781,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	::strcat(logBuffer, tempLogBuffer);
 	qtss_sprintf(tempLogBuffer, "%" _64BITARG_ "d ", movieSizeInBytes == NULL ? zeroUInt64 : *movieSizeInBytes); //filesize in bytes*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", movieAverageBitRatePtr == NULL ? (UInt32)0 : *movieAverageBitRatePtr);    //avgbandwidth in bits per second
+	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", movieAverageBitRatePtr == NULL ? (uint32_t)0 : *movieAverageBitRatePtr);    //avgbandwidth in bits per second
 	::strcat(logBuffer, tempLogBuffer);
 	qtss_sprintf(tempLogBuffer, "%s ", "RTP"); //protocol
 	::strcat(logBuffer, tempLogBuffer);
@@ -791,19 +791,19 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	::strcat(logBuffer, tempLogBuffer);
 	qtss_sprintf(tempLogBuffer, "%s ", (videoPayloadName.Ptr[0] == '\0') ? sVoidField : videoPayloadName.Ptr); //videocodec*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtpBytesSent == NULL ? (UInt32)0 : *rtpBytesSent);    //sc-bytes*
+	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtpBytesSent == NULL ? (uint32_t)0 : *rtpBytesSent);    //sc-bytes*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtcpBytesRecv == NULL ? (UInt32)0 : *rtcpBytesRecv);    //cs-bytes*
+	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtcpBytesRecv == NULL ? (uint32_t)0 : *rtcpBytesRecv);    //cs-bytes*
 	::strcat(logBuffer, tempLogBuffer);
 	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", clientBytesRecv);  //c-bytes
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtpPacketsSent == NULL ? (UInt32)0 : *rtpPacketsSent);   //s-pkts-sent*
+	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtpPacketsSent == NULL ? (uint32_t)0 : *rtpPacketsSent);   //s-pkts-sent*
 	::strcat(logBuffer, tempLogBuffer);
 	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", clientPacketsReceived);    //c-pkts-recieved
 	::strcat(logBuffer, tempLogBuffer);
 	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", clientPacketsLost);    //c-pkts-lost-client*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", (UInt32)1);  //c-buffercount 
+	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", (uint32_t)1);  //c-buffercount 
 	::strcat(logBuffer, tempLogBuffer);
 	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", clientBufferTime);     //c-totalbuffertime*
 	::strcat(logBuffer, tempLogBuffer);

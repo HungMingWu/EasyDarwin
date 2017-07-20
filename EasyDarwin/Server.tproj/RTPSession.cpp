@@ -63,7 +63,7 @@ RTPSession::~RTPSession()
 {
 	// Delete all the streams
 	RTPStream** theStream = NULL;
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 
 	if (QTSServerInterface::GetServer()->GetPrefs()->GetReliableUDPPrintfsEnabled())
 	{
@@ -112,7 +112,7 @@ RTPSession::~RTPSession()
 		RTPSession** theSession = NULL;
 		//
 		// Remove this session from the qtssSvrClientSessions attribute
-		UInt32 y = 0;
+		uint32_t y = 0;
 		for (; y < theServer->GetNumRTPSessions(); y++)
 		{
 			QTSS_Error theErr = theServer->GetValuePtr(qtssSvrClientSessions, y, (void**)&theSession, &theLen, true);
@@ -183,7 +183,7 @@ QTSS_Error  RTPSession::Activate(const StrPtrLen& inSessionID)
 RTPStream*  RTPSession::FindRTPStreamForChannelNum(uint8_t inChannelNum)
 {
 	RTPStream** theStream = NULL;
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 
 	for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
 	{
@@ -204,13 +204,13 @@ QTSS_Error RTPSession::AddStream(RTSPRequestInterface* request, RTPStream** outS
 
 	// Create a new SSRC for this stream. This should just be a random number unique
 	// to all the streams in the session
-	UInt32 theSSRC = 0;
+	uint32_t theSSRC = 0;
 	while (theSSRC == 0)
 	{
 		theSSRC = (SInt32)::rand();
 
 		RTPStream** theStream = NULL;
-		UInt32 theLen = 0;
+		uint32_t theLen = 0;
 
 		for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
 		{
@@ -245,7 +245,7 @@ void RTPSession::SetStreamThinningParams(float inLateTolerance)
 	// Set the thinning params in all the RTPStreams of the RTPSession
 	// Go through all the streams, setting their thinning params
 	RTPStream** theStream = NULL;
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 
 	for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
 	{
@@ -281,8 +281,8 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 	fPlayFlags = inFlags;
 	QTSServerInterface::GetServer()->AlterRTPPlayingSessions(1);
 
-	UInt32 theWindowSize;
-	UInt32 bitRate = this->GetMovieAvgBitrate();
+	uint32_t theWindowSize;
+	uint32_t bitRate = this->GetMovieAvgBitrate();
 	if ((bitRate == 0) || (bitRate > QTSServerInterface::GetServer()->GetPrefs()->GetWindowSizeMaxThreshold() * 1024))
 		theWindowSize = 1024 * QTSServerInterface::GetServer()->GetPrefs()->GetLargeWindowSizeInK();
 	else if (bitRate > QTSServerInterface::GetServer()->GetPrefs()->GetWindowSizeThreshold() * 1024)
@@ -297,7 +297,7 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 	//
 	// Go through all the streams, setting their thinning params
 	RTPStream** theStream = NULL;
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 
 	for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
 	{
@@ -328,7 +328,7 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 
 	// If we don't know any better, assume maximum buffer size.
 	QTSServerPrefs* thePrefs = QTSServerInterface::GetServer()->GetPrefs();
-	UInt32 theBufferSize = thePrefs->GetMaxTCPBufferSizeInBytes();
+	uint32_t theBufferSize = thePrefs->GetMaxTCPBufferSizeInBytes();
 
 #if RTPSESSION_DEBUGGING
 	qtss_printf("RTPSession GetMovieAvgBitrate %li\n", (SInt32)this->GetMovieAvgBitrate());
@@ -338,7 +338,7 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 	{
 		// We have a bit rate... use it.
 		float realBufferSize = (float)this->GetMovieAvgBitrate() * thePrefs->GetTCPSecondsToBuffer();
-		theBufferSize = (UInt32)realBufferSize;
+		theBufferSize = (uint32_t)realBufferSize;
 		theBufferSize >>= 3; // Divide by 8 to convert from bits to bytes
 
 		// Round down to the next lowest power of 2.
@@ -372,7 +372,7 @@ void RTPSession::Pause()
 {
 	fState = qtssPausedState;
 	RTPStream** theStream = NULL;
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 
 	for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
 	{
@@ -382,9 +382,9 @@ void RTPSession::Pause()
 	}
 }
 
-UInt32 RTPSession::PowerOf2Floor(UInt32 inNumToFloor)
+uint32_t RTPSession::PowerOf2Floor(uint32_t inNumToFloor)
 {
-	UInt32 retVal = 0x10000000;
+	uint32_t retVal = 0x10000000;
 	while (retVal > 0)
 	{
 		if (retVal & inNumToFloor)
@@ -410,15 +410,15 @@ void RTPSession::Teardown()
 	this->Signal(Task::kKillEvent);
 }
 
-void RTPSession::SendPlayResponse(RTSPRequestInterface* request, UInt32 inFlags)
+void RTPSession::SendPlayResponse(RTSPRequestInterface* request, uint32_t inFlags)
 {
 	QTSS_RTSPHeader theHeader = qtssRTPInfoHeader;
 
 	RTPStream** theStream = NULL;
-	UInt32 theLen = 0;
-	UInt32 valueCount = this->GetNumValues(qtssCliSesStreamObjects);
+	uint32_t theLen = 0;
+	uint32_t valueCount = this->GetNumValues(qtssCliSesStreamObjects);
 	bool lastValue = false;
-	for (UInt32 x = 0; x < valueCount; x++)
+	for (uint32_t x = 0; x < valueCount; x++)
 	{
 		this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen);
 		Assert(theStream != NULL);
@@ -529,7 +529,7 @@ SInt64 RTPSession::Run()
 			// If RTCP packets are being generated internally for this stream, 
 			// Send a BYE now.
 			RTPStream** theStream = NULL;
-			UInt32 theLen = 0;
+			uint32_t theLen = 0;
 
 			if (this->GetPlayFlags() & qtssPlayFlagsSendRTCP)
 			{
@@ -545,7 +545,7 @@ SInt64 RTPSession::Run()
 		//invoking modules here, because the session is unregistered and
 		//therefore there's no way another thread could get involved anyway
 
-		UInt32 numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kClientSessionClosingRole);
+		uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kClientSessionClosingRole);
 		{
 			for (; fCurrentModule < numModules; fCurrentModule++)
 			{
@@ -580,7 +580,7 @@ SInt64 RTPSession::Run()
 		if (fNextSendPacketsTime > theParams.rtpSendPacketsParams.inCurrentTime)
 		{
 			RTPStream** retransStream = NULL;
-			UInt32 retransStreamLen = 0;
+			uint32_t retransStreamLen = 0;
 
 			//
 			// Send retransmits if we need to
@@ -617,8 +617,8 @@ SInt64 RTPSession::Run()
 	//
 	// Make sure the duration between calls to Run() isn't greater than the
 	// max retransmit delay interval.
-	UInt32 theRetransDelayInMsec = QTSServerInterface::GetServer()->GetPrefs()->GetMaxRetransmitDelayInMsec();
-	UInt32 theSendInterval = QTSServerInterface::GetServer()->GetPrefs()->GetSendIntervalInMsec();
+	uint32_t theRetransDelayInMsec = QTSServerInterface::GetServer()->GetPrefs()->GetMaxRetransmitDelayInMsec();
+	uint32_t theSendInterval = QTSServerInterface::GetServer()->GetPrefs()->GetSendIntervalInMsec();
 
 	//
 	// We want to avoid waking up to do retransmits, and then going back to sleep for like, 1 msec. So, 

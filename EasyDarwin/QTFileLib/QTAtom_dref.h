@@ -55,9 +55,9 @@ class QTAtom_dref : public QTAtom {
 	// Class typedefs.
 	struct DataRefEntry {
 		// Data ref information
-		UInt32          Flags;
+		uint32_t          Flags;
 		OSType          ReferenceType;
-		UInt32          DataLength;
+		uint32_t          DataLength;
 		char            *Data;
 
 		// Tracking information
@@ -80,7 +80,7 @@ public:
 
 	//
 	// Accessors.
-	bool      IsRefInThisFile(UInt32 RefID) {
+	bool      IsRefInThisFile(uint32_t RefID) {
 		if (RefID && (RefID <= fNumRefs)) \
 			return  ((fRefs[RefID - 1].Flags & flagSelfRef) != 0); \
 			return false;
@@ -88,7 +88,7 @@ public:
 
 	//
 	// Read functions.
-	bool      Read(UInt32 RefID, UInt64 Offset, char * const Buffer, UInt32 Length,
+	bool      Read(uint32_t RefID, UInt64 Offset, char * const Buffer, uint32_t Length,
 		QTFile_FileControlBlock * FCB = NULL);
 
 
@@ -100,15 +100,15 @@ public:
 protected:
 	//
 	// Protected member functions.
-	char *      ResolveAlias(char * const AliasData, UInt32 AliasDataLength);
+	char *      ResolveAlias(char * const AliasData, uint32_t AliasDataLength);
 
 
 	//
 	// Protected member variables.
 	uint8_t       fVersion;
-	UInt32      fFlags; // 24 bits in the low 3 bytes
+	uint32_t      fFlags; // 24 bits in the low 3 bytes
 
-	UInt32          fNumRefs;
+	uint32_t          fNumRefs;
 	DataRefEntry    *fRefs;
 };
 

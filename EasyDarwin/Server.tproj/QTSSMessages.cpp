@@ -203,7 +203,7 @@ void QTSSMessages::Initialize()
 	QTSSDictionaryMap* theMap = QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kTextMessagesDictIndex);
 	Assert(theMap != NULL);
 
-	for (UInt32 x = 0; x < qtssMsgNumParams; x++)
+	for (uint32_t x = 0; x < qtssMsgNumParams; x++)
 		theMap->SetAttribute(x, sMessagesKeyStrings[x], NULL, qtssAttrDataTypeCharArray, qtssAttrModeRead | qtssAttrModePreempSafe);
 }
 
@@ -211,14 +211,14 @@ QTSSMessages::QTSSMessages(PrefsSource* inMessages)
 	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kTextMessagesDictIndex)),
 	numAttrs(GetDictionaryMap()->GetNumAttrs())
 {
-	static const UInt32 kMaxMessageSize = 2048;
+	static const uint32_t kMaxMessageSize = 2048;
 	char theMessage[kMaxMessageSize];
 
 	// Use the names of the attributes in the attribute map as the key values for
 	// finding preferences in the config file.
 	attrBuffer = new char*[numAttrs];
 	::memset(attrBuffer, 0, sizeof(char*) * numAttrs);
-	for (UInt32 x = 0; x < numAttrs; x++)
+	for (uint32_t x = 0; x < numAttrs; x++)
 	{
 		theMessage[0] = '\0';
 		(void)inMessages->GetValue(this->GetDictionaryMap()->GetAttrName(x), &theMessage[0]);
@@ -227,7 +227,7 @@ QTSSMessages::QTSSMessages(PrefsSource* inMessages)
 		{
 			// If a message doesn't exist in the file, check to see if this attribute
 			// name matches one of the compiled-in strings. If so, use that instead
-			for (UInt32 y = 0; y < kNumMessages; y++)
+			for (uint32_t y = 0; y < kNumMessages; y++)
 			{
 				if (::strcmp(this->GetDictionaryMap()->GetAttrName(x), sMessagesKeyStrings[y]) == 0)
 				{

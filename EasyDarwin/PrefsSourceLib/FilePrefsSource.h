@@ -39,6 +39,7 @@
 
 #include "PrefsSource.h"
 #include "OSHeaders.h"
+#include <stdint.h>
 
 class KeyValuePair; //only used in the implementation
 
@@ -50,12 +51,12 @@ public:
 	virtual ~FilePrefsSource();
 
 	virtual int     GetValue(const char* inKey, char* ioValue);
-	virtual int     GetValueByIndex(const char* inKey, UInt32 inIndex, char* ioValue);
+	virtual int     GetValueByIndex(const char* inKey, uint32_t inIndex, char* ioValue);
 
 	// Allows caller to iterate over all the values in the file.
-	char*           GetValueAtIndex(UInt32 inIndex);
-	char*           GetKeyAtIndex(UInt32 inIndex);
-	UInt32          GetNumKeys() { return fNumKeys; }
+	char*           GetValueAtIndex(uint32_t inIndex);
+	char*           GetKeyAtIndex(uint32_t inIndex);
+	uint32_t          GetNumKeys() { return fNumKeys; }
 
 	int InitFromConfigFile(const char* configFilePath);
 	void WriteToConfigFile(const char* configFilePath);
@@ -67,9 +68,9 @@ private:
 
 	static bool FilePrefsConfigSetter(const char* paramName, const char* paramValue[], void* userData);
 
-	KeyValuePair*   FindValue(const char* inKey, char* ioValue, UInt32 index = 0);
+	KeyValuePair*   FindValue(const char* inKey, char* ioValue, uint32_t index = 0);
 	KeyValuePair*   fKeyValueList;
-	UInt32          fNumKeys;
+	uint32_t          fNumKeys;
 	bool fAllowDuplicates;
 };
 

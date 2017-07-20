@@ -187,7 +187,7 @@ QTFile::ErrorCode QTFile::Open(const char * MoviePath)
 	if (QTSS_NoErr == error)
 	{
 		QTSS_AttributeID fdID;
-		UInt32 len = sizeof(fdID);
+		uint32_t len = sizeof(fdID);
 		error = QTSS_GetValue(attrInfoObject, qtssAttrID, 0, &fdID, &len);
 
 		if (theErr == QTSS_NoErr && len > 0)
@@ -308,7 +308,7 @@ char *QTFile::GetModDateStr()
 	return fModDateBuffer.GetDateBuffer();
 }
 
-void QTFile::AllocateBuffers(UInt32 inUnitSizeInK, UInt32 inBufferInc, UInt32 inBufferSizeUnits, UInt32 inMaxBitRateBuffSizeInBlocks, UInt32 inBitrate)
+void QTFile::AllocateBuffers(uint32_t inUnitSizeInK, uint32_t inBufferInc, uint32_t inBufferSizeUnits, uint32_t inMaxBitRateBuffSizeInBlocks, uint32_t inBitrate)
 {
 
 #if DSS_USE_API_CALLBACKS
@@ -351,7 +351,7 @@ bool QTFile::FindTOCEntry(const char * AtomPath, AtomTOCEntry **TOCEntry, AtomTO
 	AtomTOCEntry    *Atom, *CurParent;
 	const char      *pCurAtomType = AtomPath;
 
-	UInt32          RootTOCID = 0;
+	uint32_t          RootTOCID = 0;
 
 
 	DEEP_DEBUG_PRINT(("QTFile::FindTOCEntry - Searching for \"%s\".\n", AtomPath));
@@ -527,7 +527,7 @@ bool QTFile::NextTrack(QTTrack **Track, QTTrack *LastFoundTrack)
 	return false;
 }
 
-bool QTFile::FindTrack(UInt32 TrackID, QTTrack **Track)
+bool QTFile::FindTrack(uint32_t TrackID, QTTrack **Track)
 {
 	// General vars
 	TrackListEntry      *ListEntry;
@@ -593,7 +593,7 @@ SInt64 QTFile::GetModDate()
 {
 #if DSS_USE_API_CALLBACKS
 	SInt64 theTime = 0;
-	UInt32 theLen = sizeof(SInt64);
+	uint32_t theLen = sizeof(SInt64);
 	(void)QTSS_GetValue(fMovieFD, qtssFlObjModDate, 0, (void*)&theTime, &theLen);
 	return theTime;
 #else
@@ -604,12 +604,12 @@ SInt64 QTFile::GetModDate()
 
 //
 // Read functions.
-bool QTFile::Read(UInt64 Offset, char * const Buffer, UInt32 Length, QTFile_FileControlBlock * FCB)
+bool QTFile::Read(UInt64 Offset, char * const Buffer, uint32_t Length, QTFile_FileControlBlock * FCB)
 {
 	// General vars
 	OSMutexLocker   ReadMutex(fReadMutex);
 	bool rv = false;
-	UInt32 gotlen = 0;
+	uint32_t gotlen = 0;
 
 	if (FCB)
 		rv = FCB->Read(&fMovieFD, Offset, Buffer, Length);
@@ -640,11 +640,11 @@ bool QTFile::GenerateAtomTOC()
 {
 	// General vars
 	OSType          AtomType;
-	UInt32          atomLength;
+	uint32_t          atomLength;
 	UInt64          BigAtomLength;
 
 	UInt64          CurPos;
-	UInt32		    CurAtomHeaderSize;
+	uint32_t		    CurAtomHeaderSize;
 
 	AtomTOCEntry    *NewTOCEntry = NULL,
 		*CurParent = NULL, *LastTOCEntry = NULL;
@@ -916,7 +916,7 @@ bool QTFile::GenerateAtomTOC()
 }
 
 
-char *QTFile::MapFileToMem(UInt64 offset, UInt32 length)
+char *QTFile::MapFileToMem(UInt64 offset, uint32_t length)
 {
 #if MMAP_TABLES
 	char*  mappedMem = (char *)mmap(NULL,
@@ -937,7 +937,7 @@ char *QTFile::MapFileToMem(UInt64 offset, UInt32 length)
 
 }
 
-int QTFile::UnmapMem(char* memPtr, UInt32 length)
+int QTFile::UnmapMem(char* memPtr, uint32_t length)
 {
 #if MMAP_TABLES
 	return munmap((caddr_t)memPtr, (size_t)length);

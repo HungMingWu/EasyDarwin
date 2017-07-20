@@ -59,16 +59,16 @@ public:
 
 	//Advise: this advises the OS that we are going to be reading soon from the
 	//following position in the file
-	// void Advise(OSFileSource *dflt, UInt64 advisePos, UInt32 adviseAmt);
+	// void Advise(OSFileSource *dflt, UInt64 advisePos, uint32_t adviseAmt);
 
-	bool Read(FILE_SOURCE *dflt, UInt64 inPosition, void* inBuffer, UInt32 inLength);
+	bool Read(FILE_SOURCE *dflt, UInt64 inPosition, void* inBuffer, uint32_t inLength);
 
-	bool ReadInternal(FILE_SOURCE *dataFD, UInt64 inPosition, void* inBuffer, UInt32 inLength, UInt32 *inReadLenPtr = NULL);
+	bool ReadInternal(FILE_SOURCE *dataFD, UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t *inReadLenPtr = NULL);
 
 	//
 	// Buffer management functions
-	void AdjustDataBufferBitRate(UInt32 inUnitSizeInK = 32, UInt32 inFileBitRate = 32768, UInt32 inNumBuffSizeUnits = 0, UInt32 inMaxBitRateBuffSizeInBlocks = 8);
-	void AdjustDataBuffers(UInt32 inBlockSizeKBits = 32, UInt32 inBlockCountPerBuff = 1);
+	void AdjustDataBufferBitRate(uint32_t inUnitSizeInK = 32, uint32_t inFileBitRate = 32768, uint32_t inNumBuffSizeUnits = 0, uint32_t inMaxBitRateBuffSizeInBlocks = 8);
+	void AdjustDataBuffers(uint32_t inBlockSizeKBits = 32, uint32_t inBlockCountPerBuff = 1);
 	void EnableCacheBuffers(bool enabled) { fCacheEnabled = enabled; }
 
 	// QTSS_ErrorCode Close();
@@ -98,14 +98,14 @@ private:
 	// Data buffer cache
 	char                *fDataBufferPool;
 
-	UInt32              fDataBufferSize;
+	uint32_t              fDataBufferSize;
 	UInt64              fDataBufferPosStart, fDataBufferPosEnd;
 
 	char                *fCurrentDataBuffer, *fPreviousDataBuffer;
-	UInt32              fCurrentDataBufferLength, fPreviousDataBufferLength;
+	uint32_t              fCurrentDataBufferLength, fPreviousDataBufferLength;
 
-	UInt32              fNumBlocksPerBuff;
-	UInt32              fNumBuffs;
+	uint32_t              fNumBlocksPerBuff;
+	uint32_t              fNumBuffs;
 	bool              fCacheEnabled;
 };
 

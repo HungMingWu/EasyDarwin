@@ -88,7 +88,7 @@ QTAtom_mdhd::~QTAtom_mdhd()
 bool QTAtom_mdhd::Initialize()
 {
     // Temporary vars
-    UInt32      tempInt32;
+    uint32_t      tempInt32;
 
     //
     // Parse this atom's fields.

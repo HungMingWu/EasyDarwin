@@ -78,7 +78,7 @@ struct clucall_vector clua_vectors[] = {
 
 #endif /* TRUCLUSTER */
 
-UInt32                          SocketUtils::sNumIPAddrs = 0;
+uint32_t                          SocketUtils::sNumIPAddrs = 0;
 SocketUtils::IPAddrInfo*        SocketUtils::sIPAddrInfoArray = NULL;
 OSMutex SocketUtils::sMutex;
 
@@ -173,17 +173,17 @@ void SocketUtils::Initialize(bool lookupDNSName)
 
 #ifdef __Win32__
 
-	static const UInt32 kMaxAddrBufferSize = 2048;
+	static const uint32_t kMaxAddrBufferSize = 2048;
 	char inBuffer[kMaxAddrBufferSize];
 	char outBuffer[kMaxAddrBufferSize];
-	UInt32 theReturnedSize = 0;
+	uint32_t theReturnedSize = 0;
 
 	//
 	// Use the WSAIoctl function call to get a list of IP addresses
 	int theErr = ::WSAIoctl(tempSocket, SIO_GET_INTERFACE_LIST,
 		inBuffer, kMaxAddrBufferSize,
 		outBuffer, kMaxAddrBufferSize,
-		&theReturnedSize,
+		(LPDWORD)&theReturnedSize,
 		NULL,
 		NULL);
 	Assert(theErr == 0);
@@ -227,9 +227,9 @@ void SocketUtils::Initialize(bool lookupDNSName)
 	::memset(addrInfoMem, 0, sizeof(IPAddrInfo) * sNumIPAddrs);
 	sIPAddrInfoArray = (IPAddrInfo*)addrInfoMem;
 
-	//for (UInt32 addrCount = 0; addrCount < sNumIPAddrs; addrCount++)
-	UInt32 currentIndex = 0;
-	for (UInt32 theIfCount = sNumIPAddrs, addrCount = 0;
+	//for (uint32_t addrCount = 0; addrCount < sNumIPAddrs; addrCount++)
+	uint32_t currentIndex = 0;
+	for (uint32_t theIfCount = sNumIPAddrs, addrCount = 0;
 		addrCount < theIfCount; addrCount++)
 	{
 #ifdef __Win32__
@@ -328,7 +328,7 @@ void SocketUtils::Initialize(bool lookupDNSName)
 	//Unix Network Programming, section 16.6
 
 	//Use the SIOCGIFCONF ioctl call to iterate through the network interfaces
-	static const UInt32 kMaxAddrBufferSize = 2048;
+	static const uint32_t kMaxAddrBufferSize = 2048;
 
 	struct ifconf ifc;
 	::memset(&ifc, 0, sizeof(ifc));
@@ -425,7 +425,7 @@ void SocketUtils::Initialize(bool lookupDNSName)
 
 	//Now extract all the necessary information about each interface
 	//and put it into the array
-	UInt32 currentIndex = 0;
+	uint32_t currentIndex = 0;
 
 #ifdef TRUCLUSTER
 	// Do these cluster aliases first so they'll be first in the list
@@ -526,7 +526,7 @@ void SocketUtils::Initialize(bool lookupDNSName)
 	// which should really always be en0.
 	if ((sNumIPAddrs > 1) && (::strcmp(sIPAddrInfoArray[0].fIPAddrStr.Ptr, "127.0.0.1") == 0))
 	{
-		UInt32 tempIP = sIPAddrInfoArray[1].fIPAddr;
+		uint32_t tempIP = sIPAddrInfoArray[1].fIPAddr;
 		sIPAddrInfoArray[1].fIPAddr = sIPAddrInfoArray[0].fIPAddr;
 		sIPAddrInfoArray[0].fIPAddr = tempIP;
 		StrPtrLen tempIPStr(sIPAddrInfoArray[1].fIPAddrStr);
@@ -572,14 +572,14 @@ bool SocketUtils::IncrementIfReqIter(char** inIfReqIter, ifreq* ifr)
 }
 #endif
 
-bool SocketUtils::IsMulticastIPAddr(UInt32 inAddress)
+bool SocketUtils::IsMulticastIPAddr(uint32_t inAddress)
 {
 	return ((inAddress >> 8) & 0x00f00000) == 0x00e00000; //  multicast addresses == "class D" == 0xExxxxxxx == 1,1,1,0,<28 bits>
 }
 
-bool SocketUtils::IsLocalIPAddr(UInt32 inAddress)
+bool SocketUtils::IsLocalIPAddr(uint32_t inAddress)
 {
-	for (UInt32 x = 0; x < sNumIPAddrs; x++)
+	for (uint32_t x = 0; x < sNumIPAddrs; x++)
 		if (sIPAddrInfoArray[x].fIPAddr == inAddress)
 			return true;
 	return false;
@@ -598,7 +598,7 @@ void SocketUtils::ConvertAddrToString(const struct in_addr& theAddr, StrPtrLen* 
 	sMutex.Unlock();
 }
 
-UInt32 SocketUtils::ConvertStringToAddr(const char* inAddrStr)
+uint32_t SocketUtils::ConvertStringToAddr(const char* inAddrStr)
 {
 	if (inAddrStr == NULL)
 		return 0;

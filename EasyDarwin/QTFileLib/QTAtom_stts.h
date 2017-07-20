@@ -53,16 +53,16 @@ public:
 
 	//
 	// MT->SN Sample table cache
-	UInt32              fMTtSN_CurEntry;
-	UInt32              fMTtSN_CurMediaTime, fMTtSN_CurSample;
+	uint32_t              fMTtSN_CurEntry;
+	uint32_t              fMTtSN_CurMediaTime, fMTtSN_CurSample;
 
 	//
 	/// SN->MT Sample table cache
-	UInt32              fSNtMT_CurEntry;
-	UInt32              fSNtMT_CurMediaTime, fSNtMT_CurSample;
+	uint32_t              fSNtMT_CurEntry;
+	uint32_t              fSNtMT_CurMediaTime, fSNtMT_CurSample;
 
-	UInt32              fGetSampleMediaTime_SampleNumber;
-	UInt32              fGetSampleMediaTime_MediaTime;
+	uint32_t              fGetSampleMediaTime_SampleNumber;
+	uint32_t              fGetSampleMediaTime_MediaTime;
 
 };
 
@@ -85,9 +85,9 @@ public:
 
 	//
 	// Accessors.
-	bool      MediaTimeToSampleNumber(UInt32 MediaTime, UInt32 * SampleNumber,
+	bool      MediaTimeToSampleNumber(uint32_t MediaTime, uint32_t * SampleNumber,
 		QTAtom_stts_SampleTableControlBlock * STCB);
-	bool      SampleNumberToMediaTime(UInt32 SampleNumber, UInt32 * MediaTime,
+	bool      SampleNumberToMediaTime(uint32_t SampleNumber, uint32_t * MediaTime,
 		QTAtom_stts_SampleTableControlBlock * STCB);
 
 
@@ -100,11 +100,11 @@ protected:
 	//
 	// Protected member variables.
 	uint8_t       fVersion;
-	UInt32      fFlags; // 24 bits in the low 3 bytes
+	uint32_t      fFlags; // 24 bits in the low 3 bytes
 
-	UInt32      fNumEntries;
+	uint32_t      fNumEntries;
 	char        *fTimeToSampleTable;
-	UInt32      fTableSize;
+	uint32_t      fTableSize;
 
 };
 
@@ -124,16 +124,16 @@ public:
 
 	//
 	// MT->SN Sample table cache
-	UInt32              fMTtSN_CurEntry;
-	UInt32              fMTtSN_CurMediaTime, fMTtSN_CurSample;
+	uint32_t              fMTtSN_CurEntry;
+	uint32_t              fMTtSN_CurMediaTime, fMTtSN_CurSample;
 
 	//
 	/// SN->MT Sample table cache
-	UInt32              fSNtMT_CurEntry;
-	UInt32              fSNtMT_CurMediaTime, fSNtMT_CurSample;
+	uint32_t              fSNtMT_CurEntry;
+	uint32_t              fSNtMT_CurMediaTime, fSNtMT_CurSample;
 
-	UInt32              fGetSampleMediaTime_SampleNumber;
-	UInt32              fGetSampleMediaTime_MediaTime;
+	uint32_t              fGetSampleMediaTime_SampleNumber;
+	uint32_t              fGetSampleMediaTime_MediaTime;
 
 };
 
@@ -156,9 +156,9 @@ public:
 
 	//
 	// Accessors.
-	bool      MediaTimeToSampleNumber(UInt32 MediaTime, UInt32 * SampleNumber,
+	bool      MediaTimeToSampleNumber(uint32_t MediaTime, uint32_t * SampleNumber,
 		QTAtom_ctts_SampleTableControlBlock * STCB);
-	bool      SampleNumberToMediaTimeOffset(UInt32 SampleNumber, UInt32 * MediaTimeOffset,
+	bool      SampleNumberToMediaTimeOffset(uint32_t SampleNumber, uint32_t * MediaTimeOffset,
 		QTAtom_ctts_SampleTableControlBlock * STCB);
 
 
@@ -171,9 +171,9 @@ protected:
 	//
 	// Protected member variables.
 	uint8_t       fVersion;
-	UInt32      fFlags; // 24 bits in the low 3 bytes
+	uint32_t      fFlags; // 24 bits in the low 3 bytes
 
-	UInt32      fNumEntries;
+	uint32_t      fNumEntries;
 	char        *fTimeToSampleTable;
 
 };

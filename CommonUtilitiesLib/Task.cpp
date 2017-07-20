@@ -350,16 +350,16 @@ Task* TaskThread::WaitForTask()
 }
 
 TaskThread** TaskThreadPool::sTaskThreadArray = NULL;
-UInt32       TaskThreadPool::sNumTaskThreads = 0;
-UInt32       TaskThreadPool::sNumShortTaskThreads = 0;
-UInt32       TaskThreadPool::sNumBlockingTaskThreads = 0;
+uint32_t       TaskThreadPool::sNumTaskThreads = 0;
+uint32_t       TaskThreadPool::sNumShortTaskThreads = 0;
+uint32_t       TaskThreadPool::sNumBlockingTaskThreads = 0;
 
-bool TaskThreadPool::AddThreads(UInt32 numToAdd)
+bool TaskThreadPool::AddThreads(uint32_t numToAdd)
 {
 	Assert(sTaskThreadArray == NULL);
 	sTaskThreadArray = new TaskThread*[numToAdd];
 
-	for (UInt32 x = 0; x < numToAdd; x++)
+	for (uint32_t x = 0; x < numToAdd; x++)
 	{
 		sTaskThreadArray[x] = new TaskThread();
 		sTaskThreadArray[x]->Start();
@@ -373,7 +373,7 @@ bool TaskThreadPool::AddThreads(UInt32 numToAdd)
 	return true;
 }
 
-TaskThread* TaskThreadPool::GetThread(UInt32 index)
+TaskThread* TaskThreadPool::GetThread(uint32_t index)
 {
 
 	Assert(sTaskThreadArray != NULL);
@@ -390,17 +390,17 @@ TaskThread* TaskThreadPool::GetThread(UInt32 index)
 void TaskThreadPool::RemoveThreads()
 {
 	//Tell all the threads to stop
-	for (UInt32 x = 0; x < sNumTaskThreads; x++)
+	for (uint32_t x = 0; x < sNumTaskThreads; x++)
 		sTaskThreadArray[x]->SendStopRequest();
 
 	//Because any (or all) threads may be blocked on the queue, cycle through
 	//all the threads, signalling each one
-	for (UInt32 y = 0; y < sNumTaskThreads; y++)
+	for (uint32_t y = 0; y < sNumTaskThreads; y++)
 		sTaskThreadArray[y]->fTaskQueue.GetCond()->Signal();
 
 	//Ok, now wait for the selected threads to terminate, deleting them and removing
 	//them from the queue.
-	for (UInt32 z = 0; z < sNumTaskThreads; z++)
+	for (uint32_t z = 0; z < sNumTaskThreads; z++)
 		delete sTaskThreadArray[z];
 
 	sNumTaskThreads = 0;

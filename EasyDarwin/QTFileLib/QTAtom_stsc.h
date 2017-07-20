@@ -53,44 +53,44 @@ public:
 
 	//
 	// Sample table cache
-	UInt32              fCurEntry;
-	UInt32              fCurSample;
-	UInt32              fLastFirstChunk, fLastSamplesPerChunk, fLastSampleDescription;
+	uint32_t              fCurEntry;
+	uint32_t              fCurSample;
+	uint32_t              fLastFirstChunk, fLastSamplesPerChunk, fLastSampleDescription;
 
 
-	UInt32  fLastFirstChunk_GetChunkFirstLastSample;
-	UInt32  fLastSamplesPerChunk_GetChunkFirstLastSample;
-	UInt32  fLastTotalSamples_GetChunkFirstLastSample;
+	uint32_t  fLastFirstChunk_GetChunkFirstLastSample;
+	uint32_t  fLastSamplesPerChunk_GetChunkFirstLastSample;
+	uint32_t  fLastTotalSamples_GetChunkFirstLastSample;
 
-	UInt32 fCurEntry_GetChunkFirstLastSample;
-	UInt32 chunkNumber_GetChunkFirstLastSample;
-	UInt32 firstSample_GetChunkFirstLastSample;
-	UInt32 lastSample_GetChunkFirstLastSample;
+	uint32_t fCurEntry_GetChunkFirstLastSample;
+	uint32_t chunkNumber_GetChunkFirstLastSample;
+	uint32_t firstSample_GetChunkFirstLastSample;
+	uint32_t lastSample_GetChunkFirstLastSample;
 
 
-	UInt32 fFirstSampleNumber_SampleToChunkInfo;
-	UInt32 fFirstSamplesPerChunk_SampleToChunkInfo;
-	UInt32 fFirstChunkNumber_SampleToChunkInfo;
-	UInt32 fFirstSampleDescriptionIndex_SampleToChunkInfo;
-	UInt32 fFirstSampleOffsetInChunk_SampleToChunkInfo;
+	uint32_t fFirstSampleNumber_SampleToChunkInfo;
+	uint32_t fFirstSamplesPerChunk_SampleToChunkInfo;
+	uint32_t fFirstChunkNumber_SampleToChunkInfo;
+	uint32_t fFirstSampleDescriptionIndex_SampleToChunkInfo;
+	uint32_t fFirstSampleOffsetInChunk_SampleToChunkInfo;
 
-	UInt32  fCurEntry_SampleToChunkInfo;
-	UInt32  fCurSample_SampleToChunkInfo;
-	UInt32  fLastFirstChunk_SampleToChunkInfo;
-	UInt32  fLastSamplesPerChunk_SampleToChunkInfo;
-	UInt32  fLastSampleDescription_SampleToChunkInfo;
+	uint32_t  fCurEntry_SampleToChunkInfo;
+	uint32_t  fCurSample_SampleToChunkInfo;
+	uint32_t  fLastFirstChunk_SampleToChunkInfo;
+	uint32_t  fLastSamplesPerChunk_SampleToChunkInfo;
+	uint32_t  fLastSampleDescription_SampleToChunkInfo;
 
-	UInt32  fGetSampleInfo_SampleNumber;
-	UInt32  fGetSampleInfo_Length;
-	UInt32  fGetSampleInfo_SampleDescriptionIndex;
+	uint32_t  fGetSampleInfo_SampleNumber;
+	uint32_t  fGetSampleInfo_Length;
+	uint32_t  fGetSampleInfo_SampleDescriptionIndex;
 	UInt64  fGetSampleInfo_Offset;
-	UInt32  fGetSampleInfo_LastChunk;
-	UInt32  fGetSampleInfo_LastChunkOffset;
+	uint32_t  fGetSampleInfo_LastChunk;
+	uint32_t  fGetSampleInfo_LastChunkOffset;
 
-	UInt32 fGetSizeOfSamplesInChunk_chunkNumber;
-	UInt32 fGetSizeOfSamplesInChunk_firstSample;
-	UInt32 fGetSizeOfSamplesInChunk_lastSample;
-	UInt32 fGetSizeOfSamplesInChunk_size;
+	uint32_t fGetSizeOfSamplesInChunk_chunkNumber;
+	uint32_t fGetSizeOfSamplesInChunk_firstSample;
+	uint32_t fGetSizeOfSamplesInChunk_lastSample;
+	uint32_t fGetSizeOfSamplesInChunk_size;
 
 
 };
@@ -115,23 +115,23 @@ public:
 	//
 	// Accessors.
 
-	bool             GetChunkFirstLastSample(UInt32 chunkNumber, UInt32 *firstSample, UInt32 *lastSample, QTAtom_stsc_SampleTableControlBlock *STCB);
+	bool             GetChunkFirstLastSample(uint32_t chunkNumber, uint32_t *firstSample, uint32_t *lastSample, QTAtom_stsc_SampleTableControlBlock *STCB);
 
-	bool             SampleToChunkInfo(UInt32 SampleNumber,
-		UInt32 *samplesPerChunk = NULL,
-		UInt32 *ChunkNumber = NULL,
-		UInt32 *SampleDescriptionIndex = NULL,
-		UInt32 *SampleOffsetInChunk = NULL,
+	bool             SampleToChunkInfo(uint32_t SampleNumber,
+		uint32_t *samplesPerChunk = NULL,
+		uint32_t *ChunkNumber = NULL,
+		uint32_t *SampleDescriptionIndex = NULL,
+		uint32_t *SampleOffsetInChunk = NULL,
 		QTAtom_stsc_SampleTableControlBlock * STCB = NULL);
 
 
-	inline  bool      SampleNumberToChunkNumber(UInt32 SampleNumber, UInt32 *ChunkNumber = NULL, UInt32 *SampleDescriptionIndex = NULL, UInt32 *SampleOffsetInChunk = NULL,
+	inline  bool      SampleNumberToChunkNumber(uint32_t SampleNumber, uint32_t *ChunkNumber = NULL, uint32_t *SampleDescriptionIndex = NULL, uint32_t *SampleOffsetInChunk = NULL,
 		QTAtom_stsc_SampleTableControlBlock * STCB = NULL)
 	{
 		return SampleToChunkInfo(SampleNumber, NULL /*samplesPerChunk*/, ChunkNumber, SampleDescriptionIndex, SampleOffsetInChunk, STCB);
 	}
 
-	UInt32  GetChunkFirstSample(UInt32 chunkNumber);
+	uint32_t  GetChunkFirstSample(uint32_t chunkNumber);
 	//
 	// Debugging functions.
 	virtual void        DumpAtom();
@@ -142,11 +142,11 @@ protected:
 	//
 	// Protected member variables.
 	uint8_t       fVersion;
-	UInt32      fFlags; // 24 bits in the low 3 bytes
+	uint32_t      fFlags; // 24 bits in the low 3 bytes
 
-	UInt32      fNumEntries;
+	uint32_t      fNumEntries;
 	char        *fSampleToChunkTable;
-	UInt32      fTableSize;
+	uint32_t      fTableSize;
 };
 
 #endif // QTAtom_stsc_H

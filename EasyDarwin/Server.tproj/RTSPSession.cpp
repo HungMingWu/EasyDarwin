@@ -182,7 +182,7 @@ RTSPSession::~RTSPSession()
 	theParams.rtspSessionClosingParams.inRTSPSession = this;
 
 	// Invoke modules
-	for (UInt32 x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPSessionClosingRole); x++)
+	for (uint32_t x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPSessionClosingRole); x++)
 		(void)QTSServerInterface::GetModule(QTSSModule::kRTSPSessionClosingRole, x)->CallDispatch(QTSS_RTSPSessionClosing_Role, &theParams);
 
 	fLiveSession = false; //used in Clean up request to remove the RTP session.
@@ -218,7 +218,7 @@ SInt64 RTSPSession::Run()
 	EventFlags events = this->GetEvents();
 	QTSS_Error err = QTSS_NoErr;
 	QTSSModule* theModule = nullptr;
-	UInt32 numModules = 0;
+	uint32_t numModules = 0;
 	Assert(fLastRTPSessionIDPtr.Ptr == &fLastRTPSessionID[0]);
 
 	// Some callbacks look for this struct in the thread object
@@ -612,7 +612,7 @@ SInt64 RTSPSession::Run()
 					}
 
 					void* theSession = nullptr;
-					UInt32 theLen = sizeof(theSession);
+					uint32_t theLen = sizeof(theSession);
 					if (QTSS_NoErr == fRTPSession->GetValue(sClientBroadcastSessionAttr, 0, &theSession, &theLen))
 					{
 						fRequest->SetAction(qtssActionFlagsWrite); // an incoming broadcast session
@@ -651,7 +651,7 @@ SInt64 RTSPSession::Run()
 
 				StrPtrLen* lastUsedDigestChallengePtr = this->GetValue(qtssRTSPSesLastDigestChallenge);
 				if (lastUsedDigestChallengePtr != nullptr)
-					(void) fRequest->SetValue(qtssRTSPReqDigestChallenge, (UInt32)0, (void *)lastUsedDigestChallengePtr->Ptr, lastUsedDigestChallengePtr->Len, QTSSDictionary::kDontObeyReadOnly);
+					(void) fRequest->SetValue(qtssRTSPReqDigestChallenge, (uint32_t)0, (void *)lastUsedDigestChallengePtr->Ptr, lastUsedDigestChallengePtr->Len, QTSSDictionary::kDontObeyReadOnly);
 
 
 				numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPAthnRole);
@@ -991,8 +991,8 @@ SInt64 RTSPSession::Run()
 						OSMutexLocker   locker(fRTPSession->GetSessionMutex());
 
 						// Make sure the RTPSession contains a copy of the realStatusCode in this request
-						UInt32 realStatusCode = RTSPProtocol::GetStatusCode(fRequest->GetStatus());
-						(void)fRTPSession->SetValue(qtssCliRTSPReqRealStatusCode, (UInt32)0, (void *)&realStatusCode, sizeof(realStatusCode), QTSSDictionary::kDontObeyReadOnly);
+						uint32_t realStatusCode = RTSPProtocol::GetStatusCode(fRequest->GetStatus());
+						(void)fRTPSession->SetValue(qtssCliRTSPReqRealStatusCode, (uint32_t)0, (void *)&realStatusCode, sizeof(realStatusCode), QTSSDictionary::kDontObeyReadOnly);
 
 						// Make sure the RTPSession contains a copy of the qtssRTSPReqRespMsg in this request
 						StrPtrLen* theRespMsg = fRequest->GetValue(qtssRTSPReqRespMsg);
@@ -1535,10 +1535,10 @@ void RTSPSession::CheckAuthentication() {
 		// For digest authentication, md5 digest comparison
 		// The text returned by the authentication module in qtssUserPassword is MD5 hash of (username:realm:password)
 
-		UInt32 qop = fRequest->GetAuthQop();
+		uint32_t qop = fRequest->GetAuthQop();
 		StrPtrLen* opaque = fRequest->GetAuthOpaque();
 		StrPtrLen* sessionOpaque = fRTPSession->GetAuthOpaque();
-		UInt32 sessionQop = fRTPSession->GetAuthQop();
+		uint32_t sessionQop = fRTPSession->GetAuthQop();
 
 		do {
 			// The Opaque string should be the same as that sent by the server
@@ -1574,13 +1574,13 @@ void RTSPSession::CheckAuthentication() {
 			// For qop="auth"
 			if (qop == RTSPSessionInterface::kAuthQop) {
 				StrPtrLen* nonceCount = fRequest->GetAuthNonceCount();
-				UInt32 ncValue = 0;
+				uint32_t ncValue = 0;
 
-				// Convert nounce count (which is a string of 8 hex digits) into a UInt32
+				// Convert nounce count (which is a string of 8 hex digits) into a uint32_t
 				if (nonceCount && nonceCount->Len)
 				{
-					// Convert nounce count (which is a string of 8 hex digits) into a UInt32                 
-					UInt32 bufSize = sizeof(ncValue);
+					// Convert nounce count (which is a string of 8 hex digits) into a uint32_t                 
+					uint32_t bufSize = sizeof(ncValue);
 					StrPtrLenDel tempString(nonceCount->GetAsCString());
 					tempString.ToUpper();
 					QTSSDataConverter::ConvertCHexStringToBytes(tempString.Ptr,
@@ -1667,15 +1667,15 @@ void RTSPSession::SetupRequest()
 		OSMutexLocker locker(fRTPSession->GetMutex());
 
 		fRTPSession->RefreshTimeout();
-		UInt32 headerBits = fRequest->GetBandwidthHeaderBits();
+		uint32_t headerBits = fRequest->GetBandwidthHeaderBits();
 		if (headerBits != 0)
-			(void)fRTPSession->SetValue(qtssCliSessLastRTSPBandwidth, (UInt32)0, &headerBits, sizeof(headerBits), QTSSDictionary::kDontObeyReadOnly);
+			(void)fRTPSession->SetValue(qtssCliSessLastRTSPBandwidth, (uint32_t)0, &headerBits, sizeof(headerBits), QTSSDictionary::kDontObeyReadOnly);
 
 
 	}
 	QTSS_RTSPStatusCode statusCode = qtssSuccessOK;
 	char *body = nullptr;
-	UInt32 bodySizeBytes = 0;
+	uint32_t bodySizeBytes = 0;
 
 	// If this is an OPTIONS request, don't even bother letting modules see it. Just
 	// send a standard OPTIONS response, and be done.
@@ -1770,7 +1770,7 @@ void RTSPSession::SetupRequest()
 
 
 	OSMutexLocker locker(fRTPSession->GetMutex());
-	UInt32 headerBits = fRequest->GetBandwidthHeaderBits();
+	uint32_t headerBits = fRequest->GetBandwidthHeaderBits();
 	if (headerBits != 0)
 		(void)fRTPSession->SetValue(qtssCliSessLastRTSPBandwidth, 0, &headerBits, sizeof(headerBits), QTSSDictionary::kDontObeyReadOnly);
 
@@ -1951,33 +1951,33 @@ void RTSPSession::SetupClientSessionAttrs()
 	// store RTSP session info in the RTPSession.   
 	StrPtrLen tempStr;
 	tempStr.Len = 0;
-	(void) this->GetValuePtr(qtssRTSPSesRemoteAddrStr, (UInt32)0, (void **)&tempStr.Ptr, &tempStr.Len);
+	(void) this->GetValuePtr(qtssRTSPSesRemoteAddrStr, (uint32_t)0, (void **)&tempStr.Ptr, &tempStr.Len);
 	Assert(tempStr.Len != 0);
-	(void)fRTPSession->SetValue(qtssCliRTSPSessRemoteAddrStr, (UInt32)0, tempStr.Ptr, tempStr.Len, QTSSDictionary::kDontObeyReadOnly);
+	(void)fRTPSession->SetValue(qtssCliRTSPSessRemoteAddrStr, (uint32_t)0, tempStr.Ptr, tempStr.Len, QTSSDictionary::kDontObeyReadOnly);
 
 	tempStr.Len = 0;
-	(void) this->GetValuePtr(qtssRTSPSesLocalDNS, (UInt32)0, (void **)&tempStr.Ptr, &tempStr.Len);
+	(void) this->GetValuePtr(qtssRTSPSesLocalDNS, (uint32_t)0, (void **)&tempStr.Ptr, &tempStr.Len);
 	Assert(tempStr.Len != 0);
-	(void)fRTPSession->SetValue(qtssCliRTSPSessLocalDNS, (UInt32)0, (void **)tempStr.Ptr, tempStr.Len, QTSSDictionary::kDontObeyReadOnly);
+	(void)fRTPSession->SetValue(qtssCliRTSPSessLocalDNS, (uint32_t)0, (void **)tempStr.Ptr, tempStr.Len, QTSSDictionary::kDontObeyReadOnly);
 
 	tempStr.Len = 0;
-	(void) this->GetValuePtr(qtssRTSPSesLocalAddrStr, (UInt32)0, (void **)&tempStr.Ptr, &tempStr.Len);
+	(void) this->GetValuePtr(qtssRTSPSesLocalAddrStr, (uint32_t)0, (void **)&tempStr.Ptr, &tempStr.Len);
 	Assert(tempStr.Len != 0);
-	(void)fRTPSession->SetValue(qtssCliRTSPSessLocalAddrStr, (UInt32)0, tempStr.Ptr, tempStr.Len, QTSSDictionary::kDontObeyReadOnly);
+	(void)fRTPSession->SetValue(qtssCliRTSPSessLocalAddrStr, (uint32_t)0, tempStr.Ptr, tempStr.Len, QTSSDictionary::kDontObeyReadOnly);
 }
 
-UInt32 RTSPSession::GenerateNewSessionID(char* ioBuffer)
+uint32_t RTSPSession::GenerateNewSessionID(char* ioBuffer)
 {
 	//RANDOM NUMBER GENERATOR
 
 	//We want to make our session IDs as random as possible, so use a bunch of
 	//current server statistics to generate a random SInt64.
 
-	//Generate the random number in two UInt32 parts. The first UInt32 uses
+	//Generate the random number in two uint32_t parts. The first uint32_t uses
 	//statistics out of a random RTP session.
 	SInt64 theMicroseconds = OS::Microseconds();
 	::srand((unsigned int)theMicroseconds);
-	UInt32 theFirstRandom = ::rand();
+	uint32_t theFirstRandom = ::rand();
 
 	QTSServerInterface* theServer = QTSServerInterface::GetServer();
 
@@ -1991,14 +1991,14 @@ UInt32 RTSPSession::GenerateNewSessionID(char* ioBuffer)
 
 			OSRefHashTableIter theIter(theHashTable);
 			//Iterate through the session map, finding a random session
-			for (UInt32 theCount = 0; theCount < theFirstRandom; theIter.Next(), theCount++)
+			for (uint32_t theCount = 0; theCount < theFirstRandom; theIter.Next(), theCount++)
 				Assert(!theIter.IsDone());
 
 			RTPSession* theSession = (RTPSession*)theIter.GetCurrent()->GetObject();
 			theFirstRandom += theSession->GetPacketsSent();
-			theFirstRandom += (UInt32)theSession->GetSessionCreateTime();
-			theFirstRandom += (UInt32)theSession->GetPlayTime();
-			theFirstRandom += (UInt32)theSession->GetBytesSent();
+			theFirstRandom += (uint32_t)theSession->GetSessionCreateTime();
+			theFirstRandom += (uint32_t)theSession->GetPlayTime();
+			theFirstRandom += (uint32_t)theSession->GetBytesSent();
 		}
 	}
 	//Generate the first half of the random number
@@ -2006,11 +2006,11 @@ UInt32 RTSPSession::GenerateNewSessionID(char* ioBuffer)
 	theFirstRandom = ::rand();
 
 	//Now generate the second half
-	UInt32 theSecondRandom = ::rand();
+	uint32_t theSecondRandom = ::rand();
 	theSecondRandom += theServer->GetCurBandwidthInBits();
 	theSecondRandom += theServer->GetAvgBandwidthInBits();
 	theSecondRandom += theServer->GetRTPPacketsPerSec();
-	theSecondRandom += (UInt32)theServer->GetTotalRTPBytes();
+	theSecondRandom += (uint32_t)theServer->GetTotalRTPBytes();
 	theSecondRandom += theServer->GetTotalRTPSessions();
 
 	::srand((unsigned int)theSecondRandom);
@@ -2024,7 +2024,7 @@ UInt32 RTSPSession::GenerateNewSessionID(char* ioBuffer)
 	return ::strlen(ioBuffer);
 }
 
-bool RTSPSession::OverMaxConnections(UInt32 buffer)
+bool RTSPSession::OverMaxConnections(uint32_t buffer)
 {
 	QTSServerInterface* theServer = QTSServerInterface::GetServer();
 	SInt32 maxConns = theServer->GetPrefs()->GetMaxConnections();
@@ -2032,7 +2032,7 @@ bool RTSPSession::OverMaxConnections(UInt32 buffer)
 
 	if (maxConns > -1) // limit connections
 	{
-		UInt32 maxConnections = (UInt32)maxConns + buffer;
+		uint32_t maxConnections = (uint32_t)maxConns + buffer;
 		if ((theServer->GetNumRTPSessions() > maxConnections)
 			||
 			(theServer->GetNumRTSPSessions() + theServer->GetNumRTSPHTTPSessions() > maxConnections)
@@ -2067,7 +2067,7 @@ QTSS_Error RTSPSession::IsOkToAddNewRTPSession()
 
 	//if the max bandwidth limit has been hit
 	SInt32 maxKBits = theServer->GetPrefs()->GetMaxKBitsBandwidth();
-	if ((maxKBits > -1) && (theServer->GetCurBandwidthInBits() >= ((UInt32)maxKBits * 1024)))
+	if ((maxKBits > -1) && (theServer->GetCurBandwidthInBits() >= ((uint32_t)maxKBits * 1024)))
 		return QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientNotEnoughBandwidth,
 			qtssMsgTooMuchThruput);
 
@@ -2085,7 +2085,7 @@ void RTSPSession::SaveRequestAuthorizationParams(RTSPRequest *theRTSPRequest)
 	if (tempPtr)
 	{
 		(void)this->SetValue(qtssRTSPSesLastUserName, 0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
-		(void)fRTPSession->SetValue(qtssCliRTSPSesUserName, (UInt32)0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
+		(void)fRTPSession->SetValue(qtssCliRTSPSesUserName, (uint32_t)0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
 	}
 
 	// Same thing... user password
@@ -2094,7 +2094,7 @@ void RTSPSession::SaveRequestAuthorizationParams(RTSPRequest *theRTSPRequest)
 	if (tempPtr)
 	{
 		(void)this->SetValue(qtssRTSPSesLastUserPassword, 0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
-		(void)fRTPSession->SetValue(qtssCliRTSPSesUserPassword, (UInt32)0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
+		(void)fRTPSession->SetValue(qtssCliRTSPSesUserPassword, (uint32_t)0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
 	}
 
 	tempPtr = theRTSPRequest->GetValue(qtssRTSPReqURLRealm);
@@ -2105,14 +2105,14 @@ void RTSPSession::SaveRequestAuthorizationParams(RTSPRequest *theRTSPRequest)
 			// If there is no realm explicitly specified in the request, then let's get the default out of the prefs
 			OSCharArrayDeleter theDefaultRealm(QTSServerInterface::GetServer()->GetPrefs()->GetAuthorizationRealm());
 			char *realm = theDefaultRealm.GetObject();
-			UInt32 len = ::strlen(theDefaultRealm.GetObject());
+			uint32_t len = ::strlen(theDefaultRealm.GetObject());
 			(void)this->SetValue(qtssRTSPSesLastURLRealm, 0, realm, len, QTSSDictionary::kDontObeyReadOnly);
-			(void)fRTPSession->SetValue(qtssCliRTSPSesURLRealm, (UInt32)0, realm, len, QTSSDictionary::kDontObeyReadOnly);
+			(void)fRTPSession->SetValue(qtssCliRTSPSesURLRealm, (uint32_t)0, realm, len, QTSSDictionary::kDontObeyReadOnly);
 		}
 		else
 		{
 			(void)this->SetValue(qtssRTSPSesLastURLRealm, 0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
-			(void)fRTPSession->SetValue(qtssCliRTSPSesURLRealm, (UInt32)0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
+			(void)fRTPSession->SetValue(qtssCliRTSPSesURLRealm, (uint32_t)0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
 		}
 	}
 }
@@ -2167,7 +2167,7 @@ void RTSPSession::HandleIncomingDataPacket()
 	packetParams.rtspIncomingDataParams.inPacketData = fInputStream.GetRequestBuffer()->Ptr;
 	packetParams.rtspIncomingDataParams.inPacketLen = fInputStream.GetRequestBuffer()->Len;
 
-	UInt32 numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPIncomingDataRole);
+	uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPIncomingDataRole);
 	for (; fCurrentModule < numModules; fCurrentModule++)
 	{
 		QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRTSPIncomingDataRole, fCurrentModule);

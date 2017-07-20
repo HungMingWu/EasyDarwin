@@ -144,7 +144,7 @@ SInt64 OS::Milliseconds()
 	// using binary & to reduce it to one operation from two
 	// sCompareWrap and sWrapTime are constants that are never changed
 	// sLastTimeMilli is updated with the curTimeMilli after each call to this function
-	SInt64 curTimeMilli = (UInt32) ::timeGetTime() + (sLastTimeMilli & sCompareWrap);
+	SInt64 curTimeMilli = (uint32_t) ::timeGetTime() + (sLastTimeMilli & sCompareWrap);
 	if ((curTimeMilli - sLastTimeMilli) < 0)
 	{
 		curTimeMilli += sWrapTime;
@@ -329,7 +329,7 @@ bool OS::ThreadSafe()
 	mib[0] = CTL_KERN;
 	mib[1] = KERN_OSRELEASE;
 
-	UInt32 majorVers = 0;
+	uint32_t majorVers = 0;
 	int err = sysctl(mib, 2, releaseStr, &strLen, NULL, 0);
 	if (err == 0)
 	{
@@ -351,13 +351,13 @@ bool OS::ThreadSafe()
 }
 
 
-UInt32 OS::GetNumProcessors()
+uint32_t OS::GetNumProcessors()
 {
 #if (__Win32__)
 	SYSTEM_INFO theSystemInfo;
 	::GetSystemInfo(&theSystemInfo);
 
-	return (UInt32)theSystemInfo.dwNumberOfProcessors;
+	return (uint32_t)theSystemInfo.dwNumberOfProcessors;
 #endif
 
 #if (__MacOSX__ || __FreeBSD__)
@@ -369,7 +369,7 @@ UInt32 OS::GetNumProcessors()
 	(void) ::sysctl(mib, 2, &numCPUs, &len, NULL, 0);
 	if (numCPUs < 1)
 		numCPUs = 1;
-	return (UInt32)numCPUs;
+	return (uint32_t)numCPUs;
 #endif
 
 #if(__linux__ || __linuxppc__)
@@ -386,7 +386,7 @@ UInt32 OS::GetNumProcessors()
 	StringParser cpuInfoFileParser(&cpuInfoBuf);
 	StrPtrLen line;
 	StrPtrLen word;
-	UInt32 numCPUs = 0;
+	uint32_t numCPUs = 0;
 
 	while (cpuInfoFileParser.GetDataRemaining() != 0)
 	{
@@ -413,7 +413,7 @@ UInt32 OS::GetNumProcessors()
 
 #if(__solaris__)
 	{
-		UInt32 numCPUs = 0;
+		uint32_t numCPUs = 0;
 		char linebuff[512] = "";
 		StrPtrLen line(linebuff, sizeof(linebuff));
 		StrPtrLen word;
@@ -450,7 +450,7 @@ UInt32 OS::GetNumProcessors()
 #endif
 
 #if(__sgi__) 
-	UInt32 numCPUs = 0;
+	uint32_t numCPUs = 0;
 
 	numCPUs = sysconf(_SC_NPROC_ONLN);
 
@@ -470,7 +470,7 @@ SInt64 OS::TimeMilli_To_Fixed64Secs(SInt64 inMilliseconds)
 	// 2**32, divide by 1000, effectively this gives (rem/1000) as a
 	// binary fraction.
 	double p = ldexp((double)(inMilliseconds % 1000), +32) / 1000.;
-	UInt32 frac = (UInt32)p;
+	uint32_t frac = (uint32_t)p;
 	result |= frac;
 	return result;
 }

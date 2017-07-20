@@ -70,9 +70,9 @@ protected:
 	//
 	// Protected member variables.
 	uint8_t       fVersion;
-	UInt32      fFlags; // 24 bits in the low 3 bytes
+	uint32_t      fFlags; // 24 bits in the low 3 bytes
 	UInt64      fCreationTime, fModificationTime;
-	UInt32      fTimeScale;
+	uint32_t      fTimeScale;
 	UInt64      fDuration;
 	uint16_t      fLanguage;
 	uint16_t      fQuality;

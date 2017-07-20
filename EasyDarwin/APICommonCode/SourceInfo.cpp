@@ -44,14 +44,14 @@ SourceInfo::SourceInfo(const SourceInfo& copy)
     if(copy.fStreamArray != NULL && fNumStreams != 0)
     {
         fStreamArray = new StreamInfo[fNumStreams];
-        for (UInt32 index=0; index < fNumStreams; index++)
+        for (uint32_t index=0; index < fNumStreams; index++)
             fStreamArray[index].Copy(copy.fStreamArray[index]);
     }
     
     if(copy.fOutputArray != NULL && fNumOutputs != 0)
     {
         fOutputArray = new OutputInfo[fNumOutputs];
-        for (UInt32 index2=0; index2 < fNumOutputs; index2++)
+        for (uint32_t index2=0; index2 < fNumOutputs; index2++)
             fOutputArray[index2].Copy(copy.fOutputArray[index2]);
     }
     
@@ -75,7 +75,7 @@ bool  SourceInfo::IsReflectable()
         return false;
         
     //each stream's info must meet certain criteria
-    for (UInt32 x = 0; x < fNumStreams; x++)
+    for (uint32_t x = 0; x < fNumStreams; x++)
     {
         if (fStreamArray[x].fIsTCP)
             continue;
@@ -87,7 +87,7 @@ bool  SourceInfo::IsReflectable()
     return true;
 }
 
-bool  SourceInfo::IsReflectableIPAddr(UInt32 inIPAddr)
+bool  SourceInfo::IsReflectableIPAddr(uint32_t inIPAddr)
 {
 	//fix ffmpeg push rtsp stream setup error
 	return true;
@@ -99,7 +99,7 @@ bool  SourceInfo::IsReflectableIPAddr(UInt32 inIPAddr)
 bool  SourceInfo::HasTCPStreams()
 {   
     //each stream's info must meet certain criteria
-    for (UInt32 x = 0; x < fNumStreams; x++)
+    for (uint32_t x = 0; x < fNumStreams; x++)
     {
         if (fStreamArray[x].fIsTCP)
             return true;
@@ -110,14 +110,14 @@ bool  SourceInfo::HasTCPStreams()
 bool  SourceInfo::HasIncomingBroacast()
 {   
     //each stream's info must meet certain criteria
-    for (UInt32 x = 0; x < fNumStreams; x++)
+    for (uint32_t x = 0; x < fNumStreams; x++)
     {
         if (fStreamArray[x].fSetupToReceive)
             return true;
     }
     return false;
 }
-SourceInfo::StreamInfo* SourceInfo::GetStreamInfo(UInt32 inIndex)
+SourceInfo::StreamInfo* SourceInfo::GetStreamInfo(uint32_t inIndex)
 {
     Assert(inIndex < fNumStreams);
     if (fStreamArray == NULL)
@@ -128,11 +128,11 @@ SourceInfo::StreamInfo* SourceInfo::GetStreamInfo(UInt32 inIndex)
         return NULL;
 }
 
-SourceInfo::StreamInfo* SourceInfo::GetStreamInfoByTrackID(UInt32 inTrackID)
+SourceInfo::StreamInfo* SourceInfo::GetStreamInfoByTrackID(uint32_t inTrackID)
 {
     if (fStreamArray == NULL)
         return NULL;
-    for (UInt32 x = 0; x < fNumStreams; x++)
+    for (uint32_t x = 0; x < fNumStreams; x++)
     {
         if (fStreamArray[x].fTrackID == inTrackID)
             return &fStreamArray[x];
@@ -140,7 +140,7 @@ SourceInfo::StreamInfo* SourceInfo::GetStreamInfoByTrackID(UInt32 inTrackID)
     return NULL;
 }
 
-SourceInfo::OutputInfo* SourceInfo::GetOutputInfo(UInt32 inIndex)
+SourceInfo::OutputInfo* SourceInfo::GetOutputInfo(uint32_t inIndex)
 {
     Assert(inIndex < fNumOutputs);
     if (fOutputArray == NULL)
@@ -151,10 +151,10 @@ SourceInfo::OutputInfo* SourceInfo::GetOutputInfo(UInt32 inIndex)
         return NULL;
 }
 
-UInt32 SourceInfo::GetNumNewOutputs()
+uint32_t SourceInfo::GetNumNewOutputs()
 {
-    UInt32 theNumNewOutputs = 0;
-    for (UInt32 x = 0; x < fNumOutputs; x++)
+    uint32_t theNumNewOutputs = 0;
+    for (uint32_t x = 0; x < fNumOutputs; x++)
     {
         if (!fOutputArray[x].fAlreadySetup)
             theNumNewOutputs++;
@@ -162,7 +162,7 @@ UInt32 SourceInfo::GetNumNewOutputs()
     return theNumNewOutputs;
 }
 
-bool  SourceInfo::SetActiveNTPTimes(UInt32 startTimeNTP,UInt32 endTimeNTP)
+bool  SourceInfo::SetActiveNTPTimes(uint32_t startTimeNTP,uint32_t endTimeNTP)
 {   // right now only handles earliest start and latest end time.
 
     //qtss_printf("SourceInfo::SetActiveNTPTimes start=%"   _U32BITARG_   " end=%"   _U32BITARG_   "\n",startTimeNTP,endTimeNTP);
@@ -171,8 +171,8 @@ bool  SourceInfo::SetActiveNTPTimes(UInt32 startTimeNTP,UInt32 endTimeNTP)
     {
         if ((startTimeNTP > 0) && (endTimeNTP > 0) && (endTimeNTP < startTimeNTP)) break; // not valid NTP time
         
-        UInt32 startTimeUnixSecs = 0; 
-        UInt32 endTimeUnixSecs  = 0; 
+        uint32_t startTimeUnixSecs = 0; 
+        uint32_t endTimeUnixSecs  = 0; 
         
         if (startTimeNTP != 0 && IsValidNTPSecs(startTimeNTP)) // allow anything less than 1970 
             startTimeUnixSecs = NTPSecs_to_UnixSecs(startTimeNTP);// convert to 1970 time
@@ -226,15 +226,15 @@ bool  SourceInfo::IsActiveTime(time_t unixTimeSecs)
 }
 
 
-UInt32 SourceInfo::GetDurationSecs() 
+uint32_t SourceInfo::GetDurationSecs() 
 {    
     
     if (fEndTimeUnixSecs == 0) // unbounded time
-        return (UInt32) ~0; // max time
+        return (uint32_t) ~0; // max time
     
     time_t timeNow = OS::UnixTime_Secs();
     if (fEndTimeUnixSecs <= timeNow) // the active time has past or duration is 0 so return the minimum duration
-        return (UInt32) 0; 
+        return (uint32_t) 0; 
             
     if (fStartTimeUnixSecs == 0) // relative duration = from "now" to end time
         return fEndTimeUnixSecs - timeNow;
@@ -250,7 +250,7 @@ bool SourceInfo::Equal(SourceInfo* inInfo)
         return false;
     
     // Check the src & dest addr, and port of each stream. 
-    for (UInt32 x = 0; x < this->GetNumStreams(); x++)
+    for (uint32_t x = 0; x < this->GetNumStreams(); x++)
     {
         if (GetStreamInfo(x)->fDestIPAddr != inInfo->GetStreamInfo(x)->fDestIPAddr)
             return false;

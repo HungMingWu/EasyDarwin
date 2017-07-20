@@ -42,16 +42,16 @@
 
 
 static UInt64 sTotalChars = 0;
-static UInt32 sMaxTotalCharsInK = 100 * 1000;//100MB default
+static uint32_t sMaxTotalCharsInK = 100 * 1000;//100MB default
 static int sMaxFileSizeReached = 0;
 
-UInt32 qtss_getmaxprintfcharsinK()
+uint32_t qtss_getmaxprintfcharsinK()
 {
 	OSMutexLocker locker(OS::GetStdLibMutex());
 	return sMaxTotalCharsInK;
 }
 
-void qtss_setmaxprintfcharsinK(UInt32 newMaxCharsInK)
+void qtss_setmaxprintfcharsinK(uint32_t newMaxCharsInK)
 {
 	OSMutexLocker locker(OS::GetStdLibMutex());
 	sMaxTotalCharsInK = newMaxCharsInK;

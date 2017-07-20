@@ -71,8 +71,8 @@ public:
 		delete[] fAuthOpaque.Ptr;
 	}
 
-	virtual void SetValueComplete(UInt32 inAttrIndex, QTSSDictionaryMap* inMap,
-		UInt32 inValueIndex, void* inNewValue, UInt32 inNewValueLen);
+	virtual void SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
+		uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen);
 
 	//Timeouts. This allows clients to refresh the timeout on this session
 	void    RefreshTimeout() { fTimeoutTask.RefreshTimeout(); }
@@ -95,18 +95,18 @@ public:
 	OSMutex*        GetSessionMutex() { return &fSessionMutex; }
 	OSMutex*		GetRTSPSessionMutex() { return  &fRTSPSessionMutex; }
 
-	UInt32          GetPacketsSent() { return fPacketsSent; }
-	UInt32          GetBytesSent() { return fBytesSent; }
+	uint32_t          GetPacketsSent() { return fPacketsSent; }
+	uint32_t          GetBytesSent() { return fBytesSent; }
 	OSRef*      GetRef() { return &fRTPMapElem; }
 	RTSPSessionInterface* GetRTSPSession() { return fRTSPSession; }
-	UInt32      GetMovieAvgBitrate() { return fMovieAverageBitRate; }
+	uint32_t      GetMovieAvgBitrate() { return fMovieAverageBitRate; }
 	QTSS_CliSesTeardownReason GetTeardownReason() { return fTeardownReason; }
 	QTSS_RTPSessionState    GetSessionState() { return fState; }
-	void    SetUniqueID(UInt32 theID) { fUniqueID = theID; }
-	UInt32  GetUniqueID() { return fUniqueID; }
+	void    SetUniqueID(uint32_t theID) { fUniqueID = theID; }
+	uint32_t  GetUniqueID() { return fUniqueID; }
 	RTPBandwidthTracker* GetBandwidthTracker() { return &fTracker; }
 	RTPOverbufferWindow* GetOverbufferWindow() { return &fOverbufferWindow; }
-	UInt32  GetFramesSkipped() { return fFramesSkipped; }
+	uint32_t  GetFramesSkipped() { return fFramesSkipped; }
 
 	//
 	// MEMORY FOR RTCP PACKETS
@@ -117,18 +117,18 @@ public:
 
 	//
 	// Memory if you want to build your own
-	char*           GetSRBuffer(UInt32 inSRLen);
+	char*           GetSRBuffer(uint32_t inSRLen);
 
 	//
 	// STATISTICS UPDATING
 
 	//The session tracks the total number of bytes sent during the session.
 	//Streams can update that value by calling this function
-	void            UpdateBytesSent(UInt32 bytesSent) { fBytesSent += bytesSent; }
+	void            UpdateBytesSent(uint32_t bytesSent) { fBytesSent += bytesSent; }
 
 	//The session tracks the total number of packets sent during the session.
 	//Streams can update that value by calling this function                
-	void            UpdatePacketsSent(UInt32 packetsSent) { fPacketsSent += packetsSent; }
+	void            UpdatePacketsSent(uint32_t packetsSent) { fPacketsSent += packetsSent; }
 
 	void            UpdateCurrentBitRate(const SInt64& curTime)
 	{
@@ -160,20 +160,20 @@ public:
 	// for the duration of the session      
 	QTSS_AuthScheme GetAuthScheme() { return fAuthScheme; }
 	StrPtrLen*      GetAuthNonce() { return &fAuthNonce; }
-	UInt32          GetAuthQop() { return fAuthQop; }
-	UInt32          GetAuthNonceCount() { return fAuthNonceCount; }
+	uint32_t          GetAuthQop() { return fAuthQop; }
+	uint32_t          GetAuthNonceCount() { return fAuthNonceCount; }
 	StrPtrLen*      GetAuthOpaque() { return &fAuthOpaque; }
 	void            SetAuthScheme(QTSS_AuthScheme scheme) { fAuthScheme = scheme; }
 	// Use this if the auth scheme or the qop has to be changed from the defaults 
 	// of scheme = Digest, and qop = auth
-	void            SetChallengeParams(QTSS_AuthScheme scheme, UInt32 qop, bool newNonce, bool createOpaque);
+	void            SetChallengeParams(QTSS_AuthScheme scheme, uint32_t qop, bool newNonce, bool createOpaque);
 	// Use this otherwise...if newNonce == true, it will create a new nonce
 	// and reset nonce count. If newNonce == false but nonce was never created earlier
 	// a nonce will be created. If newNonce == false, and there is an existing nonce,
 	// the nounce count will be incremented.
-	void            UpdateDigestAuthChallengeParams(bool newNonce, bool createOpaque, UInt32 qop);
+	void            UpdateDigestAuthChallengeParams(bool newNonce, bool createOpaque, uint32_t qop);
 
-	float* GetPacketLossPercent() { UInt32 outLen; return  (float*) this->PacketLossPercent(this, &outLen); }
+	float* GetPacketLossPercent() { uint32_t outLen; return  (float*) this->PacketLossPercent(this, &outLen); }
 
 	SInt32          GetQualityLevel() { return fSessionQualityLevel; }
 	SInt32*         GetQualityLevelPtr() { return &fSessionQualityLevel; }
@@ -190,14 +190,14 @@ public:
 
 	// Used by RTPStream to increment the RTCP packet and byte counts.
 	void            IncrTotalRTCPPacketsRecv() { fTotalRTCPPacketsRecv++; }
-	UInt32          GetTotalRTCPPacketsRecv() { return fTotalRTCPPacketsRecv; }
+	uint32_t          GetTotalRTCPPacketsRecv() { return fTotalRTCPPacketsRecv; }
 	void            IncrTotalRTCPBytesRecv(uint16_t cnt) { fTotalRTCPBytesRecv += cnt; }
-	UInt32          GetTotalRTCPBytesRecv() { return fTotalRTCPBytesRecv; }
+	uint32_t          GetTotalRTCPBytesRecv() { return fTotalRTCPBytesRecv; }
 
-	UInt32          GetLastRTSPBandwithBits() { return fLastRTSPBandwidthHeaderBits; }
-	UInt32          GetCurrentMovieBitRate() { return fMovieCurrentBitRate; }
+	uint32_t          GetLastRTSPBandwithBits() { return fLastRTSPBandwidthHeaderBits; }
+	uint32_t          GetCurrentMovieBitRate() { return fMovieCurrentBitRate; }
 
-	UInt32          GetMaxBandwidthBits() { UInt32 maxRTSP = GetLastRTSPBandwithBits();  return  maxRTSP; }
+	uint32_t          GetMaxBandwidthBits() { uint32_t maxRTSP = GetLastRTSPBandwithBits();  return  maxRTSP; }
 
 protected:
 	// These variables are setup by the derived RTPSession object when
@@ -230,9 +230,9 @@ protected:
 	OSRef               fRTPMapElem;
 	char                fRTSPSessionIDBuf[QTSS_MAX_SESSION_ID_LENGTH + 4];
 
-	UInt32      fLastBitRateBytes;
+	uint32_t      fLastBitRateBytes;
 	SInt64      fLastBitRateUpdateTime;
-	UInt32      fMovieCurrentBitRate;
+	uint32_t      fMovieCurrentBitRate;
 
 	// In order to facilitate sending data over the RTSP channel from
 	// an RTP session, we store a pointer to the RTSP session used in
@@ -247,9 +247,9 @@ private:
 	// Utility function for calculating current bit rate
 	void UpdateBitRateInternal(const SInt64& curTime);
 
-	static void* PacketLossPercent(QTSSDictionary* inSession, UInt32* outLen);
-	static void* TimeConnected(QTSSDictionary* inSession, UInt32* outLen);
-	static void* CurrentBitRate(QTSSDictionary* inSession, UInt32* outLen);
+	static void* PacketLossPercent(QTSSDictionary* inSession, uint32_t* outLen);
+	static void* TimeConnected(QTSSDictionary* inSession, uint32_t* outLen);
+	static void* CurrentBitRate(QTSSDictionary* inSession, uint32_t* outLen);
 
 	// Create nonce
 	void CreateDigestAuthenticationNonce();
@@ -290,36 +290,36 @@ private:
 	char        fUserNameBuf[RTSPSessionInterface::kMaxUserNameLen];
 	char        fUserPasswordBuf[RTSPSessionInterface::kMaxUserPasswordLen];
 	char        fUserRealmBuf[RTSPSessionInterface::kMaxUserRealmLen];
-	UInt32      fLastRTSPReqRealStatusCode;
+	uint32_t      fLastRTSPReqRealStatusCode;
 
 	//for timing out this session
 	TimeoutTask fTimeoutTask;
-	UInt32      fTimeout;
+	uint32_t      fTimeout;
 
 	// Time when this session got created
 	SInt64      fSessionCreateTime;
 
 	//Packet priority levels. Each stream has a current level, and
 	//the module that owns this session sets what the number of levels is.
-	UInt32      fNumQualityLevels;
+	uint32_t      fNumQualityLevels;
 
 	//Statistics
-	UInt32 fBytesSent;
-	UInt32 fPacketsSent;
+	uint32_t fBytesSent;
+	uint32_t fPacketsSent;
 	float fPacketLossPercent;
 	SInt64 fTimeConnected;
-	UInt32 fTotalRTCPPacketsRecv;
-	UInt32 fTotalRTCPBytesRecv;
+	uint32_t fTotalRTCPPacketsRecv;
+	uint32_t fTotalRTCPBytesRecv;
 	// Movie size & movie duration. It may not be so good to associate these
 	// statistics with the movie, for a session MAY have multiple movies...
 	// however, the 1 movie assumption is in too many subsystems at this point
 	double     fMovieDuration;
 	UInt64      fMovieSizeInBytes;
-	UInt32      fMovieAverageBitRate;
+	uint32_t      fMovieAverageBitRate;
 
 	QTSS_CliSesTeardownReason fTeardownReason;
 	// So the streams can send sender reports
-	UInt32      fUniqueID;
+	uint32_t      fUniqueID;
 
 	RTCPSRPacket        fRTCPSRPacket;
 	StrPtrLen           fSRBuffer;
@@ -335,14 +335,14 @@ private:
 	// for the duration of the session      
 	QTSS_AuthScheme             fAuthScheme;
 	StrPtrLen                   fAuthNonce;
-	UInt32                      fAuthQop;
-	UInt32                      fAuthNonceCount;
+	uint32_t                      fAuthQop;
+	uint32_t                      fAuthNonceCount;
 	StrPtrLen                   fAuthOpaque;
-	UInt32                      fQualityUpdate;
+	uint32_t                      fQualityUpdate;
 
-	UInt32                      fFramesSkipped;
+	uint32_t                      fFramesSkipped;
 
-	UInt32                  fLastRTSPBandwidthHeaderBits;
+	uint32_t                  fLastRTSPBandwidthHeaderBits;
 };
 
 #endif //_RTPSESSIONINTERFACE_H_

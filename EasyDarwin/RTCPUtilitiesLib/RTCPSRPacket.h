@@ -49,7 +49,7 @@ public:
 
 	enum
 	{
-		kSRPacketType = 200,    //UInt32
+		kSRPacketType = 200,    //uint32_t
 		kByePacketType = 203
 	};
 
@@ -59,38 +59,38 @@ public:
 	// ACCESSORS
 
 	void*   GetSRPacket() { return &fSenderReportBuffer[0]; }
-	UInt32  GetSRPacketLen() { return fSenderReportWithServerInfoSize; }
-	UInt32  GetSRWithByePacketLen() { return fSenderReportWithServerInfoSize + kByeSizeInBytes; }
+	uint32_t  GetSRPacketLen() { return fSenderReportWithServerInfoSize; }
+	uint32_t  GetSRWithByePacketLen() { return fSenderReportWithServerInfoSize + kByeSizeInBytes; }
 
 	void*   GetServerInfoPacket() { return &fSenderReportBuffer[fSenderReportSize]; }
-	UInt32  GetServerInfoPacketLen() { return kServerInfoSizeInBytes; }
+	uint32_t  GetServerInfoPacketLen() { return kServerInfoSizeInBytes; }
 
 	//
 	// MODIFIERS
 
 	//
 	// FOR SR
-	inline void SetSSRC(UInt32 inSSRC);
-	inline void SetClientSSRC(UInt32 inClientSSRC);
+	inline void SetSSRC(uint32_t inSSRC);
+	inline void SetClientSSRC(uint32_t inClientSSRC);
 
 	inline void SetNTPTimestamp(SInt64 inNTPTimestamp);
-	inline void SetRTPTimestamp(UInt32 inRTPTimestamp);
+	inline void SetRTPTimestamp(uint32_t inRTPTimestamp);
 
-	inline void SetPacketCount(UInt32 inPacketCount);
-	inline void SetByteCount(UInt32 inByteCount);
+	inline void SetPacketCount(uint32_t inPacketCount);
+	inline void SetByteCount(uint32_t inByteCount);
 
 	//
 	// FOR SERVER INFO APP PACKET
-	inline void SetAckTimeout(UInt32 inAckTimeoutInMsec);
+	inline void SetAckTimeout(uint32_t inAckTimeoutInMsec);
 
 	//RTCP support requires generating unique CNames for each session.
 	//This function generates a proper cName and returns its length. The buffer
 	//passed in must be at least kMaxCNameLen
 	enum
 	{
-		kMaxCNameLen = 60   //Uint32
+		kMaxCNameLen = 60   //uint32_t
 	};
-	static UInt32           GetACName(char* ioCNameBuffer);
+	static uint32_t           GetACName(char* ioCNameBuffer);
 
 private:
 
@@ -101,33 +101,33 @@ private:
 		kByeSizeInBytes = 8
 	};
 	char        fSenderReportBuffer[kSenderReportSizeInBytes + kMaxCNameLen + kServerInfoSizeInBytes + kByeSizeInBytes];
-	UInt32      fSenderReportSize;
-	UInt32      fSenderReportWithServerInfoSize;
+	uint32_t      fSenderReportSize;
+	uint32_t      fSenderReportWithServerInfoSize;
 
 };
 
-inline void RTCPSRPacket::SetSSRC(UInt32 inSSRC)
+inline void RTCPSRPacket::SetSSRC(uint32_t inSSRC)
 {
 	// Set SSRC in SR
-	((UInt32*)&fSenderReportBuffer)[1] = htonl(inSSRC);
+	((uint32_t*)&fSenderReportBuffer)[1] = htonl(inSSRC);
 
 	// Set SSRC in SDES
-	((UInt32*)&fSenderReportBuffer)[8] = htonl(inSSRC);
+	((uint32_t*)&fSenderReportBuffer)[8] = htonl(inSSRC);
 
 	// Set SSRC in SERVER INFO
 	Assert((fSenderReportSize & 3) == 0);
-	((UInt32*)&fSenderReportBuffer)[(fSenderReportSize >> 2) + 1] = htonl(inSSRC);
+	((uint32_t*)&fSenderReportBuffer)[(fSenderReportSize >> 2) + 1] = htonl(inSSRC);
 
 	// Set SSRC in BYE
 	Assert((fSenderReportWithServerInfoSize & 3) == 0);
-	((UInt32*)&fSenderReportBuffer)[(fSenderReportWithServerInfoSize >> 2) + 1] = htonl(inSSRC);
+	((uint32_t*)&fSenderReportBuffer)[(fSenderReportWithServerInfoSize >> 2) + 1] = htonl(inSSRC);
 }
 
-inline void RTCPSRPacket::SetClientSSRC(UInt32 inClientSSRC)
+inline void RTCPSRPacket::SetClientSSRC(uint32_t inClientSSRC)
 {
 	//
 	// Set Client SSRC in SERVER INFO
-	((UInt32*)&fSenderReportBuffer)[(fSenderReportSize >> 2) + 3] = htonl(inClientSSRC);
+	((uint32_t*)&fSenderReportBuffer)[(fSenderReportSize >> 2) + 3] = htonl(inClientSSRC);
 }
 
 inline void RTCPSRPacket::SetNTPTimestamp(SInt64 inNTPTimestamp)
@@ -140,24 +140,24 @@ inline void RTCPSRPacket::SetNTPTimestamp(SInt64 inNTPTimestamp)
 #endif
 }
 
-inline void RTCPSRPacket::SetRTPTimestamp(UInt32 inRTPTimestamp)
+inline void RTCPSRPacket::SetRTPTimestamp(uint32_t inRTPTimestamp)
 {
-	((UInt32*)&fSenderReportBuffer)[4] = htonl(inRTPTimestamp);
+	((uint32_t*)&fSenderReportBuffer)[4] = htonl(inRTPTimestamp);
 }
 
-inline void RTCPSRPacket::SetPacketCount(UInt32 inPacketCount)
+inline void RTCPSRPacket::SetPacketCount(uint32_t inPacketCount)
 {
-	((UInt32*)&fSenderReportBuffer)[5] = htonl(inPacketCount);
+	((uint32_t*)&fSenderReportBuffer)[5] = htonl(inPacketCount);
 }
 
-inline void RTCPSRPacket::SetByteCount(UInt32 inByteCount)
+inline void RTCPSRPacket::SetByteCount(uint32_t inByteCount)
 {
-	((UInt32*)&fSenderReportBuffer)[6] = htonl(inByteCount);
+	((uint32_t*)&fSenderReportBuffer)[6] = htonl(inByteCount);
 }
 
-inline void RTCPSRPacket::SetAckTimeout(UInt32 inAckTimeoutInMsec)
+inline void RTCPSRPacket::SetAckTimeout(uint32_t inAckTimeoutInMsec)
 {
-	((UInt32*)&fSenderReportBuffer)[(fSenderReportWithServerInfoSize >> 2) - 1] = htonl(inAckTimeoutInMsec);
+	((uint32_t*)&fSenderReportBuffer)[(fSenderReportWithServerInfoSize >> 2) - 1] = htonl(inAckTimeoutInMsec);
 }
 
 #endif //__RTCP_SR_PACKET__

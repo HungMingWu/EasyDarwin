@@ -77,8 +77,8 @@ public:
 		kAllOrNothing = 1,
 		kAlwaysBuffer = 2
 	};
-	QTSS_Error WriteV(iovec* inVec, UInt32 inNumVectors, UInt32 inTotalLength,
-		UInt32* outLengthSent, UInt32 inSendType);
+	QTSS_Error WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength,
+		uint32_t* outLengthSent, uint32_t inSendType);
 
 	// Flushes any buffered data to the socket. If all data could be sent,
 	// this returns QTSS_NoErr, otherwise, it returns EWOULDBLOCK
@@ -91,7 +91,7 @@ private:
 
 	enum
 	{
-		kOutputBufferSizeInBytes = QTSS_MAX_REQUEST_BUFFER_SIZE  //UInt32
+		kOutputBufferSizeInBytes = QTSS_MAX_REQUEST_BUFFER_SIZE  //uint32_t
 	};
 
 	//The default buffer size is allocated inline as part of the object. Because this size
@@ -100,7 +100,7 @@ private:
 	//allocate a larger buffer.
 	char                    fOutputBuf[kOutputBufferSizeInBytes];
 	TCPSocket*              fSocket;
-	UInt32                  fBytesSentInBuffer;
+	uint32_t                  fBytesSentInBuffer;
 	TimeoutTask*            fTimeoutTask;
 	bool                  fPrintRTSP;     // debugging printfs
 

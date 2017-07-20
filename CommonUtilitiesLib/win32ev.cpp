@@ -85,7 +85,7 @@ int select_modwatch(struct eventreq* req, int which)
 		theEvent |= FD_WRITE | FD_CONNECT;
 
 	// This is a little bit of a hack, because we are assuming that the caller
-	// is actually putting a UInt32 in the void*, not a void*, and we are also
+	// is actually putting a uint32_t in the void*, not a void*, and we are also
 	// assuming caller is not using the 0 - WM_USER range of values, but
 	// both of these things are true in the EventContext.cpp code, and this
 	// mechanism of passing around cookies is just too convienent to ignore.
@@ -146,12 +146,12 @@ int select_waitevent(struct eventreq* req, void* /*onlyForMacOSX*/)
 	//
 	// Convienently, this function blocks until there is a message, so it works
 	// much like waitevent would on Mac OS X.
-	UInt32 theErr = ::GetMessage(&theMessage, sMsgWindow, 0, 0);
+	uint32_t theErr = ::GetMessage(&theMessage, sMsgWindow, 0, 0);
 
 	if (theErr > 0)
 	{
-		UInt32 theSelectErr = WSAGETSELECTERROR(theMessage.lParam);
-		UInt32 theEvent = WSAGETSELECTEVENT(theMessage.lParam);
+		uint32_t theSelectErr = WSAGETSELECTERROR(theMessage.lParam);
+		uint32_t theEvent = WSAGETSELECTEVENT(theMessage.lParam);
 
 		req->er_handle = theMessage.wParam; // the wParam is the FD
 		req->er_eventbits = EV_RE;          // WSA events & socket events don't map...

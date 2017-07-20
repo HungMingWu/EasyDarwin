@@ -35,7 +35,7 @@
 
 SInt64 RTCPTask::Run()
 {
-	const UInt32 kMaxRTCPPacketSize = 2048;
+	const uint32_t kMaxRTCPPacketSize = 2048;
 	char thePacketBuffer[kMaxRTCPPacketSize];
 	StrPtrLen thePacket(thePacketBuffer, 0);
 	QTSServerInterface* theServer = QTSServerInterface::GetServer();
@@ -53,13 +53,13 @@ SInt64 RTCPTask::Run()
 		for (OSQueueIter iter(theServer->GetSocketPool()->GetSocketQueue());
 			!iter.IsDone(); iter.Next())
 		{
-			UInt32 theRemoteAddr = 0;
+			uint32_t theRemoteAddr = 0;
 			uint16_t theRemotePort = 0;
 
 			UDPSocketPair* thePair = (UDPSocketPair*)iter.GetCurrent()->GetEnclosingObject();
 			Assert(thePair != NULL);
 
-			for (UInt32 x = 0; x < 2; x++)
+			for (uint32_t x = 0; x < 2; x++)
 			{
 				UDPSocket* theSocket = NULL;
 				if (x == 0)

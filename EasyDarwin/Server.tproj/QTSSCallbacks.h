@@ -42,7 +42,7 @@ public:
 
 	// MEMORY ROUTINES
 
-	static void*    QTSS_New(FourCharCode inMemoryIdentifier, UInt32 inSize);
+	static void*    QTSS_New(FourCharCode inMemoryIdentifier, uint32_t inSize);
 	static void     QTSS_Delete(void* inMemory);
 
 	// TIME ROUTINES
@@ -77,37 +77,37 @@ public:
 
 	static QTSS_Error   QTSS_GetAttrInfoByName(QTSS_Object inObject, const char* inAttrName, QTSS_Object* outAttrInfoObject);
 	static QTSS_Error   QTSS_GetAttrInfoByID(QTSS_Object inObject, QTSS_AttributeID inAttrID, QTSS_Object* outAttrInfoObject);
-	static QTSS_Error   QTSS_GetAttrInfoByIndex(QTSS_Object inObject, UInt32 inIndex, QTSS_Object* outAttrInfoObject);
+	static QTSS_Error   QTSS_GetAttrInfoByIndex(QTSS_Object inObject, uint32_t inIndex, QTSS_Object* outAttrInfoObject);
 
-	static QTSS_Error   QTSS_GetNumAttributes(QTSS_Object inObject, UInt32* outNumValues);
+	static QTSS_Error   QTSS_GetNumAttributes(QTSS_Object inObject, uint32_t* outNumValues);
 
 	// TYPE INFO & TYPE CONVERSIONS
 
 	static QTSS_Error   QTSS_TypeToTypeString(const QTSS_AttrDataType inType, char** outTypeString);
 	static QTSS_Error   QTSS_TypeStringToType(char* inTypeString, QTSS_AttrDataType* outType);
-	static QTSS_Error   QTSS_StringToValue(char* inValueAsString, const QTSS_AttrDataType inType, void* ioBuffer, UInt32* ioBufSize);
-	static QTSS_Error   QTSS_ValueToString(void* inValue, const UInt32 inValueLen, const QTSS_AttrDataType inType, char** outString);
+	static QTSS_Error   QTSS_StringToValue(char* inValueAsString, const QTSS_AttrDataType inType, void* ioBuffer, uint32_t* ioBufSize);
+	static QTSS_Error   QTSS_ValueToString(void* inValue, const uint32_t inValueLen, const QTSS_AttrDataType inType, char** outString);
 
 	// ATTRIBUTE VALUES
 
-	static QTSS_Error   QTSS_GetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, UInt32 inIndex, void** outBuffer, UInt32* outLen);
-	static QTSS_Error   QTSS_GetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, UInt32 inIndex, void* ioBuffer, UInt32* ioLen);
-	static QTSS_Error   QTSS_GetValueAsString(QTSS_Object inDictionary, QTSS_AttributeID inID, UInt32 inIndex, char** outString);
+	static QTSS_Error   QTSS_GetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, void** outBuffer, uint32_t* outLen);
+	static QTSS_Error   QTSS_GetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, void* ioBuffer, uint32_t* ioLen);
+	static QTSS_Error   QTSS_GetValueAsString(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, char** outString);
 
-	static QTSS_Error   QTSS_SetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, UInt32 inIndex, const void* inBuffer, UInt32 inLen);
-	static QTSS_Error   QTSS_SetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, const void* inBuffer, UInt32 inLen);
-	static QTSS_Error   QTSS_CreateObject(QTSS_Object inDictionary, QTSS_AttributeID inID, QTSS_ObjectType inType, UInt32* outIndex, QTSS_Object* outCreatedObject);
-	static QTSS_Error   QTSS_GetNumValues(QTSS_Object inObject, QTSS_AttributeID inID, UInt32* outNumValues);
-	static QTSS_Error   QTSS_RemoveValue(QTSS_Object inObject, QTSS_AttributeID inID, UInt32 inIndex);
+	static QTSS_Error   QTSS_SetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, const void* inBuffer, uint32_t inLen);
+	static QTSS_Error   QTSS_SetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, const void* inBuffer, uint32_t inLen);
+	static QTSS_Error   QTSS_CreateObject(QTSS_Object inDictionary, QTSS_AttributeID inID, QTSS_ObjectType inType, uint32_t* outIndex, QTSS_Object* outCreatedObject);
+	static QTSS_Error   QTSS_GetNumValues(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t* outNumValues);
+	static QTSS_Error   QTSS_RemoveValue(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex);
 
 	// STREAM ROUTINES
 
-	static QTSS_Error   QTSS_Write(QTSS_StreamRef inStream, void* inBuffer, UInt32 inLen, UInt32* outLenWritten, QTSS_WriteFlags inFlags);
-	static QTSS_Error   QTSS_WriteV(QTSS_StreamRef inStream, iovec* inVec, UInt32 inNumVectors, UInt32 inTotalLength, UInt32* outLenWritten);
+	static QTSS_Error   QTSS_Write(QTSS_StreamRef inStream, void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, QTSS_WriteFlags inFlags);
+	static QTSS_Error   QTSS_WriteV(QTSS_StreamRef inStream, iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten);
 	static QTSS_Error   QTSS_Flush(QTSS_StreamRef inStream);
-	static QTSS_Error   QTSS_Read(QTSS_StreamRef inRef, void* ioBuffer, UInt32 inBufLen, UInt32* outLengthRead);
+	static QTSS_Error   QTSS_Read(QTSS_StreamRef inRef, void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead);
 	static QTSS_Error   QTSS_Seek(QTSS_StreamRef inRef, UInt64 inNewPosition);
-	static QTSS_Error   QTSS_Advise(QTSS_StreamRef inRef, UInt64 inPosition, UInt32 inAdviseSize);
+	static QTSS_Error   QTSS_Advise(QTSS_StreamRef inRef, UInt64 inPosition, uint32_t inAdviseSize);
 
 	// FILE SYSTEM ROUTINES
 
@@ -128,8 +128,8 @@ public:
 	// RTSP ROUTINES
 
 	static QTSS_Error   QTSS_SendRTSPHeaders(QTSS_RTSPRequestObject inRef);
-	static QTSS_Error   QTSS_AppendRTSPHeader(QTSS_RTSPRequestObject inRef, QTSS_RTSPHeader inHeader, char* inValue, UInt32 inValueLen);
-	static QTSS_Error   QTSS_SendStandardRTSPResponse(QTSS_RTSPRequestObject inRTSPRequest, QTSS_Object inRTPInfo, UInt32 inFlags);
+	static QTSS_Error   QTSS_AppendRTSPHeader(QTSS_RTSPRequestObject inRef, QTSS_RTSPHeader inHeader, char* inValue, uint32_t inValueLen);
+	static QTSS_Error   QTSS_SendStandardRTSPResponse(QTSS_RTSPRequestObject inRTSPRequest, QTSS_Object inRTPInfo, uint32_t inFlags);
 
 	// RTP ROUTINES
 

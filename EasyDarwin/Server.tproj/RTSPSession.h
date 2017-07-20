@@ -57,7 +57,7 @@ class RTSPSession;
 //
 //	~RTSPMsg() {}
 //
-//	void    SetMsgData(char *data, UInt32 len)
+//	void    SetMsgData(char *data, uint32_t len)
 //	{
 //		Assert(kMaxRTSPMsgLen > len);
 //
@@ -127,7 +127,7 @@ private:
 	bool ParseOptionsResponse();
 
 	// Fancy random number generator
-	UInt32 GenerateNewSessionID(char* ioBuffer);
+	uint32_t GenerateNewSessionID(char* ioBuffer);
 
 	// Sends an error response & returns error if not ok.
 	QTSS_Error IsOkToAddNewRTPSession();
@@ -136,7 +136,7 @@ private:
 	void CheckAuthentication();
 
 	// test current connections handled by this object against server pref connection limit
-	bool OverMaxConnections(UInt32 buffer);
+	bool OverMaxConnections(uint32_t buffer);
 
 	char                fLastRTPSessionID[QTSS_MAX_SESSION_ID_LENGTH];
 	StrPtrLen           fLastRTPSessionIDPtr;
@@ -217,8 +217,8 @@ private:
 		kHaveNonTunnelMessage = 14                  // we've looked at the message, and its not an HTTP tunnle message
 	};
 
-	UInt32 fCurrentModule;
-	UInt32 fState;
+	uint32_t fCurrentModule;
+	uint32_t fState;
 
 
 
@@ -252,7 +252,7 @@ private:
 //    //Number of packets to allocate when the socket is first created
 //	enum
 //	{
-//		kNumPreallocatedMsgs = 20,   //UInt32
+//		kNumPreallocatedMsgs = 20,   //uint32_t
 //        sMsgHandleInterval = 1
 //	};
 //

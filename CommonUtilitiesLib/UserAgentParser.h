@@ -47,8 +47,8 @@ public:
 	struct UserAgentFields
 	{
 		char                    fFieldName[eMaxAttributeSize + 1];
-		UInt32                  fLen;
-		UInt32                  fID;
+		uint32_t                  fLen;
+		uint32_t                  fID;
 	};
 
 	struct UserAgentData

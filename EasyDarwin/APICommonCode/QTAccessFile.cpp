@@ -126,7 +126,7 @@ bool QTAccessFile::HaveUser(char *userName, void* extraDataPtr)
    return result;        
 }
 
-bool QTAccessFile::HaveGroups( char** groupArray, UInt32 numGroups, void* extraDataPtr)
+bool QTAccessFile::HaveGroups( char** groupArray, uint32_t numGroups, void* extraDataPtr)
 {
    bool result = false;
 
@@ -166,10 +166,10 @@ bool QTAccessFile::TestUser(StrPtrLen* accessUser, char *userName,void *extraDat
   return result;   
 }
 
-bool QTAccessFile::TestGroup( StrPtrLen* accessGroup, char *userName, char**groupArray, UInt32 numGroups, void *extraDataPtr)
+bool QTAccessFile::TestGroup( StrPtrLen* accessGroup, char *userName, char**groupArray, uint32_t numGroups, void *extraDataPtr)
 {
    
-    for (UInt32 index = 0; index < numGroups; index ++)
+    for (uint32_t index = 0; index < numGroups; index ++)
     {   if(accessGroup->Equal(groupArray[index])) 
             return true;
     }
@@ -184,7 +184,7 @@ bool QTAccessFile::TestExtraData( StrPtrLen* wordPtr, StringParser* lineParserPt
 }
 
 
-bool QTAccessFile::AccessAllowed  (   char *userName, char**groupArray, UInt32 numGroups, StrPtrLen *accessFileBufPtr,
+bool QTAccessFile::AccessAllowed  (   char *userName, char**groupArray, uint32_t numGroups, StrPtrLen *accessFileBufPtr,
                                         QTSS_ActionFlags inFlags,StrPtrLen* ioRealmNameStr, bool *outAllowAnyUserPtr, void *extraDataPtr
                                     )
 {       
@@ -530,7 +530,7 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     char* username = QTSSModuleUtils::GetUserName_Copy(theUserProfile);
     OSCharArrayDeleter usernameDeleter(username);
 
-    UInt32 numGroups = 0;
+    uint32_t numGroups = 0;
     char** groupCharPtrArray =  QTSSModuleUtils::GetGroupsArray_Copy(theUserProfile, &numGroups);
     OSCharPointerArrayDeleter groupCharPtrArrayDeleter(groupCharPtrArray);
     
@@ -559,7 +559,7 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     
     // Get the auth scheme
     QTSS_AuthScheme theAuthScheme = qtssAuthNone;
-    UInt32 len = sizeof(theAuthScheme);
+    uint32_t len = sizeof(theAuthScheme);
     QTSS_Error theErr = QTSS_GetValue(theRTSPRequest, qtssRTSPReqAuthScheme, 0, (void*)&theAuthScheme, &len);
     Assert(len == sizeof(theAuthScheme));
     if(theErr != QTSS_NoErr)

@@ -109,14 +109,14 @@ public:
 	// Pass in an array of FieldIDs, make sure it is kNumFields in length.
 	// This function will use the array as a guide to tell which field IDs in the
 	// packet refer to which fields.
-	bool  ParsePacket(uint8_t* inPacketBuffer, UInt32 inPacketLen, FieldID* inFieldIDArray);
+	bool  ParsePacket(uint8_t* inPacketBuffer, uint32_t inPacketLen, FieldID* inFieldIDArray);
 
 	//
 	// Call this if you would like to rewrite the Meta-Info packet
 	// as a normal RTP packet (strip off the extensions). Note that
 	// this will overwrite data in the buffer!
 	// Returns a pointer to the new RTP packet, and its length
-	uint8_t*          MakeRTPPacket(UInt32* outPacketLen);
+	uint8_t*          MakeRTPPacket(uint32_t* outPacketLen);
 
 	//
 	// Field Accessors
@@ -125,24 +125,24 @@ public:
 	UInt64          GetPacketNumber() { return fPacketNumber; }
 	UInt64          GetPacketPosition() { return fPacketPosition; }
 	uint8_t*          GetMediaDataP() { return fMediaDataP; }
-	UInt32          GetMediaDataLen() { return fMediaDataLen; }
+	uint32_t          GetMediaDataLen() { return fMediaDataLen; }
 	uint16_t          GetSeqNum() { return fSeqNum; }
 
 private:
 
 	uint8_t*          fPacketBuffer;
-	UInt32          fPacketLen;
+	uint32_t          fPacketLen;
 
 	SInt64          fTransmitTime;
 	FrameTypeField  fFrameType;
 	UInt64          fPacketNumber;
 	UInt64          fPacketPosition;
 	uint8_t*          fMediaDataP;
-	UInt32          fMediaDataLen;
+	uint32_t          fMediaDataLen;
 	uint16_t          fSeqNum;
 
 	static const FieldName kFieldNameMap[];
-	static const UInt32 kFieldLengthValidator[];
+	static const uint32_t kFieldLengthValidator[];
 };
 
 #endif // __QTRTP_META_INFO_PACKET_H__

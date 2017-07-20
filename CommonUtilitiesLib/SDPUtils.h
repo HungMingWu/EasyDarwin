@@ -69,7 +69,7 @@ class SDPContainer
 
 public:
 
-	SDPContainer(UInt32 numStrPtrs = SDPContainer::kBaseLines) :
+	SDPContainer(uint32_t numStrPtrs = SDPContainer::kBaseLines) :
 		fNumSDPLines(numStrPtrs),
 		fSDPLineArray(NULL)
 	{

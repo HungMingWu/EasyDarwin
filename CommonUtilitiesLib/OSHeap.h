@@ -45,14 +45,14 @@ public:
 
 	enum
 	{
-		kDefaultStartSize = 1024 //UInt32
+		kDefaultStartSize = 1024 //uint32_t
 	};
 
-	OSHeap(UInt32 inStartSize = kDefaultStartSize);
+	OSHeap(uint32_t inStartSize = kDefaultStartSize);
 	~OSHeap() { if (fHeap != nullptr) delete fHeap; }
 
 	//ACCESSORS
-	UInt32      CurrentHeapSize() { return fFreeIndex - 1; }
+	uint32_t      CurrentHeapSize() { return fFreeIndex - 1; }
 	OSHeapElem* PeekMin() { if (CurrentHeapSize() > 0) return fHeap[1]; return nullptr; }
 
 	//MODIFIERS
@@ -71,16 +71,16 @@ public:
 
 private:
 
-	OSHeapElem*     extract(UInt32 index);
+	OSHeapElem*     extract(uint32_t index);
 
 #if _OSHEAP_TESTING_
 	//verifies that the heap is in fact a heap
-	void            sanityCheck(UInt32 root);
+	void            sanityCheck(uint32_t root);
 #endif
 
 	OSHeapElem**    fHeap;
-	UInt32          fFreeIndex;
-	UInt32          fArraySize;
+	uint32_t          fFreeIndex;
+	uint32_t          fArraySize;
 };
 
 class OSHeapElem

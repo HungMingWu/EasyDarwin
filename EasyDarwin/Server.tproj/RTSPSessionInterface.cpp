@@ -42,7 +42,7 @@
 
 unsigned int            RTSPSessionInterface::sSessionIDCounter = kFirstRTSPSessionID;
 bool                  RTSPSessionInterface::sDoBase64Decoding = true;
-UInt32					RTSPSessionInterface::sOptionsRequestBody[kMaxRandomDataSize / sizeof(UInt32)];
+uint32_t					RTSPSessionInterface::sOptionsRequestBody[kMaxRandomDataSize / sizeof(uint32_t)];
 
 QTSSAttrInfoDict::AttrInfo  RTSPSessionInterface::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
@@ -71,13 +71,13 @@ QTSSAttrInfoDict::AttrInfo  RTSPSessionInterface::sAttributes[] =
 
 void    RTSPSessionInterface::Initialize()
 {
-	for (UInt32 x = 0; x < qtssRTSPSesNumParams; x++)
+	for (uint32_t x = 0; x < qtssRTSPSesNumParams; x++)
 		QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTSPSessionDictIndex)->
 		SetAttribute(x, sAttributes[x].fAttrName, sAttributes[x].fFuncPtr, sAttributes[x].fAttrDataType, sAttributes[x].fAttrPermission);
 
 	// DJM PROTOTYPE
 	::srand((unsigned int)OS::Microseconds());
-	for (unsigned int i = 0; i < kMaxRandomDataSize / sizeof(UInt32); i++)
+	for (unsigned int i = 0; i < kMaxRandomDataSize / sizeof(uint32_t); i++)
 		RTSPSessionInterface::sOptionsRequestBody[i] = ::rand();
 	((char *)RTSPSessionInterface::sOptionsRequestBody)[0] = 0; //always set first byte so it doesn't hit any client parser bugs for \r or \n.
 
@@ -111,7 +111,7 @@ RTSPSessionInterface::RTSPSessionInterface()
 	fSocket.SetTask(this);
 	fStreamRef = this;
 
-	//fSessionID = (UInt32)atomic_add(&sSessionIDCounter, 1);
+	//fSessionID = (uint32_t)atomic_add(&sSessionIDCounter, 1);
 	fSessionID = ++sSessionIDCounter;
 
 	this->SetVal(qtssRTSPSesID, &fSessionID, sizeof(fSessionID));
@@ -159,10 +159,10 @@ void RTSPSessionInterface::DecrementObjectHolderCount()
 		this->Signal(Task::kKillEvent);
 }
 
-QTSS_Error RTSPSessionInterface::Write(void* inBuffer, UInt32 inLength,
-	UInt32* outLenWritten, UInt32 inFlags)
+QTSS_Error RTSPSessionInterface::Write(void* inBuffer, uint32_t inLength,
+	uint32_t* outLenWritten, uint32_t inFlags)
 {
-	UInt32 sendType = RTSPResponseStream::kDontBuffer;
+	uint32_t sendType = RTSPResponseStream::kDontBuffer;
 	if ((inFlags & qtssWriteFlagsBufferData) != 0)
 		sendType = RTSPResponseStream::kAlwaysBuffer;
 
@@ -172,12 +172,12 @@ QTSS_Error RTSPSessionInterface::Write(void* inBuffer, UInt32 inLength,
 	return fOutputStream.WriteV(theVec, 2, inLength, outLenWritten, sendType);
 }
 
-QTSS_Error RTSPSessionInterface::WriteV(iovec* inVec, UInt32 inNumVectors, UInt32 inTotalLength, UInt32* outLenWritten)
+QTSS_Error RTSPSessionInterface::WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten)
 {
 	return fOutputStream.WriteV(inVec, inNumVectors, inTotalLength, outLenWritten, RTSPResponseStream::kDontBuffer);
 }
 
-QTSS_Error RTSPSessionInterface::Read(void* ioBuffer, UInt32 inLength, UInt32* outLenRead)
+QTSS_Error RTSPSessionInterface::Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead)
 {
 	//
 	// Don't let callers of this function accidently creep past the end of the
@@ -189,7 +189,7 @@ QTSS_Error RTSPSessionInterface::Read(void* ioBuffer, UInt32 inLength, UInt32* o
 	if ((fRequestBodyLen > 0) && ((SInt32)inLength > fRequestBodyLen))
 		inLength = fRequestBodyLen;
 
-	UInt32 theLenRead = 0;
+	uint32_t theLenRead = 0;
 	QTSS_Error theErr = fInputStream.Read(ioBuffer, inLength, &theLenRead);
 
 	if (fRequestBodyLen >= 0)
@@ -225,7 +225,7 @@ uint8_t RTSPSessionInterface::GetTwoChannelNumbers(StrPtrLen* inRTSPSessionID)
 
 	//
 	// Reallocate the Ch# to Session ID Map
-	UInt32 numChannelEntries = fCurChannelNum >> 1;
+	uint32_t numChannelEntries = fCurChannelNum >> 1;
 	StrPtrLen* newMap = new StrPtrLen[numChannelEntries];
 	if (fChNumToSessIDMap != nullptr)
 	{
@@ -258,7 +258,7 @@ StrPtrLen*  RTSPSessionInterface::GetSessionIDForChannelNum(uint8_t inChannelNum
 /
 */
 
-QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, UInt32 inLen, UInt32* outLenWritten, unsigned char channel)
+QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, unsigned char channel)
 {
 
 	if (inLen == 0 && fNumInCoalesceBuffer == 0)
@@ -296,7 +296,7 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, UInt32 inLen, 
 		|| (inLen + fNumInCoalesceBuffer + kInteleaveHeaderSize > kTCPCoalesceBufferSize) && fNumInCoalesceBuffer > 0
 		)
 	{
-		UInt32      buffLenWritten;
+		uint32_t      buffLenWritten;
 
 		// skip iov[0], WriteV uses it
 		iov[1].iov_base = fTCPCoalesceBuffer;
@@ -412,7 +412,7 @@ void    RTSPSessionInterface::SnarfInputSocket(RTSPSessionInterface* fromRTSPSes
 	fInputStream.AttachToSocket(fInputSocketP);
 }
 
-void* RTSPSessionInterface::SetupParams(QTSSDictionary* inSession, UInt32* /*outLen*/)
+void* RTSPSessionInterface::SetupParams(QTSSDictionary* inSession, uint32_t* /*outLen*/)
 {
 	RTSPSessionInterface* theSession = (RTSPSessionInterface*)inSession;
 

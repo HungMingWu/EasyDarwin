@@ -412,7 +412,7 @@ void WINAPI ServiceControl(DWORD inControlCode)
 void ReportStatus(DWORD inCurrentState, DWORD inExitCode)
 {
 	static bool sFirstTime = 1;
-	static UInt32 sCheckpoint = 0;
+	static uint32_t sCheckpoint = 0;
 	static SERVICE_STATUS sStatus;
 
 	if (sFirstTime)

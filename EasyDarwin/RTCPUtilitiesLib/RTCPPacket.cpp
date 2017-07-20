@@ -37,18 +37,18 @@
 #define RTCP_PACKET_DEBUG 0
 
 //returns true if successful, false otherwise
-bool RTCPPacket::ParsePacket(uint8_t* inPacketBuffer, UInt32 inPacketLen)
+bool RTCPPacket::ParsePacket(uint8_t* inPacketBuffer, uint32_t inPacketLen)
 {
     if (inPacketLen < kRTCPPacketSizeInBytes)
         return false;
         
     fReceiverPacketBuffer = inPacketBuffer;
-    if (RTCP_PACKET_DEBUG) qtss_printf("RTCPPacket::ParsePacket first 4 bytes of packet=%x \n", ntohl( *(UInt32 *)inPacketBuffer));
+    if (RTCP_PACKET_DEBUG) qtss_printf("RTCPPacket::ParsePacket first 4 bytes of packet=%x \n", ntohl( *(uint32_t *)inPacketBuffer));
     
     //the length of this packet can be no less than the advertised length (which is
     //in 32-bit words, so we must multiply) plus the size of the header (4 bytes)
-    if (RTCP_PACKET_DEBUG) qtss_printf("RTCPPacket::ParsePacket len=%"   _U32BITARG_   " min allowed=%"   _U32BITARG_   "\n", inPacketLen,(UInt32)((this->GetPacketLength() * 4) + kRTCPHeaderSizeInBytes));
-    if (inPacketLen < (UInt32)((this->GetPacketLength() * 4) + kRTCPHeaderSizeInBytes))
+    if (RTCP_PACKET_DEBUG) qtss_printf("RTCPPacket::ParsePacket len=%"   _U32BITARG_   " min allowed=%"   _U32BITARG_   "\n", inPacketLen,(uint32_t)((this->GetPacketLength() * 4) + kRTCPHeaderSizeInBytes));
+    if (inPacketLen < (uint32_t)((this->GetPacketLength() * 4) + kRTCPHeaderSizeInBytes))
     {   if (RTCP_PACKET_DEBUG) qtss_printf("RTCPPacket::ParsePacket invalid len=%"   _U32BITARG_   "\n", inPacketLen);
         return false;
     }
@@ -83,7 +83,7 @@ void RTCPReceiverPacket::Dump()//Override
 }
 
 
-bool RTCPReceiverPacket::ParseReport(uint8_t* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPReceiverPacket::ParseReport(uint8_t* inPacketBuffer, uint32_t inPacketLength)
 {
     bool ok = this->ParsePacket(inPacketBuffer, inPacketLength);
     if (!ok)
@@ -103,7 +103,7 @@ bool RTCPReceiverPacket::ParseReport(uint8_t* inPacketBuffer, UInt32 inPacketLen
     return true;
 }
 
-UInt32 RTCPReceiverPacket::GetCumulativeFractionLostPackets()
+uint32_t RTCPReceiverPacket::GetCumulativeFractionLostPackets()
 {
     float avgFractionLost = 0;
     for (short i = 0; i < this->GetReportCount(); i++)
@@ -112,11 +112,11 @@ UInt32 RTCPReceiverPacket::GetCumulativeFractionLostPackets()
         avgFractionLost /= (i+1);
     }
     
-    return (UInt32)avgFractionLost;
+    return (uint32_t)avgFractionLost;
 }
 
 
-UInt32 RTCPReceiverPacket::GetCumulativeJitter()
+uint32_t RTCPReceiverPacket::GetCumulativeJitter()
 {
     float avgJitter = 0;
     for (short i = 0; i < this->GetReportCount(); i++)
@@ -125,13 +125,13 @@ UInt32 RTCPReceiverPacket::GetCumulativeJitter()
         avgJitter /= (i + 1);
     }
     
-    return (UInt32)avgJitter;
+    return (uint32_t)avgJitter;
 }
 
 
-UInt32 RTCPReceiverPacket::GetCumulativeTotalLostPackets()
+uint32_t RTCPReceiverPacket::GetCumulativeTotalLostPackets()
 {
-    UInt32 totalLostPackets = 0;
+    uint32_t totalLostPackets = 0;
     for (short i = 0; i < this->GetReportCount(); i++)
     {
         totalLostPackets += this->GetTotalLostPackets(i);
@@ -141,7 +141,7 @@ UInt32 RTCPReceiverPacket::GetCumulativeTotalLostPackets()
 }
 
 
-bool RTCPSenderReportPacket::ParseReport(uint8_t* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPSenderReportPacket::ParseReport(uint8_t* inPacketBuffer, uint32_t inPacketLength)
 {
     bool ok = this->ParsePacket(inPacketBuffer, inPacketLength);
     if (!ok)

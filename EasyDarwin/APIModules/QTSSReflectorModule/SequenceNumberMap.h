@@ -50,7 +50,7 @@ public:
 		kDefaultSlidingWindowSize = 256
 	};
 
-	SequenceNumberMap(UInt32 inSlidingWindowSize = kDefaultSlidingWindowSize);
+	SequenceNumberMap(uint32_t inSlidingWindowSize = kDefaultSlidingWindowSize);
 	~SequenceNumberMap() { delete[] fSlidingWindow; }
 
 	// Returns whether this sequence number was already added or not.

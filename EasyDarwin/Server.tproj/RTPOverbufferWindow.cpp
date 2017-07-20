@@ -33,7 +33,7 @@
 
 #include "RTPOverbufferWindow.h"
 
-RTPOverbufferWindow::RTPOverbufferWindow(UInt32 inSendInterval, UInt32 inInitialWindowSize, UInt32 inMaxSendAheadTimeInSec,
+RTPOverbufferWindow::RTPOverbufferWindow(uint32_t inSendInterval, uint32_t inInitialWindowSize, uint32_t inMaxSendAheadTimeInSec,
 	float inOverbufferRate)
 	: fWindowSize(inInitialWindowSize),
 	fBytesSentSinceLastReport(0),
@@ -171,7 +171,7 @@ void RTPOverbufferWindow::EmptyOutWindow(const SInt64& inCurrentTime)
 	// no longer needed
 }
 
-void RTPOverbufferWindow::SetWindowSize(UInt32 inWindowSizeInBytes)
+void RTPOverbufferWindow::SetWindowSize(uint32_t inWindowSizeInBytes)
 {
 	fWindowSize = inWindowSizeInBytes;
 	fBytesSentSinceLastReport = 0;

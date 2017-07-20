@@ -151,7 +151,7 @@ QTAtom_stsc::~QTAtom_stsc()
 bool QTAtom_stsc::Initialize()
 {
 	// Temporary vars
-	UInt32      tempInt32;
+	uint32_t      tempInt32;
 
 
 	//
@@ -164,7 +164,7 @@ bool QTAtom_stsc::Initialize()
 
 	//
 	// Validate the size of the sample table.
-	if ((UInt32)(fNumEntries * 12) != (fTOCEntry.AtomDataLength - 8))
+	if ((uint32_t)(fNumEntries * 12) != (fTOCEntry.AtomDataLength - 8))
 		return false;
 
 	//
@@ -192,19 +192,19 @@ bool QTAtom_stsc::Initialize()
 // Accessors
 //
 
-bool QTAtom_stsc::GetChunkFirstLastSample(UInt32 chunkNumber, UInt32 *firstSample, UInt32 *lastSample, QTAtom_stsc_SampleTableControlBlock *STCB)
+bool QTAtom_stsc::GetChunkFirstLastSample(uint32_t chunkNumber, uint32_t *firstSample, uint32_t *lastSample, QTAtom_stsc_SampleTableControlBlock *STCB)
 {
 	// Temporary state var
 	QTAtom_stsc_SampleTableControlBlock *tempSTCB = NULL;
 
 
 	// General vars
-	UInt32      prevFirstChunk = 0, thisFirstChunk = 0;
-	UInt32      totalSamples = 0;
-	UInt32      numChunks = 0;
-	UInt32      numSamplesInChunks = 0;
-	UInt32      prevSamplesPerChunk = 0;
-	UInt32      samplesPerChunk = 0;
+	uint32_t      prevFirstChunk = 0, thisFirstChunk = 0;
+	uint32_t      totalSamples = 0;
+	uint32_t      numChunks = 0;
+	uint32_t      numSamplesInChunks = 0;
+	uint32_t      prevSamplesPerChunk = 0;
+	uint32_t      samplesPerChunk = 0;
 
 	//  qtss_printf("GetChunkFirstLastSample chunk = %d STCB->chunkNumber_GetChunkFirstLastSample= %d \n",chunkNumber,STCB->chunkNumber_GetChunkFirstLastSample);
 
@@ -320,20 +320,20 @@ GetChunkFirstLastSample_Done:
 }
 
 
-UInt32 QTAtom_stsc::GetChunkFirstSample(UInt32 chunkNumber)
+uint32_t QTAtom_stsc::GetChunkFirstSample(uint32_t chunkNumber)
 {
 	// Temporary state var
 	QTAtom_stsc_SampleTableControlBlock localSTCB;
 	QTAtom_stsc_SampleTableControlBlock *STCB = &localSTCB;
 
 	// General vars
-	UInt32      prevFirstChunk = 0, thisFirstChunk = 0, sampleDescription = 0;
-	UInt32      totalSamples = 1;
-	UInt32      numChunks = 0;
-	UInt32      numSamplesInChunks = 0;
-	UInt32      thisChunk = 0;
-	UInt32      prevSamplesPerChunk = 0;
-	UInt32      samplesPerChunk = 0;
+	uint32_t      prevFirstChunk = 0, thisFirstChunk = 0, sampleDescription = 0;
+	uint32_t      totalSamples = 1;
+	uint32_t      numChunks = 0;
+	uint32_t      numSamplesInChunks = 0;
+	uint32_t      thisChunk = 0;
+	uint32_t      prevSamplesPerChunk = 0;
+	uint32_t      samplesPerChunk = 0;
 
 
 	//
@@ -381,18 +381,18 @@ UInt32 QTAtom_stsc::GetChunkFirstSample(UInt32 chunkNumber)
 }
 
 
-//UInt32 gstscCacheCount = 0;
-//UInt32 gstscCallCount = 0;
+//uint32_t gstscCacheCount = 0;
+//uint32_t gstscCallCount = 0;
 
 
-bool QTAtom_stsc::SampleToChunkInfo(UInt32 SampleNumber, UInt32 *samplesPerChunk, UInt32 *ChunkNumber, UInt32 *SampleDescriptionIndex, UInt32 *SampleOffsetInChunk, QTAtom_stsc_SampleTableControlBlock * STCB)
+bool QTAtom_stsc::SampleToChunkInfo(uint32_t SampleNumber, uint32_t *samplesPerChunk, uint32_t *ChunkNumber, uint32_t *SampleDescriptionIndex, uint32_t *SampleOffsetInChunk, QTAtom_stsc_SampleTableControlBlock * STCB)
 {
 	// Temporary state var
 	QTAtom_stsc_SampleTableControlBlock *tempSTCB = NULL;
 
 	// General vars
-	UInt32      NewCurSample;
-	UInt32      FirstChunk = 0, SamplesPerChunk = 0, SampleDescription = 0;
+	uint32_t      NewCurSample;
+	uint32_t      FirstChunk = 0, SamplesPerChunk = 0, SampleDescription = 0;
 
 	bool      missedCache = false;
 
@@ -404,10 +404,10 @@ bool QTAtom_stsc::SampleToChunkInfo(UInt32 SampleNumber, UInt32 *samplesPerChunk
 	}
 
 
-	UInt32  aChunkNumber = 0;
-	UInt32  aSampleDescriptionIndex = 0;
-	UInt32  aSampleOffsetInChunk = 0;
-	UInt32  aSamplesPerChunk = 0;
+	uint32_t  aChunkNumber = 0;
+	uint32_t  aSampleDescriptionIndex = 0;
+	uint32_t  aSampleOffsetInChunk = 0;
+	uint32_t  aSamplesPerChunk = 0;
 
 	/*
 		gstscCallCount ++;
@@ -588,7 +588,7 @@ void QTAtom_stsc::DumpAtom()
 void QTAtom_stsc::DumpTable()
 {
 	// General vars
-	UInt32      FirstChunk = 0, SamplesPerChunk = 0, SampleDescription = 0;
+	uint32_t      FirstChunk = 0, SamplesPerChunk = 0, SampleDescription = 0;
 
 
 	//
@@ -600,7 +600,7 @@ void QTAtom_stsc::DumpTable()
 
 	//
 	// Print the table.
-	for (UInt32 CurEntry = 0; CurEntry < fNumEntries; CurEntry++) {
+	for (uint32_t CurEntry = 0; CurEntry < fNumEntries; CurEntry++) {
 		//
 		// Copy this entry's fields.
 		memcpy(&FirstChunk, fSampleToChunkTable + (CurEntry * 12) + 0, 4);

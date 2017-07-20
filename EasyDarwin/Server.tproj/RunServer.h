@@ -61,8 +61,8 @@ QTSS_ServerState StartServer(XMLPrefsParser* inPrefsSource,
 	int statsUpdateInterval,
 	QTSS_ServerState inInitialState,
 	bool inDontFork,
-	UInt32 debugLevel,
-	UInt32 debugOptions,
+	uint32_t debugLevel,
+	uint32_t debugOptions,
 	const char* sAbsolutePath);
 
 //

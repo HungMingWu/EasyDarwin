@@ -150,7 +150,7 @@ QTTrack::ErrorCode QTTrack::Initialize()
 	if (fFile->FindTOCEntry(":udta:name", &tempTOCEntry, &fTOCEntry)) {
 		fTrackName = new char[(SInt32)(tempTOCEntry->AtomDataLength + 1)];
 		if (fTrackName != NULL)
-			fFile->Read(tempTOCEntry->AtomDataPos, fTrackName, (UInt32)tempTOCEntry->AtomDataLength);
+			fFile->Read(tempTOCEntry->AtomDataPos, fTrackName, (uint32_t)tempTOCEntry->AtomDataLength);
 	}
 
 
@@ -178,7 +178,7 @@ QTTrack::ErrorCode QTTrack::Initialize()
 
 		//
 		// Compute the first edit's media time.
-		fFirstEditMediaTime = (UInt32)((((double)(SInt64)GetFirstEditMovieTime()) / fFile->GetTimeScale()) * GetTimeScale());
+		fFirstEditMediaTime = (uint32_t)((((double)(SInt64)GetFirstEditMovieTime()) / fFile->GetTimeScale()) * GetTimeScale());
 	}
 	else {
 		fEditListAtom = NULL;
@@ -293,7 +293,7 @@ QTTrack::ErrorCode QTTrack::Initialize()
 // -------------------------------------
 // Sample functions
 //
-bool QTTrack::GetSampleInfo(UInt32 SampleNumber, UInt32 * const Length, UInt64 * const Offset, UInt32 * const SampleDescriptionIndex, QTAtom_stsc_SampleTableControlBlock * STCB)
+bool QTTrack::GetSampleInfo(uint32_t SampleNumber, uint32_t * const Length, UInt64 * const Offset, uint32_t * const SampleDescriptionIndex, QTAtom_stsc_SampleTableControlBlock * STCB)
 {
 
 	Assert(STCB != NULL);
@@ -315,10 +315,10 @@ bool QTTrack::GetSampleInfo(UInt32 SampleNumber, UInt32 * const Length, UInt64 *
 
 
 	// Temporary vars
-	UInt32      sampleLength = 0;
-	UInt32      sampleDescriptionIndex = 0;
+	uint32_t      sampleLength = 0;
+	uint32_t      sampleDescriptionIndex = 0;
 	// General vars
-	UInt32      ChunkNumber, SampleOffsetInChunk;
+	uint32_t      ChunkNumber, SampleOffsetInChunk;
 	UInt64      sampleFileStartOffset = 0;
 	UInt64      ChunkOffset = 0;
 
@@ -348,7 +348,7 @@ bool QTTrack::GetSampleInfo(UInt32 SampleNumber, UInt32 * const Length, UInt64 *
 		// the chunk to this sample is.
 
 
-		UInt32  tempSampleLength = fSampleSizeAtom->GetCommonSampleSize();
+		uint32_t  tempSampleLength = fSampleSizeAtom->GetCommonSampleSize();
 		sampleFileStartOffset = ChunkOffset;
 
 		if (tempSampleLength > 0) // samples are the same size so just multiply to get size
@@ -357,7 +357,7 @@ bool QTTrack::GetSampleInfo(UInt32 SampleNumber, UInt32 * const Length, UInt64 *
 		}
 		else
 		{
-			for (UInt32 CurSample = (SampleNumber - SampleOffsetInChunk); CurSample < SampleNumber; CurSample++)
+			for (uint32_t CurSample = (SampleNumber - SampleOffsetInChunk); CurSample < SampleNumber; CurSample++)
 			{
 				// Get the length of this sample and add it to our offset.
 				if (!fSampleSizeAtom->SampleSize(CurSample, &tempSampleLength))
@@ -368,7 +368,7 @@ bool QTTrack::GetSampleInfo(UInt32 SampleNumber, UInt32 * const Length, UInt64 *
 
 
 		STCB->fGetSampleInfo_LastChunk = ChunkNumber;
-		STCB->fGetSampleInfo_LastChunkOffset = (UInt32)ChunkOffset;
+		STCB->fGetSampleInfo_LastChunkOffset = (uint32_t)ChunkOffset;
 		STCB->fGetSampleInfo_SampleDescriptionIndex = sampleDescriptionIndex;
 	}
 
@@ -388,11 +388,11 @@ bool QTTrack::GetSampleInfo(UInt32 SampleNumber, UInt32 * const Length, UInt64 *
 }
 
 
-bool QTTrack::GetSizeOfSamplesInChunk(UInt32 chunkNumber, UInt32 * const sizePtr, UInt32 * const firstSampleNumPtr, UInt32 * const lastSampleNumPtr, QTAtom_stsc_SampleTableControlBlock * stcbPtr)
+bool QTTrack::GetSizeOfSamplesInChunk(uint32_t chunkNumber, uint32_t * const sizePtr, uint32_t * const firstSampleNumPtr, uint32_t * const lastSampleNumPtr, QTAtom_stsc_SampleTableControlBlock * stcbPtr)
 {
-	UInt32 firstSample = 0;
-	UInt32 lastSample = 0;
-	UInt32 size = 0;
+	uint32_t firstSample = 0;
+	uint32_t lastSample = 0;
+	uint32_t size = 0;
 
 	if (stcbPtr && stcbPtr->fGetSizeOfSamplesInChunk_chunkNumber == chunkNumber)
 	{
@@ -426,10 +426,10 @@ bool QTTrack::GetSizeOfSamplesInChunk(UInt32 chunkNumber, UInt32 * const sizePtr
 }
 
 
-bool QTTrack::GetSample(UInt32 SampleNumber, char * Buffer, UInt32 * Length, QTFile_FileControlBlock * FCB, QTAtom_stsc_SampleTableControlBlock * STCB)
+bool QTTrack::GetSample(uint32_t SampleNumber, char * Buffer, uint32_t * Length, QTFile_FileControlBlock * FCB, QTAtom_stsc_SampleTableControlBlock * STCB)
 {
 	// General vars
-	UInt32      SampleDescriptionIndex;
+	uint32_t      SampleDescriptionIndex;
 	UInt64      SampleOffset;
 
 	//

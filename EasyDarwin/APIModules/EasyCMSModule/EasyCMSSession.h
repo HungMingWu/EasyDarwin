@@ -46,7 +46,7 @@ public:
 		kCleaningUp = 4
 	};
 
-	UInt32 fState;
+	uint32_t fState;
 
 	void CleanupRequest();
 
@@ -65,17 +65,17 @@ public:
 
 	char*				fContentBuffer;
 
-	UInt32				fContentBufferOffset;
+	uint32_t				fContentBufferOffset;
 
-	QTSS_Error FreeStream(const char * streamName, UInt32 streamChannel);
+	QTSS_Error FreeStream(const char * streamName, uint32_t streamChannel);
 
 private:
 
 	SInt64 Run() override;
 
 	char*	fStreamName;
-	UInt32	fChannelNum;
-	UInt32	fEasyMsgType;
+	uint32_t	fChannelNum;
+	uint32_t	fEasyMsgType;
 	bool	fLiveSession;
 
 	bool IsConnected() const { return fSocket->GetSocket()->IsConnected(); }

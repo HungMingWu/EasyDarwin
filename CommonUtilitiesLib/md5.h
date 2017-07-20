@@ -57,6 +57,7 @@
 #define _MD5_H_
 
 #include "OSHeaders.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -64,8 +65,8 @@ extern "C" {
 
 	/* MD5 context. */
 	typedef struct {
-		UInt32 state[4];                                   /* state (ABCD) */
-		UInt32 count[2];        /* number of bits, modulo 2^64 (lsb first) */
+		uint32_t state[4];                                   /* state (ABCD) */
+		uint32_t count[2];        /* number of bits, modulo 2^64 (lsb first) */
 		unsigned char buffer[64];                         /* input buffer */
 	} MD5_CTX;
 

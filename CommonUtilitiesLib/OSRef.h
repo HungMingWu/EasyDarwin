@@ -53,7 +53,7 @@ class OSRefTableUtils
 {
 private:
 
-	static UInt32   HashString(StrPtrLen* inString);
+	static uint32_t   HashString(StrPtrLen* inString);
 
 	friend class OSRef;
 	friend class OSRefKey;
@@ -92,7 +92,7 @@ public:
 #endif
 	void**  GetObjectPtr() { return &fObjectP; }
 	void*   GetObject() { return fObjectP; }
-	UInt32  GetRefCount() { return fRefCount; }
+	uint32_t  GetRefCount() { return fRefCount; }
 	StrPtrLen *GetString() { return &fString; }
 private:
 
@@ -102,14 +102,14 @@ private:
 	StrPtrLen   fString;
 
 	//refcounting
-	UInt32  fRefCount;
+	uint32_t  fRefCount;
 #if DEBUG
 	bool  fInATable;
 	bool  fSwapCalled;
 #endif
 	OSCond  fCond;//to block threads waiting for this ref.
 
-	UInt32              fHashValue;
+	uint32_t              fHashValue;
 	OSRef*              fNextHashEntry;
 
 	friend class OSRefKey;
@@ -159,7 +159,7 @@ private:
 
 	//data:
 	StrPtrLen *fStringP;
-	UInt32  fHashValue;
+	uint32_t  fHashValue;
 
 	friend class OSHashTable<OSRef, OSRefKey>;
 };
@@ -173,12 +173,12 @@ public:
 
 	enum
 	{
-		kDefaultTableSize = 1193 //UInt32
+		kDefaultTableSize = 1193 //uint32_t
 	};
 
 	//tableSize doesn't indicate the max number of Refs that can be added
 	//(it's unlimited), but is rather just how big to make the hash table
-	OSRefTable(UInt32 tableSize = kDefaultTableSize) : fTable(tableSize), fMutex() {}
+	OSRefTable(uint32_t tableSize = kDefaultTableSize) : fTable(tableSize), fMutex() {}
 	~OSRefTable() {}
 
 	//Allows access to the mutex in case you need to lock the table down
@@ -206,11 +206,11 @@ public:
 	//the ref currently, the calling thread will wait until the other threads
 	//stop using the ref (by calling Release, below)
 	//This function is atomic wrt this ref table.
-	void        UnRegister(OSRef* ref, UInt32 refCount = 0);
+	void        UnRegister(OSRef* ref, uint32_t refCount = 0);
 
 	// Same as UnRegister, but guarenteed not to block. Will return
 	// true if ref was sucessfully unregistered, false otherwise
-	bool      TryUnRegister(OSRef* ref, UInt32 refCount = 0);
+	bool      TryUnRegister(OSRef* ref, uint32_t refCount = 0);
 
 	//Resolve. This function uses the provided key string to identify and grab
 	//the Ref keyed by that string. Once the Ref is resolved, it is safe to use
@@ -234,7 +234,7 @@ public:
 	// the new OSRef object.
 	void        Swap(OSRef* newRef);
 
-	UInt32      GetNumRefsInTable() { UInt64 result = fTable.GetNumEntries(); Assert(result < UINT32_MAX); return (UInt32)result; }
+	uint32_t      GetNumRefsInTable() { UInt64 result = fTable.GetNumEntries(); Assert(result < UINT32_MAX); return (uint32_t)result; }
 
 private:
 

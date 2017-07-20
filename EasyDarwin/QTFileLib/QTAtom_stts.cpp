@@ -124,7 +124,7 @@ QTAtom_stts::~QTAtom_stts()
 bool QTAtom_stts::Initialize()
 {
 	// Temporary vars
-	UInt32      tempInt32;
+	uint32_t      tempInt32;
 
 
 	//
@@ -137,7 +137,7 @@ bool QTAtom_stts::Initialize()
 
 	//
 	// Validate the size of the sample table.
-	if ((UInt32)(fNumEntries * 8) != (fTOCEntry.AtomDataLength - 8))
+	if ((uint32_t)(fNumEntries * 8) != (fTOCEntry.AtomDataLength - 8))
 		return false;
 
 	//
@@ -166,10 +166,10 @@ bool QTAtom_stts::Initialize()
 // -------------------------------------
 // Accessors
 //
-bool QTAtom_stts::MediaTimeToSampleNumber(UInt32 MediaTime, UInt32 * SampleNumber, QTAtom_stts_SampleTableControlBlock * STCB)
+bool QTAtom_stts::MediaTimeToSampleNumber(uint32_t MediaTime, uint32_t * SampleNumber, QTAtom_stts_SampleTableControlBlock * STCB)
 {
 	// General vars
-	UInt32      SampleCount, SampleDuration;
+	uint32_t      SampleCount, SampleDuration;
 	QTAtom_stts_SampleTableControlBlock *tempSTCB = nullptr;
 	bool      result = false;
 	//
@@ -224,10 +224,10 @@ bool QTAtom_stts::MediaTimeToSampleNumber(UInt32 MediaTime, UInt32 * SampleNumbe
 	return result;
 }
 
-bool QTAtom_stts::SampleNumberToMediaTime(UInt32 SampleNumber, UInt32 * MediaTime, QTAtom_stts_SampleTableControlBlock * STCB)
+bool QTAtom_stts::SampleNumberToMediaTime(uint32_t SampleNumber, uint32_t * MediaTime, QTAtom_stts_SampleTableControlBlock * STCB)
 {
 	// General vars
-	UInt32      SampleCount, SampleDuration;
+	uint32_t      SampleCount, SampleDuration;
 	//
 	// Use the default STCB if one was not passed in to us.
 	Assert(STCB != nullptr);
@@ -304,9 +304,9 @@ void QTAtom_stts::DumpTable()
 
 	//
 	// Print the table.
-	UInt32      SampleCount = 0;
-	UInt32      SampleDuration = 0;
-	for (UInt32 CurEntry = 0; CurEntry < fNumEntries; CurEntry++)
+	uint32_t      SampleCount = 0;
+	uint32_t      SampleDuration = 0;
+	for (uint32_t CurEntry = 0; CurEntry < fNumEntries; CurEntry++)
 	{
 		//
 		// Copy this sample count and duration.
@@ -391,7 +391,7 @@ QTAtom_ctts::~QTAtom_ctts()
 bool QTAtom_ctts::Initialize()
 {
 	// Temporary vars
-	UInt32      tempInt32;
+	uint32_t      tempInt32;
 
 
 	//
@@ -404,7 +404,7 @@ bool QTAtom_ctts::Initialize()
 
 	//
 	// Validate the size of the sample table.
-	if ((UInt32)(fNumEntries * 8) != (fTOCEntry.AtomDataLength - 8))
+	if ((uint32_t)(fNumEntries * 8) != (fTOCEntry.AtomDataLength - 8))
 		return false;
 
 	//
@@ -425,10 +425,10 @@ bool QTAtom_ctts::Initialize()
 // -------------------------------------
 // Accessors
 //
-bool QTAtom_ctts::MediaTimeToSampleNumber(UInt32 MediaTime, UInt32 * SampleNumber, QTAtom_ctts_SampleTableControlBlock * STCB)
+bool QTAtom_ctts::MediaTimeToSampleNumber(uint32_t MediaTime, uint32_t * SampleNumber, QTAtom_ctts_SampleTableControlBlock * STCB)
 {
 	// General vars
-	UInt32      SampleCount, SampleDuration;
+	uint32_t      SampleCount, SampleDuration;
 	QTAtom_ctts_SampleTableControlBlock *tempSTCB = nullptr;
 	bool      result = false;
 	//
@@ -483,10 +483,10 @@ bool QTAtom_ctts::MediaTimeToSampleNumber(UInt32 MediaTime, UInt32 * SampleNumbe
 	return result;
 }
 
-bool QTAtom_ctts::SampleNumberToMediaTimeOffset(UInt32 SampleNumber, UInt32 * MediaTimeOffset, QTAtom_ctts_SampleTableControlBlock * STCB)
+bool QTAtom_ctts::SampleNumberToMediaTimeOffset(uint32_t SampleNumber, uint32_t * MediaTimeOffset, QTAtom_ctts_SampleTableControlBlock * STCB)
 {
 	// General vars
-	UInt32      SampleCount, SampleOffset;
+	uint32_t      SampleCount, SampleOffset;
 	//
 	// Use the default STCB if one was not passed in to us.
 	Assert(STCB != nullptr);
@@ -563,9 +563,9 @@ void QTAtom_ctts::DumpTable()
 
 	//
 	// Print the table.
-	UInt32      SampleCount = 0;
-	UInt32      SampleOffset = 0;
-	for (UInt32 CurEntry = 0; CurEntry < fNumEntries; CurEntry++)
+	uint32_t      SampleCount = 0;
+	uint32_t      SampleOffset = 0;
+	for (uint32_t CurEntry = 0; CurEntry < fNumEntries; CurEntry++)
 	{
 		//
 		// Copy this sample count and duration.

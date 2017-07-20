@@ -32,10 +32,10 @@
 
 #include "ResizeableStringFormatter.h"
 
-bool ResizeableStringFormatter::BufferIsFull(char* inBuffer, UInt32 inBufferLen)
+bool ResizeableStringFormatter::BufferIsFull(char* inBuffer, uint32_t inBufferLen)
 {
 	//allocate a buffer twice as big as the old one, and copy over the contents
-	UInt32 theNewBufferSize = this->GetTotalBufferSize() * 2;
+	uint32_t theNewBufferSize = this->GetTotalBufferSize() * 2;
 	if (theNewBufferSize == 0)
 		theNewBufferSize = 64;
 

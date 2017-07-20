@@ -69,14 +69,14 @@ public:
 	// Class typedefs.
 	struct AtomTOCEntry {
 		// TOC id (used to compare TOCs)
-		UInt32          TOCID;
+		uint32_t          TOCID;
 
 		// Atom information
 		OSType          AtomType, beAtomType; // be = Big Endian
 
 		UInt64          AtomDataPos;
 		UInt64          AtomDataLength;
-		UInt32          AtomHeaderSize;
+		uint32_t          AtomHeaderSize;
 
 		// TOC pointers
 		AtomTOCEntry    *NextOrdAtom;
@@ -87,7 +87,7 @@ public:
 
 	struct TrackListEntry {
 		// Track information
-		UInt32          TrackID;
+		uint32_t          TrackID;
 		QTTrack         *Track;
 		bool          IsHintTrack;
 
@@ -117,9 +117,9 @@ public:
 
 	//
 	// Track List functions
-	inline  UInt32      GetNumTracks() { return fNumTracks; }
+	inline  uint32_t      GetNumTracks() { return fNumTracks; }
 	bool      NextTrack(QTTrack **Track, QTTrack *LastFoundTrack = NULL);
-	bool      FindTrack(UInt32 TrackID, QTTrack **Track);
+	bool      FindTrack(uint32_t TrackID, QTTrack **Track);
 	bool      IsHintTrack(QTTrack *Track);
 
 	//
@@ -132,10 +132,10 @@ public:
 	char*       GetModDateStr();
 	//
 	// Read functions.
-	bool      Read(UInt64 Offset, char * const Buffer, UInt32 Length, QTFile_FileControlBlock * FCB = NULL);
+	bool      Read(UInt64 Offset, char * const Buffer, uint32_t Length, QTFile_FileControlBlock * FCB = NULL);
 
 
-	void        AllocateBuffers(UInt32 inUnitSizeInK, UInt32 inBufferInc, UInt32 inBufferSize, UInt32 inMaxBitRateBuffSizeInBlocks, UInt32 inBitrate);
+	void        AllocateBuffers(uint32_t inUnitSizeInK, uint32_t inBufferInc, uint32_t inBufferSize, uint32_t inMaxBitRateBuffSizeInBlocks, uint32_t inBitrate);
 #if DSS_USE_API_CALLBACKS
 	void        IncBufferUserCount() { if (fOSFileSourceFD != NULL) fOSFileSourceFD->IncMaxBuffers(); }
 	void        DecBufferUserCount() { if (fOSFileSourceFD != NULL) fOSFileSourceFD->DecMaxBuffers(); }
@@ -147,9 +147,9 @@ public:
 	inline bool       ValidTOC();
 
 
-	char*      MapFileToMem(UInt64 offset, UInt32 length);
+	char*      MapFileToMem(UInt64 offset, uint32_t length);
 
-	int         UnmapMem(char *memPtr, UInt32 length);
+	int         UnmapMem(char *memPtr, uint32_t length);
 
 	//
 	// Debugging functions.
@@ -164,7 +164,7 @@ protected:
 	// Protected member variables.
 	bool              fDebug, fDeepDebug;
 
-	UInt32              fNextTOCID;
+	uint32_t              fNextTOCID;
 #if DSS_USE_API_CALLBACKS
 	QTSS_Object         fMovieFD;
 	OSFileSource        *fOSFileSourceFD;
@@ -178,7 +178,7 @@ protected:
 
 	AtomTOCEntry        *fTOC, *fTOCOrdHead, *fTOCOrdTail;
 
-	UInt32              fNumTracks;
+	uint32_t              fNumTracks;
 	TrackListEntry      *fFirstTrack, *fLastTrack;
 
 	QTAtom_mvhd         *fMovieHeaderAtom;
@@ -194,7 +194,7 @@ bool QTFile::ValidTOC()
 	UInt64 thePos = 0;
 
 #if DSS_USE_API_CALLBACKS
-	UInt32 theDataLen = sizeof(UInt64);
+	uint32_t theDataLen = sizeof(UInt64);
 	(void)QTSS_GetValue(fMovieFD, qtssFlObjLength, 0, (void*)&theLength, &theDataLen);
 	(void)QTSS_GetValue(fMovieFD, qtssFlObjPosition, 0, (void*)&thePos, &theDataLen);
 	//  qtss_printf("GenerateAtomTOC failed CurPos=%"_64BITARG_"u < Length=%"_64BITARG_"u\n", CurPos, theLength);

@@ -55,7 +55,7 @@ public:
 
 	//
 	// Accessors.
-	inline  bool      SampleSize(UInt32 SampleNumber, UInt32 *Size = NULL) \
+	inline  bool      SampleSize(uint32_t SampleNumber, uint32_t *Size = NULL) \
 	{   if (fCommonSampleSize) {
 		\
 			if (Size != NULL) \
@@ -72,25 +72,25 @@ public:
 		return false; \
 	};
 
-	bool      SampleRangeSize(UInt32 firstSampleNumber, UInt32 lastSampleNumber, UInt32 *sizePtr);
+	bool      SampleRangeSize(uint32_t firstSampleNumber, uint32_t lastSampleNumber, uint32_t *sizePtr);
 
 	//
 	// Debugging functions.
 	virtual void        DumpAtom();
 	virtual void        DumpTable();
 
-	inline  UInt32      GetNumEntries() { return fNumEntries; }
-	inline  UInt32      GetCommonSampleSize() { return fCommonSampleSize; }
+	inline  uint32_t      GetNumEntries() { return fNumEntries; }
+	inline  uint32_t      GetCommonSampleSize() { return fCommonSampleSize; }
 
 protected:
 	//
 	// Protected member variables.
 	uint8_t       fVersion;
-	UInt32      fFlags; // 24 bits in the low 3 bytes
-	UInt32      fCommonSampleSize;
-	UInt32      fNumEntries;
+	uint32_t      fFlags; // 24 bits in the low 3 bytes
+	uint32_t      fCommonSampleSize;
+	uint32_t      fNumEntries;
 	char        *fSampleSizeTable;
-	UInt32      *fTable; // longword-aligned version of the above
+	uint32_t      *fTable; // longword-aligned version of the above
 };
 
 #endif // QTAtom_stsz_H

@@ -69,7 +69,7 @@ public:
 	void            Start();
 
 	static void     ThreadYield();
-	static void     Sleep(UInt32 inMsec);
+	static void     Sleep(uint32_t inMsec);
 
 	void            Join();
 	void            SendStopRequest() { fStopRequested = true; }
@@ -89,7 +89,7 @@ public:
 	static void     SetPersonality(char* user, char* group) { SetUser(user); SetGroup(group); };
 	bool          SwitchPersonality();
 #if DEBUG
-	UInt32          GetNumLocksHeld() { return 0; }
+	uint32_t          GetNumLocksHeld() { return 0; }
 	void            IncrementLocksHeld() {}
 	void            DecrementLocksHeld() {}
 #endif
@@ -134,7 +134,7 @@ private:
 #elif __PTHREADS__
 	pthread_t       fThreadID;
 #else
-	UInt32          fThreadID;
+	uint32_t          fThreadID;
 #endif
 	void*           fThreadData;
 	DateBuffer      fDateBuffer;

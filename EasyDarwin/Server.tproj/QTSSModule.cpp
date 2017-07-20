@@ -79,7 +79,7 @@ char*    QTSSModule::sRoleNames[] =
 void QTSSModule::Initialize()
 {
 	//Setup all the dictionary stuff
-	for (UInt32 x = 0; x < qtssModNumParams; x++)
+	for (uint32_t x = 0; x < qtssModNumParams; x++)
 		QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kModuleDictIndex)->
 		SetAttribute(x, sAttributes[x].fAttrName, sAttributes[x].fFuncPtr,
 			sAttributes[x].fAttrDataType, sAttributes[x].fAttrPermission);

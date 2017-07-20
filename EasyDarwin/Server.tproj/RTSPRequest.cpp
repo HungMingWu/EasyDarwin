@@ -215,7 +215,7 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 
 	//whatever is in this position in the URL must be the URI. Store that
 	//in the qtssURLParam. Confused?
-	UInt32 uriLen = urlParser.GetDataReceivedLen() - urlParser.GetDataParsedLen();
+	uint32_t uriLen = urlParser.GetDataReceivedLen() - urlParser.GetDataParsedLen();
 	if (uriLen > 0)
 		// qtssRTSPReqURI = /live.sdp
 		this->SetVal(qtssRTSPReqURI, urlParser.GetCurrentPosition(), urlParser.GetDataReceivedLen() - urlParser.GetDataParsedLen());
@@ -310,7 +310,7 @@ QTSS_Error RTSPRequest::ParseHeaders(StringParser& parser)
 		//Use the enumeration to look up the dictionary ID of this header,
 		//and set that dictionary attribute to be whatever is in the body of the header
 
-		UInt32 theHeader = RTSPProtocol::GetRequestHeader(theKeyWord);
+		uint32_t theHeader = RTSPProtocol::GetRequestHeader(theKeyWord);
 		StrPtrLen theHeaderVal;
 		parser.ConsumeUntil(&theHeaderVal, StringParser::sEOLMask);
 
@@ -657,7 +657,7 @@ void RTSPRequest::ParseTransportOptionsHeader()
 }
 
 
-void RTSPRequest::ParseAddrSubHeader(StrPtrLen* inSubHeader, StrPtrLen* inHeaderName, UInt32* outAddr)
+void RTSPRequest::ParseAddrSubHeader(StrPtrLen* inSubHeader, StrPtrLen* inHeaderName, uint32_t* outAddr)
 {
 	if (!inSubHeader || !inHeaderName || !outAddr)
 		return;
@@ -679,7 +679,7 @@ void RTSPRequest::ParseAddrSubHeader(StrPtrLen* inSubHeader, StrPtrLen* inHeader
 	//Set the addr string param.
 	StrPtrLen theAddr(theSubHeaderParser.GetCurrentPosition(), theSubHeaderParser.GetDataRemaining());
 
-	//Convert the string to a UInt32 IP address
+	//Convert the string to a uint32_t IP address
 	char theTerminator = theAddr.Ptr[theAddr.Len];
 	theAddr.Ptr[theAddr.Len] = '\0';
 
@@ -946,13 +946,13 @@ void RTSPRequest::SetupAuthLocalPath(void)
 	if (qtssSetupMethod == fMethod)
 		theID = qtssRTSPReqFilePathTrunc;
 
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 	char* theFullPath = QTSSModuleUtils::GetFullPath(this, theID, &theLen, NULL);
 	this->SetValue(qtssRTSPReqLocalPath, 0, theFullPath, theLen, QTSSDictionary::kDontObeyReadOnly);
 	delete[] theFullPath;
 }
 
-QTSS_Error RTSPRequest::SendDigestChallenge(UInt32 qop, StrPtrLen *nonce, StrPtrLen* opaque)
+QTSS_Error RTSPRequest::SendDigestChallenge(uint32_t qop, StrPtrLen *nonce, StrPtrLen* opaque)
 {
 	QTSS_Error theErr = QTSS_NoErr;
 

@@ -72,7 +72,7 @@ HTTPSession::~HTTPSession()
 	QTSS_RoleParams theParams;
 	theParams.rtspSessionClosingParams.inRTSPSession = this;
 
-	for (UInt32 x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPSessionClosingRole); x++)
+	for (uint32_t x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPSessionClosingRole); x++)
 		(void)QTSServerInterface::GetModule(QTSSModule::kRTSPSessionClosingRole, x)->CallDispatch(QTSS_RTSPSessionClosing_Role, &theParams);
 
 	fLiveSession = false; //used in Clean up request to remove the RTP session.
@@ -425,7 +425,7 @@ QTSS_Error HTTPSession::SetupRequest()
 	StrPtrLen* lengthPtr = fRequest->GetHeaderValue(httpContentLengthHeader);
 	StringParser theContentLenParser(lengthPtr);
 	theContentLenParser.ConsumeWhitespace();
-	UInt32 content_length = theContentLenParser.ConsumeInteger(nullptr);
+	uint32_t content_length = theContentLenParser.ConsumeInteger(nullptr);
 
 	if (content_length)
 	{
@@ -433,9 +433,9 @@ QTSS_Error HTTPSession::SetupRequest()
 		// Check for the existence of 2 attributes in the request: a pointer to our buffer for
 		// the request body, and the current offset in that buffer. If these attributes exist,
 		// then we've already been here for this request. If they don't exist, add them.
-		UInt32 theBufferOffset = 0;
+		uint32_t theBufferOffset = 0;
 		char* theRequestBody = nullptr;
-		UInt32 theLen = sizeof(theRequestBody);
+		uint32_t theLen = sizeof(theRequestBody);
 		theErr = QTSS_GetValue(this, easyHTTPSesContentBody, 0, &theRequestBody, &theLen);
 
 		if (theErr != QTSS_NoErr)
@@ -504,7 +504,7 @@ QTSS_Error HTTPSession::SetupRequest()
 		//		break;
 		//}
 
-		UInt32 offset = 0;
+		uint32_t offset = 0;
 		(void)QTSS_SetValue(this, easyHTTPSesContentBodyOffset, 0, &offset, sizeof(offset));
 		char* content = nullptr;
 		(void)QTSS_SetValue(this, easyHTTPSesContentBody, 0, &content, 0);
@@ -534,7 +534,7 @@ void HTTPSession::CleanupRequest()
 	this->SetRequestBodyLength(-1);
 }
 
-bool HTTPSession::OverMaxConnections(UInt32 buffer)
+bool HTTPSession::OverMaxConnections(uint32_t buffer)
 {
 	QTSServerInterface* theServer = QTSServerInterface::GetServer();
 	SInt32 maxConns = theServer->GetPrefs()->GetMaxConnections();
@@ -542,7 +542,7 @@ bool HTTPSession::OverMaxConnections(UInt32 buffer)
 
 	if (maxConns > -1) // limit connections
 	{
-		UInt32 maxConnections = static_cast<UInt32>(maxConns) + buffer;
+		uint32_t maxConnections = static_cast<uint32_t>(maxConns) + buffer;
 		if (theServer->GetNumRTSPSessions() > maxConnections)
 		{
 			overLimit = true;
@@ -783,7 +783,7 @@ QTSS_Error HTTPSession::execNetMsgCSGetServerVersionReqRESTful(const char* query
 
 	SInt64 timeNow = OS::Milliseconds();
 	SInt64 startupTime = 0;
-	UInt32 startupTimeSize = sizeof(startupTime);
+	uint32_t startupTimeSize = sizeof(startupTime);
 	(void)QTSS_GetValue(QTSServerInterface::GetServer(), qtssSvrStartupTime, 0, &startupTime, &startupTimeSize);
 	SInt64 longstTime = (timeNow - startupTime) / 1000;
 
@@ -922,12 +922,12 @@ QTSS_Error HTTPSession::execNetMsgCSGetBaseConfigReqRESTful(const char* queryStr
 	header[EASY_TAG_ERROR_STRING] = EasyProtocol::GetErrorString(EASY_ERROR_SUCCESS_OK);
 
 	uint16_t port;
-	UInt32 len = sizeof(uint16_t);
+	uint32_t len = sizeof(uint16_t);
 	(void)QTSS_GetValue(QTSServerInterface::GetServer()->GetPrefs(), qtssPrefsRTSPPorts, 0, static_cast<void*>(&port), &len);
 	body[EASY_TAG_CONFIG_RTSP_LAN_PORT] = EasyUtil::ToString(port);
 
 	char lanip[512] = { 0 };
-	for (UInt32 ipAddrIter = 0; ipAddrIter < SocketUtils::GetNumIPAddrs(); ipAddrIter++)
+	for (uint32_t ipAddrIter = 0; ipAddrIter < SocketUtils::GetNumIPAddrs(); ipAddrIter++)
 	{
 		StrPtrLen* ipIter = SocketUtils::GetIPAddrStr(ipAddrIter);
 		::strncat(lanip, ipIter->Ptr, ipIter->Len);
@@ -1074,7 +1074,7 @@ QTSS_Error HTTPSession::execNetMsgCSGetDeviceStreamReqRESTful(const char* queryS
 	const char* chProtocol = parList.DoFindCGIValueForParam(EASY_TAG_L_PROTOCOL);
 	//const char* chReserve = parList.DoFindCGIValueForParam(EASY_TAG_L_RESERVE);
 
-	UInt32 theChannelNum = 1;
+	uint32_t theChannelNum = 1;
 	EasyStreamType streamType = easyIllegalStreamType;
 
 	char* outURL = new char[QTSS_MAX_URL_LENGTH];
@@ -1132,8 +1132,8 @@ QTSS_Error HTTPSession::execNetMsgCSGetDeviceStreamReqRESTful(const char* queryS
 		params.easyGetDeviceStreamParams.outUrl = outURL;
 		params.easyGetDeviceStreamParams.outIsReady = false;
 
-		UInt32 numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kGetDeviceStreamRole);
-		for (UInt32 fCurrentModule = 0; fCurrentModule < numModules; fCurrentModule++)
+		uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kGetDeviceStreamRole);
+		for (uint32_t fCurrentModule = 0; fCurrentModule < numModules; fCurrentModule++)
 		{
 			QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kGetDeviceStreamRole, fCurrentModule);
 			QTSS_Error exeErr = theModule->CallDispatch(Easy_GetDeviceStream_Role, &params);
@@ -1195,7 +1195,7 @@ QTSS_Error HTTPSession::execNetMsgCSLiveDeviceStreamReqRESTful(const char * quer
 	const char* chProtocol = parList.DoFindCGIValueForParam(EASY_TAG_L_PROTOCOL);
 	//const char* chReserve = parList.DoFindCGIValueForParam(EASY_TAG_L_RESERVE);
 
-	UInt32 theChannelNum = 1;
+	uint32_t theChannelNum = 1;
 	EasyStreamType streamType = easyIllegalStreamType;
 
 	int theErr = EASY_ERROR_SERVER_NOT_IMPLEMENTED;
@@ -1236,8 +1236,8 @@ QTSS_Error HTTPSession::execNetMsgCSLiveDeviceStreamReqRESTful(const char * quer
 		params.easyGetDeviceStreamParams.outUrl = nullptr;
 		params.easyGetDeviceStreamParams.outIsReady = false;
 
-		UInt32 numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kLiveDeviceStreamRole);
-		for (UInt32 fCurrentModule = 0; fCurrentModule < numModules; fCurrentModule++)
+		uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kLiveDeviceStreamRole);
+		for (uint32_t fCurrentModule = 0; fCurrentModule < numModules; fCurrentModule++)
 		{
 			QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kLiveDeviceStreamRole, fCurrentModule);
 			QTSS_Error exeErr = theModule->CallDispatch(Easy_LiveDeviceStream_Role, &params);

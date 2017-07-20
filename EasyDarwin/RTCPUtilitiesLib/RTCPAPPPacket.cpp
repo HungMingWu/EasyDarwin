@@ -65,7 +65,7 @@ void RTCPAPPPacket::Dump()//Override
 }
 
 
-bool RTCPAPPPacket::ParseAPPPacketHeader(uint8_t* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPAPPPacket::ParseAPPPacketHeader(uint8_t* inPacketBuffer, uint32_t inPacketLength)
 {
 	if (inPacketLength < kRTCPPacketSizeInBytes + kRTCPAPPHeaderSizeInBytes)
 		return false;
@@ -73,7 +73,7 @@ bool RTCPAPPPacket::ParseAPPPacketHeader(uint8_t* inPacketBuffer, UInt32 inPacke
 	return true;
 }
 
-bool RTCPAPPPacket::ParseAPPPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPAPPPacket::ParseAPPPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength)
 {
 	if (false == this->ParsePacket(inPacketBuffer, inPacketLength)) // base class
 		return false;

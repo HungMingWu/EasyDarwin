@@ -74,7 +74,7 @@ public:
 	//
 	// Caller may also provide a SourceInfo object, though it is not needed and
 	// will also need to be provided to SetupReflectorSession when that is called.
-	ReflectorSession(StrPtrLen* inSourceID, UInt32 inChannelNum = 0, SourceInfo* inInfo = NULL);
+	ReflectorSession(StrPtrLen* inSourceID, uint32_t inChannelNum = 0, SourceInfo* inInfo = NULL);
 	virtual ~ReflectorSession();
 
 	//
@@ -94,7 +94,7 @@ public:
 	};
 
 	QTSS_Error      SetupReflectorSession(SourceInfo* inInfo, QTSS_StandardRTSP_Params* inParams,
-		UInt32 inFlags = kMarkSetup, bool filterState = true, UInt32 filterTimeout = 30);
+		uint32_t inFlags = kMarkSetup, bool filterState = true, uint32_t filterTimeout = 30);
 
 	QTSS_Error		SetSessionName();
 
@@ -111,19 +111,19 @@ public:
 
 	OSRef*          GetRef() { return &fRef; }
 	OSQueueElem*    GetQueueElem() { return &fQueueElem; }
-	UInt32          GetNumOutputs() { return fNumOutputs; }
-	UInt32          GetNumStreams() { return fSourceInfo->GetNumStreams(); }
+	uint32_t          GetNumOutputs() { return fNumOutputs; }
+	uint32_t          GetNumStreams() { return fSourceInfo->GetNumStreams(); }
 	SourceInfo*     GetSourceInfo() { return fSourceInfo; }
 	StrPtrLen*      GetLocalSDP()	{ return &fLocalSDP; }
 
 	StrPtrLen*      GetSourceID()	{ return &fSourceID; }
 	StrPtrLen*      GetStreamName() { return &fSessionName; }
-	UInt32			GetChannelNum() { return fChannelNum; }
+	uint32_t			GetChannelNum() { return fChannelNum; }
 
 	bool			IsSetup() { return fIsSetup; }
 	bool			HasVideoKeyFrameUpdate() { return fHasVideoKeyFrameUpdate; }
 
-	ReflectorStream*	GetStreamByIndex(UInt32 inIndex) { return fStreamArray[inIndex]; }
+	ReflectorStream*	GetStreamByIndex(uint32_t inIndex) { return fStreamArray[inIndex]; }
 	void AddBroadcasterClientSession(QTSS_StandardRTSP_Params* inParams);
 	QTSS_ClientSessionObject GetBroadcasterSession() { return fBroadcasterSession; }
 
@@ -134,7 +134,7 @@ public:
 	// A ReflectorSession keeps track of the aggregate bit rate each
 	// stream is reflecting (RTP only). Initially, this will return 0
 	// until enough time passes to compute an accurate average.
-	UInt32          GetBitRate();
+	uint32_t          GetBitRate();
 
 	// Returns true if this SourceInfo structure is equivalent to this
 	// ReflectorSession.
@@ -144,14 +144,14 @@ public:
 	// to an output, this cookie is used to identify which stream is writing the packet.
 	// The below function is useful so outputs can get the cookie value for a stream ID,
 	// and therefore mux the cookie to the right output stream.
-	void*   GetStreamCookie(UInt32 inStreamID);
+	void*   GetStreamCookie(uint32_t inStreamID);
 
 	//Reflector quality levels:
 	enum
 	{
-		kAudioOnlyQuality = 1,      //UInt32
-		kNormalQuality = 0,         //UInt32
-		kNumQualityLevels = 2       //UInt32
+		kAudioOnlyQuality = 1,      //uint32_t
+		kNormalQuality = 0,         //uint32_t
+		kNumQualityLevels = 2       //uint32_t
 	};
 
 	SInt64  GetInitTimeMS() { return fInitTimeMS; }
@@ -173,7 +173,7 @@ private:
 	StrPtrLen   fSourceID;
 
 	StrPtrLen	fSessionName;
-	UInt32		fChannelNum;
+	uint32_t		fChannelNum;
 
 	OSQueueElem fQueueElem; // Relay uses this.
 

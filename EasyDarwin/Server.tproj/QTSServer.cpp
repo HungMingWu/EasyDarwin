@@ -110,7 +110,7 @@ public:
 	virtual Task*   GetSessionTask(TCPSocket** outSocket);
 
 	//check whether the Listener should be idling
-	bool OverMaxConnections(UInt32 buffer);
+	bool OverMaxConnections(uint32_t buffer);
 
 };
 
@@ -125,7 +125,7 @@ public:
 	virtual Task*   GetSessionTask(TCPSocket** outSocket);
 
 	//check whether the Listener should be idling
-	bool OverMaxConnections(UInt32 buffer);
+	bool OverMaxConnections(uint32_t buffer);
 
 };
 
@@ -169,7 +169,7 @@ QTSServer::~QTSServer()
 	theModuleState.curTask = nullptr;
 	OSThread::SetMainThreadData(&theModuleState);
 
-	for (UInt32 x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kShutdownRole); x++)
+	for (uint32_t x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kShutdownRole); x++)
 		(void)QTSServerInterface::GetModule(QTSSModule::kShutdownRole, x)->CallDispatch(QTSS_Shutdown_Role, nullptr);
 
 	OSThread::SetMainThreadData(nullptr);
@@ -186,8 +186,8 @@ QTSServer::~QTSServer()
 
 bool QTSServer::Initialize(XMLPrefsParser* inPrefsSource, PrefsSource* inMessagesSource, uint16_t inPortOverride, bool createListeners, const char*inAbsolutePath)
 {
-	static const UInt32 kRTPSessionMapSize = 2000;
-	static const UInt32 kReflectorSessionMapSize = 2000;
+	static const uint32_t kRTPSessionMapSize = 2000;
+	static const uint32_t kReflectorSessionMapSize = 2000;
 	fServerState = qtssFatalErrorState;
 	sPrefsSource = inPrefsSource;
 	sMessagesSource = inMessagesSource;
@@ -329,7 +329,7 @@ void QTSServer::StartTasks()
 
 	//
 	// Start listening
-	for (UInt32 x = 0; x < fNumListeners; x++)
+	for (uint32_t x = 0; x < fNumListeners; x++)
 		fListeners[x]->RequestEvent(EV_RE);
 }
 
@@ -343,15 +343,15 @@ bool QTSServer::SetDefaultIPAddr()
 	}
 
 	//find out what our default IP addr is & dns name
-	UInt32 theNumAddrs = 0;
-	UInt32* theIPAddrs = this->GetRTSPIPAddrs(fSrvrPrefs, &theNumAddrs);
+	uint32_t theNumAddrs = 0;
+	uint32_t* theIPAddrs = this->GetRTSPIPAddrs(fSrvrPrefs, &theNumAddrs);
 	if (theNumAddrs == 1)
 		fDefaultIPAddr = SocketUtils::GetIPAddr(0);
 	else
 		fDefaultIPAddr = theIPAddrs[0];
 	delete[] theIPAddrs;
 
-	for (UInt32 ipAddrIter = 0; ipAddrIter < SocketUtils::GetNumIPAddrs(); ipAddrIter++)
+	for (uint32_t ipAddrIter = 0; ipAddrIter < SocketUtils::GetNumIPAddrs(); ipAddrIter++)
 	{
 		if (SocketUtils::GetIPAddr(ipAddrIter) == fDefaultIPAddr)
 		{
@@ -386,20 +386,20 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 		PortTracking() : fPort(0), fIPAddr(0), fNeedsCreating(true) {}
 
 		uint16_t fPort;
-		UInt32 fIPAddr;
+		uint32_t fIPAddr;
 		bool fNeedsCreating;
 	};
 
 	PortTracking* theRTSPPortTrackers = nullptr;
-	UInt32 theTotalRTSPPortTrackers = 0;
+	uint32_t theTotalRTSPPortTrackers = 0;
 
 	PortTracking* theHTTPPortTrackers = nullptr;
-	UInt32 theTotalHTTPPortTrackers = 0;
+	uint32_t theTotalHTTPPortTrackers = 0;
 
 	// Get the IP addresses from the pref
-	UInt32 theNumAddrs = 0;
-	UInt32* theIPAddrs = this->GetRTSPIPAddrs(inPrefs, &theNumAddrs);
-	UInt32 index = 0;
+	uint32_t theNumAddrs = 0;
+	uint32_t* theIPAddrs = this->GetRTSPIPAddrs(inPrefs, &theNumAddrs);
+	uint32_t index = 0;
 
 	// Stat Total Num of RTSP Port
 	if (inPortOverride != 0)
@@ -414,16 +414,16 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 	}
 	else
 	{
-		UInt32 theNumPorts = 0;
+		uint32_t theNumPorts = 0;
 		uint16_t* thePorts = GetRTSPPorts(inPrefs, &theNumPorts);
 		theTotalRTSPPortTrackers = theNumAddrs * theNumPorts;
 		theRTSPPortTrackers = new PortTracking[theTotalRTSPPortTrackers];
 
-		UInt32 currentIndex = 0;
+		uint32_t currentIndex = 0;
 
 		for (index = 0; index < theNumAddrs; index++)
 		{
-			for (UInt32 portIndex = 0; portIndex < theNumPorts; portIndex++)
+			for (uint32_t portIndex = 0; portIndex < theNumPorts; portIndex++)
 			{
 				currentIndex = (theNumPorts * index) + portIndex;
 
@@ -441,7 +441,7 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 		theHTTPPortTrackers = new PortTracking[theTotalHTTPPortTrackers];
 
 		uint16_t theHTTPPort = inPrefs->GetServiceLanPort();
-		UInt32 currentIndex = 0;
+		uint32_t currentIndex = 0;
 
 		for (index = 0; index < theNumAddrs; index++)
 		{
@@ -456,12 +456,12 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 	// If we already are listening on that port, just move the pointer to the
 	// listener over to the new array
 	TCPListenerSocket** newListenerArray = new TCPListenerSocket*[theTotalRTSPPortTrackers + theTotalHTTPPortTrackers];
-	UInt32 curPortIndex = 0;
+	uint32_t curPortIndex = 0;
 
 	// RTSPPortTrackers check
-	for (UInt32 count = 0; count < theTotalRTSPPortTrackers; count++)
+	for (uint32_t count = 0; count < theTotalRTSPPortTrackers; count++)
 	{
-		for (UInt32 count2 = 0; count2 < fNumListeners; count2++)
+		for (uint32_t count2 = 0; count2 < fNumListeners; count2++)
 		{
 			if ((fListeners[count2]->GetLocalPort() == theRTSPPortTrackers[count].fPort) &&
 				(fListeners[count2]->GetLocalAddr() == theRTSPPortTrackers[count].fIPAddr))
@@ -475,9 +475,9 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 	}
 
 	// HTTPPortTrackers check
-	for (UInt32 count = 0; count < theTotalHTTPPortTrackers; count++)
+	for (uint32_t count = 0; count < theTotalHTTPPortTrackers; count++)
 	{
-		for (UInt32 count2 = 0; count2 < fNumListeners; count2++)
+		for (uint32_t count2 = 0; count2 < fNumListeners; count2++)
 		{
 			if ((fListeners[count2]->GetLocalPort() == theHTTPPortTrackers[count].fPort) &&
 				(fListeners[count2]->GetLocalAddr() == theHTTPPortTrackers[count].fIPAddr))
@@ -491,7 +491,7 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 	}
 
 	// Create any new <RTSP> listeners we need
-	for (UInt32 count3 = 0; count3 < theTotalRTSPPortTrackers; count3++)
+	for (uint32_t count3 = 0; count3 < theTotalRTSPPortTrackers; count3++)
 	{
 		if (theRTSPPortTrackers[count3].fNeedsCreating)
 		{
@@ -524,7 +524,7 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 	}
 
 	// Create any new <HTTP> listeners we need
-	for (UInt32 count3 = 0; count3 < theTotalHTTPPortTrackers; count3++)
+	for (uint32_t count3 = 0; count3 < theTotalHTTPPortTrackers; count3++)
 	{
 		if (theHTTPPortTrackers[count3].fNeedsCreating)
 		{
@@ -558,11 +558,11 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 
 	//
 	// Kill any listeners that we no longer need
-	for (UInt32 count4 = 0; count4 < fNumListeners; count4++)
+	for (uint32_t count4 = 0; count4 < fNumListeners; count4++)
 	{
 		bool deleteThisOne = true;
 
-		for (UInt32 count5 = 0; count5 < curPortIndex; count5++)
+		for (uint32_t count5 = 0; count5 < curPortIndex; count5++)
 		{
 			if (newListenerArray[count5] == fListeners[count4])
 				deleteThisOne = false;
@@ -576,9 +576,9 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 	// Finally, make our server attributes and fListener privy to the new...
 	fListeners = newListenerArray;
 	fNumListeners = curPortIndex;
-	UInt32 portIndex = 0;
+	uint32_t portIndex = 0;
 
-	for (UInt32 count6 = 0; count6 < fNumListeners; count6++)
+	for (uint32_t count6 = 0; count6 < fNumListeners; count6++)
 	{
 		if (fListeners[count6]->GetLocalAddr() != INADDR_LOOPBACK)
 		{
@@ -594,23 +594,23 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 	return (fNumListeners > 0);
 }
 
-UInt32* QTSServer::GetRTSPIPAddrs(QTSServerPrefs* inPrefs, UInt32* outNumAddrsPtr)
+uint32_t* QTSServer::GetRTSPIPAddrs(QTSServerPrefs* inPrefs, uint32_t* outNumAddrsPtr)
 {
-	UInt32 numAddrs = inPrefs->GetNumValues(qtssPrefsRTSPIPAddr);
-	UInt32* theIPAddrArray = nullptr;
+	uint32_t numAddrs = inPrefs->GetNumValues(qtssPrefsRTSPIPAddr);
+	uint32_t* theIPAddrArray = nullptr;
 
 	if (numAddrs == 0)
 	{
 		*outNumAddrsPtr = 1;
-		theIPAddrArray = new UInt32[1];
+		theIPAddrArray = new uint32_t[1];
 		theIPAddrArray[0] = INADDR_ANY;
 	}
 	else
 	{
-		theIPAddrArray = new UInt32[numAddrs + 1];
-		UInt32 arrIndex = 0;
+		theIPAddrArray = new uint32_t[numAddrs + 1];
+		uint32_t arrIndex = 0;
 
-		for (UInt32 theIndex = 0; theIndex < numAddrs; theIndex++)
+		for (uint32_t theIndex = 0; theIndex < numAddrs; theIndex++)
 		{
 			// Get the ip addr out of the prefs dictionary
 			QTSS_Error theErr = QTSS_NoErr;
@@ -624,7 +624,7 @@ UInt32* QTSServer::GetRTSPIPAddrs(QTSServerPrefs* inPrefs, UInt32* outNumAddrsPt
 			}
 
 
-			UInt32 theIPAddr = 0;
+			uint32_t theIPAddr = 0;
 			if (theIPAddrStr != nullptr)
 			{
 				theIPAddr = SocketUtils::ConvertStringToAddr(theIPAddrStr);
@@ -646,7 +646,7 @@ UInt32* QTSServer::GetRTSPIPAddrs(QTSServerPrefs* inPrefs, UInt32* outNumAddrsPt
 	return theIPAddrArray;
 }
 
-uint16_t* QTSServer::GetRTSPPorts(QTSServerPrefs* inPrefs, UInt32* outNumPortsPtr)
+uint16_t* QTSServer::GetRTSPPorts(QTSServerPrefs* inPrefs, uint32_t* outNumPortsPtr)
 {
 	*outNumPortsPtr = inPrefs->GetNumValues(qtssPrefsRTSPPorts);
 
@@ -655,10 +655,10 @@ uint16_t* QTSServer::GetRTSPPorts(QTSServerPrefs* inPrefs, UInt32* outNumPortsPt
 
 	uint16_t* thePortArray = new uint16_t[*outNumPortsPtr];
 
-	for (UInt32 theIndex = 0; theIndex < *outNumPortsPtr; theIndex++)
+	for (uint32_t theIndex = 0; theIndex < *outNumPortsPtr; theIndex++)
 	{
 		// Get the ip addr out of the prefs dictionary
-		UInt32 theLen = sizeof(uint16_t);
+		uint32_t theLen = sizeof(uint16_t);
 		QTSS_Error theErr = QTSS_NoErr;
 		theErr = inPrefs->GetValue(qtssPrefsRTSPPorts, theIndex, &thePortArray[theIndex], &theLen);
 		Assert(theErr == QTSS_NoErr);
@@ -672,8 +672,8 @@ bool  QTSServer::SetupUDPSockets()
 	//function finds all IP addresses on this machine, and binds 1 RTP / RTCP
 	//socket pair to a port pair on each address.
 
-	UInt32 theNumAllocatedPairs = 0;
-	for (UInt32 theNumPairs = 0; theNumPairs < SocketUtils::GetNumIPAddrs(); theNumPairs++)
+	uint32_t theNumAllocatedPairs = 0;
+	for (uint32_t theNumPairs = 0; theNumPairs < SocketUtils::GetNumIPAddrs(); theNumPairs++)
 	{
 		UDPSocketPair* thePair = fSocketPool->CreateUDPSocketPair(SocketUtils::GetIPAddr(theNumPairs), 0);
 		if (thePair != nullptr)
@@ -961,7 +961,7 @@ void    QTSServer::CreateModule(char* inModuleFolderPath, char* inModuleName)
 
 	//
 	// Construct a full path to this module
-	UInt32 totPathLen = ::strlen(inModuleFolderPath) + ::strlen(inModuleName);
+	uint32_t totPathLen = ::strlen(inModuleFolderPath) + ::strlen(inModuleName);
 	OSCharArrayDeleter theModPath(new char[totPathLen + 4]);
 	::strcpy(theModPath.GetObject(), inModuleFolderPath);
 	::strcat(theModPath.GetObject(), kPathDelimiterString);
@@ -1033,7 +1033,7 @@ bool QTSServer::AddModule(QTSSModule* inModule)
 
 	//
 	// Add this module to the array of module (dictionaries)
-	UInt32 theNumModules = this->GetNumValues(qtssSvrModuleObjects);
+	uint32_t theNumModules = this->GetNumValues(qtssSvrModuleObjects);
 	QTSS_Error theErr = this->SetValue(qtssSvrModuleObjects, theNumModules, &inModule, sizeof(QTSSModule*), QTSSDictionary::kDontObeyReadOnly);
 	Assert(theErr == QTSS_NoErr);
 
@@ -1056,7 +1056,7 @@ void QTSServer::BuildModuleRoleArrays()
 	// Loop through all the roles of all the modules, recording the number of
 	// modules in each role, and also recording which modules are doing what.
 
-	for (UInt32 x = 0; x < QTSSModule::kNumRoles; x++)
+	for (uint32_t x = 0; x < QTSSModule::kNumRoles; x++)
 	{
 		sNumModulesInRole[x] = 0;
 		for (theIter.Reset(); !theIter.IsDone(); theIter.Next())
@@ -1068,7 +1068,7 @@ void QTSServer::BuildModuleRoleArrays()
 
 		if (sNumModulesInRole[x] > 0)
 		{
-			UInt32 moduleIndex = 0;
+			uint32_t moduleIndex = 0;
 			sModuleArray[x] = new QTSSModule*[sNumModulesInRole[x] + 1];
 			for (theIter.Reset(); !theIter.IsDone(); theIter.Next())
 			{
@@ -1085,7 +1085,7 @@ void QTSServer::BuildModuleRoleArrays()
 
 void QTSServer::DestroyModuleRoleArrays()
 {
-	for (UInt32 x = 0; x < QTSSModule::kNumRoles; x++)
+	for (uint32_t x = 0; x < QTSSModule::kNumRoles; x++)
 	{
 		sNumModulesInRole[x] = 0;
 		if (sModuleArray[x] != nullptr)
@@ -1119,7 +1119,7 @@ void QTSServer::DoInitRole()
 	//   QTSS_RTSPMethod	theSetParameterMethod = qtssSetParameterMethod;
 	//    (void)this->SetValue(qtssSvrHandledMethods, 0, &theSetParameterMethod, sizeof(theSetParameterMethod));
 
-	for (UInt32 x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kInitializeRole); x++)
+	for (uint32_t x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kInitializeRole); x++)
 	{
 		QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kInitializeRole, x);
 		theInitParams.initParams.inModule = theModule;
@@ -1149,16 +1149,16 @@ void QTSServer::SetupPublicHeader()
 	// So, we can prune this attribute for duplicates, and construct a string to use in the
 	// Public: header of the OPTIONS response
 	QTSS_RTSPMethod* theMethod = nullptr;
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 
 	bool theUniqueMethods[qtssNumMethods + 1];
 	::memset(theUniqueMethods, 0, sizeof(theUniqueMethods));
 
-	for (UInt32 y = 0; this->GetValuePtr(qtssSvrHandledMethods, y, (void**)&theMethod, &theLen) == QTSS_NoErr; y++)
+	for (uint32_t y = 0; this->GetValuePtr(qtssSvrHandledMethods, y, (void**)&theMethod, &theLen) == QTSS_NoErr; y++)
 		theUniqueMethods[*theMethod] = true;
 
 	// Rewrite the qtssSvrHandledMethods, eliminating any duplicates that modules may have introduced
-	UInt32 uniqueMethodCount = 0;
+	uint32_t uniqueMethodCount = 0;
 	for (QTSS_RTSPMethod z = 0; z < qtssNumMethods; z++)
 	{
 		if (theUniqueMethods[z])
@@ -1169,7 +1169,7 @@ void QTSServer::SetupPublicHeader()
 	// Format a text string for the Public: header
 	ResizeableStringFormatter theFormatter(nullptr, 0);
 
-	for (UInt32 a = 0; this->GetValuePtr(qtssSvrHandledMethods, a, (void**)&theMethod, &theLen) == QTSS_NoErr; a++)
+	for (uint32_t a = 0; this->GetValuePtr(qtssSvrHandledMethods, a, (void**)&theMethod, &theLen) == QTSS_NoErr; a++)
 	{
 		sPublicHeaderFormatter.Put(RTSPProtocol::GetMethodString(*theMethod));
 		sPublicHeaderFormatter.Put(", ");
@@ -1199,7 +1199,7 @@ Task*   RTSPListenerSocket::GetSessionTask(TCPSocket** outSocket)
 }
 
 
-bool RTSPListenerSocket::OverMaxConnections(UInt32 buffer)
+bool RTSPListenerSocket::OverMaxConnections(uint32_t buffer)
 {
 	QTSServerInterface* theServer = QTSServerInterface::GetServer();
 	SInt32 maxConns = theServer->GetPrefs()->GetMaxConnections();
@@ -1208,9 +1208,9 @@ bool RTSPListenerSocket::OverMaxConnections(UInt32 buffer)
 	if (maxConns > -1) // limit connections
 	{
 		maxConns += buffer;
-		if ((theServer->GetNumRTPSessions() > (UInt32)maxConns)
+		if ((theServer->GetNumRTPSessions() > (uint32_t)maxConns)
 			||
-			(theServer->GetNumRTSPSessions() + theServer->GetNumRTSPHTTPSessions() > (UInt32)maxConns)
+			(theServer->GetNumRTSPSessions() + theServer->GetNumRTSPHTTPSessions() > (uint32_t)maxConns)
 			)
 		{
 			overLimit = true;
@@ -1236,7 +1236,7 @@ Task*   HTTPListenerSocket::GetSessionTask(TCPSocket** outSocket)
 }
 
 
-bool HTTPListenerSocket::OverMaxConnections(UInt32 buffer)
+bool HTTPListenerSocket::OverMaxConnections(uint32_t buffer)
 {
 	QTSServerInterface* theServer = QTSServerInterface::GetServer();
 	SInt32 maxConns = theServer->GetPrefs()->GetMaxConnections();
@@ -1245,9 +1245,9 @@ bool HTTPListenerSocket::OverMaxConnections(UInt32 buffer)
 	if (maxConns > -1) // limit connections
 	{
 		maxConns += buffer;
-		if ((theServer->GetNumRTPSessions() > (UInt32)maxConns)
+		if ((theServer->GetNumRTPSessions() > (uint32_t)maxConns)
 			||
-			(theServer->GetNumRTSPSessions() + theServer->GetNumRTSPHTTPSessions() > (UInt32)maxConns)
+			(theServer->GetNumRTSPSessions() + theServer->GetNumRTSPHTTPSessions() > (uint32_t)maxConns)
 			)
 		{
 			overLimit = true;
@@ -1288,7 +1288,7 @@ void RTPSocketPool::SetUDPSocketOptions(UDPSocketPair* inPair)
 	//
 	// Always set the Rcv buf size for the RTCP sockets. This is important because the
 	// server is going to be getting many many acks.
-	UInt32 theRcvBufSize = QTSServerInterface::GetServer()->GetPrefs()->GetRTCPSocketRcvBufSizeinK();
+	uint32_t theRcvBufSize = QTSServerInterface::GetServer()->GetPrefs()->GetRTCPSocketRcvBufSizeinK();
 
 	//
 	// In case the rcv buf size is too big for the system, retry, dividing the requested size by 2.
@@ -1361,7 +1361,7 @@ QTSS_Error QTSServer::RereadPrefsService(QTSS_ServiceFunctionArgsPtr /*inArgs*/)
 
 	// Delete all the streams
 	QTSSModule** theModule = nullptr;
-	UInt32 theLen = 0;
+	uint32_t theLen = 0;
 
 	for (int y = 0; QTSServerInterface::GetServer()->GetValuePtr(qtssSvrModuleObjects, y, (void**)&theModule, &theLen) == QTSS_NoErr; y++)
 	{
@@ -1382,7 +1382,7 @@ QTSS_Error QTSServer::RereadPrefsService(QTSS_ServiceFunctionArgsPtr /*inArgs*/)
 	//
 	// Now that we are done rereading the prefs, invoke all modules in the RereadPrefs
 	// role so they can update their internal prefs caches.
-	for (UInt32 x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kRereadPrefsRole); x++)
+	for (uint32_t x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kRereadPrefsRole); x++)
 	{
 		QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRereadPrefsRole, x);
 		(void)theModule->CallDispatch(QTSS_RereadPrefs_Role, nullptr);

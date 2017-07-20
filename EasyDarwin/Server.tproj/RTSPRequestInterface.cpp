@@ -127,13 +127,13 @@ void  RTSPRequestInterface::Initialize(void)
 	Assert(sPremadeNoHeaderPtr.Len < kStaticHeaderSizeInBytes);
 
 	//Setup all the dictionary stuff
-	for (UInt32 x = 0; x < qtssRTSPReqNumParams; x++)
+	for (uint32_t x = 0; x < qtssRTSPReqNumParams; x++)
 		QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTSPRequestDictIndex)->
 		SetAttribute(x, sAttributes[x].fAttrName, sAttributes[x].fFuncPtr,
 			sAttributes[x].fAttrDataType, sAttributes[x].fAttrPermission);
 
 	QTSSDictionaryMap* theHeaderMap = QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTSPHeaderDictIndex);
-	for (UInt32 y = 0; y < qtssNumHeaders; y++)
+	for (uint32_t y = 0; y < qtssNumHeaders; y++)
 		theHeaderMap->SetAttribute(y, RTSPProtocol::GetHeaderString(y).Ptr, NULL, qtssAttrDataTypeCharArray, qtssAttrModeRead | qtssAttrModePreempSafe);
 }
 
@@ -219,7 +219,7 @@ RTSPRequestInterface::RTSPRequestInterface(RTSPSessionInterface *session)
 	// Get the default root directory from QTSSPrefs, and store that in the proper parameter
 	// Note that the GetMovieFolderPath function may allocate memory, so we check for that
 	// in this object's destructor and free that memory if necessary.
-	//UInt32 pathLen = kMovieFolderBufSizeInBytes;
+	//uint32_t pathLen = kMovieFolderBufSizeInBytes;
 	//fMovieFolderPtr = QTSServerInterface::GetServer()->GetPrefs()->GetMovieFolder(fMovieFolderPtr, &pathLen);
 	//this->SetValue(qtssRTSPReqRootDir, 0, fMovieFolderPtr, pathLen, QTSSDictionary::kDontObeyReadOnly);
 
@@ -270,7 +270,7 @@ void RTSPRequestInterface::PutStatusLine(StringFormatter* putStream, QTSS_RTSPSt
 }
 
 
-void RTSPRequestInterface::AppendContentLength(UInt32 contentLength)
+void RTSPRequestInterface::AppendContentLength(uint32_t contentLength)
 {
 	if (!fStandardHeadersWritten)
 		this->WriteStandardHeaders();
@@ -335,7 +335,7 @@ void RTSPRequestInterface::PutTransportStripped(StrPtrLen &fullTransportHeader, 
 {
 
 	// skip the fieldToStrip and echo the rest back
-	UInt32 offset = (UInt32)(fieldToStrip.Ptr - fullTransportHeader.Ptr);
+	uint32_t offset = (uint32_t)(fieldToStrip.Ptr - fullTransportHeader.Ptr);
 	StrPtrLen transportStart(fullTransportHeader.Ptr, offset);
 	while (transportStart.Len > 0) // back up removing chars up to and including ;
 	{
@@ -441,7 +441,7 @@ void RTSPRequestInterface::AppendTransportHeader(StrPtrLen* serverPortA,
 		char* theCString = ssrc->GetAsCString();
 		OSCharArrayDeleter cStrDeleter(theCString);
 
-		UInt32 ssrcVal = 0;
+		uint32_t ssrcVal = 0;
 		::sscanf(theCString, "%"   _U32BITARG_   "", &ssrcVal);
 		ssrcVal = htonl(ssrcVal);
 
@@ -467,7 +467,7 @@ void RTSPRequestInterface::AppendContentBaseHeader(StrPtrLen* theURL)
 	fOutputStream->PutEOL();
 }
 
-void RTSPRequestInterface::AppendRetransmitHeader(UInt32 inAckTimeout)
+void RTSPRequestInterface::AppendRetransmitHeader(uint32_t inAckTimeout)
 {
 	static const StrPtrLen kAckTimeout("ack-timeout=");
 
@@ -617,7 +617,7 @@ void RTSPRequestInterface::SendHeader()
 }
 
 QTSS_Error
-RTSPRequestInterface::Write(void* inBuffer, UInt32 inLength, UInt32* outLenWritten, UInt32 /*inFlags*/)
+RTSPRequestInterface::Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t /*inFlags*/)
 {
 	//now just write whatever remains into the output buffer
 	fOutputStream->Put((char*)inBuffer, inLength);
@@ -629,7 +629,7 @@ RTSPRequestInterface::Write(void* inBuffer, UInt32 inLength, UInt32* outLenWritt
 }
 
 QTSS_Error
-RTSPRequestInterface::WriteV(iovec* inVec, UInt32 inNumVectors, UInt32 inTotalLength, UInt32* outLenWritten)
+RTSPRequestInterface::WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten)
 {
 	(void)fOutputStream->WriteV(inVec, inNumVectors, inTotalLength, NULL,
 		RTSPResponseStream::kAlwaysBuffer);
@@ -639,7 +639,7 @@ RTSPRequestInterface::WriteV(iovec* inVec, UInt32 inNumVectors, UInt32 inTotalLe
 }
 
 //param retrieval functions described in .h file
-void* RTSPRequestInterface::GetAbsTruncatedPath(QTSSDictionary* inRequest, UInt32* /*outLen*/)
+void* RTSPRequestInterface::GetAbsTruncatedPath(QTSSDictionary* inRequest, uint32_t* /*outLen*/)
 {
 	// This function gets called only once
 	// if qtssRTSPReqAbsoluteURL = rtsp://www.easydarwin.org:554/live.sdp?channel=1&token=888888/trackID=1 
@@ -658,7 +658,7 @@ void* RTSPRequestInterface::GetAbsTruncatedPath(QTSSDictionary* inRequest, UInt3
 	return NULL;
 }
 
-void* RTSPRequestInterface::GetTruncatedPath(QTSSDictionary* inRequest, UInt32* /*outLen*/)
+void* RTSPRequestInterface::GetTruncatedPath(QTSSDictionary* inRequest, uint32_t* /*outLen*/)
 {
 	// This function always gets called
 
@@ -678,7 +678,7 @@ void* RTSPRequestInterface::GetTruncatedPath(QTSSDictionary* inRequest, UInt32* 
 	return NULL;
 }
 
-void* RTSPRequestInterface::GetFileName(QTSSDictionary* inRequest, UInt32* /*outLen*/)
+void* RTSPRequestInterface::GetFileName(QTSSDictionary* inRequest, uint32_t* /*outLen*/)
 {
 	// This function always gets called
 
@@ -711,7 +711,7 @@ void* RTSPRequestInterface::GetFileName(QTSSDictionary* inRequest, UInt32* /*out
 }
 
 
-void* RTSPRequestInterface::GetFileDigit(QTSSDictionary* inRequest, UInt32* /*outLen*/)
+void* RTSPRequestInterface::GetFileDigit(QTSSDictionary* inRequest, uint32_t* /*outLen*/)
 {
 	// This function always gets called
 
@@ -724,7 +724,7 @@ void* RTSPRequestInterface::GetFileDigit(QTSSDictionary* inRequest, UInt32* /*ou
 	StrPtrLen theFilePath;
 	(void)QTSS_GetValuePtr(inRequest, qtssRTSPReqTruncAbsoluteURL, 0, (void**)&theFilePath.Ptr, &theFilePath.Len);
 
-	//UInt32  theFilePathLen = theRequest->GetValue(qtssRTSPReqTruncAbsoluteURL)->Len;
+	//uint32_t  theFilePathLen = theRequest->GetValue(qtssRTSPReqTruncAbsoluteURL)->Len;
 	theFileDigit->Ptr += theFileDigit->Len -1;
 	theFileDigit->Len = 0;
 	while ((StringParser::sDigitMask[(unsigned int) *(*theFileDigit).Ptr] != '\0') &&
@@ -740,17 +740,17 @@ void* RTSPRequestInterface::GetFileDigit(QTSSDictionary* inRequest, UInt32* /*ou
 	return NULL;
 }
 
-void* RTSPRequestInterface::GetRealStatusCode(QTSSDictionary* inRequest, UInt32* outLen)
+void* RTSPRequestInterface::GetRealStatusCode(QTSSDictionary* inRequest, uint32_t* outLen)
 {
 	// Set the fRealStatusCode variable based on the current fStatusCode.
 	// This function always gets called
 	RTSPRequestInterface* theReq = (RTSPRequestInterface*)inRequest;
 	theReq->fRealStatusCode = RTSPProtocol::GetStatusCode(theReq->fStatus);
-	*outLen = sizeof(UInt32);
+	*outLen = sizeof(uint32_t);
 	return &theReq->fRealStatusCode;
 }
 
-void* RTSPRequestInterface::GetLocalPath(QTSSDictionary* inRequest, UInt32* outLen)
+void* RTSPRequestInterface::GetLocalPath(QTSSDictionary* inRequest, uint32_t* outLen)
 {
 	// This function always gets called	
 	RTSPRequestInterface* theRequest = (RTSPRequestInterface*)inRequest;
@@ -785,7 +785,7 @@ void* RTSPRequestInterface::GetLocalPath(QTSSDictionary* inRequest, UInt32* outL
 	::strncpy(rootDir, theRootDir->Ptr, theRootDir->Len);
 	OS::RecursiveMakeDir(rootDir);
 
-	UInt32 fullPathLen = filePath.Len + theRootDir->Len;
+	uint32_t fullPathLen = filePath.Len + theRootDir->Len;
 	char* theFullPath = new char[fullPathLen + 1];
 	theFullPath[fullPathLen] = '\0';
 
@@ -801,7 +801,7 @@ void* RTSPRequestInterface::GetLocalPath(QTSSDictionary* inRequest, UInt32* outL
 	return NULL;
 }
 
-void* RTSPRequestInterface::GetAuthDigestResponse(QTSSDictionary* inRequest, UInt32*)
+void* RTSPRequestInterface::GetAuthDigestResponse(QTSSDictionary* inRequest, uint32_t*)
 {
 	RTSPRequestInterface* theRequest = (RTSPRequestInterface*)inRequest;
 	(void)theRequest->SetValue(qtssRTSPReqDigestResponse, 0, theRequest->fAuthDigestResponse.Ptr, theRequest->fAuthDigestResponse.Len, QTSSDictionary::kDontObeyReadOnly);

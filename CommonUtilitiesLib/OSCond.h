@@ -61,7 +61,7 @@ private:
 
 #ifdef __Win32__
 	HANDLE              fCondition;
-	UInt32              fWaitCount;
+	uint32_t              fWaitCount;
 #elif __PTHREADS_MUTEXES__
 	pthread_cond_t      fCondition;
 	void                TimedWait(OSMutex* inMutex, SInt32 inTimeoutInMilSecs);
@@ -112,8 +112,8 @@ inline void OSCond::Broadcast()
 	// This will work, it may generate spurious wakeups,
 	// but condition variables are allowed to generate
 	// spurious wakeups
-	UInt32 waitCount = fWaitCount;
-	for (UInt32 x = 0; x < waitCount; x++)
+	uint32_t waitCount = fWaitCount;
+	for (uint32_t x = 0; x < waitCount; x++)
 	{
 		BOOL theErr = ::SetEvent(fCondition);
 		Assert(theErr == TRUE);

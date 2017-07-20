@@ -115,7 +115,7 @@ int FilePrefsSource::GetValue(const char* inKey, char* ioValue)
 }
 
 
-int FilePrefsSource::GetValueByIndex(const char* inKey, UInt32 inIndex, char* ioValue)
+int FilePrefsSource::GetValueByIndex(const char* inKey, uint32_t inIndex, char* ioValue)
 {
 	KeyValuePair* thePair = this->FindValue(inKey, ioValue, inIndex);
 
@@ -131,7 +131,7 @@ int FilePrefsSource::GetValueByIndex(const char* inKey, UInt32 inIndex, char* io
 	Assert(*valuePtr != '\t');
 	Assert(*valuePtr != ' ');
 
-	for (UInt32 count = 0; ((count < inIndex) && (valuePtr != '\0')); count++)
+	for (uint32_t count = 0; ((count < inIndex) && (valuePtr != '\0')); count++)
 	{
 		//go through all the "words" on this line (delimited by whitespace)
 		//until we hit the one specified by inIndex
@@ -160,7 +160,7 @@ int FilePrefsSource::GetValueByIndex(const char* inKey, UInt32 inIndex, char* io
 	*/
 }
 
-char* FilePrefsSource::GetValueAtIndex(UInt32 inIndex)
+char* FilePrefsSource::GetValueAtIndex(uint32_t inIndex)
 {
 	// Iterate through the queue until we have the right entry
 	KeyValuePair* thePair = fKeyValueList;
@@ -172,7 +172,7 @@ char* FilePrefsSource::GetValueAtIndex(UInt32 inIndex)
 	return NULL;
 }
 
-char* FilePrefsSource::GetKeyAtIndex(UInt32 inIndex)
+char* FilePrefsSource::GetKeyAtIndex(uint32_t inIndex)
 {
 	// Iterate through the queue until we have the right entry
 	KeyValuePair* thePair = fKeyValueList;
@@ -366,10 +366,10 @@ void FilePrefsSource::WriteToConfigFile(const char* configFilePath)
 }
 
 
-KeyValuePair* FilePrefsSource::FindValue(const char* inKey, char* ioValue, UInt32 index)
+KeyValuePair* FilePrefsSource::FindValue(const char* inKey, char* ioValue, uint32_t index)
 {
 	KeyValuePair    *keyValue = fKeyValueList;
-	UInt32          foundIndex = 0;
+	uint32_t          foundIndex = 0;
 
 	if (ioValue != NULL)
 		ioValue[0] = '\0';

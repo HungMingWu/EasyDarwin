@@ -53,26 +53,26 @@ public:
 	//The value of this can't conflict with those!
 	enum
 	{
-		kWantsDemuxer = 0x0100 //UInt32
+		kWantsDemuxer = 0x0100 //uint32_t
 	};
 
-	UDPSocket(Task* inTask, UInt32 inSocketType);
+	UDPSocket(Task* inTask, uint32_t inSocketType);
 	virtual ~UDPSocket() { if (fDemuxer != NULL) delete fDemuxer; }
 
 	//Open
 	OS_Error    Open() { return Socket::Open(SOCK_DGRAM); }
 
-	OS_Error    JoinMulticast(UInt32 inRemoteAddr);
-	OS_Error    LeaveMulticast(UInt32 inRemoteAddr);
+	OS_Error    JoinMulticast(uint32_t inRemoteAddr);
+	OS_Error    LeaveMulticast(uint32_t inRemoteAddr);
 	OS_Error    SetTtl(uint16_t timeToLive);
-	OS_Error    SetMulticastInterface(UInt32 inLocalAddr);
+	OS_Error    SetMulticastInterface(uint32_t inLocalAddr);
 
 	//returns an ERRNO
-	OS_Error        SendTo(UInt32 inRemoteAddr, uint16_t inRemotePort,
-		void* inBuffer, UInt32 inLength);
+	OS_Error        SendTo(uint32_t inRemoteAddr, uint16_t inRemotePort,
+		void* inBuffer, uint32_t inLength);
 
-	OS_Error        RecvFrom(UInt32* outRemoteAddr, uint16_t* outRemotePort,
-		void* ioBuffer, UInt32 inBufLen, UInt32* outRecvLen);
+	OS_Error        RecvFrom(uint32_t* outRemoteAddr, uint16_t* outRemotePort,
+		void* ioBuffer, uint32_t inBufLen, uint32_t* outRecvLen);
 
 	//A UDP socket may or may not have a demuxer associated with it. The demuxer
 	//is a data structure so the socket can associate incoming data with the proper

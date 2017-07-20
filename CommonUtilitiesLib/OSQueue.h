@@ -79,7 +79,7 @@ public:
 
 	OSQueueElem*    GetHead() { if (fLength > 0) return fSentinel.fPrev; return nullptr; }
 	OSQueueElem*    GetTail() { if (fLength > 0) return fSentinel.fNext; return nullptr; }
-	UInt32          GetLength() { return fLength; }
+	uint32_t          GetLength() { return fLength; }
 
 	void            Remove(OSQueueElem* object);
 
@@ -91,7 +91,7 @@ protected:
 	OSMutex 			fMutex;
 
 	OSQueueElem     fSentinel;
-	UInt32          fLength;
+	uint32_t          fLength;
 };
 
 class OSQueueIter

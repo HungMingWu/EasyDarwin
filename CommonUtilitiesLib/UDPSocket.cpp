@@ -55,7 +55,7 @@
 #include <netlog.h>
 #endif
 
-UDPSocket::UDPSocket(Task* inTask, UInt32 inSocketType)
+UDPSocket::UDPSocket(Task* inTask, uint32_t inSocketType)
 	: Socket(inTask, inSocketType), fDemuxer(NULL)
 {
 	if (inSocketType & kWantsDemuxer)
@@ -67,7 +67,7 @@ UDPSocket::UDPSocket(Task* inTask, UInt32 inSocketType)
 
 
 OS_Error
-UDPSocket::SendTo(UInt32 inRemoteAddr, uint16_t inRemotePort, void* inBuffer, UInt32 inLength)
+UDPSocket::SendTo(uint32_t inRemoteAddr, uint16_t inRemotePort, void* inBuffer, uint32_t inLength)
 {
 	Assert(inBuffer != NULL);
 
@@ -88,8 +88,8 @@ UDPSocket::SendTo(UInt32 inRemoteAddr, uint16_t inRemotePort, void* inBuffer, UI
 	return OS_NoErr;
 }
 
-OS_Error UDPSocket::RecvFrom(UInt32* outRemoteAddr, uint16_t* outRemotePort,
-	void* ioBuffer, UInt32 inBufLen, UInt32* outRecvLen)
+OS_Error UDPSocket::RecvFrom(uint32_t* outRemoteAddr, uint16_t* outRemotePort,
+	void* ioBuffer, uint32_t inBufLen, uint32_t* outRecvLen)
 {
 	Assert(outRecvLen != NULL);
 	Assert(outRemoteAddr != NULL);
@@ -114,14 +114,14 @@ OS_Error UDPSocket::RecvFrom(UInt32* outRemoteAddr, uint16_t* outRemotePort,
 	*outRemoteAddr = ntohl(fMsgAddr.sin_addr.s_addr);
 	*outRemotePort = ntohs(fMsgAddr.sin_port);
 	Assert(theRecvLen >= 0);
-	*outRecvLen = (UInt32)theRecvLen;
+	*outRecvLen = (uint32_t)theRecvLen;
 	return OS_NoErr;
 }
 
-OS_Error UDPSocket::JoinMulticast(UInt32 inRemoteAddr)
+OS_Error UDPSocket::JoinMulticast(uint32_t inRemoteAddr)
 {
 	struct ip_mreq  theMulti;
-	UInt32 localAddr = fLocalAddr.sin_addr.s_addr; // Already in network byte order
+	uint32_t localAddr = fLocalAddr.sin_addr.s_addr; // Already in network byte order
 
 #if __solaris__
 	if (localAddr == htonl(INADDR_ANY))
@@ -149,7 +149,7 @@ OS_Error UDPSocket::SetTtl(uint16_t timeToLive)
 		return OS_NoErr;
 }
 
-OS_Error UDPSocket::SetMulticastInterface(UInt32 inLocalAddr)
+OS_Error UDPSocket::SetMulticastInterface(uint32_t inLocalAddr)
 {
 	// set the outgoing interface for multicast datagrams on this socket
 	in_addr theLocalAddr;
@@ -162,7 +162,7 @@ OS_Error UDPSocket::SetMulticastInterface(UInt32 inLocalAddr)
 		return OS_NoErr;
 }
 
-OS_Error UDPSocket::LeaveMulticast(UInt32 inRemoteAddr)
+OS_Error UDPSocket::LeaveMulticast(uint32_t inRemoteAddr)
 {
 	struct ip_mreq  theMulti;
 	theMulti.imr_multiaddr.s_addr = htonl(inRemoteAddr);

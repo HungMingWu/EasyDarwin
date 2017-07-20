@@ -32,8 +32,8 @@
 
 #include "UDPSocketPool.h"
 
-UDPSocketPair* UDPSocketPool::GetUDPSocketPair(UInt32 inIPAddr, uint16_t inPort,
-	UInt32 inSrcIPAddr, uint16_t inSrcPort)
+UDPSocketPair* UDPSocketPool::GetUDPSocketPair(uint32_t inIPAddr, uint16_t inPort,
+	uint32_t inSrcIPAddr, uint16_t inSrcPort)
 {
 	OSMutexLocker locker(&fMutex);
 	if ((inSrcIPAddr != 0) || (inSrcPort != 0))
@@ -78,7 +78,7 @@ void UDPSocketPool::ReleaseUDPSocketPair(UDPSocketPair* inPair)
 	}
 }
 
-UDPSocketPair*  UDPSocketPool::CreateUDPSocketPair(UInt32 inAddr, uint16_t inPort)
+UDPSocketPair*  UDPSocketPool::CreateUDPSocketPair(uint32_t inAddr, uint16_t inPort)
 {
 	//try to find an open pair of ports to bind these suckers tooo
 	OSMutexLocker locker(&fMutex);

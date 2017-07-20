@@ -54,7 +54,7 @@ public:
 
 	QTSSMessages(PrefsSource* inMessages);
 	virtual ~QTSSMessages() {
-		for (UInt32 x = 0; x < numAttrs; x++)
+		for (uint32_t x = 0; x < numAttrs; x++)
 			if (attrBuffer[x] != NULL)
 				delete[] attrBuffer[x];
 		delete[] attrBuffer;
@@ -65,7 +65,7 @@ public:
 
 private:
 	char**              attrBuffer;
-	UInt32              numAttrs;
+	uint32_t              numAttrs;
 
 	enum
 	{

@@ -54,7 +54,7 @@ using namespace std;
 #define debug_printf if (__QTSSCALLBACKS_DEBUG__) qtss_printf
 
 
-void*   QTSSCallbacks::QTSS_New(FourCharCode /*inMemoryIdentifier*/, UInt32 inSize)
+void*   QTSSCallbacks::QTSS_New(FourCharCode /*inMemoryIdentifier*/, uint32_t inSize)
 {
 	//
 	// This callback is now deprecated because the server no longer uses FourCharCodes
@@ -152,7 +152,7 @@ QTSS_Error  QTSSCallbacks::QTSS_AddStaticAttribute(QTSS_ObjectType inObjectType,
 	if ((theState == NULL) || (theState->curRole != QTSS_Register_Role))
 		return QTSS_OutOfState;
 
-	UInt32 theDictionaryIndex = QTSSDictionaryMap::GetMapIndex(inObjectType);
+	uint32_t theDictionaryIndex = QTSSDictionaryMap::GetMapIndex(inObjectType);
 	if (theDictionaryIndex == QTSSDictionaryMap::kIllegalDictionary)
 		return QTSS_BadArgument;
 
@@ -183,14 +183,14 @@ QTSS_Error  QTSSCallbacks::QTSS_IDForAttr(QTSS_ObjectType inType, const char* in
 	if (outID == NULL)
 		return QTSS_BadArgument;
 
-	UInt32 theDictionaryIndex = QTSSDictionaryMap::GetMapIndex(inType);
+	uint32_t theDictionaryIndex = QTSSDictionaryMap::GetMapIndex(inType);
 	if (theDictionaryIndex == QTSSDictionaryMap::kIllegalDictionary)
 		return QTSS_BadArgument;
 
 	return QTSSDictionaryMap::GetMap(theDictionaryIndex)->GetAttrID(inName, outID);
 }
 
-QTSS_Error QTSSCallbacks::QTSS_GetAttrInfoByIndex(QTSS_Object inObject, UInt32 inIndex, QTSS_Object* outAttrInfoObject)
+QTSS_Error QTSSCallbacks::QTSS_GetAttrInfoByIndex(QTSS_Object inObject, uint32_t inIndex, QTSS_Object* outAttrInfoObject)
 {
 	if (inObject == NULL)
 		return QTSS_BadArgument;
@@ -215,7 +215,7 @@ QTSS_Error QTSSCallbacks::QTSS_GetAttrInfoByName(QTSS_Object inObject, const cha
 }
 
 
-QTSS_Error  QTSSCallbacks::QTSS_GetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, UInt32 inIndex, void** outBuffer, UInt32* outLen)
+QTSS_Error  QTSSCallbacks::QTSS_GetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, void** outBuffer, uint32_t* outLen)
 {
 	if ((inDictionary == NULL) || (outBuffer == NULL) || (outLen == NULL) || (inID == qtssIllegalAttrID))
 		return QTSS_BadArgument;
@@ -223,14 +223,14 @@ QTSS_Error  QTSSCallbacks::QTSS_GetValuePtr(QTSS_Object inDictionary, QTSS_Attri
 }
 
 
-QTSS_Error  QTSSCallbacks::QTSS_GetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, UInt32 inIndex, void* ioBuffer, UInt32* ioLen)
+QTSS_Error  QTSSCallbacks::QTSS_GetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, void* ioBuffer, uint32_t* ioLen)
 {
 	if (inDictionary == NULL || (inID == qtssIllegalAttrID))
 		return QTSS_BadArgument;
 	return ((QTSSDictionary*)inDictionary)->GetValue(inID, inIndex, ioBuffer, ioLen);
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_GetValueAsString(QTSS_Object inDictionary, QTSS_AttributeID inID, UInt32 inIndex, char** outString)
+QTSS_Error  QTSSCallbacks::QTSS_GetValueAsString(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, char** outString)
 {
 	if (inDictionary == NULL)
 		return QTSS_BadArgument;
@@ -255,12 +255,12 @@ QTSS_Error  QTSSCallbacks::QTSS_TypeStringToType(char* inTypeString, QTSS_AttrDa
 	return QTSS_NoErr;
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_StringToValue(char* inValueAsString, const QTSS_AttrDataType inType, void* ioBuffer, UInt32* ioBufSize)
+QTSS_Error  QTSSCallbacks::QTSS_StringToValue(char* inValueAsString, const QTSS_AttrDataType inType, void* ioBuffer, uint32_t* ioBufSize)
 {
 	return  QTSSDataConverter::StringToValue(inValueAsString, inType, ioBuffer, ioBufSize);
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_ValueToString(void* inValue, const UInt32 inValueLen, const QTSS_AttrDataType inType, char** outString)
+QTSS_Error  QTSSCallbacks::QTSS_ValueToString(void* inValue, const uint32_t inValueLen, const QTSS_AttrDataType inType, char** outString)
 {
 	if ((inValue == NULL) || (outString == NULL))
 		return QTSS_BadArgument;
@@ -269,21 +269,21 @@ QTSS_Error  QTSSCallbacks::QTSS_ValueToString(void* inValue, const UInt32 inValu
 	return QTSS_NoErr;
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_SetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, UInt32 inIndex, const void* inBuffer, UInt32 inLen)
+QTSS_Error  QTSSCallbacks::QTSS_SetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, const void* inBuffer, uint32_t inLen)
 {
 	if ((inDictionary == NULL) || ((inBuffer == NULL) && (inLen > 0)) || (inID == qtssIllegalAttrID))
 		return QTSS_BadArgument;
 	return ((QTSSDictionary*)inDictionary)->SetValue(inID, inIndex, inBuffer, inLen);
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_SetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, const void* inBuffer, UInt32 inLen)
+QTSS_Error  QTSSCallbacks::QTSS_SetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, const void* inBuffer, uint32_t inLen)
 {
 	if ((inDictionary == NULL) || ((inBuffer == NULL) && (inLen > 0)))
 		return QTSS_BadArgument;
 	return ((QTSSDictionary*)inDictionary)->SetValuePtr(inID, inBuffer, inLen);
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_CreateObject(QTSS_Object inDictionary, QTSS_AttributeID inID, QTSS_ObjectType inType, UInt32* outIndex, QTSS_Object* outCreatedObject)
+QTSS_Error  QTSSCallbacks::QTSS_CreateObject(QTSS_Object inDictionary, QTSS_AttributeID inID, QTSS_ObjectType inType, uint32_t* outIndex, QTSS_Object* outCreatedObject)
 {
 	if ((inDictionary == NULL) || (outCreatedObject == NULL) || (outIndex == NULL) || (inID == qtssIllegalAttrID))
 		return QTSS_BadArgument;
@@ -291,7 +291,7 @@ QTSS_Error  QTSSCallbacks::QTSS_CreateObject(QTSS_Object inDictionary, QTSS_Attr
 	QTSSDictionaryMap* theMap = NULL;
 	if (inType != qtssDynamicObjectType)
 	{
-		UInt32 theDictionaryIndex = QTSSDictionaryMap::GetMapIndex(inType);
+		uint32_t theDictionaryIndex = QTSSDictionaryMap::GetMapIndex(inType);
 		if (theDictionaryIndex == QTSSDictionaryMap::kIllegalDictionary)
 			return QTSS_BadArgument;
 
@@ -301,7 +301,7 @@ QTSS_Error  QTSSCallbacks::QTSS_CreateObject(QTSS_Object inDictionary, QTSS_Attr
 	return ((QTSSDictionary*)inDictionary)->CreateObjectValue(inID, outIndex, (QTSSDictionary**)outCreatedObject, theMap);
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_GetNumValues(QTSS_Object inObject, QTSS_AttributeID inID, UInt32* outNumValues)
+QTSS_Error  QTSSCallbacks::QTSS_GetNumValues(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t* outNumValues)
 {
 	if ((inObject == NULL) || (outNumValues == NULL) || (inID == qtssIllegalAttrID))
 		return QTSS_BadArgument;
@@ -310,7 +310,7 @@ QTSS_Error  QTSSCallbacks::QTSS_GetNumValues(QTSS_Object inObject, QTSS_Attribut
 	return QTSS_NoErr;
 }
 
-QTSS_Error QTSSCallbacks::QTSS_GetNumAttributes(QTSS_Object inObject, UInt32* outNumValues)
+QTSS_Error QTSSCallbacks::QTSS_GetNumAttributes(QTSS_Object inObject, uint32_t* outNumValues)
 {
 
 	if (outNumValues == NULL)
@@ -335,7 +335,7 @@ QTSS_Error QTSSCallbacks::QTSS_GetNumAttributes(QTSS_Object inObject, UInt32* ou
 	return QTSS_NoErr;
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_RemoveValue(QTSS_Object inObject, QTSS_AttributeID inID, UInt32 inIndex)
+QTSS_Error  QTSSCallbacks::QTSS_RemoveValue(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex)
 {
 	if (inObject == NULL)
 		return QTSS_BadArgument;
@@ -345,7 +345,7 @@ QTSS_Error  QTSSCallbacks::QTSS_RemoveValue(QTSS_Object inObject, QTSS_Attribute
 
 
 
-QTSS_Error  QTSSCallbacks::QTSS_Write(QTSS_StreamRef inStream, void* inBuffer, UInt32 inLen, UInt32* outLenWritten, UInt32 inFlags)
+QTSS_Error  QTSSCallbacks::QTSS_Write(QTSS_StreamRef inStream, void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags)
 {
 	if (inStream == NULL)
 		return QTSS_BadArgument;
@@ -362,7 +362,7 @@ QTSS_Error  QTSSCallbacks::QTSS_Write(QTSS_StreamRef inStream, void* inBuffer, U
 		return theErr;
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_WriteV(QTSS_StreamRef inStream, iovec* inVec, UInt32 inNumVectors, UInt32 inTotalLength, UInt32* outLenWritten)
+QTSS_Error  QTSSCallbacks::QTSS_WriteV(QTSS_StreamRef inStream, iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten)
 {
 	if (inStream == NULL)
 		return QTSS_BadArgument;
@@ -396,7 +396,7 @@ QTSS_Error  QTSSCallbacks::QTSS_Flush(QTSS_StreamRef inStream)
 		return theErr;
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_Read(QTSS_StreamRef inStream, void* ioBuffer, UInt32 inBufLen, UInt32* outLengthRead)
+QTSS_Error  QTSSCallbacks::QTSS_Read(QTSS_StreamRef inStream, void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead)
 {
 	if ((inStream == NULL) || (ioBuffer == NULL))
 		return QTSS_BadArgument;
@@ -421,7 +421,7 @@ QTSS_Error  QTSSCallbacks::QTSS_Seek(QTSS_StreamRef inStream, UInt64 inNewPositi
 }
 
 
-QTSS_Error  QTSSCallbacks::QTSS_Advise(QTSS_StreamRef inStream, UInt64 inPosition, UInt32 inAdviseSize)
+QTSS_Error  QTSSCallbacks::QTSS_Advise(QTSS_StreamRef inStream, UInt64 inPosition, uint32_t inAdviseSize)
 {
 	if (inStream == NULL)
 		return QTSS_BadArgument;
@@ -542,7 +542,7 @@ QTSS_Error QTSSCallbacks::QTSS_SendRTSPHeaders(QTSS_RTSPRequestObject inRef)
 QTSS_Error QTSSCallbacks::QTSS_AppendRTSPHeader(QTSS_RTSPRequestObject inRef,
 	QTSS_RTSPHeader inHeader,
 	char* inValue,
-	UInt32 inValueLen)
+	uint32_t inValueLen)
 {
 	if ((inRef == NULL) || (inValue == NULL))
 		return QTSS_BadArgument;
@@ -556,7 +556,7 @@ QTSS_Error QTSSCallbacks::QTSS_AppendRTSPHeader(QTSS_RTSPRequestObject inRef,
 
 QTSS_Error QTSSCallbacks::QTSS_SendStandardRTSPResponse(QTSS_RTSPRequestObject inRTSPRequest,
 	QTSS_Object inRTPInfo,
-	UInt32 inFlags)
+	uint32_t inFlags)
 {
 	if ((inRTSPRequest == NULL) || (inRTPInfo == NULL))
 		return QTSS_BadArgument;
@@ -819,8 +819,8 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 
 	QTSS_Error theErr = QTSS_RequestFailed;
 
-	UInt32 x = 0;
-	UInt32 numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPAthnRole);
+	uint32_t x = 0;
+	uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPAthnRole);
 	QTSSModule* theModulePtr = NULL;
 	bool allowedDefault = QTSServerInterface::GetServer()->GetPrefs()->GetAllowGuestDefault();
 	bool allowed = allowedDefault; //server pref?
@@ -891,8 +891,8 @@ QTSS_Error	QTSSCallbacks::QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObj
 	theParams.rtspRequestParams.inClientSession = NULL;
 
 	QTSS_Error theErr = QTSS_RequestFailed;
-	UInt32 x = 0;
-	UInt32 numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPAuthRole);
+	uint32_t x = 0;
+	uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPAuthRole);
 	QTSSModule* theModulePtr = NULL;
 	bool 		allowedDefault = QTSServerInterface::GetServer()->GetPrefs()->GetAllowGuestDefault();
 	*outAuthUserAllowed = allowedDefault;
@@ -969,7 +969,7 @@ void* QTSSCallbacks::Easy_GetRTSPPushSessions()
 	ack.SetHeaderValue(EASY_TAG_VERSION, "1.0");
 	ack.SetHeaderValue(EASY_TAG_CSEQ, "1");
 
-	UInt32 uIndex = 0;
+	uint32_t uIndex = 0;
 	OSMutexLocker locker(reflectorSessionMap->GetMutex());
 
 	for (OSRefHashTableIter theIter(reflectorSessionMap->GetHashTable()); !theIter.IsDone(); theIter.Next())
@@ -1000,7 +1000,7 @@ void* QTSSCallbacks::Easy_GetRTSPPushSessions()
 
 	string msg = ack.GetMsg();
 
-	UInt32 theMsgLen = strlen(msg.c_str());
+	uint32_t theMsgLen = strlen(msg.c_str());
 	char* retMsg = new char[theMsgLen + 1];
 	retMsg[theMsgLen] = '\0';
 	strncpy(retMsg, msg.c_str(), strlen(msg.c_str()));
@@ -1019,7 +1019,7 @@ void* QTSSCallbacks::Easy_GetRTSPPushSessions()
 
 	//char folder[QTSS_MAX_NAME_LENGTH] = { 0 };
 	////char movieFolder[QTSS_MAX_NAME_LENGTH] = { 0 };
-	////UInt32 pathLen = QTSS_MAX_NAME_LENGTH;
+	////uint32_t pathLen = QTSS_MAX_NAME_LENGTH;
 	////QTSServerInterface::GetServer()->GetPrefs()->GetMovieFolder(&movieFolder[0], &pathLen);
 
 	//char *movieFolder = RTSPRecordSession::getRecordRootPath();
@@ -1039,7 +1039,7 @@ void* QTSSCallbacks::Easy_GetRTSPPushSessions()
 	//vector<string> machList;
 	//machList.push_back(".mp4");
 	//SearchFileDir *dir = SearchFileDir::getInstance();
-	//UInt32 uIndex = 0;
+	//uint32_t uIndex = 0;
 	//if (dir->searchFileList(folder, list, machList, false)) {
 
 	//	for (auto iter : list) {
@@ -1061,7 +1061,7 @@ void* QTSSCallbacks::Easy_GetRTSPPushSessions()
 
 	//string msg = ack.GetMsg();
 
-	//UInt32 theMsgLen = strlen(msg.c_str());
+	//uint32_t theMsgLen = strlen(msg.c_str());
 	//char* retMsg = new char[theMsgLen + 1];
 	//retMsg[theMsgLen] = '\0';
 	//strncpy(retMsg, msg.c_str(), strlen(msg.c_str()));

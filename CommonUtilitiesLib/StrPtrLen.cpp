@@ -131,14 +131,14 @@ bool StrPtrLen::Equal(const char* compare) const
 
 
 
-bool StrPtrLen::NumEqualIgnoreCase(const char* compare, const UInt32 len) const
+bool StrPtrLen::NumEqualIgnoreCase(const char* compare, const uint32_t len) const
 {
 	// compare thru the first "len: bytes
 	Assert(compare != NULL);
 
 	if (len <= Len)
 	{
-		for (UInt32 x = 0; x < len; x++)
+		for (uint32_t x = 0; x < len; x++)
 			if (sCaseInsensitiveMask[(uint8_t)Ptr[x]] != sCaseInsensitiveMask[(uint8_t)compare[x]])
 				return false;
 		return true;
@@ -146,12 +146,12 @@ bool StrPtrLen::NumEqualIgnoreCase(const char* compare, const UInt32 len) const
 	return false;
 }
 
-bool StrPtrLen::EqualIgnoreCase(const char* compare, const UInt32 len) const
+bool StrPtrLen::EqualIgnoreCase(const char* compare, const uint32_t len) const
 {
 	Assert(compare != NULL);
 	if (len == Len)
 	{
-		for (UInt32 x = 0; x < len; x++)
+		for (uint32_t x = 0; x < len; x++)
 			if (sCaseInsensitiveMask[(uint8_t)Ptr[x]] != sCaseInsensitiveMask[(uint8_t)compare[x]])
 				return false;
 		return true;
@@ -189,7 +189,7 @@ char* StrPtrLen::FindStringCase(char* queryCharStr, StrPtrLen* resultStr, bool c
 	char *dupSourceString = NULL;
 	char *dupQueryString = NULL;
 	char *sourceString = Ptr;
-	UInt32 foundLen = 0;
+	uint32_t foundLen = 0;
 
 	if (editSource != NULL) // a copy of the source ptr and len 0 terminated
 		sourceString = editSource;
@@ -235,7 +235,7 @@ char* StrPtrLen::FindStringCase(char* queryCharStr, StrPtrLen* resultStr, bool c
 }
 
 
-UInt32 StrPtrLen::RemoveWhitespace()
+uint32_t StrPtrLen::RemoveWhitespace()
 {
 	if (Ptr == NULL || Len == 0)
 		return 0;
@@ -262,7 +262,7 @@ UInt32 StrPtrLen::RemoveWhitespace()
 	return Len;
 }
 
-UInt32 StrPtrLen::TrimLeadingWhitespace()
+uint32_t StrPtrLen::TrimLeadingWhitespace()
 {
 	if (Ptr == NULL || Len == 0)
 		return 0;
@@ -281,7 +281,7 @@ UInt32 StrPtrLen::TrimLeadingWhitespace()
 	return Len;
 }
 
-UInt32 StrPtrLen::TrimTrailingWhitespace()
+uint32_t StrPtrLen::TrimTrailingWhitespace()
 {
 	if (Ptr == NULL || Len == 0)
 		return 0;
@@ -304,7 +304,7 @@ void StrPtrLen::PrintStr()
 {
 	char *thestr = GetAsCString();
 
-	UInt32 i = 0;
+	uint32_t i = 0;
 	for (; i < Len; i++)
 	{
 		if (StrPtrLen::sNonPrintChars[(uint8_t)Ptr[i]])

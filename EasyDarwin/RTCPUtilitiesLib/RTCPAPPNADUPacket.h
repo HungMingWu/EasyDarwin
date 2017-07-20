@@ -45,16 +45,16 @@ public:
 	virtual ~RTCPNaduPacket() {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
-	virtual bool ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength);
+	virtual bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength);
 
 	// Call to parse if you don't know what kind of packet this is
-	bool ParseNaduPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength);
+	bool ParseNaduPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength);
 
-	UInt32 GetNumReportBlocks() { return fNumBlocks; };
+	uint32_t GetNumReportBlocks() { return fNumBlocks; };
 
-	SInt32 GetSSRCBlockIndex(UInt32 inSSRC);
+	SInt32 GetSSRCBlockIndex(uint32_t inSSRC);
 
-	UInt32 GetSSRC(SInt32 index);
+	uint32_t GetSSRC(SInt32 index);
 
 	uint16_t GetPlayOutDelay(SInt32 index);
 
@@ -100,7 +100,7 @@ public:
 
 private:
 	void ParseAndStore();
-	UInt32* fNaduDataBuffer;
+	uint32_t* fNaduDataBuffer;
 	SInt32 fNumBlocks;
 	static char sRTCPTestBuffer[256];
 
@@ -174,17 +174,17 @@ class NaduReport
 {
 
 public:
-	NaduReport(uint8_t* inPacketBuffer, UInt32 inPacketLength, UInt32 id);
+	NaduReport(uint8_t* inPacketBuffer, uint32_t inPacketLength, uint32_t id);
 	~NaduReport() { delete fPacketBuffer; }
 	uint8_t* getBuffer() { return fPacketBuffer; }
-	UInt32 getLength() { return fLength; }
-	UInt32 getID() { return fid; }
+	uint32_t getLength() { return fLength; }
+	uint32_t getID() { return fid; }
 	RTCPNaduPacket * GetNaduPacket() { return &fNaduPacket; }
 
 	uint8_t* fPacketBuffer;
-	UInt32 fLength;
+	uint32_t fLength;
 	RTCPNaduPacket fNaduPacket;
-	UInt32 fid;
+	uint32_t fid;
 
 };
 
@@ -205,27 +205,27 @@ public:
 		}
 		delete[] fNaduReportList;
 	}
-	void Initialize(UInt32 listSize = 3);
+	void Initialize(uint32_t listSize = 3);
 
-	bool AddReport(uint8_t* inPacketBuffer, UInt32 inPacketLength, UInt32 *outID);
+	bool AddReport(uint8_t* inPacketBuffer, uint32_t inPacketLength, uint32_t *outID);
 
-	NaduReport*     GetReport(UInt32 id);
+	NaduReport*     GetReport(uint32_t id);
 	NaduReport*     GetLastReport();
 	NaduReport*     GetEarliestReport();
 	NaduReport*     GetPreviousReport(NaduReport* theReport);
 	NaduReport*     GetNextReport(NaduReport* theReport);
-	UInt32          LastReportedFreeBuffSizeBytes();
-	UInt32          LastReportedTimeDelayMilli();
+	uint32_t          LastReportedFreeBuffSizeBytes();
+	uint32_t          LastReportedTimeDelayMilli();
 	uint16_t			GetLastReportedNSN();
 
 	void DumpList();
 
 private:
-	UInt32 GetReportIndex(UInt32 id);
-	UInt32 IDtoIndex(UInt32 id) { return (id - 1) % fListSize; }
+	uint32_t GetReportIndex(uint32_t id);
+	uint32_t IDtoIndex(uint32_t id) { return (id - 1) % fListSize; }
 	NaduReport**  fNaduReportList;
-	UInt32 fcurrentIndexCount;
-	UInt32 fListSize;
+	uint32_t fcurrentIndexCount;
+	uint32_t fListSize;
 
 
 };

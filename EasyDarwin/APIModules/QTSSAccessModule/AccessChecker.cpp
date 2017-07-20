@@ -103,7 +103,7 @@ void AccessChecker::UpdateFilePaths(const char* inUsersFilePath, const char* inG
 // All of the above are deleted
 void AccessChecker::deleteProfilesAndRealm()
 {
-	UInt32 i, j;
+	uint32_t i, j;
 
 	// delete the profiles
 	if (fProfiles != NULL)
@@ -168,11 +168,11 @@ void AccessChecker::deleteProfilesAndRealm()
 // Memory is also allocated for each group name found in the groups file per user
 // All this memory must be deleted if the profiles are deleted, before parsing
 // the file again
-UInt32 AccessChecker::UpdateUserProfiles() {
+uint32_t AccessChecker::UpdateUserProfiles() {
 
-	UInt32 index = 0;
-	UInt32 i = 0, j = 0;
-	UInt32 resultErr = kNoErr;
+	uint32_t index = 0;
+	uint32_t i = 0, j = 0;
+	uint32_t resultErr = kNoErr;
 	bool groupFileErrors = true;
 	bool userFileErrors = true;
 
@@ -363,7 +363,7 @@ UInt32 AccessChecker::UpdateUserProfiles() {
 
 			if (groupLineParser.Expect(':')) {
 				StrPtrLen groupUser;
-				UInt32 nameLen = groupName.Len + 1;
+				uint32_t nameLen = groupName.Len + 1;
 
 				while (groupLineParser.GetDataRemaining() != 0)
 				{
@@ -372,7 +372,7 @@ UInt32 AccessChecker::UpdateUserProfiles() {
 					for (i = 0; i < fNumUsers; i++) {
 						if (fProfiles[i]->username.Equal(groupUser))
 						{
-							UInt32 grpSize = fProfiles[i]->groupsSize;
+							uint32_t grpSize = fProfiles[i]->groupsSize;
 							if (fProfiles[i]->numGroups >= grpSize) {
 								char** oldGroups = fProfiles[i]->groups;
 								fProfiles[i]->groups = new char*[grpSize * 2];
@@ -412,7 +412,7 @@ bool AccessChecker::HaveFilePathsChanged(const char* inUsersFilePath, const char
 // No memory is allocated
 AccessChecker::UserProfile* AccessChecker::RetrieveUserProfile(const StrPtrLen* inUserName)
 {
-	UInt32 index = 0;
+	uint32_t index = 0;
 	for (index = 0; index < fNumUsers; index++) {
 		if (fProfiles[index]->username.Equal(*inUserName))
 			return fProfiles[index];

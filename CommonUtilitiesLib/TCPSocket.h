@@ -54,7 +54,7 @@ public:
 	//S_DATA:               Data is currently available on the socket.
 	//S_CONNECTIONCLOSING:  Client is closing the connection. No longer necessary
 	//                      to call Close or Disconnect, Snd & Rcv will fail.
-	TCPSocket(Task* notifytask, UInt32 inSocketType)
+	TCPSocket(Task* notifytask, uint32_t inSocketType)
 		: Socket(notifytask, inSocketType),
 		fRemoteStr(fRemoteBuffer, kIPAddrBufSize) {}
 	virtual ~TCPSocket() {}
@@ -68,7 +68,7 @@ public:
 	// CheckAsyncConnect at any time, which will return OS_NoErr if the connect
 	// has completed, EINPROGRESS if it is still in progress, or an appropriate error
 	// if the connect failed.
-	OS_Error    Connect(UInt32 inRemoteAddr, uint16_t inRemotePort);
+	OS_Error    Connect(uint32_t inRemoteAddr, uint16_t inRemotePort);
 	//OS_Error  CheckAsyncConnect();
 
 	// Basically a copy constructor for this object, also NULLs out the data
@@ -78,7 +78,7 @@ public:
 	//ACCESSORS:
 	//Returns NULL if not currently available.
 
-	UInt32      GetRemoteAddr() const
+	uint32_t      GetRemoteAddr() const
 	{ return ntohl(fRemoteAddr.sin_addr.s_addr); }
 	uint16_t      GetRemotePort() const
 	{ return ntohs(fRemoteAddr.sin_port); }
@@ -91,7 +91,7 @@ protected:
 
 	enum
 	{
-		kIPAddrBufSize = 20 //UInt32
+		kIPAddrBufSize = 20 //uint32_t
 	};
 
 	struct sockaddr_in  fRemoteAddr;

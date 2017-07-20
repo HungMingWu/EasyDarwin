@@ -34,7 +34,7 @@
 
 #include <errno.h>
 
-UInt32  OSRefTableUtils::HashString(StrPtrLen* inString)
+uint32_t  OSRefTableUtils::HashString(StrPtrLen* inString)
 {
 	Assert(inString != NULL);
 	Assert(inString->Ptr != NULL);
@@ -48,7 +48,7 @@ UInt32  OSRefTableUtils::HashString(StrPtrLen* inString)
 
 	//divide by 4 and take the characters at quarter points in the string,
 	//use those as the basis for the hash value
-	UInt32 quarterLen = inString->Len >> 2;
+	uint32_t quarterLen = inString->Len >> 2;
 	return (inString->Len * (theData[0] + theData[quarterLen] +
 		theData[quarterLen * 2] + theData[quarterLen * 3] +
 		theData[inString->Len - 1]));
@@ -110,7 +110,7 @@ OSRef* OSRefTable::RegisterOrResolve(OSRef* inRef)
 	return NULL;
 }
 
-void OSRefTable::UnRegister(OSRef* ref, UInt32 refCount)
+void OSRefTable::UnRegister(OSRef* ref, uint32_t refCount)
 {
 	Assert(ref != NULL);
 	OSMutexLocker locker(&fMutex);
@@ -131,7 +131,7 @@ void OSRefTable::UnRegister(OSRef* ref, UInt32 refCount)
 	fTable.Remove(ref);
 }
 
-bool OSRefTable::TryUnRegister(OSRef* ref, UInt32 refCount)
+bool OSRefTable::TryUnRegister(OSRef* ref, uint32_t refCount)
 {
 	OSMutexLocker locker(&fMutex);
 	if (ref->fRefCount > refCount)
@@ -165,7 +165,7 @@ void OSRefTable::Release(OSRef* ref)
 	Assert(ref != NULL);
 	OSMutexLocker locker(&fMutex);
 	ref->fRefCount--;
-	// fRefCount is a UInt32  and QTSS should never run into
+	// fRefCount is a uint32_t  and QTSS should never run into
 	// a ref greater than 16 * 64K, so this assert just checks to
 	// be sure that we have not decremented the ref less than zero.
 	Assert(ref->fRefCount < 1048576L);

@@ -59,9 +59,9 @@ public:
 	char*   Name() { return fName; }
 
 protected:
-	virtual void ParseDestination(XMLTag* destTag, UInt32 index);
-	virtual void ParseAnnouncedDestination(XMLTag* destTag, UInt32 index);
-	virtual void AllocateOutputArray(UInt32 numOutputs);
+	virtual void ParseDestination(XMLTag* destTag, uint32_t index);
+	virtual void ParseAnnouncedDestination(XMLTag* destTag, uint32_t index);
+	virtual void AllocateOutputArray(uint32_t numOutputs);
 
 	char*   fName;
 

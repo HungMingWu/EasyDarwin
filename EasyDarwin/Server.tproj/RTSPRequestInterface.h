@@ -85,10 +85,10 @@ public:
 		StrPtrLen* url, StrPtrLen* seqNumber,
 		StrPtrLen* ssrc, StrPtrLen* rtpTime, bool lastRTPInfo);
 
-	void    AppendContentLength(UInt32 contentLength);
+	void    AppendContentLength(uint32_t contentLength);
 	void    AppendDateAndExpires();
 	void    AppendSessionHeaderWithTimeout(StrPtrLen* inSessionID, StrPtrLen* inTimeout);
-	void    AppendRetransmitHeader(UInt32 inAckTimeout);
+	void    AppendRetransmitHeader(uint32_t inAckTimeout);
 
 	// MODIFIERS
 
@@ -101,11 +101,11 @@ public:
 	// QTSS STREAM FUNCTIONS
 
 	// THE FIRST ENTRY OF THE IOVEC MUST BE BLANK!!!
-	virtual QTSS_Error WriteV(iovec* inVec, UInt32 inNumVectors, UInt32 inTotalLength, UInt32* outLenWritten);
+	virtual QTSS_Error WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten);
 
 	//Write
 	//A "buffered send" that can be used for sending small chunks of data at a time.
-	virtual QTSS_Error Write(void* inBuffer, UInt32 inLength, UInt32* outLenWritten, UInt32 inFlags);
+	virtual QTSS_Error Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t inFlags);
 
 	// Flushes all currently buffered data to the network. This either returns
 	// QTSS_NoErr or EWOULDBLOCK. If it returns EWOULDBLOCK, you should wait for
@@ -113,7 +113,7 @@ public:
 	virtual QTSS_Error  Flush() { return fOutputStream->Flush(); }
 
 	// Reads data off the stream. Same behavior as calling RTSPSessionInterface::Read
-	virtual QTSS_Error Read(void* ioBuffer, UInt32 inLength, UInt32* outLenRead)
+	virtual QTSS_Error Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead)
 	{
 		return fSession->Read(ioBuffer, inLength, outLenRead);
 	}
@@ -152,12 +152,12 @@ public:
 	// these get set if there is a transport header
 	uint16_t                      GetClientPortA() { return fClientPortA; }
 	uint16_t                      GetClientPortB() { return fClientPortB; }
-	UInt32                      GetDestAddr() { return fDestinationAddr; }
-	UInt32                      GetSourceAddr() { return fSourceAddr; }
+	uint32_t                      GetDestAddr() { return fDestinationAddr; }
+	uint32_t                      GetSourceAddr() { return fSourceAddr; }
 	uint16_t                      GetTtl() { return fTtl; }
 	QTSS_RTPTransportType       GetTransportType() { return fTransportType; }
 	QTSS_RTPNetworkMode         GetNetworkMode() { return fNetworkMode; }
-	UInt32                      GetWindowSize() { return fWindowSize; }
+	uint32_t                      GetWindowSize() { return fWindowSize; }
 
 
 	bool                      HasResponseBeenSent()
@@ -189,7 +189,7 @@ public:
 	StrPtrLen*                  GetAuthRealm() { return &fAuthRealm; }
 	StrPtrLen*                  GetAuthNonce() { return &fAuthNonce; }
 	StrPtrLen*                  GetAuthUri() { return &fAuthUri; }
-	UInt32                      GetAuthQop() { return fAuthQop; }
+	uint32_t                      GetAuthQop() { return fAuthQop; }
 	StrPtrLen*                  GetAuthNonceCount() { return &fAuthNonceCount; }
 	StrPtrLen*                  GetAuthCNonce() { return &fAuthCNonce; }
 	StrPtrLen*                  GetAuthResponse() { return &fAuthResponse; }
@@ -204,9 +204,9 @@ public:
 	SInt32                      GetDynamicRateState() { return fEnableDynamicRateState; }
 
 	// DJM PROTOTYPE
-	UInt32						GetRandomDataSize() { return fRandomDataSize; }
+	uint32_t						GetRandomDataSize() { return fRandomDataSize; }
 
-	UInt32                      GetBandwidthHeaderBits() { return fBandwidthBits; }
+	uint32_t                      GetBandwidthHeaderBits() { return fBandwidthBits; }
 
 	StrPtrLen*                  GetRequestChallenge() { return &fAuthDigestChallenge; }
 
@@ -218,13 +218,13 @@ protected:
 	//REQUEST HEADER DATA
 	enum
 	{
-		kMovieFolderBufSizeInBytes = 256,   //Uint32
-		kMaxFilePathSizeInBytes = 256       //Uint32
+		kMovieFolderBufSizeInBytes = 256,   //uint32_t
+		kMaxFilePathSizeInBytes = 256       //uint32_t
 	};
 
 	QTSS_RTSPMethod             fMethod;            //Method of this request
 	QTSS_RTSPStatusCode         fStatus;            //Current status of this request
-	UInt32                      fRealStatusCode;    //Current RTSP status num of this request
+	uint32_t                      fRealStatusCode;    //Current RTSP status num of this request
 	bool                      fRequestKeepAlive;  //Does the client want keep-alive?
 	bool                      fResponseKeepAlive; //Are we going to keep-alive?
 	RTSPProtocol::RTSPVersion   fVersion;
@@ -235,12 +235,12 @@ protected:
 	uint16_t                      fClientPortA;       //This is all info that comes out
 	uint16_t                      fClientPortB;       //of the Transport: header
 	uint16_t                      fTtl;
-	UInt32                      fDestinationAddr;
-	UInt32                      fSourceAddr;
+	uint32_t                      fDestinationAddr;
+	uint32_t                      fSourceAddr;
 	QTSS_RTPTransportType       fTransportType;
 	QTSS_RTPNetworkMode         fNetworkMode;
 
-	UInt32                      fContentLength;
+	uint32_t                      fContentLength;
 	SInt64                      fIfModSinceDate;
 	float                     fSpeed;
 	float                     fLateTolerance;
@@ -253,7 +253,7 @@ protected:
 
 	//
 	// For reliable UDP
-	UInt32                      fWindowSize;
+	uint32_t                      fWindowSize;
 	StrPtrLen                   fWindowSizeStr;
 
 	//Because of URL decoding issues, we need to make a copy of the file path.
@@ -278,7 +278,7 @@ protected:
 	StrPtrLen                   fAuthRealm;
 	StrPtrLen                   fAuthNonce;
 	StrPtrLen                   fAuthUri;
-	UInt32                      fAuthQop;
+	uint32_t                      fAuthQop;
 	StrPtrLen                   fAuthNonceCount;
 	StrPtrLen                   fAuthCNonce;
 	StrPtrLen                   fAuthResponse;
@@ -292,9 +292,9 @@ protected:
 	SInt32                      fEnableDynamicRateState;
 
 	// DJM PROTOTYPE
-	UInt32						fRandomDataSize;
+	uint32_t						fRandomDataSize;
 
-	UInt32                      fBandwidthBits;
+	uint32_t                      fBandwidthBits;
 	StrPtrLen                   fAuthDigestChallenge;
 	StrPtrLen                   fAuthDigestResponse;
 private:
@@ -305,7 +305,7 @@ private:
 
 	enum
 	{
-		kStaticHeaderSizeInBytes = 512  //UInt32
+		kStaticHeaderSizeInBytes = 512  //uint32_t
 	};
 
 	bool                  fStandardHeadersWritten;
@@ -317,13 +317,13 @@ private:
 		RTSPProtocol::RTSPVersion version);
 
 	//Individual param retrieval functions
-	static void*        GetAbsTruncatedPath(QTSSDictionary* inRequest, UInt32* outLen);
-	static void*        GetTruncatedPath(QTSSDictionary* inRequest, UInt32* outLen);
-	static void*        GetFileName(QTSSDictionary* inRequest, UInt32* outLen);
-	static void*        GetFileDigit(QTSSDictionary* inRequest, UInt32* outLen);
-	static void*        GetRealStatusCode(QTSSDictionary* inRequest, UInt32* outLen);
-	static void*		GetLocalPath(QTSSDictionary* inRequest, UInt32* outLen);
-	static void* 		GetAuthDigestResponse(QTSSDictionary* inRequest, UInt32* outLen);
+	static void*        GetAbsTruncatedPath(QTSSDictionary* inRequest, uint32_t* outLen);
+	static void*        GetTruncatedPath(QTSSDictionary* inRequest, uint32_t* outLen);
+	static void*        GetFileName(QTSSDictionary* inRequest, uint32_t* outLen);
+	static void*        GetFileDigit(QTSSDictionary* inRequest, uint32_t* outLen);
+	static void*        GetRealStatusCode(QTSSDictionary* inRequest, uint32_t* outLen);
+	static void*		GetLocalPath(QTSSDictionary* inRequest, uint32_t* outLen);
+	static void* 		GetAuthDigestResponse(QTSSDictionary* inRequest, uint32_t* outLen);
 
 	//optimized preformatted response header strings
 	static char             sPremadeHeader[kStaticHeaderSizeInBytes];

@@ -41,6 +41,7 @@
 #define __RTP_BANDWIDTH_TRACKER_H__
 
 #include "OSHeaders.h"
+#include <stdint.h>
 
 class RTPBandwidthTracker
 {
@@ -80,7 +81,7 @@ public:
 	//
 	// Before sending new data, let the tracker know
 	// how much data you are sending so it can adjust the window.
-	void FillWindow(UInt32 inNumBytes)
+	void FillWindow(uint32_t inNumBytes)
 	{
 		fBytesInList += inNumBytes; fIsRetransmitting = false;
 	}
@@ -88,7 +89,7 @@ public:
 	//
 	// When data is acked, let the tracker know how much
 	// data was acked so it can adjust the window
-	void EmptyWindow(UInt32 inNumBytes, bool updateBytesInList = true);
+	void EmptyWindow(uint32_t inNumBytes, bool updateBytesInList = true);
 
 	//
 	// When retransmitting a packet, call this function so
@@ -100,7 +101,7 @@ public:
 	const bool ReadyForAckProcessing() { return (fClientWindow > 0 && fCongestionWindow > 0); } // see RTPBandwidthTracker::EmptyWindow for requirements
 	const bool IsFlowControlled() { return ((SInt32)fBytesInList >= fCongestionWindow); }
 	const SInt32 ClientWindowSize() { return fClientWindow; }
-	const UInt32 BytesInList() { return fBytesInList; }
+	const uint32_t BytesInList() { return fBytesInList; }
 	const SInt32 CongestionWindow() { return fCongestionWindow; }
 	const SInt32 SlowStartThreshold() { return fSlowStartThreshold; }
 	const SInt32 RunningAverageMSecs() { return fRunningAverageMSecs / 8; }  // fRunningAverageMSecs is stored scaled up 8x
@@ -110,8 +111,8 @@ public:
 	{
 		return (fUnadjustedRTO > 0) ? (fCongestionWindow * 1000) / fUnadjustedRTO : 0;
 	}
-	inline const UInt32 RecommendedClientAckTimeout() { return fAckTimeout; }
-	void UpdateAckTimeout(UInt32 bitsSentInInterval, SInt64 intervalLengthInMsec);
+	inline const uint32_t RecommendedClientAckTimeout() { return fAckTimeout; }
+	void UpdateAckTimeout(uint32_t bitsSentInInterval, SInt64 intervalLengthInMsec);
 	void UpdateStats();
 
 	//
@@ -151,8 +152,8 @@ private:
 	SInt32              fSlowStartThreshold;    // point at which we stop adding to the window for each ack, and add to the window for each window full of acks
 	SInt32              fSlowStartByteCount;            // counts window a full of acks when past ss thresh
 	SInt32              fClientWindow;          // max window size based on client UDP buffer
-	UInt32              fBytesInList;               // how many unacked bytes on this stream
-	UInt32              fAckTimeout;
+	uint32_t              fBytesInList;               // how many unacked bytes on this stream
+	uint32_t              fAckTimeout;
 
 	bool              fUseSlowStart;
 	bool              fIsRetransmitting;      // are we in the re-transmit 'state' ( started resending, but have yet to send 'new' data

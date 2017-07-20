@@ -82,7 +82,7 @@ private:
 	CRITICAL_SECTION fMutex;
 
 	DWORD       fHolder;
-	UInt32      fHolderCount;
+	uint32_t      fHolderCount;
 
 #elif !__PTHREADS_MUTEXES__
 	mymutex_t fMutex;
@@ -91,7 +91,7 @@ private:
 	// These two platforms don't implement pthreads recursive mutexes, so
 	// we have to do it manually
 	pthread_t   fHolder;
-	UInt32      fHolderCount;
+	uint32_t      fHolderCount;
 #endif
 
 #if __PTHREADS_MUTEXES__ || __Win32__       

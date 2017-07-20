@@ -65,7 +65,7 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 {
 	while (true)
 	{
-		UInt32 newOffset = 0;
+		uint32_t newOffset = 0;
 
 		//If this is the case, we already HAVE a request on this session, and we now are done
 		//with the request and want to move onto the next one. The first thing we should do
@@ -158,7 +158,7 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 			if (fRequest.Len < 4)
 				continue;
 			uint16_t* dataLenP = (uint16_t*)fRequest.Ptr;
-			UInt32 interleavedPacketLen = ntohs(dataLenP[1]) + 4;
+			uint32_t interleavedPacketLen = ntohs(dataLenP[1]) + 4;
 			if (interleavedPacketLen > fRequest.Len)
 				continue;
 
@@ -176,7 +176,7 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 		{
 			DateBuffer theDate;
 			DateTranslator::UpdateDateBuffer(&theDate, 0); // get the current GMT date and time
-			qtss_printf("\n\n#C->S:\n#time: ms=%"   _U32BITARG_   " date=%s\n", (UInt32)OS::StartTimeMilli_Int(), theDate.GetDateBuffer());
+			qtss_printf("\n\n#C->S:\n#time: ms=%"   _U32BITARG_   " date=%s\n", (uint32_t)OS::StartTimeMilli_Int(), theDate.GetDateBuffer());
 
 			if (fSocket != NULL)
 			{
@@ -268,9 +268,9 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 	}
 }
 
-QTSS_Error RTSPRequestStream::Read(void* ioBuffer, UInt32 inBufLen, UInt32* outLengthRead)
+QTSS_Error RTSPRequestStream::Read(void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead)
 {
-	UInt32 theLengthRead = 0;
+	uint32_t theLengthRead = 0;
 	uint8_t* theIoBuffer = (uint8_t*)ioBuffer;
 
 	//
@@ -305,7 +305,7 @@ QTSS_Error RTSPRequestStream::Read(void* ioBuffer, UInt32 inBufLen, UInt32* outL
 
 	//
 	// Read data directly from the socket and place it in our buffer
-	UInt32 theNewOffset = 0;
+	uint32_t theNewOffset = 0;
 	QTSS_Error theErr = fSocket->Read(&theIoBuffer[theLengthRead], inBufLen - theLengthRead, &theNewOffset);
 #if READ_DEBUGGING
 	qtss_printf("In RTSPRequestStream::Read: Got %d bytes off Socket\n", theNewOffset);
@@ -316,7 +316,7 @@ QTSS_Error RTSPRequestStream::Read(void* ioBuffer, UInt32 inBufLen, UInt32* outL
 	return theErr;
 }
 
-QTSS_Error RTSPRequestStream::DecodeIncomingData(char* inSrcData, UInt32 inSrcDataLen)
+QTSS_Error RTSPRequestStream::DecodeIncomingData(char* inSrcData, uint32_t inSrcDataLen)
 {
 	Assert(fRetreatBytes == 0);
 
@@ -330,11 +330,11 @@ QTSS_Error RTSPRequestStream::DecodeIncomingData(char* inSrcData, UInt32 inSrcDa
 	fEncodedBytesRemaining = inSrcDataLen & 3;
 
 	// Let our friendly Base64Decode function know this by NULL terminating at that point
-	UInt32 bytesToDecode = inSrcDataLen - fEncodedBytesRemaining;
+	uint32_t bytesToDecode = inSrcDataLen - fEncodedBytesRemaining;
 	char endChar = inSrcData[bytesToDecode];
 	inSrcData[bytesToDecode] = '\0';
 
-	UInt32 encodedBytesConsumed = 0;
+	uint32_t encodedBytesConsumed = 0;
 
 	// Loop until the whole load is decoded
 	while (encodedBytesConsumed < bytesToDecode)
@@ -342,7 +342,7 @@ QTSS_Error RTSPRequestStream::DecodeIncomingData(char* inSrcData, UInt32 inSrcDa
 		Assert((encodedBytesConsumed & 3) == 0);
 		Assert((bytesToDecode & 3) == 0);
 
-		UInt32 bytesDecoded = Base64decode(fRequest.Ptr + fRequest.Len, inSrcData + encodedBytesConsumed);
+		uint32_t bytesDecoded = Base64decode(fRequest.Ptr + fRequest.Len, inSrcData + encodedBytesConsumed);
 
 		// If bytesDecoded is 0, we will end up being in an endless loop. The
 		// base64 must be corrupt, so let's just return an error and abort

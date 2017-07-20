@@ -72,24 +72,24 @@ class SourceInfo
             
             void Copy(const StreamInfo& copy);// Does copy dynamically allocated data
             
-            UInt32 fSrcIPAddr;  // Src IP address of content (this may be 0 if not known for sure)
-            UInt32 fDestIPAddr; // Dest IP address of content (destination IP addr for source broadcast!)
+            uint32_t fSrcIPAddr;  // Src IP address of content (this may be 0 if not known for sure)
+            uint32_t fDestIPAddr; // Dest IP address of content (destination IP addr for source broadcast!)
             uint16_t fPort;       // Dest (RTP) port of source content
             uint16_t fTimeToLive; // Ttl for this stream
             QTSS_RTPPayloadType fPayloadType;   // Payload type of this stream
             StrPtrLen fPayloadName; // Payload name of this stream
-            UInt32 fTrackID;    // ID of this stream
+            uint32_t fTrackID;    // ID of this stream
 			StrPtrLen fTrackName;//Track Name of this stream
             float fBufferDelay; // buffer delay (default is 3 seconds)
             bool  fIsTCP;     // Is this a TCP broadcast? If this is the case, the port and ttl are not valid
             bool  fSetupToReceive;    // If true then a push to the server is setup on this stream.
-            UInt32  fTimeScale;
+            uint32_t  fTimeScale;
         };
         
         // Returns the number of StreamInfo objects (number of Streams in this source)
-        UInt32      GetNumStreams() { return fNumStreams; }
-        StreamInfo* GetStreamInfo(UInt32 inStreamIndex);
-        StreamInfo* GetStreamInfoByTrackID(UInt32 inTrackID);
+        uint32_t      GetNumStreams() { return fNumStreams; }
+        StreamInfo* GetStreamInfo(uint32_t inStreamIndex);
+        StreamInfo* GetStreamInfoByTrackID(uint32_t inTrackID);
          
         // If this source is to be Relayed, it may have "Output" information. This
         // tells the reader where to forward the incoming streams onto. There may be
@@ -106,26 +106,26 @@ class SourceInfo
             
             void Copy(const OutputInfo& copy);// Does copy dynamically allocated data
 
-            UInt32 fDestAddr;       // Destination address to forward the input onto
-            UInt32 fLocalAddr;      // Address of local interface to send out on (may be 0)
+            uint32_t fDestAddr;       // Destination address to forward the input onto
+            uint32_t fLocalAddr;      // Address of local interface to send out on (may be 0)
             uint16_t fTimeToLive;     // Time to live for resulting output (if multicast)
             uint16_t* fPortArray;     // 1 destination RTP port for each Stream.
-            UInt32 fNumPorts;       // Size of the fPortArray (usually equal to fNumStreams)
+            uint32_t fNumPorts;       // Size of the fPortArray (usually equal to fNumStreams)
             uint16_t fBasePort;       // The base destination RTP port - for i=1 to fNumStreams fPortArray[i] = fPortArray[i-1] + 2
             bool  fAlreadySetup;  // A flag used in QTSSReflectorModule.cpp
         };
 
         // Returns the number of OutputInfo objects.
-        UInt32      GetNumOutputs() { return fNumOutputs; }
-        UInt32      GetNumNewOutputs(); // Returns # of outputs not already setup
+        uint32_t      GetNumOutputs() { return fNumOutputs; }
+        uint32_t      GetNumNewOutputs(); // Returns # of outputs not already setup
 
-        OutputInfo* GetOutputInfo(UInt32 inOutputIndex);
+        OutputInfo* GetOutputInfo(uint32_t inOutputIndex);
         
         // GetLocalSDP. This may or may not be supported by sources. Typically, if
         // the source is reflectable, this must be supported. It returns a newly
         // allocated buffer (that the caller is responsible for) containing an SDP
         // description of the source, stripped of all network info.
-        virtual char*   GetLocalSDP(UInt32* /*newSDPLen*/) { return NULL; }
+        virtual char*   GetLocalSDP(uint32_t* /*newSDPLen*/) { return NULL; }
         
         // This is only supported by the RTSPSourceInfo sub class
         virtual bool IsRTSPSourceInfo() { return false; }
@@ -137,10 +137,10 @@ class SourceInfo
         
         // SDP scheduled times supports earliest start and latest end -- doesn't handle repeat times or multiple active times.
         #define kNTP_Offset_From_1970 2208988800LU
-        time_t  NTPSecs_to_UnixSecs(time_t time) {return (time_t) (time - (UInt32)kNTP_Offset_From_1970);}
-        UInt32  UnixSecs_to_NTPSecs(time_t time) {return (UInt32) (time + (UInt32)kNTP_Offset_From_1970);}
-        bool  SetActiveNTPTimes(UInt32 startNTPTime,UInt32 endNTPTime);
-        bool  IsValidNTPSecs(UInt32 time) {return time >= (UInt32) kNTP_Offset_From_1970 ? true : false;}
+        time_t  NTPSecs_to_UnixSecs(time_t time) {return (time_t) (time - (uint32_t)kNTP_Offset_From_1970);}
+        uint32_t  UnixSecs_to_NTPSecs(time_t time) {return (uint32_t) (time + (uint32_t)kNTP_Offset_From_1970);}
+        bool  SetActiveNTPTimes(uint32_t startNTPTime,uint32_t endNTPTime);
+        bool  IsValidNTPSecs(uint32_t time) {return time >= (uint32_t) kNTP_Offset_From_1970 ? true : false;}
         bool  IsPermanentSource() { return ((fStartTimeUnixSecs == 0) && (fEndTimeUnixSecs == 0)) ? true : false; }
         bool  IsActiveTime(time_t unixTimeSecs);
         bool  IsActiveNow() { return IsActiveTime(OS::UnixTime_Secs()); }
@@ -149,24 +149,24 @@ class SourceInfo
         bool  HasIncomingBroacast();
         time_t  GetStartTimeUnixSecs() {return fStartTimeUnixSecs; }
         time_t  GetEndTimeUnixSecs() {return fEndTimeUnixSecs; }
-        UInt32  GetDurationSecs();
+        uint32_t  GetDurationSecs();
         enum {kSDPTimeControl, kRTSPSessionControl};
     protected:
         
         //utility function used by IsReflectable
-        bool IsReflectableIPAddr(UInt32 inIPAddr);
+        bool IsReflectableIPAddr(uint32_t inIPAddr);
 
         StreamInfo* fStreamArray;
-        UInt32      fNumStreams;
+        uint32_t      fNumStreams;
         
         OutputInfo* fOutputArray;
-        UInt32      fNumOutputs;
+        uint32_t      fNumOutputs;
         
         bool      fTimeSet;
         time_t      fStartTimeUnixSecs;
         time_t      fEndTimeUnixSecs;
             
-        UInt32      fSessionControlType;
+        uint32_t      fSessionControlType;
         bool      fHasValidTime;
 };
 

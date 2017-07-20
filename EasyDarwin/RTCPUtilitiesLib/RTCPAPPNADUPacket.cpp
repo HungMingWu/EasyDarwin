@@ -123,8 +123,8 @@ void RTCPNaduPacket::GetTestPacket(StrPtrLen* resultPtr)
 	*/
 
 #if 1 //full receiver report with SDES and Nadu
-	UInt32  *theWriterStart = (UInt32*)sRTCPTestBuffer;
-	UInt32  *theWriter = (UInt32*)sRTCPTestBuffer;
+	uint32_t  *theWriterStart = (uint32_t*)sRTCPTestBuffer;
+	uint32_t  *theWriter = (uint32_t*)sRTCPTestBuffer;
 
 	*(theWriter++) = htonl(0x81c90007);     // 1 RR  packet header, full report
 	*(theWriter++) = htonl(0x2935F2D6);     // 1 Sender SSRC = 691401430
@@ -146,7 +146,7 @@ void RTCPNaduPacket::GetTestPacket(StrPtrLen* resultPtr)
 
 	*(theWriter++) = htonl(0x80CC0000);     // 1 APP packet header, needs len -> assigned beow
 
-	UInt32  *appPacketLenStart = theWriter;
+	uint32_t  *appPacketLenStart = theWriter;
 
 	*(theWriter++) = htonl(FOUR_CHARS_TO_INT('S', 'S', 'R', 'C')); //nadu ssrc
 	*(theWriter++) = htonl(FOUR_CHARS_TO_INT('P', 'S', 'S', '0')); //nadu app packet name
@@ -162,19 +162,19 @@ void RTCPNaduPacket::GetTestPacket(StrPtrLen* resultPtr)
 	*(theWriter++) = htonl(0xFFFFAD9C); //nun | fbs= 31 | 44444
 
 	uint16_t *packetLenOffsetPtr = &((uint16_t*)theWriterStart)[29];
-	uint16_t  packetLenInWords = htons(((UInt32*)theWriter - (UInt32*)appPacketLenStart));
+	uint16_t  packetLenInWords = htons(((uint32_t*)theWriter - (uint32_t*)appPacketLenStart));
 
 	*packetLenOffsetPtr = packetLenInWords;
 	qtss_printf("packetLenInWords =%lu\n", ntohs(packetLenInWords));
-	UInt32 len = (char*)theWriter - (char*)theWriterStart;
+	uint32_t len = (char*)theWriter - (char*)theWriterStart;
 	if (resultPtr)
 		resultPtr->Set(sRTCPTestBuffer, len);
 
 #endif
 
 #if 0 //full receiver report with Nadu
-	UInt32  *theWriterStart = (UInt32*)sRTCPTestBuffer;
-	UInt32  *theWriter = (UInt32*)sRTCPTestBuffer;
+	uint32_t  *theWriterStart = (uint32_t*)sRTCPTestBuffer;
+	uint32_t  *theWriter = (uint32_t*)sRTCPTestBuffer;
 
 	*(theWriter++) = htonl(0x80c90007);     // 1 RR  packet header, empty len is ok but could be a full report
 	*(theWriter++) = htonl(0x2935F2D6);     // 1 SSRC = 691401430
@@ -189,7 +189,7 @@ void RTCPNaduPacket::GetTestPacket(StrPtrLen* resultPtr)
 
 	*(theWriter++) = htonl(0x80CC0000);     // 1 APP packet header, needs len -> assigned beow
 
-	UInt32  *appPacketLenStart = theWriter;
+	uint32_t  *appPacketLenStart = theWriter;
 
 	*(theWriter++) = htonl(FOUR_CHARS_TO_INT('S', 'S', 'R', 'C')); //nadu ssrc
 	*(theWriter++) = htonl(FOUR_CHARS_TO_INT('P', 'S', 'S', '0')); //nadu app packet name
@@ -205,25 +205,25 @@ void RTCPNaduPacket::GetTestPacket(StrPtrLen* resultPtr)
 	*(theWriter++) = htonl(0xFFFFAD9C); //nun | fbs= 31 | 44444
 
 	uint16_t *packetLenOffsetPtr = &((uint16_t*)theWriterStart)[17];
-	uint16_t  packetLenInWords = htons((UInt32*)theWriter - (UInt32*)appPacketLenStart);
+	uint16_t  packetLenInWords = htons((uint32_t*)theWriter - (uint32_t*)appPacketLenStart);
 
 	*packetLenOffsetPtr = packetLenInWords;
 
-	UInt32 len = (char*)theWriter - (char*)theWriterStart;
+	uint32_t len = (char*)theWriter - (char*)theWriterStart;
 	if (resultPtr)
 		resultPtr->Set(sRTCPTestBuffer, len);
 
 #endif
 
 #if 0 //empty receiver report with NADU
-	UInt32  *theWriterStart = (UInt32*)sRTCPTestBuffer;
-	UInt32  *theWriter = (UInt32*)sRTCPTestBuffer;
+	uint32_t  *theWriterStart = (uint32_t*)sRTCPTestBuffer;
+	uint32_t  *theWriter = (uint32_t*)sRTCPTestBuffer;
 
 	*(theWriter++) = htonl(0x80c90000);     // 1 RR  packet header, empty len is ok but could be a full report
 
 	*(theWriter++) = htonl(0x80CC0000);     // 1 APP packet header, needs len -> assigned beow
 
-	UInt32  *appPacketLenStart = theWriter;
+	uint32_t  *appPacketLenStart = theWriter;
 
 	*(theWriter++) = htonl(FOUR_CHARS_TO_INT('S', 'S', 'R', 'C')); //nadu ssrc
 	*(theWriter++) = htonl(FOUR_CHARS_TO_INT('P', 'S', 'S', '0')); //nadu app packet name
@@ -239,11 +239,11 @@ void RTCPNaduPacket::GetTestPacket(StrPtrLen* resultPtr)
 	*(theWriter++) = htonl(0xFFFFAD9C); //nun | fbs= 31 | 44444
 
 	uint16_t *packetLenOffsetPtr = &((uint16_t*)theWriterStart)[3];
-	uint16_t  packetLenInWords = htons((UInt32*)theWriter - (UInt32*)appPacketLenStart);
+	uint16_t  packetLenInWords = htons((uint32_t*)theWriter - (uint32_t*)appPacketLenStart);
 
 	*packetLenOffsetPtr = packetLenInWords;
 
-	UInt32 len = (char*)theWriter - (char*)theWriterStart;
+	uint32_t len = (char*)theWriter - (char*)theWriterStart;
 	if (resultPtr)
 		resultPtr->Set(sRTCPTestBuffer, len);
 #endif
@@ -281,7 +281,7 @@ void RTCPNaduPacket::GetTestPacket(StrPtrLen* resultPtr)
 
 
 // use if you don't know what kind of packet this is
-bool RTCPNaduPacket::ParseNaduPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPNaduPacket::ParseNaduPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength)
 {
 
 	if (!this->ParseAPPPacket(inPacketBuffer, inPacketLength))
@@ -294,13 +294,13 @@ bool RTCPNaduPacket::ParseNaduPacket(uint8_t* inPacketBuffer, UInt32 inPacketLen
 }
 
 
-bool RTCPNaduPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPNaduPacket::ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength)
 {
 
 	if (!this->ParseNaduPacket(inPacketBuffer, inPacketLength))
 		return false;
 
-	UInt32 *naduDataBuffer = (UInt32 *)(this->GetPacketBuffer() + kNaduDataOffset);
+	uint32_t *naduDataBuffer = (uint32_t *)(this->GetPacketBuffer() + kNaduDataOffset);
 
 	int wordsLen = this->GetPacketLength() - 2;
 	if (wordsLen < 3) // min is 3
@@ -337,8 +337,8 @@ void RTCPNaduPacket::DumpNaduPacket()
 	for (; count < fNumBlocks; count++)
 	{
 
-		UInt32 ssrc = this->GetSSRC(count);
-		UInt32 ssrcIndex = this->GetSSRCBlockIndex(ssrc);
+		uint32_t ssrc = this->GetSSRC(count);
+		uint32_t ssrcIndex = this->GetSSRCBlockIndex(ssrc);
 		uint16_t playoutDelay = this->GetPlayOutDelay(count);
 		uint16_t nsn = this->GetNSN(count);
 		uint16_t nun = this->GetNUN(count);
@@ -358,11 +358,11 @@ void RTCPNaduPacket::DumpNaduPacket()
 
 
 
-SInt32 RTCPNaduPacket::GetSSRCBlockIndex(UInt32 inSSRC)
+SInt32 RTCPNaduPacket::GetSSRCBlockIndex(uint32_t inSSRC)
 {
-	UInt32 *blockBuffer = NULL;
+	uint32_t *blockBuffer = NULL;
 	SInt32 count = 0;
-	UInt32 ssrc = 0;
+	uint32_t ssrc = 0;
 
 	if (NULL == fNaduDataBuffer)
 		return -1;
@@ -370,7 +370,7 @@ SInt32 RTCPNaduPacket::GetSSRCBlockIndex(UInt32 inSSRC)
 	for (; count < fNumBlocks; count++)
 	{
 		blockBuffer = fNaduDataBuffer + (count * 3);
-		ssrc = (UInt32)ntohl(*(UInt32*)&blockBuffer[kOffsetNaduSSRC]);
+		ssrc = (uint32_t)ntohl(*(uint32_t*)&blockBuffer[kOffsetNaduSSRC]);
 
 		if (ssrc == inSSRC)
 			return count;
@@ -380,7 +380,7 @@ SInt32 RTCPNaduPacket::GetSSRCBlockIndex(UInt32 inSSRC)
 	return -1;
 }
 
-UInt32 RTCPNaduPacket::GetSSRC(SInt32 index)
+uint32_t RTCPNaduPacket::GetSSRC(SInt32 index)
 {
 
 	if (index < 0)
@@ -392,8 +392,8 @@ UInt32 RTCPNaduPacket::GetSSRC(SInt32 index)
 	if (index >= fNumBlocks)
 		return 0;
 
-	UInt32 *blockBufferPtr = fNaduDataBuffer + (index * 3);
-	UInt32 ssrc = (UInt32)ntohl(*(UInt32*)&blockBufferPtr[kOffsetNaduSSRC]);
+	uint32_t *blockBufferPtr = fNaduDataBuffer + (index * 3);
+	uint32_t ssrc = (uint32_t)ntohl(*(uint32_t*)&blockBufferPtr[kOffsetNaduSSRC]);
 
 	return ssrc;
 
@@ -410,8 +410,8 @@ uint16_t RTCPNaduPacket::GetPlayOutDelay(SInt32 index)
 	if (index >= fNumBlocks)
 		return 0;
 
-	UInt32 *blockBufferPtr = fNaduDataBuffer + (index * 3);
-	uint16_t delay = (uint16_t)((ntohl(*(UInt32*)&blockBufferPtr[kOffsetNaduPlayoutDelay])  & kPlayoutMask) >> 16);
+	uint32_t *blockBufferPtr = fNaduDataBuffer + (index * 3);
+	uint16_t delay = (uint16_t)((ntohl(*(uint32_t*)&blockBufferPtr[kOffsetNaduPlayoutDelay])  & kPlayoutMask) >> 16);
 
 	return delay;
 }
@@ -427,7 +427,7 @@ uint16_t RTCPNaduPacket::GetNSN(SInt32 index)
 	if (index >= fNumBlocks)
 		return 0;
 
-	UInt32 *blockBufferPtr = fNaduDataBuffer + (index * 3);
+	uint32_t *blockBufferPtr = fNaduDataBuffer + (index * 3);
 	uint16_t nsn = (uint16_t)(ntohl(blockBufferPtr[kOffsetNSN]) & kNSNMask);
 
 	return nsn;
@@ -444,7 +444,7 @@ uint16_t RTCPNaduPacket::GetNUN(SInt32 index)
 	if (index >= fNumBlocks)
 		return 0;
 
-	UInt32 *blockBufferPtr = fNaduDataBuffer + (index * 3);
+	uint32_t *blockBufferPtr = fNaduDataBuffer + (index * 3);
 	uint16_t nun = (uint16_t)((ntohl(blockBufferPtr[kOffsetNUN]) & kNUNMask) >> 16);
 
 	return nun;
@@ -461,7 +461,7 @@ uint16_t RTCPNaduPacket::GetFBS(SInt32 index)
 	if (index >= fNumBlocks)
 		return 0;
 
-	UInt32 *blockBufferPtr = fNaduDataBuffer + (index * 3);
+	uint32_t *blockBufferPtr = fNaduDataBuffer + (index * 3);
 	uint16_t fbs = (uint16_t)ntohl(blockBufferPtr[kOffsetFBS]) & kFBSMask;
 
 	return fbs;
@@ -474,7 +474,7 @@ void   RTCPNaduPacket::Dump()
 }
 
 /* class NaduReport */
-NaduReport::NaduReport(uint8_t* inPacketBuffer, UInt32 inPacketLength, UInt32 id)
+NaduReport::NaduReport(uint8_t* inPacketBuffer, uint32_t inPacketLength, uint32_t id)
 {
 	fPacketBuffer = new uint8_t[inPacketLength + 1];
 	fPacketBuffer[inPacketLength] = 0;
@@ -488,7 +488,7 @@ NaduReport::NaduReport(uint8_t* inPacketBuffer, UInt32 inPacketLength, UInt32 id
 
 /* class NaduList */
 
-void NaduList::Initialize(UInt32 listSize)
+void NaduList::Initialize(uint32_t listSize)
 {
 
 	fNaduReportList = new NaduReport *[listSize];
@@ -497,7 +497,7 @@ void NaduList::Initialize(UInt32 listSize)
 
 }
 
-NaduReport* NaduList::GetReport(UInt32 id)
+NaduReport* NaduList::GetReport(uint32_t id)
 {
 
 	if (NULL == fNaduReportList)
@@ -511,13 +511,13 @@ NaduReport* NaduList::GetReport(UInt32 id)
 
 }
 
-UInt32 NaduList::GetReportIndex(UInt32 id)
+uint32_t NaduList::GetReportIndex(uint32_t id)
 {
 
 	if (NULL == fNaduReportList)
 		return 0;
 
-	UInt32 index = this->IDtoIndex(id);
+	uint32_t index = this->IDtoIndex(id);
 	NaduReport *result = fNaduReportList[index];
 	if (result && result->getID() == id)
 		return index;
@@ -530,7 +530,7 @@ NaduReport* NaduList::GetLastReport()
 	if (NULL == fNaduReportList || fcurrentIndexCount == 0)
 		return NULL;
 
-	UInt32 index = this->IDtoIndex(fcurrentIndexCount);
+	uint32_t index = this->IDtoIndex(fcurrentIndexCount);
 	return fNaduReportList[index];
 
 }
@@ -564,13 +564,13 @@ NaduReport* NaduList::GetEarliestReport()
 }
 
 
-bool NaduList::AddReport(uint8_t* inPacketBuffer, UInt32 inPacketLength, UInt32 *outID)
+bool NaduList::AddReport(uint8_t* inPacketBuffer, uint32_t inPacketLength, uint32_t *outID)
 {
 	if (NULL == fNaduReportList)
 		return false;
 
-	UInt32 resultID = ++fcurrentIndexCount;
-	UInt32 index = this->IDtoIndex(fcurrentIndexCount);
+	uint32_t resultID = ++fcurrentIndexCount;
+	uint32_t index = this->IDtoIndex(fcurrentIndexCount);
 
 	if (fNaduReportList[index] != 0)
 		delete fNaduReportList[index];
@@ -586,7 +586,7 @@ bool NaduList::AddReport(uint8_t* inPacketBuffer, UInt32 inPacketLength, UInt32 
 
 
 
-UInt32 NaduList::LastReportedFreeBuffSizeBytes()
+uint32_t NaduList::LastReportedFreeBuffSizeBytes()
 {
 	NaduReport* currentReportPtr = this->GetLastReport();
 	if (NULL == currentReportPtr)
@@ -596,10 +596,10 @@ UInt32 NaduList::LastReportedFreeBuffSizeBytes()
 	if (NULL == theNADUPacketData)
 		return 0;
 
-	return ((UInt32)theNADUPacketData->GetFBS(0)) * 64; //64 byte blocks are in the report
+	return ((uint32_t)theNADUPacketData->GetFBS(0)) * 64; //64 byte blocks are in the report
 }
 
-UInt32 NaduList::LastReportedTimeDelayMilli()
+uint32_t NaduList::LastReportedTimeDelayMilli()
 {
 	NaduReport* currentReportPtr = this->GetLastReport();
 	if (NULL == currentReportPtr)
@@ -632,8 +632,8 @@ void NaduList::DumpList()
 	qtss_printf("-------------------------------------------------------------\n");
 	NaduReport* lastReportPtr = this->GetLastReport();
 	NaduReport* earliestReportPtr = this->GetEarliestReport();
-	UInt32 thisID = 0;
-	UInt32 stopID = 0;
+	uint32_t thisID = 0;
+	uint32_t stopID = 0;
 	if (earliestReportPtr)
 		stopID = earliestReportPtr->getID();
 

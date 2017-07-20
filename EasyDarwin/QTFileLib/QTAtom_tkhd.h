@@ -66,8 +66,8 @@ public:
 
 	//
 	// Accessors.
-	inline  UInt32      GetTrackID() { return fTrackID; }
-	inline  UInt32      GetFlags() { return fFlags; }
+	inline  uint32_t      GetTrackID() { return fTrackID; }
+	inline  uint32_t      GetFlags() { return fFlags; }
 	inline  UInt64      GetCreationTime() { return fCreationTime; }
 	inline  UInt64      GetModificationTime() { return fModificationTime; }
 	inline  UInt64      GetDuration() { return fDuration; }
@@ -82,17 +82,17 @@ protected:
 	//
 	// Protected member variables.
 	uint8_t       fVersion;
-	UInt32      fFlags; // 24 bits in the low 3 bytes
+	uint32_t      fFlags; // 24 bits in the low 3 bytes
 	UInt64      fCreationTime, fModificationTime;
-	UInt32      fTrackID;
-	UInt32      freserved1;
+	uint32_t      fTrackID;
+	uint32_t      freserved1;
 	UInt64      fDuration;
-	UInt32      freserved2, freserved3;
+	uint32_t      freserved2, freserved3;
 	uint16_t      fLayer, fAlternateGroup;
 	uint16_t      fVolume;
 	uint16_t      freserved4;
-	UInt32      fa, fb, fu, fc, fd, fv, fx, fy, fw;
-	UInt32      fTrackWidth, fTrackHeight;
+	uint32_t      fa, fb, fu, fc, fd, fv, fx, fy, fw;
+	uint32_t      fTrackWidth, fTrackHeight;
 };
 
 #endif // QTAtom_tkhd_H

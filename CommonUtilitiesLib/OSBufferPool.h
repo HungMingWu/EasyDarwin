@@ -41,7 +41,7 @@ class OSBufferPool
 {
 public:
 
-	OSBufferPool(UInt32 inBufferSize) : fBufSize(inBufferSize), fTotNumBuffers(0) {}
+	OSBufferPool(uint32_t inBufferSize) : fBufSize(inBufferSize), fTotNumBuffers(0) {}
 
 	//
 	// This object currently *does not* clean up for itself when
@@ -50,8 +50,8 @@ public:
 
 	//
 	// ACCESSORS
-	UInt32  GetTotalNumBuffers() { return fTotNumBuffers; }
-	UInt32  GetNumAvailableBuffers() { return fQueue.GetLength(); }
+	uint32_t  GetTotalNumBuffers() { return fTotNumBuffers; }
+	uint32_t  GetNumAvailableBuffers() { return fQueue.GetLength(); }
 
 	//
 	// All these functions are thread-safe
@@ -69,8 +69,8 @@ private:
 
 	OSMutex fMutex;
 	OSQueue fQueue;
-	UInt32  fBufSize;
-	UInt32  fTotNumBuffers;
+	uint32_t  fBufSize;
+	uint32_t  fTotNumBuffers;
 };
 
 #endif //__OS_BUFFER_POOL_H__

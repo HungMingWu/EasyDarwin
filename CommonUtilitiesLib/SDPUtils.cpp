@@ -33,7 +33,7 @@
 SInt32 SDPContainer::AddHeaderLine(StrPtrLen *theLinePtr)
 {
 	Assert(theLinePtr);
-	UInt32 thisLine = fNumUsedLines;
+	uint32_t thisLine = fNumUsedLines;
 	Assert(fNumUsedLines < fNumSDPLines);
 	fSDPLineArray[thisLine].Set(theLinePtr->Ptr, theLinePtr->Len);
 	fNumUsedLines++;
@@ -276,7 +276,7 @@ SDPLineSorter::SDPLineSorter(SDPContainer *rawSDPContainerPtr, float adjustMedia
 	StrPtrLen *theMediaStart = rawSDPContainerPtr->GetLine(rawSDPContainerPtr->FindHeaderLineType('m', 0));
 	if (theMediaStart && theMediaStart->Ptr && theSDPData.Ptr)
 	{
-		UInt32  mediaLen = theSDPData.Len - (UInt32)(theMediaStart->Ptr - theSDPData.Ptr);
+		uint32_t  mediaLen = theSDPData.Len - (uint32_t)(theMediaStart->Ptr - theSDPData.Ptr);
 		char *mediaStartPtr = theMediaStart->Ptr;
 		fMediaHeaders.Set(mediaStartPtr, mediaLen);
 		StringParser sdpParser(&fMediaHeaders);
@@ -306,7 +306,7 @@ SDPLineSorter::SDPLineSorter(SDPContainer *rawSDPContainerPtr, float adjustMedia
 			{
 				StringParser bLineParser(&sdpLine);
 				bLineParser.ConsumeUntilDigit();
-				UInt32 bandwidth = (UInt32)(.5 + (adjustMediaBandwidthPercent * (float)bLineParser.ConsumeInteger()));
+				uint32_t bandwidth = (uint32_t)(.5 + (adjustMediaBandwidthPercent * (float)bLineParser.ConsumeInteger()));
 				if (bandwidth < 1)
 					bandwidth = 1;
 

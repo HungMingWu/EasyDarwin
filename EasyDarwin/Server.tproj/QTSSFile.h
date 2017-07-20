@@ -51,11 +51,11 @@ public:
 
 	//
 	// Implementation of stream functions.
-	virtual QTSS_Error  Read(void* ioBuffer, UInt32 inLen, UInt32* outLen);
+	virtual QTSS_Error  Read(void* ioBuffer, uint32_t inLen, uint32_t* outLen);
 
 	virtual QTSS_Error  Seek(UInt64 inNewPosition);
 
-	virtual QTSS_Error  Advise(UInt64 inPosition, UInt32 inAdviseSize);
+	virtual QTSS_Error  Advise(UInt64 inPosition, uint32_t inAdviseSize);
 
 	virtual QTSS_Error  RequestEvent(QTSS_EventType inEventMask);
 

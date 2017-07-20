@@ -140,8 +140,8 @@ private:
 	// Call module init roles
 	void                    DoInitRole();
 	void                    SetupPublicHeader();
-	UInt32*                 GetRTSPIPAddrs(QTSServerPrefs* inPrefs, UInt32* outNumAddrsPtr);
-	uint16_t*                 GetRTSPPorts(QTSServerPrefs* inPrefs, UInt32* outNumPortsPtr);
+	uint32_t*                 GetRTSPIPAddrs(QTSServerPrefs* inPrefs, uint32_t* outNumAddrsPtr);
+	uint16_t*                 GetRTSPPorts(QTSServerPrefs* inPrefs, uint32_t* outNumPortsPtr);
 
 	// Build & destroy the optimized role / module arrays for invoking modules
 	void                    BuildModuleRoleArrays();

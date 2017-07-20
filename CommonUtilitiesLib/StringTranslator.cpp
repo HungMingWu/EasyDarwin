@@ -225,9 +225,9 @@ SInt32 StringTranslator::EncodeURL(const char* inSrc, SInt32 inSrcLen, char* ioD
 	return theLengthWritten;
 }
 
-void StringTranslator::DecodePath(char* inSrc, UInt32 inSrcLen)
+void StringTranslator::DecodePath(char* inSrc, uint32_t inSrcLen)
 {
-	for (UInt32 x = 0; x < inSrcLen; x++)
+	for (uint32_t x = 0; x < inSrcLen; x++)
 		if (inSrc[x] == '/')
 			inSrc[x] = kPathDelimiterChar;
 }

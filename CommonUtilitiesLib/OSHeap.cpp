@@ -35,7 +35,7 @@
 
 #include "OSHeap.h"
 
-OSHeap::OSHeap(UInt32 inStartSize)
+OSHeap::OSHeap(uint32_t inStartSize)
 	: fFreeIndex(1)
 {
 	if (inStartSize < 2)
@@ -75,12 +75,12 @@ void OSHeap::Insert(OSHeapElem* inElem)
 	//bubble the new element up to its proper place in the heap
 
 	//start at the last leaf of the tree
-	UInt32 swapPos = fFreeIndex;
+	uint32_t swapPos = fFreeIndex;
 	while (swapPos > 1)
 	{
 		//move up the chain until we get to the root, bubbling this new element
 		//to its proper place in the tree
-		UInt32 nextSwapPos = swapPos >> 1;
+		uint32_t nextSwapPos = swapPos >> 1;
 
 		//if this child is greater than it's parent, we need to do the old
 		//switcheroo
@@ -100,7 +100,7 @@ void OSHeap::Insert(OSHeapElem* inElem)
 }
 
 
-OSHeapElem* OSHeap::extract(UInt32 inIndex)
+OSHeapElem* OSHeap::extract(uint32_t inIndex)
 {
 	if ((fHeap == NULL) || (fFreeIndex <= inIndex))
 		return NULL;
@@ -123,17 +123,17 @@ OSHeapElem* OSHeap::extract(UInt32 inIndex)
 	//The gist is that this new item at the top of the heap needs to be bubbled down
 	//until it is bigger than its two children, therefore maintaining the heap property.
 
-	UInt32 parent = inIndex;
+	uint32_t parent = inIndex;
 	while (parent < fFreeIndex)
 	{
 		//which is bigger? parent or left child?
-		UInt32 greatest = parent;
-		UInt32 leftChild = parent * 2;
+		uint32_t greatest = parent;
+		uint32_t leftChild = parent * 2;
 		if ((leftChild < fFreeIndex) && (fHeap[leftChild]->fValue < fHeap[parent]->fValue))
 			greatest = leftChild;
 
 		//which is bigger? the biggest so far or the right child?
-		UInt32 rightChild = (parent * 2) + 1;
+		uint32_t rightChild = (parent * 2) + 1;
 		if ((rightChild < fFreeIndex) && (fHeap[rightChild]->fValue < fHeap[greatest]->fValue))
 			greatest = rightChild;
 
@@ -165,7 +165,7 @@ OSHeapElem* OSHeap::Remove(OSHeapElem* elem)
 #endif
 
 	//first attempt to locate this element in the heap
-	UInt32 theIndex = 1;
+	uint32_t theIndex = 1;
 	for (; theIndex < fFreeIndex; theIndex++)
 		if (elem == fHeap[theIndex])
 			break;
@@ -180,7 +180,7 @@ OSHeapElem* OSHeap::Remove(OSHeapElem* elem)
 
 #if _OSHEAP_TESTING_
 
-void OSHeap::sanityCheck(UInt32 root)
+void OSHeap::sanityCheck(uint32_t root)
 {
 	//make sure root is greater than both its children. Do so recursively
 	if (root < fFreeIndex)

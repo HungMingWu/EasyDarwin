@@ -129,10 +129,10 @@ typedef struct {
 
 typedef struct
 {
-    UInt32                  inServerAPIVersion;
+    uint32_t                  inServerAPIVersion;
     QTSS_CallbacksPtr       inCallbacks;
     QTSS_StreamRef          inErrorLogStream;
-    UInt32                  outStubLibraryVersion;
+    uint32_t                  outStubLibraryVersion;
     QTSS_DispatchFuncPtr    outDispatchFunction;
     
 } QTSS_PrivateArgs, *QTSS_PrivateArgsPtr;

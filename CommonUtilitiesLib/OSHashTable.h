@@ -40,7 +40,7 @@
 
  /*
  T must have a fNextHashEntry field, and key(T) must returns the key of type K.
- K must have a method GetHashKey() that returns an UInt32 bit hash value.
+ K must have a method GetHashKey() that returns an uint32_t bit hash value.
  Will the hash table can contain duplicate keys, the Map function will return only the first one.
  */
 
@@ -48,7 +48,7 @@ template<class T, class K>
 class OSHashTable
 {
 public:
-	OSHashTable(UInt32 size)
+	OSHashTable(uint32_t size)
 	{
 		fHashTable = new (T*[size]);
 		Assert(fHashTable);
@@ -70,7 +70,7 @@ public:
 	{
 		Assert(entry->fNextHashEntry == nullptr);
 		K key(entry);
-		UInt32 theIndex = ComputeIndex(key.GetHashKey());
+		uint32_t theIndex = ComputeIndex(key.GetHashKey());
 		entry->fNextHashEntry = fHashTable[theIndex];
 		fHashTable[theIndex] = entry;
 		fNumEntries++;
@@ -78,7 +78,7 @@ public:
 	void Remove(T* entry)
 	{
 		K key(entry);
-		UInt32 theIndex = ComputeIndex(key.GetHashKey());
+		uint32_t theIndex = ComputeIndex(key.GetHashKey());
 		T* elem = fHashTable[theIndex];
 		T* last = nullptr;
 		while (elem && elem != entry)
@@ -100,7 +100,7 @@ public:
 	}
 	T* Map(K* key)
 	{
-		UInt32 theIndex = ComputeIndex(key->GetHashKey());
+		uint32_t theIndex = ComputeIndex(key->GetHashKey());
 		T* elem = fHashTable[theIndex];
 		while (elem)
 		{
@@ -113,16 +113,16 @@ public:
 	}
 	UInt64 GetNumEntries() { return fNumEntries; }
 
-	UInt32 GetTableSize() { return fSize; }
+	uint32_t GetTableSize() { return fSize; }
 	T* GetTableEntry(int i) { return fHashTable[i]; }
 
 private:
 	T** fHashTable;
-	UInt32 fSize;
-	UInt32 fMask;
+	uint32_t fSize;
+	uint32_t fMask;
 	UInt64 fNumEntries;
 
-	UInt32 ComputeIndex(UInt32 hashKey)
+	uint32_t ComputeIndex(uint32_t hashKey)
 	{
 		if (fMask)
 			return(hashKey & fMask);
@@ -171,6 +171,6 @@ public:
 private:
 	OSHashTable<T, K>* fHashTable;
 	T* fCurrent;
-	UInt32 fIndex;
+	uint32_t fIndex;
 };
 #endif //_OSHASHTABLE_H_

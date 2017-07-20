@@ -97,8 +97,8 @@ class QTSSRollingLog : public Task
 
         enum
         {
-            kMaxDateBufferSizeInBytes = 30, //UInt32
-            kMaxFilenameLengthInBytes = 31  //UInt32
+            kMaxDateBufferSizeInBytes = 30, //uint32_t
+            kMaxFilenameLengthInBytes = 31  //uint32_t
         };
     
     protected:
@@ -110,8 +110,8 @@ class QTSSRollingLog : public Task
         //Derived class must provide a way to get the log & rolled log name
         virtual char* GetLogName() = 0;
         virtual char* GetLogDir() = 0;
-        virtual UInt32 GetRollIntervalInDays() = 0;//0 means no interval
-        virtual UInt32 GetMaxLogBytes() = 0;//0 means unlimited
+        virtual uint32_t GetRollIntervalInDays() = 0;//0 means no interval
+        virtual uint32_t GetMaxLogBytes() = 0;//0 means unlimited
                     
         //to record the time the file was created (for time based rolling)
         virtual time_t  WriteLogHeader(FILE *inFile);

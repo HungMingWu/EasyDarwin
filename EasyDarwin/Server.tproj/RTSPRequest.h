@@ -78,7 +78,7 @@ public:
 
 	void SetupAuthLocalPath(void);
 	QTSS_Error SendBasicChallenge(void);
-	QTSS_Error SendDigestChallenge(UInt32 qop, StrPtrLen *nonce, StrPtrLen* opaque);
+	QTSS_Error SendDigestChallenge(uint32_t qop, StrPtrLen *nonce, StrPtrLen* opaque);
 	QTSS_Error SendForbiddenResponse(void);
 private:
 
@@ -104,7 +104,7 @@ private:
 	void    ParseRangeHeader();
 	void    ParseTransportHeader();
 	void    ParseIfModSinceHeader();
-	void    ParseAddrSubHeader(StrPtrLen* inSubHeader, StrPtrLen* inHeaderName, UInt32* outAddr);
+	void    ParseAddrSubHeader(StrPtrLen* inSubHeader, StrPtrLen* inHeaderName, uint32_t* outAddr);
 	void    ParseRetransmitHeader();
 	void    ParseContentLengthHeader();
 	void    ParseSpeedHeader();

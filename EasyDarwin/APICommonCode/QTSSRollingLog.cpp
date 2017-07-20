@@ -273,7 +273,7 @@ bool QTSSRollingLog::CheckRollLog()
     
     
     //now check size based log rolling
-    UInt32 theCurrentPos = ::ftell(fLog);
+    uint32_t theCurrentPos = ::ftell(fLog);
     //max_transfer_log_size being 0 is a signal to ignore the setting.
     if ((this->GetMaxLogBytes() != 0) &&
         (theCurrentPos > this->GetMaxLogBytes()))
@@ -424,7 +424,7 @@ time_t QTSSRollingLog::ReadLogHeader(FILE* inFile)
         return -1;
     (void)::rewind(inFile);
 
-    const UInt32 kMaxHeaderLength = 500;
+    const uint32_t kMaxHeaderLength = 500;
     char theFirstLine[kMaxHeaderLength];
     
     if (nullptr == ::fgets(theFirstLine, kMaxHeaderLength, inFile))
@@ -499,7 +499,7 @@ SInt64 QTSSRollingLog::Run()
     
     OSMutexLocker locker(&fMutex);
     
-    UInt32 theRollInterval = (this->GetRollIntervalInDays())  * 60 * 60 * 24;
+    uint32_t theRollInterval = (this->GetRollIntervalInDays())  * 60 * 60 * 24;
     
     if((fLogCreateTime != -1) && (fLog != nullptr))
     {
@@ -513,7 +513,7 @@ SInt64 QTSSRollingLog::Run()
             Assert(-1 != calendarTime);
             double theExactInterval = ::difftime(calendarTime, logRollTimeMidnight);
             if(theExactInterval > 0) {
-                UInt32 theCurInterval = (UInt32)::floor(theExactInterval);
+                uint32_t theCurInterval = (uint32_t)::floor(theExactInterval);
                 if (theCurInterval >= theRollInterval)
                     this->RollLog();
             }

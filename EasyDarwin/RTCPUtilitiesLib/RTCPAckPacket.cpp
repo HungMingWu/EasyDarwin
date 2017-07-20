@@ -39,7 +39,7 @@
 
 
  // use if you don't know what kind of packet this is
-bool RTCPAckPacket::ParseAckPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPAckPacket::ParseAckPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength)
 {
 
 	if (!this->ParseAPPPacket(inPacketBuffer, inPacketLength))
@@ -56,7 +56,7 @@ bool RTCPAckPacket::ParseAckPacket(uint8_t* inPacketBuffer, UInt32 inPacketLengt
 }
 
 
-bool RTCPAckPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPAckPacket::ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength)
 {
 	if (!this->ParseAckPacket(inPacketBuffer, inPacketLength))
 		return false;
@@ -69,7 +69,7 @@ bool RTCPAckPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength)
 	if ((inPacketLength < kAckMaskOffset) || (!this->IsAckPacketType()))
 		return false;
 
-	Assert(inPacketLength == (UInt32)((this->GetPacketLength() * 4)) + RTCPPacket::kRTCPHeaderSizeInBytes);
+	Assert(inPacketLength == (uint32_t)((this->GetPacketLength() * 4)) + RTCPPacket::kRTCPHeaderSizeInBytes);
 	fAckMaskSize = inPacketLength - kAckMaskOffset;
 
 	return true;
@@ -78,7 +78,7 @@ bool RTCPAckPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength)
 bool RTCPAckPacket::IsAckPacketType()
 {
 	// While we are moving to a new type, check for both
-	UInt32 theAppType = this->GetAppPacketName();
+	uint32_t theAppType = this->GetAppPacketName();
 
 	//  if ( theAppType == kAckPacketAlternateName ) qtss_printf("ack\n"); 
 	//  if ( theAppType == kAckPacketName ) qtss_printf("qtack\n");
@@ -90,7 +90,7 @@ void   RTCPAckPacket::Dump()
 {
 	uint16_t theSeqNum = this->GetAckSeqNum();
 	uint16_t thePacketLen = this->GetPacketLength();
-	UInt32 theAckMaskSizeInBits = this->GetAckMaskSizeInBits();
+	uint32_t theAckMaskSizeInBits = this->GetAckMaskSizeInBits();
 
 	char name[5];
 	name[4] = 0;
@@ -101,7 +101,7 @@ void   RTCPAckPacket::Dump()
 	OSCharArrayDeleter deleter(maskBytesBuffer);
 	maskBytesBuffer[0] = 0;
 	maskBytesBuffer[numBufferBytes - 1] = 0;
-	for (UInt32 maskCount = 0; maskCount < theAckMaskSizeInBits; maskCount++)
+	for (uint32_t maskCount = 0; maskCount < theAckMaskSizeInBits; maskCount++)
 	{
 		if (this->IsNthBitEnabled(maskCount))
 		{

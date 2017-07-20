@@ -46,28 +46,28 @@ public:
 	virtual ~RTCPCompressedQTSSPacket() {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
-	virtual bool ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength);
+	virtual bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength);
 
 	// Call to parse if you don't know what kind of packet this is
-	bool ParseCompressedQTSSPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength);
-	inline UInt32 GetQTSSReportSourceID();
+	bool ParseCompressedQTSSPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength);
+	inline uint32_t GetQTSSReportSourceID();
 	inline uint16_t GetQTSSPacketVersion();
-	inline uint16_t GetQTSSPacketLength(); //In 'UInt32's
+	inline uint16_t GetQTSSPacketLength(); //In 'uint32_t's
 
 
-	inline UInt32 GetReceiverBitRate() { return fReceiverBitRate; }
+	inline uint32_t GetReceiverBitRate() { return fReceiverBitRate; }
 	inline uint16_t GetAverageLateMilliseconds() { return fAverageLateMilliseconds; }
 	inline uint16_t GetPercentPacketsLost() { return fPercentPacketsLost; }
 	inline uint16_t GetAverageBufferDelayMilliseconds() { return fAverageBufferDelayMilliseconds; }
 	inline bool GetIsGettingBetter() { return fIsGettingBetter; }
 	inline bool GetIsGettingWorse() { return fIsGettingWorse; }
-	inline UInt32 GetNumEyes() { return fNumEyes; }
-	inline UInt32 GetNumEyesActive() { return fNumEyesActive; }
-	inline UInt32 GetNumEyesPaused() { return fNumEyesPaused; }
-	inline UInt32 GetOverbufferWindowSize() { return fOverbufferWindowSize; }
+	inline uint32_t GetNumEyes() { return fNumEyes; }
+	inline uint32_t GetNumEyesActive() { return fNumEyesActive; }
+	inline uint32_t GetNumEyesPaused() { return fNumEyesPaused; }
+	inline uint32_t GetOverbufferWindowSize() { return fOverbufferWindowSize; }
 
 	//Proposed - are these there yet?
-	inline UInt32 GetTotalPacketReceived() { return fTotalPacketsReceived; }
+	inline uint32_t GetTotalPacketReceived() { return fTotalPacketsReceived; }
 	inline uint16_t GetTotalPacketsDropped() { return fTotalPacketsDropped; }
 	inline uint16_t GetTotalPacketsLost() { return fTotalPacketsLost; }
 	inline uint16_t GetClientBufferFill() { return fClientBufferFill; }
@@ -79,19 +79,19 @@ public:
 
 	static void GetTestPacket(StrPtrLen* resultPtr) {}
 
-	UInt32 fReceiverBitRate;
+	uint32_t fReceiverBitRate;
 	uint16_t fAverageLateMilliseconds;
 	uint16_t fPercentPacketsLost;
 	uint16_t fAverageBufferDelayMilliseconds;
 	bool fIsGettingBetter;
 	bool fIsGettingWorse;
-	UInt32 fNumEyes;
-	UInt32 fNumEyesActive;
-	UInt32 fNumEyesPaused;
-	UInt32 fOverbufferWindowSize;
+	uint32_t fNumEyes;
+	uint32_t fNumEyesActive;
+	uint32_t fNumEyesPaused;
+	uint32_t fOverbufferWindowSize;
 
 	//Proposed - are these there yet?
-	UInt32 fTotalPacketsReceived;
+	uint32_t fTotalPacketsReceived;
 	uint16_t fTotalPacketsDropped;
 	uint16_t fTotalPacketsLost;
 	uint16_t fClientBufferFill;
@@ -141,23 +141,23 @@ private:
 
 };
 
-inline UInt32 RTCPCompressedQTSSPacket::GetQTSSReportSourceID()
+inline uint32_t RTCPCompressedQTSSPacket::GetQTSSReportSourceID()
 {
-	return (UInt32)ntohl(((UInt32*)this->GetPacketBuffer())[kQTSSReportSourceIDOffset]);
+	return (uint32_t)ntohl(((uint32_t*)this->GetPacketBuffer())[kQTSSReportSourceIDOffset]);
 }
 
 
 inline uint16_t RTCPCompressedQTSSPacket::GetQTSSPacketVersion()
 {
-	UInt32 field = ((UInt32*)this->GetPacketBuffer())[kQTSSPacketVersionOffset];
+	uint32_t field = ((uint32_t*)this->GetPacketBuffer())[kQTSSPacketVersionOffset];
 	uint16_t vers = (uint16_t)((ntohl(field) & kQTSSPacketVersionMask) >> kQTSSPacketVersionShift);
 	return vers;
 }
 
 inline uint16_t RTCPCompressedQTSSPacket::GetQTSSPacketLength()
 {
-	UInt32  field = ((UInt32*)this->GetPacketBuffer())[kQTSSPacketLengthOffset];
-	return (uint16_t)((UInt32)ntohl(field)  & kQTSSPacketLengthMask);
+	uint32_t  field = ((uint32_t*)this->GetPacketBuffer())[kQTSSPacketLengthOffset];
+	return (uint16_t)((uint32_t)ntohl(field)  & kQTSSPacketLengthMask);
 }
 
 /*
@@ -198,29 +198,29 @@ public:
 	virtual ~RTCPqtssPacket() {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
-	virtual bool ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength);
+	virtual bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength);
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
-	bool ParseQTSSPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength);
+	bool ParseQTSSPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength);
 
 
-	inline UInt32 GetReceiverBitRate() { return fReceiverBitRate; }
-	inline UInt32 GetAverageLateMilliseconds() { return fAverageLateMilliseconds; }
-	inline UInt32 GetPercentPacketsLost() { return fPercentPacketsLost; }
-	inline UInt32 GetAverageBufferDelayMilliseconds() { return fAverageBufferDelayMilliseconds; }
+	inline uint32_t GetReceiverBitRate() { return fReceiverBitRate; }
+	inline uint32_t GetAverageLateMilliseconds() { return fAverageLateMilliseconds; }
+	inline uint32_t GetPercentPacketsLost() { return fPercentPacketsLost; }
+	inline uint32_t GetAverageBufferDelayMilliseconds() { return fAverageBufferDelayMilliseconds; }
 	inline bool GetIsGettingBetter() { return fIsGettingBetter; }
 	inline bool GetIsGettingWorse() { return fIsGettingWorse; }
-	inline UInt32 GetNumEyes() { return fNumEyes; }
-	inline UInt32 GetNumEyesActive() { return fNumEyesActive; }
-	inline UInt32 GetNumEyesPaused() { return fNumEyesPaused; }
+	inline uint32_t GetNumEyes() { return fNumEyes; }
+	inline uint32_t GetNumEyesActive() { return fNumEyesActive; }
+	inline uint32_t GetNumEyesPaused() { return fNumEyesPaused; }
 
 	//Proposed - are these there yet?
-	inline UInt32 GetTotalPacketReceived() { return fTotalPacketsReceived; }
-	inline UInt32 GetTotalPacketsDropped() { return fTotalPacketsDropped; }
-	inline UInt32 GetClientBufferFill() { return fClientBufferFill; }
-	inline UInt32 GetFrameRate() { return fFrameRate; }
-	inline UInt32 GetExpectedFrameRate() { return fExpectedFrameRate; }
-	inline UInt32 GetAudioDryCount() { return fAudioDryCount; }
+	inline uint32_t GetTotalPacketReceived() { return fTotalPacketsReceived; }
+	inline uint32_t GetTotalPacketsDropped() { return fTotalPacketsDropped; }
+	inline uint32_t GetClientBufferFill() { return fClientBufferFill; }
+	inline uint32_t GetFrameRate() { return fFrameRate; }
+	inline uint32_t GetExpectedFrameRate() { return fExpectedFrameRate; }
+	inline uint32_t GetAudioDryCount() { return fAudioDryCount; }
 
 
 
@@ -228,27 +228,27 @@ private:
 
 	void ParseAndStore();
 
-	UInt32 fReportSourceID;
+	uint32_t fReportSourceID;
 	uint16_t fAppPacketVersion;
-	uint16_t fAppPacketLength;    //In 'UInt32's
+	uint16_t fAppPacketLength;    //In 'uint32_t's
 
-	UInt32 fReceiverBitRate;
-	UInt32 fAverageLateMilliseconds;
-	UInt32 fPercentPacketsLost;
-	UInt32 fAverageBufferDelayMilliseconds;
+	uint32_t fReceiverBitRate;
+	uint32_t fAverageLateMilliseconds;
+	uint32_t fPercentPacketsLost;
+	uint32_t fAverageBufferDelayMilliseconds;
 	bool fIsGettingBetter;
 	bool fIsGettingWorse;
-	UInt32 fNumEyes;
-	UInt32 fNumEyesActive;
-	UInt32 fNumEyesPaused;
+	uint32_t fNumEyes;
+	uint32_t fNumEyesActive;
+	uint32_t fNumEyesPaused;
 
 	//Proposed - are these there yet?
-	UInt32 fTotalPacketsReceived;
-	UInt32 fTotalPacketsDropped;
-	UInt32 fClientBufferFill;
-	UInt32 fFrameRate;
-	UInt32 fExpectedFrameRate;
-	UInt32 fAudioDryCount;
+	uint32_t fTotalPacketsReceived;
+	uint32_t fTotalPacketsDropped;
+	uint32_t fClientBufferFill;
+	uint32_t fFrameRate;
+	uint32_t fExpectedFrameRate;
+	uint32_t fAudioDryCount;
 
 	enum
 	{

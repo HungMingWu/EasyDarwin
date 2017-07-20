@@ -58,8 +58,8 @@ public:
 
 	//
 	// Accessors.
-	inline  UInt32      GetNumReferences() { return (UInt32)fNumEntries; }
-	inline  bool      TrackReferenceToTrackID(UInt32 TrackReference, UInt32 * TrackID = NULL) \
+	inline  uint32_t      GetNumReferences() { return (uint32_t)fNumEntries; }
+	inline  bool      TrackReferenceToTrackID(uint32_t TrackReference, uint32_t * TrackID = NULL) \
 	{   if (TrackReference < fNumEntries) {
 		\
 			if (TrackID != NULL) \
@@ -81,7 +81,7 @@ protected:
 	// Protected member variables.
 	UInt64      fNumEntries;
 	char        *fTrackReferenceTable;
-	UInt32      *fTable; // longword-aligned version of the above
+	uint32_t      *fTable; // longword-aligned version of the above
 };
 
 #endif // QTAtom_tref_H

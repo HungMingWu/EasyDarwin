@@ -51,7 +51,7 @@ static char* kDataTypeStrings[] =
 	"int16_t",
 	"uint16_t",
 	"SInt32",
-	"UInt32",
+	"uint32_t",
 	"SInt64",
 	"UInt64",
 	"QTSS_Object",
@@ -103,7 +103,7 @@ char*   QTSSDataConverter::TypeToTypeString(QTSS_AttrDataType inType)
 
 QTSS_AttrDataType QTSSDataConverter::TypeStringToType(char* inTypeString)
 {
-	for (UInt32 x = 0; x < qtssAttrDataTypeNumTypes; x++)
+	for (uint32_t x = 0; x < qtssAttrDataTypeNumTypes; x++)
 	{
 		StrPtrLen theTypeStrPtr(inTypeString);
 		if (theTypeStrPtr.EqualIgnoreCase(kDataTypeStrings[x], ::strlen(kDataTypeStrings[x])))
@@ -115,9 +115,9 @@ QTSS_AttrDataType QTSSDataConverter::TypeStringToType(char* inTypeString)
 QTSS_Error QTSSDataConverter::StringToValue(char* inValueAsString,
 	QTSS_AttrDataType inType,
 	void* ioBuffer,
-	UInt32* ioBufSize)
+	uint32_t* ioBufSize)
 {
-	UInt32 theBufSize = 0;
+	uint32_t theBufSize = 0;
 	char* theFormat = NULL;
 
 	if (inValueAsString == NULL || ioBufSize == NULL)
@@ -128,7 +128,7 @@ QTSS_Error QTSSDataConverter::StringToValue(char* inValueAsString,
 		//
 		// If this data type is a string, copy the string into
 		// the destination buffer
-		UInt32 theLen = ::strlen(inValueAsString);
+		uint32_t theLen = ::strlen(inValueAsString);
 
 		//
 		// First check to see if the destination is big enough
@@ -193,7 +193,7 @@ QTSS_Error QTSSDataConverter::StringToValue(char* inValueAsString,
 
 	case qtssAttrDataTypeUInt32:
 		{
-			theBufSize = sizeof(UInt32);
+			theBufSize = sizeof(uint32_t);
 			theFormat = "%u";
 		}
 		break;
@@ -250,10 +250,10 @@ QTSS_Error QTSSDataConverter::StringToValue(char* inValueAsString,
 
 QTSS_Error QTSSDataConverter::ConvertCHexStringToBytes(char* inValueAsString,
 	void* ioBuffer,
-	UInt32* ioBufSize)
+	uint32_t* ioBufSize)
 {
-	UInt32 stringLen = ::strlen(inValueAsString);
-	UInt32 dataLen = (stringLen + (stringLen & 1 ? 1 : 0)) / 2;
+	uint32_t stringLen = ::strlen(inValueAsString);
+	uint32_t dataLen = (stringLen + (stringLen & 1 ? 1 : 0)) / 2;
 
 	// First check to see if the destination is big enough
 	if ((ioBuffer == NULL) || (*ioBufSize < dataLen))
@@ -278,17 +278,17 @@ QTSS_Error QTSSDataConverter::ConvertCHexStringToBytes(char* inValueAsString,
 	return QTSS_NoErr;
 }
 
-char* QTSSDataConverter::ConvertBytesToCHexString(void* inValue, const UInt32 inValueLen)
+char* QTSSDataConverter::ConvertBytesToCHexString(void* inValue, const uint32_t inValueLen)
 {
 	uint8_t* theDataPtr = (uint8_t*)inValue;
-	UInt32 len = inValueLen * 2;
+	uint32_t len = inValueLen * 2;
 
 	char *theString = new char[len + 1];
 	char *resultStr = theString;
 	if (theString != NULL)
 	{
 		uint8_t temp;
-		UInt32 count = 0;
+		uint32_t count = 0;
 		for (count = 0; count < inValueLen; count++)
 		{
 			temp = *theDataPtr++;
@@ -301,7 +301,7 @@ char* QTSSDataConverter::ConvertBytesToCHexString(void* inValue, const UInt32 in
 }
 
 char* QTSSDataConverter::ValueToString(void* inValue,
-	const UInt32 inValueLen,
+	const uint32_t inValueLen,
 	const QTSS_AttrDataType inType)
 {
 	if (inValue == NULL)
@@ -343,7 +343,7 @@ char* QTSSDataConverter::ValueToString(void* inValue,
 		break;
 
 	case qtssAttrDataTypeUInt32:
-		qtss_sprintf(theString, "%"   _U32BITARG_, *(UInt32*)inValue);
+		qtss_sprintf(theString, "%"   _U32BITARG_, *(uint32_t*)inValue);
 		break;
 
 	case qtssAttrDataTypeSInt64:

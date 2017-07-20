@@ -64,7 +64,7 @@ class QTSSModuleUtils
         // role to tell the server what those methods are.
         static void     SetupSupportedMethods(  QTSS_Object inServer,
                                                 QTSS_RTSPMethod* inMethodArray,
-                                                UInt32 inNumMethods);
+                                                uint32_t inNumMethods);
                                                 
         // Using a message out of the text messages dictionary is a common
         // way to log errors to the error log. Here is a function to
@@ -72,7 +72,7 @@ class QTSSModuleUtils
         
         static void     LogError(   QTSS_ErrorVerbosity inVerbosity,
                                     QTSS_AttributeID inTextMessage,
-                                    UInt32 inErrNumber,
+                                    uint32_t inErrNumber,
                                     char* inArgument = NULL,
                                     char* inArg2 = NULL);
                                     
@@ -85,7 +85,7 @@ class QTSSModuleUtils
 
         static char* GetFullPath(   QTSS_RTSPRequestObject inRequest,
                                     QTSS_AttributeID whichFileType,
-                                    UInt32* outLen,
+                                    uint32_t* outLen,
                                     StrPtrLen* suffix = NULL);
 
         //
@@ -135,13 +135,13 @@ class QTSSModuleUtils
         static void SendDescribeResponse(QTSS_RTSPRequestObject inRequest,
                                                     QTSS_ClientSessionObject inSession,
                                                     iovec* describeData,
-                                                    UInt32 inNumVectors,
-                                                    UInt32 inTotalLength);
+                                                    uint32_t inNumVectors,
+                                                    uint32_t inTotalLength);
 
                 
                 // Called by SendDescribeResponse to coalesce iovec to a buffer
                 // Allocates memory - remember to delete it!
-                static char* CoalesceVectors(iovec* inVec, UInt32 inNumVectors, UInt32 inTotalLength);
+                static char* CoalesceVectors(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength);
                                                                                                                                                     
         //
         // SEARCH FOR A SPECIFIC MODULE OBJECT                          
@@ -177,10 +177,10 @@ class QTSSModuleUtils
         //
         // This function logs an error if there was a default value provided.
         static void GetAttribute(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType,
-                            void* ioBuffer, void* inDefaultValue, UInt32 inBufferLen);
+                            void* ioBuffer, void* inDefaultValue, uint32_t inBufferLen);
                             
         static void GetIOAttribute(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType,
-                            void* ioDefaultResultBuffer, UInt32 inBufferLen);
+                            void* ioDefaultResultBuffer, uint32_t inBufferLen);
         //
         // GET STRING ATTRIBUTE
         //
@@ -209,15 +209,15 @@ class QTSSModuleUtils
         static char* GetMoviesRootDir_Copy(QTSS_RTSPRequestObject theRTSPRequest);
         static QTSS_UserProfileObject GetUserProfileObject(QTSS_RTSPRequestObject theRTSPRequest);
         static QTSS_AttrRights GetRights(QTSS_UserProfileObject theUserProfileObject);
-        static char* GetExtendedRights(QTSS_UserProfileObject theUserProfileObject, UInt32 index);
+        static char* GetExtendedRights(QTSS_UserProfileObject theUserProfileObject, uint32_t index);
        
         static char*  GetUserName_Copy(QTSS_UserProfileObject inUserProfile);
-        static char** GetGroupsArray_Copy(QTSS_UserProfileObject inUserProfile, UInt32 *outNumGroupsPtr);
-        static bool UserInGroup(QTSS_UserProfileObject inUserProfile, char* inGroupName, UInt32 inGroupNameLen);
+        static char** GetGroupsArray_Copy(QTSS_UserProfileObject inUserProfile, uint32_t *outNumGroupsPtr);
+        static bool UserInGroup(QTSS_UserProfileObject inUserProfile, char* inGroupName, uint32_t inGroupNameLen);
 
         static void SetEnableRTSPErrorMsg(bool enable) {QTSSModuleUtils::sEnableRTSPErrorMsg = enable; }
         
-        static QTSS_AttributeID CreateAttribute(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType, void* inDefaultValue, UInt32 inBufferLen);
+        static QTSS_AttributeID CreateAttribute(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType, void* inDefaultValue, uint32_t inBufferLen);
   
         static bool AddressInList(QTSS_Object inObject, QTSS_AttributeID listID, StrPtrLen *theAddressPtr);
   
@@ -226,7 +226,7 @@ class QTSSModuleUtils
   
         static bool FindStringInAttributeList(QTSS_Object inObject, QTSS_AttributeID listID, StrPtrLen *inStrPtr);
 
-        static bool HavePlayerProfile(QTSS_PrefsObject inPrefObjectToCheck, QTSS_StandardRTSP_Params* inParams, UInt32 feature);
+        static bool HavePlayerProfile(QTSS_PrefsObject inPrefObjectToCheck, QTSS_StandardRTSP_Params* inParams, uint32_t feature);
         
         static QTSS_Error AuthorizeRequest(QTSS_RTSPRequestObject theRTSPRequest, bool* allowed, bool*haveUser,bool *authContinue);
         
@@ -235,7 +235,7 @@ class QTSSModuleUtils
     
         //
         // Used in the implementation of the above functions
-        static QTSS_AttributeID CheckAttributeDataType(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType, void* inDefaultValue, UInt32 inBufferLen);    
+        static QTSS_AttributeID CheckAttributeDataType(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType, void* inDefaultValue, uint32_t inBufferLen);    
 
         static QTSS_TextMessagesObject  sMessages;
         static QTSS_ServerObject        sServer;

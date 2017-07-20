@@ -68,7 +68,7 @@ QTSSAttrInfoDict::AttrInfo  HTTPSessionInterface::sAttributes[] =
 
 void    HTTPSessionInterface::Initialize()
 {
-	for (UInt32 x = 0; x < easyHTTPSesNumParams; x++)
+	for (uint32_t x = 0; x < easyHTTPSesNumParams; x++)
 		QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kHTTPSessionDictIndex)->
 		SetAttribute(x, sAttributes[x].fAttrName, sAttributes[x].fFuncPtr, sAttributes[x].fAttrDataType, sAttributes[x].fAttrPermission);
 }
@@ -92,7 +92,7 @@ HTTPSessionInterface::HTTPSessionInterface()
 	fTimeoutTask.SetTask(this);
 	fSocket.SetTask(this);
 
-	//fSessionIndex = (UInt32)atomic_add(&sSessionIndexCounter, 1);
+	//fSessionIndex = (uint32_t)atomic_add(&sSessionIndexCounter, 1);
 	fSessionIndex = ++sSessionIndexCounter;
 	this->SetVal(easyHTTPSesID, &fSessionIndex, sizeof(fSessionIndex));
 
@@ -128,10 +128,10 @@ void HTTPSessionInterface::DecrementObjectHolderCount()
 
 }
 
-QTSS_Error HTTPSessionInterface::Write(void* inBuffer, UInt32 inLength,
-	UInt32* outLenWritten, UInt32 inFlags)
+QTSS_Error HTTPSessionInterface::Write(void* inBuffer, uint32_t inLength,
+	uint32_t* outLenWritten, uint32_t inFlags)
 {
-	UInt32 sendType = RTSPResponseStream::kDontBuffer;
+	uint32_t sendType = RTSPResponseStream::kDontBuffer;
 	if ((inFlags & qtssWriteFlagsBufferData) != 0)
 		sendType = RTSPResponseStream::kAlwaysBuffer;
 
@@ -141,12 +141,12 @@ QTSS_Error HTTPSessionInterface::Write(void* inBuffer, UInt32 inLength,
 	return fOutputStream.WriteV(theVec, 2, inLength, outLenWritten, sendType);
 }
 
-QTSS_Error HTTPSessionInterface::WriteV(iovec* inVec, UInt32 inNumVectors, UInt32 inTotalLength, UInt32* outLenWritten)
+QTSS_Error HTTPSessionInterface::WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten)
 {
 	return fOutputStream.WriteV(inVec, inNumVectors, inTotalLength, outLenWritten, RTSPResponseStream::kDontBuffer);
 }
 
-QTSS_Error HTTPSessionInterface::Read(void* ioBuffer, UInt32 inLength, UInt32* outLenRead)
+QTSS_Error HTTPSessionInterface::Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead)
 {
 	//
 	// Don't let callers of this function accidently creep past the end of the
@@ -158,7 +158,7 @@ QTSS_Error HTTPSessionInterface::Read(void* ioBuffer, UInt32 inLength, UInt32* o
 	if ((fRequestBodyLen > 0) && ((SInt32)inLength > fRequestBodyLen))
 		inLength = fRequestBodyLen;
 
-	UInt32 theLenRead = 0;
+	uint32_t theLenRead = 0;
 	QTSS_Error theErr = fInputStream.Read(ioBuffer, inLength, &theLenRead);
 
 	if (fRequestBodyLen >= 0)
@@ -204,7 +204,7 @@ void    HTTPSessionInterface::SnarfInputSocket(HTTPSessionInterface* fromRTSPSes
 }
 
 
-void* HTTPSessionInterface::SetupParams(QTSSDictionary* inSession, UInt32* /*outLen*/)
+void* HTTPSessionInterface::SetupParams(QTSSDictionary* inSession, uint32_t* /*outLen*/)
 {
 	HTTPSessionInterface* theSession = (HTTPSessionInterface*)inSession;
 

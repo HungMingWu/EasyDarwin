@@ -64,27 +64,27 @@ public:
 
 	//
 	// Returns the number of pref values for the pref at this index
-	UInt32  GetNumPrefValues(ContainerRef pref);
+	uint32_t  GetNumPrefValues(ContainerRef pref);
 
 	//
 	// Returns the number of prefs associated with this given module
-	UInt32  GetNumPrefsByContainer(ContainerRef container);
+	uint32_t  GetNumPrefsByContainer(ContainerRef container);
 
 	//
 	// Returns the pref value at the specfied location
-	char*   GetPrefValueByIndex(ContainerRef container, const UInt32 inPrefsIndex, const UInt32 inValueIndex,
+	char*   GetPrefValueByIndex(ContainerRef container, const uint32_t inPrefsIndex, const uint32_t inValueIndex,
 		char** outPrefName, char** outDataType);
 
-	char*   GetPrefValueByRef(ContainerRef pref, const UInt32 inValueIndex,
+	char*   GetPrefValueByRef(ContainerRef pref, const uint32_t inValueIndex,
 		char** outPrefName, char** outDataType);
 
-	ContainerRef    GetObjectValue(ContainerRef pref, const UInt32 inValueIndex);
+	ContainerRef    GetObjectValue(ContainerRef pref, const uint32_t inValueIndex);
 
 	ContainerRef    GetPrefRefByName(ContainerRef container,
 		const char* inPrefName);
 
 	ContainerRef    GetPrefRefByIndex(ContainerRef container,
-		const UInt32 inPrefsIndex);
+		const uint32_t inPrefsIndex);
 
 	//
 	// MODIFIERS
@@ -103,12 +103,12 @@ public:
 	//
 	// If this value index does not exist yet, and it is one higher than
 	// the highest one, this function implictly adds the new value.
-	void    SetPrefValue(ContainerRef pref, const UInt32 inValueIndex,
+	void    SetPrefValue(ContainerRef pref, const uint32_t inValueIndex,
 		char* inNewValue);
 
 	//
 	// Removes the pref entirely if # of values drops to 0
-	void    RemovePrefValue(ContainerRef pref, const UInt32 inValueIndex);
+	void    RemovePrefValue(ContainerRef pref, const uint32_t inValueIndex);
 
 	void    RemovePref(ContainerRef pref);
 

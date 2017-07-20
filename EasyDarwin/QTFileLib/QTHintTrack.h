@@ -54,7 +54,7 @@ public:
 	SInt32      relativePacketTransmissionTime;
 	uint16_t      hintFlags;
 	uint16_t      dataEntryCount;
-	UInt32      tlvSize;
+	uint32_t      tlvSize;
 	SInt32      tlvTimestampOffset; //'rtpo' TLV which is the timestamp offset for this packet
 };
 
@@ -94,16 +94,16 @@ public:
 
 	//
 	// Sample cache
-	UInt32              fCachedSampleNumber;
+	uint32_t              fCachedSampleNumber;
 	char *              fCachedSample;
-	UInt32              fCachedSampleSize, fCachedSampleLength;
+	uint32_t              fCachedSampleSize, fCachedSampleLength;
 
 	//
 	// Sample (description) cache
-	UInt32              fCachedHintTrackSampleNumber, fCachedHintTrackSampleOffset;
+	uint32_t              fCachedHintTrackSampleNumber, fCachedHintTrackSampleOffset;
 	char *              fCachedHintTrackSample;
-	UInt32              fCachedHintTrackSampleLength;
-	UInt32              fCachedHintTrackBufferLength;
+	uint32_t              fCachedHintTrackSampleLength;
+	uint32_t              fCachedHintTrackBufferLength;
 
 	uint16_t              fLastPacketNumberFetched;   // for optimizing Getting a packet from a cached sample
 	char*               fPointerToNextPacket;       // after we get one, we point the next at this...
@@ -111,7 +111,7 @@ public:
 	//
 	// To support RTP-Meta-Info payload
 	RTPMetaInfoPacket::FieldID*         fRTPMetaInfoFieldArray;
-	UInt32                              fSyncSampleCursor; // Where are we in the sync sample table?
+	uint32_t                              fSyncSampleCursor; // Where are we in the sync sample table?
 	bool                              fIsVideo; // so that we know what to do with the frame type field
 	UInt64              fCurrentPacketNumber;
 	UInt64              fCurrentPacketPosition;
@@ -148,23 +148,23 @@ public:
 	inline  UInt64      GetTotalRTPBytes() { return fHintInfoAtom ? fHintInfoAtom->GetTotalRTPBytes() : 0; }
 	inline  UInt64      GetTotalRTPPackets() { return fHintInfoAtom ? fHintInfoAtom->GetTotalRTPPackets() : 0; }
 
-	inline  UInt32      GetFirstRTPTimestamp() { return fFirstRTPTimestamp; }
+	inline  uint32_t      GetFirstRTPTimestamp() { return fFirstRTPTimestamp; }
 	inline  void        SetAllowInvalidHintRefs(bool inAllowInvalidHintRefs) { fAllowInvalidHintRefs = inAllowInvalidHintRefs; }
 
 	//
 	// Sample functions
-	bool      GetSamplePtr(UInt32 SampleNumber, char ** Buffer, UInt32 * Length,
+	bool      GetSamplePtr(uint32_t SampleNumber, char ** Buffer, uint32_t * Length,
 		QTHintTrack_HintTrackControlBlock * HTCB);
 
 	//
 	// Packet functions
-	inline  UInt32      GetRTPTimescale() { return fRTPTimescale; }
+	inline  uint32_t      GetRTPTimescale() { return fRTPTimescale; }
 
-	inline  UInt32      GetRTPTimestampRandomOffset() { return fTimestampRandomOffset; }
+	inline  uint32_t      GetRTPTimestampRandomOffset() { return fTimestampRandomOffset; }
 
 	inline  uint16_t      GetRTPSequenceNumberRandomOffset() { return fSequenceNumberRandomOffset; }
 
-	ErrorCode   GetNumPackets(UInt32 SampleNumber, uint16_t * NumPackets,
+	ErrorCode   GetNumPackets(uint32_t SampleNumber, uint16_t * NumPackets,
 		QTHintTrack_HintTrackControlBlock * HTCB = NULL);
 
 	//
@@ -178,15 +178,15 @@ public:
 	//      is a compressed field ID.
 	//
 	// Supported fields: tt, md, ft, pp, pn, sq
-	ErrorCode   GetPacket(UInt32 SampleNumber, uint16_t PacketNumber,
-		char * Buffer, UInt32 * Length,
+	ErrorCode   GetPacket(uint32_t SampleNumber, uint16_t PacketNumber,
+		char * Buffer, uint32_t * Length,
 		double * TransmitTime,
 		bool dropBFrames,
 		bool dropRepeatPackets = false,
-		UInt32 SSRC = 0,
+		uint32_t SSRC = 0,
 		QTHintTrack_HintTrackControlBlock * HTCB = NULL);
 
-	inline ErrorCode    GetSampleData(QTHintTrack_HintTrackControlBlock * htcb, char **buffPtr, char **ppPacketBufOut, UInt32 sampleNumber, uint16_t packetNumber, UInt32 buffOutLen);
+	inline ErrorCode    GetSampleData(QTHintTrack_HintTrackControlBlock * htcb, char **buffPtr, char **ppPacketBufOut, uint32_t sampleNumber, uint16_t packetNumber, uint32_t buffOutLen);
 
 	//
 	// Debugging functions.
@@ -223,9 +223,9 @@ protected:
 
 	QTTrack             **fTrackRefs;
 
-	UInt32              fMaxPacketSize;
-	UInt32              fRTPTimescale, fFirstRTPTimestamp;
-	UInt32              fTimestampRandomOffset;
+	uint32_t              fMaxPacketSize;
+	uint32_t              fRTPTimescale, fFirstRTPTimestamp;
+	uint32_t              fTimestampRandomOffset;
 	uint16_t              fSequenceNumberRandomOffset;
 	bool              fHintTrackInitialized;
 	int16_t              fHintType;
@@ -235,9 +235,9 @@ protected:
 	// Used by GetPacket for RTP-Meta-Info payload stuff
 	void                WriteMetaInfoField(RTPMetaInfoPacket::FieldIndex inFieldIndex,
 		RTPMetaInfoPacket::FieldID inFieldID,
-		void* inFieldData, UInt32 inFieldLen, char** ioBuffer);
+		void* inFieldData, uint32_t inFieldLen, char** ioBuffer);
 
-	inline QTTrack::ErrorCode   GetSamplePacketPtr(char ** samplePacketPtr, UInt32 sampleNumber, uint16_t packetNumber, QTHintTrackRTPHeaderData &hdrData, QTHintTrack_HintTrackControlBlock & htcb);
+	inline QTTrack::ErrorCode   GetSamplePacketPtr(char ** samplePacketPtr, uint32_t sampleNumber, uint16_t packetNumber, QTHintTrackRTPHeaderData &hdrData, QTHintTrack_HintTrackControlBlock & htcb);
 	inline void         GetSamplePacketHeaderVars(char *samplePacketPtr, char *maxBuffPtr, QTHintTrackRTPHeaderData &hdrData);
 };
 

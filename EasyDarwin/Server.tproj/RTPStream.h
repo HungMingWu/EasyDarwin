@@ -71,20 +71,20 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         //
         // CONSTRUCTOR / DESTRUCTOR
         
-        RTPStream(UInt32 inSSRC, RTPSessionInterface* inSession);
+        RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession);
         virtual ~RTPStream();
         
         //
         //ACCESS uint8_t
         
-        UInt32      GetSSRC()                   { return fSsrc; }
+        uint32_t      GetSSRC()                   { return fSsrc; }
         uint8_t       GetRTPChannelNum()          { return fRTPChannel; }
         uint8_t       GetRTCPChannelNum()         { return fRTCPChannel; }
         RTPPacketResender* GetResender()        { return &fResender; }
         QTSS_RTPTransportType GetTransportType() { return fTransportType; }
-        UInt32      GetStalePacketsDropped()    { return fStalePacketsDropped; }
-        UInt32      GetTotalPacketsRecv()       { return fTotalPacketsRecv; }
-        UInt32      GetSDPStreamID()            { return fTrackID; } //streamID is trackID
+        uint32_t      GetStalePacketsDropped()    { return fStalePacketsDropped; }
+        uint32_t      GetTotalPacketsRecv()       { return fTotalPacketsRecv; }
+        uint32_t      GetSDPStreamID()            { return fTrackID; } //streamID is trackID
 		RTPSessionInterface &GetSession()		{ return *fSession; }
         
         // Setup uses the info in the RTSPRequestInterface to associate
@@ -94,8 +94,8 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         
         // Write sends RTP data to the client. Caller must specify
         // either qtssWriteFlagsIsRTP or qtssWriteFlagsIsRTCP
-        virtual QTSS_Error  Write(void* inBuffer, UInt32 inLen,
-                                        UInt32* outLenWritten, QTSS_WriteFlags inFlags);
+        virtual QTSS_Error  Write(void* inBuffer, uint32_t inLen,
+                                        uint32_t* outLenWritten, QTSS_WriteFlags inFlags);
         
         
         //UTILITY uint8_t_t:
@@ -111,7 +111,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         //Formats a RTP-Info header for this stream.
         //Isn't useful unless you've already called Play()
         void            AppendRTPInfo(QTSS_RTSPHeader inHeader,
-                                        RTSPRequestInterface* request, UInt32 inFlags, bool lastInfo);
+                                        RTSPRequestInterface* request, uint32_t inFlags, bool lastInfo);
 
         //
         // When we get an incoming Interleaved Packet for this stream, this
@@ -128,7 +128,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         //Process the incoming qtss app RTCP packet
         bool ProcessCompressedQTSSPacket(RTCPPacket &rtcpPacket, SInt64 &curTime, StrPtrLen &currentPtr);
         
-        bool ProcessNADUPacket(RTCPPacket &rtcpPacket, SInt64 &curTime, StrPtrLen &currentPtr, UInt32 highestSeqNum);
+        bool ProcessNADUPacket(RTCPPacket &rtcpPacket, SInt64 &curTime, StrPtrLen &currentPtr, uint32_t highestSeqNum);
 
 
         // Send a RTCP SR on this stream. Pass in true if this SR should also have a BYE
@@ -159,7 +159,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         void            SetQualityLevel(SInt32 level);
 		void			HalveQualityLevel()
 		{
-			UInt32 minLevel = fNumQualityLevels - 1;
+			uint32_t minLevel = fNumQualityLevels - 1;
 			SetQualityLevel(minLevel - (minLevel - GetQualityLevel()) / 2);
 		}
 		void			SetMaxQualityLevelLimit(SInt32 newMaxLimit) //Changes what is the best quality level possible
@@ -171,7 +171,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
 
 		SInt32			GetMaxQualityLevelLimit() { return fMaxQualityLevel; }
 		
-		UInt32          GetNumQualityLevels() { return fNumQualityLevels; } 
+		uint32_t          GetNumQualityLevels() { return fNumQualityLevels; } 
 		QTSS_RTPPayloadType GetPayLoadType() { return fPayloadType; }
 		
     private:
@@ -208,28 +208,28 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
 
         
         //who am i sending to?
-        UInt32      fRemoteAddr;
+        uint32_t      fRemoteAddr;
         uint16_t      fRemoteRTPPort;
         uint16_t      fRemoteRTCPPort;
         uint16_t      fLocalRTPPort;
-		UInt32	    fMonitorAddr;
+		uint32_t	    fMonitorAddr;
 		int         fMonitorSocket;
-		UInt32      fPlayerToMonitorAddr;
+		uint32_t      fPlayerToMonitorAddr;
 
         //RTCP stuff 
         SInt64      fLastSenderReportTime;
-        UInt32      fPacketCount;
-        UInt32      fLastPacketCount;
-        UInt32      fPacketCountInRTCPInterval;
-        UInt32      fByteCount;
+        uint32_t      fPacketCount;
+        uint32_t      fLastPacketCount;
+        uint32_t      fPacketCountInRTCPInterval;
+        uint32_t      fByteCount;
         
         // DICTIONARY ATTRIBUTES
         
         //Module assigns a streamID to this object
-        UInt32      fTrackID;
+        uint32_t      fTrackID;
         
         //low-level RTP stuff 
-        UInt32      fSsrc;
+        uint32_t      fSsrc;
         char        fSsrcString[kMaxSsrcSizeInBytes];
         StrPtrLen   fSsrcStringPtr;
         bool      fEnableSSRC;
@@ -240,43 +240,43 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
 
         //Media information.
         uint16_t      fFirstSeqNumber;//used in sending the play response
-        UInt32      fFirstTimeStamp;//RTP time
-        UInt32      fTimescale;
+        uint32_t      fFirstTimeStamp;//RTP time
+        uint32_t      fTimescale;
         
         //what is the URL for this stream?
         char        fStreamURL[kMaxStreamURLSizeInBytes];
         StrPtrLen   fStreamURLPtr;
         
         SInt32      fQualityLevel;
-        UInt32      fNumQualityLevels;
+        uint32_t      fNumQualityLevels;
         
-        UInt32      fLastRTPTimestamp;
+        uint32_t      fLastRTPTimestamp;
 		SInt64		fLastNTPTimeStamp;
-		UInt32		fEstRTT;				//The estimated RTT calculated from RTCP's DLSR and LSR fields
+		uint32_t		fEstRTT;				//The estimated RTT calculated from RTCP's DLSR and LSR fields
         
         // RTCP data
-        UInt32      fFractionLostPackets;
-        UInt32      fTotalLostPackets;
-        UInt32      fJitter;
-        UInt32      fReceiverBitRate;
+        uint32_t      fFractionLostPackets;
+        uint32_t      fTotalLostPackets;
+        uint32_t      fJitter;
+        uint32_t      fReceiverBitRate;
         uint16_t      fAvgLateMsec;
         uint16_t      fPercentPacketsLost;
         uint16_t      fAvgBufDelayMsec;
         uint16_t      fIsGettingBetter;
         uint16_t      fIsGettingWorse;
-        UInt32      fNumEyes;
-        UInt32      fNumEyesActive;
-        UInt32      fNumEyesPaused;
-        UInt32      fTotalPacketsRecv;
-        UInt32      fPriorTotalPacketsRecv;
+        uint32_t      fNumEyes;
+        uint32_t      fNumEyesActive;
+        uint32_t      fNumEyesPaused;
+        uint32_t      fTotalPacketsRecv;
+        uint32_t      fPriorTotalPacketsRecv;
         uint16_t      fTotalPacketsDropped;
         uint16_t      fTotalPacketsLost;
-        UInt32      fCurPacketsLostInRTCPInterval;
+        uint32_t      fCurPacketsLostInRTCPInterval;
         uint16_t      fClientBufferFill;
         uint16_t      fFrameRate;
         uint16_t      fExpectedFrameRate;
         uint16_t      fAudioDryCount;
-        UInt32      fClientSSRC;
+        uint32_t      fClientSSRC;
         
         bool      fIsTCP;
         QTSS_RTPTransportType   fTransportType;
@@ -289,7 +289,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         SInt32      fTurnThinningOffDelay_TCP;
         SInt32      fIncreaseThinningDelay_TCP;
         SInt32      fDropAllPacketsForThisStreamDelay_TCP;
-        UInt32      fStalePacketsDropped_TCP;
+        uint32_t      fStalePacketsDropped_TCP;
         SInt64      fTimeStreamCaughtUp_TCP;
         SInt64      fLastQualityLevelIncreaseTime_TCP;
         //
@@ -304,7 +304,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         SInt32      fThickAllTheWayDelay;
         SInt32      fQualityCheckInterval;
         SInt32      fDropAllPacketsForThisStreamDelay;
-        UInt32      fStalePacketsDropped;
+        uint32_t      fStalePacketsDropped;
         SInt64      fLastCurrentPacketDelay;
         bool      fWaitOnLevelAdjustment;
         
@@ -314,11 +314,11 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         // Pointer to the stream ref (this is just a this pointer)
         QTSS_StreamRef  fStreamRef;
         
-        UInt32      fCurrentAckTimeout;
+        uint32_t      fCurrentAckTimeout;
         SInt32      fMaxSendAheadTimeMSec;
         
 #if DEBUG
-        UInt32      fNumPacketsDroppedOnTCPFlowControl;
+        uint32_t      fNumPacketsDroppedOnTCPFlowControl;
         SInt64      fFlowControlStartedMsec;
         SInt64      fFlowControlDurationMsec;
 #endif
@@ -337,7 +337,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
        
         bool fDisableThinning;
         SInt64 fLastQualityUpdate;
-        UInt32 fDefaultQualityLevel;
+        uint32_t fDefaultQualityLevel;
         SInt32 fMaxQualityLevel;
 		bool fInitialMaxQualityLevelIsSet;
 		bool fUDPMonitorEnabled;
@@ -346,14 +346,14 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         
         //-----------------------------------------------------------
         // acutally write the data out that way
-        QTSS_Error  InterleavedWrite(void* inBuffer, UInt32 inLen, UInt32* outLenWritten, unsigned char channel );
+        QTSS_Error  InterleavedWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, unsigned char channel );
 
         // implements the ReliableRTP protocol
-        QTSS_Error  ReliableRTPWrite(void* inBuffer, UInt32 inLen, const SInt64& curPacketDelay);
+        QTSS_Error  ReliableRTPWrite(void* inBuffer, uint32_t inLen, const SInt64& curPacketDelay);
 
          
         void        SetTCPThinningParams();
-        QTSS_Error  TCPWrite(void* inBuffer, UInt32 inLen, UInt32* outLenWritten, UInt32 inFlags);
+        QTSS_Error  TCPWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags);
 
         static QTSSAttrInfoDict::AttrInfo   sAttributes[];
         static StrPtrLen                    sChannelNums[];
@@ -365,7 +365,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         static char *TCP;
         
         bool UpdateQualityLevel(const SInt64& inTransmitTime, const SInt64& inCurrentPacketDelay,
-                                        const SInt64& inCurrentTime, UInt32 inPacketSize);
+                                        const SInt64& inCurrentTime, uint32_t inPacketSize);
         
         void            DisableThinning() { fDisableThinning = true; }
 		void			SetInitialMaxQualityLevel();
@@ -373,16 +373,16 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         char *GetStreamTypeStr();
         enum { rtp = 0, rtcpSR = 1, rtcpRR = 2, rtcpACK = 3, rtcpAPP = 4 };
         float GetStreamStartTimeSecs() { return (float) ((OS::Milliseconds() - this->fSession->GetSessionCreateTime())/1000.0); }
-        void PrintPacket(char *inBuffer, UInt32 inLen, SInt32 inType); 
-        void PrintRTP(char* packetBuff, UInt32 inLen);
-        void PrintRTCPSenderReport(char* packetBuff, UInt32 inLen);
-inline  void PrintPacketPrefEnabled(char *inBuffer,UInt32 inLen, SInt32 inType) { if (QTSServerInterface::GetServer()->GetPrefs()->PacketHeaderPrintfsEnabled() ) this->PrintPacket(inBuffer,inLen, inType); }
+        void PrintPacket(char *inBuffer, uint32_t inLen, SInt32 inType); 
+        void PrintRTP(char* packetBuff, uint32_t inLen);
+        void PrintRTCPSenderReport(char* packetBuff, uint32_t inLen);
+inline  void PrintPacketPrefEnabled(char *inBuffer,uint32_t inLen, SInt32 inType) { if (QTSServerInterface::GetServer()->GetPrefs()->PacketHeaderPrintfsEnabled() ) this->PrintPacket(inBuffer,inLen, inType); }
 
         void SetOverBufferState(RTSPRequestInterface* request);
         
-        bool TestRTCPPackets(StrPtrLen* inPacketPtr, UInt32 itemName);
+        bool TestRTCPPackets(StrPtrLen* inPacketPtr, uint32_t itemName);
         
-        void UDPMonitorWrite(void* thePacketData, UInt32 inLen, bool isRTCP);
+        void UDPMonitorWrite(void* thePacketData, uint32_t inLen, bool isRTCP);
 
 
 };

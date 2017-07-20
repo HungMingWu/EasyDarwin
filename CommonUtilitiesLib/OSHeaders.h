@@ -77,7 +77,6 @@
 
 #if 0 // old defs we are now using MacTypes.h
     /* Typedefs */
-    typedef unsigned int        UInt32;
     typedef signed int          SInt32;
     typedef signed long long	SInt64;
     typedef unsigned long long	UInt64;
@@ -138,7 +137,6 @@
     /* Typedefs */
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef uint32_t    	UInt32;
     typedef int32_t   		SInt32;
     typedef int64_t         	SInt64;
     typedef uint64_t          	UInt64;
@@ -236,7 +234,6 @@
     /* Typedefs */
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned long       UInt32;
     typedef signed long         SInt32;
     typedef LONGLONG            SInt64;
     typedef ULONGLONG           UInt64;
@@ -288,7 +285,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned long       UInt32;
     typedef signed long         SInt32;
     typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
@@ -347,7 +343,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned long       UInt32;
     typedef signed long         SInt32;
     typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
@@ -399,7 +394,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned long       UInt32;
     typedef signed long         SInt32;
     typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
@@ -449,7 +443,6 @@
 
     /* Typedefs */
     typedef unsigned long       PointerSizedInt;
-    typedef unsigned int        UInt32;
     typedef signed int          SInt32;
     typedef signed long         SInt64;
     typedef unsigned long       UInt64;

@@ -63,19 +63,19 @@ public:
 		return logDirStr;
 	}
 
-	virtual UInt32 GetRollIntervalInDays() { return 0; }
-	virtual UInt32 GetMaxLogBytes() { return 0; }
+	virtual uint32_t GetRollIntervalInDays() { return 0; }
+	virtual uint32_t GetMaxLogBytes() { return 0; }
 
 	char    fLogFName[128];
 
 };
 #endif
 
-static const UInt32 kPacketArrayIncreaseInterval = 32;// must be multiple of 2
-static const UInt32 kInitialPacketArraySize = 64;// must be multiple of kPacketArrayIncreaseInterval (Turns out this is as big as we typically need)
-//static const UInt32 kMaxPacketArraySize = 512;// must be multiple of kPacketArrayIncreaseInterval it would have to be a 3 mbit or more
+static const uint32_t kPacketArrayIncreaseInterval = 32;// must be multiple of 2
+static const uint32_t kInitialPacketArraySize = 64;// must be multiple of kPacketArrayIncreaseInterval (Turns out this is as big as we typically need)
+//static const uint32_t kMaxPacketArraySize = 512;// must be multiple of kPacketArrayIncreaseInterval it would have to be a 3 mbit or more
 
-static const UInt32 kMaxDataBufferSize = 1600;
+static const uint32_t kMaxDataBufferSize = 1600;
 OSBufferPool RTPPacketResender::sBufferPool(kMaxDataBufferSize);
 unsigned int    RTPPacketResender::sNumWastedBytes = 0;
 
@@ -104,7 +104,7 @@ RTPPacketResender::RTPPacketResender()
 
 RTPPacketResender::~RTPPacketResender()
 {
-	for (UInt32 x = 0; x < fPacketArraySize; x++)
+	for (uint32_t x = 0; x < fPacketArraySize; x++)
 	{
 		if (fPacketArray[x].fPacketSize > 0)
 			atomic_sub(&sNumWastedBytes, kMaxDataBufferSize - fPacketArray[x].fPacketSize);
@@ -153,7 +153,7 @@ void RTPPacketResender::logprintf(const char * format, ...)
 }
 
 
-void RTPPacketResender::SetDebugInfo(UInt32 trackID, uint16_t remoteRTCPPort, UInt32 curPacketDelay)
+void RTPPacketResender::SetDebugInfo(uint32_t trackID, uint16_t remoteRTCPPort, uint32_t curPacketDelay)
 {
 	fTrackID = trackID;
 	fRemoteRTCPPort = remoteRTCPPort;
@@ -186,7 +186,7 @@ void RTPPacketResender::LogClose(SInt64 inTimeSpentInFlowControl)
 }
 
 
-UInt32 RTPPacketResender::SpillGuts(UInt32 inBytesSentThisInterval)
+uint32_t RTPPacketResender::SpillGuts(uint32_t inBytesSentThisInterval)
 {
 	if (fInfoDisplayTimer.DurationInMilliseconds() > 1000)
 	{
@@ -218,19 +218,19 @@ UInt32 RTPPacketResender::SpillGuts(UInt32 inBytesSentThisInterval)
 #endif
 
 
-void RTPPacketResender::SetDestination(UDPSocket* inOutputSocket, UInt32 inDestAddr, uint16_t inDestPort)
+void RTPPacketResender::SetDestination(UDPSocket* inOutputSocket, uint32_t inDestAddr, uint16_t inDestPort)
 {
 	fSocket = inOutputSocket;
 	fDestAddr = inDestAddr;
 	fDestPort = inDestPort;
 }
 
-RTPResenderEntry*   RTPPacketResender::GetEmptyEntry(uint16_t inSeqNum, UInt32 inPacketSize)
+RTPResenderEntry*   RTPPacketResender::GetEmptyEntry(uint16_t inSeqNum, uint32_t inPacketSize)
 {
 
 	RTPResenderEntry* theEntry = NULL;
 
-	for (UInt32 packetIndex = 0; packetIndex < fPacketsInList; packetIndex++) // see if packet is already in the array
+	for (uint32_t packetIndex = 0; packetIndex < fPacketsInList; packetIndex++) // see if packet is already in the array
 	{
 		if (inSeqNum == fPacketArray[packetIndex].fSeqNum)
 		{
@@ -309,7 +309,7 @@ void RTPPacketResender::ClearOutstandingPackets()
 	Assert(fPacketsInList == 0);
 }
 
-void RTPPacketResender::AddPacket(void * inRTPPacket, UInt32 packetSize, SInt32 ageLimit)
+void RTPPacketResender::AddPacket(void * inRTPPacket, uint32_t packetSize, SInt32 ageLimit)
 {
 	//OSMutexLocker packetQLocker(&fPacketQMutex);
 	// the caller needs to adjust the overall age limit by reducing it
@@ -363,7 +363,7 @@ void RTPPacketResender::AckPacket(uint16_t inSeqNum, SInt64& inCurTimeInMsec)
 	//OSMutexLocker packetQLocker(&fPacketQMutex);
 
 	SInt32 foundIndex = -1;
-	for (UInt32 packetIndex = 0; packetIndex < fPacketsInList; packetIndex++)
+	for (uint32_t packetIndex = 0; packetIndex < fPacketsInList; packetIndex++)
 	{
 		if (inSeqNum == fPacketArray[packetIndex].fSeqNum)
 		{
@@ -438,7 +438,7 @@ void RTPPacketResender::AckPacket(uint16_t inSeqNum, SInt64& inCurTimeInMsec)
 	}
 }
 
-void RTPPacketResender::RemovePacket(UInt32 packetIndex, bool reuseIndex)
+void RTPPacketResender::RemovePacket(uint32_t packetIndex, bool reuseIndex)
 {
 	//OSMutexLocker packetQLocker(&fPacketQMutex);
 

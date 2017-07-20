@@ -274,7 +274,7 @@ void MD5Encode(char* pw, char* salt, char* result, int nbytes)
 	unsigned char final[kHashLen];
 	int sl, pl, i;
 	MD5_CTX ctx, ctx1;
-	UInt32 l;
+	uint32_t l;
 
 	/*
 	 * Refine the salt first.  It's possible we were given an already-hashed

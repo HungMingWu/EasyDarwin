@@ -75,17 +75,17 @@ protected:
 	//
 	// Protected member variables.
 	uint8_t       fVersion;
-	UInt32      fFlags; // 24 bits in the low 3 bytes
+	uint32_t      fFlags; // 24 bits in the low 3 bytes
 	UInt64      fCreationTime, fModificationTime;
-	UInt32      fTimeScale;
+	uint32_t      fTimeScale;
 	UInt64      fDuration;
-	UInt32      fPreferredRate;
+	uint32_t      fPreferredRate;
 	uint16_t      fPreferredVolume;
-	UInt32      fa, fb, fu, fc, fd, fv, fx, fy, fw;
-	UInt32      fPreviewTime, fPreviewDuration, fPosterTime;
-	UInt32      fSelectionTime, fSelectionDuration;
-	UInt32      fCurrentTime;
-	UInt32      fNextTrackID;
+	uint32_t      fa, fb, fu, fc, fd, fv, fx, fy, fw;
+	uint32_t      fPreviewTime, fPreviewDuration, fPosterTime;
+	uint32_t      fSelectionTime, fSelectionDuration;
+	uint32_t      fCurrentTime;
+	uint32_t      fNextTrackID;
 };
 
 #endif // QTAtom_mvhd_H

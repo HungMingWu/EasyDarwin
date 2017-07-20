@@ -60,7 +60,7 @@ RTCPCompressedQTSSPacket::RTCPCompressedQTSSPacket(bool debug) :
 }
 
 // use if you don't know what kind of packet this is
-bool RTCPCompressedQTSSPacket::ParseCompressedQTSSPacket(uint8_t* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPCompressedQTSSPacket::ParseCompressedQTSSPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength)
 {
 	if (!this->ParseAPPPacket(inPacketBuffer, inPacketLength))
 		return false;
@@ -72,7 +72,7 @@ bool RTCPCompressedQTSSPacket::ParseCompressedQTSSPacket(uint8_t* inPacketBuffer
 		return false;
 
 	//figure out how many 32-bit words remain in the buffer
-	UInt32 theMaxDataLen = inPacketLength - kQTSSDataOffset;
+	uint32_t theMaxDataLen = inPacketLength - kQTSSDataOffset;
 	theMaxDataLen /= 4;
 
 	//if the number of 32 bit words reported in the packet is greater than the theoretical limit,
@@ -93,7 +93,7 @@ bool RTCPCompressedQTSSPacket::ParseCompressedQTSSPacket(uint8_t* inPacketBuffer
 
 
 // You know the packet type and just want to parse it now
-bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPacketLength)
+bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength)
 {
 
 	if (!this->ParseCompressedQTSSPacket(inPacketBuffer, inPacketLength))
@@ -112,13 +112,13 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 	uint8_t* qtssDataBuffer = this->GetPacketBuffer() + kQTSSDataOffset;
 
 	//packet length is given in words
-	UInt32 bytesRemaining = this->GetQTSSPacketLength() * 4;
+	uint32_t bytesRemaining = this->GetQTSSPacketLength() * 4;
 	while (bytesRemaining >= 4) //items must be at least 32 bits
 	{
 		// DMS - There is no guarentee that qtssDataBuffer will be 4 byte aligned, because
 		// individual APP packet fields can be 6 bytes or 4 bytes or 8 bytes. So we have to
 		// use the 4-byte align protection functions. Sparc and MIPS processors will crash otherwise
-		UInt32 theHeader = ntohl(OS::GetUInt32FromMemory((UInt32*)&qtssDataBuffer[kQTSSItemTypeOffset]));
+		uint32_t theHeader = ntohl(OS::GetUInt32FromMemory((uint32_t*)&qtssDataBuffer[kQTSSItemTypeOffset]));
 		uint16_t itemType = (uint16_t)((theHeader & kQTSSItemTypeMask) >> kQTSSItemTypeShift);
 		uint8_t itemVersion = (uint8_t)((theHeader & kQTSSItemVersionMask) >> kQTSSItemVersionShift);
 		uint8_t itemLengthInBytes = (uint8_t)(theHeader & kQTSSItemLengthMask);
@@ -127,12 +127,12 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 		APPEND_TO_DUMP_ARRAY(", h_vers=%u", itemVersion);
 		APPEND_TO_DUMP_ARRAY(", h_size=%u", itemLengthInBytes);
 
-		qtssDataBuffer += sizeof(UInt32);   //advance past the above uint16_t's & uint8_t's (point it at the actual item data)
+		qtssDataBuffer += sizeof(uint32_t);   //advance past the above uint16_t's & uint8_t's (point it at the actual item data)
 
 		//Update bytesRemaining (move it past current item)
 		//This itemLengthInBytes is part of the packet and could therefore be bogus.
 		//Make sure not to overstep the end of the buffer!
-		bytesRemaining -= sizeof(UInt32);
+		bytesRemaining -= sizeof(uint32_t);
 		if (itemLengthInBytes > bytesRemaining)
 			break; //don't walk off the end of the buffer
 			//itemLengthInBytes = bytesRemaining;
@@ -142,7 +142,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 		{
 		case  TW0_CHARS_TO_INT('r', 'r'): //'rr': //'rrcv':
 			{
-				fReceiverBitRate = ntohl(OS::GetUInt32FromMemory((UInt32*)qtssDataBuffer));
+				fReceiverBitRate = ntohl(OS::GetUInt32FromMemory((uint32_t*)qtssDataBuffer));
 				qtssDataBuffer += sizeof(fReceiverBitRate);
 				APPEND_TO_DUMP_ARRAY(", rcvr_bit_rate=%"   _U32BITARG_   "", fReceiverBitRate);
 			}
@@ -194,19 +194,19 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 
 		case TW0_CHARS_TO_INT('e', 'y'): //'ey':   //'eyes':
 			{
-				fNumEyes = ntohl(OS::GetUInt32FromMemory((UInt32*)qtssDataBuffer));
+				fNumEyes = ntohl(OS::GetUInt32FromMemory((uint32_t*)qtssDataBuffer));
 				qtssDataBuffer += sizeof(fNumEyes);
 				APPEND_TO_DUMP_ARRAY(", eyes=%"   _U32BITARG_   "", fNumEyes);
 
 				if (itemLengthInBytes >= 2)
 				{
-					fNumEyesActive = ntohl(OS::GetUInt32FromMemory((UInt32*)qtssDataBuffer));
+					fNumEyesActive = ntohl(OS::GetUInt32FromMemory((uint32_t*)qtssDataBuffer));
 					qtssDataBuffer += sizeof(fNumEyesActive);
 					APPEND_TO_DUMP_ARRAY(", eyes_actv=%"   _U32BITARG_   "", fNumEyesActive);
 				}
 				if (itemLengthInBytes >= 3)
 				{
-					fNumEyesPaused = ntohl(OS::GetUInt32FromMemory((UInt32*)qtssDataBuffer));
+					fNumEyesPaused = ntohl(OS::GetUInt32FromMemory((uint32_t*)qtssDataBuffer));
 					qtssDataBuffer += sizeof(fNumEyesPaused);
 					APPEND_TO_DUMP_ARRAY(", eyes_pausd=%"   _U32BITARG_   "", fNumEyesPaused);
 				}
@@ -215,7 +215,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 
 		case TW0_CHARS_TO_INT('p', 'r'): // 'pr':  //'prcv':
 			{
-				fTotalPacketsReceived = ntohl(OS::GetUInt32FromMemory((UInt32*)qtssDataBuffer));
+				fTotalPacketsReceived = ntohl(OS::GetUInt32FromMemory((uint32_t*)qtssDataBuffer));
 				qtssDataBuffer += sizeof(fTotalPacketsReceived);
 				APPEND_TO_DUMP_ARRAY(", pckts_rcvd=%"   _U32BITARG_   "", fTotalPacketsReceived);
 			}
@@ -275,7 +275,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, UInt32 inPa
 
 		case TW0_CHARS_TO_INT('o', 'b'): //'ob': // overbuffer window size
 			{
-				fOverbufferWindowSize = ntohl(OS::GetUInt32FromMemory((UInt32*)qtssDataBuffer));
+				fOverbufferWindowSize = ntohl(OS::GetUInt32FromMemory((uint32_t*)qtssDataBuffer));
 				qtssDataBuffer += sizeof(fOverbufferWindowSize);
 				APPEND_TO_DUMP_ARRAY(", ovr_buffr_windw_siz=%"   _U32BITARG_   "", fOverbufferWindowSize);
 			}

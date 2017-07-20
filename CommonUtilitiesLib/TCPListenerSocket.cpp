@@ -49,7 +49,7 @@
 
 
 
-OS_Error TCPListenerSocket::listen(UInt32 queueLength)
+OS_Error TCPListenerSocket::listen(uint32_t queueLength)
 {
 	if (fFileDesc == EventContext::kInvalidFileDesc)
 		return EBADF;
@@ -60,7 +60,7 @@ OS_Error TCPListenerSocket::listen(UInt32 queueLength)
 	return OS_NoErr;
 }
 
-OS_Error TCPListenerSocket::Initialize(UInt32 addr, uint16_t port)
+OS_Error TCPListenerSocket::Initialize(uint32_t addr, uint16_t port)
 {
 	OS_Error err = this->TCPSocket::Open();
 	if (0 == err) do

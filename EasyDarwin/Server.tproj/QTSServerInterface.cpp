@@ -44,7 +44,7 @@
 
 // STATIC DATA
 
-UInt32                  QTSServerInterface::sServerAPIVersion = QTSS_API_VERSION;
+uint32_t                  QTSServerInterface::sServerAPIVersion = QTSS_API_VERSION;
 QTSServerInterface*     QTSServerInterface::sServer = NULL;
 #if __MacOSX__
 StrPtrLen               QTSServerInterface::sServerNameStr("EasyDarwin");
@@ -66,7 +66,7 @@ ResizeableStringFormatter       QTSServerInterface::sPublicHeaderFormatter(NULL,
 StrPtrLen                       QTSServerInterface::sPublicHeaderStr;
 
 QTSSModule**            QTSServerInterface::sModuleArray[QTSSModule::kNumRoles];
-UInt32                  QTSServerInterface::sNumModulesInRole[QTSSModule::kNumRoles];
+uint32_t                  QTSServerInterface::sNumModulesInRole[QTSSModule::kNumRoles];
 OSQueue                 QTSServerInterface::sModuleQueue;
 QTSSErrorLogStream      QTSServerInterface::sErrorLogStream;
 
@@ -135,12 +135,12 @@ QTSSAttrInfoDict::AttrInfo  QTSServerInterface::sAttributes[] =
 
 void    QTSServerInterface::Initialize()
 {
-	for (UInt32 x = 0; x < qtssSvrNumParams; x++)
+	for (uint32_t x = 0; x < qtssSvrNumParams; x++)
 		QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kServerDictIndex)->
 		SetAttribute(x, sAttributes[x].fAttrName, sAttributes[x].fFuncPtr,
 			sAttributes[x].fAttrDataType, sAttributes[x].fAttrPermission);
 
-	for (UInt32 y = 0; y < qtssConnectionNumParams; y++)
+	for (uint32_t y = 0; y < qtssConnectionNumParams; y++)
 		QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kQTSSConnectedUserDictIndex)->
 		SetAttribute(y, sConnectedUserAttributes[y].fAttrName, sConnectedUserAttributes[y].fFuncPtr,
 			sConnectedUserAttributes[y].fAttrDataType, sConnectedUserAttributes[y].fAttrPermission);
@@ -218,7 +218,7 @@ QTSServerInterface::QTSServerInterface()
 	fNumThinned(0),
 	fNumThreads(0)
 {
-	for (UInt32 y = 0; y < QTSSModule::kNumRoles; y++)
+	for (uint32_t y = 0; y < QTSSModule::kNumRoles; y++)
 	{
 		sModuleArray[y] = NULL;
 		sNumModulesInRole[y] = 0;
@@ -263,7 +263,7 @@ void QTSServerInterface::LogError(QTSS_ErrorVerbosity inVerbosity, char* inBuffe
 	theParams.errorParams.inVerbosity = inVerbosity;
 	theParams.errorParams.inBuffer = inBuffer;
 
-	for (UInt32 x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kErrorLogRole); x++)
+	for (uint32_t x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kErrorLogRole); x++)
 		(void)QTSServerInterface::GetModule(QTSSModule::kErrorLogRole, x)->CallDispatch(QTSS_ErrorLog_Role, &theParams);
 
 	// If this is a fatal error, set the proper attribute in the RTSPServer dictionary
@@ -285,8 +285,8 @@ void QTSServerInterface::KillAllRTPSessions()
 	}
 }
 
-void QTSServerInterface::SetValueComplete(UInt32 inAttrIndex, QTSSDictionaryMap* inMap,
-	UInt32 inValueIndex, void* inNewValue, UInt32 inNewValueLen)
+void QTSServerInterface::SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
+	uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen)
 {
 	if (inAttrIndex == qtssSvrState)
 	{
@@ -303,9 +303,9 @@ void QTSServerInterface::SetValueComplete(UInt32 inAttrIndex, QTSSDictionaryMap*
 		else
 			OSThread::GetCurrent()->SetThreadData(&sStateChangeState);
 
-		UInt32 numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kStateChangeRole);
+		uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kStateChangeRole);
 		{
-			for (UInt32 theCurrentModule = 0; theCurrentModule < numModules; theCurrentModule++)
+			for (uint32_t theCurrentModule = 0; theCurrentModule < numModules; theCurrentModule++)
 			{
 				QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kStateChangeRole, theCurrentModule);
 				(void)theModule->CallDispatch(QTSS_StateChange_Role, &theParams);
@@ -399,7 +399,7 @@ SInt64 RTPStatsUpdaterTask::Run()
 	if (fLastBandwidthTime != 0)
 	{
 		Assert(curTime > fLastBandwidthTime);
-		UInt32 delta = (UInt32)(curTime - fLastBandwidthTime);
+		uint32_t delta = (uint32_t)(curTime - fLastBandwidthTime);
 		// Prevent divide by zero errror
 		if (delta < 1000) {
 			WarnV(delta >= 1000, "delta < 1000");
@@ -407,25 +407,25 @@ SInt64 RTPStatsUpdaterTask::Run()
 			return theServer->GetPrefs()->GetTotalBytesUpdateTimeInSecs() * 1000;
 		}
 
-		UInt32 packetsPerSecond = periodicPackets;
-		UInt32 theTime = delta / 1000;
+		uint32_t packetsPerSecond = periodicPackets;
+		uint32_t theTime = delta / 1000;
 
 		packetsPerSecond /= theTime;
 		Assert(packetsPerSecond >= 0);
 		theServer->fRTPPacketsPerSecond = packetsPerSecond;
-		UInt32 additionalBytes = 28 * packetsPerSecond; // IP headers = 20 + UDP headers = 8
-		UInt32 headerBits = 8 * additionalBytes;
+		uint32_t additionalBytes = 28 * packetsPerSecond; // IP headers = 20 + UDP headers = 8
+		uint32_t headerBits = 8 * additionalBytes;
 		headerBits /= theTime;
 
 		float bits = periodicBytes * 8;
 		bits /= theTime;
-		theServer->fCurrentRTPBandwidthInBits = (UInt32)(bits + headerBits);
+		theServer->fCurrentRTPBandwidthInBits = (uint32_t)(bits + headerBits);
 
 		//do the computation for cpu percent
 		float diffTime = cpuTimeInSec - theServer->fCPUTimeUsedInSec;
 		theServer->fCPUPercent = (diffTime / theTime) * 100;
 
-		UInt32 numProcessors = OS::GetNumProcessors();
+		uint32_t numProcessors = OS::GetNumProcessors();
 
 		if (numProcessors > 1)
 			theServer->fCPUPercent /= numProcessors;
@@ -440,7 +440,7 @@ SInt64 RTPStatsUpdaterTask::Run()
 	if ((fLastBandwidthAvg != 0) && (curTime > (fLastBandwidthAvg +
 		(theServer->GetPrefs()->GetAvgBandwidthUpdateTimeInSecs() * 1000))))
 	{
-		UInt32 delta = (UInt32)(curTime - fLastBandwidthAvg);
+		uint32_t delta = (uint32_t)(curTime - fLastBandwidthAvg);
 		SInt64 bytesSent = theServer->fTotalRTPBytes - fLastBytesSent;
 		Assert(bytesSent >= 0);
 
@@ -451,7 +451,7 @@ SInt64 RTPStatsUpdaterTask::Run()
 		theAvgTime /= 1000;
 		bits /= theAvgTime;
 		Assert(bits >= 0);
-		theServer->fAvgRTPBandwidthInBits = (UInt32)bits;
+		theServer->fAvgRTPBandwidthInBits = (uint32_t)bits;
 
 		fLastBandwidthAvg = curTime;
 		fLastBytesSent = theServer->fTotalRTPBytes;
@@ -459,7 +459,7 @@ SInt64 RTPStatsUpdaterTask::Run()
 		//if the bandwidth is above the bandwidth setting, disconnect 1 user by sending them
 		//a BYE RTCP packet.
 		SInt32 maxKBits = theServer->GetPrefs()->GetMaxKBitsBandwidth();
-		if ((maxKBits > -1) && (theServer->fAvgRTPBandwidthInBits > ((UInt32)maxKBits * 1024)))
+		if ((maxKBits > -1) && (theServer->fAvgRTPBandwidthInBits > ((uint32_t)maxKBits * 1024)))
 		{
 			//we need to make sure that all of this happens atomically wrt the session map
 			OSMutexLocker locker(theServer->GetRTPSessionMap()->GetMutex());
@@ -504,7 +504,7 @@ RTPSessionInterface* RTPStatsUpdaterTask::GetNewestSession(OSRefTable* inRTPSess
 
 
 
-void* QTSServerInterface::CurrentUnixTimeMilli(QTSSDictionary* inServer, UInt32* outLen)
+void* QTSServerInterface::CurrentUnixTimeMilli(QTSSDictionary* inServer, uint32_t* outLen)
 {
 	QTSServerInterface* theServer = (QTSServerInterface*)inServer;
 	theServer->fCurrentTime_UnixMilli = OS::TimeMilli_To_UnixTimeMilli(OS::Milliseconds());
@@ -514,7 +514,7 @@ void* QTSServerInterface::CurrentUnixTimeMilli(QTSSDictionary* inServer, UInt32*
 	return &theServer->fCurrentTime_UnixMilli;
 }
 
-void* QTSServerInterface::GetTotalUDPSockets(QTSSDictionary* inServer, UInt32* outLen)
+void* QTSServerInterface::GetTotalUDPSockets(QTSSDictionary* inServer, uint32_t* outLen)
 {
 	QTSServerInterface* theServer = (QTSServerInterface*)inServer;
 	// Multiply by 2 because this is returning the number of socket *pairs*
@@ -525,12 +525,12 @@ void* QTSServerInterface::GetTotalUDPSockets(QTSSDictionary* inServer, UInt32* o
 	return &theServer->fTotalUDPSockets;
 }
 
-void* QTSServerInterface::IsOutOfDescriptors(QTSSDictionary* inServer, UInt32* outLen)
+void* QTSServerInterface::IsOutOfDescriptors(QTSSDictionary* inServer, uint32_t* outLen)
 {
 	QTSServerInterface* theServer = (QTSServerInterface*)inServer;
 
 	theServer->fIsOutOfDescriptors = false;
-	for (UInt32 x = 0; x < theServer->fNumListeners; x++)
+	for (uint32_t x = 0; x < theServer->fNumListeners; x++)
 	{
 		if (theServer->fListeners[x]->IsOutOfDescriptors())
 		{
@@ -543,7 +543,7 @@ void* QTSServerInterface::IsOutOfDescriptors(QTSSDictionary* inServer, UInt32* o
 	return &theServer->fIsOutOfDescriptors;
 }
 
-void* QTSServerInterface::GetNumUDPBuffers(QTSSDictionary* inServer, UInt32* outLen)
+void* QTSServerInterface::GetNumUDPBuffers(QTSSDictionary* inServer, uint32_t* outLen)
 {
 	// This param retrieval function must be invoked each time it is called,
 	// because whether we are out of descriptors or not is continually changing
@@ -556,7 +556,7 @@ void* QTSServerInterface::GetNumUDPBuffers(QTSSDictionary* inServer, UInt32* out
 	return &theServer->fNumUDPBuffers;
 }
 
-void* QTSServerInterface::GetNumWastedBytes(QTSSDictionary* inServer, UInt32* outLen)
+void* QTSServerInterface::GetNumWastedBytes(QTSSDictionary* inServer, uint32_t* outLen)
 {
 	// This param retrieval function must be invoked each time it is called,
 	// because whether we are out of descriptors or not is continually changing
@@ -569,11 +569,11 @@ void* QTSServerInterface::GetNumWastedBytes(QTSSDictionary* inServer, UInt32* ou
 	return &theServer->fUDPWastageInBytes;
 }
 
-void* QTSServerInterface::TimeConnected(QTSSDictionary* inConnection, UInt32* outLen)
+void* QTSServerInterface::TimeConnected(QTSSDictionary* inConnection, uint32_t* outLen)
 {
 	SInt64 connectTime;
 	void* result;
-	UInt32 len = sizeof(connectTime);
+	uint32_t len = sizeof(connectTime);
 	inConnection->GetValue(qtssConnectionCreateTimeInMsec, 0, &connectTime, &len);
 	SInt64 timeConnected = OS::Milliseconds() - connectTime;
 	*outLen = sizeof(timeConnected);
@@ -585,7 +585,7 @@ void* QTSServerInterface::TimeConnected(QTSSDictionary* inConnection, UInt32* ou
 }
 
 
-QTSS_Error  QTSSErrorLogStream::Write(void* inBuffer, UInt32 inLen, UInt32* outLenWritten, UInt32 inFlags)
+QTSS_Error  QTSSErrorLogStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags)
 {
 	// For the error log stream, the flags are considered to be the verbosity
 	// of the error.

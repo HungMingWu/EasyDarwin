@@ -84,9 +84,9 @@ void QTFile_FileControlBlock::Set(char * DataPath)
 
 }
 
-bool QTFile_FileControlBlock::ReadInternal(FILE_SOURCE *dataFD, UInt64 inPosition, void* inBuffer, UInt32 inLength, UInt32 *inReadLenPtr)
+bool QTFile_FileControlBlock::ReadInternal(FILE_SOURCE *dataFD, UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t *inReadLenPtr)
 {
-	UInt32 readLen = 0;
+	uint32_t readLen = 0;
 	if (NULL != inReadLenPtr)
 		*inReadLenPtr = 0;
 
@@ -110,10 +110,10 @@ bool QTFile_FileControlBlock::ReadInternal(FILE_SOURCE *dataFD, UInt64 inPositio
 }
 
 
-bool QTFile_FileControlBlock::Read(FILE_SOURCE *dflt, UInt64 inPosition, void* inBuffer, UInt32 inLength)
+bool QTFile_FileControlBlock::Read(FILE_SOURCE *dflt, UInt64 inPosition, void* inBuffer, uint32_t inLength)
 {
 	// Temporary vars
-	UInt32 rcSize;
+	uint32_t rcSize;
 
 	// General vars
 	FILE_SOURCE     *dataFD;
@@ -175,7 +175,7 @@ bool QTFile_FileControlBlock::Read(FILE_SOURCE *dflt, UInt64 inPosition, void* i
 				goto done;
 
 			//Assert(rcSize == fDataBufferSize);
-			fCurrentDataBufferLength = (UInt32)rcSize;
+			fCurrentDataBufferLength = (uint32_t)rcSize;
 			fDataBufferPosEnd += fCurrentDataBufferLength;
 		}
 		else
@@ -196,7 +196,7 @@ bool QTFile_FileControlBlock::Read(FILE_SOURCE *dflt, UInt64 inPosition, void* i
 				goto done;
 
 			//Assert(rcSize == fDataBufferSize);
-			fCurrentDataBufferLength = (UInt32)rcSize;
+			fCurrentDataBufferLength = (uint32_t)rcSize;
 			fDataBufferPosEnd = fDataBufferPosStart + fCurrentDataBufferLength;
 		}
 
@@ -223,7 +223,7 @@ bool QTFile_FileControlBlock::Read(FILE_SOURCE *dflt, UInt64 inPosition, void* i
 			// Read the first part of the block.
 			ReadLength = fDataBufferSize - ReadOffset;
 			if (ReadLength <= (fPreviousDataBufferLength - ReadOffset))
-				::memcpy(pBuffer, fPreviousDataBuffer + ReadOffset, (UInt32)ReadLength);
+				::memcpy(pBuffer, fPreviousDataBuffer + ReadOffset, (uint32_t)ReadLength);
 			else
 				goto done;
 
@@ -234,7 +234,7 @@ bool QTFile_FileControlBlock::Read(FILE_SOURCE *dflt, UInt64 inPosition, void* i
 			ReadLength = inLength - ReadLength;
 			if (ReadLength <= fCurrentDataBufferLength)
 			{
-				::memcpy(pBuffer, fCurrentDataBuffer, (UInt32)ReadLength);
+				::memcpy(pBuffer, fCurrentDataBuffer, (uint32_t)ReadLength);
 				result = true;
 			}
 			//
@@ -244,7 +244,7 @@ bool QTFile_FileControlBlock::Read(FILE_SOURCE *dflt, UInt64 inPosition, void* i
 		{
 			if (ReadLength <= (fPreviousDataBufferLength - ReadOffset))
 			{
-				::memcpy(inBuffer, fPreviousDataBuffer + ReadOffset, (UInt32)ReadLength);
+				::memcpy(inBuffer, fPreviousDataBuffer + ReadOffset, (uint32_t)ReadLength);
 
 				result = true;
 			}
@@ -254,7 +254,7 @@ bool QTFile_FileControlBlock::Read(FILE_SOURCE *dflt, UInt64 inPosition, void* i
 			ReadOffset -= fPreviousDataBufferLength;
 			if (ReadLength <= (fCurrentDataBufferLength - ReadOffset))
 			{
-				::memcpy(inBuffer, fCurrentDataBuffer + ReadOffset, (UInt32)ReadLength);
+				::memcpy(inBuffer, fCurrentDataBuffer + ReadOffset, (uint32_t)ReadLength);
 				result = true;
 			}
 
@@ -267,15 +267,15 @@ done:
 }
 
 
-void QTFile_FileControlBlock::AdjustDataBufferBitRate(UInt32 inUnitSizeInK, UInt32 inFileBitRate, UInt32 inNumBuffSizeUnits, UInt32 inMaxBitRateBuffSizeInBlocks)
+void QTFile_FileControlBlock::AdjustDataBufferBitRate(uint32_t inUnitSizeInK, uint32_t inFileBitRate, uint32_t inNumBuffSizeUnits, uint32_t inMaxBitRateBuffSizeInBlocks)
 {
 	if (!fCacheEnabled)
 		return;
 
 	// General vars
-	UInt32  newDataBufferSizeInUnits = inNumBuffSizeUnits;
-	UInt32  newDataBufferSize = 0;
-	UInt32  newUnitSizeBytes = 0;
+	uint32_t  newDataBufferSizeInUnits = inNumBuffSizeUnits;
+	uint32_t  newDataBufferSize = 0;
+	uint32_t  newUnitSizeBytes = 0;
 
 	if (inUnitSizeInK < 1)
 		inUnitSizeInK = 32;

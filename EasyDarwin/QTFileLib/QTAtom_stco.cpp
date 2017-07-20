@@ -81,7 +81,7 @@ QTAtom_stco::~QTAtom_stco()
 bool QTAtom_stco::Initialize()
 {
 	// Temporary vars
-	UInt32      tempInt32;
+	uint32_t      tempInt32;
 
 
 	//
@@ -94,7 +94,7 @@ bool QTAtom_stco::Initialize()
 
 	//
 	// Validate the size of the sample table.
-	if ((UInt32)(fNumEntries * fOffSetSize) != (fTOCEntry.AtomDataLength - 8))
+	if ((uint32_t)(fNumEntries * fOffSetSize) != (fTOCEntry.AtomDataLength - 8))
 		return false;
 
 	//
@@ -138,7 +138,7 @@ void QTAtom_stco::DumpTable()
 	//
 	// Print the table.
 	UInt64 offset = 0;
-	for (UInt32 CurEntry = 1; CurEntry <= fNumEntries; CurEntry++)
+	for (uint32_t CurEntry = 1; CurEntry <= fNumEntries; CurEntry++)
 	{
 		if (ChunkOffset(CurEntry, &offset))
 			qtss_printf("  %10"   _U32BITARG_   ": %" _64BITARG_ "u\n", CurEntry, offset);

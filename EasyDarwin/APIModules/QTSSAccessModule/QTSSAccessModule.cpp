@@ -84,8 +84,8 @@ static QTSS_ModulePrefsObject   sPrefs = NULL;
 static QTSS_PrefsObject         sServerPrefs = NULL;
 
 static AccessChecker**          sAccessCheckers;
-static UInt32                   sNumAccessCheckers = 0;
-static UInt32                   sAccessCheckerArraySize = 0;
+static uint32_t                   sNumAccessCheckers = 0;
+static uint32_t                   sAccessCheckerArraySize = 0;
 
 static bool                   sAllowGuestDefaultEnabled = true;
 static bool                   sDefaultGuestEnabled = true;
@@ -201,7 +201,7 @@ QTSS_Error Shutdown()
 	//cleanup
 
 	// delete all the AccessCheckers
-	UInt32 index;
+	uint32_t index;
 	for (index = 0; index < sNumAccessCheckers; index++)
 		delete sAccessCheckers[index];
 	delete[] sAccessCheckers;
@@ -279,7 +279,7 @@ QTSS_Error RereadPrefs()
 	if (sAccessCheckers[0]->HaveFilePathsChanged(sUsersFilePath, sGroupsFilePath))
 	{
 		sAccessCheckers[0]->UpdateFilePaths(sUsersFilePath, sGroupsFilePath);
-		UInt32 err;
+		uint32_t err;
 		err = sAccessCheckers[0]->UpdateUserProfiles();
 		if (err & AccessChecker::kUsersFileNotFoundErr)
 			QTSSModuleUtils::LogError(qtssWarningVerbosity, sUsersFileNotFoundMessageAttrID, 0, sUsersFilePath, NULL);
@@ -301,7 +301,7 @@ QTSS_Error RereadPrefs()
 QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 {
 	QTSS_RTSPRequestObject  theRTSPRequest = inParams->inRTSPRequest;
-	UInt32 fileErr;
+	uint32_t fileErr;
 
 	OSMutexLocker locker(sUserMutex);
 
@@ -310,7 +310,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 
 	// Get the user profile object from the request object
 	QTSS_UserProfileObject theUserProfile = NULL;
-	UInt32 len = sizeof(QTSS_UserProfileObject);
+	uint32_t len = sizeof(QTSS_UserProfileObject);
 	QTSS_Error theErr = QTSS_GetValue(theRTSPRequest, qtssRTSPReqUserProfile, 0, (void*)&theUserProfile, &len);
 	Assert(len == sizeof(QTSS_UserProfileObject));
 	if (theErr != QTSS_NoErr)
@@ -360,7 +360,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	OSCharArrayDeleter groupPathDeleter(groupsFilePath);
 
 	AccessChecker* currentChecker = NULL;
-	UInt32 index;
+	uint32_t index;
 
 	// If the default users and groups file are not the ones we need
 	if (!defaultPaths)
@@ -490,10 +490,10 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 
 
 	// Set the multivalued qtssUserGroups attr to the groups the user belongs to, if any
-	UInt32 maxLen = profile->maxGroupNameLen;
+	uint32_t maxLen = profile->maxGroupNameLen;
 	for (index = 0; index < profile->numGroups; index++)
 	{
-		UInt32 curLen = ::strlen(profile->groups[index]);
+		uint32_t curLen = ::strlen(profile->groups[index]);
 		if (curLen < maxLen)
 		{
 			char* groupWithPaddedZeros = new char[maxLen];  // memory allocated

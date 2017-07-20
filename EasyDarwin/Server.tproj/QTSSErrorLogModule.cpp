@@ -108,9 +108,9 @@ public:
 
 	virtual char* GetLogDir() { return QTSServerInterface::GetServer()->GetPrefs()->GetErrorLogDir(); }
 
-	virtual UInt32 GetRollIntervalInDays() { return QTSServerInterface::GetServer()->GetPrefs()->GetErrorRollIntervalInDays(); }
+	virtual uint32_t GetRollIntervalInDays() { return QTSServerInterface::GetServer()->GetPrefs()->GetErrorRollIntervalInDays(); }
 
-	virtual UInt32 GetMaxLogBytes() { return QTSServerInterface::GetServer()->GetPrefs()->GetMaxErrorLogBytes(); }
+	virtual uint32_t GetMaxLogBytes() { return QTSServerInterface::GetServer()->GetPrefs()->GetMaxErrorLogBytes(); }
 
 };
 
@@ -126,7 +126,7 @@ private:
 	virtual SInt64 Run();
 };
 
-const UInt32 kMaxLogStringLen = 2172;
+const uint32_t kMaxLogStringLen = 2172;
 
 // STATIC DATA
 

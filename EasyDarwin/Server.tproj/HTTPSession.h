@@ -46,7 +46,7 @@ private:
 	QTSS_Error execNetMsgCSRestartServiceRESTful(const char* queryString);
 
 	// test current connections handled by this object against server pref connection limit
-	static inline bool OverMaxConnections(UInt32 buffer);
+	static inline bool OverMaxConnections(uint32_t buffer);
 
 	QTSS_Error dumpRequestData();
 
@@ -66,8 +66,8 @@ private:
 		kHaveCompleteMessage = 7
 	};
 
-	UInt32 fCurrentModule;
-	UInt32 fState;
+	uint32_t fCurrentModule;
+	uint32_t fState;
 
 	QTSS_RoleParams     fRoleParams;//module param blocks for roles.
 	QTSS_ModuleState    fModuleState;

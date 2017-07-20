@@ -56,12 +56,12 @@ public:
 
 	//
 	// Accessors.
-	void        PreviousSyncSample(UInt32 SampleNumber, UInt32 *SyncSampleNumber);
-	void        NextSyncSample(UInt32 SampleNumber, UInt32 *SyncSampleNumber);
-	inline bool       IsSyncSample(UInt32 SampleNumber, UInt32 inCursor)
+	void        PreviousSyncSample(uint32_t SampleNumber, uint32_t *SyncSampleNumber);
+	void        NextSyncSample(uint32_t SampleNumber, uint32_t *SyncSampleNumber);
+	inline bool       IsSyncSample(uint32_t SampleNumber, uint32_t inCursor)
 	{
 		Assert(inCursor <= fNumEntries);
-		for (UInt32 curEntry = inCursor; curEntry < fNumEntries; curEntry++)
+		for (uint32_t curEntry = inCursor; curEntry < fNumEntries; curEntry++)
 		{
 			if (fTable[curEntry] == SampleNumber)
 				return true;
@@ -82,12 +82,12 @@ protected:
 	//
 	// Protected member variables.
 	uint8_t       fVersion;
-	UInt32      fFlags; // 24 bits in the low 3 bytes
+	uint32_t      fFlags; // 24 bits in the low 3 bytes
 
-	UInt32      fNumEntries;
+	uint32_t      fNumEntries;
 	char        *fSyncSampleTable;
-	UInt32      *fTable; // longword-aligned version of the above
-	UInt32      fTableSize;
+	uint32_t      *fTable; // longword-aligned version of the above
+	uint32_t      fTableSize;
 };
 
 #endif // QTAtom_stss_H

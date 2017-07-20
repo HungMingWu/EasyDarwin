@@ -43,7 +43,7 @@ class RTPOverbufferWindow
 public:
 
 	RTPOverbufferWindow(UInt32 inSendInterval, UInt32 inInitialWindowSize, UInt32 inMaxSendAheadTimeInSec,
-		Float32 inOverbufferRate);
+		float inOverbufferRate);
 	~RTPOverbufferWindow() { }
 
 	void ResetOverBufferWindow();
@@ -117,7 +117,7 @@ private:
 	bool fWriteBurstBeginning;
 	bool fOverbufferingEnabled;
 
-	Float32 fOverbufferRate;
+	float fOverbufferRate;
 	UInt32 fSendAheadDurationInMsec;
 
 	SInt64 fOverbufferWindowBegin;

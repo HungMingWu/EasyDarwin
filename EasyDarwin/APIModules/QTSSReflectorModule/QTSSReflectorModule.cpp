@@ -1293,14 +1293,14 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 
 
 	// ------------ Put SDP header lines in correct order
-	Float32 adjustMediaBandwidthPercent = 1.0;
+	float adjustMediaBandwidthPercent = 1.0;
 	bool adjustMediaBandwidth = false;
 
 	if (sPlayerCompatibility)
 		adjustMediaBandwidth = QTSSModuleUtils::HavePlayerProfile(sServerPrefs, inParams, QTSSModuleUtils::kAdjustBandwidth);
 
 	if (adjustMediaBandwidth)
-		adjustMediaBandwidthPercent = (Float32)sAdjustMediaBandwidthPercent / 100.0;
+		adjustMediaBandwidthPercent = (float)sAdjustMediaBandwidthPercent / 100.0;
 
 	ResizeableStringFormatter buffer;
 	SDPContainer* insertMediaLines = NULL;

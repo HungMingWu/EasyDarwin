@@ -115,13 +115,13 @@ public:
 	static UInt32   GetNumProcessors();
 
 	// CPU Load
-	static Float32  GetCurrentCPULoadPercent();
+	static float  GetCurrentCPULoadPercent();
 
 	// Mutex for StdLib calls
 	static OSMutex* GetStdLibMutex() { return &sStdLibOSMutex; }
 
 	static SInt64   InitialMSec() { return sInitialMsec; }
-	static Float32  StartTimeMilli_Float() { return (Float32)((Float64)((SInt64)OS::Milliseconds() - (SInt64)OS::InitialMSec()) / (Float64) 1000.0); }
+	static float  StartTimeMilli_Float() { return (float)((Float64)((SInt64)OS::Milliseconds() - (SInt64)OS::InitialMSec()) / (Float64) 1000.0); }
 	static SInt64   StartTimeMilli_Int() { return (OS::Milliseconds() - OS::InitialMSec()); }
 
 	static bool 	ThreadSafe();

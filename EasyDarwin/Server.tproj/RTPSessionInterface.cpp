@@ -317,7 +317,7 @@ void* RTPSessionInterface::PacketLossPercent(QTSSDictionary* inSession, UInt32* 
 
 			packetsSent += (SInt64)streamCurPackets;
 			packetsLost += (SInt64)streamCurPacketsLost;
-			//qtss_printf("stream calculated loss = %f \n",x, (Float32) streamCurPacketsLost / (Float32) streamCurPackets);
+			//qtss_printf("stream calculated loss = %f \n",x, (float) streamCurPacketsLost / (float) streamCurPackets);
 
 		}
 
@@ -329,7 +329,7 @@ void* RTPSessionInterface::PacketLossPercent(QTSSDictionary* inSession, UInt32* 
 	if (packetsSent > 0)
 	{
 		if (packetsLost <= packetsSent)
-			theSession->fPacketLossPercent = (Float32)((((Float32)packetsLost / (Float32)packetsSent) * 100.0));
+			theSession->fPacketLossPercent = (float)((((float)packetsLost / (float)packetsSent) * 100.0));
 		else
 			theSession->fPacketLossPercent = 100.0;
 	}

@@ -202,7 +202,7 @@ public:
 	UInt64              GetTotalRTPBytes() { return fTotalRTPBytes; }
 	UInt64              GetTotalRTPPacketsLost() { return fTotalRTPPacketsLost; }
 	UInt64              GetTotalRTPPackets() { return fTotalRTPPackets; }
-	Float32             GetCPUPercent() { return fCPUPercent; }
+	float             GetCPUPercent() { return fCPUPercent; }
 	bool              SigIntSet() { return fSigInt; }
 	bool				SigTermSet() { return fSigTerm; }
 
@@ -412,8 +412,8 @@ private:
 	UInt32              fAvgRTPBandwidthInBits;
 	UInt32              fRTPPacketsPerSecond;
 
-	Float32             fCPUPercent;
-	Float32             fCPUTimeUsedInSec;
+	float             fCPUPercent;
+	float             fCPUTimeUsedInSec;
 
 	// stores # of UDP sockets in the server currently (gets updated lazily via.
 	// param retrieval function)
@@ -470,7 +470,7 @@ private:
 
 	virtual SInt64 Run();
 	RTPSessionInterface* GetNewestSession(OSRefTable* inRTPSessionMap);
-	Float32 GetCPUTimeInSeconds();
+	float GetCPUTimeInSeconds();
 
 	SInt64 fLastBandwidthTime;
 	SInt64 fLastBandwidthAvg;

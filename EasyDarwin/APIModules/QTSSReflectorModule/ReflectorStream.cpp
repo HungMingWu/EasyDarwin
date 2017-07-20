@@ -809,7 +809,7 @@ void ReflectorSender::ReflectRelayPackets(SInt64* ioWakeupTime, OSQueue* inFreeQ
 		(void)atomic_sub(&fStream->fBytesSentInThisInterval, intervalBytes);
 
 		// Multiply by 1000 to convert from milliseconds to seconds, and by 8 to convert from bytes to bits
-		Float32 bps = (Float32)(intervalBytes * 8) / (Float32)(currentTime - fStream->fLastBitRateSample);
+		float bps = (float)(intervalBytes * 8) / (float)(currentTime - fStream->fLastBitRateSample);
 		bps *= 1000;
 		fStream->fCurrentBitRate = (UInt32)bps;
 
@@ -1988,7 +1988,7 @@ bool ReflectorSocket::ProcessPacket(const SInt64& inMilliseconds, ReflectorPacke
 				// if it was in the past we leave it alone because it will be deleted after processing.
 
 
-				//printf("ReflectorSocket::ProcessPacket packetOffsetFromStart=%f\n", (Float32) packetOffsetFromStart / 1000);
+				//printf("ReflectorSocket::ProcessPacket packetOffsetFromStart=%f\n", (float) packetOffsetFromStart / 1000);
 			}
 
 		}

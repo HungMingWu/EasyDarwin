@@ -421,7 +421,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	// To ensure NULL termination, just memset the buffers to 0, and make sure that
 	// the last byte of each array is untouched.
 
-	Float32* packetLossPercent = NULL;
+	float* packetLossPercent = NULL;
 	Float64* movieDuration = NULL;
 	UInt64* movieSizeInBytes = NULL;
 	UInt32* movieAverageBitRatePtr = 0;
@@ -591,7 +591,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 			}
 		}
 
-		Float32* clientBufferTimePtr = NULL;
+		float* clientBufferTimePtr = NULL;
 		(void)QTSS_GetValuePtr(theRTPStreamObject, qtssRTPStrBufferDelayInSecs, 0, (void**)&clientBufferTimePtr, &theLen);
 		if ((clientBufferTimePtr != NULL) && (*clientBufferTimePtr != 0))
 		{
@@ -700,7 +700,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 
 	float zeroFloat = 0;
 	UInt64 zeroUInt64 = 0;
-	Float32 fcpuUtilized = 0;
+	float fcpuUtilized = 0;
 
 	theLen = sizeof(fcpuUtilized);
 	(void)QTSS_GetValue(sServer, qtssSvrCPULoadPercent, 0, &fcpuUtilized, &theLen);

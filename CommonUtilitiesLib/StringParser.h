@@ -88,8 +88,8 @@ public:
 
 	//Returns whatever integer is currently in the stream
 	UInt32          ConsumeInteger(StrPtrLen* outString = nullptr);
-	Float32         ConsumeFloat();
-	Float32         ConsumeNPT();
+	float         ConsumeFloat();
+	float         ConsumeNPT();
 
 	//Keeps on going until non-whitespace
 	void            ConsumeWhitespace()

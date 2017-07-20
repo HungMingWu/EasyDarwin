@@ -516,31 +516,31 @@ void DebugStatus(UInt32 debugLevel, bool printHeader)
 
 void FormattedTotalBytesBuffer(char *outBuffer, int outBufferLen, UInt64 totalBytes)
 {
-	Float32 displayBytes = 0.0;
+	float displayBytes = 0.0;
 	char  sizeStr[] = "B";
 	char* format = NULL;
 
 	if (totalBytes > 1073741824) //GBytes
 	{
-		displayBytes = (Float32)((Float64)(SInt64)totalBytes / (Float64)(SInt64)1073741824);
+		displayBytes = (float)((Float64)(SInt64)totalBytes / (Float64)(SInt64)1073741824);
 		sizeStr[0] = 'G';
 		format = "%.4f%s ";
 	}
 	else if (totalBytes > 1048576) //MBytes
 	{
-		displayBytes = (Float32)(SInt32)totalBytes / (Float32)(SInt32)1048576;
+		displayBytes = (float)(SInt32)totalBytes / (float)(SInt32)1048576;
 		sizeStr[0] = 'M';
 		format = "%.3f%s ";
 	}
 	else if (totalBytes > 1024) //KBytes
 	{
-		displayBytes = (Float32)(SInt32)totalBytes / (Float32)(SInt32)1024;
+		displayBytes = (float)(SInt32)totalBytes / (float)(SInt32)1024;
 		sizeStr[0] = 'K';
 		format = "%.2f%s ";
 	}
 	else
 	{
-		displayBytes = (Float32)(SInt32)totalBytes;  //Bytes
+		displayBytes = (float)(SInt32)totalBytes;  //Bytes
 		sizeStr[0] = 'B';
 		format = "%4.0f%s ";
 	}

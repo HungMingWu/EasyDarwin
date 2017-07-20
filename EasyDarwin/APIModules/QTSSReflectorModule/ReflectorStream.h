@@ -547,7 +547,7 @@ void    ReflectorStream::UpdateBitRate(SInt64 currentTime)
 		(void)atomic_sub(&fBytesSentInThisInterval, intervalBytes);
 
 		// Multiply by 1000 to convert from milliseconds to seconds, and by 8 to convert from bytes to bits
-		Float32 bps = (Float32)(intervalBytes * 8) / (Float32)(currentTime - fLastBitRateSample);
+		float bps = (float)(intervalBytes * 8) / (float)(currentTime - fLastBitRateSample);
 		bps *= 1000;
 		fCurrentBitRate = (UInt32)bps;
 

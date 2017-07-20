@@ -112,7 +112,7 @@ class SDPLineSorter {
 
 public:
 	SDPLineSorter() : fSessionLineCount(0), fSDPSessionHeaders(NULL, 0), fSDPMediaHeaders(NULL, 0) {};
-	SDPLineSorter(SDPContainer *rawSDPContainerPtr, Float32 adjustMediaBandwidthPercent = 1.0, SDPContainer *insertMediaLinesArray = NULL);
+	SDPLineSorter(SDPContainer *rawSDPContainerPtr, float adjustMediaBandwidthPercent = 1.0, SDPContainer *insertMediaLinesArray = NULL);
 
 	StrPtrLen* GetSessionHeaders() { return &fSessionHeaders; }
 	StrPtrLen* GetMediaHeaders() { return &fMediaHeaders; }

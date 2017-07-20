@@ -329,12 +329,12 @@ RTPStatsUpdaterTask::RTPStatsUpdaterTask()
 	this->Signal(Task::kStartEvent);
 }
 
-Float32 RTPStatsUpdaterTask::GetCPUTimeInSeconds()
+float RTPStatsUpdaterTask::GetCPUTimeInSeconds()
 {
 	// This function returns the total number of seconds that the
 	// process running RTPStatsUpdaterTask() has been executing as
 	// a user process.
-	Float32 cpuTimeInSec = 0.0;
+	float cpuTimeInSec = 0.0;
 #ifdef __Win32__
 	// The Win32 way of getting the time for this process
 	HANDLE hProcess = GetCurrentProcess();
@@ -343,7 +343,7 @@ Float32 RTPStatsUpdaterTask::GetCPUTimeInSeconds()
 	{
 		// userTime is in 10**-7 seconds since Jan.1, 1607.
 		// (What type of computers did they use in 1607?)
-		cpuTimeInSec = (Float32)(userTime / 10000000.0);
+		cpuTimeInSec = (float)(userTime / 10000000.0);
 	}
 	else
 	{
@@ -354,7 +354,7 @@ Float32 RTPStatsUpdaterTask::GetCPUTimeInSeconds()
 #else
 	// The UNIX way of getting the time for this process
 	clock_t cpuTime = clock();
-	cpuTimeInSec = (Float32)cpuTime / CLOCKS_PER_SEC;
+	cpuTimeInSec = (float)cpuTime / CLOCKS_PER_SEC;
 #endif
 	return cpuTimeInSec;
 }
@@ -393,7 +393,7 @@ SInt64 RTPStatsUpdaterTask::Run()
 	SInt64 curTime = OS::Milliseconds();
 
 	//for cpu percent
-	Float32 cpuTimeInSec = GetCPUTimeInSeconds();
+	float cpuTimeInSec = GetCPUTimeInSeconds();
 
 	//also update current bandwidth statistic
 	if (fLastBandwidthTime != 0)
@@ -417,12 +417,12 @@ SInt64 RTPStatsUpdaterTask::Run()
 		UInt32 headerBits = 8 * additionalBytes;
 		headerBits /= theTime;
 
-		Float32 bits = periodicBytes * 8;
+		float bits = periodicBytes * 8;
 		bits /= theTime;
 		theServer->fCurrentRTPBandwidthInBits = (UInt32)(bits + headerBits);
 
 		//do the computation for cpu percent
-		Float32 diffTime = cpuTimeInSec - theServer->fCPUTimeUsedInSec;
+		float diffTime = cpuTimeInSec - theServer->fCPUTimeUsedInSec;
 		theServer->fCPUPercent = (diffTime / theTime) * 100;
 
 		UInt32 numProcessors = OS::GetNumProcessors();
@@ -446,8 +446,8 @@ SInt64 RTPStatsUpdaterTask::Run()
 
 		//do the bandwidth computation using floating point divides
 		//for accuracy and speed.
-		Float32 bits = (Float32)(bytesSent * 8);
-		Float32 theAvgTime = (Float32)delta;
+		float bits = (float)(bytesSent * 8);
+		float theAvgTime = (float)delta;
 		theAvgTime /= 1000;
 		bits /= theAvgTime;
 		Assert(bits >= 0);

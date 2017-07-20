@@ -67,7 +67,7 @@ class SourceInfo
         // the following metadata.
         struct StreamInfo
         {
-            StreamInfo() : fSrcIPAddr(0), fDestIPAddr(0), fPort(0), fTimeToLive(0), fPayloadType(0), fPayloadName(NULL), fTrackID(0), fTrackName(NULL), fBufferDelay((Float32) eDefaultBufferDelay), fIsTCP(false),fSetupToReceive(false), fTimeScale(0){}
+            StreamInfo() : fSrcIPAddr(0), fDestIPAddr(0), fPort(0), fTimeToLive(0), fPayloadType(0), fPayloadName(NULL), fTrackID(0), fTrackName(NULL), fBufferDelay((float) eDefaultBufferDelay), fIsTCP(false),fSetupToReceive(false), fTimeScale(0){}
             ~StreamInfo(); // Deletes the memory allocated for the fPayloadName string 
             
             void Copy(const StreamInfo& copy);// Does copy dynamically allocated data
@@ -80,7 +80,7 @@ class SourceInfo
             StrPtrLen fPayloadName; // Payload name of this stream
             UInt32 fTrackID;    // ID of this stream
 			StrPtrLen fTrackName;//Track Name of this stream
-            Float32 fBufferDelay; // buffer delay (default is 3 seconds)
+            float fBufferDelay; // buffer delay (default is 3 seconds)
             bool  fIsTCP;     // Is this a TCP broadcast? If this is the case, the port and ttl are not valid
             bool  fSetupToReceive;    // If true then a push to the server is setup on this stream.
             UInt32  fTimeScale;

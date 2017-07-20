@@ -87,7 +87,7 @@ public:
 		QTSS_AddStreamFlags inFlags);
 
 	//Reset the thinning params for all streams using the late tolerance value
-	void SetStreamThinningParams(Float32 inLateTolerance);
+	void SetStreamThinningParams(float inLateTolerance);
 
 	//Begins playing all streams. Currently must be associated with an RTSP Play
 	//request, and the request interface must be provided.

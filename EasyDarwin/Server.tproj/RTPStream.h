@@ -148,7 +148,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
 		// Reset the delay parameters that are stored for the thinning calculations
 		void ResetThinningDelayParams() { fLastCurrentPacketDelay = 0; }
 		
-		void SetLateTolerance(Float32 inLateToleranceInSec) { fLateToleranceInSec = inLateToleranceInSec; }
+		void SetLateTolerance(float inLateToleranceInSec) { fLateToleranceInSec = inLateToleranceInSec; }
 		
 		void EnableSSRC() { fEnableSSRC = true; }
 		void DisableSSRC() { fEnableSSRC = false; }
@@ -308,8 +308,8 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         SInt64      fLastCurrentPacketDelay;
         bool      fWaitOnLevelAdjustment;
         
-        Float32     fBufferDelay; // from the sdp
-        Float32     fLateToleranceInSec;
+        float     fBufferDelay; // from the sdp
+        float     fLateToleranceInSec;
                 
         // Pointer to the stream ref (this is just a this pointer)
         QTSS_StreamRef  fStreamRef;
@@ -372,7 +372,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         
         char *GetStreamTypeStr();
         enum { rtp = 0, rtcpSR = 1, rtcpRR = 2, rtcpACK = 3, rtcpAPP = 4 };
-        Float32 GetStreamStartTimeSecs() { return (Float32) ((OS::Milliseconds() - this->fSession->GetSessionCreateTime())/1000.0); }
+        float GetStreamStartTimeSecs() { return (float) ((OS::Milliseconds() - this->fSession->GetSessionCreateTime())/1000.0); }
         void PrintPacket(char *inBuffer, UInt32 inLen, SInt32 inType); 
         void PrintRTP(char* packetBuff, UInt32 inLen);
         void PrintRTCPSenderReport(char* packetBuff, UInt32 inLen);

@@ -326,12 +326,12 @@ UInt32 StringParser::ConsumeInteger(StrPtrLen* outString)
 	return theValue;
 }
 
-Float32 StringParser::ConsumeFloat()
+float StringParser::ConsumeFloat()
 {
 	if (this->ParserIsEmpty(NULL))
 		return 0.0;
 
-	Float32 theFloat = 0;
+	float theFloat = 0;
 	while ((fStartGet < fEndGet) && (*fStartGet >= '0') && (*fStartGet <= '9'))
 	{
 		theFloat = (theFloat * 10) + (*fStartGet - '0');
@@ -339,24 +339,24 @@ Float32 StringParser::ConsumeFloat()
 	}
 	if ((fStartGet < fEndGet) && (*fStartGet == '.'))
 		advanceMark();
-	Float32 multiplier = (Float32) .1;
+	float multiplier = (float) .1;
 	while ((fStartGet < fEndGet) && (*fStartGet >= '0') && (*fStartGet <= '9'))
 	{
 		theFloat += (multiplier * (*fStartGet - '0'));
-		multiplier *= (Float32).1;
+		multiplier *= (float).1;
 
 		advanceMark();
 	}
 	return theFloat;
 }
 
-Float32 StringParser::ConsumeNPT()
+float StringParser::ConsumeNPT()
 {
 	if (this->ParserIsEmpty(NULL))
 		return 0.0;
 
-	Float32 valArray[4] = { 0, 0, 0, 0 };
-	Float32 divArray[4] = { 1, 1, 1, 1 };
+	float valArray[4] = { 0, 0, 0, 0 };
+	float divArray[4] = { 1, 1, 1, 1 };
 	UInt32 valType = 0; // 0 == npt-sec, 1 == npt-hhmmss
 	UInt32 index;
 

@@ -232,7 +232,7 @@ void SDPSourceInfo::Parse(char* sdpData, UInt32 sdpLen)
     theGlobalStreamInfo.fTimeToLive = kDefaultTTL;
         
     //Set bufferdelay to default of 3
-    theGlobalStreamInfo.fBufferDelay = (Float32) eDefaultBufferDelay;
+    theGlobalStreamInfo.fBufferDelay = (float) eDefaultBufferDelay;
     
     //Now actually get all the data on all the streams
     while (sdpParser.GetDataRemaining() > 0)
@@ -413,8 +413,8 @@ void SDPSourceInfo::Parse(char* sdpData, UInt32 sdpLen)
     }       
     
     // Add the default buffer delay
-    Float32 bufferDelay = (Float32) eDefaultBufferDelay;
-    if (theGlobalStreamInfo.fBufferDelay != (Float32) eDefaultBufferDelay)
+    float bufferDelay = (float) eDefaultBufferDelay;
+    if (theGlobalStreamInfo.fBufferDelay != (float) eDefaultBufferDelay)
         bufferDelay = theGlobalStreamInfo.fBufferDelay;
     
     UInt32 count = 0;

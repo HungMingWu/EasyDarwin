@@ -240,7 +240,7 @@ QTSS_Error RTPSession::AddStream(RTSPRequestInterface* request, RTPStream** outS
 	return theErr;
 }
 
-void RTPSession::SetStreamThinningParams(Float32 inLateTolerance)
+void RTPSession::SetStreamThinningParams(float inLateTolerance)
 {
 	// Set the thinning params in all the RTPStreams of the RTPSession
 	// Go through all the streams, setting their thinning params
@@ -337,7 +337,7 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 	if (this->GetMovieAvgBitrate() > 0)
 	{
 		// We have a bit rate... use it.
-		Float32 realBufferSize = (Float32)this->GetMovieAvgBitrate() * thePrefs->GetTCPSecondsToBuffer();
+		float realBufferSize = (float)this->GetMovieAvgBitrate() * thePrefs->GetTCPSecondsToBuffer();
 		theBufferSize = (UInt32)realBufferSize;
 		theBufferSize >>= 3; // Divide by 8 to convert from bits to bytes
 

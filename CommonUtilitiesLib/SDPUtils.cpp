@@ -265,7 +265,7 @@ char SDPLineSorter::sessionSingleLines[] = "vtosiuepcbzk";    // return only 1 o
 StrPtrLen  SDPLineSorter::sEOL("\r\n");
 StrPtrLen  SDPLineSorter::sMaxBandwidthTag("b=AS:");
 
-SDPLineSorter::SDPLineSorter(SDPContainer *rawSDPContainerPtr, Float32 adjustMediaBandwidthPercent, SDPContainer *insertMediaLinesArray) : fSessionLineCount(0), fSDPSessionHeaders(NULL, 0), fSDPMediaHeaders(NULL, 0)
+SDPLineSorter::SDPLineSorter(SDPContainer *rawSDPContainerPtr, float adjustMediaBandwidthPercent, SDPContainer *insertMediaLinesArray) : fSessionLineCount(0), fSDPSessionHeaders(NULL, 0), fSDPMediaHeaders(NULL, 0)
 {
 
 	Assert(rawSDPContainerPtr != NULL);
@@ -306,7 +306,7 @@ SDPLineSorter::SDPLineSorter(SDPContainer *rawSDPContainerPtr, Float32 adjustMed
 			{
 				StringParser bLineParser(&sdpLine);
 				bLineParser.ConsumeUntilDigit();
-				UInt32 bandwidth = (UInt32)(.5 + (adjustMediaBandwidthPercent * (Float32)bLineParser.ConsumeInteger()));
+				UInt32 bandwidth = (UInt32)(.5 + (adjustMediaBandwidthPercent * (float)bLineParser.ConsumeInteger()));
 				if (bandwidth < 1)
 					bandwidth = 1;
 

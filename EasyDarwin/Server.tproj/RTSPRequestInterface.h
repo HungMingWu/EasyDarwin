@@ -142,11 +142,11 @@ public:
 
 	//
 	// Value of Speed: header in request
-	Float32                     GetSpeed() { return fSpeed; }
+	float                     GetSpeed() { return fSpeed; }
 
 	//
 	// Value of late-tolerance field of x-RTP-Options header
-	Float32                     GetLateToleranceInSec() { return fLateTolerance; }
+	float                     GetLateToleranceInSec() { return fLateTolerance; }
 	StrPtrLen*                  GetLateToleranceStr() { return &fLateToleranceStr; }
 
 	// these get set if there is a transport header
@@ -242,10 +242,10 @@ protected:
 
 	UInt32                      fContentLength;
 	SInt64                      fIfModSinceDate;
-	Float32                     fSpeed;
-	Float32                     fLateTolerance;
+	float                     fSpeed;
+	float                     fLateTolerance;
 	StrPtrLen                   fLateToleranceStr;
-	Float32                     fPrebufferAmt;
+	float                     fPrebufferAmt;
 
 	StrPtrLen                   fFirstTransport;
 

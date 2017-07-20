@@ -85,7 +85,7 @@ public:
 	// for tcp buffer size scaling
 	UInt32  GetMinTCPBufferSizeInBytes() { return fMinTCPBufferSizeInBytes; }
 	UInt32  GetMaxTCPBufferSizeInBytes() { return fMaxTCPBufferSizeInBytes; }
-	Float32 GetTCPSecondsToBuffer() { return fTCPSecondsToBuffer; }
+	float GetTCPSecondsToBuffer() { return fTCPSecondsToBuffer; }
 
 	//for joining HTTP sessions from behind a round-robin DNS
 	bool  GetDoReportHTTPConnectionAddress() { return fDoReportHTTPConnectionAddress; }
@@ -123,7 +123,7 @@ public:
 	bool  GetRTSPDebugPrintfs() { return fEnableRTSPDebugPrintfs; }
 	bool  GetRTSPServerInfoEnabled() { return fEnableRTSPServerInfo; }
 
-	Float32    GetOverbufferRate() { return fOverbufferRate; }
+	float    GetOverbufferRate() { return fOverbufferRate; }
 
 	// RUDP window size
 	UInt32  GetSmallWindowSizeInK() { return fSmallWindowSizeInK; }
@@ -263,7 +263,7 @@ private:
 
 	UInt32  fMinTCPBufferSizeInBytes;
 	UInt32  fMaxTCPBufferSizeInBytes;
-	Float32 fTCPSecondsToBuffer;
+	float fTCPSecondsToBuffer;
 
 	bool  fDoReportHTTPConnectionAddress;
 	bool  fAppendSrcAddrInTransport;
@@ -301,7 +301,7 @@ private:
 	bool  fEnableMonitorStatsFile;
 	UInt32  fStatsFileIntervalSeconds;
 
-	Float32	fOverbufferRate;
+	float	fOverbufferRate;
 
 	bool   fEnablePacketHeaderPrintfs;
 	UInt32 fPacketHeaderPrintfOptions;

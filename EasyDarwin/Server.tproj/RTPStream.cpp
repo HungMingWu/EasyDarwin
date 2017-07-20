@@ -1715,9 +1715,9 @@ void RTPStream::PrintRTP(char* packetBuff, UInt32 inLen)
 	if (fFirstTimeStamp == 0)
 		fFirstTimeStamp = timestamp;
 
-	Float32 rtpTimeInSecs = 0.0;
+	float rtpTimeInSecs = 0.0;
 	if (fTimescale > 0 && fFirstTimeStamp < timestamp)
-		rtpTimeInSecs = (Float32)(timestamp - fFirstTimeStamp) / (Float32)fTimescale;
+		rtpTimeInSecs = (float)(timestamp - fFirstTimeStamp) / (float)fTimescale;
 
 
 	StrPtrLen   *payloadStr = this->GetValue(qtssRTPStrPayloadName);
@@ -1749,13 +1749,13 @@ void RTPStream::PrintRTCPSenderReport(char* packetBuff, UInt32 inLen)
 
 	theReport += 2;
 	UInt32 timestamp = ntohl(*theReport);
-	Float32 theTimeInSecs = 0.0;
+	float theTimeInSecs = 0.0;
 
 	if (fFirstTimeStamp == 0)
 		fFirstTimeStamp = timestamp;
 
 	if (fTimescale > 0 && fFirstTimeStamp < timestamp)
-		theTimeInSecs = (Float32)(timestamp - fFirstTimeStamp) / (Float32)fTimescale;
+		theTimeInSecs = (float)(timestamp - fFirstTimeStamp) / (float)fTimescale;
 
 	theReport++;
 	UInt32 packetcount = ntohl(*theReport);

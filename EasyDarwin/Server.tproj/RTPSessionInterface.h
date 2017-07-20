@@ -173,7 +173,7 @@ public:
 	// the nounce count will be incremented.
 	void            UpdateDigestAuthChallengeParams(bool newNonce, bool createOpaque, UInt32 qop);
 
-	Float32* GetPacketLossPercent() { UInt32 outLen; return  (Float32*) this->PacketLossPercent(this, &outLen); }
+	float* GetPacketLossPercent() { UInt32 outLen; return  (float*) this->PacketLossPercent(this, &outLen); }
 
 	SInt32          GetQualityLevel() { return fSessionQualityLevel; }
 	SInt32*         GetQualityLevelPtr() { return &fSessionQualityLevel; }
@@ -306,7 +306,7 @@ private:
 	//Statistics
 	UInt32 fBytesSent;
 	UInt32 fPacketsSent;
-	Float32 fPacketLossPercent;
+	float fPacketLossPercent;
 	SInt64 fTimeConnected;
 	UInt32 fTotalRTCPPacketsRecv;
 	UInt32 fTotalRTCPBytesRecv;

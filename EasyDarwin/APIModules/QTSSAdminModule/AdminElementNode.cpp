@@ -187,7 +187,7 @@ void PRINT_STR(StrPtrLen *spl)
 	}
 }
 
-void COPYBUFFER(char *dest, char *src, SInt8 size)
+void COPYBUFFER(char *dest, char *src, int8_t size)
 {
 	if ((dest != NULL) && (src != NULL) && (size > 0))
 		memcpy(dest, src, size);

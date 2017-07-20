@@ -45,7 +45,7 @@
 #include "AdminQuery.h"
 
 void PRINT_STR(StrPtrLen *spl);
-void COPYBUFFER(char *dest, char *src, SInt8 size);
+void COPYBUFFER(char *dest, char *src, int8_t size);
 
 void ElementNode_InitPtrArray();
 void ElementNode_InsertPtr(void *ptr, char * src);

@@ -506,7 +506,7 @@ int main(int argc, char * argv[])
                 while (status == 0) //loop on wait until status is != 0;
                 {	
                  	pid =::wait(&status);
-                 	SInt8 exitStatus = (SInt8) WEXITSTATUS(status);
+                 	int8_t exitStatus = (int8_t) WEXITSTATUS(status);
                 	//qtss_printf("Child Process %d wait exited with pid=%d status=%d exit status=%d\n", processID, pid, status, exitStatus);
                 	
 					if (WIFEXITED(status) && pid > 0 && status != 0) // child exited with status -2 restart or -1 don't restart 

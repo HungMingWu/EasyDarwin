@@ -465,7 +465,7 @@ QTSS_Error RTPStream::Setup(RTSPRequestInterface* request, QTSS_AddStreamFlags i
 	if (fTransportType == qtssRTPTransportTypeTCP)
 	{
 		fIsTCP = true;
-		fSession->GetOverbufferWindow()->SetWindowSize(kUInt32_Max);
+		fSession->GetOverbufferWindow()->SetWindowSize(UINT32_MAX);
 
 		// If it is, get 2 channel numbers from the RTSP session.
 		fRTPChannel = request->GetSession()->GetTwoChannelNumbers(fSession->GetValue(qtssCliSesRTSPSessionID));

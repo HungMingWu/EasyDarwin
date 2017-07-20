@@ -30,7 +30,7 @@
 
  */
 
-
+#include <cstdint>
 #include "RTCPAPPQTSSPacket.h"
 #include "MyAssert.h"
 #include "OS.h"
@@ -46,7 +46,7 @@ RTCPCompressedQTSSPacket::RTCPCompressedQTSSPacket(bool debug) :
 	fNumEyes(0),
 	fNumEyesActive(0),
 	fNumEyesPaused(0),
-	fOverbufferWindowSize(kUInt32_Max),
+	fOverbufferWindowSize(UINT32_MAX),
 
 	//Proposed - are these there yet?
 	fTotalPacketsReceived(0),

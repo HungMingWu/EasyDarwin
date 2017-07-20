@@ -75,15 +75,6 @@
 
 #include "/System/Library/Frameworks/CoreServices.framework/Headers/../Frameworks/CarbonCore.framework/Headers/MacTypes.h"
 
-#define kSInt16_Max (SInt16) SHRT_MAX
-#define kUInt16_Max (UInt16) USHRT_MAX
-
-#define kSInt32_Max (SInt32) LONG_MAX
-#define kUInt32_Max (UInt32) ULONG_MAX
-
-#define kSInt64_Max (SInt64) LONG_LONG_MAX
-#define kUInt64_Max (UInt64) ULONG_LONG_MAX
-
 #if 0 // old defs we are now using MacTypes.h
     /* Typedefs */
     typedef unsigned char       UInt8;
@@ -151,15 +142,6 @@
     /* Constants */
     #define QT_TIME_TO_LOCAL_TIME   (-2082844800)
     #define QT_PATH_SEPARATOR       '/'
-
-    #define kSInt16_Max (SInt16) SHRT_MAX
-    #define kUInt16_Max (UInt16) USHRT_MAX
-
-    #define kSInt32_Max (SInt32) LONG_MAX
-    #define kUInt32_Max (UInt32) ULONG_MAX
-
-    #define kSInt64_Max (SInt64) LONG_LONG_MAX
-    #define kUInt64_Max (UInt64) ULONG_LONG_MAX
 
     /* Typedefs */
     typedef signed long         PointerSizedInt;
@@ -297,18 +279,6 @@
     #endif
         
     #define TW0_CHARS_TO_INT( c1, c2 )  ( c1 << 8 | c2 )
-
-    #define kSInt16_Max USHRT_MAX
-    #define kUInt16_Max USHRT_MAX
-    
-    #define kSInt32_Max LONG_MAX
-    #define kUInt32_Max ULONG_MAX
-    
-    #undef kSInt64_Max
-    #define kSInt64_Max  9223372036854775807i64
-    
-    #undef kUInt64_Max
-    #define kUInt64_Max  (kSInt64_Max * 2ULL + 1)
 
 #elif __sgi__
     /* Defines */

@@ -29,6 +29,7 @@
                     
 */
 
+#include <cstdint>
 #include "QTSSModuleUtils.h"
 #include "QTSS_Private.h"
 
@@ -119,7 +120,7 @@ QTSS_Error QTSSModuleUtils::ReadEntireFile(char* inPath, StrPtrLen* outData, QTS
 			if (theParamLen != sizeof(UInt64))
 				break;
 			
-			if (*theLength > kSInt32_Max)
+			if (*theLength > INT32_MAX)
 				break;
 	
 			// Allocate memory for the file data

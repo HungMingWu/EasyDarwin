@@ -34,6 +34,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <cstdint>
 
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -476,7 +477,7 @@ OS_Error OSFileSource::ReadFromCache(UInt64 inPosition, void* inBuffer, UInt32 i
 #if FILE_SOURCE_DEBUG
 			qtss_printf("OSFileSource::ReadFromCache end of file reached buffIndex=%" _U32BITARG_ " buffSize = %" _S32BITARG_ " bytesToCopy=%"   _U32BITARG_   "\n", buffIndex, buffSize, bytesToCopy);
 #endif
-			Assert(buffSize <= (SInt64)kUInt32_Max);
+			Assert(buffSize <= (SInt64)UINT32_MAX);
 			::memcpy(buffOut, buffOffset, (UInt32)buffSize);
 			*outRcvLen += (UInt32)buffSize;
 			break;

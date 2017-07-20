@@ -128,7 +128,7 @@ RTPSessionInterface::RTPSessionInterface()
 	fTeardownReason(0),
 	fUniqueID(0),
 	fTracker(QTSServerInterface::GetServer()->GetPrefs()->IsSlowStartEnabled()),
-	fOverbufferWindow(QTSServerInterface::GetServer()->GetPrefs()->GetSendIntervalInMsec(), kUInt32_Max, QTSServerInterface::GetServer()->GetPrefs()->GetMaxSendAheadTimeInSecs(),
+	fOverbufferWindow(QTSServerInterface::GetServer()->GetPrefs()->GetSendIntervalInMsec(), UINT32_MAX, QTSServerInterface::GetServer()->GetPrefs()->GetMaxSendAheadTimeInSecs(),
 		QTSServerInterface::GetServer()->GetPrefs()->GetOverbufferRate()),
 	fAuthScheme(QTSServerInterface::GetServer()->GetPrefs()->GetAuthScheme()),
 	fAuthQop(RTSPSessionInterface::kNoQop),

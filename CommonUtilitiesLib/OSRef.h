@@ -41,6 +41,7 @@
 #ifndef _OSREF_H_
 #define _OSREF_H_
 
+#include <cstdint>
 #include "StrPtrLen.h"
 #include "OSHashTable.h"
 #include "OSCond.h"
@@ -233,7 +234,7 @@ public:
 	// the new OSRef object.
 	void        Swap(OSRef* newRef);
 
-	UInt32      GetNumRefsInTable() { UInt64 result = fTable.GetNumEntries(); Assert(result < kUInt32_Max); return (UInt32)result; }
+	UInt32      GetNumRefsInTable() { UInt64 result = fTable.GetNumEntries(); Assert(result < UINT32_MAX); return (UInt32)result; }
 
 private:
 

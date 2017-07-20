@@ -91,8 +91,6 @@
     
     typedef signed long		    PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef UInt16              Bool16;
-    typedef UInt8               Bool8;
     
 
     #ifdef  FOUR_CHARS_TO_INT
@@ -152,8 +150,6 @@
     typedef int32_t   		SInt32;
     typedef int64_t         	SInt64;
     typedef uint64_t          	UInt64;
-    typedef UInt16              Bool16;
-    typedef UInt8               Bool8;
     
     typedef unsigned int	FourCharCode;
     typedef FourCharCode        OSType;
@@ -256,8 +252,6 @@
     typedef signed long         SInt32;
     typedef LONGLONG            SInt64;
     typedef ULONGLONG           UInt64;
-    typedef UInt16              Bool16;
-    typedef UInt8               Bool8;
     
     typedef unsigned long       FourCharCode;
     typedef FourCharCode        OSType;
@@ -318,8 +312,6 @@
     typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
 	
-	typedef UInt16				Bool16;
-
 	typedef unsigned long		FourCharCode;
 	typedef FourCharCode		OSType;
 
@@ -371,9 +363,6 @@
     #define QT_PATH_SEPARATOR       '/'
 
     /* Typedefs */
-    //typedef unsigned char     Bool16;
-    //#define true              1
-    //#define false             0
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
@@ -385,8 +374,6 @@
     typedef signed long         SInt32;
     typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
-    typedef UInt16              Bool16;
-    typedef UInt8               Bool8;
     
     typedef unsigned long       FourCharCode;
     typedef FourCharCode        OSType;
@@ -432,9 +419,6 @@
     #define QT_PATH_SEPARATOR       '/'
 
     /* Typedefs */
-    //typedef unsigned char     Bool16;
-    //#define true              1
-    //#define false             0
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
@@ -446,8 +430,6 @@
     typedef signed long         SInt32;
     typedef signed long long    SInt64;
     typedef unsigned long long  UInt64;
-    typedef UInt16              Bool16;
-    typedef UInt8               Bool8;
 
     typedef unsigned long       FourCharCode;
     typedef FourCharCode        OSType;
@@ -502,8 +484,6 @@
     typedef signed int          SInt32;
     typedef signed long         SInt64;
     typedef unsigned long       UInt64;
-    typedef UInt16              Bool16;
-    typedef UInt8               Bool8;
     
     typedef unsigned int        FourCharCode;
     typedef FourCharCode        OSType;

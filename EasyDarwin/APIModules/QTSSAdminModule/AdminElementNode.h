@@ -62,8 +62,8 @@ public:
 	char fURLBuffer[512];
 	uint32_t fBitrate;
 	float fPacketLossPercent;
-	UInt64 fBytesSent;
-	UInt64 fTimeConnected;
+	int64_t fBytesSent;
+	int64_t fTimeConnected;
 
 };
 

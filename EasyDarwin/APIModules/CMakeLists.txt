@@ -1,0 +1,20 @@
+include_directories(../../CommonUtilitiesLib 
+					../../RTSPUtilitiesLib
+					../../HTTPUtilitiesLib
+					../../EasyProtocol/Include
+					../APICommonCode
+					../RTPMetaInfoLib
+					../Server.tproj
+					../APIStubLib
+					../PrefsSourceLib
+					../RTCPUtilitiesLib
+					../
+					)
+add_library (APIModules 
+			 QTSSAccessLogModule/QTSSAccessLogModule.cpp
+			 QTSSFlowControlModule/QTSSFlowControlModule.cpp
+             QTSSReflectorModule/QTSSReflectorModule.cpp
+			 QTSSReflectorModule/ReflectorSession.cpp
+			 QTSSReflectorModule/ReflectorStream.cpp
+			 QTSSAccessModule/QTSSAccessModule.cpp
+			 QTSSAccessModule/AccessChecker.cpp)

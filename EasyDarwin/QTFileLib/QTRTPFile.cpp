@@ -517,13 +517,13 @@ double QTRTPFile::GetMovieDuration()
 	return fFile->GetDurationInSeconds();
 }
 
-UInt64 QTRTPFile::GetAddedTracksRTPBytes()
+uint64_t QTRTPFile::GetAddedTracksRTPBytes()
 {
 	// Temporary vars
 	RTPTrackListEntry   *curEntry;
 
 	// General vars
-	UInt64              totalRTPBytes = 0;
+	uint64_t              totalRTPBytes = 0;
 
 
 	//
@@ -836,7 +836,7 @@ uint32_t QTRTPFile::GetBytesPerSecond()
 {
 	if (NULL == fFile)
 		return 0;
-	// Must be a int64_t bc Win32 doesn't implement UInt64 -> double
+	// Must be a int64_t bc Win32 doesn't implement uint64_t -> double
 	int64_t  totalBytes = (int64_t)QTRTPFile::GetAddedTracksRTPBytes();
 
 #ifdef USE_RTP_TRACK_DURATION
@@ -957,8 +957,8 @@ QTRTPFile::ErrorCode QTRTPFile::Seek(double seekToTime, double maxBackupTime)
 
 	if (0 == seekToTime) // optimize the first read to align to the first chunk
 	{
-		UInt64  firstChunkOffset = ~(UInt64)0;// max UInt64
-		UInt64  trackChunkOffset = 0;
+		uint64_t  firstChunkOffset = ~(uint64_t)0;// max uint64_t
+		uint64_t  trackChunkOffset = 0;
 		QTTrack *track = NULL;
 		for (; fFile->NextTrack(&track, track); )
 		{
@@ -969,11 +969,11 @@ QTRTPFile::ErrorCode QTRTPFile::Seek(double seekToTime, double maxBackupTime)
 				continue;
 
 			track->ChunkOffset(1, &trackChunkOffset);
-			if ((UInt64)trackChunkOffset < firstChunkOffset)
-				firstChunkOffset = (UInt64)trackChunkOffset;
+			if ((uint64_t)trackChunkOffset < firstChunkOffset)
+				firstChunkOffset = (uint64_t)trackChunkOffset;
 		}
 
-		if (~(UInt64)0 != firstChunkOffset)
+		if (~(uint64_t)0 != firstChunkOffset)
 		{
 			char junk[4];
 			fFile->Read(firstChunkOffset, junk, sizeof(junk), fFCB);
@@ -1084,7 +1084,7 @@ QTRTPFile::ErrorCode QTRTPFile::ScanToCorrectSample()
 	return errNoError;
 }
 
-QTRTPFile::ErrorCode QTRTPFile::SeekToPacketNumber(uint32_t inTrackID, UInt64 inPacketNumber)
+QTRTPFile::ErrorCode QTRTPFile::SeekToPacketNumber(uint32_t inTrackID, uint64_t inPacketNumber)
 {
 	if (fErr == errCallAgain)
 	{
@@ -1135,7 +1135,7 @@ QTRTPFile::ErrorCode QTRTPFile::SeekToPacketNumber(uint32_t inTrackID, UInt64 in
 	return fErr;
 }
 
-QTRTPFile::ErrorCode    QTRTPFile::ScanToCorrectPacketNumber(uint32_t inTrackID, UInt64 inPacketNumber)
+QTRTPFile::ErrorCode    QTRTPFile::ScanToCorrectPacketNumber(uint32_t inTrackID, uint64_t inPacketNumber)
 {
 	int theLen = 0;
 	for (uint32_t packetCount = 0; packetCount < 100; packetCount++)

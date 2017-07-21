@@ -133,7 +133,7 @@ private:
 	StrPtrLen   fPacketPtr;
 	bool      fIsRTCP;
 	bool      fNeededByOutput; // is this packet still needed for output?
-	UInt64      fStreamCountID;
+	uint64_t      fStreamCountID;
 
 	friend class ReflectorSender;
 	friend class ReflectorSocket;
@@ -249,7 +249,7 @@ private:
 	uint32_t  fTimeoutSecs;
 
 	bool  fHasReceiveTime;
-	UInt64  fFirstReceiveTime;
+	uint64_t  fFirstReceiveTime;
 	int64_t  fFirstArrivalTime;
 	uint32_t  fCurrentSSRC;
 
@@ -434,7 +434,7 @@ public:
 
 	uint32_t                  GetBufferDelay() { return ReflectorStream::sOverBufferInMsec; }
 	uint32_t                  GetTimeScale() { return fStreamInfo.fTimeScale; }
-	UInt64                  fPacketCount;
+	uint64_t                  fPacketCount;
 
 	void                    SetEnableBuffer(bool enableBuffer) { fEnableBuffer = enableBuffer; }
 	bool                  BufferEnabled() { return fEnableBuffer; }

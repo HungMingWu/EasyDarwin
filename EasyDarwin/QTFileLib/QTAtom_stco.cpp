@@ -137,7 +137,7 @@ void QTAtom_stco::DumpTable()
 
 	//
 	// Print the table.
-	UInt64 offset = 0;
+	uint64_t offset = 0;
 	for (uint32_t CurEntry = 1; CurEntry <= fNumEntries; CurEntry++)
 	{
 		if (ChunkOffset(CurEntry, &offset))

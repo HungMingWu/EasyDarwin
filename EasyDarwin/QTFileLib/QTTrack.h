@@ -86,13 +86,13 @@ public:
 
 	inline  const char *GetTrackName() { return (fTrackName ? fTrackName : ""); }
 	inline  uint32_t      GetTrackID() { return fTrackHeaderAtom->GetTrackID(); }
-	inline  UInt64      GetCreationTime() { return fTrackHeaderAtom->GetCreationTime(); }
-	inline  UInt64      GetModificationTime() { return fTrackHeaderAtom->GetModificationTime(); }
+	inline  uint64_t      GetCreationTime() { return fTrackHeaderAtom->GetCreationTime(); }
+	inline  uint64_t      GetModificationTime() { return fTrackHeaderAtom->GetModificationTime(); }
 	inline  int64_t      GetDuration() { return (int64_t)fTrackHeaderAtom->GetDuration(); }
 	inline  double     GetTimeScale() { return fMediaHeaderAtom->GetTimeScale(); }
 	inline  double     GetTimeScaleRecip() { return fMediaHeaderAtom->GetTimeScaleRecip(); }
 	inline  double     GetDurationInSeconds() { return GetDuration() / (double)GetTimeScale(); }
-	inline  UInt64      GetFirstEditMovieTime(void)
+	inline  uint64_t      GetFirstEditMovieTime(void)
 	{
 		if (fEditListAtom != NULL) return fEditListAtom->FirstEditMovieTime();
 		else return 0;
@@ -129,7 +129,7 @@ public:
 		return fSampleToChunkAtom->GetChunkFirstSample(chunkNumber);
 	}
 
-	inline  bool      ChunkOffset(uint32_t ChunkNumber, UInt64 *Offset = NULL)
+	inline  bool      ChunkOffset(uint32_t ChunkNumber, uint64_t *Offset = NULL)
 	{
 		return fChunkOffsetAtom->ChunkOffset(ChunkNumber, Offset);
 	}
@@ -144,7 +144,7 @@ public:
 		return fSampleSizeAtom->SampleRangeSize(firstSample, lastSample, sizePtr);
 	}
 
-	bool      GetSampleInfo(uint32_t SampleNumber, uint32_t * const Length, UInt64 * const Offset, uint32_t * const SampleDescriptionIndex,
+	bool      GetSampleInfo(uint32_t SampleNumber, uint32_t * const Length, uint64_t * const Offset, uint32_t * const SampleDescriptionIndex,
 		QTAtom_stsc_SampleTableControlBlock * STCB);
 
 	bool      GetSample(uint32_t SampleNumber, char * Buffer, uint32_t * Length, QTFile_FileControlBlock * FCB,
@@ -182,7 +182,7 @@ public:
 	}
 	//
 	// Read functions.
-	inline  bool      Read(uint32_t SampleDescriptionID, UInt64 Offset, char * const Buffer, uint32_t Length,
+	inline  bool      Read(uint32_t SampleDescriptionID, uint64_t Offset, char * const Buffer, uint32_t Length,
 		QTFile_FileControlBlock * FCB = NULL)
 	{
 		return fDataReferenceAtom->Read(fSampleDescriptionAtom->SampleDescriptionToDataReference(SampleDescriptionID), Offset, Buffer, Length, FCB);

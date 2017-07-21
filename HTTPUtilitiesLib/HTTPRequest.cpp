@@ -487,7 +487,7 @@ void HTTPRequest::AppendResponseHeader(HTTPHeader inHeader, StrPtrLen* inValue) 
 	fHTTPHeader->Len = fHTTPHeaderFormatter->GetCurrentOffset();
 }
 
-void HTTPRequest::AppendContentLengthHeader(UInt64 length_64bit) const
+void HTTPRequest::AppendContentLengthHeader(uint64_t length_64bit) const
 {
 	//char* contentLength = new char[256];
 	char contentLength[256] = { 0 };

@@ -88,7 +88,7 @@ public:
 
 	//
 	// Read functions.
-	bool      Read(uint32_t RefID, UInt64 Offset, char * const Buffer, uint32_t Length,
+	bool      Read(uint32_t RefID, uint64_t Offset, char * const Buffer, uint32_t Length,
 		QTFile_FileControlBlock * FCB = NULL);
 
 

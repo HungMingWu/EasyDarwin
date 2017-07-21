@@ -164,7 +164,7 @@ public:
 	//
 	// Accessors
 	double     GetMovieDuration();
-	UInt64      GetAddedTracksRTPBytes();
+	uint64_t      GetAddedTracksRTPBytes();
 	char *      GetSDPFile(int * SDPFileLength);
 	uint32_t      GetBytesPerSecond();
 
@@ -214,7 +214,7 @@ public:
 	//
 	// Packet functions
 	ErrorCode   Seek(double Time, double MaxBackupTime = 3.0);
-	ErrorCode   SeekToPacketNumber(uint32_t inTrackID, UInt64 inPacketNumber);
+	ErrorCode   SeekToPacketNumber(uint32_t inTrackID, uint64_t inPacketNumber);
 
 	uint32_t      GetSeekTimestamp(uint32_t TrackID);
 	double     GetRequestedSeekTime() { return fRequestedSeekTime; }
@@ -249,7 +249,7 @@ protected:
 	// Protected member functions.
 	bool      PrefetchNextPacket(RTPTrackListEntry * TrackEntry, bool doSeek = false);
 	ErrorCode   ScanToCorrectSample();
-	ErrorCode   ScanToCorrectPacketNumber(uint32_t inTrackID, UInt64 inPacketNumber);
+	ErrorCode   ScanToCorrectPacketNumber(uint32_t inTrackID, uint64_t inPacketNumber);
 
 	//
 	// Protected member variables.

@@ -199,9 +199,9 @@ public:
 	uint32_t              GetCurBandwidthInBits() { return fCurrentRTPBandwidthInBits; }
 	uint32_t              GetAvgBandwidthInBits() { return fAvgRTPBandwidthInBits; }
 	uint32_t              GetRTPPacketsPerSec() { return fRTPPacketsPerSecond; }
-	UInt64              GetTotalRTPBytes() { return fTotalRTPBytes; }
-	UInt64              GetTotalRTPPacketsLost() { return fTotalRTPPacketsLost; }
-	UInt64              GetTotalRTPPackets() { return fTotalRTPPackets; }
+	uint64_t              GetTotalRTPBytes() { return fTotalRTPBytes; }
+	uint64_t              GetTotalRTPPacketsLost() { return fTotalRTPPacketsLost; }
+	uint64_t              GetTotalRTPPackets() { return fTotalRTPPackets; }
 	float             GetCPUPercent() { return fCPUPercent; }
 	bool              SigIntSet() { return fSigInt; }
 	bool				SigTermSet() { return fSigTerm; }
@@ -391,11 +391,11 @@ private:
 	//stores the total number of connections since startup.
 	uint32_t              fTotalRTPSessions;
 	//stores the total number of bytes served since startup
-	UInt64              fTotalRTPBytes;
+	uint64_t              fTotalRTPBytes;
 	//total number of rtp packets sent since startup
-	UInt64              fTotalRTPPackets;
+	uint64_t              fTotalRTPPackets;
 	//stores the total number of bytes lost (as reported by clients) since startup
-	UInt64              fTotalRTPPacketsLost;
+	uint64_t              fTotalRTPPacketsLost;
 
 	//because there is no 64 bit atomic add (for obvious reasons), we efficiently
 	//implement total byte counting by atomic adding to this variable, then every

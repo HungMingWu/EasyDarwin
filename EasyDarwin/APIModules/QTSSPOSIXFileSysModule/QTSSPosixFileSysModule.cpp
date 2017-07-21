@@ -119,7 +119,7 @@ QTSS_Error  OpenFile(QTSS_OpenFile_Params* inParams)
 {
 	OSFileSource* theFileSource = new OSFileSource(inParams->inPath);
 
-	UInt64 theLength = theFileSource->GetLength();
+	uint64_t theLength = theFileSource->GetLength();
 
 	//
 	// OSFileSource returns mod date as a time_t.

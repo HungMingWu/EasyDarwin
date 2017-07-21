@@ -340,12 +340,12 @@ QTTrack::ErrorCode QTHintTrack::Initialize()
 	// Calculate the first RTP timestamp for this track.
 	if (GetFirstEditMovieTime() > 0)
 	{
-		UInt64 trackTime = GetFirstEditMovieTime();
+		uint64_t trackTime = GetFirstEditMovieTime();
 
 		trackTime *= fRTPTimescale;
 
 		if (fFile->GetTimeScale() > 0.0)
-			trackTime /= (UInt64)fFile->GetTimeScale();
+			trackTime /= (uint64_t)fFile->GetTimeScale();
 
 		fFirstRTPTimestamp = (uint32_t)(trackTime & 0xffffffff);
 
@@ -601,7 +601,7 @@ bool QTHintTrack::GetSamplePtr(uint32_t sampleNumber, char ** samplePtr, uint32_
 	//
 	// Get the length of the new sample.
 	uint32_t      sampleDescriptionIndex;
-	UInt64      sampleOffset;
+	uint64_t      sampleOffset;
 
 	if (!this->GetSampleInfo(sampleNumber, &newSampleLength, &sampleOffset, &sampleDescriptionIndex, &htcb->fstscSTCB))
 		return false;
@@ -689,17 +689,17 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 	uint16_t      bytesPerCompressionBlock = 0;
 	uint16_t      samplesPerCompressionBlock = 0;  // inititialization eliminates a stupid compiler warning :(
 	uint32_t      sampleDescriptionIndex;
-	UInt64      dataOffset;
+	uint64_t      dataOffset;
 	char*       pBuf = NULL;
 	char*       maxBuffPtr = NULL;
 	char*       buffOutPtr = NULL;
 	QTTrack     *track = NULL;
 	uint32_t      samplesPerChunk = 0;
 	uint32_t      chunkNumber = 0;
-	UInt64      chunkOffset = 0;
+	uint64_t      chunkOffset = 0;
 	uint32_t      sampleOffsetInChunk = 0;
 	uint32_t      sampleLength = 0;
-	UInt64      cacheHintSampleLen = 0;
+	uint64_t      cacheHintSampleLen = 0;
 	int32_t      hintMaxRead = 0;
 	int64_t      sizeOfSamplesInChunk = 0;
 	int64_t      endOfSampleInChunk = 0;
@@ -930,7 +930,7 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 			if (!track->ChunkOffset(chunkNumber, &chunkOffset))
 				return (errInvalidQuickTimeFile);
 
-			dataOffset = (UInt64)chunkOffset + (UInt64)((double)sampleOffsetInChunk * ((double)bytesPerCompressionBlock / (double)samplesPerCompressionBlock));
+			dataOffset = (uint64_t)chunkOffset + (uint64_t)((double)sampleOffsetInChunk * ((double)bytesPerCompressionBlock / (double)samplesPerCompressionBlock));
 
 			if (!track->GetSizeOfSamplesInChunk(chunkNumber, (uint32_t *)&sizeOfSamplesInChunk, NULL, NULL, mediaTrackSTSC_STCBPtr))
 				return (errInvalidQuickTimeFile);
@@ -952,7 +952,7 @@ QTTrack::ErrorCode QTHintTrack::GetSampleData(QTHintTrack_HintTrackControlBlock 
 //              qtss_printf("chunkOffset = %" _S32BITARG_ "  ",chunkOffset);
 //              qtss_printf("old dataOffset = %qd ",dataOffset);
 				remainingLength = 0;
-				dataOffset = chunkOffset + readOffset + (UInt64)(sampleOffsetInChunk * ((double)bytesPerCompressionBlock / (double)samplesPerCompressionBlock));
+				dataOffset = chunkOffset + readOffset + (uint64_t)(sampleOffsetInChunk * ((double)bytesPerCompressionBlock / (double)samplesPerCompressionBlock));
 				//              qtss_printf("new dataOffset = %qd \n", dataOffset);
 			}
 

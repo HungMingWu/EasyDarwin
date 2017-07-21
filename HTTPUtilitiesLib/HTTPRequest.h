@@ -81,7 +81,7 @@ public:
 	void                    AppendDateField() const;
 	void                    AppendConnectionCloseHeader() const;
 	void                    AppendConnectionKeepAliveHeader() const;
-	void                    AppendContentLengthHeader(UInt64 length_64bit) const;
+	void                    AppendContentLengthHeader(uint64_t length_64bit) const;
 	void                    AppendContentLengthHeader(uint32_t length_32bit) const;
 
 	// Returns the completed response header by appending CRLF to the end of the header

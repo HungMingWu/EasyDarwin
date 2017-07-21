@@ -1961,11 +1961,11 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 		{
 			uint32_t offset = thePacket->fPacketPtr.Len;
 			char* theTag = ((char*)thePacket->fPacketPtr.Ptr + offset) - 12;
-			UInt64* theValue = (UInt64*)((char*)((char*)thePacket->fPacketPtr.Ptr + offset) - 8);
+			uint64_t* theValue = (uint64_t*)((char*)((char*)thePacket->fPacketPtr.Ptr + offset) - 8);
 
 			if (0 == ::strncmp(theTag, "aktt", 4))
 			{
-				UInt64 theReceiveTime = OS::NetworkToHostSInt64(*theValue);
+				uint64_t theReceiveTime = OS::NetworkToHostSInt64(*theValue);
 				uint32_t theSSRC = thePacket->GetSSRC(theRemotePort & 1); // use to check if broadcast has restarted so we can reset
 
 				if (!this->fHasReceiveTime || (this->fCurrentSSRC != theSSRC))

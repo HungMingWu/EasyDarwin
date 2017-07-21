@@ -54,7 +54,7 @@ QTSSAttrInfoDict::AttrInfo  RTPSessionInterface::sAttributes[] =
 	/* 8  */ { "qtssCliSesPresentationURL",         NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 9  */ { "qtssCliSesFirstUserAgent",          NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 10 */ { "qtssCliStrMovieDurationInSecs",     NULL,   qtssAttrDataTypeFloat64,        qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 11 */ { "qtssCliStrMovieSizeInBytes",        NULL,   qtssAttrDataTypeUInt64,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 11 */ { "qtssCliStrMovieSizeInBytes",        NULL,   qtssAttrDataTypeuint64_t,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
 	/* 12 */ { "qtssCliSesMovieAverageBitRate",     NULL,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
 	/* 13 */ { "qtssCliSesLastRTSPSession",         NULL,   qtssAttrDataTypeQTSS_Object,    qtssAttrModeRead | qtssAttrModePreempSafe } ,
 	/* 14 */ { "qtssCliSesFullURL",                 NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe } ,

@@ -314,7 +314,7 @@ private:
 	// statistics with the movie, for a session MAY have multiple movies...
 	// however, the 1 movie assumption is in too many subsystems at this point
 	double     fMovieDuration;
-	UInt64      fMovieSizeInBytes;
+	uint64_t      fMovieSizeInBytes;
 	uint32_t      fMovieAverageBitRate;
 
 	QTSS_CliSesTeardownReason fTeardownReason;

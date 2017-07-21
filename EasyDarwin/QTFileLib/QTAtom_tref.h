@@ -79,7 +79,7 @@ public:
 protected:
 	//
 	// Protected member variables.
-	UInt64      fNumEntries;
+	uint64_t      fNumEntries;
 	char        *fTrackReferenceTable;
 	uint32_t      *fTable; // longword-aligned version of the above
 };

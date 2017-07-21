@@ -59,7 +59,7 @@ public:
 	inline  double     GetTimeScale() { return (double)fTimeScale; }
 	inline  double     GetTimeScaleRecip() { return fTimeScaleRecip; }
 
-	inline  UInt64      GetDuration() { return fDuration; }
+	inline  uint64_t      GetDuration() { return fDuration; }
 
 	//
 	// Debugging functions.
@@ -71,9 +71,9 @@ protected:
 	// Protected member variables.
 	uint8_t       fVersion;
 	uint32_t      fFlags; // 24 bits in the low 3 bytes
-	UInt64      fCreationTime, fModificationTime;
+	uint64_t      fCreationTime, fModificationTime;
 	uint32_t      fTimeScale;
-	UInt64      fDuration;
+	uint64_t      fDuration;
 	uint16_t      fLanguage;
 	uint16_t      fQuality;
 

@@ -413,7 +413,7 @@ QTSS_Error  QTSSCallbacks::QTSS_Read(QTSS_StreamRef inStream, void* ioBuffer, ui
 		return theErr;
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_Seek(QTSS_StreamRef inStream, UInt64 inNewPosition)
+QTSS_Error  QTSSCallbacks::QTSS_Seek(QTSS_StreamRef inStream, uint64_t inNewPosition)
 {
 	if (inStream == NULL)
 		return QTSS_BadArgument;
@@ -421,7 +421,7 @@ QTSS_Error  QTSSCallbacks::QTSS_Seek(QTSS_StreamRef inStream, UInt64 inNewPositi
 }
 
 
-QTSS_Error  QTSSCallbacks::QTSS_Advise(QTSS_StreamRef inStream, UInt64 inPosition, uint32_t inAdviseSize)
+QTSS_Error  QTSSCallbacks::QTSS_Advise(QTSS_StreamRef inStream, uint64_t inPosition, uint32_t inAdviseSize)
 {
 	if (inStream == NULL)
 		return QTSS_BadArgument;
@@ -1008,7 +1008,7 @@ void* QTSSCallbacks::Easy_GetRTSPPushSessions()
 }
 
 
-//void *QTSSCallbacks::Easy_GetRTSPRecordSessions(char* inSessionName, UInt64 startTime, UInt64 endTime) 
+//void *QTSSCallbacks::Easy_GetRTSPRecordSessions(char* inSessionName, uint64_t startTime, uint64_t endTime) 
 //{
 //	return nullptr;
 	//char * rootdir = RTSPRecordSession::getNetRecordRootPath();

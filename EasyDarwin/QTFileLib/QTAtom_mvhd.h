@@ -57,7 +57,7 @@ public:
 	inline  double     GetTimeScale() { return (double)fTimeScale; }
 #if __Win32__
 
-	// Win compiler can't convert UInt64 to double. It does support int64_t to double though.
+	// Win compiler can't convert uint64_t to double. It does support int64_t to double though.
 
 	inline  double     GetDurationInSeconds() { if (fTimeScale != 0) { return (double)((int64_t)fDuration) / (double)((int64_t)fTimeScale); } else { return (double) 0.0; } }
 
@@ -76,9 +76,9 @@ protected:
 	// Protected member variables.
 	uint8_t       fVersion;
 	uint32_t      fFlags; // 24 bits in the low 3 bytes
-	UInt64      fCreationTime, fModificationTime;
+	uint64_t      fCreationTime, fModificationTime;
 	uint32_t      fTimeScale;
-	UInt64      fDuration;
+	uint64_t      fDuration;
 	uint32_t      fPreferredRate;
 	uint16_t      fPreferredVolume;
 	uint32_t      fa, fb, fu, fc, fd, fv, fx, fy, fw;

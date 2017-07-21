@@ -55,8 +55,8 @@
 QTSServer* sServer = NULL;
 int sStatusUpdateInterval = 0;
 bool sHasPID = false;
-UInt64 sLastStatusPackets = 0;
-UInt64 sLastDebugPackets = 0;
+uint64_t sLastStatusPackets = 0;
+uint64_t sLastDebugPackets = 0;
 int64_t sLastDebugTotalQuality = 0;
 #ifdef __sgi__ 
 #include <sched.h>
@@ -514,7 +514,7 @@ void DebugStatus(uint32_t debugLevel, bool printHeader)
 		::fclose(statusFile);
 }
 
-void FormattedTotalBytesBuffer(char *outBuffer, int outBufferLen, UInt64 totalBytes)
+void FormattedTotalBytesBuffer(char *outBuffer, int outBufferLen, uint64_t totalBytes)
 {
 	float displayBytes = 0.0;
 	char  sizeStr[] = "B";
@@ -584,7 +584,7 @@ void PrintStatus(bool printHeader)
 	qtss_printf("%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = NULL;
 
-	UInt64 totalBytes = sServer->GetTotalRTPBytes();
+	uint64_t totalBytes = sServer->GetTotalRTPBytes();
 	char  displayBuff[32] = "";
 	FormattedTotalBytesBuffer(displayBuff, sizeof(displayBuff), totalBytes);
 	qtss_printf("%17s", displayBuff);

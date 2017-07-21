@@ -48,7 +48,7 @@ class QTAtom_elst : public QTAtom {
 	// Class typedefs.
 	struct EditListEntry {
 		// Edit information
-		UInt64          EditDuration;
+		uint64_t          EditDuration;
 		int64_t          StartingMediaTime;
 		uint32_t          EditMediaRate;
 	};
@@ -68,7 +68,7 @@ public:
 
 	//
 	// Accessors.
-	inline  UInt64      FirstEditMovieTime() { return fFirstEditMovieTime; }
+	inline  uint64_t      FirstEditMovieTime() { return fFirstEditMovieTime; }
 
 
 	//
@@ -85,7 +85,7 @@ protected:
 	uint32_t          fNumEdits;
 	EditListEntry   *fEdits;
 
-	UInt64      fFirstEditMovieTime;
+	uint64_t      fFirstEditMovieTime;
 };
 
 #endif // QTAtom_elst_H

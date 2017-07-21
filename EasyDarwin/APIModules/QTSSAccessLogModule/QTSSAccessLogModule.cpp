@@ -423,7 +423,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 
 	float* packetLossPercent = NULL;
 	double* movieDuration = NULL;
-	UInt64* movieSizeInBytes = NULL;
+	uint64_t* movieSizeInBytes = NULL;
 	uint32_t* movieAverageBitRatePtr = 0;
 	uint32_t clientPacketsReceived = 0;
 	uint32_t clientPacketsLost = 0;
@@ -699,7 +699,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 #endif
 
 	float zeroFloat = 0;
-	UInt64 zeroUInt64 = 0;
+	uint64_t zerouint64_t = 0;
 	float fcpuUtilized = 0;
 
 	theLen = sizeof(fcpuUtilized);
@@ -779,7 +779,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	::strcat(logBuffer, tempLogBuffer);
 	qtss_sprintf(tempLogBuffer, "%0.0f ", movieDuration == NULL ? zeroFloat : *movieDuration); //filelength in secs*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%" _64BITARG_ "d ", movieSizeInBytes == NULL ? zeroUInt64 : *movieSizeInBytes); //filesize in bytes*
+	qtss_sprintf(tempLogBuffer, "%" _64BITARG_ "d ", movieSizeInBytes == NULL ? zerouint64_t : *movieSizeInBytes); //filesize in bytes*
 	::strcat(logBuffer, tempLogBuffer);
 	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", movieAverageBitRatePtr == NULL ? (uint32_t)0 : *movieAverageBitRatePtr);    //avgbandwidth in bits per second
 	::strcat(logBuffer, tempLogBuffer);

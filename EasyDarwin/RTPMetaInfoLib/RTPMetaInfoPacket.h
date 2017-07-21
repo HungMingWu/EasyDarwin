@@ -122,8 +122,8 @@ public:
 	// Field Accessors
 	int64_t          GetTransmitTime() { return fTransmitTime; }
 	FrameTypeField  GetFrameType() { return fFrameType; }
-	UInt64          GetPacketNumber() { return fPacketNumber; }
-	UInt64          GetPacketPosition() { return fPacketPosition; }
+	uint64_t          GetPacketNumber() { return fPacketNumber; }
+	uint64_t          GetPacketPosition() { return fPacketPosition; }
 	uint8_t*          GetMediaDataP() { return fMediaDataP; }
 	uint32_t          GetMediaDataLen() { return fMediaDataLen; }
 	uint16_t          GetSeqNum() { return fSeqNum; }
@@ -135,8 +135,8 @@ private:
 
 	int64_t          fTransmitTime;
 	FrameTypeField  fFrameType;
-	UInt64          fPacketNumber;
-	UInt64          fPacketPosition;
+	uint64_t          fPacketNumber;
+	uint64_t          fPacketPosition;
 	uint8_t*          fMediaDataP;
 	uint32_t          fMediaDataLen;
 	uint16_t          fSeqNum;

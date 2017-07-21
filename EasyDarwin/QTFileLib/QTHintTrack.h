@@ -113,8 +113,8 @@ public:
 	RTPMetaInfoPacket::FieldID*         fRTPMetaInfoFieldArray;
 	uint32_t                              fSyncSampleCursor; // Where are we in the sync sample table?
 	bool                              fIsVideo; // so that we know what to do with the frame type field
-	UInt64              fCurrentPacketNumber;
-	UInt64              fCurrentPacketPosition;
+	uint64_t              fCurrentPacketNumber;
+	uint64_t              fCurrentPacketPosition;
 
 	int32_t              fMediaTrackRefIndex;
 	QTAtom_stsc_SampleTableControlBlock * fMediaTrackSTSC_STCB;
@@ -145,8 +145,8 @@ public:
 	ErrorCode   GetSDPFileLength(int * Length);
 	char *      GetSDPFile(int * Length);
 
-	inline  UInt64      GetTotalRTPBytes() { return fHintInfoAtom ? fHintInfoAtom->GetTotalRTPBytes() : 0; }
-	inline  UInt64      GetTotalRTPPackets() { return fHintInfoAtom ? fHintInfoAtom->GetTotalRTPPackets() : 0; }
+	inline  uint64_t      GetTotalRTPBytes() { return fHintInfoAtom ? fHintInfoAtom->GetTotalRTPBytes() : 0; }
+	inline  uint64_t      GetTotalRTPPackets() { return fHintInfoAtom ? fHintInfoAtom->GetTotalRTPPackets() : 0; }
 
 	inline  uint32_t      GetFirstRTPTimestamp() { return fFirstRTPTimestamp; }
 	inline  void        SetAllowInvalidHintRefs(bool inAllowInvalidHintRefs) { fAllowInvalidHintRefs = inAllowInvalidHintRefs; }

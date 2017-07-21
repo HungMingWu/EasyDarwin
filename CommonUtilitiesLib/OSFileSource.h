@@ -113,7 +113,7 @@ class FileMap
 public:
 	FileMap() :fFileMapArray(nullptr), fDataBufferSize(0), fMapArraySize(0), fNumBuffSizeUnits(0) {}
 	~FileMap() { fFileMapArray = nullptr; }
-	void    AllocateBufferMap(uint32_t inUnitSizeInK, uint32_t inNumBuffSizeUnits, uint32_t inBufferIncCount, uint32_t inMaxBitRateBuffSizeInBlocks, UInt64 fileLen, uint32_t inBitRate);
+	void    AllocateBufferMap(uint32_t inUnitSizeInK, uint32_t inNumBuffSizeUnits, uint32_t inBufferIncCount, uint32_t inMaxBitRateBuffSizeInBlocks, uint64_t fileLen, uint32_t inBitRate);
 	char*   GetBuffer(int64_t bufIndex, bool* outIsEmptyBuff);
 	void    TestBuffer(int32_t bufIndex) const
 	{ Assert(bufIndex >= 0); fFileMapArray[bufIndex]->TestBuffer(); };
@@ -132,12 +132,12 @@ public:
 	void    Clean();
 	void    DeleteMap();
 	void    DeleteOldBuffs();
-	int64_t  GetBuffIndex(UInt64 inPosition) const
+	int64_t  GetBuffIndex(uint64_t inPosition) const
 	{ return inPosition / this->GetMaxBufSize(); }
 	int64_t  GetMaxBuffIndex() const
 	{ Assert(fMapArraySize > 0); return fMapArraySize - 1; }
-	UInt64  GetBuffOffset(int64_t bufIndex) const
-	{ return static_cast<UInt64>(bufIndex * this->GetMaxBufSize()); }
+	uint64_t  GetBuffOffset(int64_t bufIndex) const
+	{ return static_cast<uint64_t>(bufIndex * this->GetMaxBufSize()); }
 	FileBlockPool fBlockPool;
 
 	FileBlockBuffer**   fFileMapArray;
@@ -187,17 +187,17 @@ public:
 
 	//Advise: this advises the OS that we are going to be reading soon from the
 	//following position in the file
-	void            Advise(UInt64 advisePos, uint32_t adviseAmt);
+	void            Advise(uint64_t advisePos, uint32_t adviseAmt);
 
 	OS_Error    Read(void* inBuffer, uint32_t inLength, uint32_t* outRcvLen = nullptr)
 	{
 		return ReadFromDisk(inBuffer, inLength, outRcvLen);
 	}
 
-	OS_Error    Read(UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen = nullptr);
+	OS_Error    Read(uint64_t inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen = nullptr);
 	OS_Error    ReadFromDisk(void* inBuffer, uint32_t inLength, uint32_t* outRcvLen = nullptr);
-	OS_Error    ReadFromCache(UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen = nullptr);
-	OS_Error    ReadFromPos(UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen = nullptr);
+	OS_Error    ReadFromCache(uint64_t inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen = nullptr);
+	OS_Error    ReadFromPos(uint64_t inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen = nullptr);
 	void        EnableFileCache(bool enabled) { OSMutexLocker locker(&fMutex); fCacheEnabled = enabled; }
 	bool      GetCacheEnabled() const
 	{ return fCacheEnabled; }
@@ -213,9 +213,9 @@ public:
 	void            Close();
 	time_t          GetModDate() const
 	{ return fModDate; }
-	UInt64          GetLength() const
+	uint64_t          GetLength() const
 	{ return fLength; }
-	UInt64          GetCurOffset() const
+	uint64_t          GetCurOffset() const
 	{ return fPosition; }
 	void            Seek(int64_t newPosition) { fPosition = newPosition; }
 	bool IsValid() const
@@ -235,9 +235,9 @@ public:
 private:
 
 	int     fFile;
-	UInt64  fLength;
-	UInt64  fPosition;
-	UInt64  fReadPos;
+	uint64_t  fLength;
+	uint64_t  fPosition;
+	uint64_t  fReadPos;
 	bool  fShouldClose;
 	bool  fIsDir;
 	time_t  fModDate;

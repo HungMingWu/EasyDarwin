@@ -58,30 +58,30 @@ public:
 #if BIGENDIAN
 		return networkOrdered;
 #else
-		return (int64_t)((UInt64)(networkOrdered << 56) | (UInt64)(((UInt64)0x00ff0000 << 32) & (networkOrdered << 40))
-			| (UInt64)(((UInt64)0x0000ff00 << 32) & (networkOrdered << 24)) | (UInt64)(((UInt64)0x000000ff << 32) & (networkOrdered << 8))
-			| (UInt64)(((UInt64)0x00ff0000 << 8) & (networkOrdered >> 8)) | (UInt64)((UInt64)0x00ff0000 & (networkOrdered >> 24))
-			| (UInt64)((UInt64)0x0000ff00 & (networkOrdered >> 40)) | (UInt64)((UInt64)0x00ff & (networkOrdered >> 56)));
+		return (int64_t)((uint64_t)(networkOrdered << 56) | (uint64_t)(((uint64_t)0x00ff0000 << 32) & (networkOrdered << 40))
+			| (uint64_t)(((uint64_t)0x0000ff00 << 32) & (networkOrdered << 24)) | (uint64_t)(((uint64_t)0x000000ff << 32) & (networkOrdered << 8))
+			| (uint64_t)(((uint64_t)0x00ff0000 << 8) & (networkOrdered >> 8)) | (uint64_t)((uint64_t)0x00ff0000 & (networkOrdered >> 24))
+			| (uint64_t)((uint64_t)0x0000ff00 & (networkOrdered >> 40)) | (uint64_t)((uint64_t)0x00ff & (networkOrdered >> 56)));
 #endif
 	}
 
 	//
 	// Read functions.
-	bool      ReadBytes(UInt64 Offset, char* Buffer, uint32_t Length);
-	bool      ReadInt8(UInt64 Offset, uint8_t* Datum);
-	bool      ReadInt16(UInt64 Offset, uint16_t* Datum);
-	bool      ReadInt32(UInt64 Offset, uint32_t* Datum);
-	bool      ReadInt64(UInt64 Offset, UInt64* Datum);
-	bool      ReadInt32To64(UInt64 Offset, UInt64* Datum);
-	bool		ReadInt32To64Signed(UInt64 Offset, int64_t* Datum);
+	bool      ReadBytes(uint64_t Offset, char* Buffer, uint32_t Length);
+	bool      ReadInt8(uint64_t Offset, uint8_t* Datum);
+	bool      ReadInt16(uint64_t Offset, uint16_t* Datum);
+	bool      ReadInt32(uint64_t Offset, uint32_t* Datum);
+	bool      ReadInt64(uint64_t Offset, uint64_t* Datum);
+	bool      ReadInt32To64(uint64_t Offset, uint64_t* Datum);
+	bool		ReadInt32To64Signed(uint64_t Offset, int64_t* Datum);
 
 	bool      ReadSubAtomBytes(const char* AtomPath, char* Buffer, uint32_t Length);
 	bool      ReadSubAtomInt8(const char* AtomPath, uint8_t* Datum);
 	bool      ReadSubAtomInt16(const char* AtomPath, uint16_t* Datum);
 	bool      ReadSubAtomInt32(const char* AtomPath, uint32_t* Datum);
-	bool      ReadSubAtomInt64(const char* AtomPath, UInt64* Datum);
+	bool      ReadSubAtomInt64(const char* AtomPath, uint64_t* Datum);
 
-	char*       MemMap(UInt64 Offset, uint32_t Length);
+	char*       MemMap(uint64_t Offset, uint32_t Length);
 	bool      UnMap(char* memPtr, uint32_t Length);
 	//
 	// Debugging functions.

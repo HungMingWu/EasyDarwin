@@ -68,7 +68,7 @@ public:
 	//disable: calculates integer value only                { return (int64_t) ( (double) inMilliseconds / 1000) * ((int64_t) 1 << 32 ) ; }
 	static int64_t	Fixed64Secs_To_TimeMilli(int64_t inFixed64Secs)
 	{
-		UInt64 value = (UInt64)inFixed64Secs; return (value >> 32) * 1000 + (((value % ((UInt64)1 << 32)) * 1000) >> 32);
+		uint64_t value = (uint64_t)inFixed64Secs; return (value >> 32) * 1000 + (((value % ((uint64_t)1 << 32)) * 1000) >> 32);
 	}
 
 	//This converts the local time (from OS::Milliseconds) to NTP time.

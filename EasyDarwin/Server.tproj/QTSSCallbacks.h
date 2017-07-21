@@ -106,8 +106,8 @@ public:
 	static QTSS_Error   QTSS_WriteV(QTSS_StreamRef inStream, iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten);
 	static QTSS_Error   QTSS_Flush(QTSS_StreamRef inStream);
 	static QTSS_Error   QTSS_Read(QTSS_StreamRef inRef, void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead);
-	static QTSS_Error   QTSS_Seek(QTSS_StreamRef inRef, UInt64 inNewPosition);
-	static QTSS_Error   QTSS_Advise(QTSS_StreamRef inRef, UInt64 inPosition, uint32_t inAdviseSize);
+	static QTSS_Error   QTSS_Seek(QTSS_StreamRef inRef, uint64_t inNewPosition);
+	static QTSS_Error   QTSS_Advise(QTSS_StreamRef inRef, uint64_t inPosition, uint32_t inAdviseSize);
 
 	// FILE SYSTEM ROUTINES
 

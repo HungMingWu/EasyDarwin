@@ -102,8 +102,8 @@ QTSS_Error QTSSModuleUtils::ReadEntireFile(char* inPath, StrPtrLen* outData, QTS
 			}
 			
 			theParamLen = 8;
-			UInt64* theLength = NULL;
-			UInt64 sdpLen = 0;
+			uint64_t* theLength = NULL;
+			uint64_t sdpLen = 0;
 			//theErr = QTSS_GetValuePtr(theFileObject, qtssFlObjLength, 0, (void**)&theLength, &theParamLen);
 			char *sdpContext = CSdpCache::GetInstance()->getSdpMap(inPath);
 			if(sdpContext == NULL)
@@ -117,7 +117,7 @@ QTSS_Error QTSSModuleUtils::ReadEntireFile(char* inPath, StrPtrLen* outData, QTS
 			
 			theLength = &sdpLen;
 			
-			if (theParamLen != sizeof(UInt64))
+			if (theParamLen != sizeof(uint64_t))
 				break;
 			
 			if (*theLength > INT32_MAX)

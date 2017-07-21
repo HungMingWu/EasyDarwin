@@ -604,7 +604,7 @@ int64_t QTFile::GetModDate()
 
 //
 // Read functions.
-bool QTFile::Read(UInt64 Offset, char * const Buffer, uint32_t Length, QTFile_FileControlBlock * FCB)
+bool QTFile::Read(uint64_t Offset, char * const Buffer, uint32_t Length, QTFile_FileControlBlock * FCB)
 {
 	// General vars
 	OSMutexLocker   ReadMutex(fReadMutex);
@@ -641,9 +641,9 @@ bool QTFile::GenerateAtomTOC()
 	// General vars
 	OSType          AtomType;
 	uint32_t          atomLength;
-	UInt64          BigAtomLength;
+	uint64_t          BigAtomLength;
 
-	UInt64          CurPos;
+	uint64_t          CurPos;
 	uint32_t		    CurAtomHeaderSize;
 
 	AtomTOCEntry    *NewTOCEntry = NULL,
@@ -662,7 +662,7 @@ bool QTFile::GenerateAtomTOC()
 		// Swap the AtomLength for little-endian machines.
 		CurPos += 4;
 		atomLength = ntohl(atomLength);
-		BigAtomLength = (UInt64)atomLength;
+		BigAtomLength = (uint64_t)atomLength;
 		hasBigAtom = false;
 
 		//
@@ -696,7 +696,7 @@ bool QTFile::GenerateAtomTOC()
 			if (!Read(CurPos, (char *)&atomLength, 4))
 				return false;
 			CurPos += 4;
-			BigAtomLength = (UInt64)ntohl(atomLength);
+			BigAtomLength = (uint64_t)ntohl(atomLength);
 
 			if (!Read(CurPos, (char *)&AtomType, 4))
 				return false;
@@ -916,7 +916,7 @@ bool QTFile::GenerateAtomTOC()
 }
 
 
-char *QTFile::MapFileToMem(UInt64 offset, uint32_t length)
+char *QTFile::MapFileToMem(uint64_t offset, uint32_t length)
 {
 #if MMAP_TABLES
 	char*  mappedMem = (char *)mmap(NULL,

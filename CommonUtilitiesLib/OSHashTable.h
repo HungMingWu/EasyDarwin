@@ -111,7 +111,7 @@ public:
 		}
 		return elem;
 	}
-	UInt64 GetNumEntries() { return fNumEntries; }
+	uint64_t GetNumEntries() { return fNumEntries; }
 
 	uint32_t GetTableSize() { return fSize; }
 	T* GetTableEntry(int i) { return fHashTable[i]; }
@@ -120,7 +120,7 @@ private:
 	T** fHashTable;
 	uint32_t fSize;
 	uint32_t fMask;
-	UInt64 fNumEntries;
+	uint64_t fNumEntries;
 
 	uint32_t ComputeIndex(uint32_t hashKey)
 	{

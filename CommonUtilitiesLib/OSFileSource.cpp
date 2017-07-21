@@ -206,7 +206,7 @@ FileBlockPool::~FileBlockPool()
 }
 
 
-void FileMap::AllocateBufferMap(uint32_t inUnitSizeInK, uint32_t inNumBuffSizeUnits, uint32_t inBufferIncCount, uint32_t inMaxBitRateBuffSizeInBlocks, UInt64 fileLen, uint32_t inBitRate)
+void FileMap::AllocateBufferMap(uint32_t inUnitSizeInK, uint32_t inNumBuffSizeUnits, uint32_t inBufferIncCount, uint32_t inMaxBitRateBuffSizeInBlocks, uint64_t fileLen, uint32_t inBitRate)
 {
 
 	if (fFileMapArray != NULL && fNumBuffSizeUnits == inNumBuffSizeUnits && inBufferIncCount == fBlockPool.GetMaxBuffers())
@@ -364,7 +364,7 @@ void OSFileSource::Set(const char* inPath)
 	}
 }
 
-void OSFileSource::Advise(UInt64, uint32_t)
+void OSFileSource::Advise(uint64_t, uint32_t)
 {
 	// does nothing on platforms other than MacOSXServer
 }
@@ -372,7 +372,7 @@ void OSFileSource::Advise(UInt64, uint32_t)
 OS_Error OSFileSource::FillBuffer(char* ioBuffer, char* buffStart, int32_t buffIndex)
 {
 	uint32_t buffSize = fFileMap.GetMaxBufSize();
-	UInt64 startPos = (UInt64)buffIndex * (UInt64)buffSize;
+	uint64_t startPos = (uint64_t)buffIndex * (uint64_t)buffSize;
 	uint32_t readLen = 0;
 
 	OS_Error theErr = this->ReadFromPos(startPos, buffStart, buffSize, &readLen);
@@ -387,7 +387,7 @@ OS_Error OSFileSource::FillBuffer(char* ioBuffer, char* buffStart, int32_t buffI
 static int32_t sBuffCount = 1;
 #endif
 
-OS_Error OSFileSource::Read(UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen)
+OS_Error OSFileSource::Read(uint64_t inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen)
 {
 
 	if ((!fFileMap.Initialized())
@@ -400,7 +400,7 @@ OS_Error OSFileSource::Read(UInt64 inPosition, void* inBuffer, uint32_t inLength
 }
 
 
-OS_Error OSFileSource::ReadFromCache(UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen)
+OS_Error OSFileSource::ReadFromCache(uint64_t inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen)
 {
 	OSMutexLocker locker(&fMutex);
 
@@ -555,7 +555,7 @@ OS_Error OSFileSource::ReadFromDisk(void* inBuffer, uint32_t inLength, uint32_t*
 	return OS_NoErr;
 }
 
-OS_Error OSFileSource::ReadFromPos(UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen)
+OS_Error OSFileSource::ReadFromPos(uint64_t inPosition, void* inBuffer, uint32_t inLength, uint32_t* outRcvLen)
 {
 #if TEST_TIME
 	{

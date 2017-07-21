@@ -64,9 +64,9 @@ class QTSSStream
                                                             
         virtual QTSS_Error  Flush()                         { return QTSS_Unimplemented; }
         
-        virtual QTSS_Error  Seek(UInt64 /*inNewPosition*/)  { return QTSS_Unimplemented; }
+        virtual QTSS_Error  Seek(uint64_t /*inNewPosition*/)  { return QTSS_Unimplemented; }
         
-        virtual QTSS_Error  Advise(UInt64 /*inPosition*/, uint32_t /*inAdviseSize*/)
+        virtual QTSS_Error  Advise(uint64_t /*inPosition*/, uint32_t /*inAdviseSize*/)
                                                             { return QTSS_Unimplemented; }
                                                             
         virtual QTSS_Error  RequestEvent(QTSS_EventType /*inEventMask*/)

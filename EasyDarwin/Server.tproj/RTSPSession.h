@@ -87,7 +87,7 @@ class RTSPSession;
 //	char        fPacketData[kMaxRTSPMsgLen];
 //	StrPtrLen   fPacketPtr;
 //	bool      fIsData;
-//	UInt64      fMsgCountID;
+//	uint64_t      fMsgCountID;
 //
 //	friend class RTSPSession;
 //	friend class RTSPSessionHandler;
@@ -231,7 +231,7 @@ private:
 	void SaveRequestAuthorizationParams(RTSPRequest *theRTSPRequest);
 	QTSS_Error DumpRequestData();
 
-    UInt64 fMsgCount;
+    uint64_t fMsgCount;
 
     //friend class RTSPSessionHandler;
 

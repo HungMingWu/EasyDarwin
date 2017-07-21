@@ -199,7 +199,7 @@ void OSThread::Sleep(uint32_t inMsec)
 	int64_t startTime = OS::Milliseconds();
 	int64_t timeLeft = inMsec;
 	int64_t timeSlept = 0;
-	UInt64 utimeLeft = 0;
+	uint64_t utimeLeft = 0;
 
 	do { // loop in case we leave the sleep early
 		//qtss_printf("OSThread::Sleep time slept= %qd request sleep=%qd\n",timeSlept, timeLeft);

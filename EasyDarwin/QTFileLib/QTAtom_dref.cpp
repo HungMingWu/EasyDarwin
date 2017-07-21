@@ -131,7 +131,7 @@ bool QTAtom_dref::Initialize()
 	uint32_t      tempInt32;
 
 	// General vars
-	UInt64      refPos;
+	uint64_t      refPos;
 
 
 	//
@@ -226,7 +226,7 @@ bool QTAtom_dref::Initialize()
 // -------------------------------------
 // Read functions.
 //
-bool QTAtom_dref::Read(uint32_t RefID, UInt64 Offset, char * const Buffer, uint32_t Length, QTFile_FileControlBlock * FCB)
+bool QTAtom_dref::Read(uint32_t RefID, uint64_t Offset, char * const Buffer, uint32_t Length, QTFile_FileControlBlock * FCB)
 {
 	// General vars
 	DataRefEntry        *Entry;

@@ -74,8 +74,8 @@ public:
 		// Atom information
 		OSType          AtomType, beAtomType; // be = Big Endian
 
-		UInt64          AtomDataPos;
-		UInt64          AtomDataLength;
+		uint64_t          AtomDataPos;
+		uint64_t          AtomDataLength;
 		uint32_t          AtomHeaderSize;
 
 		// TOC pointers
@@ -132,7 +132,7 @@ public:
 	char*       GetModDateStr();
 	//
 	// Read functions.
-	bool      Read(UInt64 Offset, char * const Buffer, uint32_t Length, QTFile_FileControlBlock * FCB = NULL);
+	bool      Read(uint64_t Offset, char * const Buffer, uint32_t Length, QTFile_FileControlBlock * FCB = NULL);
 
 
 	void        AllocateBuffers(uint32_t inUnitSizeInK, uint32_t inBufferInc, uint32_t inBufferSize, uint32_t inMaxBitRateBuffSizeInBlocks, uint32_t inBitrate);
@@ -147,7 +147,7 @@ public:
 	inline bool       ValidTOC();
 
 
-	char*      MapFileToMem(UInt64 offset, uint32_t length);
+	char*      MapFileToMem(uint64_t offset, uint32_t length);
 
 	int         UnmapMem(char *memPtr, uint32_t length);
 
@@ -190,11 +190,11 @@ protected:
 
 bool QTFile::ValidTOC()
 {
-	UInt64 theLength = 0;
-	UInt64 thePos = 0;
+	uint64_t theLength = 0;
+	uint64_t thePos = 0;
 
 #if DSS_USE_API_CALLBACKS
-	uint32_t theDataLen = sizeof(UInt64);
+	uint32_t theDataLen = sizeof(uint64_t);
 	(void)QTSS_GetValue(fMovieFD, qtssFlObjLength, 0, (void*)&theLength, &theDataLen);
 	(void)QTSS_GetValue(fMovieFD, qtssFlObjPosition, 0, (void*)&thePos, &theDataLen);
 	//  qtss_printf("GenerateAtomTOC failed CurPos=%"_64BITARG_"u < Length=%"_64BITARG_"u\n", CurPos, theLength);

@@ -364,7 +364,7 @@ enum
     qtssAttrDataTypeint32_t          = 5,
     qtssAttrDataTypeUInt32          = 6,
     qtssAttrDataTypeint64_t          = 7,
-    qtssAttrDataTypeUInt64          = 8,
+    qtssAttrDataTypeuint64_t          = 8,
     qtssAttrDataTypeQTSS_Object     = 9,
     qtssAttrDataTypeQTSS_StreamRef  = 10,
     qtssAttrDataTypeFloat32         = 11,
@@ -481,7 +481,7 @@ enum
     qtssCliSesPresentationURL       = 8,    //read      //char array    //Presentation URL for this session. This URL is the "base" URL for the session. RTSP requests to this URL are assumed to affect all streams on the session.
     qtssCliSesFirstUserAgent        = 9,    //read      //char array    //Private
     qtssCliSesMovieDurationInSecs   = 10,   //r/w       //Float64       //Duration of the movie for this session in seconds. This will default to 0 unless set by a module.
-    qtssCliSesMovieSizeInBytes      = 11,   //r/w       //UInt64        //Movie size in bytes. This will default to 0 unless explictly set by a module
+    qtssCliSesMovieSizeInBytes      = 11,   //r/w       //uint64_t        //Movie size in bytes. This will default to 0 unless explictly set by a module
     qtssCliSesMovieAverageBitRate   = 12,   //r/w       //uint32_t        //average bits per second based on total RTP bits/movie duration. This will default to 0 unless explictly set by a module.
     qtssCliSesLastRTSPSession       = 13,   //read      //QTSS_RTSPSessionObject //Private
     qtssCliSesFullURL               = 14,   //read      //char array    //full Presentation URL for this session. Same as qtssCliSesPresentationURL, but includes rtsp://domain.com prefix
@@ -669,10 +669,10 @@ enum
     qtssRTPSvrCurConn               = 13,   //read      //uint32_t    //Number of clients currently connected to the server
     qtssRTPSvrTotalConn             = 14,   //read      //uint32_t    //Total number of clients since startup
     qtssRTPSvrCurBandwidth          = 15,   //read      //uint32_t    //Current bandwidth being output by the server in bits per second
-    qtssRTPSvrTotalBytes            = 16,   //read      //UInt64    //Total number of bytes served since startup
+    qtssRTPSvrTotalBytes            = 16,   //read      //uint64_t    //Total number of bytes served since startup
     qtssRTPSvrAvgBandwidth          = 17,   //read      //uint32_t    //Average bandwidth being output by the server in bits per second
     qtssRTPSvrCurPackets            = 18,   //read      //uint32_t    //Current packets per second being output by the server
-    qtssRTPSvrTotalPackets          = 19,   //read      //UInt64    //Total number of bytes served since startup
+    qtssRTPSvrTotalPackets          = 19,   //read      //uint64_t    //Total number of bytes served since startup
     
     qtssSvrHandledMethods           = 20,   //r/w       //QTSS_RTSPMethod   //The methods that the server supports. Modules should append the methods they support to this attribute in their QTSS_Initialize_Role.
     qtssSvrModuleObjects            = 21,   //read		//this IS PREMPTIVE SAFE!  //QTSS_ModuleObject // A module object representing each module
@@ -881,8 +881,8 @@ enum
     
     qtssFlObjStream                 = 0,    // read // QTSS_FileStream. Stream ref for this file object
     qtssFlObjFileSysModuleName      = 1,    // read // char array. Name of the file system module handling this file object
-    qtssFlObjLength                 = 2,    // r/w  // UInt64. Length of the file
-    qtssFlObjPosition               = 3,    // read // UInt64. Current position of the file pointer in the file.
+    qtssFlObjLength                 = 2,    // r/w  // uint64_t. Length of the file
+    qtssFlObjPosition               = 3,    // read // uint64_t. Current position of the file pointer in the file.
     qtssFlObjModDate                = 4,    // r/w  // QTSS_TimeVal. Date & time of last modification
 
     qtssFlObjNumParams              = 5
@@ -1164,14 +1164,14 @@ typedef struct
 typedef struct
 {
     QTSS_Object                 inFileObject;
-    UInt64                      inPosition;
+    uint64_t                      inPosition;
     uint32_t                      inSize;
 } QTSS_AdviseFile_Params;
 
 typedef struct
 {
     QTSS_Object                 inFileObject;
-    UInt64                      inFilePosition;
+    uint64_t                      inFilePosition;
     void*                       ioBuffer;
     uint32_t                      inBufLen;
     uint32_t*                     outLenRead;
@@ -1680,7 +1680,7 @@ QTSS_Error  QTSS_Read(QTSS_StreamRef inRef, void* ioBuffer, uint32_t inBufLen, u
 //  Returns:    QTSS_NoErr
 //              QTSS_RequestFailed
 //              QTSS_BadArgument
-QTSS_Error  QTSS_Seek(QTSS_StreamRef inRef, UInt64 inNewPosition);
+QTSS_Error  QTSS_Seek(QTSS_StreamRef inRef, uint64_t inNewPosition);
 
 /********************************************************************/
 //  QTSS_Advise
@@ -1694,7 +1694,7 @@ QTSS_Error  QTSS_Seek(QTSS_StreamRef inRef, UInt64 inNewPosition);
 //  Returns:    QTSS_NoErr
 //              QTSS_RequestFailed
 //              QTSS_BadArgument
-QTSS_Error  QTSS_Advise(QTSS_StreamRef inRef, UInt64 inPosition, uint32_t inAdviseSize);
+QTSS_Error  QTSS_Advise(QTSS_StreamRef inRef, uint64_t inPosition, uint32_t inAdviseSize);
 
 
 /*****************************************/

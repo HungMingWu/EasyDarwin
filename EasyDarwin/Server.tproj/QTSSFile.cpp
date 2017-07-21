@@ -35,9 +35,9 @@ QTSSAttrInfoDict::AttrInfo  QTSSFile::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
 	/* 0 */ { "qtssFlObjStream",                NULL,   qtssAttrDataTypeQTSS_StreamRef, qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 1 */ { "qtssFlObjFileSysModuleName",     NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 2 */ { "qtssFlObjLength",                NULL,   qtssAttrDataTypeUInt64,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 3 */ { "qtssFlObjPosition",              NULL,   qtssAttrDataTypeUInt64,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 4 */ { "qtssFlObjModDate",               NULL,   qtssAttrDataTypeUInt64,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite }
+	/* 2 */ { "qtssFlObjLength",                NULL,   qtssAttrDataTypeuint64_t,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 3 */ { "qtssFlObjPosition",              NULL,   qtssAttrDataTypeuint64_t,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 4 */ { "qtssFlObjModDate",               NULL,   qtssAttrDataTypeuint64_t,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite }
 };
 
 void    QTSSFile::Initialize()
@@ -146,14 +146,14 @@ QTSS_Error  QTSSFile::Read(void* ioBuffer, uint32_t inBufLen, uint32_t* outLengt
 	return theErr;
 }
 
-QTSS_Error  QTSSFile::Seek(UInt64 inNewPosition)
+QTSS_Error  QTSSFile::Seek(uint64_t inNewPosition)
 {
-	UInt64* theFileLength = NULL;
+	uint64_t* theFileLength = NULL;
 	uint32_t theParamLength = 0;
 
 	(void)this->GetValuePtr(qtssFlObjLength, 0, (void**)&theFileLength, &theParamLength);
 
-	if (theParamLength != sizeof(UInt64))
+	if (theParamLength != sizeof(uint64_t))
 		return QTSS_RequestFailed;
 
 	if (inNewPosition > *theFileLength)
@@ -163,7 +163,7 @@ QTSS_Error  QTSSFile::Seek(UInt64 inNewPosition)
 	return QTSS_NoErr;
 }
 
-QTSS_Error  QTSSFile::Advise(UInt64 inPosition, uint32_t inAdviseSize)
+QTSS_Error  QTSSFile::Advise(uint64_t inPosition, uint32_t inAdviseSize)
 {
 	Assert(fModule != NULL);
 

@@ -237,10 +237,10 @@ int64_t OS::HostToNetworkSInt64(int64_t hostOrdered)
 #if BIGENDIAN
 	return hostOrdered;
 #else
-	return (int64_t)((UInt64)(hostOrdered << 56) | (UInt64)(((UInt64)0x00ff0000 << 32) & (hostOrdered << 40))
-		| (UInt64)(((UInt64)0x0000ff00 << 32) & (hostOrdered << 24)) | (UInt64)(((UInt64)0x000000ff << 32) & (hostOrdered << 8))
-		| (UInt64)(((UInt64)0x00ff0000 << 8) & (hostOrdered >> 8)) | (UInt64)((UInt64)0x00ff0000 & (hostOrdered >> 24))
-		| (UInt64)((UInt64)0x0000ff00 & (hostOrdered >> 40)) | (UInt64)((UInt64)0x00ff & (hostOrdered >> 56)));
+	return (int64_t)((uint64_t)(hostOrdered << 56) | (uint64_t)(((uint64_t)0x00ff0000 << 32) & (hostOrdered << 40))
+		| (uint64_t)(((uint64_t)0x0000ff00 << 32) & (hostOrdered << 24)) | (uint64_t)(((uint64_t)0x000000ff << 32) & (hostOrdered << 8))
+		| (uint64_t)(((uint64_t)0x00ff0000 << 8) & (hostOrdered >> 8)) | (uint64_t)((uint64_t)0x00ff0000 & (hostOrdered >> 24))
+		| (uint64_t)((uint64_t)0x0000ff00 & (hostOrdered >> 40)) | (uint64_t)((uint64_t)0x00ff & (hostOrdered >> 56)));
 #endif
 }
 
@@ -249,10 +249,10 @@ int64_t OS::NetworkToHostSInt64(int64_t networkOrdered)
 #if BIGENDIAN
 	return networkOrdered;
 #else
-	return (int64_t)((UInt64)(networkOrdered << 56) | (UInt64)(((UInt64)0x00ff0000 << 32) & (networkOrdered << 40))
-		| (UInt64)(((UInt64)0x0000ff00 << 32) & (networkOrdered << 24)) | (UInt64)(((UInt64)0x000000ff << 32) & (networkOrdered << 8))
-		| (UInt64)(((UInt64)0x00ff0000 << 8) & (networkOrdered >> 8)) | (UInt64)((UInt64)0x00ff0000 & (networkOrdered >> 24))
-		| (UInt64)((UInt64)0x0000ff00 & (networkOrdered >> 40)) | (UInt64)((UInt64)0x00ff & (networkOrdered >> 56)));
+	return (int64_t)((uint64_t)(networkOrdered << 56) | (uint64_t)(((uint64_t)0x00ff0000 << 32) & (networkOrdered << 40))
+		| (uint64_t)(((uint64_t)0x0000ff00 << 32) & (networkOrdered << 24)) | (uint64_t)(((uint64_t)0x000000ff << 32) & (networkOrdered << 8))
+		| (uint64_t)(((uint64_t)0x00ff0000 << 8) & (networkOrdered >> 8)) | (uint64_t)((uint64_t)0x00ff0000 & (networkOrdered >> 24))
+		| (uint64_t)((uint64_t)0x0000ff00 & (networkOrdered >> 40)) | (uint64_t)((uint64_t)0x00ff & (networkOrdered >> 56)));
 #endif
 }
 

@@ -83,7 +83,7 @@ public:
 	uint32_t  fGetSampleInfo_SampleNumber;
 	uint32_t  fGetSampleInfo_Length;
 	uint32_t  fGetSampleInfo_SampleDescriptionIndex;
-	UInt64  fGetSampleInfo_Offset;
+	uint64_t  fGetSampleInfo_Offset;
 	uint32_t  fGetSampleInfo_LastChunk;
 	uint32_t  fGetSampleInfo_LastChunkOffset;
 

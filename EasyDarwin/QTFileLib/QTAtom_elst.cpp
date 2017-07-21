@@ -139,7 +139,7 @@ bool QTAtom_elst::Initialize()
 
 				// Get all of the data in this edit list entry.
 				ReadInt64(elstPos_EditList + (CurEdit * 20) + elstEntryPosV1_Duration, &fEdits[CurEdit].EditDuration);
-				ReadInt64(elstPos_EditList + (CurEdit * 20) + elstEntryPosV1_MediaTime, (UInt64*)&fEdits[CurEdit].StartingMediaTime);
+				ReadInt64(elstPos_EditList + (CurEdit * 20) + elstEntryPosV1_MediaTime, (uint64_t*)&fEdits[CurEdit].StartingMediaTime);
 
 				ReadInt32(elstPos_EditList + (CurEdit * 20) + elstEntryPosV1_MediaRate, &fEdits[CurEdit].EditMediaRate);
 

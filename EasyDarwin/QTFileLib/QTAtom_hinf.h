@@ -54,15 +54,15 @@ public:
 
 	//
 	// Accessors.
-	inline  UInt64      GetTotalRTPBytes() { return  fTotalRTPBytes32 ? (UInt64)fTotalRTPBytes32 : fTotalRTPBytes64; }
-	inline  UInt64      GetTotalRTPPackets() { return  fTotalRTPPackets32 ? (UInt64)fTotalRTPPackets32 : fTotalRTPPackets64; }
+	inline  uint64_t      GetTotalRTPBytes() { return  fTotalRTPBytes32 ? (uint64_t)fTotalRTPBytes32 : fTotalRTPBytes64; }
+	inline  uint64_t      GetTotalRTPPackets() { return  fTotalRTPPackets32 ? (uint64_t)fTotalRTPPackets32 : fTotalRTPPackets64; }
 
-	inline  UInt64      GetTotalPayLoadBytes() { return  fTotalPayLoadBytes32 ? (UInt64)fTotalPayLoadBytes32 : fTotalPayLoadBytes64; }
+	inline  uint64_t      GetTotalPayLoadBytes() { return  fTotalPayLoadBytes32 ? (uint64_t)fTotalPayLoadBytes32 : fTotalPayLoadBytes64; }
 
-	inline  UInt64      GetMaxDataRate() { return  fMaxDataRate64; }
-	inline  UInt64      GetTotalMediaBytes() { return  fTotalMediaBytes64; }
-	inline  UInt64      GetTotalImmediateBytes() { return  fTotalImmediateBytes64; }
-	inline  UInt64      GetRepeatBytes() { return  fTotalRepeatBytes64; }
+	inline  uint64_t      GetMaxDataRate() { return  fMaxDataRate64; }
+	inline  uint64_t      GetTotalMediaBytes() { return  fTotalMediaBytes64; }
+	inline  uint64_t      GetTotalImmediateBytes() { return  fTotalImmediateBytes64; }
+	inline  uint64_t      GetRepeatBytes() { return  fTotalRepeatBytes64; }
 
 	inline  uint32_t      GetMinTransTime() { return  fMinTransTime32; }
 	inline  uint32_t      GetMaxTransTime() { return  fMaxTransTime32; }
@@ -80,17 +80,17 @@ protected:
 	//
 	// Protected member variables.
 	uint32_t      fTotalRTPBytes32; //totl
-	UInt64      fTotalRTPBytes64; //trpy
+	uint64_t      fTotalRTPBytes64; //trpy
 
 	uint32_t      fTotalRTPPackets32; //nump
-	UInt64      fTotalRTPPackets64; //npck
+	uint64_t      fTotalRTPPackets64; //npck
 
 	uint32_t      fTotalPayLoadBytes32; //tpay
-	UInt64      fTotalPayLoadBytes64; //tpyl
-	UInt64      fMaxDataRate64; //maxr
-	UInt64      fTotalMediaBytes64; //dmed
-	UInt64      fTotalImmediateBytes64; //dimm  
-	UInt64      fTotalRepeatBytes64; //drep
+	uint64_t      fTotalPayLoadBytes64; //tpyl
+	uint64_t      fMaxDataRate64; //maxr
+	uint64_t      fTotalMediaBytes64; //dmed
+	uint64_t      fTotalImmediateBytes64; //dimm  
+	uint64_t      fTotalRepeatBytes64; //drep
 
 	uint32_t      fMinTransTime32; //tmin
 	uint32_t      fMaxTransTime32; //tmax

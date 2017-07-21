@@ -41,7 +41,7 @@
 #include "SafeStdLib.h"
 
 
-static UInt64 sTotalChars = 0;
+static uint64_t sTotalChars = 0;
 static uint32_t sMaxTotalCharsInK = 100 * 1000;//100MB default
 static int sMaxFileSizeReached = 0;
 
@@ -64,7 +64,7 @@ int qtss_maxprintf(const char* fmt, ...)
 
 	OSMutexLocker locker(OS::GetStdLibMutex());
 
-	if (sTotalChars > ((UInt64)sMaxTotalCharsInK * 1024))
+	if (sTotalChars > ((uint64_t)sMaxTotalCharsInK * 1024))
 	{
 		if (sMaxFileSizeReached == 0)
 			printf("\nReached maximum configured output limit = %"   _U32BITARG_   "K\n", sMaxTotalCharsInK);

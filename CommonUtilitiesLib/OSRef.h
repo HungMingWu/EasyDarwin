@@ -234,7 +234,7 @@ public:
 	// the new OSRef object.
 	void        Swap(OSRef* newRef);
 
-	uint32_t      GetNumRefsInTable() { UInt64 result = fTable.GetNumEntries(); Assert(result < UINT32_MAX); return (uint32_t)result; }
+	uint32_t      GetNumRefsInTable() { uint64_t result = fTable.GetNumEntries(); Assert(result < UINT32_MAX); return (uint32_t)result; }
 
 private:
 

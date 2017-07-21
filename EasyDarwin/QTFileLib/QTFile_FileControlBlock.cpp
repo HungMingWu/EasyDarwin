@@ -84,7 +84,7 @@ void QTFile_FileControlBlock::Set(char * DataPath)
 
 }
 
-bool QTFile_FileControlBlock::ReadInternal(FILE_SOURCE *dataFD, UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t *inReadLenPtr)
+bool QTFile_FileControlBlock::ReadInternal(FILE_SOURCE *dataFD, uint64_t inPosition, void* inBuffer, uint32_t inLength, uint32_t *inReadLenPtr)
 {
 	uint32_t readLen = 0;
 	if (NULL != inReadLenPtr)
@@ -110,7 +110,7 @@ bool QTFile_FileControlBlock::ReadInternal(FILE_SOURCE *dataFD, UInt64 inPositio
 }
 
 
-bool QTFile_FileControlBlock::Read(FILE_SOURCE *dflt, UInt64 inPosition, void* inBuffer, uint32_t inLength)
+bool QTFile_FileControlBlock::Read(FILE_SOURCE *dflt, uint64_t inPosition, void* inBuffer, uint32_t inLength)
 {
 	// Temporary vars
 	uint32_t rcSize;
@@ -206,8 +206,8 @@ bool QTFile_FileControlBlock::Read(FILE_SOURCE *dflt, UInt64 inPosition, void* i
 	// Copy the data out of our buffer(s).
 	{
 		// General vars
-		UInt64      ReadLength = inLength;
-		UInt64      ReadOffset = inPosition - fDataBufferPosStart;
+		uint64_t      ReadLength = inLength;
+		uint64_t      ReadOffset = inPosition - fDataBufferPosStart;
 
 		//
 		// Figure out if doing a continuous copy would cause us to cross a

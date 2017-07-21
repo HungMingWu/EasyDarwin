@@ -59,11 +59,11 @@ public:
 
 	//Advise: this advises the OS that we are going to be reading soon from the
 	//following position in the file
-	// void Advise(OSFileSource *dflt, UInt64 advisePos, uint32_t adviseAmt);
+	// void Advise(OSFileSource *dflt, uint64_t advisePos, uint32_t adviseAmt);
 
-	bool Read(FILE_SOURCE *dflt, UInt64 inPosition, void* inBuffer, uint32_t inLength);
+	bool Read(FILE_SOURCE *dflt, uint64_t inPosition, void* inBuffer, uint32_t inLength);
 
-	bool ReadInternal(FILE_SOURCE *dataFD, UInt64 inPosition, void* inBuffer, uint32_t inLength, uint32_t *inReadLenPtr = NULL);
+	bool ReadInternal(FILE_SOURCE *dataFD, uint64_t inPosition, void* inBuffer, uint32_t inLength, uint32_t *inReadLenPtr = NULL);
 
 	//
 	// Buffer management functions
@@ -99,7 +99,7 @@ private:
 	char                *fDataBufferPool;
 
 	uint32_t              fDataBufferSize;
-	UInt64              fDataBufferPosStart, fDataBufferPosEnd;
+	uint64_t              fDataBufferPosStart, fDataBufferPosEnd;
 
 	char                *fCurrentDataBuffer, *fPreviousDataBuffer;
 	uint32_t              fCurrentDataBufferLength, fPreviousDataBufferLength;

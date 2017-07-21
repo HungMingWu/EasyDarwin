@@ -68,9 +68,9 @@ public:
 	// Accessors.
 	inline  uint32_t      GetTrackID() { return fTrackID; }
 	inline  uint32_t      GetFlags() { return fFlags; }
-	inline  UInt64      GetCreationTime() { return fCreationTime; }
-	inline  UInt64      GetModificationTime() { return fModificationTime; }
-	inline  UInt64      GetDuration() { return fDuration; }
+	inline  uint64_t      GetCreationTime() { return fCreationTime; }
+	inline  uint64_t      GetModificationTime() { return fModificationTime; }
+	inline  uint64_t      GetDuration() { return fDuration; }
 
 
 	//
@@ -83,10 +83,10 @@ protected:
 	// Protected member variables.
 	uint8_t       fVersion;
 	uint32_t      fFlags; // 24 bits in the low 3 bytes
-	UInt64      fCreationTime, fModificationTime;
+	uint64_t      fCreationTime, fModificationTime;
 	uint32_t      fTrackID;
 	uint32_t      freserved1;
-	UInt64      fDuration;
+	uint64_t      fDuration;
 	uint32_t      freserved2, freserved3;
 	uint16_t      fLayer, fAlternateGroup;
 	uint16_t      fVolume;

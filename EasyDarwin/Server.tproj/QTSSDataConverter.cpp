@@ -53,7 +53,7 @@ static char* kDataTypeStrings[] =
 	"int32_t",
 	"uint32_t",
 	"int64_t",
-	"UInt64",
+	"uint64_t",
 	"QTSS_Object",
 	"QTSS_StreamRef",
 	"float",
@@ -205,9 +205,9 @@ QTSS_Error QTSSDataConverter::StringToValue(char* inValueAsString,
 		}
 		break;
 
-	case qtssAttrDataTypeUInt64:
+	case qtssAttrDataTypeuint64_t:
 		{
-			theBufSize = sizeof(UInt64);
+			theBufSize = sizeof(uint64_t);
 			theFormat = "%" _64BITARG_ "u";
 		}
 		break;
@@ -350,8 +350,8 @@ char* QTSSDataConverter::ValueToString(void* inValue,
 		qtss_sprintf(theString, "%" _64BITARG_ "d", *(int64_t*)inValue);
 		break;
 
-	case qtssAttrDataTypeUInt64:
-		qtss_sprintf(theString, "%" _64BITARG_ "u", *(UInt64*)inValue);
+	case qtssAttrDataTypeuint64_t:
+		qtss_sprintf(theString, "%" _64BITARG_ "u", *(uint64_t*)inValue);
 		break;
 
 	case qtssAttrDataTypeFloat32:

@@ -73,7 +73,7 @@ QTAtom::~QTAtom(void)
 // -------------------------------------
 // Read functions
 //
-bool QTAtom::ReadBytes(UInt64 Offset, char * Buffer, uint32_t Length)
+bool QTAtom::ReadBytes(uint64_t Offset, char * Buffer, uint32_t Length)
 {
 	//
 	// Validate the arguments.
@@ -85,7 +85,7 @@ bool QTAtom::ReadBytes(UInt64 Offset, char * Buffer, uint32_t Length)
 	return fFile->Read(fTOCEntry.AtomDataPos + Offset, Buffer, Length);
 }
 
-char *QTAtom::MemMap(UInt64 Offset, uint32_t Length)
+char *QTAtom::MemMap(uint64_t Offset, uint32_t Length)
 {
 	//
 	// Validate the arguments.
@@ -107,14 +107,14 @@ bool QTAtom::UnMap(char *memPtr, uint32_t Length)
 }
 
 
-bool QTAtom::ReadInt8(UInt64 Offset, uint8_t * Datum)
+bool QTAtom::ReadInt8(uint64_t Offset, uint8_t * Datum)
 {
 	//
 	// Read and return.
 	return ReadBytes(Offset, (char *)Datum, 1);
 }
 
-bool QTAtom::ReadInt16(UInt64 Offset, uint16_t * Datum)
+bool QTAtom::ReadInt16(uint64_t Offset, uint16_t * Datum)
 {
 	// General vars
 	uint16_t      tempDatum;
@@ -129,7 +129,7 @@ bool QTAtom::ReadInt16(UInt64 Offset, uint16_t * Datum)
 	return true;
 }
 
-bool QTAtom::ReadInt32(UInt64 Offset, uint32_t * Datum)
+bool QTAtom::ReadInt32(uint64_t Offset, uint32_t * Datum)
 {
 	// General vars
 	uint32_t      tempDatum;
@@ -144,7 +144,7 @@ bool QTAtom::ReadInt32(UInt64 Offset, uint32_t * Datum)
 	return true;
 }
 
-bool QTAtom::ReadInt32To64(UInt64 Offset, UInt64 * Datum)
+bool QTAtom::ReadInt32To64(uint64_t Offset, uint64_t * Datum)
 {
 	// General vars
 	uint32_t      tempDatum;
@@ -156,11 +156,11 @@ bool QTAtom::ReadInt32To64(UInt64 Offset, UInt64 * Datum)
 		return false;
 
 	tempDatum = ntohl(tempDatum);
-	*Datum = (UInt64)tempDatum;
+	*Datum = (uint64_t)tempDatum;
 	return true;
 }
 
-bool QTAtom::ReadInt32To64Signed(UInt64 Offset, int64_t * Datum)
+bool QTAtom::ReadInt32To64Signed(uint64_t Offset, int64_t * Datum)
 {
 	// General vars
 	uint32_t		tempDatum;
@@ -177,10 +177,10 @@ bool QTAtom::ReadInt32To64Signed(UInt64 Offset, int64_t * Datum)
 
 
 
-bool QTAtom::ReadInt64(UInt64 Offset, UInt64 * Datum)
+bool QTAtom::ReadInt64(uint64_t Offset, uint64_t * Datum)
 {
 	// General vars
-	UInt64      tempDatum;
+	uint64_t      tempDatum;
 
 
 	//
@@ -188,7 +188,7 @@ bool QTAtom::ReadInt64(UInt64 Offset, UInt64 * Datum)
 	if (!ReadBytes(Offset, (char *)&tempDatum, 8))
 		return false;
 
-	*Datum = (UInt64)QTAtom::NTOH64(tempDatum);
+	*Datum = (uint64_t)QTAtom::NTOH64(tempDatum);
 	return true;
 }
 
@@ -251,10 +251,10 @@ bool QTAtom::ReadSubAtomInt32(const char * AtomPath, uint32_t * Datum)
 	return true;
 }
 
-bool QTAtom::ReadSubAtomInt64(const char * AtomPath, UInt64 * Datum)
+bool QTAtom::ReadSubAtomInt64(const char * AtomPath, uint64_t * Datum)
 {
 	// General vars
-	UInt64      tempDatum;
+	uint64_t      tempDatum;
 
 
 	//
@@ -262,7 +262,7 @@ bool QTAtom::ReadSubAtomInt64(const char * AtomPath, UInt64 * Datum)
 	if (!ReadSubAtomBytes(AtomPath, (char *)&tempDatum, 8))
 		return false;
 
-	*Datum = (UInt64)QTAtom::NTOH64(tempDatum);
+	*Datum = (uint64_t)QTAtom::NTOH64(tempDatum);
 	return true;
 }
 

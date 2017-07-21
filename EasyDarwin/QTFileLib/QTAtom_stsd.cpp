@@ -113,7 +113,7 @@ bool QTAtom_stsd::Initialize()
 	if (fNumEntries > 0) {
 		//
 		// Allocate our description tables.
-		UInt64 tableSize = fTOCEntry.AtomDataLength - 8;
+		uint64_t tableSize = fTOCEntry.AtomDataLength - 8;
 		Assert(tableSize < INT32_MAX);
 		fSampleDescriptionTable = new char[(int32_t)tableSize];
 		if (fSampleDescriptionTable == NULL)

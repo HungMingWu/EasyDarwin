@@ -58,14 +58,14 @@ public:
 	//
 	// Accessors.
 
-	inline  bool      ChunkOffset(uint32_t ChunkNumber, UInt64 *Offset = NULL)
+	inline  bool      ChunkOffset(uint32_t ChunkNumber, uint64_t *Offset = NULL)
 	{
 		if (Offset && ChunkNumber && (ChunkNumber <= fNumEntries))
 		{
 			if (4 == fOffSetSize)
-				*Offset = (UInt64)ntohl(((uint32_t *)fTable)[ChunkNumber - 1]);
+				*Offset = (uint64_t)ntohl(((uint32_t *)fTable)[ChunkNumber - 1]);
 			else
-				*Offset = (UInt64)QTAtom::NTOH64(((UInt64 *)fTable)[ChunkNumber - 1]);
+				*Offset = (uint64_t)QTAtom::NTOH64(((uint64_t *)fTable)[ChunkNumber - 1]);
 
 			return true;
 		}

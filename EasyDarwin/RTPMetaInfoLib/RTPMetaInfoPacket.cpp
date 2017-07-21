@@ -177,13 +177,13 @@ bool RTPMetaInfoPacket::ParsePacket(uint8_t* inPacketBuffer, uint32_t inPacketLe
 		case kPacketPosField:
 			{
 				::memcpy(&sInt64Val, theFieldP, sizeof(sInt64Val));
-				fPacketPosition = (UInt64)OS::NetworkToHostSInt64(sInt64Val);
+				fPacketPosition = (uint64_t)OS::NetworkToHostSInt64(sInt64Val);
 				break;
 			}
 		case kTransTimeField:
 			{
 				::memcpy(&sInt64Val, theFieldP, sizeof(sInt64Val));
-				fTransmitTime = (UInt64)OS::NetworkToHostSInt64(sInt64Val);
+				fTransmitTime = (uint64_t)OS::NetworkToHostSInt64(sInt64Val);
 				break;
 			}
 		case kFrameTypeField:
@@ -194,7 +194,7 @@ bool RTPMetaInfoPacket::ParsePacket(uint8_t* inPacketBuffer, uint32_t inPacketLe
 		case kPacketNumField:
 			{
 				::memcpy(&sInt64Val, theFieldP, sizeof(sInt64Val));
-				fPacketNumber = (UInt64)OS::NetworkToHostSInt64(sInt64Val);
+				fPacketNumber = (uint64_t)OS::NetworkToHostSInt64(sInt64Val);
 				break;
 			}
 		case kSeqNumField:

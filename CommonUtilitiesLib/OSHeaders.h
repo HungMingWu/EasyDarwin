@@ -65,7 +65,6 @@
 
 #if 0 // old defs we are now using MacTypes.h
     /* Typedefs */
-    typedef unsigned long long	UInt64;
     typedef UInt32              FourCharCode;
     typedef FourCharCode        OSType;
 #endif
@@ -123,7 +122,6 @@
     /* Typedefs */
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef uint64_t          	UInt64;
     
     typedef unsigned int	FourCharCode;
     typedef FourCharCode        OSType;
@@ -218,7 +216,6 @@
     /* Typedefs */
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef ULONGLONG           UInt64;
     
     typedef unsigned long       FourCharCode;
     typedef FourCharCode        OSType;
@@ -267,7 +264,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned long long  UInt64;
 	
 	typedef unsigned long		FourCharCode;
 	typedef FourCharCode		OSType;
@@ -323,7 +319,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned long long  UInt64;
     
     typedef unsigned long       FourCharCode;
     typedef FourCharCode        OSType;
@@ -372,7 +367,6 @@
 
     typedef signed long         PointerSizedInt;
     typedef unsigned long       PointerSizedUInt;
-    typedef unsigned long long  UInt64;
 
     typedef unsigned long       FourCharCode;
     typedef FourCharCode        OSType;
@@ -419,7 +413,6 @@
 
     /* Typedefs */
     typedef unsigned long       PointerSizedInt;
-    typedef unsigned long       UInt64;
     
     typedef unsigned int        FourCharCode;
     typedef FourCharCode        OSType;

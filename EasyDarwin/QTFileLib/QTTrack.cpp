@@ -293,7 +293,7 @@ QTTrack::ErrorCode QTTrack::Initialize()
 // -------------------------------------
 // Sample functions
 //
-bool QTTrack::GetSampleInfo(uint32_t SampleNumber, uint32_t * const Length, UInt64 * const Offset, uint32_t * const SampleDescriptionIndex, QTAtom_stsc_SampleTableControlBlock * STCB)
+bool QTTrack::GetSampleInfo(uint32_t SampleNumber, uint32_t * const Length, uint64_t * const Offset, uint32_t * const SampleDescriptionIndex, QTAtom_stsc_SampleTableControlBlock * STCB)
 {
 
 	Assert(STCB != NULL);
@@ -319,8 +319,8 @@ bool QTTrack::GetSampleInfo(uint32_t SampleNumber, uint32_t * const Length, UInt
 	uint32_t      sampleDescriptionIndex = 0;
 	// General vars
 	uint32_t      ChunkNumber, SampleOffsetInChunk;
-	UInt64      sampleFileStartOffset = 0;
-	UInt64      ChunkOffset = 0;
+	uint64_t      sampleFileStartOffset = 0;
+	uint64_t      ChunkOffset = 0;
 
 
 	// Locate this sample, compute its offset, and get its size.
@@ -430,7 +430,7 @@ bool QTTrack::GetSample(uint32_t SampleNumber, char * Buffer, uint32_t * Length,
 {
 	// General vars
 	uint32_t      SampleDescriptionIndex;
-	UInt64      SampleOffset;
+	uint64_t      SampleOffset;
 
 	//
 	// Get the location and size of this sample.

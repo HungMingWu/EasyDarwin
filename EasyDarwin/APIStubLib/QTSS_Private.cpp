@@ -225,12 +225,12 @@ QTSS_Error  QTSS_Read(QTSS_StreamRef inRef, void* ioBuffer, uint32_t inBufLen, u
     return (sCallbacks->addr [kReadCallback]) (inRef, ioBuffer, inBufLen, outLengthRead);       
 }
 
-QTSS_Error  QTSS_Seek(QTSS_StreamRef inRef, UInt64 inNewPosition)
+QTSS_Error  QTSS_Seek(QTSS_StreamRef inRef, uint64_t inNewPosition)
 {
     return (sCallbacks->addr [kSeekCallback]) (inRef, inNewPosition);
 }
 
-QTSS_Error  QTSS_Advise(QTSS_StreamRef inRef, UInt64 inPosition, uint32_t inAdviseSize)
+QTSS_Error  QTSS_Advise(QTSS_StreamRef inRef, uint64_t inPosition, uint32_t inAdviseSize)
 {
     return (sCallbacks->addr [kAdviseCallback]) (inRef, inPosition, inAdviseSize);      
 }

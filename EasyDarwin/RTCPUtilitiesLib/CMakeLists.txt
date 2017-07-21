@@ -4,4 +4,5 @@ add_library (RTCPUtilitiesLib
 			 RTCPPacket.cpp RTCPPacket.h
 			 RTCPAPPPacket.cpp RTCPAPPPacket.h
 			 RTCPAPPQTSSPacket.cpp RTCPAPPQTSSPacket.h
-			 RTCPAPPNADUPacket.cpp RTCPAPPNADUPacket.h)
+			 RTCPAPPNADUPacket.cpp RTCPAPPNADUPacket.h
+			 RTCPSRPacket.cpp RTCPSRPacket.h)

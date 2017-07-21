@@ -1,3 +1,4 @@
+include_directories(../EasyProtocol/Include)
 set (SRC 
              getopt.c getopt.h 
 			 OSThread.cpp OSThread.h
@@ -36,8 +37,12 @@ set (SRC
 			 md5digest.cpp md5digest.h
 			 QueryParamList.cpp QueryParamList.h
 			 DateTranslator.cpp DateTranslator.h
-			 StringTranslator.cpp StringTranslator.h)
-
+			 StringTranslator.cpp StringTranslator.h
+			 SDPUtils.cpp SDPUtils.h
+			 Trim.c Trim.h
+			 UserAgentParser.cpp UserAgentParser.h
+			 ClientSocket.cpp ClientSocket.h
+			 Format.cpp Format.h)
 IF (MSVC)
 set (SRC ${SRC} win32ev.cpp CreateDump.cpp)
 ENDIF()

@@ -1,0 +1,3 @@
+set (SRC ${SRC} ${CMAKE_CURRENT_SOURCE_DIR}/QTSSPOSIXFileSysModule.cpp 
+                ${CMAKE_CURRENT_SOURCE_DIR}/QTSSPOSIXFileSysModule.h 
+				PARENT_SCOPE) 

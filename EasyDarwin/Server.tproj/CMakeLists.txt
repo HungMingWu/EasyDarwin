@@ -14,9 +14,6 @@ include_directories(../../CommonUtilitiesLib ../../RTSPUtilitiesLib
 					../)
 
 set (SRC 
-     ../PrefsSourceLib/FilePrefsSource.cpp ../PrefsSourceLib/FilePrefsSource.h
-     ../PrefsSourceLib/XMLParser.cpp ../PrefsSourceLib/XMLParser.h
-     ../PrefsSourceLib/XMLPrefsParser.cpp ../PrefsSourceLib/XMLPrefsParser.h
      RunServer.cpp RunServer.h
 	 QTSSCallbacks.cpp QTSSCallbacks.h
 	 QTSSModule.cpp QTSSModule.h
@@ -44,12 +41,17 @@ set (SRC
 	 QTSSExpirationDate.cpp QTSSExpirationDate.h
 	 RTSPRequestStream.cpp RTSPRequestStream.h
 	 HTTPSessionInterface.cpp HTTPSessionInterface.h
-	 HTTPSession.cpp HTTPSession.h)
+	 HTTPSession.cpp HTTPSession.h
+	 GenerateXMLPrefs.cpp GenerateXMLPrefs.h
+	 QTSSErrorLogModule.cpp QTSSErrorLogModule.h
+	 RTCPTask.cpp RTCPTask.h)
 
 IF (MSVC)
-link_libraries(Ws2_32)
+link_libraries(Ws2_32 Winmm)
 set (SRC ${SRC} win32main.cpp)
 ENDIF()
 
-link_libraries(HTTPUtilitiesLib RTCPUtilitiesLib RTSPUtilitiesLib APICommonCode APIModules APIStubLib SafeStdLib CommonUtilitiesLib RTPMetaInfoLib)
+link_libraries(HTTPUtilitiesLib RTCPUtilitiesLib RTSPUtilitiesLib PrefsSourceLib
+               APICommonCode APIModules APIStubLib SafeStdLib EasyRedisClient
+			   EasyProtocol CommonUtilitiesLib RTPMetaInfoLib jsoncpp)
 add_executable (EasyDarwin ${SRC})

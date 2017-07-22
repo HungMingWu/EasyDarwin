@@ -48,7 +48,7 @@ FileDeleter::FileDeleter(StrPtrLen* inSDPPath)
 
 FileDeleter::~FileDeleter()
 {
-	//qtss_printf("FileDeleter::~FileDeleter delete = %s \n",fFilePath.Ptr);
+	//printf("FileDeleter::~FileDeleter delete = %s \n",fFilePath.Ptr);
 	::unlink(fFilePath.Ptr);
 	delete fFilePath.Ptr;
 	fFilePath.Ptr = nullptr;
@@ -181,7 +181,7 @@ QTSS_Error ReflectorSession::SetupReflectorSession(SourceInfo* inInfo, QTSS_Stan
 
 		// If the port was 0, update it to reflect what the actual RTP port is.
 		fSourceInfo->GetStreamInfo(x)->fPort = fStreamArray[x]->GetStreamInfo()->fPort;
-		//qtss_printf("ReflectorSession::SetupReflectorSession fSourceInfo->GetStreamInfo(x)->fPort= %u\n",fSourceInfo->GetStreamInfo(x)->fPort);   
+		//printf("ReflectorSession::SetupReflectorSession fSourceInfo->GetStreamInfo(x)->fPort= %u\n",fSourceInfo->GetStreamInfo(x)->fPort);   
 	}
 
 	if (inFlags & kMarkSetup)
@@ -198,7 +198,7 @@ void ReflectorSession::AddBroadcasterClientSession(QTSS_StandardRTSP_Params* inP
 	for (uint32_t x = 0; x < fSourceInfo->GetNumStreams(); x++)
 	{
 		if (fStreamArray[x] != nullptr)
-		{   //qtss_printf("AddBroadcasterSession=%"   _U32BITARG_   "\n",inParams->inClientSession);
+		{   //printf("AddBroadcasterSession=%"   _U32BITARG_   "\n",inParams->inClientSession);
 			((ReflectorSocket*)fStreamArray[x]->GetSocketPair()->GetSocketA())->AddBroadcasterSession(inParams->inClientSession);
 			((ReflectorSocket*)fStreamArray[x]->GetSocketPair()->GetSocketB())->AddBroadcasterSession(inParams->inClientSession);
 		}
@@ -334,7 +334,7 @@ void ReflectorSession::DelRedisLive()
 	uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRedisUpdateStreamInfoRole);
 	for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
 	{
-		qtss_printf("从redis中删除推流名称%s\n", fSourceID.Ptr);
+		printf("从redis中删除推流名称%s\n", fSourceID.Ptr);
 		QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRedisUpdateStreamInfoRole, currentModule);
 		(void)theModule->CallDispatch(Easy_RedisUpdateStreamInfo_Role, &theParams);
 	}

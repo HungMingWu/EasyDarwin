@@ -271,7 +271,7 @@ QTSS_Error EasyCMSSession::ProcessMessage()
 
 	if (content_length)
 	{
-		qtss_printf("EasyCMSSession::ProcessMessage read content-length:%d \n", content_length);
+		printf("EasyCMSSession::ProcessMessage read content-length:%d \n", content_length);
 		// 检查content的fContentBuffer和fContentBufferOffset是否有值存在,如果存在，说明我们已经开始
 		// 进行content请求处理,如果不存在,我们需要创建并初始化fContentBuffer和fContentBufferOffset
 		if (fContentBuffer == nullptr)
@@ -295,7 +295,7 @@ QTSS_Error EasyCMSSession::ProcessMessage()
 			return QTSS_RequestFailed;
 		}
 
-		qtss_printf("EasyCMSSession::ProcessMessage() Add Len:%d \n", theLen);
+		printf("EasyCMSSession::ProcessMessage() Add Len:%d \n", theLen);
 		if ((theErr == QTSS_WouldBlock) || (theLen < (content_length - fContentBufferOffset)))
 		{
 			//
@@ -311,7 +311,7 @@ QTSS_Error EasyCMSSession::ProcessMessage()
 		// 处理完成报文后会自动进行Delete处理
 		OSCharArrayDeleter charArrayPathDeleter(fContentBuffer);
 
-		qtss_printf("EasyCMSSession::ProcessMessage() Get Complete Msg:\n%s", fContentBuffer);
+		printf("EasyCMSSession::ProcessMessage() Get Complete Msg:\n%s", fContentBuffer);
 
 		EasyProtocol protocol(fContentBuffer);
 		int nNetMsg = protocol.GetMessageType();
@@ -323,7 +323,7 @@ QTSS_Error EasyCMSSession::ProcessMessage()
 			string strSerial = protocol.GetBodyValue(EASY_TAG_SERIAL);
 			string strChannle = protocol.GetBodyValue(EASY_TAG_CHANNEL);
 
-			qtss_printf("EasyCMS停止推流响应:%s,Serial=%s,Channel=%s", strErrorNum.c_str(), strSerial.c_str(), strChannle.c_str());
+			printf("EasyCMS停止推流响应:%s,Serial=%s,Channel=%s", strErrorNum.c_str(), strSerial.c_str(), strChannle.c_str());
 			fLiveSession = false;//进入析构
 		}
 		break;
@@ -425,13 +425,13 @@ QTSS_Error EasyCMSSession::FreeStream(const char * streamName, uint32_t streamCh
 
 		if (chCMSIP[0] == 0)
 		{
-			qtss_printf("获取关联CMS失败\n");
+			printf("获取关联CMS失败\n");
 			return QTSS_ValueNotFound;
 		}
 		else
 		{
 			uCMSPort = atoi(chCMSPort);
-			qtss_printf("获取关联CMS成功\n");
+			printf("获取关联CMS成功\n");
 		}
 		//TODO::
 		//如果查询失败，返回QTSS_ValueNotFound

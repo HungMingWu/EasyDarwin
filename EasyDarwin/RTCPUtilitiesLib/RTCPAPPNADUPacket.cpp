@@ -165,7 +165,7 @@ void RTCPNaduPacket::GetTestPacket(StrPtrLen* resultPtr)
 	uint16_t  packetLenInWords = htons(((uint32_t*)theWriter - (uint32_t*)appPacketLenStart));
 
 	*packetLenOffsetPtr = packetLenInWords;
-	qtss_printf("packetLenInWords =%lu\n", ntohs(packetLenInWords));
+	printf("packetLenInWords =%lu\n", ntohs(packetLenInWords));
 	uint32_t len = (char*)theWriter - (char*)theWriterStart;
 	if (resultPtr)
 		resultPtr->Set(sRTCPTestBuffer, len);
@@ -330,9 +330,9 @@ void RTCPNaduPacket::DumpNaduPacket()
 {
 	char   printName[5];
 	(void) this->GetAppPacketName(printName, sizeof(printName));
-	qtss_printf(" H_app_packet_name = %s, ", printName);
+	printf(" H_app_packet_name = %s, ", printName);
 
-	qtss_printf("\n");
+	printf("\n");
 	int32_t count = 0;
 	for (; count < fNumBlocks; count++)
 	{
@@ -343,15 +343,15 @@ void RTCPNaduPacket::DumpNaduPacket()
 		uint16_t nsn = this->GetNSN(count);
 		uint16_t nun = this->GetNUN(count);
 		uint16_t fbs = this->GetFBS(count);
-		qtss_printf("              ");
-		qtss_printf("RTCP APP NADU Report[%"   _U32BITARG_   "] ", ssrcIndex);
-		qtss_printf("h_ssrc = %"   _U32BITARG_, ssrc);
-		qtss_printf(", h_playoutdelay = %u", playoutDelay);
-		qtss_printf(", h_sequence_num = %u", nsn);
-		qtss_printf(", h_nun_unit_num = %u", nun);
-		qtss_printf(", h_fbs_free_buf = %u", fbs);
+		printf("              ");
+		printf("RTCP APP NADU Report[%"   _U32BITARG_   "] ", ssrcIndex);
+		printf("h_ssrc = %"   _U32BITARG_, ssrc);
+		printf(", h_playoutdelay = %u", playoutDelay);
+		printf(", h_sequence_num = %u", nsn);
+		printf(", h_nun_unit_num = %u", nun);
+		printf(", h_fbs_free_buf = %u", fbs);
 
-		qtss_printf("\n");
+		printf("\n");
 	}
 }
 
@@ -628,8 +628,8 @@ uint16_t NaduList::GetLastReportedNSN()
 void NaduList::DumpList()
 {
 
-	qtss_printf("\nDumping Nadu List (list size = %"   _U32BITARG_   "  record count=%"   _U32BITARG_   ")\n", fListSize, fcurrentIndexCount);
-	qtss_printf("-------------------------------------------------------------\n");
+	printf("\nDumping Nadu List (list size = %"   _U32BITARG_   "  record count=%"   _U32BITARG_   ")\n", fListSize, fcurrentIndexCount);
+	printf("-------------------------------------------------------------\n");
 	NaduReport* lastReportPtr = this->GetLastReport();
 	NaduReport* earliestReportPtr = this->GetEarliestReport();
 	uint32_t thisID = 0;
@@ -640,7 +640,7 @@ void NaduList::DumpList()
 	while (lastReportPtr)
 	{
 		thisID = lastReportPtr->getID();
-		qtss_printf("NADU Record: list_index = %"   _U32BITARG_   " list_recordID = %"   _U32BITARG_   "\n", this->GetReportIndex(thisID), thisID);
+		printf("NADU Record: list_index = %"   _U32BITARG_   " list_recordID = %"   _U32BITARG_   "\n", this->GetReportIndex(thisID), thisID);
 		lastReportPtr->GetNaduPacket()->Dump();
 		if (thisID == stopID)
 			break;

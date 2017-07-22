@@ -80,17 +80,17 @@ void MyAssert(char* s);
 
 #define Warn(condition) {                                       \
             if (!(condition))                                       \
-                qtss_printf( "_Warn: %s, %d\n",__FILE__, __LINE__ );     }                                                           
+                printf( "_Warn: %s, %d\n",__FILE__, __LINE__ );     }                                                           
 
 #define WarnV(condition,msg)        {                               \
         if (!(condition))                                               \
-            qtss_printf ("_WarnV: %s, %d (%s)\n",__FILE__, __LINE__, msg );  }                                                   
+            printf ("_WarnV: %s, %d (%s)\n",__FILE__, __LINE__, msg );  }                                                   
 
 #define WarnVE(condition,msg,err)  {                           		\
         if (!(condition))                                               \
         {   char buffer[kAssertBuffSize];								\
             buffer[kAssertBuffSize -1] = 0;                              \
-            qtss_printf ("_WarnV: %s, %d (%s, %s [err=%d])\n",__FILE__, __LINE__, msg, qtss_strerror(err,buffer,sizeof(buffer) -1), err );  \
+            printf ("_WarnV: %s, %d (%s, %s [err=%d])\n",__FILE__, __LINE__, msg, qtss_strerror(err,buffer,sizeof(buffer) -1), err );  \
         }	}
 
 #else

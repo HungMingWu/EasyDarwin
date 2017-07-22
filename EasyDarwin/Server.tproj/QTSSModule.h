@@ -103,7 +103,7 @@ public:
 			this->GetValue(qtssModName)->PrintStr("QTSSModule::CallDispatch ENTER module=", " role=");
 			theRoleIndex = GetPrivateRoleIndex(inRole);
 			if (theRoleIndex != -1)
-				qtss_printf(" %s ENTR\n", sRoleNames[theRoleIndex]);
+				printf(" %s ENTR\n", sRoleNames[theRoleIndex]);
 
 		}
 		QTSS_Error theError = (fDispatchFunc)(inRole, inParams);
@@ -112,7 +112,7 @@ public:
 		{
 			this->GetValue(qtssModName)->PrintStr("QTSSModule::CallDispatch EXIT  module=", " role=");
 			if (theRoleIndex != -1)
-				qtss_printf(" %s EXIT\n", sRoleNames[theRoleIndex]);
+				printf(" %s EXIT\n", sRoleNames[theRoleIndex]);
 		}
 
 		return theError;

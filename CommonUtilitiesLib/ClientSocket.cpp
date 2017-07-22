@@ -155,7 +155,7 @@ TCPClientSocket::TCPClientSocket(uint32_t inSocketType)
 void TCPClientSocket::SetOptions(int sndBufSize, int rcvBufSize)
 {   //set options on the socket
 
-	//qtss_printf("TCPClientSocket::SetOptions sndBufSize=%d,rcvBuf=%d,keepAlive=%d,noDelay=%d\n",sndBufSize,rcvBufSize,(int)keepAlive,(int)noDelay);
+	//printf("TCPClientSocket::SetOptions sndBufSize=%d,rcvBuf=%d,keepAlive=%d,noDelay=%d\n",sndBufSize,rcvBufSize,(int)keepAlive,(int)noDelay);
 	int err = ::setsockopt(fSocket.GetSocketFD(), SOL_SOCKET, SO_SNDBUF, (char*)&sndBufSize, sizeof(int));
 	AssertV(err == 0, OSThread::GetErrno());
 
@@ -233,7 +233,7 @@ OS_Error HTTPClientSocket::Read(void* inBuffer, const uint32_t inLength, uint32_
 	if (!fGetSocket.IsConnected())
 	{
 #if CLIENT_SOCKET_DEBUG
-		qtss_printf("HTTPClientSocket::Read: Sending GET\n");
+		printf("HTTPClientSocket::Read: Sending GET\n");
 #endif
 		qtss_sprintf(fSendBuffer.Ptr, "GET %s HTTP/1.0\r\nX-SessionCookie: %"   _U32BITARG_   "\r\nAccept: application/x-rtsp-rtp-interleaved\r\nUser-Agent: QTSS/2.0\r\n\r\n", fURL.Ptr, fCookie);
 		fSendBuffer.Len = ::strlen(fSendBuffer.Ptr);
@@ -274,7 +274,7 @@ OS_Error HTTPClientSocket::Read(void* inBuffer, const uint32_t inLength, uint32_
 				theGetEnd += 4;
 
 #if CLIENT_SOCKET_DEBUG
-				qtss_printf("HTTPClientSocket::Read: Received GET response\n");
+				printf("HTTPClientSocket::Read: Received GET response\n");
 #endif
 
 				// Whatever remains is part of an RTSP request, so move that to
@@ -289,7 +289,7 @@ OS_Error HTTPClientSocket::Read(void* inBuffer, const uint32_t inLength, uint32_
 		} while (*outRcvLen > 0);
 
 #if CLIENT_SOCKET_DEBUG
-		qtss_printf("HTTPClientSocket::Read: Waiting for GET response\n");
+		printf("HTTPClientSocket::Read: Waiting for GET response\n");
 #endif
 		// Message wasn't entirely received. Caller should wait for a read event on the GET socket
 		Assert(theErr != OS_NoErr);
@@ -302,14 +302,14 @@ OS_Error HTTPClientSocket::Read(void* inBuffer, const uint32_t inLength, uint32_
 	if (theErr != OS_NoErr)
 	{
 #if CLIENT_SOCKET_DEBUG
-		//qtss_printf("HTTPClientSocket::Read: Waiting for data\n");
+		//printf("HTTPClientSocket::Read: Waiting for data\n");
 #endif
 		fSocketP = &fGetSocket;
 		fEventMask = EV_RE;
 	}
 #if CLIENT_SOCKET_DEBUG
 	//else
-		//qtss_printf("HTTPClientSocket::Read: Got some data\n");
+		//printf("HTTPClientSocket::Read: Got some data\n");
 #endif
 	return theErr;
 }
@@ -324,7 +324,7 @@ OS_Error HTTPClientSocket::SendV(iovec* inVec, uint32_t inNumVecs)
 	if (!fPostSocket->IsConnected())
 	{
 #if CLIENT_SOCKET_DEBUG
-		qtss_printf("HTTPClientSocket::Send: Sending POST\n");
+		printf("HTTPClientSocket::Send: Sending POST\n");
 #endif
 		qtss_sprintf(fSendBuffer.Ptr, "POST %s HTTP/1.0\r\nX-SessionCookie: %"   _U32BITARG_   "\r\nAccept: application/x-rtsp-rtp-interleaved\r\nUser-Agent: QTSS/2.0\r\n\r\n", fURL.Ptr, fCookie);
 		fSendBuffer.Len = ::strlen(fSendBuffer.Ptr);
@@ -342,7 +342,7 @@ OS_Error HTTPClientSocket::SendV(iovec* inVec, uint32_t inNumVecs)
 		this->encodeVec(inVec, inNumVecs);
 
 #if CLIENT_SOCKET_DEBUG
-	//qtss_printf("HTTPClientSocket::Send: Sending data\n");
+	//printf("HTTPClientSocket::Send: Sending data\n");
 #endif
 	return this->SendSendBuffer(fPostSocket);
 }

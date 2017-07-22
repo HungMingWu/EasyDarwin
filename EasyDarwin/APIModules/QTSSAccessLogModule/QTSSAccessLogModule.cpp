@@ -624,7 +624,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	uint32_t* theStatusCode = &sTimeoutCode;
 	theLen = sizeof(uint32_t);
 	(void)QTSS_GetValuePtr(inClientSession, qtssCliRTSPReqRealStatusCode, 0, (void **)&theStatusCode, &theLen);
-	//  qtss_printf("qtssCliRTSPReqRealStatusCode = %"   _U32BITARG_   " \n", *theStatusCode);
+	//  printf("qtssCliRTSPReqRealStatusCode = %"   _U32BITARG_   " \n", *theStatusCode);
 
 
 	if (inCloseReasonPtr) do
@@ -634,7 +634,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 			if (*inCloseReasonPtr == qtssCliSesCloseTimeout) // there was a timeout
 			{
 				*theStatusCode = sTimeoutCode;
-				//                  qtss_printf(" log timeout ");
+				//                  printf(" log timeout ");
 				break;
 			}
 
@@ -645,37 +645,37 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 				QTSS_CliSesClosingReason* theReasonPtr = &sReason;
 				theLen = sizeof(QTSS_CliSesTeardownReason);
 				(void)QTSS_GetValuePtr(inClientSession, qtssCliTeardownReason, 0, (void **)&theReasonPtr, &theLen);
-				//              qtss_printf("qtssCliTeardownReason = %"   _U32BITARG_   " \n", *theReasonPtr);
+				//              printf("qtssCliTeardownReason = %"   _U32BITARG_   " \n", *theReasonPtr);
 
 				if (*theReasonPtr == qtssCliSesTearDownClientRequest) //  the client asked for a tear down
 				{
-					//                  qtss_printf(" client requests teardown  ");
+					//                  printf(" client requests teardown  ");
 					break;
 				}
 
 				if (*theReasonPtr == qtssCliSesTearDownUnsupportedMedia) //  An error occured while streaming the file.
 				{
 					*theStatusCode = 415;
-					//                      qtss_printf(" log UnsupportedMedia ");
+					//                      printf(" log UnsupportedMedia ");
 					break;
 				}
 				if (*theReasonPtr == qtssCliSesTearDownBroadcastEnded) //  a broadcaster stopped broadcasting
 				{
 					*theStatusCode = 452;
-					//                      qtss_printf(" log broadcast removed ");
+					//                      printf(" log broadcast removed ");
 					break;
 				}
 
 				*theStatusCode = 500; // some unknown reason for cancelling the connection
 			}
 
-			//          qtss_printf("return status ");
+			//          printf("return status ");
 						// just use the qtssCliRTSPReqRealStatusCode for the reason
 		}
 
 	} while (false);
 
-	//  qtss_printf(" = %"   _U32BITARG_   " \n", *theStatusCode);
+	//  printf(" = %"   _U32BITARG_   " \n", *theStatusCode);
 
 
 		// Find out what time it is
@@ -695,7 +695,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 #if TESTUNIXTIME
 	char thetestDateBuffer[QTSSRollingLog::kMaxDateBufferSizeInBytes];
 	TestUnixTime(QTSS_MilliSecsTo1970Secs(*theCreateTime), thetestDateBuffer);
-	qtss_printf("%s\n", thetestDateBuffer);
+	printf("%s\n", thetestDateBuffer);
 #endif
 
 	float zeroFloat = 0;
@@ -712,17 +712,17 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	char lastURLRealm[eTempLogItemSize] = { 0 };
 	StrPtrLen lastURLRealmStr(lastURLRealm, eTempLogItemSize);
 
-	//qtss_printf("logging of saved params are in dictionary \n");
+	//printf("logging of saved params are in dictionary \n");
 
 	tempLogStr.Ptr[0] = 0; tempLogStr.Len = eTempLogItemSize;
 	(void)QTSS_GetValue(inClientSession, qtssCliRTSPSesUserName, 0, tempLogStr.Ptr, &tempLogStr.Len);
 	ReplaceSpaces(&tempLogStr, &lastUserNameStr, "%20");
-	//qtss_printf("qtssRTSPSesLastUserName dictionary item = %s len = %" _S32BITARG_ "\n",lastUserNameStr.Ptr,lastUserNameStr.Len);
+	//printf("qtssRTSPSesLastUserName dictionary item = %s len = %" _S32BITARG_ "\n",lastUserNameStr.Ptr,lastUserNameStr.Len);
 
 	tempLogStr.Ptr[0] = 0; tempLogStr.Len = eTempLogItemSize;
 	(void)QTSS_GetValue(inClientSession, qtssCliRTSPSesURLRealm, 0, tempLogStr.Ptr, &tempLogStr.Len);
 	ReplaceSpaces(&tempLogStr, &lastURLRealmStr, "%20");
-	//qtss_printf("qtssRTSPSesLastURLRealm dictionary  item = %s len = %" _S32BITARG_ "\n",lastURLRealmStr.Ptr,lastURLRealmStr.Len);  
+	//printf("qtssRTSPSesLastURLRealm dictionary  item = %s len = %" _S32BITARG_ "\n",lastURLRealmStr.Ptr,lastURLRealmStr.Len);  
 
 	char respMsgBuffer[1024] = { 0 };
 	StrPtrLen theRespMsg;

@@ -43,19 +43,19 @@ bool RTCPPacket::ParsePacket(uint8_t* inPacketBuffer, uint32_t inPacketLen)
         return false;
         
     fReceiverPacketBuffer = inPacketBuffer;
-    if (RTCP_PACKET_DEBUG) qtss_printf("RTCPPacket::ParsePacket first 4 bytes of packet=%x \n", ntohl( *(uint32_t *)inPacketBuffer));
+    if (RTCP_PACKET_DEBUG) printf("RTCPPacket::ParsePacket first 4 bytes of packet=%x \n", ntohl( *(uint32_t *)inPacketBuffer));
     
     //the length of this packet can be no less than the advertised length (which is
     //in 32-bit words, so we must multiply) plus the size of the header (4 bytes)
-    if (RTCP_PACKET_DEBUG) qtss_printf("RTCPPacket::ParsePacket len=%"   _U32BITARG_   " min allowed=%"   _U32BITARG_   "\n", inPacketLen,(uint32_t)((this->GetPacketLength() * 4) + kRTCPHeaderSizeInBytes));
+    if (RTCP_PACKET_DEBUG) printf("RTCPPacket::ParsePacket len=%"   _U32BITARG_   " min allowed=%"   _U32BITARG_   "\n", inPacketLen,(uint32_t)((this->GetPacketLength() * 4) + kRTCPHeaderSizeInBytes));
     if (inPacketLen < (uint32_t)((this->GetPacketLength() * 4) + kRTCPHeaderSizeInBytes))
-    {   if (RTCP_PACKET_DEBUG) qtss_printf("RTCPPacket::ParsePacket invalid len=%"   _U32BITARG_   "\n", inPacketLen);
+    {   if (RTCP_PACKET_DEBUG) printf("RTCPPacket::ParsePacket invalid len=%"   _U32BITARG_   "\n", inPacketLen);
         return false;
     }
     
     //do some basic validation on the packet
     if (this->GetVersion() != kSupportedRTCPVersion)
-    {   if (RTCP_PACKET_DEBUG) qtss_printf("RTCPPacket::ParsePacket unsupported version\n");
+    {   if (RTCP_PACKET_DEBUG) printf("RTCPPacket::ParsePacket unsupported version\n");
         return false;
     }
         
@@ -65,10 +65,10 @@ bool RTCPPacket::ParsePacket(uint8_t* inPacketBuffer, uint32_t inPacketLen)
 void RTCPReceiverPacket::Dump()//Override
 {
     RTCPPacket::Dump();
-    qtss_printf("\n");
+    printf("\n");
     for (int i = 0;i<this->GetReportCount(); i++)
     {
-        qtss_printf( "              RTCP RR Report[%d] H_ssrc=%"   _U32BITARG_   ", H_frac_lost=%d, H_tot_lost=%"   _U32BITARG_   ", H_high_seq=%"   _U32BITARG_   " H_jit=%"   _U32BITARG_   ", H_last_sr_time=%"   _U32BITARG_   ", H_last_sr_delay=%"   _U32BITARG_   " \n",
+        printf( "              RTCP RR Report[%d] H_ssrc=%"   _U32BITARG_   ", H_frac_lost=%d, H_tot_lost=%"   _U32BITARG_   ", H_high_seq=%"   _U32BITARG_   " H_jit=%"   _U32BITARG_   ", H_last_sr_time=%"   _U32BITARG_   ", H_last_sr_delay=%"   _U32BITARG_   " \n",
                              i,
                              this->GetReportSourceID(i),
                              this->GetFractionLostPackets(i),
@@ -164,7 +164,7 @@ bool RTCPSenderReportPacket::ParseReport(uint8_t* inPacketBuffer, uint32_t inPac
 
 void RTCPPacket::Dump()
 {  
-    qtss_printf( "H_vers=%d, H_pad=%d, H_rprt_count=%d, H_type=%d, H_length=%d, H_ssrc=%" _S32BITARG_ "",
+    printf( "H_vers=%d, H_pad=%d, H_rprt_count=%d, H_type=%d, H_length=%d, H_ssrc=%" _S32BITARG_ "",
              this->GetVersion(),
              (int)this->GetHasPadding(),
              this->GetReportCount(),

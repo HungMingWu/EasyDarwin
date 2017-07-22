@@ -40,7 +40,7 @@ void MyAssert(char* inMessage)
 		sLogger->LogAssert(inMessage);
 	else
 	{
-		qtss_printf("%s\n", inMessage);
+		printf("%s\n", inMessage);
 #if __Win32__
 		DebugBreak();
 #else

@@ -62,7 +62,7 @@
 
 
 #if RTP_RTCP_DEBUG
-#define DEBUG_RTCP_PRINTF(s) qtss_printf s
+#define DEBUG_RTCP_PRINTF(s) printf s
 #else
 #define DEBUG_RTCP_PRINTF(s) {}
 #endif
@@ -333,12 +333,12 @@ RTPStream::~RTPStream()
 
 #if RTP_PACKET_RESENDER_DEBUGGING
 	//fResender.LogClose(fFlowControlDurationMsec);
-	//qtss_printf("Flow control duration msec: %" _64BITARG_ "d. Max outstanding packets: %d\n", fFlowControlDurationMsec, fResender.GetMaxPacketsInList());
+	//printf("Flow control duration msec: %" _64BITARG_ "d. Max outstanding packets: %d\n", fFlowControlDurationMsec, fResender.GetMaxPacketsInList());
 #endif
 
 #if RTP_TCP_STREAM_DEBUG
 	if (fIsTCP)
-		qtss_printf("DEBUG: ~RTPStream %li sends got EAGAIN'd.\n", (int32_t)fNumPacketsDroppedOnTCPFlowControl);
+		printf("DEBUG: ~RTPStream %li sends got EAGAIN'd.\n", (int32_t)fNumPacketsDroppedOnTCPFlowControl);
 #endif
 
 	if (fMonitorSocket != 0)
@@ -575,7 +575,7 @@ QTSS_Error RTPStream::Setup(RTSPRequestInterface* request, QTSS_AddStreamFlags i
 			uint32_t      clientAddr = request->GetSession()->GetSocket()->GetRemoteAddr();
 			memcpy(url, presoURL->Ptr, presoURL->Len);
 			url[presoURL->Len] = 0;
-			qtss_printf("RTPStream::Setup for %s will use ACKS, ip addr: %li.%li.%li.%li\n", url, (clientAddr & 0xff000000) >> 24
+			printf("RTPStream::Setup for %s will use ACKS, ip addr: %li.%li.%li.%li\n", url, (clientAddr & 0xff000000) >> 24
 				, (clientAddr & 0x00ff0000) >> 16
 				, (clientAddr & 0x0000ff00) >> 8
 				, (clientAddr & 0x000000ff)
@@ -662,7 +662,7 @@ void RTPStream::AppendTransport(RTSPRequestInterface* request)
 			char rtcpPortStr[10];
 			qtss_sprintf(rtpPortStr, "%u", request->GetSetUpServerPort());
 			qtss_sprintf(rtcpPortStr, "%u", request->GetSetUpServerPort() + 1);
-			//qtss_printf(" RTPStream::AppendTransport rtpPort=%u rtcpPort=%u \n",request->GetSetUpServerPort(),request->GetSetUpServerPort()+1);
+			//printf(" RTPStream::AppendTransport rtpPort=%u rtcpPort=%u \n",request->GetSetUpServerPort(),request->GetSetUpServerPort()+1);
 			StrPtrLen rtpSPL(rtpPortStr);
 			StrPtrLen rtcpSPL(rtcpPortStr);
 			// Append UDP socket port numbers.
@@ -749,9 +749,9 @@ void RTPStream::UDPMonitorWrite(void* thePacketData, uint32_t inLen, bool isRTCP
 		int result = ::sendto(fMonitorSocket, (const char*)thePacketData, inLen, 0, (struct sockaddr *)&sin, sizeof(struct sockaddr));
 		//if (DEBUG)
 		// {   if (result < 0)
-		//         qtss_printf("RTCP Monitor Socket sendto failed\n");
+		//         printf("RTCP Monitor Socket sendto failed\n");
 		//     else if (0)
-		//         qtss_printf("RTCP Monitor Socket sendto port=%hu, packetLen=%"   _U32BITARG_   "\n", ntohs(sin.sin_port), inLen);
+		//         printf("RTCP Monitor Socket sendto port=%hu, packetLen=%"   _U32BITARG_   "\n", ntohs(sin.sin_port), inLen);
 		// }
 	}
 
@@ -804,7 +804,7 @@ QTSS_Error  RTPStream::InterleavedWrite(void* inBuffer, uint32_t inLen, uint32_t
 		fSession->RefreshTimeout(); // RTSP session gets refreshed internally in WriteV
 
 #if RTP_TCP_STREAM_DEBUG
-//qtss_printf( "DEBUG: RTPStream fCurrentPacketDelay %li, fQualityLevel %i\n", (int32_t)fCurrentPacketDelay, (int)fQualityLevel );
+//printf( "DEBUG: RTPStream fCurrentPacketDelay %li, fQualityLevel %i\n", (int32_t)fCurrentPacketDelay, (int)fQualityLevel );
 #endif
 
 	return err;
@@ -839,8 +839,8 @@ QTSS_Error RTPStream::ReliableRTPWrite(void* inBuffer, uint32_t inLen, const int
 	// Send retransmits if we need to
 	for (int streamIter = 0; fSession->GetValuePtr(qtssCliSesStreamObjects, streamIter, (void**)&retransStream, &retransStreamLen) == QTSS_NoErr; streamIter++)
 	{
-		//qtss_printf("Resending packets for stream: %d\n",(*retransStream)->fTrackID);
-		//qtss_printf("RTPStream::ReliableRTPWrite. Calling ResendDueEntries\n");
+		//printf("Resending packets for stream: %d\n",(*retransStream)->fTrackID);
+		//printf("RTPStream::ReliableRTPWrite. Calling ResendDueEntries\n");
 		if (retransStream != NULL && *retransStream != NULL)
 			(*retransStream)->fResender.ResendDueEntries();
 	}
@@ -860,11 +860,11 @@ QTSS_Error RTPStream::ReliableRTPWrite(void* inBuffer, uint32_t inLen, const int
 
 	if (fResender.IsFlowControlled())
 	{
-		//      qtss_printf("Flow controlled\n");
+		//      printf("Flow controlled\n");
 #if DEBUG
 		if (fFlowControlStartedMsec == 0)
 		{
-			//qtss_printf("Flow control start\n");
+			//printf("Flow control start\n");
 			fFlowControlStartedMsec = OS::Milliseconds();
 		}
 #endif
@@ -988,7 +988,7 @@ bool RTPStream::UpdateQualityLevel(const int64_t& inTransmitTime, const int64_t&
 			// stale packets to the client, AGGRESSIVELY thin the stream
 			this->SetMinQuality();
 			//          if (fPayloadType == qtssVideoPayloadType)
-			//              qtss_printf("Q=%d, delay = %qd\n", GetQualityLevel(), inCurrentPacketDelay);
+			//              printf("Q=%d, delay = %qd\n", GetQualityLevel(), inCurrentPacketDelay);
 			if (inCurrentPacketDelay > fDropAllPacketsForThisStreamDelay)
 			{
 				fStalePacketsDropped++;
@@ -1034,7 +1034,7 @@ bool RTPStream::UpdateQualityLevel(const int64_t& inTransmitTime, const int64_t&
 		}
 
 		//		if (fPayloadType == qtssVideoPayloadType)
-		//			qtss_printf("Q=%d, delay = %qd\n", GetQualityLevel(), inCurrentPacketDelay);
+		//			printf("Q=%d, delay = %qd\n", GetQualityLevel(), inCurrentPacketDelay);
 		fLastCurrentPacketDelay = inCurrentPacketDelay;
 		fSession->fLastQualityCheckTime = inCurrentTime;
 		fSession->fLastQualityCheckMediaTime = inTransmitTime;
@@ -1124,7 +1124,7 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 #if RTP_PACKET_RESENDER_DEBUGGING
 			fResender.logprintf("Overbuffer window full. Num bytes in overbuffer: %d. Wakeup time: %qd\n", fSession->GetOverbufferWindow()->AvailableSpaceInWindow(), thePacket->packetTransmitTime);
 #endif
-			//qtss_printf("Overbuffer window full. Returning: %qd\n", thePacket->suggestedWakeupTime - theTime);
+			//printf("Overbuffer window full. Returning: %qd\n", thePacket->suggestedWakeupTime - theTime);
 
 			fSession->GetSessionMutex()->Unlock();// Make sure to unlock the mutex
 			return QTSS_WouldBlock;
@@ -1167,12 +1167,12 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 					{
 						if (time != -1)
 						{
-							qtss_printf("   %qd KBit (%d in %qd secs)", byteCount * 8 * 1000 / (theTime - time) / 1024, totalBytes, (theTime - startTime) / 1000);
+							printf("   %qd KBit (%d in %qd secs)", byteCount * 8 * 1000 / (theTime - time) / 1024, totalBytes, (theTime - startTime) / 1000);
 							if (fTracker)
-								qtss_printf(" Window = %d\n", fTracker->CongestionWindow());
+								printf(" Window = %d\n", fTracker->CongestionWindow());
 							else
-								qtss_printf("\n");
-							qtss_printf("Packet #%d xmit time = %qd\n", numPackets, (thePacket->packetTransmitTime - firstTime) / 1000);
+								printf("\n");
+							printf("Packet #%d xmit time = %qd\n", numPackets, (thePacket->packetTransmitTime - firstTime) / 1000);
 						}
 						else
 						{
@@ -1188,7 +1188,7 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 					totalBytes += inLen;
 					numPackets++;
 
-					qtss_printf("Packet %d for time %qd sent at %qd (%d bytes)\n", theSeqNum, thePacket->packetTransmitTime - fSession->GetPlayTime(), theTime - fSession->GetPlayTime(), inLen);
+					printf("Packet %d for time %qd sent at %qd (%d bytes)\n", theSeqNum, thePacket->packetTransmitTime - fSession->GetPlayTime(), theTime - fSession->GetPlayTime(), inLen);
 				}
 			}
 #endif
@@ -1202,7 +1202,7 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 			fResender.logprintf("Sent packet: %d. Overbuffer window: %d Transmit time %qd. Cur time %qd\n", ntohs(theSeqNum[1]), fSession->GetOverbufferWindow()->AvailableSpaceInWindow(), thePacket->packetTransmitTime, theTime);
 #endif
 		//if (err != QTSS_NoErr)
-		//  qtss_printf("flow controlled\n");
+		//  printf("flow controlled\n");
 		if (err == QTSS_NoErr && inLen > 0)
 		{
 			// Update statistics if we were actually able to send the data (don't
@@ -1367,7 +1367,7 @@ bool RTPStream::ProcessCompressedQTSSPacket(RTCPPacket &rtcpPacket, int64_t &cur
 	// Update our overbuffer window size to match what the client is telling us
 	if (fTransportType != qtssRTPTransportTypeUDP)
 	{
-		//  qtss_printf("Setting over buffer to %d\n", compressedQTSSPacket.GetOverbufferWindowSize());
+		//  printf("Setting over buffer to %d\n", compressedQTSSPacket.GetOverbufferWindowSize());
 		fSession->GetOverbufferWindow()->SetWindowSize(compressedQTSSPacket.GetOverbufferWindowSize());
 	}
 
@@ -1399,14 +1399,14 @@ bool RTPStream::ProcessAckPacket(RTCPPacket &rtcpPacket, int64_t &curTime)
 	{
 		uint16_t theSeqNum = theAckPacket.GetAckSeqNum();
 		fResender.AckPacket(theSeqNum, curTime);
-		//qtss_printf("Got ack: %d\n",theSeqNum);
+		//printf("Got ack: %d\n",theSeqNum);
 
 		for (uint16_t maskCount = 0; maskCount < theAckPacket.GetAckMaskSizeInBits(); maskCount++)
 		{
 			if (theAckPacket.IsNthBitEnabled(maskCount))
 			{
 				fResender.AckPacket(theSeqNum + maskCount + 1, curTime);
-				//qtss_printf("Got ack in mask: %d\n",theSeqNum + maskCount + 1);
+				//printf("Got ack in mask: %d\n",theSeqNum + maskCount + 1);
 			}
 		}
 
@@ -1428,7 +1428,7 @@ bool RTPStream::TestRTCPPackets(StrPtrLen* inPacketPtr, uint32_t itemName)
 	itemName = RTCPNaduPacket::kNaduPacketName;
 
 
-	qtss_printf("RTPStream::TestRTCPPackets received packet inPacketPtr.Ptr=%p inPacketPtr.len =%lu\n", inPacketPtr->Ptr, inPacketPtr->Len);
+	printf("RTPStream::TestRTCPPackets received packet inPacketPtr.Ptr=%p inPacketPtr.len =%lu\n", inPacketPtr->Ptr, inPacketPtr->Len);
 
 	switch (itemName)
 	{
@@ -1436,28 +1436,28 @@ bool RTPStream::TestRTCPPackets(StrPtrLen* inPacketPtr, uint32_t itemName)
 	case RTCPAckPacket::kAckPacketName:
 	case RTCPAckPacket::kAckPacketAlternateName:
 		{
-			qtss_printf("testing RTCPAckPacket");
+			printf("testing RTCPAckPacket");
 			RTCPAckPacket::GetTestPacket(inPacketPtr);
 		}
 		break;
 
 	case RTCPCompressedQTSSPacket::kCompressedQTSSPacketName:
 		{
-			qtss_printf("testing RTCPCompressedQTSSPacket");
+			printf("testing RTCPCompressedQTSSPacket");
 			RTCPCompressedQTSSPacket::GetTestPacket(inPacketPtr);
 		}
 		break;
 
 	case RTCPNaduPacket::kNaduPacketName:
 		{
-			qtss_printf("testing RTCPNaduPacket");
+			printf("testing RTCPNaduPacket");
 			RTCPNaduPacket::GetTestPacket(inPacketPtr);
 		}
 		break;
 
 	};
 
-	qtss_printf(" using packet inPacketPtr.Ptr=%p inPacketPtr.len =%lu\n", inPacketPtr->Ptr, inPacketPtr->Len);
+	printf(" using packet inPacketPtr.Ptr=%p inPacketPtr.len =%lu\n", inPacketPtr->Ptr, inPacketPtr->Len);
 
 	return true;
 }
@@ -1542,14 +1542,14 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 					//increment the server total by the new delta
 					QTSServerInterface::GetServer()->IncrementTotalRTPPacketsLost(curTotalLostPackets - fTotalLostPackets);
 					fCurPacketsLostInRTCPInterval = curTotalLostPackets - fTotalLostPackets;
-					//                  qtss_printf("fCurPacketsLostInRTCPInterval = %d\n", fCurPacketsLostInRTCPInterval);
+					//                  printf("fCurPacketsLostInRTCPInterval = %d\n", fCurPacketsLostInRTCPInterval);
 					fTotalLostPackets = curTotalLostPackets;
 					hasPacketLoss = true;
 				}
 				else if (curTotalLostPackets == fTotalLostPackets)
 				{
 					fCurPacketsLostInRTCPInterval = 0;
-					//                  qtss_printf("fCurPacketsLostInRTCPInterval set to 0\n");
+					//                  printf("fCurPacketsLostInRTCPInterval set to 0\n");
 				}
 
 
@@ -1724,10 +1724,10 @@ void RTPStream::PrintRTP(char* packetBuff, uint32_t inLen)
 	if (payloadStr && payloadStr->Len > 0)
 		payloadStr->PrintStr();
 	else
-		qtss_printf("?");
+		printf("?");
 
 
-	qtss_printf(" H_ssrc=%" _S32BITARG_ " H_seq=%u H_ts=%"   _U32BITARG_   " seq_count=%"   _U32BITARG_   " ts_secs=%.3f \n", ssrc, sequence, timestamp, fPacketCount + 1, rtpTimeInSecs);
+	printf(" H_ssrc=%" _S32BITARG_ " H_seq=%u H_ts=%"   _U32BITARG_   " seq_count=%"   _U32BITARG_   " ts_secs=%.3f \n", ssrc, sequence, timestamp, fPacketCount + 1, rtpTimeInSecs);
 
 }
 
@@ -1767,9 +1767,9 @@ void RTPStream::PrintRTCPSenderReport(char* packetBuff, uint32_t inLen)
 	if (payloadStr && payloadStr->Len > 0)
 		payloadStr->PrintStr();
 	else
-		qtss_printf("?");
+		printf("?");
 
-	qtss_printf(" H_ssrc=%"   _U32BITARG_   " H_bytes=%"   _U32BITARG_   " H_ts=%"   _U32BITARG_   " H_pckts=%"   _U32BITARG_   " ts_secs=%.3f H_ntp=%s\n",
+	printf(" H_ssrc=%"   _U32BITARG_   " H_bytes=%"   _U32BITARG_   " H_ts=%"   _U32BITARG_   " H_pckts=%"   _U32BITARG_   " ts_secs=%.3f H_ntp=%s\n",
 		ssrc, bytecount, timestamp, packetcount, theTimeInSecs, ::qtss_ctime(&theTime, timebuffer, sizeof(timebuffer)));
 }
 
@@ -1792,8 +1792,8 @@ void RTPStream::PrintPacket(char *inBuffer, uint32_t inLen, int32_t inType)
 	case RTPStream::rtp:
 		if (QTSServerInterface::GetServer()->GetPrefs()->PrintRTPHeaders())
 		{
-			qtss_printf("\n");
-			qtss_printf("<send sess=%"   _U32BITARG_   ": RTP %s xmit_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), this->GetStreamTypeStr(), this->GetStreamStartTimeSecs(), theType, inLen);
+			printf("\n");
+			printf("<send sess=%"   _U32BITARG_   ": RTP %s xmit_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), this->GetStreamTypeStr(), this->GetStreamStartTimeSecs(), theType, inLen);
 			PrintRTP(inBuffer, inLen);
 		}
 		break;
@@ -1801,8 +1801,8 @@ void RTPStream::PrintPacket(char *inBuffer, uint32_t inLen, int32_t inType)
 	case RTPStream::rtcpSR:
 		if (QTSServerInterface::GetServer()->GetPrefs()->PrintSRHeaders())
 		{
-			qtss_printf("\n");
-			qtss_printf("<send sess=%"   _U32BITARG_   ": SR %s xmit_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), this->GetStreamTypeStr(), this->GetStreamStartTimeSecs(), theType, inLen);
+			printf("\n");
+			printf("<send sess=%"   _U32BITARG_   ": SR %s xmit_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), this->GetStreamTypeStr(), this->GetStreamStartTimeSecs(), theType, inLen);
 			PrintRTCPSenderReport(inBuffer, inLen);
 		}
 		break;
@@ -1813,8 +1813,8 @@ void RTPStream::PrintPacket(char *inBuffer, uint32_t inLen, int32_t inType)
 			RTCPReceiverPacket rtcpRR;
 			if (rtcpRR.ParseReport((uint8_t*)inBuffer, inLen))
 			{
-				qtss_printf("\n");
-				qtss_printf(">recv sess=%"   _U32BITARG_   ": RTCP %s recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), rr, this->GetStreamStartTimeSecs(), theType, inLen);
+				printf("\n");
+				printf(">recv sess=%"   _U32BITARG_   ": RTCP %s recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), rr, this->GetStreamStartTimeSecs(), theType, inLen);
 				rtcpRR.Dump();
 			}
 		}
@@ -1833,7 +1833,7 @@ void RTPStream::PrintPacket(char *inBuffer, uint32_t inLen, int32_t inType)
 
 			if (RTCPCompressedQTSSPacket::kCompressedQTSSPacketName == itemName)
 			{
-				qtss_printf(">recv sess=%"   _U32BITARG_   ": RTCP APP QTSS recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), this->GetStreamStartTimeSecs(), theType, inLen);
+				printf(">recv sess=%"   _U32BITARG_   ": RTCP APP QTSS recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), this->GetStreamStartTimeSecs(), theType, inLen);
 				RTCPCompressedQTSSPacket compressedQTSSPacket(debug);
 				if (compressedQTSSPacket.ParseAPPData((uint8_t*)inBuffer, inLen))
 				{
@@ -1844,7 +1844,7 @@ void RTPStream::PrintPacket(char *inBuffer, uint32_t inLen, int32_t inType)
 
 			if (RTCPNaduPacket::kNaduPacketName == itemName)
 			{
-				qtss_printf(">recv sess=%"   _U32BITARG_   ": RTCP APP NADU recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), this->GetStreamStartTimeSecs(), theType, inLen);
+				printf(">recv sess=%"   _U32BITARG_   ": RTCP APP NADU recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), this->GetStreamStartTimeSecs(), theType, inLen);
 				RTCPNaduPacket naduPacket(debug);
 				if (naduPacket.ParseAPPData((uint8_t*)inBuffer, inLen))
 				{
@@ -1856,8 +1856,8 @@ void RTPStream::PrintPacket(char *inBuffer, uint32_t inLen, int32_t inType)
 			}
 
 			//unknown app packet
-			qtss_printf(">recv sess=%"   _U32BITARG_   ": RTCP APP %c%c%c%c recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), ((uint8_t*)&itemName)[0], (char)((uint8_t*)&itemName)[1], (char)((uint8_t*)&itemName)[2], (char)((uint8_t*)&itemName)[3], this->GetStreamStartTimeSecs(), theType, inLen);
-			qtss_printf("unknown APP packet: ");
+			printf(">recv sess=%"   _U32BITARG_   ": RTCP APP %c%c%c%c recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), ((uint8_t*)&itemName)[0], (char)((uint8_t*)&itemName)[1], (char)((uint8_t*)&itemName)[2], (char)((uint8_t*)&itemName)[3], this->GetStreamStartTimeSecs(), theType, inLen);
+			printf("unknown APP packet: ");
 			appPacket.Dump();
 
 
@@ -1870,7 +1870,7 @@ void RTPStream::PrintPacket(char *inBuffer, uint32_t inLen, int32_t inType)
 			RTCPAckPacket rtcpAck;
 			if (rtcpAck.ParseAPPData((uint8_t*)inBuffer, inLen))
 			{
-				qtss_printf(">recv sess=%"   _U32BITARG_   ": RTCP %s recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), ack, this->GetStreamStartTimeSecs(), theType, inLen);
+				printf(">recv sess=%"   _U32BITARG_   ": RTCP %s recv_sec=%.3f %s size=%"   _U32BITARG_   " ", this->fSession->GetUniqueID(), ack, this->GetStreamStartTimeSecs(), theType, inLen);
 				rtcpAck.Dump();
 			}
 		}

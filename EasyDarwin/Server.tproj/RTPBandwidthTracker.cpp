@@ -49,9 +49,9 @@ void RTPBandwidthTracker::SetWindowSize(int32_t clientWindowSize)
 #if RTP_PACKET_RESENDER_DEBUGGING   
 	//€ test to see what happens w/o slow start at beginning
 	//if ( initSlowStart )
-	//  qtss_printf( "ack list initializing with slow start.\n" );
+	//  printf( "ack list initializing with slow start.\n" );
 	//else
-	//  qtss_printf( "ack list initializing at full speed.\n" );
+	//  printf( "ack list initializing at full speed.\n" );
 #endif
 
 	if (fUseSlowStart)
@@ -112,7 +112,7 @@ void RTPBandwidthTracker::EmptyWindow(uint32_t bytesIncreased, bool updateBytesI
 	if (fCongestionWindow > fClientWindow)
 		fCongestionWindow = fClientWindow;
 
-	//  qtss_printf("Window = %d, %d left\n", fCongestionWindow, fCongestionWindow-fBytesInList);
+	//  printf("Window = %d, %d left\n", fCongestionWindow, fCongestionWindow-fBytesInList);
 }
 
 void RTPBandwidthTracker::AdjustWindowForRetransmit()
@@ -162,15 +162,15 @@ void RTPBandwidthTracker::AdjustWindowForRetransmit()
 	if (fCongestionWindow < kMaximumSegmentSize)
 		fCongestionWindow = kMaximumSegmentSize;
 
-	// qtss_printf("Congestion window now %d\n", fCongestionWindow);
+	// printf("Congestion window now %d\n", fCongestionWindow);
 	fIsRetransmitting = true;
 }
 
 void RTPBandwidthTracker::AddToRTTEstimate(int32_t rttSampleMSecs)
 {
-	//  qtss_printf("%d ", rttSampleMSecs);
+	//  printf("%d ", rttSampleMSecs);
 	//  static int count = 0;
-	//  if ((count++ % 10) == 0) qtss_printf("\n");
+	//  if ((count++ % 10) == 0) printf("\n");
 
 		// this assert hits
 	Assert(fBytesInList < ((uint32_t)fClientWindow + 2000)); //mainly just to catch fBytesInList wrapping below 0
@@ -208,7 +208,7 @@ void RTPBandwidthTracker::AddToRTTEstimate(int32_t rttSampleMSecs)
 	// or too high...
 	if (fCurRetransmitTimeout > kMaxRetransmitIntervalMSecs)
 		fCurRetransmitTimeout = kMaxRetransmitIntervalMSecs;
-	//  qtss_printf("CurTimeout == %d\n", fCurRetransmitTimeout);
+	//  printf("CurTimeout == %d\n", fCurRetransmitTimeout);
 }
 
 void RTPBandwidthTracker::UpdateStats()
@@ -245,12 +245,12 @@ void RTPBandwidthTracker::UpdateAckTimeout(uint32_t bitsSentInInterval, int64_t 
 	if (rto < fAckTimeout)
 		rto = fAckTimeout;
 	uint32_t adjustment = (rto - fAckTimeout) / 2;
-	//qtss_printf("UnadjustedTimeout = %"   _U32BITARG_   ". rto: %" _S32BITARG_ ". Last ack timeout: %"   _U32BITARG_   ". Adjustment = %"   _U32BITARG_   ".", unadjustedTimeout, fUnadjustedRTO, fAckTimeout, adjustment);
+	//printf("UnadjustedTimeout = %"   _U32BITARG_   ". rto: %" _S32BITARG_ ". Last ack timeout: %"   _U32BITARG_   ". Adjustment = %"   _U32BITARG_   ".", unadjustedTimeout, fUnadjustedRTO, fAckTimeout, adjustment);
 	if (adjustment > unadjustedTimeout)
 		adjustment = unadjustedTimeout;
 	fAckTimeout = unadjustedTimeout - adjustment;
 
-	//qtss_printf("AckTimeout: %"   _U32BITARG_   "\n",fAckTimeout);
+	//printf("AckTimeout: %"   _U32BITARG_   "\n",fAckTimeout);
 	if (fAckTimeout > kMaxAckTimeout)
 		fAckTimeout = kMaxAckTimeout;
 	else if (fAckTimeout < kMinAckTimeout)

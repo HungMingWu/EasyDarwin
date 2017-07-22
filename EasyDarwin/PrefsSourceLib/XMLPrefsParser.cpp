@@ -389,7 +389,7 @@ int XMLPrefsParser::Parse()
 
 	if (!ParseFile(error, sizeof(error)))
 	{
-		qtss_printf("%s\n", error);
+		printf("%s\n", error);
 		return -1;
 	}
 

@@ -120,7 +120,7 @@ protected:
 		fUseThisThread = (TaskThread*)OSThread::GetCurrent();
 		Assert(fUseThisThread != NULL);
 		if (TASK_DEBUG) if (fTaskName[0] == 0) ::strcpy(fTaskName, " corrupt task");
-		if (TASK_DEBUG) qtss_printf("Task::ForceSameThread fUseThisThread %p task %s enque elem=%p enclosing %p\n", (void*)fUseThisThread, fTaskName, (void *)&fTaskQueueElem, (void *)this);
+		if (TASK_DEBUG) printf("Task::ForceSameThread fUseThisThread %p task %s enque elem=%p enclosing %p\n", (void*)fUseThisThread, fTaskName, (void *)&fTaskQueueElem, (void *)this);
 	}
 	int64_t                  CallLocked() {
 		ForceSameThread();

@@ -155,7 +155,7 @@ int64_t OS::Milliseconds()
 	//int64_t tempCurMsec = (curTimeMilli - sInitialMsec) + sMsecSince1970;
 	//int32_t tempCurSec = tempCurMsec / 1000;
 	//char buffer[kTimeStrSize];
-	//qtss_printf("OS::MilliSeconds current time = %s\n", qtss_ctime(&tempCurSec, buffer, sizeof(buffer)));
+	//printf("OS::MilliSeconds current time = %s\n", qtss_ctime(&tempCurSec, buffer, sizeof(buffer)));
 
 	return (curTimeMilli - sInitialMsec) + sMsecSince1970; // convert to application time
 #else

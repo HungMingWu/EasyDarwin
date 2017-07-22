@@ -429,7 +429,7 @@ QTSS_Error HTTPSession::SetupRequest()
 
 	if (content_length)
 	{
-		qtss_printf("HTTPSession read content-length:%d \n", content_length);
+		printf("HTTPSession read content-length:%d \n", content_length);
 		// Check for the existence of 2 attributes in the request: a pointer to our buffer for
 		// the request body, and the current offset in that buffer. If these attributes exist,
 		// then we've already been here for this request. If they don't exist, add them.
@@ -470,7 +470,7 @@ QTSS_Error HTTPSession::SetupRequest()
 			return QTSS_RequestFailed;
 		}
 
-		qtss_printf("Add Len:%d \n", theLen);
+		printf("Add Len:%d \n", theLen);
 		if ((theErr == QTSS_WouldBlock) || (theLen < (content_length - theBufferOffset)))
 		{
 			//
@@ -511,7 +511,7 @@ QTSS_Error HTTPSession::SetupRequest()
 
 	}
 
-	qtss_printf("get complete http msg:%s QueryString:%s \n", fRequest->GetRequestPath(), fRequest->GetQueryString());
+	printf("get complete http msg:%s QueryString:%s \n", fRequest->GetRequestPath(), fRequest->GetQueryString());
 
 	return QTSS_NoErr;
 }

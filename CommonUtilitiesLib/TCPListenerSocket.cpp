@@ -196,13 +196,13 @@ void TCPListenerSocket::ProcessEvent(int /*eventBits*/)
 		// We are at our maximum supported sockets
 		// slow down so we have time to process the active ones (we will respond with errors or service).
 		// wake up and execute again after sleeping. The timer must be reset each time through
-		//qtss_printf("TCPListenerSocket slowing down\n");
+		//printf("TCPListenerSocket slowing down\n");
 		this->SetIdleTimer(kTimeBetweenAcceptsInMsec); //sleep 1 second
 	}
 	else
 	{
 		// sleep until there is a read event outstanding (another client wants to connect)
-		//qtss_printf("TCPListenerSocket normal speed\n");
+		//printf("TCPListenerSocket normal speed\n");
 		this->RequestEvent(EV_RE);
 	}
 

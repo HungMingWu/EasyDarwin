@@ -132,7 +132,7 @@ void    Socket::SetSocketBufSize(uint32_t inNewSize)
 #if SOCKET_DEBUG
 	int setValue;
 	error = ::getsockopt(fFileDesc, SOL_SOCKET, SO_SNDBUF, (void*)&setValue, (socklen_t*)&buffSize);
-	qtss_printf("Socket::SetSocketBufSize ");
+	printf("Socket::SetSocketBufSize ");
 	if (fState & kBound)
 	{
 		if (NULL != this->GetLocalAddrStr())
@@ -141,8 +141,8 @@ void    Socket::SetSocketBufSize(uint32_t inNewSize)
 			this->GetLocalPortStr()->PrintStr(" ");
 	}
 	else
-		qtss_printf("unbound ");
-	qtss_printf("socket=%d old SO_SNDBUF =%d inNewSize=%d setValue=%d\n", (int)fFileDesc, value, bufSize, setValue);
+		printf("unbound ");
+	printf("socket=%d old SO_SNDBUF =%d inNewSize=%d setValue=%d\n", (int)fFileDesc, value, bufSize, setValue);
 #endif
 
 }
@@ -161,7 +161,7 @@ OS_Error    Socket::SetSocketRcvBufSize(uint32_t inNewSize)
 #if SOCKET_DEBUG
 	int setValue;
 	error = ::getsockopt(fFileDesc, SOL_SOCKET, SO_RCVBUF, (void*)&setValue, (socklen_t*)&buffSize);
-	qtss_printf("Socket::SetSocketRcvBufSize ");
+	printf("Socket::SetSocketRcvBufSize ");
 	if (fState & kBound)
 	{
 		if (NULL != this->GetLocalAddrStr())
@@ -170,8 +170,8 @@ OS_Error    Socket::SetSocketRcvBufSize(uint32_t inNewSize)
 			this->GetLocalPortStr()->PrintStr(" ");
 	}
 	else
-		qtss_printf("unbound ");
-	qtss_printf("socket=%d old SO_RCVBUF =%d inNewSize=%d setValue=%d\n", (int)fFileDesc, value, bufSize, setValue);
+		printf("unbound ");
+	printf("socket=%d old SO_RCVBUF =%d inNewSize=%d setValue=%d\n", (int)fFileDesc, value, bufSize, setValue);
 #endif
 
 

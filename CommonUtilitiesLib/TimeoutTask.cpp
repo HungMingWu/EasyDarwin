@@ -89,7 +89,7 @@ int64_t TimeoutTaskThread::Run()
 		if ((theTimeoutTask->fTimeoutAtThisTime > 0) && (curTime >= theTimeoutTask->fTimeoutAtThisTime))
 		{
 #if TIMEOUT_DEBUGGING
-			qtss_printf("TimeoutTask %" _S32BITARG_ " timed out. Curtime = %" _64BITARG_ "d, timeout time = %" _64BITARG_ "d\n", (int32_t)theTimeoutTask, curTime, theTimeoutTask->fTimeoutAtThisTime);
+			printf("TimeoutTask %" _S32BITARG_ " timed out. Curtime = %" _64BITARG_ "d, timeout time = %" _64BITARG_ "d\n", (int32_t)theTimeoutTask, curTime, theTimeoutTask->fTimeoutAtThisTime);
 #endif
 			theTimeoutTask->fTask->Signal(Task::kTimeoutEvent);
 		}
@@ -99,7 +99,7 @@ int64_t TimeoutTaskThread::Run()
 			if ((taskInterval > 0) && (theTimeoutTask->fTimeoutInMilSecs > 0) && (intervalMilli > taskInterval))
 				intervalMilli = taskInterval + 1000; // set timeout to 1 second past this task's timeout
 #if TIMEOUT_DEBUGGING
-			qtss_printf("TimeoutTask %" _S32BITARG_ " not being timed out. Curtime = %" _64BITARG_ "d. timeout time = %" _64BITARG_ "d\n", (int32_t)theTimeoutTask, curTime, theTimeoutTask->fTimeoutAtThisTime);
+			printf("TimeoutTask %" _S32BITARG_ " not being timed out. Curtime = %" _64BITARG_ "d. timeout time = %" _64BITARG_ "d\n", (int32_t)theTimeoutTask, curTime, theTimeoutTask->fTimeoutAtThisTime);
 #endif
 		}
 	}
@@ -108,7 +108,7 @@ int64_t TimeoutTaskThread::Run()
 	OSThread::ThreadYield();
 
 #if TIMEOUT_DEBUGGING
-	qtss_printf("TimeoutTaskThread::Run interval seconds= %" _S32BITARG_ "\n", (int32_t)intervalMilli / 1000);
+	printf("TimeoutTaskThread::Run interval seconds= %" _S32BITARG_ "\n", (int32_t)intervalMilli / 1000);
 #endif
 
 	return intervalMilli;//don't delete me!

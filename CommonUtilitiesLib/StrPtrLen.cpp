@@ -228,7 +228,7 @@ char* StrPtrLen::FindStringCase(char* queryCharStr, StrPtrLen* resultStr, bool c
 		resultStr->Set(resultChar, queryStr.Len);
 
 #if STRPTRLENTESTING    
-	qtss_printf("StrPtrLen::FindStringCase found string=%s\n", resultChar);
+	printf("StrPtrLen::FindStringCase found string=%s\n", resultChar);
 #endif
 
 	return resultChar;
@@ -317,7 +317,7 @@ void StrPtrLen::PrintStr()
 
 	if (thestr != NULL)
 	{
-		qtss_printf(thestr);
+		printf(thestr);
 		delete[]thestr;
 	}
 }
@@ -326,18 +326,18 @@ void StrPtrLen::PrintStr(char* appendStr)
 {
 	StrPtrLen::PrintStr();
 	if (appendStr != NULL)
-		qtss_printf(appendStr);
+		printf(appendStr);
 }
 
 void StrPtrLen::PrintStr(char* prependStr, char* appendStr)
 {
 	if (prependStr != NULL)
-		qtss_printf(prependStr);
+		printf(prependStr);
 
 	StrPtrLen::PrintStr();
 
 	if (appendStr != NULL)
-		qtss_printf(appendStr);
+		printf(appendStr);
 }
 
 
@@ -404,8 +404,8 @@ void StrPtrLen::PrintStrEOL(char* stopStr, char* appendStr)
 
 		if (nextLine != NULL)
 		{
-			qtss_printf(theStrLine);
-			qtss_printf(theChar);
+			printf(theStrLine);
+			printf(theChar);
 
 			theStrLine = nextLine;
 			nextLine = NULL;
@@ -413,11 +413,11 @@ void StrPtrLen::PrintStrEOL(char* stopStr, char* appendStr)
 			i = -1;
 		}
 	}
-	qtss_printf(theStrLine);
+	printf(theStrLine);
 	delete[]thestr;
 
 	if (appendStr != NULL)
-		qtss_printf(appendStr);
+		printf(appendStr);
 
 }
 

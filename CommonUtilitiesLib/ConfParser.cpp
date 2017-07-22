@@ -46,17 +46,17 @@ void TestParseConfigFile()
 
 static bool SampleConfigSetter(const char* paramName, const char* paramValue[], void* /*userData*/)
 {
-	qtss_printf("param: %s", paramName);
+	printf("param: %s", paramName);
 
 	int x = 0;
 
 	while (paramValue[x])
 	{
-		qtss_printf(" value(%" _S32BITARG_ "): %s ", (int32_t)x, (char *)paramValue[x]);
+		printf(" value(%" _S32BITARG_ "): %s ", (int32_t)x, (char *)paramValue[x]);
 		x++;
 	}
 
-	qtss_printf("\n");
+	printf("\n");
 
 	return false;
 }
@@ -65,19 +65,19 @@ static bool SampleConfigSetter(const char* paramName, const char* paramValue[], 
 static void DisplayConfigErr(const char* fname, int lineCount, const char* lineBuff, const char* errMessage)
 {
 
-	qtss_printf("- Configuration file error:\n");
+	printf("- Configuration file error:\n");
 
 
 	if (lineCount)
-		qtss_printf("  file: %s, line# %i\n", fname, lineCount);
+		printf("  file: %s, line# %i\n", fname, lineCount);
 	else
-		qtss_printf("  file: %s\n", fname);
+		printf("  file: %s\n", fname);
 
 	if (lineBuff)
-		qtss_printf("  text: %s", lineBuff); // lineBuff already includes a \n
+		printf("  text: %s", lineBuff); // lineBuff already includes a \n
 
 	if (errMessage)
-		qtss_printf("  reason: %s\n", errMessage); // lineBuff already includes a \n
+		printf("  reason: %s\n", errMessage); // lineBuff already includes a \n
 }
 
 
@@ -138,7 +138,7 @@ int ParseConfigFile(
 					// it's a comment
 					// prabably do nothing in release version?
 
-					//  qtss_printf( "comment: %s" , &lineBuff[1] );
+					//  printf( "comment: %s" , &lineBuff[1] );
 
 					error = 0;
 
@@ -226,7 +226,7 @@ int ParseConfigFile(
 	}
 	//  else
 	//  {
-	//      qtss_printf("Couldn't open config file at: %s\n", fname);
+	//      printf("Couldn't open config file at: %s\n", fname);
 	//  }
 
 	return error;

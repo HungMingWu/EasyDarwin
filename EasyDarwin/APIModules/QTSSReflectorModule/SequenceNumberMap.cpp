@@ -96,7 +96,7 @@ bool SequenceNumberMap::AddSequenceNumber(uint16_t inSeqNumber)
 	fSlidingWindow[theWindowIndex] = true;
 #if SEQUENCENUMBERMAPTESTING
 	//if (alreadyAdded)
-	//  qtss_printf("Found a duplicate seq num. Num = %d\n", inSeqNumber);
+	//  printf("Found a duplicate seq num. Num = %d\n", inSeqNumber);
 #endif
 	return alreadyAdded;
 }

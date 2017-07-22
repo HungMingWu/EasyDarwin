@@ -1070,24 +1070,24 @@ QTSS_Error RTSPRequest::SendBasicChallenge(void)
 
 			memcpy(test, sDefaultRealm.Ptr, sDefaultRealm.Len);
 			test[sDefaultRealm.Len] = 0;
-			qtss_printf("the static realm =%s \n", test);
+			printf("the static realm =%s \n", test);
 
 			OSCharArrayDeleter prefDeleter(QTSServerInterface::GetServer()->GetPrefs()->GetAuthorizationRealm());
 			memcpy(test, prefDeleter.GetObject(), strlen(prefDeleter.GetObject()));
 			test[strlen(prefDeleter.GetObject())] = 0;
-			qtss_printf("the Pref realm =%s \n", test);
+			printf("the Pref realm =%s \n", test);
 
 			memcpy(test, moduleRealm.Ptr, moduleRealm.Len);
 			test[moduleRealm.Len] = 0;
-			qtss_printf("the moduleRealm  =%s \n", test);
+			printf("the moduleRealm  =%s \n", test);
 
 			memcpy(test, whichRealm.Ptr, whichRealm.Len);
 			test[whichRealm.Len] = 0;
-			qtss_printf("the challenge realm  =%s \n", test);
+			printf("the challenge realm  =%s \n", test);
 
 			memcpy(test, challenge.Ptr, challenge.Len);
 			test[challenge.Len] = 0;
-			qtss_printf("the challenge string  =%s len = %" _S32BITARG_ "\n", test, challenge.Len);
+			printf("the challenge string  =%s len = %" _S32BITARG_ "\n", test, challenge.Len);
 		}
 #endif
 

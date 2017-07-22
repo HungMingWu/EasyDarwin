@@ -574,7 +574,7 @@ QTSS_Error  RTPSessionOutput::WritePacket(StrPtrLen* inPacket, void* inStreamCoo
 
 	(void)QTSS_GetValuePtr(fClientSession, qtssCliSesState, 0, (void**)&theState, &theLen);
 	if (theLen == 0 || theState == NULL || *theState != qtssPlayingState)
-	{   //qtss_printf("QTSS_WouldBlock *theState=%d qtssPlayingState=%d\n", *theState , qtssPlayingState);
+	{   //printf("QTSS_WouldBlock *theState=%d qtssPlayingState=%d\n", *theState , qtssPlayingState);
 		return QTSS_WouldBlock;
 	}
 
@@ -592,7 +592,7 @@ QTSS_Error  RTPSessionOutput::WritePacket(StrPtrLen* inPacket, void* inStreamCoo
 				return QTSS_NoErr; // keep looking at packets
 
 			if (!this->PacketReadyToSend(theStreamPtr, &currentTime, inFlags, packetIDPtr, timeToSendThisPacketAgain))
-			{   //qtss_printf("QTSS_WouldBlock\n");
+			{   //printf("QTSS_WouldBlock\n");
 				return QTSS_WouldBlock; // stop not ready to send packets now
 			}
 
@@ -610,7 +610,7 @@ QTSS_Error  RTPSessionOutput::WritePacket(StrPtrLen* inPacket, void* inStreamCoo
 			writeErr = QTSS_Write(*theStreamPtr, &thePacket, inPacket->Len, NULL, inFlags | qtssWriteFlagsWriteBurstBegin);
 			if (writeErr == QTSS_WouldBlock)
 			{
-				//qtss_printf("QTSS_Write == QTSS_WouldBlock\n");
+				//printf("QTSS_Write == QTSS_WouldBlock\n");
 			   //
 			   // We are flow controlled. See if we know when flow control will be lifted and report that
 				*timeToSendThisPacketAgain = thePacket.suggestedWakeupTime;
@@ -618,7 +618,7 @@ QTSS_Error  RTPSessionOutput::WritePacket(StrPtrLen* inPacket, void* inStreamCoo
 				if (firstPacket)
 				{
 					fBufferDelayMSecs = (currentTime - *arrivalTimeMSecPtr);
-					//qtss_printf("firstPacket fBufferDelayMSecs =%lu \n", fBufferDelayMSecs);
+					//printf("firstPacket fBufferDelayMSecs =%lu \n", fBufferDelayMSecs);
 				}
 			}
 			else
@@ -733,7 +733,7 @@ bool RTPSessionOutput::PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrP
 	{
 		*curQualityLevel -= 1; // reduce quality value.  If we quality doesn't change then we may have hit some steady state which we can't get out of without thinning or increasing the quality
 		*lastChangeTime = timeNow;
-		//qtss_printf("RTPSessionOutput set quality to %"   _U32BITARG_   "\n",*curQualityLevel);
+		//printf("RTPSessionOutput set quality to %"   _U32BITARG_   "\n",*curQualityLevel);
 	}
 
 	//Check to see if we need to drop to audio only
@@ -741,7 +741,7 @@ bool RTPSessionOutput::PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrP
 		(*nextSeqNum == 0))
 	{
 #if REFLECTOR_THINNING_DEBUGGING || RTP_SESSION_DEBUGGING
-		qtss_printf(" *** Reflector Dropping to audio only *** \n");
+		printf(" *** Reflector Dropping to audio only *** \n");
 #endif
 		//All we need to do in this case is mark the sequence number of the first dropped packet
 		(void)QTSS_SetValue(inStream, sNextSeqNumAttr, 0, &curSeqNum, sizeof(uint16_t));

@@ -70,7 +70,7 @@ bool Task::Valid()
 {
 	if ((this->fTaskName == NULL) || (0 != ::strncmp(sTaskStateStr, this->fTaskName, 5)))
 	{
-		if (TASK_DEBUG) qtss_printf("Task::Valid Found invalid task = %p\n", (void *)this);
+		if (TASK_DEBUG) printf("Task::Valid Found invalid task = %p\n", (void *)this);
 
 		return false;
 	}
@@ -108,8 +108,8 @@ void Task::Signal(EventFlags events)
 			if (TASK_DEBUG)
 			{
 				if (fTaskName[0] == 0) ::strcpy(fTaskName, " _Corrupt_Task");
-				qtss_printf("Task::Signal EnQueue TaskName=%s fUseThisThread=%p q_elem=%p enclosing=%p\n", fTaskName, (void *)fUseThisThread, (void *)&fTaskQueueElem, (void *) this);
-				if (TaskThreadPool::sTaskThreadArray[0] == fUseThisThread) qtss_printf("Task::Signal  RTSP Thread running  TaskName=%s \n", fTaskName);
+				printf("Task::Signal EnQueue TaskName=%s fUseThisThread=%p q_elem=%p enclosing=%p\n", fTaskName, (void *)fUseThisThread, (void *)&fTaskQueueElem, (void *) this);
+				if (TaskThreadPool::sTaskThreadArray[0] == fUseThisThread) printf("Task::Signal  RTSP Thread running  TaskName=%s \n", fTaskName);
 			}
 
 			fUseThisThread->fTaskQueue.EnQueue(&fTaskQueueElem);
@@ -123,14 +123,14 @@ void Task::Signal(EventFlags events)
 			{
 				theThreadIndex %= TaskThreadPool::sNumShortTaskThreads;
 
-				if (TASK_DEBUG)  qtss_printf("Task::Signal EnQueue TaskName=%s using Task::sShortTaskThreadPicker=%u numShortTaskThreads=%"   _U32BITARG_   " short task range=[0-%"   _U32BITARG_   "] thread index =%u \n", fTaskName, Task::sShortTaskThreadPicker, TaskThreadPool::sNumShortTaskThreads, TaskThreadPool::sNumShortTaskThreads - 1, theThreadIndex);
+				if (TASK_DEBUG)  printf("Task::Signal EnQueue TaskName=%s using Task::sShortTaskThreadPicker=%u numShortTaskThreads=%"   _U32BITARG_   " short task range=[0-%"   _U32BITARG_   "] thread index =%u \n", fTaskName, Task::sShortTaskThreadPicker, TaskThreadPool::sNumShortTaskThreads, TaskThreadPool::sNumShortTaskThreads - 1, theThreadIndex);
 			}
 			else if (&Task::sBlockingTaskThreadPicker == pickerToUse)
 			{
 				theThreadIndex %= TaskThreadPool::sNumBlockingTaskThreads;
 				theThreadIndex += TaskThreadPool::sNumShortTaskThreads; //don't pick from lower non-blocking (short task) threads.
 
-				if (TASK_DEBUG)  qtss_printf("Task::Signal EnQueue TaskName=%s using Task::sBlockingTaskThreadPicker=%u numBlockingThreads=%"   _U32BITARG_   " blocking thread range=[%"   _U32BITARG_   "-%"   _U32BITARG_   "] thread index =%u \n", fTaskName, Task::sBlockingTaskThreadPicker, TaskThreadPool::sNumBlockingTaskThreads, TaskThreadPool::sNumShortTaskThreads, TaskThreadPool::sNumBlockingTaskThreads + TaskThreadPool::sNumShortTaskThreads - 1, theThreadIndex);
+				if (TASK_DEBUG)  printf("Task::Signal EnQueue TaskName=%s using Task::sBlockingTaskThreadPicker=%u numBlockingThreads=%"   _U32BITARG_   " blocking thread range=[%"   _U32BITARG_   "-%"   _U32BITARG_   "] thread index =%u \n", fTaskName, Task::sBlockingTaskThreadPicker, TaskThreadPool::sNumBlockingTaskThreads, TaskThreadPool::sNumShortTaskThreads, TaskThreadPool::sNumBlockingTaskThreads + TaskThreadPool::sNumShortTaskThreads - 1, theThreadIndex);
 			}
 			else
 			{
@@ -142,14 +142,14 @@ void Task::Signal(EventFlags events)
 
 			if (TASK_DEBUG) if (fTaskName[0] == 0) ::strcpy(fTaskName, " _Corrupt_Task");
 
-			if (TASK_DEBUG) qtss_printf("Task::Signal EnQueue B TaskName=%s theThreadIndex=%u thread=%p fTaskQueue.GetLength(%"   _U32BITARG_   ") q_elem=%p enclosing=%p\n", fTaskName, theThreadIndex, (void *)TaskThreadPool::sTaskThreadArray[theThreadIndex], TaskThreadPool::sTaskThreadArray[theThreadIndex]->fTaskQueue.GetQueue()->GetLength(), (void *)&fTaskQueueElem, (void *) this);
+			if (TASK_DEBUG) printf("Task::Signal EnQueue B TaskName=%s theThreadIndex=%u thread=%p fTaskQueue.GetLength(%"   _U32BITARG_   ") q_elem=%p enclosing=%p\n", fTaskName, theThreadIndex, (void *)TaskThreadPool::sTaskThreadArray[theThreadIndex], TaskThreadPool::sTaskThreadArray[theThreadIndex]->fTaskQueue.GetQueue()->GetLength(), (void *)&fTaskQueueElem, (void *) this);
 			TaskThreadPool::sTaskThreadArray[theThreadIndex]->fTaskQueue.EnQueue(&fTaskQueueElem);
-			if (TASK_DEBUG) qtss_printf("Task::Signal EnQueue A TaskName=%s theThreadIndex=%u thread=%p fTaskQueue.GetLength(%"   _U32BITARG_   ") q_elem=%p enclosing=%p\n", fTaskName, theThreadIndex, (void *)TaskThreadPool::sTaskThreadArray[theThreadIndex], TaskThreadPool::sTaskThreadArray[theThreadIndex]->fTaskQueue.GetQueue()->GetLength(), (void *)&fTaskQueueElem, (void *) this);
+			if (TASK_DEBUG) printf("Task::Signal EnQueue A TaskName=%s theThreadIndex=%u thread=%p fTaskQueue.GetLength(%"   _U32BITARG_   ") q_elem=%p enclosing=%p\n", fTaskName, theThreadIndex, (void *)TaskThreadPool::sTaskThreadArray[theThreadIndex], TaskThreadPool::sTaskThreadArray[theThreadIndex]->fTaskQueue.GetQueue()->GetLength(), (void *)&fTaskQueueElem, (void *) this);
 
 		}
 	}
 	else
-		if (TASK_DEBUG) qtss_printf("Task::Signal Sent to dead TaskName=%s  q_elem=%p  enclosing=%p\n", fTaskName, (void *)&fTaskQueueElem, (void *) this);
+		if (TASK_DEBUG) printf("Task::Signal Sent to dead TaskName=%s  q_elem=%p  enclosing=%p\n", fTaskName, (void *)&fTaskQueueElem, (void *) this);
 }
 
 
@@ -172,15 +172,15 @@ void Task::SetThreadPicker(unsigned int* picker)
 
 		if (&Task::sShortTaskThreadPicker == pickerToUse)
 		{
-			qtss_printf("Task::SetThreadPicker sShortTaskThreadPicker for task=%s\n", fTaskName);
+			printf("Task::SetThreadPicker sShortTaskThreadPicker for task=%s\n", fTaskName);
 		}
 		else if (&Task::sBlockingTaskThreadPicker == pickerToUse)
 		{
-			qtss_printf("Task::SetThreadPicker sBlockingTaskThreadPicker for task=%s\n", fTaskName);
+			printf("Task::SetThreadPicker sBlockingTaskThreadPicker for task=%s\n", fTaskName);
 		}
 		else
 		{
-			qtss_printf("Task::SetThreadPicker ERROR unknown picker for task=%s\n", fTaskName);
+			printf("Task::SetThreadPicker ERROR unknown picker for task=%s\n", fTaskName);
 		}
 	}
 
@@ -217,7 +217,7 @@ void TaskThread::Entry()
 			if (theTask->fWriteLock)
 			{
 				OSMutexWriteLocker mutexLocker(&TaskThreadPool::sMutexRW);
-				if (TASK_DEBUG) qtss_printf("TaskThread::Entry run global locked TaskName=%s CurMSec=%.3f thread=%p task=%p\n", theTask->fTaskName, OS::StartTimeMilli_Float(), (void *) this, (void *)theTask);
+				if (TASK_DEBUG) printf("TaskThread::Entry run global locked TaskName=%s CurMSec=%.3f thread=%p task=%p\n", theTask->fTaskName, OS::StartTimeMilli_Float(), (void *) this, (void *)theTask);
 
 				theTimeout = theTask->Run();
 				theTask->fWriteLock = false;
@@ -225,7 +225,7 @@ void TaskThread::Entry()
 			else
 			{
 				OSMutexReadLocker mutexLocker(&TaskThreadPool::sMutexRW);
-				if (TASK_DEBUG) qtss_printf("TaskThread::Entry run TaskName=%s CurMSec=%.3f thread=%p task=%p\n", theTask->fTaskName, OS::StartTimeMilli_Float(), (void *) this, (void *)theTask);
+				if (TASK_DEBUG) printf("TaskThread::Entry run TaskName=%s CurMSec=%.3f thread=%p task=%p\n", theTask->fTaskName, OS::StartTimeMilli_Float(), (void *) this, (void *)theTask);
 
 				theTimeout = theTask->Run();
 
@@ -239,20 +239,20 @@ void TaskThread::Entry()
 			{
 				if (TASK_DEBUG)
 				{
-					qtss_printf("TaskThread::Entry delete TaskName=%s CurMSec=%.3f thread=%p task=%p\n", theTask->fTaskName, OS::StartTimeMilli_Float(), (void *) this, (void *)theTask);
+					printf("TaskThread::Entry delete TaskName=%s CurMSec=%.3f thread=%p task=%p\n", theTask->fTaskName, OS::StartTimeMilli_Float(), (void *) this, (void *)theTask);
 
 					theTask->fUseThisThread = NULL;
 
 					if (NULL != fHeap.Remove(&theTask->fTimerHeapElem))
-						qtss_printf("TaskThread::Entry task still in heap before delete\n");
+						printf("TaskThread::Entry task still in heap before delete\n");
 
 					if (NULL != theTask->fTaskQueueElem.InQueue())
-						qtss_printf("TaskThread::Entry task still in queue before delete\n");
+						printf("TaskThread::Entry task still in queue before delete\n");
 
 					theTask->fTaskQueueElem.Remove();
 
 					if (theTask->fEvents &~Task::kAlive)
-						qtss_printf("TaskThread::Entry flags still set  before delete\n");
+						printf("TaskThread::Entry flags still set  before delete\n");
 
 					(void)atomic_sub(&theTask->fEvents, 0);
 
@@ -278,7 +278,7 @@ void TaskThread::Entry()
 			{
 				//note that if we get here, we don't reset theTask, so it will get passed into
 				//WaitForTask
-				if (TASK_DEBUG) qtss_printf("TaskThread::Entry insert TaskName=%s in timer heap thread=%p elem=%p task=%p timeout=%.2f\n", theTask->fTaskName, (void *) this, (void *)&theTask->fTimerHeapElem, (void *)theTask, (float)theTimeout / (float)1000);
+				if (TASK_DEBUG) printf("TaskThread::Entry insert TaskName=%s in timer heap thread=%p elem=%p task=%p timeout=%.2f\n", theTask->fTaskName, (void *) this, (void *)&theTask->fTimerHeapElem, (void *)theTask, (float)theTimeout / (float)1000);
 				theTask->fTimerHeapElem.SetValue(OS::Milliseconds() + theTimeout);
 				fHeap.Insert(&theTask->fTimerHeapElem);
 				(void)atomic_or(&theTask->fEvents, Task::kIdleEvent);
@@ -297,7 +297,7 @@ void TaskThread::Entry()
 
 			if (yieldDur > 1)
 			{
-				if (TASK_DEBUG) qtss_printf("TaskThread::Entry time in Yield %qd, numZeroYields %qd \n", yieldDur, numZeroYields);
+				if (TASK_DEBUG) printf("TaskThread::Entry time in Yield %qd, numZeroYields %qd \n", yieldDur, numZeroYields);
 				numZeroYields = 0;
 			}
 			else
@@ -316,7 +316,7 @@ Task* TaskThread::WaitForTask()
 
 		if ((fHeap.PeekMin() != NULL) && (fHeap.PeekMin()->GetValue() <= theCurrentTime))
 		{
-			if (TASK_DEBUG) qtss_printf("TaskThread::WaitForTask found timer-task=%s thread %p fHeap.CurrentHeapSize(%"   _U32BITARG_   ") taskElem = %p enclose=%p\n", ((Task*)fHeap.PeekMin()->GetEnclosingObject())->fTaskName, (void *) this, fHeap.CurrentHeapSize(), (void *)fHeap.PeekMin(), (void *)fHeap.PeekMin()->GetEnclosingObject());
+			if (TASK_DEBUG) printf("TaskThread::WaitForTask found timer-task=%s thread %p fHeap.CurrentHeapSize(%"   _U32BITARG_   ") taskElem = %p enclose=%p\n", ((Task*)fHeap.PeekMin()->GetEnclosingObject())->fTaskName, (void *) this, fHeap.CurrentHeapSize(), (void *)fHeap.PeekMin(), (void *)fHeap.PeekMin()->GetEnclosingObject());
 			return (Task*)fHeap.ExtractMin()->GetEnclosingObject();
 		}
 
@@ -338,7 +338,7 @@ Task* TaskThread::WaitForTask()
 		OSQueueElem* theElem = fTaskQueue.DeQueueBlocking(this, (int32_t)theTimeout);
 		if (theElem != NULL)
 		{
-			if (TASK_DEBUG) qtss_printf("TaskThread::WaitForTask found signal-task=%s thread %p fTaskQueue.GetLength(%"   _U32BITARG_   ") taskElem = %p enclose=%p\n", ((Task*)theElem->GetEnclosingObject())->fTaskName, (void *) this, fTaskQueue.GetQueue()->GetLength(), (void *)theElem, (void *)theElem->GetEnclosingObject());
+			if (TASK_DEBUG) printf("TaskThread::WaitForTask found signal-task=%s thread %p fTaskQueue.GetLength(%"   _U32BITARG_   ") taskElem = %p enclose=%p\n", ((Task*)theElem->GetEnclosingObject())->fTaskName, (void *) this, fTaskQueue.GetQueue()->GetLength(), (void *)theElem, (void *)theElem->GetEnclosingObject());
 			return (Task*)theElem->GetEnclosingObject();
 		}
 
@@ -363,7 +363,7 @@ bool TaskThreadPool::AddThreads(uint32_t numToAdd)
 	{
 		sTaskThreadArray[x] = new TaskThread();
 		sTaskThreadArray[x]->Start();
-		if (TASK_DEBUG)  qtss_printf("TaskThreadPool::AddThreads sTaskThreadArray[%"   _U32BITARG_   "]=%p\n", x, sTaskThreadArray[x]);
+		if (TASK_DEBUG)  printf("TaskThreadPool::AddThreads sTaskThreadArray[%"   _U32BITARG_   "]=%p\n", x, sTaskThreadArray[x]);
 	}
 	sNumTaskThreads = numToAdd;
 

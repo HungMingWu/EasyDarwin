@@ -180,11 +180,11 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrPayloadType, 0, (void**)&thePayloadType, &thePayloadLen);
 
 	if ((*thePayloadType != 0) && (*thePayloadType == qtssVideoPayloadType))
-		qtss_printf("Video track reporting:\n");
+		printf("Video track reporting:\n");
 	else if ((*thePayloadType != 0) && (*thePayloadType == qtssAudioPayloadType))
-		qtss_printf("Audio track reporting:\n");
+		printf("Audio track reporting:\n");
 	else
-		qtss_printf("Unknown track reporting\n");
+		printf("Unknown track reporting\n");
 #endif
 
 	//
@@ -258,7 +258,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 		uint16_t thePercentLoss = *uint16_tPtr;
 		thePercentLoss /= 256; //Hmmm... looks like the client reports loss percent in multiples of 256
 #if FLOW_CONTROL_DEBUGGING
-		qtss_printf("Percent loss: %d\n", thePercentLoss);
+		printf("Percent loss: %d\n", thePercentLoss);
 #endif
 
 		//check for a thinning condition
@@ -271,14 +271,14 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 			if (theNumLossesAboveTol >= sNumLossesToThin)
 			{
 #if FLOW_CONTROL_DEBUGGING
-				qtss_printf("Percent loss too high: ratcheting less\n");
+				printf("Percent loss too high: ratcheting less\n");
 #endif
 				ratchetLess = true;
 			}
 			else
 			{
 #if FLOW_CONTROL_DEBUGGING
-				qtss_printf("Percent loss too high: Incrementing percent loss count to %"   _U32BITARG_   "\n", theNumLossesAboveTol);
+				printf("Percent loss too high: Incrementing percent loss count to %"   _U32BITARG_   "\n", theNumLossesAboveTol);
 #endif
 				(void)QTSS_SetValue(theStream, sNumLossesAboveTolAttr, 0, &theNumLossesAboveTol, sizeof(theNumLossesAboveTol));
 				clearPercentLossThinCount = false;
@@ -291,14 +291,14 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 			if (theNumLossesBelowTol >= sLossesToThick)
 			{
 #if FLOW_CONTROL_DEBUGGING
-				qtss_printf("Percent is low: ratcheting more\n");
+				printf("Percent is low: ratcheting more\n");
 #endif
 				ratchetMore = true;
 			}
 			else
 			{
 #if FLOW_CONTROL_DEBUGGING
-				qtss_printf("Percent is low: Incrementing percent loss count to %"   _U32BITARG_   "\n", theNumLossesBelowTol);
+				printf("Percent is low: Incrementing percent loss count to %"   _U32BITARG_   "\n", theNumLossesBelowTol);
 #endif
 				(void)QTSS_SetValue(theStream, sNumLossesBelowTolAttr, 0, &theNumLossesBelowTol, sizeof(theNumLossesBelowTol));
 				clearPercentLossThickCount = false;
@@ -320,14 +320,14 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 			if (theNumWorses >= sWorsesToThin)
 			{
 #if FLOW_CONTROL_DEBUGGING
-				qtss_printf("Client reporting getting worse. Ratcheting less\n");
+				printf("Client reporting getting worse. Ratcheting less\n");
 #endif
 				ratchetLess = true;
 			}
 			else
 			{
 #if FLOW_CONTROL_DEBUGGING
-				qtss_printf("Client reporting getting worse. Incrementing num worses count to %"   _U32BITARG_   "\n", theNumWorses);
+				printf("Client reporting getting worse. Incrementing num worses count to %"   _U32BITARG_   "\n", theNumWorses);
 #endif
 				(void)QTSS_SetValue(theStream, sNumWorsesAttr, 0, &theNumWorses, sizeof(theNumWorses));
 			}
@@ -399,7 +399,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 		//that this is the ONLY way that the fNumGettingWorses count gets cleared
 		(void)QTSS_SetValue(theStream, sNumWorsesAttr, 0, &zero, sizeof(zero));
 #if FLOW_CONTROL_DEBUGGING
-		qtss_printf("Clearing num worses count\n");
+		printf("Clearing num worses count\n");
 #endif
 		clearPercentLossThinCount = true;
 		clearPercentLossThickCount = true;
@@ -409,14 +409,14 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	if (clearPercentLossThinCount)
 	{
 #if FLOW_CONTROL_DEBUGGING
-		qtss_printf("Clearing num losses above tolerance count\n");
+		printf("Clearing num losses above tolerance count\n");
 #endif
 		(void)QTSS_SetValue(theStream, sNumLossesAboveTolAttr, 0, &zero, sizeof(zero));
 	}
 	if (clearPercentLossThickCount)
 	{
 #if FLOW_CONTROL_DEBUGGING
-		qtss_printf("Clearing num losses below tolerance count\n");
+		printf("Clearing num losses below tolerance count\n");
 #endif
 
 		(void)QTSS_SetValue(theStream, sNumLossesBelowTolAttr, 0, &zero, sizeof(zero));

@@ -50,7 +50,7 @@
 #endif
      
 #define DEBUG_QTACCESS 0
-#define debug_printf if (DEBUG_QTACCESS) qtss_printf
+#define debug_printf if (DEBUG_QTACCESS) printf
 
 char* QTAccessFile::sAccessValidUser = "require valid-user\n";
 char* QTAccessFile::sAccessAnyUser = "require any-user\n";
@@ -541,13 +541,13 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     if (accessFileBuf.Len == 0 && !allowNoAccessFiles)
     {   accessFileBuf.Set(sAccessValidUser);
         if (DEBUG_QTACCESS) 
-            qtss_printf("QTAccessFile::AuthorizeRequest SET Accessfile valid user for no accessfile %s\n", sAccessValidUser);
+            printf("QTAccessFile::AuthorizeRequest SET Accessfile valid user for no accessfile %s\n", sAccessValidUser);
     }
       
     if (accessFileBuf.Len == 0 && allowNoAccessFiles)
     {   accessFileBuf.Set(sAccessAnyUser);
         if (DEBUG_QTACCESS) 
-            qtss_printf("QTAccessFile::AuthorizeRequest SET Accessfile any user for no access file %s\n", sAccessAnyUser);
+            printf("QTAccessFile::AuthorizeRequest SET Accessfile any user for no access file %s\n", sAccessAnyUser);
     }
       
     char realmName[kBuffLen] = { 0 };
@@ -590,9 +590,9 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
  
     
 if (DEBUG_QTACCESS)
-{   qtss_printf("QTAccessFile::AuthorizeRequest qtaccess profile user =%s ", username);
+{   printf("QTAccessFile::AuthorizeRequest qtaccess profile user =%s ", username);
     reqNameStr.PrintStr("request user=","\n");
-    qtss_printf("QTAccessFile::AuthorizeRequest allowRequest=%d founduser=%d authContinue=%d\n", allowRequest, founduser, authContinue);
+    printf("QTAccessFile::AuthorizeRequest allowRequest=%d founduser=%d authContinue=%d\n", allowRequest, founduser, authContinue);
 }   
     if (allowRequest && founduser)
         theErr = QTSSModuleUtils::AuthorizeRequest(theRTSPRequest, &allowRequest, &founduser,&authContinue);
@@ -600,9 +600,9 @@ if (DEBUG_QTACCESS)
         theErr = QTSSModuleUtils::AuthorizeRequest(theRTSPRequest, &allowRequest, &founduser,&authContinue);
 
 if (DEBUG_QTACCESS)
-{   qtss_printf("QTAccessFile::AuthorizeRequest QTSSModuleUtils::AuthorizeRequest qtaccess profile user =%s ", username);
+{   printf("QTAccessFile::AuthorizeRequest QTSSModuleUtils::AuthorizeRequest qtaccess profile user =%s ", username);
     reqNameStr.PrintStr("request user=","\n");
-    qtss_printf("QTAccessFile::AuthorizeRequest allowRequest=%d founduser=%d authContinue=%d\n", allowRequest, founduser, authContinue);
+    printf("QTAccessFile::AuthorizeRequest allowRequest=%d founduser=%d authContinue=%d\n", allowRequest, founduser, authContinue);
 }   
  
     return theErr;

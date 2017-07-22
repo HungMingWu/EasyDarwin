@@ -176,7 +176,7 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 		{
 			DateBuffer theDate;
 			DateTranslator::UpdateDateBuffer(&theDate, 0); // get the current GMT date and time
-			qtss_printf("\n\n#C->S:\n#time: ms=%"   _U32BITARG_   " date=%s\n", (uint32_t)OS::StartTimeMilli_Int(), theDate.GetDateBuffer());
+			printf("\n\n#C->S:\n#time: ms=%"   _U32BITARG_   " date=%s\n", (uint32_t)OS::StartTimeMilli_Int(), theDate.GetDateBuffer());
 
 			if (fSocket != NULL)
 			{
@@ -186,20 +186,20 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 				StrPtrLen* theRemoteAddrStr = fSocket->GetRemoteAddrStr();
 				if (theLocalAddrStr != NULL)
 				{
-					qtss_printf("#server: ip="); theLocalAddrStr->PrintStr(); qtss_printf(" port=%u\n", serverPort);
+					printf("#server: ip="); theLocalAddrStr->PrintStr(); printf(" port=%u\n", serverPort);
 				}
 				else
 				{
-					qtss_printf("#server: ip=NULL port=%u\n", serverPort);
+					printf("#server: ip=NULL port=%u\n", serverPort);
 				}
 
 				if (theRemoteAddrStr != NULL)
 				{
-					qtss_printf("#client: ip="); theRemoteAddrStr->PrintStr(); qtss_printf(" port=%u\n", clientPort);
+					printf("#client: ip="); theRemoteAddrStr->PrintStr(); printf(" port=%u\n", clientPort);
 				}
 				else
 				{
-					qtss_printf("#client: ip=NULL port=%u\n", clientPort);
+					printf("#client: ip=NULL port=%u\n", clientPort);
 				}
 
 			}
@@ -290,7 +290,7 @@ QTSS_Error RTSPRequestStream::Read(void* ioBuffer, uint32_t inBufLen, uint32_t* 
 		fRetreatBytes -= theLengthRead;
 		fRetreatBytesRead += theLengthRead;
 #if READ_DEBUGGING
-		qtss_printf("In RTSPRequestStream::Read: Got %d Retreat Bytes\n", theLengthRead);
+		printf("In RTSPRequestStream::Read: Got %d Retreat Bytes\n", theLengthRead);
 #endif  
 	}
 
@@ -308,7 +308,7 @@ QTSS_Error RTSPRequestStream::Read(void* ioBuffer, uint32_t inBufLen, uint32_t* 
 	uint32_t theNewOffset = 0;
 	QTSS_Error theErr = fSocket->Read(&theIoBuffer[theLengthRead], inBufLen - theLengthRead, &theNewOffset);
 #if READ_DEBUGGING
-	qtss_printf("In RTSPRequestStream::Read: Got %d bytes off Socket\n", theNewOffset);
+	printf("In RTSPRequestStream::Read: Got %d bytes off Socket\n", theNewOffset);
 #endif  
 	if (outLengthRead != NULL)
 		*outLengthRead = theNewOffset + theLengthRead;

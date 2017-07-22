@@ -92,9 +92,9 @@ public:
 		if (EVENTCONTEXT_DEBUG)
 		{
 			if (fTask == NULL)
-				qtss_printf("EventContext::SetTask context=%p task= NULL\n", (void *) this);
+				printf("EventContext::SetTask context=%p task= NULL\n", (void *) this);
 			else
-				qtss_printf("EventContext::SetTask context=%p task= %p name=%s\n", (void *) this, (void *)fTask, fTask->fTaskName);
+				printf("EventContext::SetTask context=%p task= %p name=%s\n", (void *) this, (void *)fTask, fTask->fTaskName);
 		}
 	}
 
@@ -128,9 +128,9 @@ protected:
 		if (EVENTCONTEXT_DEBUG)
 		{
 			if (fTask == NULL)
-				qtss_printf("EventContext::ProcessEvent context=%p task=NULL\n", (void *) this);
+				printf("EventContext::ProcessEvent context=%p task=NULL\n", (void *) this);
 			else
-				qtss_printf("EventContext::ProcessEvent context=%p task=%p TaskName=%s\n", (void *)this, (void *)fTask, fTask->fTaskName);
+				printf("EventContext::ProcessEvent context=%p task=%p TaskName=%s\n", (void *)this, (void *)fTask, fTask->fTaskName);
 		}
 
 		if (fTask != NULL)

@@ -220,7 +220,7 @@ bool FilePrefsSource::FilePrefsConfigSetter(const char* paramName, const char* p
 		// multiple values are passed in the paramValue array as distinct strs
 	while (paramValue[valueIndex] != NULL)
 	{
-		//qtss_printf("Adding config setting  <key=\"%s\", value=\"%s\">\n", paramName,  paramValue[valueIndex] );
+		//printf("Adding config setting  <key=\"%s\", value=\"%s\">\n", paramName,  paramValue[valueIndex] );
 		theFilePrefs->SetValue(paramName, paramValue[valueIndex]);
 		valueIndex++;
 	}
@@ -292,7 +292,7 @@ int FilePrefsSource::InitFromConfigFile(const char* configFilePath)
 
 				if (key[0] != '#' && key[0] != '\0' && value[0] != '\0')
 				{
-					qtss_printf("Adding config setting  <key=\"%s\", value=\"%s\">\n", key, value);
+					printf("Adding config setting  <key=\"%s\", value=\"%s\">\n", key, value);
 					this->SetValue(key, value);
 				}
 				else

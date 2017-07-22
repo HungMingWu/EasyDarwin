@@ -267,8 +267,8 @@ void RTPSessionInterface::UpdateBitRateInternal(const int64_t& curTime)
 		fLastBitRateBytes = fBytesSent;
 		fLastBitRateUpdateTime = curTime;
 	}
-	//qtss_printf("fMovieCurrentBitRate=%"   _U32BITARG_   "\n",fMovieCurrentBitRate);
-	//qtss_printf("Cur bandwidth: %d. Cur ack timeout: %d.\n",fTracker.GetCurrentBandwidthInBps(), fTracker.RecommendedClientAckTimeout());
+	//printf("fMovieCurrentBitRate=%"   _U32BITARG_   "\n",fMovieCurrentBitRate);
+	//printf("Cur bandwidth: %d. Cur ack timeout: %d.\n",fTracker.GetCurrentBandwidthInBps(), fTracker.RecommendedClientAckTimeout());
 }
 
 void* RTPSessionInterface::TimeConnected(QTSSDictionary* inSession, uint32_t* outLen)
@@ -308,16 +308,16 @@ void* RTPSessionInterface::PacketLossPercent(QTSSDictionary* inSession, uint32_t
 			uint32_t streamCurPacketsLost = 0;
 			theLen = sizeof(uint32_t);
 			(void)theStream->GetValue(qtssRTPStrCurPacketsLostInRTCPInterval, 0, &streamCurPacketsLost, &theLen);
-			//qtss_printf("stream = %d streamCurPacketsLost = %"   _U32BITARG_   " \n",x, streamCurPacketsLost);
+			//printf("stream = %d streamCurPacketsLost = %"   _U32BITARG_   " \n",x, streamCurPacketsLost);
 
 			uint32_t streamCurPackets = 0;
 			theLen = sizeof(uint32_t);
 			(void)theStream->GetValue(qtssRTPStrPacketCountInRTCPInterval, 0, &streamCurPackets, &theLen);
-			//qtss_printf("stream = %d streamCurPackets = %"   _U32BITARG_   " \n",x, streamCurPackets);
+			//printf("stream = %d streamCurPackets = %"   _U32BITARG_   " \n",x, streamCurPackets);
 
 			packetsSent += (int64_t)streamCurPackets;
 			packetsLost += (int64_t)streamCurPacketsLost;
-			//qtss_printf("stream calculated loss = %f \n",x, (float) streamCurPacketsLost / (float) streamCurPackets);
+			//printf("stream calculated loss = %f \n",x, (float) streamCurPacketsLost / (float) streamCurPackets);
 
 		}
 
@@ -335,7 +335,7 @@ void* RTPSessionInterface::PacketLossPercent(QTSSDictionary* inSession, uint32_t
 	}
 	else
 		theSession->fPacketLossPercent = 0.0;
-	//qtss_printf("Session loss percent packetsLost = %qd packetsSent= %qd theSession->fPacketLossPercent=%f\n",packetsLost,packetsSent,theSession->fPacketLossPercent);
+	//printf("Session loss percent packetsLost = %qd packetsSent= %qd theSession->fPacketLossPercent=%f\n",packetsLost,packetsSent,theSession->fPacketLossPercent);
 	// Return the result
 	*outLen = sizeof(theSession->fPacketLossPercent);
 	return &theSession->fPacketLossPercent;

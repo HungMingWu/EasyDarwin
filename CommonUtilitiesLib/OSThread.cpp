@@ -202,13 +202,13 @@ void OSThread::Sleep(uint32_t inMsec)
 	uint64_t utimeLeft = 0;
 
 	do { // loop in case we leave the sleep early
-		//qtss_printf("OSThread::Sleep time slept= %qd request sleep=%qd\n",timeSlept, timeLeft);
+		//printf("OSThread::Sleep time slept= %qd request sleep=%qd\n",timeSlept, timeLeft);
 		timeLeft = inMsec - timeSlept;
 		if (timeLeft < 1)
 			break;
 
 		utimeLeft = timeLeft * 1000;
-		//qtss_printf("OSThread::Sleep usleep=%qd\n", utimeLeft);
+		//printf("OSThread::Sleep usleep=%qd\n", utimeLeft);
 		::usleep(utimeLeft);
 
 		timeSlept = (OS::Milliseconds() - startTime);
@@ -217,7 +217,7 @@ void OSThread::Sleep(uint32_t inMsec)
 
 	} while (timeSlept < inMsec);
 
-	//qtss_printf("total sleep = %qd request sleep=%"   _U32BITARG_   "\n", timeSlept,inMsec);
+	//printf("total sleep = %qd request sleep=%"   _U32BITARG_   "\n", timeSlept,inMsec);
 
 #elif defined(__osf__) || defined(__hpux__)
 	if (inMsec < 1000)
@@ -273,11 +273,11 @@ bool  OSThread::SwitchPersonality()
 		struct group* gr = ::getgrnam(sGroup);
 		if (gr == NULL || ::setgid(gr->gr_gid) == -1)
 		{
-			//qtss_printf("thread %"   _U32BITARG_   " setgid  to group=%s FAILED \n", (uint32_t) this, sGroup);
+			//printf("thread %"   _U32BITARG_   " setgid  to group=%s FAILED \n", (uint32_t) this, sGroup);
 			return false;
 		}
 
-		//qtss_printf("thread %"   _U32BITARG_   " setgid  to group=%s \n", (uint32_t) this, sGroup);
+		//printf("thread %"   _U32BITARG_   " setgid  to group=%s \n", (uint32_t) this, sGroup);
 	}
 
 
@@ -286,11 +286,11 @@ bool  OSThread::SwitchPersonality()
 		struct passwd* pw = ::getpwnam(sUser);
 		if (pw == NULL || ::setuid(pw->pw_uid) == -1)
 		{
-			//qtss_printf("thread %"   _U32BITARG_   " setuid  to user=%s FAILED \n", (uint32_t) this, sUser);
+			//printf("thread %"   _U32BITARG_   " setuid  to user=%s FAILED \n", (uint32_t) this, sUser);
 			return false;
 		}
 
-		//qtss_printf("thread %"   _U32BITARG_   " setuid  to user=%s \n", (uint32_t) this, sUser);
+		//printf("thread %"   _U32BITARG_   " setuid  to user=%s \n", (uint32_t) this, sUser);
 	}
 #endif
 

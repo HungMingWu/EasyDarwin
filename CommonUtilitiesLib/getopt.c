@@ -235,7 +235,7 @@ main(int argc, char** argv)
 			break;
 		case 'o':
 			ofile = optarg;
-			(void)qtss_printf("ofile = %s\n", ofile);
+			(void)printf("ofile = %s\n", ofile);
 			break;
 		case '?':
 			errflg++;
@@ -246,7 +246,7 @@ main(int argc, char** argv)
 		exit(2);
 	}
 	for (; optind < argc; optind++)
-		(void)qtss_printf("%s\n", argv[optind]);
+		(void)printf("%s\n", argv[optind]);
 	return 0;
 }
 

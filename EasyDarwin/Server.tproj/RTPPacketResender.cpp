@@ -148,7 +148,7 @@ void RTPPacketResender::logprintf(const char * format, ...)
 	if (fLogger)
 	{
 		fLogger->WriteToLog(buff, false);
-		qtss_printf(buff);
+		printf(buff);
 	}
 }
 
@@ -246,7 +246,7 @@ RTPResenderEntry*   RTPPacketResender::GetEmptyEntry(uint16_t inSeqNum, uint32_t
 		::memcpy(tempArray, fPacketArray, sizeof(RTPResenderEntry) * fPacketsInList);
 		delete[] fPacketArray;
 		fPacketArray = tempArray;
-		//qtss_printf("NewArray size=%" _S32BITARG_ " packetsInList=%" _S32BITARG_ "\n",fPacketArraySize, fPacketsInList);
+		//printf("NewArray size=%" _S32BITARG_ " packetsInList=%" _S32BITARG_ "\n",fPacketArraySize, fPacketsInList);
 	}
 
 	if (fPacketsInList < fPacketArraySize) // have an open spot
@@ -267,7 +267,7 @@ RTPResenderEntry*   RTPPacketResender::GetEmptyEntry(uint16_t inSeqNum, uint32_t
 		else
 			fLastUsed = 0;
 
-		//qtss_printf("array is full = %"   _U32BITARG_   " reusing index=%"   _U32BITARG_   "\n",fPacketsInList,fLastUsed); 
+		//printf("array is full = %"   _U32BITARG_   " reusing index=%"   _U32BITARG_   "\n",fPacketsInList,fLastUsed); 
 		theEntry = &fPacketArray[fLastUsed];
 		RemovePacket(fLastUsed, false); // delete packet in place don't fill we will use the spot
 	}
@@ -388,7 +388,7 @@ void RTPPacketResender::AckPacket(uint16_t inSeqNum, int64_t& inCurTimeInMsec)
 		);
 #endif
 		fNumAcksForMissingPackets++;
-		//qtss_printf("Ack for missing packet: %d\n", inSeqNum);
+		//printf("Ack for missing packet: %d\n", inSeqNum);
 
 		 // hmm.. we -should not have- closed down the window in this case
 		 // so reopen it a bit as we normally would.
@@ -404,7 +404,7 @@ void RTPPacketResender::AckPacket(uint16_t inSeqNum, int64_t& inCurTimeInMsec)
 		//fRTTEstimator.AddToEstimate( fRTTEstimator.CurRetransmitTimeout() * 3 / 2 );
 		/// this results in some very very big RTO's since the dupes come in batches of maybe 10 or more!
 
-//      qtss_printf("Got ack for expired packet %d\n", inSeqNum);
+//      printf("Got ack for expired packet %d\n", inSeqNum);
 	}
 	else
 	{
@@ -424,7 +424,7 @@ void RTPPacketResender::AckPacket(uint16_t inSeqNum, int64_t& inCurTimeInMsec)
 			//fRTTEstimator.AddToEstimate( theEntry->fPacketRTTDuration.DurationInMilliseconds() );
 			fBandwidthTracker->AddToRTTEstimate((int32_t)(inCurTimeInMsec - theEntry->fAddedTime));
 
-			//          qtss_printf("Got ack for packet %d RTT = %qd\n", inSeqNum, inCurTimeInMsec - theEntry->fAddedTime);
+			//          printf("Got ack for packet %d RTT = %qd\n", inSeqNum, inCurTimeInMsec - theEntry->fAddedTime);
 		}
 		else
 		{
@@ -521,16 +521,16 @@ void RTPPacketResender::ResendDueEntries()
 				//
 				// This packet is expired
 				fNumExpired++;
-				//qtss_printf("Packet expired: %d\n", ((uint16_t*)thePacket)[1]);
+				//printf("Packet expired: %d\n", ((uint16_t*)thePacket)[1]);
 				fBandwidthTracker->EmptyWindow(theEntry->fPacketSize);
 				this->RemovePacket(packetIndex);
-				//              qtss_printf("Expired packet %d\n", theEntry->fSeqNum);
+				//              printf("Expired packet %d\n", theEntry->fSeqNum);
 				continue;
 			}
 
 			// Resend this packet
 			fSocket->SendTo(fDestAddr, fDestPort, theEntry->fPacketData, theEntry->fPacketSize);
-			//qtss_printf("Packet resent: %d\n", ((uint16_t*)theEntry->fPacketData)[1]);
+			//printf("Packet resent: %d\n", ((uint16_t*)theEntry->fPacketData)[1]);
 
 			theEntry->fNumResends++;
 #if RTP_PACKET_RESENDER_DEBUGGING   
@@ -542,7 +542,7 @@ void RTPPacketResender::ResendDueEntries()
 			fNumResends++;
 
 			numResends++;
-			//qtss_printf("resend loop numResends=%" _S32BITARG_ " packet theEntry->fNumResends=%" _S32BITARG_ " stream fNumResends=\n",numResends,theEntry->fNumResends++, fNumResends);
+			//printf("resend loop numResends=%" _S32BITARG_ " packet theEntry->fNumResends=%" _S32BITARG_ " stream fNumResends=\n",numResends,theEntry->fNumResends++, fNumResends);
 
 			// ok -- lets try this.. add 1.5x of the INITIAL duration since the last send to the rto estimator
 			// since we won't get an ack on this packet
@@ -553,7 +553,7 @@ void RTPPacketResender::ResendDueEntries()
 			if (theEntry->fNumResends == 1)
 				fBandwidthTracker->AddToRTTEstimate((int32_t)((theEntry->fOrigRetransTimeout * 3) / 2));
 
-			//          qtss_printf("Retransmitted packet %d\n", theEntry->fSeqNum);
+			//          printf("Retransmitted packet %d\n", theEntry->fSeqNum);
 			theEntry->fAddedTime = curTime;
 			fBandwidthTracker->AdjustWindowForRetransmit();
 			continue;

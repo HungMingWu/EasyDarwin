@@ -47,7 +47,7 @@ QTSSDictionary::QTSSDictionary(QTSSDictionaryMap* inMap, OSMutex* inMutex)
 	{
 		if (fMap->GetNumAttrs() > QTSS_MAX_ATTRIBUTE_NUMS)
 		{
-			qtss_printf("QTSS_MAX_ATTRIBUTE_NUMS not big enough,please check!");
+			printf("QTSS_MAX_ATTRIBUTE_NUMS not big enough,please check!");
 			exit(0);
 		}
 	}
@@ -646,7 +646,7 @@ void    QTSSDictionary::SetEmptyVal(QTSS_AttributeID inAttrID, void* inBuf, uint
 
 #if !ALLOW_NON_WORD_ALIGN_ACCESS
 	//if (((uint32_t) inBuf % 4) > 0)
-	//  qtss_printf("bad align by %d\n",((uint32_t) inBuf % 4) );
+	//  printf("bad align by %d\n",((uint32_t) inBuf % 4) );
 	Assert(((PointerSizedInt)inBuf % 4) == 0);
 #endif
 }
@@ -995,7 +995,7 @@ QTSS_Error  QTSSDictionaryMap::RemoveAttribute(QTSS_AttributeID inAttrID)
 	if (!(fFlags & kAllowRemoval))
 		return QTSS_BadArgument;
 
-	//qtss_printf("QTSSDictionaryMap::RemoveAttribute arraySize=%"   _U32BITARG_   " numNonRemove= %"   _U32BITARG_   " fAttrArray[%"   _U32BITARG_   "]->fAttrInfo.fAttrName=%s\n",this->GetNumAttrs(), this->GetNumNonRemovedAttrs(), theIndex,fAttrArray[theIndex]->fAttrInfo.fAttrName);
+	//printf("QTSSDictionaryMap::RemoveAttribute arraySize=%"   _U32BITARG_   " numNonRemove= %"   _U32BITARG_   " fAttrArray[%"   _U32BITARG_   "]->fAttrInfo.fAttrName=%s\n",this->GetNumAttrs(), this->GetNumNonRemovedAttrs(), theIndex,fAttrArray[theIndex]->fAttrInfo.fAttrName);
 	//
 	// Don't actually touch the attribute or anything. Just flag the
 	// it as removed.
@@ -1086,7 +1086,7 @@ QTSS_Error  QTSSDictionaryMap::GetAttrInfoByIndex(uint32_t inIndex, QTSSAttrInfo
 			actualIndex++;
 		}
 	}
-	//qtss_printf("QTSSDictionaryMap::GetAttrInfoByIndex arraySize=%"   _U32BITARG_   " numNonRemove= %"   _U32BITARG_   " fAttrArray[%"   _U32BITARG_   "]->fAttrInfo.fAttrName=%s\n",this->GetNumAttrs(), this->GetNumNonRemovedAttrs(), actualIndex,fAttrArray[actualIndex]->fAttrInfo.fAttrName);
+	//printf("QTSSDictionaryMap::GetAttrInfoByIndex arraySize=%"   _U32BITARG_   " numNonRemove= %"   _U32BITARG_   " fAttrArray[%"   _U32BITARG_   "]->fAttrInfo.fAttrName=%s\n",this->GetNumAttrs(), this->GetNumNonRemovedAttrs(), actualIndex,fAttrArray[actualIndex]->fAttrInfo.fAttrName);
 	Assert(actualIndex < fNextAvailableID);
 	Assert(!(fAttrArray[actualIndex]->fAttrInfo.fAttrPermission & qtssPrivateAttrModeRemoved));
 	*outAttrInfoObject = fAttrArray[actualIndex];

@@ -305,7 +305,7 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, uint32_t inLen
 		err = this->GetOutputStream()->WriteV(iov, 2, fNumInCoalesceBuffer, &buffLenWritten, RTSPResponseStream::kAllOrNothing);
 
 #if RTSP_SESSION_INTERFACE_DEBUGGING 
-		qtss_printf("InterleavedWrite: flushing %li\n", fNumInCoalesceBuffer);
+		printf("InterleavedWrite: flushing %li\n", fNumInCoalesceBuffer);
 #endif
 
 		if (err == QTSS_NoErr)
@@ -335,7 +335,7 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, uint32_t inLen
 			err = this->GetOutputStream()->WriteV(iov, 3, inLen + sizeof(rih), outLenWritten, RTSPResponseStream::kAllOrNothing);
 
 #if RTSP_SESSION_INTERFACE_DEBUGGING 
-			qtss_printf("InterleavedWrite: bypass %li\n", inLen);
+			printf("InterleavedWrite: bypass %li\n", inLen);
 #endif
 
 		}
@@ -361,7 +361,7 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, uint32_t inLen
 			fNumInCoalesceBuffer += inLen;
 
 #if RTSP_SESSION_INTERFACE_DEBUGGING 
-			qtss_printf("InterleavedWrite: coalesce %li, total bufff %li\n", inLen, fNumInCoalesceBuffer);
+			printf("InterleavedWrite: coalesce %li, total bufff %li\n", inLen, fNumInCoalesceBuffer);
 #endif
 		}
 	}

@@ -150,14 +150,14 @@ QTSS_ServerState StartServer(XMLPrefsParser* inPrefsSource, PrefsSource* inMessa
 			numBlockingThreads = 1;
 
 		numThreads = numShortTaskThreads + numBlockingThreads;
-		//qtss_printf("Add threads shortask=%lu blocking=%lu\n",numShortTaskThreads, numBlockingThreads);
+		//printf("Add threads shortask=%lu blocking=%lu\n",numShortTaskThreads, numBlockingThreads);
 		TaskThreadPool::SetNumShortTaskThreads(numShortTaskThreads);
 		TaskThreadPool::SetNumBlockingTaskThreads(numBlockingThreads);
 		TaskThreadPool::AddThreads(numThreads);
 		sServer->InitNumThreads(numThreads);
 
 #if DEBUG
-		qtss_printf("Number of task threads: %"   _U32BITARG_   "\n", numThreads);
+		printf("Number of task threads: %"   _U32BITARG_   "\n", numThreads);
 #endif
 
 		// Start up the server's global tasks, and start listening
@@ -194,7 +194,7 @@ QTSS_ServerState StartServer(XMLPrefsParser* inPrefsSource, PrefsSource* inMessa
 		WritePid(!inDontFork);
 
 		doneStartingUp = true;
-		qtss_printf("Streaming Server done starting up\n");
+		printf("Streaming Server done starting up\n");
 		//OSMemory::SetMemoryError(ENOMEM);
 	}
 
@@ -557,46 +557,46 @@ void PrintStatus(bool printHeader)
 
 	if (printHeader)
 	{
-		qtss_printf("     RTP-Conns RTSP-Conns HTTP-Conns  kBits/Sec   Pkts/Sec    TotConn     TotBytes   TotPktsLost          Time\n");
+		printf("     RTP-Conns RTSP-Conns HTTP-Conns  kBits/Sec   Pkts/Sec    TotConn     TotBytes   TotPktsLost          Time\n");
 	}
 
 	(void)QTSS_GetValueAsString(sServer, qtssRTPSvrCurConn, 0, &thePrefStr);
-	qtss_printf("%11s", thePrefStr);
+	printf("%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = NULL;
 
 	(void)QTSS_GetValueAsString(sServer, qtssRTSPCurrentSessionCount, 0, &thePrefStr);
-	qtss_printf("%11s", thePrefStr);
+	printf("%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = NULL;
 
 	(void)QTSS_GetValueAsString(sServer, qtssRTSPHTTPCurrentSessionCount, 0, &thePrefStr);
-	qtss_printf("%11s", thePrefStr);
+	printf("%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = NULL;
 
 	uint32_t curBandwidth = 0;
 	theLen = sizeof(curBandwidth);
 	(void)QTSS_GetValue(sServer, qtssRTPSvrCurBandwidth, 0, &curBandwidth, &theLen);
-	qtss_printf("%11"   _U32BITARG_, curBandwidth / 1024);
+	printf("%11"   _U32BITARG_, curBandwidth / 1024);
 
 	(void)QTSS_GetValueAsString(sServer, qtssRTPSvrCurPackets, 0, &thePrefStr);
-	qtss_printf("%11s", thePrefStr);
+	printf("%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = NULL;
 
 	(void)QTSS_GetValueAsString(sServer, qtssRTPSvrTotalConn, 0, &thePrefStr);
-	qtss_printf("%11s", thePrefStr);
+	printf("%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = NULL;
 
 	uint64_t totalBytes = sServer->GetTotalRTPBytes();
 	char  displayBuff[32] = "";
 	FormattedTotalBytesBuffer(displayBuff, sizeof(displayBuff), totalBytes);
-	qtss_printf("%17s", displayBuff);
+	printf("%17s", displayBuff);
 
-	qtss_printf("%11" _64BITARG_ "u", sServer->GetTotalRTPPacketsLost());
+	printf("%11" _64BITARG_ "u", sServer->GetTotalRTPPacketsLost());
 
 	char theDateBuffer[QTSSRollingLog::kMaxDateBufferSizeInBytes];
 	(void)QTSSRollingLog::FormatDate(theDateBuffer, false);
-	qtss_printf("%25s", theDateBuffer);
+	printf("%25s", theDateBuffer);
 
-	qtss_printf("\n");
+	printf("\n");
 
 }
 

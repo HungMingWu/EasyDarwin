@@ -47,7 +47,7 @@ char*   QTSSExpirationDate::sExpirationDate = "12/31/2017";
 void QTSSExpirationDate::PrintExpirationDate()
 {
 	if (sIsExpirationEnabled)
-		qtss_printf("Software expires on: %s ,Get latest version on www.EasyDarwin.org\n", sExpirationDate);
+		printf("Software expires on: %s ,Get latest version on www.EasyDarwin.org\n", sExpirationDate);
 }
 
 void QTSSExpirationDate::sPrintExpirationDate(char* ioExpireMessage)

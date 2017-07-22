@@ -79,7 +79,7 @@ void OSFileSource::SetLog(const char *inPath)
 		{
 			qtss_fprintf(fFileLog, "%s", "QTFILE_READ_LOG\n");
 			qtss_fprintf(fFileLog, "size: %qu\n", GetLength());
-			qtss_printf("OSFileSource::SetLog=%s\n", fFilePath);
+			printf("OSFileSource::SetLog=%s\n", fFilePath);
 
 		}
 		::fclose(fFileLog);
@@ -90,7 +90,7 @@ void OSFileSource::SetLog(const char *inPath)
 {
 
 #if FILE_SOURCE_DEBUG
-	qtss_printf("OSFileSource::SetLog=%s\n", inPath);
+	printf("OSFileSource::SetLog=%s\n", inPath);
 #endif
 
 }
@@ -106,7 +106,7 @@ FileBlockBuffer::~FileBlockBuffer()
 
 #if FILE_SOURCE_DEBUG
 		::memset((char *)fDataBuffer, 0, fBufferSize);
-		qtss_printf("FileBlockBuffer::~FileBlockBuffer delete %" _U32BITARG_ " this=%" _U32BITARG_ "\n", fDataBuffer, this);
+		printf("FileBlockBuffer::~FileBlockBuffer delete %" _U32BITARG_ " this=%" _U32BITARG_ "\n", fDataBuffer, this);
 #endif
 		delete fDataBuffer;
 		fDataBuffer = NULL;
@@ -124,7 +124,7 @@ void FileBlockBuffer::AllocateBuffer(uint32_t buffSize)
 
 #if FILE_SOURCE_DEBUG
 	this->CleanBuffer();
-	qtss_printf("FileBlockBuffer::FileBlockBuffer allocate buff ptr =%" _U32BITARG_ " len=%" _U32BITARG_ " this=%"   _U32BITARG_   "\n", fDataBuffer, buffSize, this);
+	printf("FileBlockBuffer::FileBlockBuffer allocate buff ptr =%" _U32BITARG_ " len=%" _U32BITARG_ " this=%"   _U32BITARG_   "\n", fDataBuffer, buffSize, this);
 #endif
 
 }
@@ -157,7 +157,7 @@ FileBlockBuffer* FileBlockPool::GetBufferElement(uint32_t bufferSizeBytes)
 	if (fNumCurrentBuffers < fMaxBuffers)
 	{
 #if FILE_SOURCE_DEBUG
-		qtss_printf("FileBlockPool::GetBufferElement new element fNumCurrentBuffers=%" _U32BITARG_ " fMaxBuffers=%"   _U32BITARG_   " fBufferUnitSizeBytes=%"   _U32BITARG_   " bufferSizeBytes=%"   _U32BITARG_   "\n", fNumCurrentBuffers, fMaxBuffers, fBufferUnitSizeBytes, bufferSizeBytes);
+		printf("FileBlockPool::GetBufferElement new element fNumCurrentBuffers=%" _U32BITARG_ " fMaxBuffers=%"   _U32BITARG_   " fBufferUnitSizeBytes=%"   _U32BITARG_   " bufferSizeBytes=%"   _U32BITARG_   "\n", fNumCurrentBuffers, fMaxBuffers, fBufferUnitSizeBytes, bufferSizeBytes);
 #endif
 		theNewBuf = new FileBlockBuffer();
 		theNewBuf->AllocateBuffer(bufferSizeBytes);
@@ -177,7 +177,7 @@ FileBlockBuffer* FileBlockPool::GetBufferElement(uint32_t bufferSizeBytes)
 
 	theNewBuf = (FileBlockBuffer*)theElem->GetEnclosingObject();
 	Assert(theNewBuf != NULL);
-	//qtss_printf("FileBlockPool::GetBufferElement reuse buffer theNewBuf=%" _U32BITARG_ " fDataBuffer=%"   _U32BITARG_   " fArrayIndex=%" _S32BITARG_ "\n",theNewBuf,theNewBuf->fDataBuffer,theNewBuf->fArrayIndex);
+	//printf("FileBlockPool::GetBufferElement reuse buffer theNewBuf=%" _U32BITARG_ " fDataBuffer=%"   _U32BITARG_   " fArrayIndex=%" _S32BITARG_ "\n",theNewBuf,theNewBuf->fDataBuffer,theNewBuf->fArrayIndex);
 
 	return theNewBuf;
 
@@ -247,7 +247,7 @@ void FileMap::AllocateBufferMap(uint32_t inUnitSizeInK, uint32_t inNumBuffSizeUn
 
 	this->Clean(); // required because fFileMapArray's array is used to store buffer pointers.
 #if FILE_SOURCE_DEBUG
-	qtss_printf("FileMap::AllocateBufferMap shared buffers fFileMapArray=%" _U32BITARG_ " fDataBufferSize= %"   _U32BITARG_   " fMapArraySize=%"   _U32BITARG_   " fileLen=%qu \n", fFileMapArray, fDataBufferSize, fMapArraySize, fileLen);
+	printf("FileMap::AllocateBufferMap shared buffers fFileMapArray=%" _U32BITARG_ " fDataBufferSize= %"   _U32BITARG_   " fMapArraySize=%"   _U32BITARG_   " fileLen=%qu \n", fFileMapArray, fDataBufferSize, fMapArraySize, fileLen);
 #endif
 
 }
@@ -275,7 +275,7 @@ char* FileMap::GetBuffer(int64_t buffIndex, bool* outFillBuff)
 	if (NULL == theElem)
 	{
 #if FILE_SOURCE_DEBUG
-		qtss_printf("FileMap::GetBuffer call fBlockPool.GetBufferElement(); buffIndex=%" _S32BITARG_ "\n", buffIndex);
+		printf("FileMap::GetBuffer call fBlockPool.GetBufferElement(); buffIndex=%" _S32BITARG_ "\n", buffIndex);
 #endif
 
 		theElem = fBlockPool.GetBufferElement(fDataBufferSize);
@@ -287,7 +287,7 @@ char* FileMap::GetBuffer(int64_t buffIndex, bool* outFillBuff)
 	if (theElem->fArrayIndex == buffIndex) // found a pre-allocated and filled buffer
 	{
 #if FILE_SOURCE_DEBUG
-		//qtss_printf("FileMap::GetBuffer pre-allocated buff buffIndex=%" _S32BITARG_ "\n",buffIndex);
+		//printf("FileMap::GetBuffer pre-allocated buff buffIndex=%" _S32BITARG_ "\n",buffIndex);
 #endif
 
 		*outFillBuff = false;
@@ -321,7 +321,7 @@ void FileMap::DeleteMap()
 		return;
 
 #if FILE_SOURCE_DEBUG
-	qtss_printf("FileMap::DeleteMap fFileMapArray=%" _U32BITARG_ " fMapArraySize=%" _S32BITARG_ " \n", fFileMapArray, fMapArraySize);
+	printf("FileMap::DeleteMap fFileMapArray=%" _U32BITARG_ " fMapArraySize=%" _S32BITARG_ " \n", fFileMapArray, fMapArraySize);
 	this->Clean();
 #endif
 
@@ -441,8 +441,8 @@ OS_Error OSFileSource::ReadFromCache(uint64_t inPosition, void* inBuffer, uint32
 	{
 #if FILE_SOURCE_DEBUG
 
-		qtss_printf("OSFileSource::ReadFromCache bad index: buffIndex=%" _S32BITARG_ " endIndex=%" _S32BITARG_ " maxIndex=%" _S32BITARG_ "\n", buffIndex, endIndex, maxIndex);
-		qtss_printf("OSFileSource::ReadFromCache inPosition =%qu buffSize = %"   _U32BITARG_   " index=%" _S32BITARG_ "\n", inPosition, fFileMap.GetMaxBufSize(), buffIndex);
+		printf("OSFileSource::ReadFromCache bad index: buffIndex=%" _S32BITARG_ " endIndex=%" _S32BITARG_ " maxIndex=%" _S32BITARG_ "\n", buffIndex, endIndex, maxIndex);
+		printf("OSFileSource::ReadFromCache inPosition =%qu buffSize = %"   _U32BITARG_   " index=%" _S32BITARG_ "\n", inPosition, fFileMap.GetMaxBufSize(), buffIndex);
 #endif
 		Assert(0);
 	}
@@ -450,7 +450,7 @@ OS_Error OSFileSource::ReadFromCache(uint64_t inPosition, void* inBuffer, uint32
 	while (buffIndex <= endIndex && buffIndex <= maxIndex)
 	{
 #if FILE_SOURCE_DEBUG
-		qtss_printf("OSFileSource::ReadFromCache inPosition =%qu buffSize = %" _U32BITARG_ " index=%" _S32BITARG_ "\n", inPosition, fFileMap.GetMaxBufSize(), buffIndex);
+		printf("OSFileSource::ReadFromCache inPosition =%qu buffSize = %" _U32BITARG_ " index=%" _S32BITARG_ "\n", inPosition, fFileMap.GetMaxBufSize(), buffIndex);
 #endif
 
 		buffStart = fFileMap.GetBuffer(buffIndex, &fillBuff);
@@ -475,7 +475,7 @@ OS_Error OSFileSource::ReadFromCache(uint64_t inPosition, void* inBuffer, uint32
 		{
 
 #if FILE_SOURCE_DEBUG
-			qtss_printf("OSFileSource::ReadFromCache end of file reached buffIndex=%" _U32BITARG_ " buffSize = %" _S32BITARG_ " bytesToCopy=%"   _U32BITARG_   "\n", buffIndex, buffSize, bytesToCopy);
+			printf("OSFileSource::ReadFromCache end of file reached buffIndex=%" _U32BITARG_ " buffSize = %" _S32BITARG_ " bytesToCopy=%"   _U32BITARG_   "\n", buffIndex, buffSize, bytesToCopy);
 #endif
 			Assert(buffSize <= (int64_t)UINT32_MAX);
 			::memcpy(buffOut, buffOffset, (uint32_t)buffSize);
@@ -502,7 +502,7 @@ OS_Error OSFileSource::ReadFromCache(uint64_t inPosition, void* inBuffer, uint32
 	}
 
 #if FILE_SOURCE_DEBUG
-	//qtss_printf("OSFileSource::ReadFromCache inLength= %" _U32BITARG_ " *outRcvLen=%" _U32BITARG_ "\n",inLength, *outRcvLen);
+	//printf("OSFileSource::ReadFromCache inLength= %" _U32BITARG_ " *outRcvLen=%" _U32BITARG_ "\n",inLength, *outRcvLen);
 #endif
 
 #if FILE_SOURCE_BUFFTEST    
@@ -511,13 +511,13 @@ OS_Error OSFileSource::ReadFromCache(uint64_t inPosition, void* inBuffer, uint32
 
 	Assert(*outRcvLen == outLen);
 	if (*outRcvLen != outLen)
-		qtss_printf("OSFileSource::ReadFromCache *outRcvLen != outLen *outRcvLen=%" _U32BITARG_ " outLen=%" _U32BITARG_ "\n", *outRcvLen, outLen);
+		printf("OSFileSource::ReadFromCache *outRcvLen != outLen *outRcvLen=%" _U32BITARG_ " outLen=%" _U32BITARG_ "\n", *outRcvLen, outLen);
 
 	for (int i = 0; i < inLength; i++)
 	{
 		if (((char*)inBuffer)[i] != testBuff[i])
 		{
-			qtss_printf("OSFileSource::ReadFromCache byte pos %d of %" _U32BITARG_ " failed len=%" _U32BITARG_ " inPosition=%qu sBuffCount=%" _S32BITARG_ "\n", i, inLength, outLen, inPosition, sBuffCount);
+			printf("OSFileSource::ReadFromCache byte pos %d of %" _U32BITARG_ " failed len=%" _U32BITARG_ " inPosition=%qu sBuffCount=%" _S32BITARG_ "\n", i, inLength, outLen, inPosition, sBuffCount);
 			break;
 		}
 	}
@@ -530,7 +530,7 @@ OS_Error OSFileSource::ReadFromCache(uint64_t inPosition, void* inBuffer, uint32
 OS_Error OSFileSource::ReadFromDisk(void* inBuffer, uint32_t inLength, uint32_t* outRcvLen)
 {
 #if FILE_SOURCE_BUFFTEST
-	qtss_printf("OSFileSource::Read inLength=%"   _U32BITARG_   " fFile=%d\n", inLength, fFile);
+	printf("OSFileSource::Read inLength=%"   _U32BITARG_   " fFile=%d\n", inLength, fFile);
 #endif
 
 #if __Win32__
@@ -563,7 +563,7 @@ OS_Error OSFileSource::ReadFromPos(uint64_t inPosition, void* inBuffer, uint32_t
 		sReadCount++;
 		if (outRcvLen)
 			*outRcvLen = 0;
-		qtss_printf("OSFileSource::Read sReadCount = %" _S32BITARG_ " totalbytes=%" _S32BITARG_ " readsize=%"   _U32BITARG_   "\n", sReadCount, sByteCount, inLength);
+		printf("OSFileSource::Read sReadCount = %" _S32BITARG_ " totalbytes=%" _S32BITARG_ " readsize=%"   _U32BITARG_   "\n", sReadCount, sByteCount, inLength);
 	}
 #endif
 
@@ -596,7 +596,7 @@ void OSFileSource::SetTrackID(uint32_t trackID)
 {
 #if READ_LOG
 	fTrackID = trackID;
-	//  qtss_printf("OSFileSource::SetTrackID = %"   _U32BITARG_   " this=%"   _U32BITARG_   "\n",fTrackID,(uint32_t) this);
+	//  printf("OSFileSource::SetTrackID = %"   _U32BITARG_   " this=%"   _U32BITARG_   "\n",fTrackID,(uint32_t) this);
 #endif
 }
 
@@ -627,8 +627,8 @@ void OSFileSource::Close()
 	if (fShouldClose)
 	{
 		sMovie = 0;
-		//      qtss_printf("OSFileSource::Close sReadCount = %" _S32BITARG_ " totalbytes=%" _S32BITARG_ "\n",sReadCount,sByteCount);
-		//      qtss_printf("OSFileSource::Close durationTime = %qd\n",durationTime);
+		//      printf("OSFileSource::Close sReadCount = %" _S32BITARG_ " totalbytes=%" _S32BITARG_ "\n",sReadCount,sByteCount);
+		//      printf("OSFileSource::Close durationTime = %qd\n",durationTime);
 	}
 #endif
 

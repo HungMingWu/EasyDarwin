@@ -60,7 +60,7 @@ void RTCPAPPPacket::Dump()//Override
 
 	RTCPPacket::Dump();
 	fDumpReport.PutTerminator();
-	qtss_printf("%s\n", fDumpReport.GetBufPtr());
+	printf("%s\n", fDumpReport.GetBufPtr());
 	fDumpReport.Reset();
 }
 

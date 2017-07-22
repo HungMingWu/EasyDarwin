@@ -51,7 +51,7 @@ using namespace EasyDarwin::Protocol;
 using namespace std;
 
 #define __QTSSCALLBACKS_DEBUG__ 0
-#define debug_printf if (__QTSSCALLBACKS_DEBUG__) qtss_printf
+#define debug_printf if (__QTSSCALLBACKS_DEBUG__) printf
 
 
 void*   QTSSCallbacks::QTSS_New(FourCharCode /*inMemoryIdentifier*/, uint32_t inSize)

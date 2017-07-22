@@ -46,7 +46,7 @@ int OSMutexRW::fMaxCount = 0;
 void OSMutexRW::CountConflict(int i)
 {
 	fCount += i;
-	if (i == -1) qtss_printf("Num Conflicts: %d\n", fMaxCount);
+	if (i == -1) printf("Num Conflicts: %d\n", fMaxCount);
 	if (fCount > fMaxCount)
 		fMaxCount = fCount;
 
@@ -59,7 +59,7 @@ void OSMutexRW::LockRead()
 #if DEBUGMUTEXRW
 	if (fState != 0)
 	{
-		qtss_printf("LockRead(conflict) fState = %d active readers = %d, waiting writers = %d, waiting readers=%d\n", fState, fActiveReaders, fWriteWaiters, fReadWaiters);
+		printf("LockRead(conflict) fState = %d active readers = %d, waiting writers = %d, waiting readers=%d\n", fState, fActiveReaders, fWriteWaiters, fReadWaiters);
 		CountConflict(1);
 	}
 
@@ -78,7 +78,7 @@ void OSMutexRW::LockRead()
 	fActiveReaders = fState;
 
 #if DEBUGMUTEXRW
-	//  qtss_printf("LockRead(conflict) fState = %d active readers = %d, waiting writers = %d, waiting readers=%d\n",fState,  fActiveReaders, fWriteWaiters, fReadWaiters);
+	//  printf("LockRead(conflict) fState = %d active readers = %d, waiting writers = %d, waiting readers=%d\n",fState,  fActiveReaders, fWriteWaiters, fReadWaiters);
 
 #endif
 }
@@ -91,11 +91,11 @@ void OSMutexRW::LockWrite()
 
 	if (Active())
 	{
-		qtss_printf("LockWrite(conflict) state = %d active readers = %d, waiting writers = %d, waiting readers=%d\n", fState, fActiveReaders, fWriteWaiters, fReadWaiters);
+		printf("LockWrite(conflict) state = %d active readers = %d, waiting writers = %d, waiting readers=%d\n", fState, fActiveReaders, fWriteWaiters, fReadWaiters);
 		CountConflict(1);
 	}
 
-	qtss_printf("LockWrite 'waiting' fState = %d locked active readers = %d, waiting writers = %d, waiting readers=%d\n", fState, fActiveReaders, fReadWaiters, fWriteWaiters);
+	printf("LockWrite 'waiting' fState = %d locked active readers = %d, waiting writers = %d, waiting readers=%d\n", fState, fActiveReaders, fReadWaiters, fWriteWaiters);
 #endif
 
 	while (activeReaders())  // active readers
@@ -107,7 +107,7 @@ void OSMutexRW::LockWrite()
 	setState(OSMutexRW::eActiveWriterState);    // this is the active writer    
 	fActiveReaders = fState;
 #if DEBUGMUTEXRW
-	//  qtss_printf("LockWrite 'locked' fState = %d locked active readers = %d, waiting writers = %d, waiting readers=%d\n",fState, fActiveReaders, fReadWaiters, fWriteWaiters);
+	//  printf("LockWrite 'locked' fState = %d locked active readers = %d, waiting writers = %d, waiting readers=%d\n",fState, fActiveReaders, fReadWaiters, fWriteWaiters);
 #endif
 
 }
@@ -116,7 +116,7 @@ void OSMutexRW::Unlock()
 {
 	OSMutexLocker locker(&fInternalLock);
 #if DEBUGMUTEXRW
-	//  qtss_printf("Unlock active readers = %d, waiting writers = %d, waiting readers=%d\n", fActiveReaders, fReadWaiters, fWriteWaiters);
+	//  printf("Unlock active readers = %d, waiting writers = %d, waiting readers=%d\n", fActiveReaders, fReadWaiters, fWriteWaiters);
 
 #endif
 
@@ -132,7 +132,7 @@ void OSMutexRW::Unlock()
 			fReadersCond.Broadcast();
 		}
 #if DEBUGMUTEXRW
-		qtss_printf("Unlock(writer) active readers = %d, waiting writers = %d, waiting readers=%d\n", fActiveReaders, fReadWaiters, fWriteWaiters);
+		printf("Unlock(writer) active readers = %d, waiting writers = %d, waiting readers=%d\n", fActiveReaders, fReadWaiters, fWriteWaiters);
 #endif
 	}
 	else

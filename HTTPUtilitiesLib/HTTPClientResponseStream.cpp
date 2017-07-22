@@ -39,7 +39,7 @@ QTSS_Error HTTPClientResponseStream::WriteV(iovec* inVec, uint32_t inNumVectors,
 			DateBuffer theDate;
 			DateTranslator::UpdateDateBuffer(&theDate, 0); // get the current GMT date and time
 
-			qtss_printf("\n#S->C:\n#time: ms=%" _U32BITARG_ " date=%s\n", (uint32_t)OS::StartTimeMilli_Int(), theDate.GetDateBuffer());
+			printf("\n#S->C:\n#time: ms=%" _U32BITARG_ " date=%s\n", (uint32_t)OS::StartTimeMilli_Int(), theDate.GetDateBuffer());
 			for (uint32_t i = 0; i < inNumVectors; i++)
 			{
 				StrPtrLen str((char*)inVec[i].iov_base, (uint32_t)inVec[i].iov_len);
@@ -157,7 +157,7 @@ QTSS_Error HTTPClientResponseStream::Flush()
 				DateBuffer theDate;
 				DateTranslator::UpdateDateBuffer(&theDate, 0); // get the current GMT date and time
 
-				qtss_printf("\n#S->C:\n#time: ms=%"   _U32BITARG_   " date=%s\n", (uint32_t)OS::StartTimeMilli_Int(), theDate.GetDateBuffer());
+				printf("\n#S->C:\n#time: ms=%"   _U32BITARG_   " date=%s\n", (uint32_t)OS::StartTimeMilli_Int(), theDate.GetDateBuffer());
 				StrPtrLen str(this->GetBufPtr() + fBytesSentInBuffer, amtInBuffer);
 				str.PrintStrEOL();
 			}

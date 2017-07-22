@@ -30,7 +30,7 @@
 #define __RTSP_HTTP_DEBUG__ 0
 #define __RTSP_HTTP_VERBOSE__ 0
 #define __RTSP_AUTH_DEBUG__ 0
-#define debug_printf if (__RTSP_AUTH_DEBUG__) qtss_printf
+#define debug_printf if (__RTSP_AUTH_DEBUG__) printf
 
 #include "RTSPSession.h"
 #include "RTSPRequest.h"
@@ -55,10 +55,10 @@
 #endif
 
 #if __RTSP_HTTP_DEBUG__
-#define HTTP_TRACE(s) qtss_printf(s);
+#define HTTP_TRACE(s) printf(s);
 #define HTTP_TRACE_SPL(s) PrintfStrPtrLen(s);
-#define HTTP_TRACE_ONE(s, one ) qtss_printf(s, one);
-#define HTTP_TRACE_TWO(s, one, two ) qtss_printf(s, one, two);
+#define HTTP_TRACE_ONE(s, one ) printf(s, one);
+#define HTTP_TRACE_TWO(s, one, two ) printf(s, one, two);
 #else
 #define HTTP_TRACE(s);
 #define HTTP_TRACE_SPL(s);
@@ -67,10 +67,10 @@
 #endif
 
 #if __RTSP_HTTP_VERBOSE__
-#define HTTP_VTRACE(s) qtss_printf(s);
+#define HTTP_VTRACE(s) printf(s);
 #define HTTP_VTRACE_SPL(s) PrintfStrPtrLen(s);
-#define HTTP_VTRACE_ONE(s, one ) qtss_printf(s, one);
-#define HTTP_VTRACE_TWO(s, one, two ) qtss_printf(s, one, two);
+#define HTTP_VTRACE_ONE(s, one ) printf(s, one);
+#define HTTP_VTRACE_TWO(s, one, two ) printf(s, one, two);
 #else
 #define HTTP_VTRACE(s);
 #define HTTP_VTRACE_SPL(s);
@@ -88,7 +88,7 @@ static void PrintfStrPtrLen(StrPtrLen *splRequest)
 	buff[splRequest->Len] = 0;
 
 	HTTP_TRACE_ONE("%s\n", buff)
-		//qtss_printf( "%s\n", buff );
+		//printf( "%s\n", buff );
 }
 #endif
 
@@ -498,7 +498,7 @@ int64_t RTSPSession::Run()
 				if (fSentOptionsRequest && this->ParseOptionsResponse())
 				{
 					fRoundTripTime = (int32_t)(OS::Milliseconds() - fOptionsRequestSendTime);
-					//qtss_printf("RTSPSession::Run RTT time = %" _S32BITARG_ " msec\n", fRoundTripTime);
+					//printf("RTSPSession::Run RTT time = %" _S32BITARG_ " msec\n", fRoundTripTime);
 					fState = kSendingResponse;
 					break;
 				}

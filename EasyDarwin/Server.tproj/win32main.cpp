@@ -71,7 +71,7 @@ int main(int argc, char * argv[])
 	char* compileType = "Compile_Flags/_RELEASE;";
 #endif
 
-	qtss_printf("%s/%s ( Build/%s; Platform/%s; %s%s) Built on: %s\n",
+	printf("%s/%s ( Build/%s; Platform/%s; %s%s) Built on: %s\n",
 		QTSServerInterface::GetServerName().Ptr,
 		QTSServerInterface::GetServerVersion().Ptr,
 		QTSServerInterface::GetServerBuild().Ptr,
@@ -87,7 +87,7 @@ int main(int argc, char * argv[])
 		{
 		case 'v':
 
-			qtss_printf("%s/%s ( Build/%s; Platform/%s; %s%s) Built on: %s\n", 
+			printf("%s/%s ( Build/%s; Platform/%s; %s%s) Built on: %s\n", 
 				QTSServerInterface::GetServerName().Ptr,
 				QTSServerInterface::GetServerVersion().Ptr,
 				QTSServerInterface::GetServerBuild().Ptr,
@@ -96,17 +96,17 @@ int main(int argc, char * argv[])
 				QTSServerInterface::GetServerComment().Ptr,
 				QTSServerInterface::GetServerBuildDate().Ptr);
 
-			qtss_printf("usage: %s [ -d | -p port | -v | -c /myconfigpath.xml | -o /myconfigpath.conf | -x | -S numseconds | -I | -h ]\n", QTSServerInterface::GetServerName().Ptr);
-			qtss_printf("-d: Don't run as a Win32 Service\n");
-			qtss_printf("-p XXX: Specify the default RTSP listening port of the server\n");
-			qtss_printf("-c c:\\myconfigpath.xml: Specify a config file path\n");
-			qtss_printf("-o c:\\myconfigpath.conf: Specify a DSS 1.x / 2.x config file path\n");
-			qtss_printf("-x: Force create new .xml config file from 1.x / 2.x config\n");
-			qtss_printf("-i: Install the EasyDarwin service\n");
-			qtss_printf("-r: Remove the EasyDarwin service\n");
-			qtss_printf("-s: Start the EasyDarwin service\n");
-			qtss_printf("-S n: Display server stats in the console every \"n\" seconds\n");
-			qtss_printf("-I: Start the server in the idle state\n");
+			printf("usage: %s [ -d | -p port | -v | -c /myconfigpath.xml | -o /myconfigpath.conf | -x | -S numseconds | -I | -h ]\n", QTSServerInterface::GetServerName().Ptr);
+			printf("-d: Don't run as a Win32 Service\n");
+			printf("-p XXX: Specify the default RTSP listening port of the server\n");
+			printf("-c c:\\myconfigpath.xml: Specify a config file path\n");
+			printf("-o c:\\myconfigpath.conf: Specify a DSS 1.x / 2.x config file path\n");
+			printf("-x: Force create new .xml config file from 1.x / 2.x config\n");
+			printf("-i: Install the EasyDarwin service\n");
+			printf("-r: Remove the EasyDarwin service\n");
+			printf("-s: Start the EasyDarwin service\n");
+			printf("-S n: Display server stats in the console every \"n\" seconds\n");
+			printf("-I: Start the server in the idle state\n");
 			::exit(0);
 		case 'd':
 			notAService = true;
@@ -131,18 +131,18 @@ int main(int argc, char * argv[])
 			theXMLPrefsExist = false; // Force us to generate a new XML prefs file
 			break;
 		case 'i':
-			qtss_printf("Installing the EasyDarwin service...\n");
+			printf("Installing the EasyDarwin service...\n");
 			::InstallService("EasyDarwin");
-			qtss_printf("Starting the EasyDarwin service...\n");
+			printf("Starting the EasyDarwin service...\n");
 			::RunAsService("EasyDarwin");
 			::exit(0);
 			break;
 		case 'r':
-			qtss_printf("Removing the EasyDarwin service...\n");
+			printf("Removing the EasyDarwin service...\n");
 			::RemoveService("EasyDarwin");
 			::exit(0);
 		case 's':
-			qtss_printf("Starting the EasyDarwin service...\n");
+			printf("Starting the EasyDarwin service...\n");
 			::RunAsService("EasyDarwin");
 			::exit(0);
 		case 'I':
@@ -158,7 +158,7 @@ int main(int argc, char * argv[])
 	QTSSExpirationDate::PrintExpirationDate();
 	if (QTSSExpirationDate::IsSoftwareExpired())
 	{
-		qtss_printf("Streaming Server has expired\n");
+		printf("Streaming Server has expired\n");
 		::exit(0);
 	}
 
@@ -171,13 +171,13 @@ int main(int argc, char * argv[])
 	// just bail because we do not want to overwrite a directory
 	if (sXMLParser->DoesFileExistAsDirectory())
 	{
-		qtss_printf("Directory located at location where streaming server prefs file should be.\n");
+		printf("Directory located at location where streaming server prefs file should be.\n");
 		::exit(0);
 	}
 
 	if (!sXMLParser->CanWriteFile())
 	{
-		qtss_printf("Cannot write to the streaming server prefs file.\n");
+		printf("Cannot write to the streaming server prefs file.\n");
 		::exit(0);
 	}
 
@@ -193,14 +193,14 @@ int main(int argc, char * argv[])
 
 		int prefsErr = sPrefsSource.InitFromConfigFile(theConfigFilePath);
 		if (prefsErr)
-			qtss_printf("Could not load configuration file at %s.\n Generating a new prefs file at %s\n", theConfigFilePath, theXMLFilePath);
+			printf("Could not load configuration file at %s.\n Generating a new prefs file at %s\n", theConfigFilePath, theXMLFilePath);
 
 		//
 		// Generate a brand-new XML prefs file out of the old prefs
 		int xmlGenerateErr = GenerateAllXMLPrefs(&sPrefsSource, sXMLParser);
 		if (xmlGenerateErr)
 		{
-			qtss_printf("Fatal Error: Could not create new prefs file at: %s. (%d)\n", theConfigFilePath, OSThread::GetErrno());
+			printf("Fatal Error: Could not create new prefs file at: %s. (%d)\n", theConfigFilePath, OSThread::GetErrno());
 			::exit(-1);
 		}
 	}
@@ -210,7 +210,7 @@ int main(int argc, char * argv[])
 	int xmlParseErr = sXMLParser->Parse();
 	if (xmlParseErr)
 	{
-		qtss_printf("Fatal Error: Could not load configuration file at %s. (%d)\n", theXMLFilePath, OSThread::GetErrno());
+		printf("Fatal Error: Could not load configuration file at %s. (%d)\n", theXMLFilePath, OSThread::GetErrno());
 		::exit(-1);
 	}
 
@@ -240,13 +240,13 @@ int main(int argc, char * argv[])
 
 	//
 	// In case someone runs the server improperly, print out a friendly message.
-	qtss_printf("EasyDarwin must either be started from the DOS Console\n");
-	qtss_printf("using the -d command-line option, or using the Service Control Manager\n\n");
-	qtss_printf("Waiting for the Service Control Manager to start EasyDarwin...\n");
+	printf("EasyDarwin must either be started from the DOS Console\n");
+	printf("using the -d command-line option, or using the Service Control Manager\n\n");
+	printf("Waiting for the Service Control Manager to start EasyDarwin...\n");
 	BOOL theErr = ::StartServiceCtrlDispatcher(dispatchTable);
 	if (!theErr)
 	{
-		qtss_printf("Fatal Error: Couldn't start Service\n");
+		printf("Fatal Error: Couldn't start Service\n");
 		::exit(-1);
 	}
 
@@ -296,7 +296,7 @@ void __stdcall ServiceMain(DWORD /*argc*/, LPTSTR *argv)
 	sServiceStatusHandle = ::RegisterServiceCtrlHandler(theServerName, &ServiceControl);
 	if (sServiceStatusHandle == 0)
 	{
-		qtss_printf("Failure registering service handler");
+		printf("Failure registering service handler");
 		return;
 	}
 
@@ -404,7 +404,7 @@ void WINAPI ServiceControl(DWORD inControlCode)
 	else
 		theStatusReport = SERVICE_START_PENDING;
 
-	qtss_printf("Reporting status from ServiceControl function\n");
+	printf("Reporting status from ServiceControl function\n");
 	::ReportStatus(theStatusReport, NO_ERROR);
 
 }
@@ -470,11 +470,11 @@ void RunAsService(char* inServiceName)
 		const int32_t kNotRunning = 1062;
 		bool stopped = ::ControlService(theService, SERVICE_CONTROL_STOP, &lpServiceStatus);
 		if (!stopped && ((int32_t) ::GetLastError() != kNotRunning))
-			qtss_printf("Stopping Service Error: %d\n", ::GetLastError());
+			printf("Stopping Service Error: %d\n", ::GetLastError());
 
 		bool started = ::StartService(theService, 0, NULL);
 		if (!started)
-			qtss_printf("Starting Service Error: %d\n", ::GetLastError());
+			printf("Starting Service Error: %d\n", ::GetLastError());
 
 		::CloseServiceHandle(theService);
 	}
@@ -504,7 +504,7 @@ void InstallService(char* inServiceName)
 	);
 	if (!theSCManager)
 	{
-		qtss_printf("Failed to install EasyDarwin Service\n");
+		printf("Failed to install EasyDarwin Service\n");
 		return;
 	}
 
@@ -526,10 +526,10 @@ void InstallService(char* inServiceName)
 	if (theService)
 	{
 		::CloseServiceHandle(theService);
-		qtss_printf("Installed EasyDarwin Service\n");
+		printf("Installed EasyDarwin Service\n");
 	}
 	else
-		qtss_printf("Failed to install EasyDarwin Service\n");
+		printf("Failed to install EasyDarwin Service\n");
 
 	::CloseServiceHandle(theSCManager);
 }
@@ -546,7 +546,7 @@ void RemoveService(char *inServiceName)
 	);
 	if (!theSCManager)
 	{
-		qtss_printf("Failed to remove EasyDarwin Service\n");
+		printf("Failed to remove EasyDarwin Service\n");
 		return;
 	}
 
@@ -555,14 +555,14 @@ void RemoveService(char *inServiceName)
 	{
 		bool stopped = ::ControlService(theService, SERVICE_CONTROL_STOP, NULL);
 		if (!stopped)
-			qtss_printf("Stopping Service Error: %d\n", ::GetLastError());
+			printf("Stopping Service Error: %d\n", ::GetLastError());
 
 		(void)::DeleteService(theService);
 		::CloseServiceHandle(theService);
-		qtss_printf("Removed EasyDarwin Service\n");
+		printf("Removed EasyDarwin Service\n");
 	}
 	else
-		qtss_printf("Failed to remove EasyDarwin Service\n");
+		printf("Failed to remove EasyDarwin Service\n");
 
 	::CloseServiceHandle(theSCManager);
 }

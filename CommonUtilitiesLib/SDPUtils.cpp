@@ -227,7 +227,7 @@ void  SDPContainer::PrintLine(int32_t lineIndex)
 	if (printLinePtr)
 	{
 		printLinePtr->PrintStr();
-		qtss_printf("\n");
+		printf("\n");
 	}
 
 }
@@ -240,7 +240,7 @@ void  SDPContainer::PrintAllLines()
 			PrintLine(i);
 	}
 	else
-		qtss_printf("SDPContainer::PrintAllLines no lines\n");
+		printf("SDPContainer::PrintAllLines no lines\n");
 }
 
 bool SDPLineSorter::ValidateSessionHeader(StrPtrLen *theHeaderLinePtr)
@@ -334,7 +334,7 @@ SDPLineSorter::SDPLineSorter(SDPContainer *rawSDPContainerPtr, float adjustMedia
 	for (int16_t sessionLineIndex = 0; sessionLineIndex < fSessionLineCount; sessionLineIndex++)
 		fSessionSDPContainer.AddHeaderLine((StrPtrLen *)rawSDPContainerPtr->GetLine(sessionLineIndex));
 
-	//qtss_printf("\nSession raw Lines:\n"); fSessionSDPContainer.PrintAllLines();
+	//printf("\nSession raw Lines:\n"); fSessionSDPContainer.PrintAllLines();
 
 	int16_t numHeaderTypes = sizeof(SDPLineSorter::sSessionOrderedLines) - 1;
 	bool addLine = true;

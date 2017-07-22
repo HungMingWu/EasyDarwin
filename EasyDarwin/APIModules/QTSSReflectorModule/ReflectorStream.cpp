@@ -308,7 +308,7 @@ int32_t ReflectorStream::AddOutput(ReflectorOutput* inOutput, int32_t putInThisB
 		{
 			fOutputArray[putInThisBucket][y] = inOutput;
 #if REFLECTOR_STREAM_DEBUGGING 
-			qtss_printf("Adding new output (0x%lx) to bucket %" _S32BITARG_ ", index %" _S32BITARG_ ",\nnum buckets %li bucketSize: %li \n", (int32_t)inOutput, putInThisBucket, y, (int32_t)fNumBuckets, (int32_t)sBucketSize);
+			printf("Adding new output (0x%lx) to bucket %" _S32BITARG_ ", index %" _S32BITARG_ ",\nnum buckets %li bucketSize: %li \n", (int32_t)inOutput, putInThisBucket, y, (int32_t)fNumBuckets, (int32_t)sBucketSize);
 #endif
 			fNumElements++;
 			return putInThisBucket;
@@ -351,7 +351,7 @@ void  ReflectorStream::RemoveOutput(ReflectorOutput* inOutput)
 				fOutputArray[x][y] = NULL;//just clear out the pointer
 
 #if REFLECTOR_STREAM_DEBUGGING  
-				qtss_printf("Removing output %x from bucket %" _S32BITARG_ ", index %" _S32BITARG_ "\n", inOutput, x, y);
+				printf("Removing output %x from bucket %" _S32BITARG_ ", index %" _S32BITARG_ "\n", inOutput, x, y);
 #endif
 				fNumElements--;
 				return;
@@ -377,7 +377,7 @@ void  ReflectorStream::TearDownAllOutputs()
 			{
 				theOutputPtr->TearDown();
 #if REFLECTOR_STREAM_DEBUGGING  
-				qtss_printf("TearDownAllOutputs Removing output from bucket %" _S32BITARG_ ", index %" _S32BITARG_ "\n", x, y);
+				printf("TearDownAllOutputs Removing output from bucket %" _S32BITARG_ ", index %" _S32BITARG_ "\n", x, y);
 #endif
 			}
 		}
@@ -535,11 +535,11 @@ void ReflectorStream::PushPacket(char *packet, uint32_t packetLen, bool isRTCP)
 		ReflectorPacket* thePacket = NULL;
 		if (isRTCP)
 		{
-			//qtss_printf("ReflectorStream::PushPacket RTCP packetlen = %"   _U32BITARG_   "\n",packetLen);
+			//printf("ReflectorStream::PushPacket RTCP packetlen = %"   _U32BITARG_   "\n",packetLen);
 			thePacket = ((ReflectorSocket*)fSockets->GetSocketB())->GetPacket();
 			if (thePacket == NULL)
 			{
-				//qtss_printf("ReflectorStream::PushPacket RTCP GetPacket() is NULL\n");
+				//printf("ReflectorStream::PushPacket RTCP GetPacket() is NULL\n");
 				return;
 			}
 
@@ -550,11 +550,11 @@ void ReflectorStream::PushPacket(char *packet, uint32_t packetLen, bool isRTCP)
 		}
 		else
 		{
-			//qtss_printf("ReflectorStream::PushPacket RTP packetlen = %"   _U32BITARG_   "\n",packetLen);
+			//printf("ReflectorStream::PushPacket RTP packetlen = %"   _U32BITARG_   "\n",packetLen);
 			thePacket = ((ReflectorSocket*)fSockets->GetSocketA())->GetPacket();
 			if (thePacket == NULL)
 			{
-				//qtss_printf("ReflectorStream::PushPacket GetPacket() is NULL\n");
+				//printf("ReflectorStream::PushPacket GetPacket() is NULL\n");
 				return;
 			}
 
@@ -609,7 +609,7 @@ bool ReflectorSender::ShouldReflectNow(const int64_t& inCurrentTime, int64_t* io
 		//We don't need to do work right now, but
 		//this stream must still communicate when it needs to be woken up next
 		int64_t theWakeupTime = fNextTimeToRun + inCurrentTime;
-		//qtss_printf("ReflectorSender::ShouldReflectNow theWakeupTime=%qd newWakeUpTime=%qd  ioWakepTime=%qd\n", theWakeupTime, fNextTimeToRun + inCurrentTime,*ioWakeupTime);
+		//printf("ReflectorSender::ShouldReflectNow theWakeupTime=%qd newWakeUpTime=%qd  ioWakepTime=%qd\n", theWakeupTime, fNextTimeToRun + inCurrentTime,*ioWakeupTime);
 		if ((fNextTimeToRun > 0) && (theWakeupTime < *ioWakeupTime))
 			*ioWakeupTime = theWakeupTime;
 		return false;
@@ -1130,8 +1130,8 @@ void ReflectorSender::ReflectPackets(int64_t* ioWakeupTime, OSQueue* inFreeQueue
 	// exit with fNextTimeToRun in real time, not relative time.
 	fNextTimeToRun += currentTime;
 
-	// qtss_printf("SetNextTimeToRun fNextTimeToRun=%qd + currentTime=%qd\n", fNextTimeToRun, currentTime);
-	// qtss_printf("ReflectorSender::ReflectPackets *ioWakeupTime = %qd\n", *ioWakeupTime);
+	// printf("SetNextTimeToRun fNextTimeToRun=%qd + currentTime=%qd\n", fNextTimeToRun, currentTime);
+	// printf("ReflectorSender::ReflectPackets *ioWakeupTime = %qd\n", *ioWakeupTime);
 
 }
 
@@ -1165,17 +1165,17 @@ OSQueueElem*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOutput,
 				theOutput->fLastIntervalMilliSec = 5;
 
 			if (timeToSendPacket < 0) // blocked and we are behind
-			{    //qtss_printf("fNextTimeToRun = theOutput->fLastIntervalMilliSec=%qd;\n", theOutput->fLastIntervalMilliSec); // Use the last packet interval 
+			{    //printf("fNextTimeToRun = theOutput->fLastIntervalMilliSec=%qd;\n", theOutput->fLastIntervalMilliSec); // Use the last packet interval 
 				this->SetNextTimeToRun(theOutput->fLastIntervalMilliSec);
 			}
 
 			if (fNextTimeToRun > 100) //don't wait that long
-			{    //qtss_printf("fNextTimeToRun = %qd now 100;\n", fNextTimeToRun);
+			{    //printf("fNextTimeToRun = %qd now 100;\n", fNextTimeToRun);
 				this->SetNextTimeToRun(100);
 			}
 
 			if (fNextTimeToRun < 5) //wait longer
-			{    //qtss_printf("fNextTimeToRun = 5;\n");
+			{    //printf("fNextTimeToRun = 5;\n");
 				this->SetNextTimeToRun(5);
 			}
 
@@ -1184,7 +1184,7 @@ OSQueueElem*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOutput,
 			else
 				theOutput->fLastIntervalMilliSec *= 2; // scale upwards over time
 
-			//qtss_printf ( "Blocked ReflectorSender::SendPacketsToOutput timeToSendPacket=%qd fLastIntervalMilliSec=%qd fNextTimeToRun=%qd \n", timeToSendPacket, theOutput->fLastIntervalMilliSec, fNextTimeToRun);
+			//printf ( "Blocked ReflectorSender::SendPacketsToOutput timeToSendPacket=%qd fLastIntervalMilliSec=%qd fNextTimeToRun=%qd \n", timeToSendPacket, theOutput->fLastIntervalMilliSec, fNextTimeToRun);
 
 			break;
 		}
@@ -1597,11 +1597,11 @@ void ReflectorSocketPool::DestructUDPSocket(ReflectorSocket* socket)
 		//if (socket->GetLocalPort() > 0) // bound and active
 		//{   //The socket's run function may be executing RIGHT NOW! So we can't
 			//just delete the thing, we need to send the sockets kill events.
-			//qtss_printf("ReflectorSocketPool::DestructUDPSocketPair Signal kKillEvent socket=%p\n",socket);
+			//printf("ReflectorSocketPool::DestructUDPSocketPair Signal kKillEvent socket=%p\n",socket);
 		socket->Signal(Task::kKillEvent);
 		//}
 		//else // not bound ok to delete
-		//{   //qtss_printf("ReflectorSocketPool::DestructUDPSocketPair delete socket=%p\n",socket);
+		//{   //printf("ReflectorSocketPool::DestructUDPSocketPair delete socket=%p\n",socket);
 		//    delete socket;
 		//}  
 	}
@@ -1609,10 +1609,10 @@ void ReflectorSocketPool::DestructUDPSocket(ReflectorSocket* socket)
 
 void ReflectorSocketPool::DestructUDPSocketPair(UDPSocketPair *inPair)
 {
-	//qtss_printf("ReflectorSocketPool::DestructUDPSocketPair inPair=%p socketA=%p\n", inPair,(ReflectorSocket*)inPair->GetSocketA());
+	//printf("ReflectorSocketPool::DestructUDPSocketPair inPair=%p socketA=%p\n", inPair,(ReflectorSocket*)inPair->GetSocketA());
 	this->DestructUDPSocket((ReflectorSocket*)inPair->GetSocketA());
 
-	//qtss_printf("ReflectorSocketPool::DestructUDPSocketPair inPair=%p socketB=%p\n", inPair,(ReflectorSocket*)inPair->GetSocketB());
+	//printf("ReflectorSocketPool::DestructUDPSocketPair inPair=%p socketB=%p\n", inPair,(ReflectorSocket*)inPair->GetSocketB());
 	this->DestructUDPSocket((ReflectorSocket*)inPair->GetSocketB());
 
 	delete inPair;
@@ -1738,7 +1738,7 @@ void ReflectorSocket::FilterInvalidSSRCs(ReflectorPacket* thePacket, bool isRTCP
 		{
 			fValidSSRC = thePacket->GetSSRC(isRTCP); // SSRC of 0 is allowed
 			fLastValidSSRCTime = currentTime;
-			//qtss_printf("socket=%"   _U32BITARG_   " FIRST PACKET fValidSSRC=%"   _U32BITARG_   " \n", (uint32_t) this,fValidSSRC);
+			//printf("socket=%"   _U32BITARG_   " FIRST PACKET fValidSSRC=%"   _U32BITARG_   " \n", (uint32_t) this,fValidSSRC);
 			break;
 		}
 
@@ -1748,11 +1748,11 @@ void ReflectorSocket::FilterInvalidSSRCs(ReflectorPacket* thePacket, bool isRTCP
 			if (packetSSRC == fValidSSRC)
 			{
 				fLastValidSSRCTime = currentTime;
-				//qtss_printf("socket=%"   _U32BITARG_   " good packet\n", (uint32_t) this );
+				//printf("socket=%"   _U32BITARG_   " good packet\n", (uint32_t) this );
 				break;
 			}
 
-			//qtss_printf("socket=%"   _U32BITARG_   " bad packet packetSSRC= %"   _U32BITARG_   " fValidSSRC=%"   _U32BITARG_   " \n", (uint32_t) this,packetSSRC,fValidSSRC);
+			//printf("socket=%"   _U32BITARG_   " bad packet packetSSRC= %"   _U32BITARG_   " fValidSSRC=%"   _U32BITARG_   " \n", (uint32_t) this,packetSSRC,fValidSSRC);
 			thePacket->fPacketPtr.Len = 0; // ignore this packet wrong SSRC
 		}
 
@@ -1760,7 +1760,7 @@ void ReflectorSocket::FilterInvalidSSRCs(ReflectorPacket* thePacket, bool isRTCP
 		if ((fLastValidSSRCTime + fTimeoutSecs) < currentTime) // fValidSSRC timed out --no packets with this SSRC seen for awhile
 		{
 			fValidSSRC = 0; // reset the valid SSRC with the next packet's SSRC
-		 //qtss_printf("RESET fValidSSRC\n");
+		 //printf("RESET fValidSSRC\n");
 		}
 
 	} while (false);
@@ -1792,7 +1792,7 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 			fFreeQueue.EnQueue(&thePacket->fQueueElem);
 			this->RequestEvent(EV_RE);
 			done = true;
-			//qtss_printf("ReflectorSocket::ProcessPacket no more packets on this socket!\n");
+			//printf("ReflectorSocket::ProcessPacket no more packets on this socket!\n");
 			break;//no more packets on this socket!
 		}
 
@@ -1828,7 +1828,7 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 		if (theSender == NULL)
 		{
 			//uint16_t* theSeqNumberP = (uint16_t*)thePacket->fPacketPtr.Ptr;
-			//qtss_printf("ReflectorSocket::ProcessPacket no sender found for packet! sequence number=%d\n",ntohs(theSeqNumberP[1]));
+			//printf("ReflectorSocket::ProcessPacket no sender found for packet! sequence number=%d\n",ntohs(theSeqNumberP[1]));
 			fFreeQueue.EnQueue(&thePacket->fQueueElem); // don't process the packet
 			done = true;
 			break;

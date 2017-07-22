@@ -312,7 +312,7 @@ void SDPSourceInfo::Parse(char* sdpData, uint32_t sdpLen)
 
                 {   // found a control line for the broadcast (delete at time or delete at end of broadcast/server startup) 
 
-                    // qtss_printf("found =%s\n",sBroadcastControlStr);
+                    // printf("found =%s\n",sBroadcastControlStr);
 
                     aParser.ConsumeUntil(NULL,StringParser::sWordMask);
 
@@ -346,9 +346,9 @@ void SDPSourceInfo::Parse(char* sdpData, uint32_t sdpLen)
                         StrPtrLen payloadNameFromParser;
                         (void)aParser.GetThruEOL(&payloadNameFromParser);
 						char* temp = payloadNameFromParser.GetAsCString();
-//                                                qtss_printf("payloadNameFromParser (%x) = %s\n", temp, temp);
+//                                                printf("payloadNameFromParser (%x) = %s\n", temp, temp);
                         (fStreamArray[theStreamIndex - 1].fPayloadName).Set(temp, payloadNameFromParser.Len);
-//                                                qtss_printf("%s\n", fStreamArray[theStreamIndex - 1].fPayloadName.Ptr);
+//                                                printf("%s\n", fStreamArray[theStreamIndex - 1].fPayloadName.Ptr);
                     }
                 }
                 else if (aLineType.Equal(sControlStr))
@@ -363,9 +363,9 @@ void SDPSourceInfo::Parse(char* sdpData, uint32_t sdpLen)
 						aParser.GetThruEOL(&trackNameFromParser);
 
 						char* temp = trackNameFromParser.GetAsCString();
-//                                                qtss_printf("trackNameFromParser (%x) = %s\n", temp, temp);
+//                                                printf("trackNameFromParser (%x) = %s\n", temp, temp);
 						(fStreamArray[theStreamIndex - 1].fTrackName).Set(temp, trackNameFromParser.Len);
-//                                                qtss_printf("%s\n", fStreamArray[theStreamIndex - 1].fTrackName.Ptr);
+//                                                printf("%s\n", fStreamArray[theStreamIndex - 1].fTrackName.Ptr);
 					
 						StringParser tParser(&trackNameFromParser);
 						tParser.ConsumeUntil(NULL, '=');

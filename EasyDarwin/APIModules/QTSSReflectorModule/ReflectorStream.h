@@ -331,7 +331,7 @@ public:
 	inline void SetNextTimeToRun(int64_t nextTime)
 	{
 		fNextTimeToRun = nextTime;
-		//qtss_printf("SetNextTimeToRun =%"_64BITARG_"d\n", fNextTimeToRun);
+		//printf("SetNextTimeToRun =%"_64BITARG_"d\n", fNextTimeToRun);
 	}
 
 	bool      fHasNewPackets;

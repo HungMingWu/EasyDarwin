@@ -270,7 +270,7 @@ QTSS_Error LogError(QTSS_RoleParamPtr inParamBlock)
 					//The error logger is the bottleneck for any and all messages printed by the server.
 					//For debugging purposes, these messages can be printed to stdout as well.
 				if (thePrefs->IsScreenLoggingEnabled())
-					qtss_printf("--last message repeated %d times\n", sDupErrorStringCount);
+					printf("--last message repeated %d times\n", sDupErrorStringCount);
 
 				CheckErrorLogState();
 
@@ -302,7 +302,7 @@ QTSS_Error LogError(QTSS_RoleParamPtr inParamBlock)
 		//The error logger is the bottleneck for any and all messages printed by the server.
 		//For debugging purposes, these messages can be printed to stdout as well.
 		if (thePrefs->IsScreenLoggingEnabled())
-			qtss_printf("%s %s\n", sErrorLevel[verbLvl], inParamBlock->errorParams.inBuffer);
+			printf("%s %s\n", sErrorLevel[verbLvl], inParamBlock->errorParams.inBuffer);
 
 		CheckErrorLogState();
 

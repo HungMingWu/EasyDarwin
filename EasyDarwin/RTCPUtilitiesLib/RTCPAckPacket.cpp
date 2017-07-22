@@ -80,8 +80,8 @@ bool RTCPAckPacket::IsAckPacketType()
 	// While we are moving to a new type, check for both
 	uint32_t theAppType = this->GetAppPacketName();
 
-	//  if ( theAppType == kAckPacketAlternateName ) qtss_printf("ack\n"); 
-	//  if ( theAppType == kAckPacketName ) qtss_printf("qtack\n");
+	//  if ( theAppType == kAckPacketAlternateName ) printf("ack\n"); 
+	//  if ( theAppType == kAckPacketName ) printf("qtack\n");
 
 	return this->IsAckType(theAppType);
 }
@@ -109,7 +109,7 @@ void   RTCPAckPacket::Dump()
 		}
 	}
 	Assert(::strlen(maskBytesBuffer) < numBufferBytes);
-	qtss_printf(" H_name=%s H_seq=%u H_len=%u mask_size=%"   _U32BITARG_   " seq_nums_bit_set=%s\n",
+	printf(" H_name=%s H_seq=%u H_len=%u mask_size=%"   _U32BITARG_   " seq_nums_bit_set=%s\n",
 		name, theSeqNum, thePacketLen, theAckMaskSizeInBits, maskBytesBuffer);
 
 }

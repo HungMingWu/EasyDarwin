@@ -107,7 +107,7 @@ static void  PrintNameAndValue(PLDoubleLinkedListNode<QueryParamListElement>* no
 	// used by QueryParamList::PrintAll
 	QueryParamListElement*  nvPair = node->fElement;
 
-	qtss_printf("qpl: %s, name %s, val %s\n", (char*)userData, nvPair->mName, nvPair->mValue);
+	printf("qpl: %s, name %s, val %s\n", (char*)userData, nvPair->mName, nvPair->mValue);
 }
 
 void QueryParamList::PrintAll(char* idString)

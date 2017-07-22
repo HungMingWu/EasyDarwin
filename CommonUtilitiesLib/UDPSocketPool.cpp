@@ -118,18 +118,18 @@ UDPSocketPair*  UDPSocketPool::CreateUDPSocketPair(uint32_t inAddr, uint16_t inP
 
 		OS_Error theErr = theElem->fSocketA->Bind(inAddr, curPort);
 		if (theErr == OS_NoErr)
-		{   //qtss_printf("fSocketA->Bind ok on port%u\n", curPort);
+		{   //printf("fSocketA->Bind ok on port%u\n", curPort);
 			theErr = theElem->fSocketB->Bind(inAddr, socketBPort);
 			if (theErr == OS_NoErr)
-			{   //qtss_printf("fSocketB->Bind ok on port%u\n", socketBPort);
+			{   //printf("fSocketB->Bind ok on port%u\n", socketBPort);
 				foundPair = true;
 				fUDPQueue.EnQueue(&theElem->fElem);
 				theElem->fRefCount++;
 				return theElem;
 			}
-			//else qtss_printf("fSocketB->Bind failed on port%u\n", socketBPort);
+			//else printf("fSocketB->Bind failed on port%u\n", socketBPort);
 		}
-		//else qtss_printf("fSocketA->Bind failed on port%u\n", curPort);
+		//else printf("fSocketA->Bind failed on port%u\n", curPort);
 
 	   //If we are looking to bind to a specific port set, and we couldn't then
 	   //just break here.

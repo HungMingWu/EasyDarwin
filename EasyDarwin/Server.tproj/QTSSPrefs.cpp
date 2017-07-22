@@ -97,7 +97,7 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 		uint32_t nameLen = 0;
 		theErr = theAttrInfoPtr->GetValuePtr(qtssAttrName, 0, (void **)&modulePrefInServer[i], &nameLen);
 		Assert(theErr == QTSS_NoErr);
-		//qtss_printf("QTSSPrefs::RereadPreferences modulePrefInServer in server=%s\n",modulePrefInServer[i]);
+		//printf("QTSSPrefs::RereadPreferences modulePrefInServer in server=%s\n",modulePrefInServer[i]);
 	}
 
 	// Use the names of the attributes in the attribute map as the key values for
@@ -128,7 +128,7 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 			if (modulePrefInServer[i] != NULL && thePrefName != NULL && 0 == ::strcmp(modulePrefInServer[i], thePrefName))
 			{
 				modulePrefInServer[i] = NULL; // in the server so don't delete later
-			 //qtss_printf("QTSSPrefs::RereadPreferences modulePrefInServer in file and in server=%s\n",thePrefName);
+			 //printf("QTSSPrefs::RereadPreferences modulePrefInServer in file and in server=%s\n",thePrefName);
 			}
 		}
 
@@ -194,7 +194,7 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 					char* theName = NULL;
 					uint32_t nameLen = 0;
 					theAttrInfoPtr->GetValuePtr(qtssAttrName, 0, (void **)&theName, &nameLen);
-					qtss_printf("QTSSPrefs::RereadPreferences about to delete modulePrefInServer=%s attr=%s id=%"   _U32BITARG_   "\n", modulePrefInServer[a], theName, theAttrID);
+					printf("QTSSPrefs::RereadPreferences about to delete modulePrefInServer=%s attr=%s id=%"   _U32BITARG_   "\n", modulePrefInServer[a], theName, theAttrID);
 				}
 
 

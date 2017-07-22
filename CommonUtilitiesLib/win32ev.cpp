@@ -32,10 +32,12 @@
 
  */
 
-#include "ev.h"
 #include "OSHeaders.h"
 #include "OSThread.h"
 #include "MyAssert.h"
+#include "common.h"
+
+int select_modwatch(struct eventreq* req, int which);
 
  //
  // You have to create a window to get socket events? What's up with that?

@@ -40,6 +40,7 @@
 #include "OSThread.h"
 #include "Task.h"
 #include "OSRef.h"
+#include "common.h"
 
 #if MACOSXEVENTQUEUE
 #ifdef AVAILABLE_MAC_OS_X_VERSION_10_5_AND_LATER

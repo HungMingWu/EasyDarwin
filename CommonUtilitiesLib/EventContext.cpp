@@ -34,6 +34,10 @@
 
 #include <errno.h>
 
+int select_removeevent(int /*which*/);
+int select_modwatch(struct eventreq* req, int which);
+int select_waitevent(struct eventreq* req, void* /*onlyForMacOSX*/);
+
 #ifndef __Win32__
 #include <unistd.h>
 #include <fcntl.h>

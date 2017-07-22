@@ -51,6 +51,8 @@
 #include <stdlib.h>
 #include <QTSSModuleUtils.h>
 
+void select_startevents();
+
 QTSServer* sServer = NULL;
 int sStatusUpdateInterval = 0;
 bool sHasPID = false;

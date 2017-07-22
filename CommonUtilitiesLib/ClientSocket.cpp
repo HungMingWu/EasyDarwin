@@ -42,6 +42,7 @@
 #include "ClientSocket.h"
 #include "base64.h"
 #include "MyAssert.h"
+#include "common.h"
 
 #define CLIENT_SOCKET_DEBUG 0
 

@@ -61,7 +61,7 @@ RTPFileSession::~RTPFileSession()
     OSMutexLocker locker (sOpenFileMap.GetMutex());
 
 #if RTPFILESESSIONDEBUG
-    qtss_printf("Dropping refcount on file\n");
+    printf("Dropping refcount on file\n");
 #endif
     if (fFile == NULL)
         return;
@@ -70,7 +70,7 @@ RTPFileSession::~RTPFileSession()
     if (fFile->GetRef()->GetRefCount() == 0)
     {
 #if RTPFILESESSIONDEBUG
-        qtss_printf("Refcount dropped to 0. Deleting file\n");
+        printf("Refcount dropped to 0. Deleting file\n");
 #endif
         sOpenFileMap.UnRegister(fFile->GetRef());
         delete fFile;
@@ -91,7 +91,7 @@ RTPFileSession::ErrorCode   RTPFileSession::Initialize(StrPtrLen& inFilePath, Fl
 
     if (theFileRef == NULL)
     {
-        //qtss_printf("Didn't find file in map. Creating new one\n");
+        //printf("Didn't find file in map. Creating new one\n");
         fFile = NEW RTPFile();
         ErrorCode theErr = fFile->Initialize(inFilePath);
         if (theErr != errNoError)
@@ -110,7 +110,7 @@ RTPFileSession::ErrorCode   RTPFileSession::Initialize(StrPtrLen& inFilePath, Fl
     }   
     else
     {
-        //qtss_printf("Found file. Refcounting.\n");
+        //printf("Found file. Refcounting.\n");
         fFile = (RTPFile*)theFileRef->GetObject();
     }
     
@@ -303,7 +303,7 @@ Float64 RTPFileSession::GetNextPacket(UInt8** outPacket, UInt32* outPacketLength
             {
             
 #if RTPFILESESSIONDEBUG
-                qtss_printf("RTPFileSession::GetNextPacket fCurrentPosition == fFileLength quit\n");
+                printf("RTPFileSession::GetNextPacket fCurrentPosition == fFileLength quit\n");
 #endif
                 *outPacket = NULL;
                 return -1;
@@ -321,7 +321,7 @@ Float64 RTPFileSession::GetNextPacket(UInt8** outPacket, UInt32* outPacketLength
             fReadBufferOffset &= kBlockMask; //Rounds down to the nearest block size
             
 #if RTPFILESESSIONDEBUG
-            qtss_printf("Found a pad packet. Moving on\n");
+            printf("Found a pad packet. Moving on\n");
 #endif
             // Check to make sure we aren't at the end of the buffer
             if (fReadBufferOffset >= fDataBufferLen)
@@ -370,7 +370,7 @@ void RTPFileSession::SkipToNextPacket(RTPFilePacket* inCurPacket)
     if (fReadBufferOffset >= fDataBufferLen)
     {
 #if RTPFILESESSIONDEBUG
-        qtss_printf("In SkipToNextPacket. Out of data\n");
+        printf("In SkipToNextPacket. Out of data\n");
 #endif
         fCurrentPacket = NULL;
     }
@@ -389,7 +389,7 @@ void RTPFileSession::ReadAndAdvise()
     // Read the next block. There should always be at least one packet
     // here, as we have a valid block in the block table.
 #if RTPFILESESSIONDEBUG
-    //qtss_printf("Moving onto next block. File loc: %qd\n",fFileSource.GetCurOffset());
+    //printf("Moving onto next block. File loc: %qd\n",fFileSource.GetCurOffset());
 #endif
     fDataBufferLen = 0;
     //(void)fFileSource.Read(fDataBuffer, fDataBufferSize, &fDataBufferLen);

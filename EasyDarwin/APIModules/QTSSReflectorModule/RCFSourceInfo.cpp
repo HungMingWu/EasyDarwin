@@ -222,7 +222,7 @@ void RCFSourceInfo::ParseDestination(XMLTag* destTag, uint32_t index)
 	{
 		prefTag = destTag->GetEmbeddedTagByNameAndAttr("PREF", "NAME", "udp_base_port");
 		if (prefTag == NULL)
-			qtss_printf("Missing both 'udp_base_port' and 'udp_ports' tags.\n Cannot set up the destination!\n");
+			printf("Missing both 'udp_base_port' and 'udp_ports' tags.\n Cannot set up the destination!\n");
 		else
 		{
 			char* basePortStr = prefTag->GetValue();

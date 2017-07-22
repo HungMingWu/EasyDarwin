@@ -1660,7 +1660,7 @@ QTSS_Error SendPackets(QTSS_RTPSendPackets_Params* inParams)
 				inParams->outNextPacketTime = (*theFile)->fPacketStruct.suggestedWakeupTime - inParams->inCurrentTime;
 			}
 
-			//qtss_printf("Call again: %qd\n", inParams->outNextPacketTime);
+			//printf("Call again: %qd\n", inParams->outNextPacketTime);
 
 			return QTSS_NoErr;
 		}

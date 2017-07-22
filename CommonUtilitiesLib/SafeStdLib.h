@@ -57,9 +57,9 @@ extern "C" {
 
 
 #ifdef __USE_MAX_PRINTF__
-#define qtss_printf qtss_maxprintf
+#define printf qtss_maxprintf
 #else
-	extern int qtss_printf(const char *fmt, ...);
+	extern int printf(const char *fmt, ...);
 
 #endif
 
@@ -88,9 +88,9 @@ extern "C" {
 #define qtss_fprintf fprintf
 
 #ifdef __USE_MAX_PRINTF__
-#define qtss_printf qtss_maxprintf
+#define printf qtss_maxprintf
 #else
-#define qtss_printf printf
+#define printf printf
 #endif
 
 #if __Win32__

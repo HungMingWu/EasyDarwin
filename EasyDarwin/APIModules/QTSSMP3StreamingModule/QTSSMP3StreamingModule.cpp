@@ -48,9 +48,9 @@
 #define DEBUG_MP3STREAMING_MODULE 0
 
 #if DEBUG_MP3STREAMING_MODULE
-#define DTRACE(s)       qtss_printf(s)
-#define DTRACE1(s,n1)       qtss_printf(s,n1)
-#define DTRACE2(s,n1,n2)    qtss_printf(s,n1,n2)
+#define DTRACE(s)       printf(s)
+#define DTRACE1(s,n1)       printf(s,n1)
+#define DTRACE2(s,n1,n2)    printf(s,n1,n2)
 #else
 #define DTRACE(s)
 #define DTRACE1(s,n1)
@@ -1752,7 +1752,7 @@ void PrintStringBuffer(StrPtrLen& stringBuffer)
 		len = 255;
 	::memcpy(localBuffer, stringBuffer.Ptr, len);
 	localBuffer[len] = '\0';
-	qtss_printf("%s", localBuffer);
+	printf("%s", localBuffer);
 }
 #endif
 

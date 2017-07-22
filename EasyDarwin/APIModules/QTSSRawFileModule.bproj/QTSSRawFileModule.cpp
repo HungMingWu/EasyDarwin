@@ -273,12 +273,12 @@ QTSS_Error Preprocess(QTSS_StandardRTSP_Params* inParams)
                 theReadOffset += theRecvLen;
                 theOffset += theRecvLen;
 #if RAW_FILE_DEBUGGING
-                qtss_printf("Got %"_U32BITARG_" bytes back from file read. Now at: %"_64BITARG_"u\n", theRecvLen, theOffset);
+                printf("Got %"_U32BITARG_" bytes back from file read. Now at: %"_64BITARG_"u\n", theRecvLen, theOffset);
 #endif
                 if (theReadOffset < theBufferSize)
                 {
 #if RAW_FILE_DEBUGGING
-                    qtss_printf("Flow controlled on file. Waiting for read event\n");
+                    printf("Flow controlled on file. Waiting for read event\n");
 #endif
                     isBlocked = true;
                     break;
@@ -314,12 +314,12 @@ QTSS_Error Preprocess(QTSS_StandardRTSP_Params* inParams)
                                     &theWrittenLen);
                 theWriteOffset += theWrittenLen;
 #if RAW_FILE_DEBUGGING
-                qtss_printf("Got %"_U32BITARG_" bytes back from socket write.\n", theWrittenLen);
+                printf("Got %"_U32BITARG_" bytes back from socket write.\n", theWrittenLen);
 #endif
                 if (theWriteOffset < theBufferSize)
                 {
 #if RAW_FILE_DEBUGGING
-                    qtss_printf("Flow controlled on socket. Waiting for write event.\n");
+                    printf("Flow controlled on socket. Waiting for write event.\n");
 #endif
                     isBlocked = true;
                     break;
@@ -329,7 +329,7 @@ QTSS_Error Preprocess(QTSS_StandardRTSP_Params* inParams)
                 if (theOffset == theFileLength)
                 {
 #if RAW_FILE_DEBUGGING
-                    qtss_printf("File transfer complete\n");
+                    printf("File transfer complete\n");
 #endif
                     return QTSS_NoErr;
                 }

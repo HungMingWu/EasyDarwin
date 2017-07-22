@@ -35,7 +35,7 @@
 
 #include <time.h>
 
-#include <stdio.h>      /* for qtss_printf */
+#include <stdio.h>      /* for printf */
 #include <stdlib.h>     /* for getloadavg & other useful stuff */
 
 #include "QTSSWebStatsModule.h"

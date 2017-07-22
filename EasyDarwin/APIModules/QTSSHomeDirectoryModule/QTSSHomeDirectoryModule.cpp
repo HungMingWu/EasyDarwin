@@ -292,12 +292,12 @@ void RewriteRootDir(QTSS_StandardRTSP_Params* inParams, StrPtrLen* inHomeDir)
 #if HOME_DIRECTORY_MODULE_DEBUGGING
 	char* newRequestPath = NULL;
 	theErr = QTSS_GetValueAsString (theRequest, qtssRTSPReqFilePath, 0, &newRequestPath);
-	qtss_printf("QTSSHomeDirectoryModule::RewriteRootDir qtssRTSPReqFilePath = %s\n", newRequestPath);
+	printf("QTSSHomeDirectoryModule::RewriteRootDir qtssRTSPReqFilePath = %s\n", newRequestPath);
 	QTSS_Delete(newRequestPath);
 
 	char* newRequestRootDir = NULL;
 	theErr = QTSS_GetValueAsString (theRequest, qtssRTSPReqRootDir, 0, &newRequestRootDir);
-	qtss_printf("QTSSHomeDirectoryModule::RewriteRootDir qtssRTSPReqRootDir = %s\n", newRequestRootDir);
+	printf("QTSSHomeDirectoryModule::RewriteRootDir qtssRTSPReqRootDir = %s\n", newRequestRootDir);
 	QTSS_Delete(newRequestRootDir);
 #endif
 

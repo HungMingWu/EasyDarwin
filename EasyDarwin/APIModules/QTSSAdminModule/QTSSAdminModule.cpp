@@ -44,7 +44,7 @@
 #endif
 
 #include <time.h>
-#include <stdio.h>      /* for qtss_printf */
+#include <stdio.h>      /* for printf */
 #include <stdlib.h>     /* for getloadavg & other useful stuff */
 #include "QTSSAdminModule.h"
 #include "OSArrayObjectDeleter.h"
@@ -171,50 +171,50 @@ static bool AcceptSession(QTSS_RTSPSessionObject inRTSPSession);
 #else
 void ShowQuery_DEBUG()
 {
-	qtss_printf("======REQUEST #%"   _U32BITARG_   "======\n", ++sRequestCount);
+	printf("======REQUEST #%"   _U32BITARG_   "======\n", ++sRequestCount);
 	StrPtrLen*  aStr;
 	aStr = sQueryPtr->GetURL();
-	qtss_printf("URL="); PRINT_STR(aStr);
+	printf("URL="); PRINT_STR(aStr);
 
 	aStr = sQueryPtr->GetQuery();
-	qtss_printf("Query="); PRINT_STR(aStr);
+	printf("Query="); PRINT_STR(aStr);
 
 	aStr = sQueryPtr->GetParameters();
-	qtss_printf("Parameters="); PRINT_STR(aStr);
+	printf("Parameters="); PRINT_STR(aStr);
 
 	aStr = sQueryPtr->GetCommand();
-	qtss_printf("Command="); PRINT_STR(aStr);
-	qtss_printf("CommandID=%" _S32BITARG_ " \n", sQueryPtr->GetCommandID());
+	printf("Command="); PRINT_STR(aStr);
+	printf("CommandID=%" _S32BITARG_ " \n", sQueryPtr->GetCommandID());
 	aStr = sQueryPtr->GetValue();
-	qtss_printf("Value="); PRINT_STR(aStr);
+	printf("Value="); PRINT_STR(aStr);
 	aStr = sQueryPtr->GetType();
-	qtss_printf("Type="); PRINT_STR(aStr);
+	printf("Type="); PRINT_STR(aStr);
 	aStr = sQueryPtr->GetAccess();
-	qtss_printf("Access="); PRINT_STR(aStr);
+	printf("Access="); PRINT_STR(aStr);
 }
 
 void APITests_DEBUG()
 {
 	if (0)
 	{
-		qtss_printf("QTSSAdminModule start tests \n");
+		printf("QTSSAdminModule start tests \n");
 
 		if (0)
 		{
-			qtss_printf("admin called locked \n");
+			printf("admin called locked \n");
 			const int ksleeptime = 15;
-			qtss_printf("sleeping for %d seconds \n", ksleeptime);
+			printf("sleeping for %d seconds \n", ksleeptime);
 			sleep(ksleeptime);
-			qtss_printf("done sleeping \n");
-			qtss_printf("QTSS_GlobalUnLock \n");
+			printf("done sleeping \n");
+			printf("QTSS_GlobalUnLock \n");
 			(void)QTSS_GlobalUnLock();
-			qtss_printf("again sleeping for %d seconds \n", ksleeptime);
+			printf("again sleeping for %d seconds \n", ksleeptime);
 			sleep(ksleeptime);
 		}
 
 		if (0)
 		{
-			qtss_printf(" GET VALUE PTR TEST \n");
+			printf(" GET VALUE PTR TEST \n");
 
 			QTSS_Object *sessionsPtr = NULL;
 			uint32_t      paramLen = sizeof(sessionsPtr);
@@ -223,13 +223,13 @@ void APITests_DEBUG()
 
 			err = QTSS_GetNumValues(sServer, qtssSvrClientSessions, &numValues);
 			err = QTSS_GetValuePtr(sServer, qtssSvrClientSessions, 0, (void**)&sessionsPtr, &paramLen);
-			qtss_printf("Admin Module Num Sessions = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ " err = %" _S32BITARG_ " paramLen =%"   _U32BITARG_   "\n", numValues, (int32_t)*sessionsPtr, err, paramLen);
+			printf("Admin Module Num Sessions = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ " err = %" _S32BITARG_ " paramLen =%"   _U32BITARG_   "\n", numValues, (int32_t)*sessionsPtr, err, paramLen);
 
 			uint32_t      numAttr = 0;
 			if (sessionsPtr)
 			{
 				err = QTSS_GetNumAttributes(*sessionsPtr, &numAttr);
-				qtss_printf("Admin Module Num attributes = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ "  err = %" _S32BITARG_ "\n", numAttr, (int32_t)*sessionsPtr, err);
+				printf("Admin Module Num attributes = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ "  err = %" _S32BITARG_ "\n", numAttr, (int32_t)*sessionsPtr, err);
 
 				QTSS_Object theAttributeInfo;
 				char nameBuff[128];
@@ -240,14 +240,14 @@ void APITests_DEBUG()
 					nameBuff[0] = 0; len = 127;
 					err = QTSS_GetValue(theAttributeInfo, qtssAttrName, 0, nameBuff, &len);
 					nameBuff[len] = 0;
-					qtss_printf("found %s \n", nameBuff);
+					printf("found %s \n", nameBuff);
 				}
 			}
 		}
 
 		if (0)
 		{
-			qtss_printf(" GET VALUE TEST \n");
+			printf(" GET VALUE TEST \n");
 
 			QTSS_Object sessions = NULL;
 			uint32_t      paramLen = sizeof(sessions);
@@ -256,13 +256,13 @@ void APITests_DEBUG()
 
 			err = QTSS_GetNumValues(sServer, qtssSvrClientSessions, &numValues);
 			err = QTSS_GetValue(sServer, qtssSvrClientSessions, 0, (void*)&sessions, &paramLen);
-			qtss_printf("Admin Module Num Sessions = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ " err = %" _S32BITARG_ " paramLen = %"   _U32BITARG_   "\n", numValues, (int32_t)sessions, err, paramLen);
+			printf("Admin Module Num Sessions = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ " err = %" _S32BITARG_ " paramLen = %"   _U32BITARG_   "\n", numValues, (int32_t)sessions, err, paramLen);
 
 			if (sessions)
 			{
 				uint32_t      numAttr = 0;
 				err = QTSS_GetNumAttributes(sessions, &numAttr);
-				qtss_printf("Admin Module Num attributes = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ "  err = %" _S32BITARG_ "\n", numAttr, (int32_t)sessions, err);
+				printf("Admin Module Num attributes = %"   _U32BITARG_   " sessions[0] = %" _S32BITARG_ "  err = %" _S32BITARG_ "\n", numAttr, (int32_t)sessions, err);
 
 				QTSS_Object theAttributeInfo;
 				char nameBuff[128];
@@ -273,7 +273,7 @@ void APITests_DEBUG()
 					nameBuff[0] = 0; len = 127;
 					err = QTSS_GetValue(theAttributeInfo, qtssAttrName, 0, nameBuff, &len);
 					nameBuff[len] = 0;
-					qtss_printf("found %s \n", nameBuff);
+					printf("found %s \n", nameBuff);
 				}
 			}
 		}
@@ -281,14 +281,14 @@ void APITests_DEBUG()
 
 		if (0)
 		{
-			qtss_printf("----------------- Start test ----------------- \n");
-			qtss_printf(" GET indexed pref TEST \n");
+			printf("----------------- Start test ----------------- \n");
+			printf(" GET indexed pref TEST \n");
 
 			QTSS_Error  err = 0;
 
 			uint32_t      numAttr = 1;
 			err = QTSS_GetNumAttributes(sAdminPrefs, &numAttr);
-			qtss_printf("Admin Module Num preference attributes = %"   _U32BITARG_   " err = %" _S32BITARG_ "\n", numAttr, err);
+			printf("Admin Module Num preference attributes = %"   _U32BITARG_   " err = %" _S32BITARG_ "\n", numAttr, err);
 
 			QTSS_Object theAttributeInfo;
 			char valueBuff[512];
@@ -296,7 +296,7 @@ void APITests_DEBUG()
 			QTSS_AttributeID theID;
 			uint32_t len = 127;
 			uint32_t i = 0;
-			qtss_printf("first pass over preferences\n");
+			printf("first pass over preferences\n");
 			for (i = 0; i < numAttr; i++)
 			{
 				err = QTSS_GetAttrInfoByIndex(sAdminPrefs, i, &theAttributeInfo);
@@ -306,13 +306,13 @@ void APITests_DEBUG()
 
 				theID = qtssIllegalAttrID; len = sizeof(theID);
 				err = QTSS_GetValue(theAttributeInfo, qtssAttrID, 0, &theID, &len);
-				qtss_printf("found preference=%s \n", nameBuff);
+				printf("found preference=%s \n", nameBuff);
 			}
 			valueBuff[0] = 0; len = 512;
 			err = QTSS_GetValue(sAdminPrefs, theID, 0, valueBuff, &len); valueBuff[len] = 0;
-			qtss_printf("Admin Module QTSS_GetValue name = %s id = %" _S32BITARG_ " value=%s err = %" _S32BITARG_ "\n", nameBuff, theID, valueBuff, err);
+			printf("Admin Module QTSS_GetValue name = %s id = %" _S32BITARG_ " value=%s err = %" _S32BITARG_ "\n", nameBuff, theID, valueBuff, err);
 			err = QTSS_SetValue(sAdminPrefs, theID, 0, valueBuff, len);
-			qtss_printf("Admin Module QTSS_SetValue name = %s id = %" _S32BITARG_ " value=%s err = %" _S32BITARG_ "\n", nameBuff, theID, valueBuff, err);
+			printf("Admin Module QTSS_SetValue name = %s id = %" _S32BITARG_ " value=%s err = %" _S32BITARG_ "\n", nameBuff, theID, valueBuff, err);
 
 			{   QTSS_ServiceID id;
 			(void)QTSS_IDForService(QTSS_REREAD_PREFS_SERVICE, &id);
@@ -321,11 +321,11 @@ void APITests_DEBUG()
 
 			valueBuff[0] = 0; len = 512;
 			err = QTSS_GetValue(sAdminPrefs, theID, 0, valueBuff, &len); valueBuff[len] = 0;
-			qtss_printf("Admin Module QTSS_GetValue name = %s id = %" _S32BITARG_ " value=%s err = %" _S32BITARG_ "\n", nameBuff, theID, valueBuff, err);
+			printf("Admin Module QTSS_GetValue name = %s id = %" _S32BITARG_ " value=%s err = %" _S32BITARG_ "\n", nameBuff, theID, valueBuff, err);
 			err = QTSS_SetValue(sAdminPrefs, theID, 0, valueBuff, len);
-			qtss_printf("Admin Module QTSS_SetValue name = %s id = %" _S32BITARG_ " value=%s err = %" _S32BITARG_ "\n", nameBuff, theID, valueBuff, err);
+			printf("Admin Module QTSS_SetValue name = %s id = %" _S32BITARG_ " value=%s err = %" _S32BITARG_ "\n", nameBuff, theID, valueBuff, err);
 
-			qtss_printf("second pass over preferences\n");
+			printf("second pass over preferences\n");
 			for (i = 0; i < numAttr; i++)
 			{
 				err = QTSS_GetAttrInfoByIndex(sAdminPrefs, i, &theAttributeInfo);
@@ -335,9 +335,9 @@ void APITests_DEBUG()
 
 				theID = qtssIllegalAttrID; len = sizeof(theID);
 				err = QTSS_GetValue(theAttributeInfo, qtssAttrID, 0, &theID, &len);
-				qtss_printf("found preference=%s \n", nameBuff);
+				printf("found preference=%s \n", nameBuff);
 			}
-			qtss_printf("----------------- Done test ----------------- \n");
+			printf("----------------- Done test ----------------- \n");
 		}
 
 	}
@@ -549,9 +549,9 @@ inline void ParseAuthNameAndPassword(StrPtrLen *codedStrPtr, StrPtrLen* namePtr,
 	namePtr->Ptr[namePtr->Len] = 0;
 	passwordPtr->Ptr[passwordPtr->Len] = 0;
 
-	//qtss_printf("decoded nameAndPassword="); PRINT_STR(&nameAndPassword); 
-	//qtss_printf("decoded name="); PRINT_STR(namePtr); 
-	//qtss_printf("decoded password="); PRINT_STR(passwordPtr); 
+	//printf("decoded nameAndPassword="); PRINT_STR(&nameAndPassword); 
+	//printf("decoded name="); PRINT_STR(namePtr); 
+	//printf("decoded password="); PRINT_STR(passwordPtr); 
 
 	return;
 };
@@ -706,7 +706,7 @@ bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen
 	OSCharArrayDeleter realmDeleter(realm);
 
 	if (err != QTSS_NoErr) {
-		qtss_printf("QTSSAdminModule::Authenticate: QTSS_Authorize failed\n");
+		printf("QTSSAdminModule::Authenticate: QTSS_Authorize failed\n");
 		return false; // Couldn't even call QTSS_Authorize...abandon!
 	}
 
@@ -787,7 +787,7 @@ bool StillFlushing(QTSS_Filter_Params* inParams, bool flushing)
 	if (flushing)
 	{
 		err = QTSS_Flush(inParams->inRTSPRequest);
-		//qtss_printf("Flushing session=%"   _U32BITARG_   " QTSS_Flush err =%" _S32BITARG_ "\n",sSessID,err); 
+		//printf("Flushing session=%"   _U32BITARG_   " QTSS_Flush err =%" _S32BITARG_ "\n",sSessID,err); 
 	}
 	if (err == QTSS_WouldBlock) // more to flush later
 	{
@@ -795,7 +795,7 @@ bool StillFlushing(QTSS_Filter_Params* inParams, bool flushing)
 		(void)QTSS_SetValue(inParams->inRTSPRequest, sFlushingID, 0, (void*)&sFlushing, sFlushingLen);
 		err = QTSS_RequestEvent(inParams->inRTSPRequest, QTSS_WriteableEvent);
 		KeepSession(inParams->inRTSPRequest, true);
-		//qtss_printf("Flushing session=%"   _U32BITARG_   " QTSS_RequestEvent err =%" _S32BITARG_ "\n",sSessID,err);
+		//printf("Flushing session=%"   _U32BITARG_   " QTSS_RequestEvent err =%" _S32BITARG_ "\n",sSessID,err);
 	}
 	else
 	{
@@ -806,7 +806,7 @@ bool StillFlushing(QTSS_Filter_Params* inParams, bool flushing)
 		if (flushing) // we were flushing so reset the LastRequestTime
 		{
 			sLastRequestTime = QTSS_Milliseconds();
-			//qtss_printf("Done Flushing session=%"   _U32BITARG_   "\n",sSessID);
+			//printf("Done Flushing session=%"   _U32BITARG_   "\n",sSessID);
 			return true;
 		}
 	}
@@ -857,15 +857,15 @@ inline bool InWaitInterval(QTSS_Filter_Params* inParams)
 	if (currentTime < nextExecuteTime)
 	{
 		int32_t waitTime = (int32_t)(nextExecuteTime - currentTime) + 1;
-		//qtss_printf("(currentTime < nextExecuteTime) sSessID = %"   _U32BITARG_   " waitTime =%" _S32BITARG_ " currentTime = %qd nextExecute = %qd interval=%"   _U32BITARG_   "\n",sSessID, waitTime, currentTime, nextExecuteTime,sRequestTimeIntervalMilli);
+		//printf("(currentTime < nextExecuteTime) sSessID = %"   _U32BITARG_   " waitTime =%" _S32BITARG_ " currentTime = %qd nextExecute = %qd interval=%"   _U32BITARG_   "\n",sSessID, waitTime, currentTime, nextExecuteTime,sRequestTimeIntervalMilli);
 		(void)QTSS_SetIdleTimer(waitTime);
 		KeepSession(inParams->inRTSPRequest, true);
 
-		//qtss_printf("-- call me again after %" _S32BITARG_ " millisecs session=%"   _U32BITARG_   " \n",waitTime,sSessID);
+		//printf("-- call me again after %" _S32BITARG_ " millisecs session=%"   _U32BITARG_   " \n",waitTime,sSessID);
 		return true;
 	}
 	sLastRequestTime = QTSS_Milliseconds();
-	//qtss_printf("handle sessID=%"   _U32BITARG_   " time=%qd \n",sSessID,currentTime);
+	//printf("handle sessID=%"   _U32BITARG_   " time=%qd \n",sSessID,currentTime);
 	return false;
 }
 
@@ -874,7 +874,7 @@ inline void GetQueryData(QTSS_RTSPRequestObject theRequest)
 	sAdminPtr = new AdminClass();
 	Assert(sAdminPtr != NULL);
 	if (sAdminPtr == NULL)
-	{   //qtss_printf ("new AdminClass() failed!! \n");
+	{   //printf ("new AdminClass() failed!! \n");
 		return;
 	}
 	if (sAdminPtr != NULL)
@@ -926,9 +926,9 @@ inline bool GetRequestFlushState(QTSS_Filter_Params* inParams)
 	{
 		paramLen = sizeof(result);
 		result = false;
-		//qtss_printf("no flush val so set to false session=%"   _U32BITARG_   " err =%" _S32BITARG_ "\n",sSessID, err);
+		//printf("no flush val so set to false session=%"   _U32BITARG_   " err =%" _S32BITARG_ "\n",sSessID, err);
 		err = QTSS_SetValue(inParams->inRTSPRequest, sFlushingID, 0, (void*)&result, paramLen);
-		//qtss_printf("QTSS_SetValue flush session=%"   _U32BITARG_   " err =%" _S32BITARG_ "\n",sSessID, err);
+		//printf("QTSS_SetValue flush session=%"   _U32BITARG_   " err =%" _S32BITARG_ "\n",sSessID, err);
 	}
 	return result;
 }
@@ -997,13 +997,13 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 		if (InWaitInterval(inParams))
 			return QTSS_NoErr;
 
-		//qtss_printf("New Request Wait for GlobalLock session=%"   _U32BITARG_   "\n",sSessID);
+		//printf("New Request Wait for GlobalLock session=%"   _U32BITARG_   "\n",sSessID);
 		(void)QTSS_RequestGlobalLock();
 		KeepSession(theRequest, true);
 		return QTSS_NoErr;
 	}
 
-	//qtss_printf("Handle request session=%"   _U32BITARG_   "\n",sSessID);
+	//printf("Handle request session=%"   _U32BITARG_   "\n",sSessID);
 	APITests_DEBUG();
 
 	if (sQueryPtr != NULL)

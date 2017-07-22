@@ -137,7 +137,7 @@ void InitHitCountFromFile()
     int i = 0;
     while ( (c = fscanf(hitfile, "%s %d", gHitcountArray[i].url, &gHitcountArray[i].hitcount)) == 2 ) 
     {
-        qtss_printf("%s %d\n", gHitcountArray[i].url, gHitcountArray[i].hitcount);
+        printf("%s %d\n", gHitcountArray[i].url, gHitcountArray[i].hitcount);
         i++;
     }
         
@@ -160,7 +160,7 @@ void WriteHitCountToFile()
 void CountHit(char* url)
 {
 #if HTTP_FILE_DEBUGGING
-            qtss_printf("Counting Hit for \"%s\"\n", url);   
+            printf("Counting Hit for \"%s\"\n", url);   
 #endif
 
     if ( url == NULL )
@@ -192,7 +192,7 @@ int HitCountCompare(const void * hitCount1, const void *hitCount2)
 QTSS_Error ClientSessionClosing(QTSS_ClientSessionClosing_Params* inParams)
 {
 #if HTTP_FILE_DEBUGGING
-    qtss_printf("ClientSessionClosing\n");
+    printf("ClientSessionClosing\n");
 #endif
     return CountRequest(NULL, inParams->inClientSession, NULL, &inParams->inReason);
 }
@@ -256,7 +256,7 @@ void GenerateHotHitSMIL(char* buffer)
     strcat(bufferCursor, templateCursor);
     
 #if HTTP_FILE_DEBUGGING
-            qtss_printf("smil generated:\n%s\n", buffer);    
+            printf("smil generated:\n%s\n", buffer);    
 #endif
 
 }
@@ -277,7 +277,7 @@ QTSS_Error QTSSDemoSMILModule_Main(void* inPrivateArgs)
 QTSS_Error QTSSDemoSMILDispatch(QTSS_Role inRole, QTSS_RoleParamPtr inParams)
 {
 #if HTTP_FILE_DEBUGGING
-    qtss_printf("QTSSDemoSMILDispatch\n");
+    printf("QTSSDemoSMILDispatch\n");
 #endif
 
     switch (inRole)
@@ -298,7 +298,7 @@ QTSS_Error QTSSDemoSMILDispatch(QTSS_Role inRole, QTSS_RoleParamPtr inParams)
 QTSS_Error Register(QTSS_Register_Params* inParams)
 {
 #if HTTP_FILE_DEBUGGING
-    qtss_printf("Register\n");
+    printf("Register\n");
 #endif
     // Do role & attribute setup
     (void)QTSS_AddRole(QTSS_Initialize_Role);
@@ -315,7 +315,7 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 QTSS_Error Initialize(QTSS_Initialize_Params* inParams)
 {
 #if HTTP_FILE_DEBUGGING
-    qtss_printf("Initialize\n");
+    printf("Initialize\n");
 #endif
     // Setup module utils
     QTSSModuleUtils::Initialize(inParams->inMessages, inParams->inServer, inParams->inErrorLogStream);
@@ -332,7 +332,7 @@ QTSS_Error Initialize(QTSS_Initialize_Params* inParams)
 QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 {
 #if HTTP_FILE_DEBUGGING
-    qtss_printf("FilterRequest\n");
+    printf("FilterRequest\n");
 #endif
 
     static Bool16 sFalse = false;
@@ -383,7 +383,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
     (void)QTSS_SetValue(theRequest, qtssRTSPReqRespKeepAlive, 0, &sFalse, sizeof(sFalse));
     
 #if HTTP_FILE_DEBUGGING
-    qtss_printf("Creating a smil file\n");   
+    printf("Creating a smil file\n");   
 #endif
     // Create a ref movie buffer for the single file. It is of the form:
     //  rtsptext\r
@@ -410,7 +410,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
     QTSS_Write(theRequest, theFileBuffer, strlen(theFileBuffer), NULL, 0);
     
 #if HTTP_FILE_DEBUGGING
-    qtss_printf("Wrote the smil file to the request stream. Successful!\n"); 
+    printf("Wrote the smil file to the request stream. Successful!\n"); 
 #endif
 
     return QTSS_NoErr;

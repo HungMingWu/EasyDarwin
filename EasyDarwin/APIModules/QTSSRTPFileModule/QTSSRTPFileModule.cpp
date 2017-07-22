@@ -729,7 +729,7 @@ QTSS_Error SendPackets(QTSS_RTPSendPackets_Params* inParams)
             UInt32* theTimestampP = (UInt32*)(*theFile)->fNextPacket;
             UInt32* theTrackID = NULL;
             (void)QTSS_GetValuePtr((*theFile)->fStream, qtssRTPStrTrackID, 0, (void**)&theTrackID, &theLen);
-            qtss_printf("Got packet. Seq num: %d. Timestamp: %d. TrackID: %d. Transmittime: %f\n",theSeqNumPtr[1], theTimestampP[1], *theTrackID, theTransmitTime);
+            printf("Got packet. Seq num: %d. Timestamp: %d. TrackID: %d. Transmittime: %f\n",theSeqNumPtr[1], theTimestampP[1], *theTrackID, theTransmitTime);
 #endif
         }
         
@@ -737,7 +737,7 @@ QTSS_Error SendPackets(QTSS_RTPSendPackets_Params* inParams)
         if ((*theFile)->fPacketStruct.packetData == NULL)
         {
 #if RTP_FILE_MODULE_DEBUGGING >= 8
-            qtss_printf("done w all packets\n");
+            printf("done w all packets\n");
 #endif
             inParams->outNextPacketTime = qtssDontCallSendPacketsAgain;
             return QTSS_NoErr;

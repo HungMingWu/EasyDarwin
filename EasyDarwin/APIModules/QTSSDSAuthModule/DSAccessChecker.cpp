@@ -68,7 +68,7 @@
 #include "QTAccessFile.h"
 
 #define DEBUG_DSACCESS 0
-#define debug_printf if (DEBUG_DSACCESS) ::qtss_printf
+#define debug_printf if (DEBUG_DSACCESS) ::printf
 
 #include <AvailabilityMacros.h>
 

@@ -180,7 +180,7 @@ UInt32 GetPathParentDestructive(const StrPtrLen *thePathPtr, StrPtrLen *resultPa
             memcpy (resultPathPtr->Ptr,thePath.Ptr, thePath.Len);
             resultPathPtr->Len = thePath.Len;
             resultPathPtr->Ptr[thePath.Len] = 0;
-            //qtss_printf("new dir =%s \n",resultPathPtr->Ptr);
+            //printf("new dir =%s \n",resultPathPtr->Ptr);
         }
             
     }
@@ -236,7 +236,7 @@ Bool16 CheckFileAccess(struct passwd    *passwdStructPtr, StrPtrLen */*nameStrPt
             
         if (0 != statResult)
         {   
-            //qtss_printf("no access to file =%s\n",pathBuff);
+            //printf("no access to file =%s\n",pathBuff);
             result = true; // let access error be handled by server
             break;
         }   
@@ -245,12 +245,12 @@ Bool16 CheckFileAccess(struct passwd    *passwdStructPtr, StrPtrLen */*nameStrPt
         if ( statData.st_uid == (UInt16) passwdStructPtr->pw_uid) // check if owner
         {
             if  (  (statData.st_mode & 0400 ) != 0 ) // has owner read access
-            {   //qtss_printf("owner access to file =%s\n",pathBuff); 
+            {   //printf("owner access to file =%s\n",pathBuff); 
                 result = true;
                 break;
             }
             else
-            {   //qtss_printf("no owner access to file =%s\n",pathBuff); 
+            {   //printf("no owner access to file =%s\n",pathBuff); 
                 result = false;
                 break;
             
@@ -261,12 +261,12 @@ Bool16 CheckFileAccess(struct passwd    *passwdStructPtr, StrPtrLen */*nameStrPt
         if (statData.st_gid == (UInt16) passwdStructPtr->pw_gid)  // check if user's default group owns
         {
             if  ( (statData.st_mode & 0040) != 0 ) // has group read access
-            {   //qtss_printf("user default group has access to file =%s\n",pathBuff); 
+            {   //printf("user default group has access to file =%s\n",pathBuff); 
                 result = true;
                 break;
             }
             else
-            {   //qtss_printf("user default group has no access to file =%s\n",pathBuff); 
+            {   //printf("user default group has no access to file =%s\n",pathBuff); 
                 result = false;
                 break;
             }
@@ -276,12 +276,12 @@ Bool16 CheckFileAccess(struct passwd    *passwdStructPtr, StrPtrLen */*nameStrPt
         if (IsUserMember(passwdStructPtr->pw_uid, statData.st_gid)) // check if user in group
         {
             if  ( (statData.st_mode & 0040) != 0 ) // has group read access
-            {   //qtss_printf("user member group has access to file =%s\n",pathBuff); 
+            {   //printf("user member group has access to file =%s\n",pathBuff); 
                 result = true;
                 break;
             }
             else
-            {   //qtss_printf("user member group has no access to file =%s\n",pathBuff); 
+            {   //printf("user member group has no access to file =%s\n",pathBuff); 
                 result = false;
                 break;
             }
@@ -290,13 +290,13 @@ Bool16 CheckFileAccess(struct passwd    *passwdStructPtr, StrPtrLen */*nameStrPt
         
         if  ( (statData.st_mode & 0004) != 0 ) // has world read access
         {       
-            //qtss_printf("world has access to file =%s\n",pathBuff); 
+            //printf("world has access to file =%s\n",pathBuff); 
             result = true;
             break;
             
         }
         
-        //qtss_printf("world has no read access to file =%s\n",pathBuff); 
+        //printf("world has no read access to file =%s\n",pathBuff); 
         result = false;
                         
     } while (false);
@@ -304,11 +304,11 @@ Bool16 CheckFileAccess(struct passwd    *passwdStructPtr, StrPtrLen */*nameStrPt
     
     if (!result) 
     {   
-        //qtss_printf("CheckFileAccess failed for %s on file %s\n",nameStrPtr->Ptr, pathBuff);
+        //printf("CheckFileAccess failed for %s on file %s\n",nameStrPtr->Ptr, pathBuff);
     }
     else
     {
-        //qtss_printf("success on file %s for %s\n",pathBuff, nameStrPtr->Ptr);
+        //printf("success on file %s for %s\n",pathBuff, nameStrPtr->Ptr);
     }
     
     return result;
@@ -353,7 +353,7 @@ Bool16 CheckDirAccess(struct passwd *passwdStructPtr, StrPtrLen */*nameStrPtr*/,
                     
                 if (0 != statResult)
                 {   
-                    //qtss_printf("no access to path =%s\n",searchBuffer);
+                    //printf("no access to path =%s\n",searchBuffer);
                     result = true; // let the error be handled in the server
                     break; //  allow
                 }   
@@ -363,12 +363,12 @@ Bool16 CheckDirAccess(struct passwd *passwdStructPtr, StrPtrLen */*nameStrPtr*/,
                 if ( statData.st_uid == (UInt16) passwdStructPtr->pw_uid) // check if owner
                 {
                     if  (  (statData.st_mode & 0100 ) != 0 ) // has owner search access
-                    {   //qtss_printf("owner search access to directory =%s\n",pathBuff); 
+                    {   //printf("owner search access to directory =%s\n",pathBuff); 
                         result = true;
                         break;
                     }
                     else
-                    {   //qtss_printf("no owner search access to directory =%s\n",pathBuff); 
+                    {   //printf("no owner search access to directory =%s\n",pathBuff); 
                         result = false;
                         break;
                     
@@ -379,12 +379,12 @@ Bool16 CheckDirAccess(struct passwd *passwdStructPtr, StrPtrLen */*nameStrPtr*/,
                 if (statData.st_gid == (UInt16) passwdStructPtr->pw_gid)  // check if user's default group owns
                 {
                     if  ( (statData.st_mode & 0010) != 0 ) // has group search access
-                    {   //qtss_printf("user default group has search access to directory =%s\n",pathBuff); 
+                    {   //printf("user default group has search access to directory =%s\n",pathBuff); 
                         result = true;
                         break;
                     }
                     else
-                    {   //qtss_printf("user default group has no search access to directory =%s\n",pathBuff); 
+                    {   //printf("user default group has no search access to directory =%s\n",pathBuff); 
                         result = false;
                         break;
                     }
@@ -394,12 +394,12 @@ Bool16 CheckDirAccess(struct passwd *passwdStructPtr, StrPtrLen */*nameStrPtr*/,
                 if (IsUserMember(passwdStructPtr->pw_uid, statData.st_gid)) // check if user in group
                 {
                     if  ( (statData.st_mode & 0010) != 0 ) // has group search access
-                    {   //qtss_printf("user member group has search access to directory =%s\n",pathBuff); 
+                    {   //printf("user member group has search access to directory =%s\n",pathBuff); 
                         result = true;
                         break;
                     }
                     else
-                    {   //qtss_printf("user member group has no search access to directory =%s\n",pathBuff); 
+                    {   //printf("user member group has no search access to directory =%s\n",pathBuff); 
                         result = false;
                         break;
                     }
@@ -408,13 +408,13 @@ Bool16 CheckDirAccess(struct passwd *passwdStructPtr, StrPtrLen */*nameStrPtr*/,
                 
                 if  ( (statData.st_mode & 0001) != 0 ) // has world search access
                 {       
-                    //qtss_printf("world has search access to directory =%s\n",pathBuff); 
+                    //printf("world has search access to directory =%s\n",pathBuff); 
                     result = true;
                     break;
                     
                 }
                 
-                //qtss_printf("world has no search access to directory =%s\n",pathBuff); 
+                //printf("world has no search access to directory =%s\n",pathBuff); 
                 result = false;
 
                                 
@@ -427,11 +427,11 @@ Bool16 CheckDirAccess(struct passwd *passwdStructPtr, StrPtrLen */*nameStrPtr*/,
     
     if (!result) 
     {   
-        //qtss_printf("CheckDirAccess failed for %s on file %s\n",nameStrPtr->Ptr, searchBuffer);
+        //printf("CheckDirAccess failed for %s on file %s\n",nameStrPtr->Ptr, searchBuffer);
     }
     else
     {
-        //qtss_printf("success on file %s for %s\n",searchBuffer, nameStrPtr->Ptr);
+        //printf("success on file %s for %s\n",searchBuffer, nameStrPtr->Ptr);
     }
     
     return result;
@@ -463,18 +463,18 @@ Bool16 CheckWorldFileAccess(char* pathBuff)
                             
     do // once only check for the current entity
     {
-        //qtss_printf("stat on %s \n",pathBuff);
+        //printf("stat on %s \n",pathBuff);
         if (0 != stat(pathBuff,&statData))
         {   
-            //qtss_printf("no access to path =%s\n",pathBuff);
+            //printf("no access to path =%s\n",pathBuff);
             result = true; // let the server deal with this one
             break;
         }           
             
-        //qtss_printf("statData.st_mode = %x \n",statData.st_mode);  
+        //printf("statData.st_mode = %x \n",statData.st_mode);  
         if (0 == (statData.st_mode & 0004) ) // world read access
         {   
-            //qtss_printf("no world access to path =%s\n",pathBuff);
+            //printf("no world access to path =%s\n",pathBuff);
             break;
         }
 
@@ -506,18 +506,18 @@ Bool16 CheckWorldDirAccess(char* pathBuff)
                         
             do // once only check for the current entity
             {
-                //qtss_printf("stat on %s \n",searchBuffer);
+                //printf("stat on %s \n",searchBuffer);
                 if (0 != stat(searchBuffer,&statData))
                 {   
-                    //qtss_printf("no world access to path =%s\n",searchBuffer);
+                    //printf("no world access to path =%s\n",searchBuffer);
                     result = true; // let the server deal with this one
                     break;
                 }           
                     
-                //qtss_printf("statData.st_mode = %x \n",statData.st_mode);  
+                //printf("statData.st_mode = %x \n",statData.st_mode);  
                 if (0 == (statData.st_mode & 0001) )
                 {   
-                    //qtss_printf("no world access to path =%s\n",searchBuffer);
+                    //printf("no world access to path =%s\n",searchBuffer);
                     result = false;
                     break;
                 }
@@ -551,30 +551,30 @@ Bool16 QTSSAuthorize(QTSS_StandardRTSP_Params* inParams, char* pathBuff)
     {
 
         theErr = QTSS_GetValue (inParams->inRTSPRequest,qtssRTSPReqUserName,0, (void *) nameStr.Ptr, &nameStr.Len);
-        //qtss_printf("GetValue qtssRTSPReqUserName err =%"_S32BITARG_" \n",theErr);
+        //printf("GetValue qtssRTSPReqUserName err =%"_S32BITARG_" \n",theErr);
         
         if ( (theErr != QTSS_NoErr) || (nameStr.Len == 0) || (nameStr.Ptr == NULL) || (*nameStr.Ptr == '\0'))
         {
-            //qtss_printf ("no user name\n");
+            //printf ("no user name\n");
             noUserName = true;
         }
             
-        //qtss_printf("RTSPRequest dictionary name =%s  len = %"_S32BITARG_"\n",nameStr.Ptr, nameStr.Len);
+        //printf("RTSPRequest dictionary name =%s  len = %"_S32BITARG_"\n",nameStr.Ptr, nameStr.Len);
 
         theErr = QTSS_GetValue (inParams->inRTSPRequest,qtssRTSPReqUserPassword,0, (void *) passwordStr.Ptr, &passwordStr.Len);
-        //qtss_printf("GetValue qtssRTSPReqUserName err =%"_S32BITARG_" \n",theErr);
+        //printf("GetValue qtssRTSPReqUserName err =%"_S32BITARG_" \n",theErr);
         if ( (theErr != QTSS_NoErr) || (passwordStr.Len == 0) || (passwordStr.Ptr == NULL) || (*passwordStr.Ptr == '\0'))
         {
-            //qtss_printf ("no Password\n");
+            //printf ("no Password\n");
             noPassword = true;
         }
-        //qtss_printf("RTSPRequest dictionary password =%s len = %"_S32BITARG_" \n",passwordStr.Ptr, passwordStr.Len);
+        //printf("RTSPRequest dictionary password =%s len = %"_S32BITARG_" \n",passwordStr.Ptr, passwordStr.Len);
 
         if (noUserName && noPassword) isSpecialGuest = true;
         
         if (isSpecialGuest) // no name and no password means guest
         {
-            //qtss_printf ("User is guest check for access\n");
+            //printf ("User is guest check for access\n");
             
             result = CheckWorldDirAccess(pathBuff);
             if (true == result)
@@ -584,7 +584,7 @@ Bool16 QTSSAuthorize(QTSS_StandardRTSP_Params* inParams, char* pathBuff)
         }
         
         if (0 == strcasecmp(nameStr.Ptr, sRootUserPtr) )
-        {   //qtss_printf("user is root no root access to file =%s\n",pathBuff); // must log
+        {   //printf("user is root no root access to file =%s\n",pathBuff); // must log
             result = false; // don't allow
             break;
         }
@@ -592,14 +592,14 @@ Bool16 QTSSAuthorize(QTSS_StandardRTSP_Params* inParams, char* pathBuff)
         struct passwd   *passwdStructPtr = getpwnam(nameStr.Ptr);
         if (NULL == passwdStructPtr) 
         {   
-            //qtss_printf("failed to find name =%s\n",passwordStr.Ptr);
+            //printf("failed to find name =%s\n",passwordStr.Ptr);
             break;
         }
         
         char *theCryptedPassword = crypt(passwordStr.Ptr, passwdStructPtr->pw_passwd);
         if ( 0 != strcmp(passwdStructPtr->pw_passwd, theCryptedPassword ) )
         {   
-            //qtss_printf("failed to match name to password =%s\n",passwordStr.Ptr);
+            //printf("failed to match name to password =%s\n",passwordStr.Ptr);
             break;
         }
         
@@ -609,13 +609,13 @@ Bool16 QTSSAuthorize(QTSS_StandardRTSP_Params* inParams, char* pathBuff)
         result = CheckFileAccess(passwdStructPtr, &nameStr, pathBuff);
         if (!result) break;
 
-        //qtss_printf("QTSSAuthorize: user %s is authorized for %s\n",nameStr.Ptr,pathBuff);
+        //printf("QTSSAuthorize: user %s is authorized for %s\n",nameStr.Ptr,pathBuff);
         
         
     } while (false);
     
     if (!result) 
-    {   //qtss_printf("QTSSAuthorize: user %s is un authorized for %s\n",nameStr.Ptr,pathBuff);
+    {   //printf("QTSSAuthorize: user %s is un authorized for %s\n",nameStr.Ptr,pathBuff);
     }
     
     return result;
@@ -629,24 +629,24 @@ Bool16 FileOrSDPFileExists(char *pathBuff, UInt32 *pathLen, const UInt32 maxLen,
     {
         if (FileExists(pathBuff)) 
         {   
-            //qtss_printf("file exists =%s\n",pathBuff);
+            //printf("file exists =%s\n",pathBuff);
             result = true;
             break; // file is there
         }
         
         if ( (*pathLen + sSDPSuffix.Len + 1) >= maxLen)
         {   
-            //qtss_printf("buffer too small for path\n");
+            //printf("buffer too small for path\n");
             if (theErrPtr) *theErrPtr = ENAMETOOLONG; // don't allow request to succed we can't authorize
             break;
         }
         
         strcat(pathBuff, sSDPSuffix.Ptr);
-        //qtss_printf("sdp path =%s\n",pathBuff);
+        //printf("sdp path =%s\n",pathBuff);
         
         if (FileExists(pathBuff)) 
         {
-            //qtss_printf("sdp file exists =%s\n",pathBuff);
+            //printf("sdp file exists =%s\n",pathBuff);
             result = true; 
             break; // sdp file is there     
         }
@@ -692,14 +692,14 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_StandardRTSP_Params* inParams)
         theErr = QTSS_GetValue (theRTSPRequest,qtssRTSPReqLocalPath,0, (void *) pathBuff, &pathLen);
         if ( (theErr != QTSS_NoErr) || (0 == pathLen) )
         {   
-            //qtss_printf("path not found in request\n");
+            //printf("path not found in request\n");
             break; // Bail on the request. The Server will handle the error
         }
 
         Bool16 fileOk = FileOrSDPFileExists(pathBuff, &pathLen, kMaxPathLen, &theErr);
         if (!fileOk) 
         {   
-            //qtss_printf("file not found\n");
+            //printf("file not found\n");
             break; // Do nothing. The Server will handle the error
         }
 
@@ -707,7 +707,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_StandardRTSP_Params* inParams)
         Bool16 allowRequest = QTSSAuthorize(inParams, pathBuff);
         if (allowRequest) 
         {   
-            //qtss_printf("user is authorized\n");
+            //printf("user is authorized\n");
             break; // Do nothing. Allow the request (the default behavior)
         }
             

@@ -62,7 +62,7 @@ extern "C"
 const UInt32 kBuffLen = 512;
 #define MODPREFIX_ "modDSAuth_"
 #define AUTHDEBUG 0
-#define debug_printf if (AUTHDEBUG) qtss_printf
+#define debug_printf if (AUTHDEBUG) printf
 
 
 static QTSS_ModulePrefsObject   sPrefs = NULL;

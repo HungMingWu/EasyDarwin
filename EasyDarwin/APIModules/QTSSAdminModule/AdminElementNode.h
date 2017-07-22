@@ -38,7 +38,7 @@
 #include <unistd.h>     /* for getopt() et al */
 #endif
 
-#include <stdio.h>      /* for //qtss_printf */
+#include <stdio.h>      /* for //printf */
 #include "OSArrayObjectDeleter.h"
 #include "StrPtrLen.h"
 #include "OSRef.h"
@@ -132,7 +132,7 @@ public:
 	void    GetMyAccess(StrPtrLen* str) { Assert(str); if (str != NULL) str->Set(fSelfPtr->fAccessData, fSelfPtr->fAccessLen); };
 	QTSS_Object GetMySource() {
 		Assert(fSelfPtr != NULL);
-		//qtss_printf("GetMySource fSelfPtr->fAPISource = %"_U32BITARG_" \n", fSelfPtr->fAPISource); 
+		//printf("GetMySource fSelfPtr->fAPISource = %"_U32BITARG_" \n", fSelfPtr->fAPISource); 
 		return fSelfPtr->fAPISource;
 	};
 
@@ -200,7 +200,7 @@ public:
 		if (source != NULL)
 			return source;
 		else
-		{   //qtss_printf("GetSource return fDataSource = %"_U32BITARG_" \n",fDataSource);
+		{   //printf("GetSource return fDataSource = %"_U32BITARG_" \n",fDataSource);
 			return fDataSource;
 		}
 	};

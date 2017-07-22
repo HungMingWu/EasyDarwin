@@ -383,7 +383,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
                                             // then it's on-the-fly ref movie generation
                 {                           // for a single movie file
 #if HTTP_FILE_DEBUGGING
-                    qtss_printf("Request for on-the-fly generated ref movie of a hinted QuickTime file\n");
+                    printf("Request for on-the-fly generated ref movie of a hinted QuickTime file\n");
 #endif 
                     type = transferRefMovieFile;
                     delete [] thePath;
@@ -400,7 +400,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
             else                    // If it's a directory in the movie folder, then it's on-the-fly ref movie generation
             {                       // for a directory of movie files
 #if HTTP_FILE_DEBUGGING
-                qtss_printf("Request for on-the-fly generated ref movie for a directory of hinted QuickTime files\n");
+                printf("Request for on-the-fly generated ref movie for a directory of hinted QuickTime files\n");
 #endif 
                 type = transferRefMovieFolder;                          
             }    
@@ -428,7 +428,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
             if( (theErr == QTSS_NoErr) )    // If the file is in the http folder
             {                               // it is a  request for progressive download
 #if HTTP_FILE_DEBUGGING
-                qtss_printf("Request for the HTTP transfer of a file\n");
+                printf("Request for the HTTP transfer of a file\n");
 #endif 
                 type = transferHttpFile;
                 delete [] thePath;
@@ -440,7 +440,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
                 delete [] thePath;
                 type = 0;
 #if HTTP_FILE_DEBUGGING
-                qtss_printf("Request file not found by this module\n");
+                printf("Request file not found by this module\n");
 #endif 
                 return QTSS_NoErr;  
             }
@@ -452,7 +452,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
         if ( type == 0 )
         {
 #if HTTP_FILE_DEBUGGING
-            qtss_printf("Request file not found by this module\n");
+            printf("Request file not found by this module\n");
 #endif
             return QTSS_NoErr;
         }
@@ -528,8 +528,8 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
             case transferRefMovieFolder:
             {   
 #if HTTP_FILE_DEBUGGING
-                                            qtss_printf("Creating a ref movie for the folder\n");
-                                            qtss_printf("filenames:\n");     
+                                            printf("Creating a ref movie for the folder\n");
+                                            printf("filenames:\n");     
 #endif          
                                             UInt32 fileCount = 0;
                                             struct dirent* entry;
@@ -541,7 +541,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
                                                 
                                             }
 #if HTTP_FILE_DEBUGGING
-                                            qtss_printf("Number of .mov files in the directory: %"_U32BITARG_"\n", fileCount);
+                                            printf("Number of .mov files in the directory: %"_U32BITARG_"\n", fileCount);
 #endif          
                                             // Go back to the beginning of the directory
                                             ::rewinddir(theDirectory);
@@ -558,7 +558,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
                                                     fileNames[fileCount] = fileName;
                                                     fileCount ++;
 #if HTTP_FILE_DEBUGGING
-                                                    qtss_printf("%"_U32BITARG_" : %s\n", fileCount, fileName);
+                                                    printf("%"_U32BITARG_" : %s\n", fileCount, fileName);
 #endif          
                                                 }
                                             }
@@ -600,9 +600,9 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
                                                 //Find the approximate bit rate for each .mov file in the directory
                                                 bitRate = GetBitRate(filePath);
 #if HTTP_FILE_DEBUGGING
-                                                qtss_printf("%"_U32BITARG_"\t: Path = %s\n", arrayIndex + 1, filePath);
-                                                qtss_printf("Url = %s\n", url);
-                                                qtss_printf("Rate = %"_U32BITARG_"\n", bitRate); 
+                                                printf("%"_U32BITARG_"\t: Path = %s\n", arrayIndex + 1, filePath);
+                                                printf("Url = %s\n", url);
+                                                printf("Rate = %"_U32BITARG_"\n", bitRate); 
 #endif
                                                 if ( bitRate != 0 )
                                                 {
@@ -681,7 +681,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
             case transferRefMovieFile:      
             {
 #if HTTP_FILE_DEBUGGING
-                                            qtss_printf("Creating a ref movie for the hinted file\n");   
+                                            printf("Creating a ref movie for the hinted file\n");   
 #endif
                                             // Create a ref movie buffer for the single file. It is of the form:
                                             //  rtsptext\r
@@ -727,7 +727,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
                                             
                                             (void)QTSS_CloseFileObject(theFile);
 #if HTTP_FILE_DEBUGGING
-                                            qtss_printf("Wrote the ref movie to the request stream. Successful!\n"); 
+                                            printf("Wrote the ref movie to the request stream. Successful!\n"); 
 #endif
                                             // Store the content length string for the purposes of logging
                                             // Must be done here as we return a response to the client after this.
@@ -744,7 +744,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
             default:
             {                               // Shouldn't ever happen
 #if HTTP_FILE_DEBUGGING
-                                            qtss_printf("Illegal transfer type: Not a ref movie file/directory or http file transfer\n");
+                                            printf("Illegal transfer type: Not a ref movie file/directory or http file transfer\n");
 #endif                                          
                                             return QTSS_NoErr;
             }
@@ -862,12 +862,12 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
                                         theReadOffset += theRecvLen;
                                         theOffset += theRecvLen;
 #if HTTP_FILE_DEBUGGING
-                                        qtss_printf("Got %"_U32BITARG_" bytes back from file read. Now at: %"_64BITARG_"u\n", theRecvLen, theOffset);
+                                        printf("Got %"_U32BITARG_" bytes back from file read. Now at: %"_64BITARG_"u\n", theRecvLen, theOffset);
 #endif
                                         if (theRecvLen < theBufferSize)
                                         {
 #if HTTP_FILE_DEBUGGING
-                                            qtss_printf("Flow controlled on file. Waiting for read event\n");
+                                            printf("Flow controlled on file. Waiting for read event\n");
 #endif
                                             isBlocked = true;
                                             break;
@@ -888,12 +888,12 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
                                         theWriteOffset += theWrittenLen;
 
 #if HTTP_FILE_DEBUGGING
-                                        qtss_printf("Got %"_U32BITARG_" bytes back from socket write.\n", theWrittenLen);
+                                        printf("Got %"_U32BITARG_" bytes back from socket write.\n", theWrittenLen);
 #endif
                                         if (theWriteOffset < theFileBufferLen)
                                         {
 #if HTTP_FILE_DEBUGGING
-                                            qtss_printf("Flow controlled on socket.Waiting for write event. \n");
+                                            printf("Flow controlled on socket.Waiting for write event. \n");
 #endif
                                             isBlocked = true;
                                             break;
@@ -905,7 +905,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
                                         if ((theTransferType == transferHttpFile) && (theOffset == theFileLength))
                                         {
 #if HTTP_FILE_DEBUGGING
-                                            qtss_printf("File transfer complete\n");
+                                            printf("File transfer complete\n");
 #endif
                                             // If we've gotten here, we're done sending the file!
                                             // Deletion of resources is handled in another role : RTSPSessionClosing role
@@ -918,7 +918,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
                                         if(theTransferType != transferHttpFile)
                                         {                                          
 #if HTTP_FILE_DEBUGGING
-                                            qtss_printf("Refmovie buffer transfer complete\n");
+                                            printf("Refmovie buffer transfer complete\n");
 #endif
                                             // Deletion of resources is handled in another role : RTSPSessionClosing role
                                             theWriteOffset = 0;
@@ -1024,7 +1024,7 @@ UInt32 GetBitRate(char* filePath)
         QTHintTrack* hintTrack;
         if( track->Initialize() != QTTrack::errNoError )
         {
-            qtss_printf("!!! Failed to initialize track !!!\n");
+            printf("!!! Failed to initialize track !!!\n");
             continue;
         }
          
@@ -1052,7 +1052,7 @@ UInt32 GetBitRate(char* filePath)
         rate = 150000;
 
 #if HTTP_FILE_DEBUGGING
-    qtss_printf("Actual rate: %"_U32BITARG_"\n", actualRate);
+    printf("Actual rate: %"_U32BITARG_"\n", actualRate);
 #endif
 
     return rate;

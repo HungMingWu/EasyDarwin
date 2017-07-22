@@ -76,22 +76,22 @@ void usage()
 //long ptrsize = sizeof(char *); printf("size of ptr = %ld\n", ptrsize);
 //long longsize = sizeof(long); printf("size of long = %ld\n", longsize);
 
-   qtss_printf("%s/%s ( Build/%s; Platform/%s; %s) Built on: %s\n",QTSServerInterface::GetServerName().Ptr,
+   printf("%s/%s ( Build/%s; Platform/%s; %s) Built on: %s\n",QTSServerInterface::GetServerName().Ptr,
                                         QTSServerInterface::GetServerVersion().Ptr,
                                         QTSServerInterface::GetServerBuild().Ptr,
                                         QTSServerInterface::GetServerPlatform().Ptr,
                                         QTSServerInterface::GetServerComment().Ptr,
                                         QTSServerInterface::GetServerBuildDate().Ptr);
-    qtss_printf("usage: %s [ -d | -p port | -v | -c /myconfigpath.xml | -o /myconfigpath.conf | -x | -S numseconds | -I | -h ]\n", usage_name);
-    qtss_printf("-d: Run in the foreground\n");
-    qtss_printf("-D: Display performance data\n");
-    qtss_printf("-p XXX: Specify the default RTSP listening port of the server\n");
-    qtss_printf("-c /myconfigpath.xml: Specify a config file\n");
-    qtss_printf("-o /myconfigpath.conf: Specify a DSS 1.x / 2.x config file to build XML file from\n");
-    qtss_printf("-x: Force create new .xml config file and exit.\n");
-    qtss_printf("-S n: Display server stats in the console every \"n\" seconds\n");
-    qtss_printf("-I: Start the server in the idle state\n");
-    qtss_printf("-h: Prints usage\n");
+    printf("usage: %s [ -d | -p port | -v | -c /myconfigpath.xml | -o /myconfigpath.conf | -x | -S numseconds | -I | -h ]\n", usage_name);
+    printf("-d: Run in the foreground\n");
+    printf("-D: Display performance data\n");
+    printf("-p XXX: Specify the default RTSP listening port of the server\n");
+    printf("-c /myconfigpath.xml: Specify a config file\n");
+    printf("-o /myconfigpath.conf: Specify a DSS 1.x / 2.x config file to build XML file from\n");
+    printf("-x: Force create new .xml config file and exit.\n");
+    printf("-S n: Display server stats in the console every \"n\" seconds\n");
+    printf("-I: Start the server in the idle state\n");
+    printf("-h: Prints usage\n");
 }
 
 bool sendtochild(int sig, pid_t myPID);
@@ -110,7 +110,7 @@ void sigcatcher(int sig, int /*sinfo*/, struct sigcontext* /*sctxt*/);
 void sigcatcher(int sig, int /*sinfo*/, struct sigcontext* /*sctxt*/)
 {
 #if DEBUG
-    qtss_printf("Signal %d caught\n", sig);
+    printf("Signal %d caught\n", sig);
 #endif
     pid_t myPID = getpid();
     //
@@ -302,7 +302,7 @@ int main(int argc, char * argv[])
         int maxSocketBufferSizeVal = 2000 * 1024; // Allow up to 2 MB. That is WAY more than we should need
         (void) ::sysctl(mib, 3, 0, 0, &maxSocketBufferSizeVal, sizeof(maxSocketBufferSizeVal));
         //int sysctlErr =  ::sysctl(mib, 3, 0, 0, &maxSocketBufferSizeVal, sizeof(maxSocketBufferSizeVal));
-        //qtss_printf("sysctl maxSocketBufferSizeVal=%d err=%d\n",maxSocketBufferSizeVal, sysctlErr);
+        //printf("sysctl maxSocketBufferSizeVal=%d err=%d\n",maxSocketBufferSizeVal, sysctlErr);
  #endif
     
     //First thing to do is to read command-line arguments.
@@ -388,7 +388,7 @@ int main(int argc, char * argv[])
     // Check port
     if (thePort < 0 || thePort > 65535)
     { 
-        qtss_printf("Invalid port value = %d max value = 65535\n",thePort);
+        printf("Invalid port value = %d max value = 65535\n",thePort);
         exit (-1);
     }
 
@@ -396,7 +396,7 @@ int main(int argc, char * argv[])
     QTSSExpirationDate::PrintExpirationDate();
     if (QTSSExpirationDate::IsSoftwareExpired())
     {
-        qtss_printf("Streaming Server has expired\n");
+        printf("Streaming Server has expired\n");
         ::exit(0);
     }
 
@@ -408,7 +408,7 @@ int main(int argc, char * argv[])
     // just bail because we do not want to overwrite a directory
     if (theXMLParser.DoesFileExistAsDirectory())
     {
-        qtss_printf("Directory located at location where streaming server prefs file should be.\n");
+        printf("Directory located at location where streaming server prefs file should be.\n");
         exit(-1);
     }
     
@@ -416,7 +416,7 @@ int main(int argc, char * argv[])
     // Check to see if we can write to the file
     if (!theXMLParser.CanWriteFile())
     {
-        qtss_printf("Cannot write to the streaming server prefs file.\n");
+        printf("Cannot write to the streaming server prefs file.\n");
         exit(-1);
     }
 
@@ -438,12 +438,12 @@ int main(int argc, char * argv[])
             
             if ( filePrefsSource->InitFromConfigFile(theConfigFilePath) )
             { 
-               qtss_printf("Generating a new prefs file at %s\n", theXMLFilePath);
+               printf("Generating a new prefs file at %s\n", theXMLFilePath);
             }
 
             if (GenerateAllXMLPrefs(filePrefsSource, &theXMLParser))
             {
-                qtss_printf("Fatal Error: Could not create new prefs file at: %s. (%d)\n", theXMLFilePath, OSThread::GetErrno());
+                printf("Fatal Error: Could not create new prefs file at: %s. (%d)\n", theXMLFilePath, OSThread::GetErrno());
                 ::exit(-1);
             }
         }
@@ -455,7 +455,7 @@ int main(int argc, char * argv[])
     int xmlParseErr = theXMLParser.Parse();
     if (xmlParseErr)
     {
-        qtss_printf("Fatal Error: Could not load configuration file at %s. (%d)\n", theXMLFilePath, OSThread::GetErrno());
+        printf("Fatal Error: Could not load configuration file at %s. (%d)\n", theXMLFilePath, OSThread::GetErrno());
         ::exit(-1);
     }
     
@@ -474,7 +474,7 @@ int main(int argc, char * argv[])
 #endif
         {
 #if DEBUG
-            qtss_printf("Failed to daemonize process. Error = %d\n", OSThread::GetErrno());
+            printf("Failed to daemonize process. Error = %d\n", OSThread::GetErrno());
 #endif
             exit(-1);
         }
@@ -507,15 +507,15 @@ int main(int argc, char * argv[])
                 {	
                  	pid =::wait(&status);
                  	int8_t exitStatus = (int8_t) WEXITSTATUS(status);
-                	//qtss_printf("Child Process %d wait exited with pid=%d status=%d exit status=%d\n", processID, pid, status, exitStatus);
+                	//printf("Child Process %d wait exited with pid=%d status=%d exit status=%d\n", processID, pid, status, exitStatus);
                 	
 					if (WIFEXITED(status) && pid > 0 && status != 0) // child exited with status -2 restart or -1 don't restart 
 					{
-						//qtss_printf("child exited with status=%d\n", exitStatus);
+						//printf("child exited with status=%d\n", exitStatus);
 						
 						if ( exitStatus == -1) // child couldn't run don't try again
 						{
-							qtss_printf("child exited with -1 fatal error so parent is exiting too.\n");
+							printf("child exited with -1 fatal error so parent is exiting too.\n");
 							exit (EXIT_FAILURE); 
 						}
 						break; // restart the child
@@ -524,24 +524,24 @@ int main(int argc, char * argv[])
 					
 					if (WIFSIGNALED(status)) // child exited on an unhandled signal (maybe a bus error or seg fault)
 					{	
-						//qtss_printf("child was signalled\n");
+						//printf("child was signalled\n");
 						break; // restart the child
 					}
 
                  		
                 	if (pid == -1 && status == 0) // parent woken up by a handled signal
                    	{
-						//qtss_printf("handled signal continue waiting\n");
+						//printf("handled signal continue waiting\n");
                    		continue;
                    	}
                    	
                  	if (pid > 0 && status == 0)
                  	{
-                 		//qtss_printf("child exited cleanly so parent is exiting\n");
+                 		//printf("child exited cleanly so parent is exiting\n");
                  		exit(EXIT_SUCCESS);                		
                 	}
                 	
-                	//qtss_printf("child died for unknown reasons parent is exiting\n");
+                	//printf("child died for unknown reasons parent is exiting\n");
                 	exit (EXIT_FAILURE);
                 }
             }
@@ -575,7 +575,7 @@ int main(int argc, char * argv[])
 	char commandStr[64];
 	qtss_sprintf(commandStr, "/usr/bin/rtprio -t -%d", (int) getpid()); 
 #if DEBUG
-	qtss_printf("setting priority to Real Time: %s\n", commandStr);
+	printf("setting priority to Real Time: %s\n", commandStr);
 #endif
 	(void) ::system(commandStr);    
 #endif

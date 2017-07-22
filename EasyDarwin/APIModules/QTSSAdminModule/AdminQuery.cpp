@@ -36,7 +36,7 @@
 #endif
 
 #include <time.h>
-#include <stdio.h>      /* for //qtss_printf */
+#include <stdio.h>      /* for //printf */
 #include <stdlib.h>     /* for getloadavg & other useful stuff */
 #include "QTSSAdminModule.h"
 #include "OSArrayObjectDeleter.h"
@@ -73,8 +73,8 @@ StrPtrLen * QueryURI::NextSegment(StrPtrLen *currentPathPtr, StrPtrLen *outNextP
 			&& (currentPathPtr->Ptr < &theURLPtr->Ptr[theURLPtr->Len])
 			)
 		{
-			//qtss_printf("theURLPtr="); PRINT_STR(theURLPtr);
-			//qtss_printf("QueryURI::NextSegment currentPathPtr="); PRINT_STR(currentPathPtr);
+			//printf("theURLPtr="); PRINT_STR(theURLPtr);
+			//printf("QueryURI::NextSegment currentPathPtr="); PRINT_STR(currentPathPtr);
 
 			uint32_t len = (PointerSizedInt)&(theURLPtr->Ptr[theURLPtr->Len - 1]) - ((PointerSizedInt)currentPathPtr->Ptr + (currentPathPtr->Len - 1));
 			char *startPtr = (char *)((PointerSizedInt)currentPathPtr->Ptr + currentPathPtr->Len);
@@ -86,7 +86,7 @@ StrPtrLen * QueryURI::NextSegment(StrPtrLen *currentPathPtr, StrPtrLen *outNextP
 			URLparser.ConsumeUntil(outNextPtr, (uint8_t*)sNotQueryData);
 			result = outNextPtr;
 
-			//qtss_printf("QueryURI::NextSegment nextPathPtr=");PRINT_STR(outNextPtr);
+			//printf("QueryURI::NextSegment nextPathPtr=");PRINT_STR(outNextPtr);
 		}
 
 	}
@@ -364,7 +364,7 @@ QueryURI::~QueryURI()
 {
 	/*
 		for (int count = 0; fURIFieldsPtr[count].fID != -1 ; count++)
-		{   //qtss_printf("QueryURI::~QueryURI delete %s=",fURIFieldsPtr[count].fFieldName); PRINT_STR(fURIFieldsPtr[count].fData);
+		{   //printf("QueryURI::~QueryURI delete %s=",fURIFieldsPtr[count].fFieldName); PRINT_STR(fURIFieldsPtr[count].fData);
 			if (fURIFieldsPtr[count].fData && fURIFieldsPtr[count].fData->Ptr)
 				delete fURIFieldsPtr[count].fData->Ptr;
 			fURIFieldsPtr[count].fData = NULL;
@@ -577,7 +577,7 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 				}
 			}
 			else
-			{   //qtss_printf("Set fQueryMessageBuff=%s\n",evalMessage.Ptr);
+			{   //printf("Set fQueryMessageBuff=%s\n",evalMessage.Ptr);
 				qtss_sprintf(fQueryMessageBuff, "reason=\"%s for command %s\"", evalMessage.Ptr, QueryURI::sCommandDefs[GetCommandID()]);
 			}
 		}
@@ -587,7 +587,7 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 		}
 
 		fQueryEvalMessage.Set(fQueryMessageBuff, strlen(fQueryMessageBuff));
-		//qtss_printf("fQueryMessageBuff=%s\n",fQueryMessageBuff);
+		//printf("fQueryMessageBuff=%s\n",fQueryMessageBuff);
 	}
 	fQueryEvalResult = result;
 	return result;
@@ -603,7 +603,7 @@ void QueryURI::ParseQueryString(StringParser *parserPtr, StrPtrLen *urlStreamPtr
 	tempQueryParse.ConsumeUntil(NULL, '?'); // stop at start of query
 	tempQueryParse.Expect('?');
 	char* startCharPtr = tempQueryParse.GetCurrentPosition();
-	//qtss_printf("QueryURI::ParseQueryString start Position = '%s'\n",startCharPtr);
+	//printf("QueryURI::ParseQueryString start Position = '%s'\n",startCharPtr);
 	while (tempQueryParse.GetDataRemaining() > 0)
 	{
 
@@ -614,11 +614,11 @@ void QueryURI::ParseQueryString(StringParser *parserPtr, StrPtrLen *urlStreamPtr
 			tempQueryParse.ConsumeLength(NULL, 1);
 			tempQueryParse.ConsumeUntil(NULL, '"');
 			tempQueryParse.ConsumeLength(NULL, 1);
-			//qtss_printf("QueryURI::ParseQueryString is quote GetCurrentPosition = '%s' len = %"   _U32BITARG_   "\n",stopCharPtr, strlen(stopCharPtr));
+			//printf("QueryURI::ParseQueryString is quote GetCurrentPosition = '%s' len = %"   _U32BITARG_   "\n",stopCharPtr, strlen(stopCharPtr));
 		}
 		else
 		{
-			//qtss_printf("QueryURI::ParseQueryString white or EOL GetCurrentPosition = '%s' len = %"   _U32BITARG_   "\n",stopCharPtr, strlen(stopCharPtr));
+			//printf("QueryURI::ParseQueryString white or EOL GetCurrentPosition = '%s' len = %"   _U32BITARG_   "\n",stopCharPtr, strlen(stopCharPtr));
 			if (*stopCharPtr == ' ')
 			{
 				tempQueryParse.ConsumeWhitespace();
@@ -640,7 +640,7 @@ void QueryURI::ParseQueryString(StringParser *parserPtr, StrPtrLen *urlStreamPtr
 		fURIFieldsPtr[eQuery].fData = &fURIFieldSPL[eQuery];
 	}
 
-	//qtss_printf("Query String = '%s' Query len = %"   _U32BITARG_   " parseLen = %"   _U32BITARG_   "\n",queryStr.Ptr, queryStr.Len,len);
+	//printf("Query String = '%s' Query len = %"   _U32BITARG_   " parseLen = %"   _U32BITARG_   "\n",queryStr.Ptr, queryStr.Len,len);
 
 };
 
@@ -654,12 +654,12 @@ void QueryURI::ParseURLString(StringParser *parserPtr, StrPtrLen *urlStreamPtr)
 	if (urlStreamPtr->Len < QueryURI::eMaxBufferSize)
 		memcpy(fURIBuffer, urlStreamPtr->Ptr, urlStreamPtr->Len); // make a local copy in fAdminFullURI
 
-	//qtss_printf("QueryURI::ParseURLString fURIBuffer =%s len = %"   _U32BITARG_   "\n", fURIBuffer,urlStreamPtr->Len);
+	//printf("QueryURI::ParseURLString fURIBuffer =%s len = %"   _U32BITARG_   "\n", fURIBuffer,urlStreamPtr->Len);
 
 	StringParser tempURLParse(&fAdminFullURI);// point to local copy    
 	tempURLParse.ConsumeUntil(&fURIFieldSPL[eURL], '?'); // pull out URL
 	fURIFieldsPtr[eURL].fData = &fURIFieldSPL[eURL];
-	//qtss_printf("QueryURI::ParseURLString fURIFieldsPtr[eURL]="); PRINT_STR(fURIFieldsPtr[eURL].fData);    
+	//printf("QueryURI::ParseURLString fURIFieldsPtr[eURL]="); PRINT_STR(fURIFieldsPtr[eURL].fData);    
 };
 
 
@@ -699,13 +699,13 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 
 			if (decodedRequestStr.Len < 1)
 			{
-				//qtss_printf("no string to parse \n");
+				//printf("no string to parse \n");
 				break;
 			}
 
 			if (decodedRequestStr.Len > QueryURI::eMaxBufferSize - 1)
 			{
-				//qtss_printf("URL string bigger than Buffer size=%"   _U32BITARG_   "\n",decodedRequestStr.Len);
+				//printf("URL string bigger than Buffer size=%"   _U32BITARG_   "\n",decodedRequestStr.Len);
 				break;
 			}
 
@@ -716,7 +716,7 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 			static StrPtrLen sGet("GET");
 			if (false == httpRequest.Equal(sPost) && false == httpRequest.Equal(sGet))    //bail if not a GET or POST
 			{
-				//qtss_printf("not a POST or GET \n");
+				//printf("not a POST or GET \n");
 				break;
 			}
 
@@ -731,14 +731,14 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 
 				if (!URIParser.Expect('/'))
 				{
-					//qtss_printf("no starting slash\n");
+					//printf("no starting slash\n");
 					break;
 				}
 
 				URIParser.ConsumeWord(&tempStr);
 				if (!(tempStr.Len != 0 && tempStr.Equal(StrPtrLen(fURIFieldsPtr[eModuleID].fFieldName, fURIFieldsPtr[eModuleID].fFieldLen))))//check "modules" request
 				{
-					//qtss_printf("no %s in URL\n",fURIFieldsPtr[eModuleID].fFieldName);
+					//printf("no %s in URL\n",fURIFieldsPtr[eModuleID].fFieldName);
 					break;
 				}
 				fURIFieldSPL[eModuleID] = tempStr;
@@ -746,13 +746,13 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 
 				if (!URIParser.Expect('/'))
 				{
-					//qtss_printf("no trailing slash for modules\n");
+					//printf("no trailing slash for modules\n");
 					break;
 				}
 				URIParser.ConsumeWord(&tempStr);
 				if (!(tempStr.Len != 0 && tempStr.Equal(StrPtrLen(fURIFieldsPtr[eRootID].fFieldName, fURIFieldsPtr[eRootID].fFieldLen))))//check "modules" request
 				{
-					//qtss_printf("no %s in URL\n", fURIFieldsPtr[eRootID].fFieldName);
+					//printf("no %s in URL\n", fURIFieldsPtr[eRootID].fFieldName);
 					break;
 				}
 
@@ -771,7 +771,7 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 				StrPtrLen tempStr(fURIFieldSPL[eQuery].Ptr, fURIFieldSPL[eQuery].Len);
 				StrPtrLen tempData;
 
-				//qtss_printf("queryParser=");PRINT_STR(fURIFieldsPtr[eQuery].fData);
+				//printf("queryParser=");PRINT_STR(fURIFieldsPtr[eQuery].fData);
 				while (queryParser.GetDataRemaining() != 0)
 				{
 					tempData.Set(NULL, 0);
@@ -779,14 +779,14 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 					if (queryParser.GetDataRemaining())queryParser.ConsumeUntil(&tempStr, (uint8_t*)sNotQueryData);
 					if (tempStr.Len == 0)
 					{
-						//qtss_printf("no query name\n");
+						//printf("no query name\n");
 						if (queryParser.GetDataRemaining())queryParser.ConsumeLength(NULL, 1);
 						continue;
 					}
 					if (queryParser.GetDataRemaining())queryParser.ConsumeWhitespace();
 					if (!queryParser.Expect('='))
 					{
-						//qtss_printf("no '=' for query name ");PRINT_STR(&tempStr);
+						//printf("no '=' for query name ");PRINT_STR(&tempStr);
 						if (queryParser.GetDataRemaining())queryParser.ConsumeLength(NULL, 1);
 						continue;
 					}
@@ -807,7 +807,7 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 					{
 						if (queryParser.GetDataRemaining())queryParser.Expect('+');
 						if (queryParser.GetDataRemaining())queryParser.ConsumeWhitespace();
-						//qtss_printf("no query data for ");PRINT_STR(&tempStr);
+						//printf("no query data for ");PRINT_STR(&tempStr);
 						continue;
 					}
 
@@ -815,7 +815,7 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 					if (queryParser.GetDataRemaining())queryParser.Expect('+');
 					if (queryParser.GetDataRemaining())queryParser.ConsumeWhitespace();
 
-					//qtss_printf("set data =%s\n", tempData.Ptr);
+					//printf("set data =%s\n", tempData.Ptr);
 
 					StrPtrLen   definedID;
 					uint32_t      fieldID;
@@ -851,7 +851,7 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 
 		/*
 				for (int count = 0; fURIFieldsPtr[count].fID != -1 ; count++)
-				{   //qtss_printf("QueryURI::URLParse %s=",fURIFieldsPtr[count].fFieldName); PRINT_STR(fURIFieldsPtr[count].fData);
+				{   //printf("QueryURI::URLParse %s=",fURIFieldsPtr[count].fFieldName); PRINT_STR(fURIFieldsPtr[count].fData);
 				}
 		*/
 

@@ -105,7 +105,7 @@ void   RTCPAckPacket::Dump()
 	{
 		if (this->IsNthBitEnabled(maskCount))
 		{
-			qtss_sprintf(&maskBytesBuffer[::strlen(maskBytesBuffer)], "%"   _U32BITARG_   ", ", theSeqNum + 1 + maskCount);
+			sprintf(&maskBytesBuffer[::strlen(maskBytesBuffer)], "%"   _U32BITARG_   ", ", theSeqNum + 1 + maskCount);
 		}
 	}
 	Assert(::strlen(maskBytesBuffer) < numBufferBytes);

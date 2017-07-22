@@ -286,7 +286,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, uint32_t in
 				if (fDebug)
 				{
 					char s[12] = "";
-					qtss_sprintf(s, "  [%.2s]", (char*)&itemType);
+					sprintf(s, "  [%.2s]", (char*)&itemType);
 					WarnV(false, "Unknown APP('QTSS') item type");
 					WarnV(false, s);
 				}

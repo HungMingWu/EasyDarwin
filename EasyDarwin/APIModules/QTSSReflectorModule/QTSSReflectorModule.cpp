@@ -566,15 +566,15 @@ QTSS_Error RereadPrefs()
 				|| ((sMinimumStaticSDPPort >= minServerPort) && (sMinimumStaticSDPPort <= maxServerPort))
 				)
 			{
-				qtss_sprintf(min, "%u", minServerPort);
-				qtss_sprintf(max, "%u", maxServerPort);
+				sprintf(min, "%u", minServerPort);
+				sprintf(max, "%u", maxServerPort);
 				QTSSModuleUtils::LogError(qtssWarningVerbosity, sStaticPortsConflictErr, 0, min, max);
 			}
 
 			if (sMinimumStaticSDPPort > sMaximumStaticSDPPort)
 			{
-				qtss_sprintf(min, "%u", sMinimumStaticSDPPort);
-				qtss_sprintf(max, "%u", sMaximumStaticSDPPort);
+				sprintf(min, "%u", sMinimumStaticSDPPort);
+				sprintf(max, "%u", sMaximumStaticSDPPort);
 				QTSSModuleUtils::LogError(qtssWarningVerbosity, sInvalidPortRangeErr, 0, min, max);
 			}
 		}
@@ -1354,7 +1354,7 @@ bool InfoPortsOK(QTSS_StandardRTSP_Params* inParams, SDPSourceInfo* theInfo, Str
 			if (theErrorMessageID != qtssIllegalAttrID)
 			{
 				char thePort[32];
-				qtss_sprintf(thePort, "%u", theInfoPort);
+				sprintf(thePort, "%u", theInfoPort);
 
 				char *thePath = inPath->GetAsCString();
 				OSCharArrayDeleter charArrayPathDeleter(thePath);
@@ -1362,7 +1362,7 @@ bool InfoPortsOK(QTSS_StandardRTSP_Params* inParams, SDPSourceInfo* theInfo, Str
 				char *thePathPort = new char[inPath->Len + 32];
 				OSCharArrayDeleter charArrayPathPortDeleter(thePathPort);
 
-				qtss_sprintf(thePathPort, "%s:%s", thePath, thePort);
+				sprintf(thePathPort, "%s:%s", thePath, thePort);
 				(void)QTSSModuleUtils::LogError(qtssWarningVerbosity, theErrorMessageID, 0, thePathPort);
 
 				StrPtrLen thePortStr(thePort);

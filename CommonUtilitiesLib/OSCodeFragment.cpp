@@ -136,7 +136,7 @@ void* OSCodeFragment::GetSymbol(const char* inSymbolName)
 #elif defined(DLSYM_NEEDS_UNDERSCORE)
 	char *symbol = (char*)malloc(sizeof(char)*(strlen(inSymbolName) + 2));
 	void *retval;
-	qtss_sprintf(symbol, "_%s", inSymbolName);
+	sprintf(symbol, "_%s", inSymbolName);
 	retval = dlsym(fFragmentP, symbol);
 	free(symbol);
 	return retval;

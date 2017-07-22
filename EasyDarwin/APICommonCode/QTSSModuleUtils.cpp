@@ -187,7 +187,7 @@ void    QTSSModuleUtils::LogError(  QTSS_ErrorVerbosity inVerbosity,
     if ((theMessage.Ptr == NULL) || (theMessage.Len == 0))
         return;
     
-    // qtss_sprintf and ::strlen will crash if inArgument is NULL
+    // sprintf and ::strlen will crash if inArgument is NULL
     if (inArgument == NULL)
         inArgument = sEmptyArg;
     if (inArg2 == NULL)
@@ -198,7 +198,7 @@ void    QTSSModuleUtils::LogError(  QTSS_ErrorVerbosity inVerbosity,
     uint32_t theMessageLen = theMessage.Len + ::strlen(inArgument) + ::strlen(inArg2);
 
     OSCharArrayDeleter theLogString(new char[theMessageLen + 1]);
-    qtss_sprintf(theLogString.GetObject(), theMessage.Ptr, inArgument, inArg2);
+    sprintf(theLogString.GetObject(), theMessage.Ptr, inArgument, inArg2);
     Assert(theMessageLen >= ::strlen(theLogString.GetObject()));
     
     (void)QTSS_Write(sErrorLog, theLogString.GetObject(), ::strlen(theLogString.GetObject()),
@@ -430,7 +430,7 @@ QTSS_Error  QTSSModuleUtils::SendErrorResponse( QTSS_RTSPRequestObject inRequest
         
         
         char buff[32];
-        qtss_sprintf(buff,"%"   _U32BITARG_   "",theErrorMsgFormatter.GetBytesWritten());
+        sprintf(buff,"%"   _U32BITARG_   "",theErrorMsgFormatter.GetBytesWritten());
         (void)QTSS_AppendRTSPHeader(inRequest, qtssContentLengthHeader, buff, ::strlen(buff));
     }
     
@@ -467,7 +467,7 @@ QTSS_Error	QTSSModuleUtils::SendErrorResponseWithMessage( QTSS_RTSPRequestObject
 		theErrorMessage.Set(inErrorMessagePtr->Ptr, inErrorMessagePtr->Len);
 		
         char buff[32];
-        qtss_sprintf(buff,"%"   _U32BITARG_   "",inErrorMessagePtr->Len);
+        sprintf(buff,"%"   _U32BITARG_   "",inErrorMessagePtr->Len);
         (void)QTSS_AppendRTSPHeader(inRequest, qtssContentLengthHeader, buff, ::strlen(buff));
     }
     
@@ -589,7 +589,7 @@ void    QTSSModuleUtils::SendDescribeResponse(QTSS_RTSPRequestObject inRequest,
 {
     //write content size header
     char buf[32];
-    qtss_sprintf(buf, "%" _S32BITARG_ "", inTotalLength);
+    sprintf(buf, "%" _S32BITARG_ "", inTotalLength);
     (void)QTSS_AppendRTSPHeader(inRequest, qtssContentLengthHeader, &buf[0], ::strlen(&buf[0]));
 
     (void)QTSS_SendStandardRTSPResponse(inRequest, inSession, 0);

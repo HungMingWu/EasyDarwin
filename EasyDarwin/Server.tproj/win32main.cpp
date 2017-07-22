@@ -495,7 +495,7 @@ void InstallService(char* inServiceName)
 	if (!theErr)
 		return;
 
-	qtss_sprintf(theQuotedPath, "\"%s\"", thePath);
+	sprintf(theQuotedPath, "\"%s\"", thePath);
 
 	theSCManager = ::OpenSCManager(
 		NULL,                   // machine (NULL == local)

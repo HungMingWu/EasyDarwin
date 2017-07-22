@@ -491,7 +491,7 @@ void HTTPRequest::AppendContentLengthHeader(uint64_t length_64bit) const
 {
 	//char* contentLength = new char[256];
 	char contentLength[256] = { 0 };
-	qtss_sprintf(contentLength, "%" _64BITARG_ "d", length_64bit);
+	sprintf(contentLength, "%" _64BITARG_ "d", length_64bit);
 	StrPtrLen contentLengthPtr(contentLength);
 	AppendResponseHeader(httpContentLengthHeader, &contentLengthPtr);
 }
@@ -500,7 +500,7 @@ void HTTPRequest::AppendContentLengthHeader(uint32_t length_32bit) const
 {
 	//char* contentLength = new char[256];
 	char contentLength[256] = { 0 };
-	qtss_sprintf(contentLength, "%"   _U32BITARG_   "", length_32bit);
+	sprintf(contentLength, "%"   _U32BITARG_   "", length_32bit);
 	StrPtrLen contentLengthPtr(contentLength);
 	AppendResponseHeader(httpContentLengthHeader, &contentLengthPtr);
 }

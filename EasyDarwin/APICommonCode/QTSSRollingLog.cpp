@@ -330,12 +330,12 @@ bool QTSSRollingLog::RenameLogFile(const char* inFileName)
         if (x  == 1000) //we don't have any digits left, so just reuse the "---" until tomorrow...
         {
             //add a bogus log number and exit the loop
-            qtss_sprintf(theNewNameBuffer + theBaseNameLength, "---.log");
+            sprintf(theNewNameBuffer + theBaseNameLength, "---.log");
             break;
         }
 
         //add the log number & suffix
-        qtss_sprintf(theNewNameBuffer + theBaseNameLength, "%03" _S32BITARG_ ".log", x);
+        sprintf(theNewNameBuffer + theBaseNameLength, "%03" _S32BITARG_ ".log", x);
 
         //assume that when ::stat returns an error, it is becase
         //the file doesnt exist. Once that happens, we have a unique name
@@ -400,7 +400,7 @@ time_t QTSSRollingLog::WriteLogHeader(FILE* inFile)
 
     char tempbuf[1024];
     qtss_strftime(tempbuf, sizeof(tempbuf), "#Log File Created On: %m/%d/%Y %H:%M:%S\n", theLocalTime);
-    //qtss_sprintf(tempbuf, "#Log File Created On: %d/%d/%d %d:%d:%d %d:%d:%d GMT\n",
+    //sprintf(tempbuf, "#Log File Created On: %d/%d/%d %d:%d:%d %d:%d:%d GMT\n",
     //          theLocalTime->tm_mon, theLocalTime->tm_mday, theLocalTime->tm_year,
     //          theLocalTime->tm_hour, theLocalTime->tm_min, theLocalTime->tm_sec,
     //          theLocalTime->tm_yday, theLocalTime->tm_wday, theLocalTime->tm_isdst);

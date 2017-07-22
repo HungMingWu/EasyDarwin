@@ -163,7 +163,7 @@ int32_t StringTranslator::EncodeURL(const char* inSrc, int32_t inSrcLen, char* i
 			if (inDestLen - theLengthWritten < 3)
 				return OS_NotEnoughSpace;
 
-			qtss_sprintf(ioDest, "%%%X", (unsigned char)*inSrc);
+			sprintf(ioDest, "%%%X", (unsigned char)*inSrc);
 			ioDest += 3;
 			theLengthWritten += 3;
 			inSrc++;
@@ -205,7 +205,7 @@ int32_t StringTranslator::EncodeURL(const char* inSrc, int32_t inSrcLen, char* i
 				if ((inDestLen - theLengthWritten) < 3)
 					return OS_NotEnoughSpace;
 
-				qtss_sprintf(ioDest, "%%%X", (int)*inSrc);
+				sprintf(ioDest, "%%%X", (int)*inSrc);
 				ioDest += 3;
 				theLengthWritten += 3;
 				break;

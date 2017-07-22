@@ -331,39 +331,39 @@ char* QTSSDataConverter::ValueToString(void* inValue,
 	switch (inType)
 	{
 	case qtssAttrDataTypeUInt16:
-		qtss_sprintf(theString, "%hu", *(uint16_t*)inValue);
+		sprintf(theString, "%hu", *(uint16_t*)inValue);
 		break;
 
 	case qtssAttrDataTypeSInt16:
-		qtss_sprintf(theString, "%hd", *(int16_t*)inValue);
+		sprintf(theString, "%hd", *(int16_t*)inValue);
 		break;
 
 	case qtssAttrDataTypeint32_t:
-		qtss_sprintf(theString, "%" _S32BITARG_, *(int32_t*)inValue);
+		sprintf(theString, "%" _S32BITARG_, *(int32_t*)inValue);
 		break;
 
 	case qtssAttrDataTypeUInt32:
-		qtss_sprintf(theString, "%"   _U32BITARG_, *(uint32_t*)inValue);
+		sprintf(theString, "%"   _U32BITARG_, *(uint32_t*)inValue);
 		break;
 
 	case qtssAttrDataTypeint64_t:
-		qtss_sprintf(theString, "%" _64BITARG_ "d", *(int64_t*)inValue);
+		sprintf(theString, "%" _64BITARG_ "d", *(int64_t*)inValue);
 		break;
 
 	case qtssAttrDataTypeuint64_t:
-		qtss_sprintf(theString, "%" _64BITARG_ "u", *(uint64_t*)inValue);
+		sprintf(theString, "%" _64BITARG_ "u", *(uint64_t*)inValue);
 		break;
 
 	case qtssAttrDataTypeFloat32:
-		qtss_sprintf(theString, "%f", *(float*)inValue);
+		sprintf(theString, "%f", *(float*)inValue);
 		break;
 
 	case qtssAttrDataTypeFloat64:
-		qtss_sprintf(theString, "%f", *(double*)inValue);
+		sprintf(theString, "%f", *(double*)inValue);
 		break;
 
 	case qtssAttrDataTypeTimeVal:
-		qtss_sprintf(theString, "%" _64BITARG_ "d", *(int64_t*)inValue);
+		sprintf(theString, "%" _64BITARG_ "d", *(int64_t*)inValue);
 		break;
 
 	default:

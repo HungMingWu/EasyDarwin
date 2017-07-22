@@ -499,7 +499,7 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 			QTSS_Error err = newListenerArray[curPortIndex]->Initialize(theRTSPPortTrackers[count3].fIPAddr, theRTSPPortTrackers[count3].fPort);
 
 			char thePortStr[20];
-			qtss_sprintf(thePortStr, "%hu", theRTSPPortTrackers[count3].fPort);
+			sprintf(thePortStr, "%hu", theRTSPPortTrackers[count3].fPort);
 
 			//
 			// If there was an error creating this listener, destroy it and log an error
@@ -532,7 +532,7 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 			QTSS_Error err = newListenerArray[curPortIndex]->Initialize(theHTTPPortTrackers[count3].fIPAddr, theHTTPPortTrackers[count3].fPort);
 
 			char thePortStr[20];
-			qtss_sprintf(thePortStr, "%hu", theHTTPPortTrackers[count3].fPort);
+			sprintf(thePortStr, "%hu", theHTTPPortTrackers[count3].fPort);
 
 			//
 			// If there was an error creating this listener, destroy it and log an error
@@ -1306,7 +1306,7 @@ void RTPSocketPool::SetUDPSocketOptions(UDPSocketPair* inPair)
 	if (theRcvBufSize != QTSServerInterface::GetServer()->GetPrefs()->GetRTCPSocketRcvBufSizeinK())
 	{
 		char theRcvBufSizeStr[20];
-		qtss_sprintf(theRcvBufSizeStr, "%"   _U32BITARG_   "", theRcvBufSize);
+		sprintf(theRcvBufSizeStr, "%"   _U32BITARG_   "", theRcvBufSize);
 		//
 		// For now, do not log an error, though we should enable this in the future.
 		//QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssMsgSockBufSizesTooLarge, theRcvBufSizeStr);

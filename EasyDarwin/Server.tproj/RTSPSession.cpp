@@ -126,11 +126,11 @@ void RTSPSession::Initialize()
 	sHTTPProxyTunnelMap = new OSRefTable(OSRefTable::kDefaultTableSize);
 
 	// Construct premade HTTP response for HTTP proxy tunnel
-	qtss_sprintf(sHTTPResponseHeaderBuf, sHTTPResponseFormatStr, "", "", "", QTSServerInterface::GetServerHeader().Ptr);
+	sprintf(sHTTPResponseHeaderBuf, sHTTPResponseFormatStr, "", "", "", QTSServerInterface::GetServerHeader().Ptr);
 	sHTTPResponseHeaderPtr.Len = ::strlen(sHTTPResponseHeaderBuf);
 	Assert(sHTTPResponseHeaderPtr.Len < kMaxHTTPResponseLen);
 
-	qtss_sprintf(sHTTPResponseNoServerHeaderBuf, sHTTPNoServerResponseFormatStr, "", "", "", "");
+	sprintf(sHTTPResponseNoServerHeaderBuf, sHTTPNoServerResponseFormatStr, "", "", "", "");
 	sHTTPResponseNoServerHeaderPtr.Len = ::strlen(sHTTPResponseNoServerHeaderBuf);
 	Assert(sHTTPResponseNoServerHeaderPtr.Len < kMaxHTTPResponseLen);
 }
@@ -1373,11 +1373,11 @@ QTSS_Error RTSPSession::PreFilterForHTTPProxyTunnel()
 			if (showServerInfo)
 			{
 				headerFieldPtr = QTSServerInterface::GetServerHeader().Ptr;
-				qtss_sprintf(responseHeaderBuf, sHTTPResponseFormatStr, "X-server-ip-address: ", localIPAddrBuf, "\r\n", headerFieldPtr);
+				sprintf(responseHeaderBuf, sHTTPResponseFormatStr, "X-server-ip-address: ", localIPAddrBuf, "\r\n", headerFieldPtr);
 			}
 			else
 			{
-				qtss_sprintf(responseHeaderBuf, sHTTPNoServerResponseFormatStr, "X-server-ip-address: ", localIPAddrBuf, "\r\n", headerFieldPtr);
+				sprintf(responseHeaderBuf, sHTTPNoServerResponseFormatStr, "X-server-ip-address: ", localIPAddrBuf, "\r\n", headerFieldPtr);
 			}
 			Assert(::strlen(responseHeaderBuf) < kMaxHTTPResponseLen);
 			fOutputStream.Put(responseHeaderBuf);
@@ -2019,7 +2019,7 @@ uint32_t RTSPSession::GenerateNewSessionID(char* ioBuffer)
 	int64_t theSessionID = (int64_t)theFirstRandom;
 	theSessionID <<= 32;
 	theSessionID += (int64_t)theSecondRandom;
-	qtss_sprintf(ioBuffer, "%" _64BITARG_ "d", theSessionID);
+	sprintf(ioBuffer, "%" _64BITARG_ "d", theSessionID);
 	Assert(::strlen(ioBuffer) < QTSS_MAX_SESSION_ID_LENGTH);
 	return ::strlen(ioBuffer);
 }

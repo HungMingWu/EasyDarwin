@@ -293,7 +293,7 @@ StrPtrLen*  Socket::GetLocalPortStr()
 	if (fPortStr.Len == kPortBufSizeInBytes)
 	{
 		int temp = ntohs(fLocalAddr.sin_port);
-		qtss_sprintf(fPortBuffer, "%d", temp);
+		sprintf(fPortBuffer, "%d", temp);
 		fPortStr.Len = ::strlen(fPortBuffer);
 	}
 	return &fPortStr;

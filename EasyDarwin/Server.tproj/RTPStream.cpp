@@ -266,7 +266,7 @@ RTPStream::RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession)
 	fFlowControlDurationMsec = 0;
 #endif
 	//format the ssrc as a string
-	qtss_sprintf(fSsrcString, "%"   _U32BITARG_   "", fSsrc);
+	sprintf(fSsrcString, "%"   _U32BITARG_   "", fSsrc);
 	fSsrcStringPtr.Len = ::strlen(fSsrcString);
 	Assert(fSsrcStringPtr.Len < kMaxSsrcSizeInBytes);
 
@@ -567,7 +567,7 @@ QTSS_Error RTPStream::Setup(RTSPRequestInterface* request, QTSS_AddStreamFlags i
 		{
 			char        url[256];
 			char        logfile[256];
-			qtss_sprintf(logfile, "resend_log_%"   _U32BITARG_   "", fSession->GetRTSPSession()->GetSessionID());
+			sprintf(logfile, "resend_log_%"   _U32BITARG_   "", fSession->GetRTSPSession()->GetSessionID());
 			StrPtrLen   logName(logfile);
 			fResender.SetLog(&logName);
 
@@ -660,8 +660,8 @@ void RTPStream::AppendTransport(RTSPRequestInterface* request)
 		{
 			char rtpPortStr[10];
 			char rtcpPortStr[10];
-			qtss_sprintf(rtpPortStr, "%u", request->GetSetUpServerPort());
-			qtss_sprintf(rtcpPortStr, "%u", request->GetSetUpServerPort() + 1);
+			sprintf(rtpPortStr, "%u", request->GetSetUpServerPort());
+			sprintf(rtcpPortStr, "%u", request->GetSetUpServerPort() + 1);
 			//printf(" RTPStream::AppendTransport rtpPort=%u rtcpPort=%u \n",request->GetSetUpServerPort(),request->GetSetUpServerPort()+1);
 			StrPtrLen rtpSPL(rtpPortStr);
 			StrPtrLen rtcpSPL(rtcpPortStr);
@@ -678,15 +678,15 @@ void RTPStream::AppendTransport(RTSPRequestInterface* request)
 	}
 	else if (fRTCPChannel < kNumPrebuiltChNums)
 		// We keep a certain number of channel number strings prebuilt, so most of the time
-		// we won't have to call qtss_sprintf
+		// we won't have to call sprintf
 		request->AppendTransportHeader(NULL, NULL, &sChannelNums[fRTPChannel], &sChannelNums[fRTCPChannel], NULL, ssrcPtr);
 	else
 	{
-		// If these channel numbers fall outside prebuilt range, we will have to call qtss_sprintf.
+		// If these channel numbers fall outside prebuilt range, we will have to call sprintf.
 		char rtpChannelBuf[10];
 		char rtcpChannelBuf[10];
-		qtss_sprintf(rtpChannelBuf, "%d", fRTPChannel);
-		qtss_sprintf(rtcpChannelBuf, "%d", fRTCPChannel);
+		sprintf(rtpChannelBuf, "%d", fRTPChannel);
+		sprintf(rtcpChannelBuf, "%d", fRTCPChannel);
 
 		StrPtrLen rtpChannel(rtpChannelBuf);
 		StrPtrLen rtcpChannel(rtcpChannelBuf);
@@ -702,7 +702,7 @@ void    RTPStream::AppendRTPInfo(QTSS_RTSPHeader inHeader, RTSPRequestInterface*
 	StrPtrLen rtpTimeBufPtr;
 	if (inFlags & qtssPlayRespWriteTrackInfo)
 	{
-		qtss_sprintf(rtpTimeBuf, "%"   _U32BITARG_   "", fFirstTimeStamp);
+		sprintf(rtpTimeBuf, "%"   _U32BITARG_   "", fFirstTimeStamp);
 		rtpTimeBufPtr.Set(rtpTimeBuf, ::strlen(rtpTimeBuf));
 		Assert(rtpTimeBufPtr.Len < 20);
 	}
@@ -711,7 +711,7 @@ void    RTPStream::AppendRTPInfo(QTSS_RTSPHeader inHeader, RTSPRequestInterface*
 	StrPtrLen seqNumberBufPtr;
 	if (inFlags & qtssPlayRespWriteTrackInfo)
 	{
-		qtss_sprintf(seqNumberBuf, "%u", fFirstSeqNumber);
+		sprintf(seqNumberBuf, "%u", fFirstSeqNumber);
 		seqNumberBufPtr.Set(seqNumberBuf, ::strlen(seqNumberBuf));
 		Assert(seqNumberBufPtr.Len < 20);
 	}

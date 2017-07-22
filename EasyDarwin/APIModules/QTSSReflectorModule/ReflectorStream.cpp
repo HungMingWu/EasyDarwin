@@ -1699,7 +1699,7 @@ int64_t ReflectorSocket::Run()
 	{
 		int32_t temp = (int32_t)(fSleepTime - theMilliseconds);
 		char tempBuf[20];
-		qtss_sprintf(tempBuf, "%" _S32BITARG_ "", temp);
+		sprintf(tempBuf, "%" _S32BITARG_ "", temp);
 		WarnV(fSleepTime <= theMilliseconds, tempBuf);
 	}
 #endif

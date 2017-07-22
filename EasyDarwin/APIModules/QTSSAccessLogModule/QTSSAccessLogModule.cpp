@@ -746,82 +746,82 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	char logBuffer[2048];
 	// compatible fields (no respMsgEncoded field)
 	::memset(logBuffer, 0, 2048);
-	qtss_sprintf(tempLogBuffer, "%s ", (remoteAddr.Ptr[0] == '\0') ? sVoidField : remoteAddr.Ptr); //c-ip*
+	sprintf(tempLogBuffer, "%s ", (remoteAddr.Ptr[0] == '\0') ? sVoidField : remoteAddr.Ptr); //c-ip*
 	::strcpy(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (theDateBuffer[0] == '\0') ? sVoidField : theDateBuffer);   //date* time*
+	sprintf(tempLogBuffer, "%s ", (theDateBuffer[0] == '\0') ? sVoidField : theDateBuffer);   //date* time*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (remoteDNS.Ptr[0] == '\0') ? sVoidField : remoteDNS.Ptr); //c-dns
+	sprintf(tempLogBuffer, "%s ", (remoteDNS.Ptr[0] == '\0') ? sVoidField : remoteDNS.Ptr); //c-dns
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (url.Ptr[0] == '\0') ? sVoidField : url.Ptr);   //cs-uri-stem*
+	sprintf(tempLogBuffer, "%s ", (url.Ptr[0] == '\0') ? sVoidField : url.Ptr);   //cs-uri-stem*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", startPlayTimeInSecs);  //c-starttime 
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", startPlayTimeInSecs);  //c-starttime 
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", theCreateTime == NULL ? (uint32_t)0 : (uint32_t)(QTSS_MilliSecsTo1970Secs(curTime)
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", theCreateTime == NULL ? (uint32_t)0 : (uint32_t)(QTSS_MilliSecsTo1970Secs(curTime)
 		- QTSS_MilliSecsTo1970Secs(*theCreateTime)));   //x-duration* 
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%" _S32BITARG_ " ", (uint32_t)1);  //c-rate
+	sprintf(tempLogBuffer, "%" _S32BITARG_ " ", (uint32_t)1);  //c-rate
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%" _S32BITARG_ " ", *theStatusCode);   //c-status*
+	sprintf(tempLogBuffer, "%" _S32BITARG_ " ", *theStatusCode);   //c-status*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (playerIDBuf[0] == '\0') ? sVoidField : playerIDBuf);   //c-playerid*
+	sprintf(tempLogBuffer, "%s ", (playerIDBuf[0] == '\0') ? sVoidField : playerIDBuf);   //c-playerid*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (playerVersionBuf[0] == '\0') ? sVoidField : playerVersionBuf); //c-playerversion
+	sprintf(tempLogBuffer, "%s ", (playerVersionBuf[0] == '\0') ? sVoidField : playerVersionBuf); //c-playerversion
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (playerLangBuf[0] == '\0') ? sVoidField : playerLangBuf);   //c-playerlanguage*
+	sprintf(tempLogBuffer, "%s ", (playerLangBuf[0] == '\0') ? sVoidField : playerLangBuf);   //c-playerlanguage*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (userAgent.Ptr[0] == '\0') ? sVoidField : userAgent.Ptr);   //cs(User-Agent) 
+	sprintf(tempLogBuffer, "%s ", (userAgent.Ptr[0] == '\0') ? sVoidField : userAgent.Ptr);   //cs(User-Agent) 
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (playerOSBuf[0] == '\0') ? sVoidField : playerOSBuf);   //c-os*
+	sprintf(tempLogBuffer, "%s ", (playerOSBuf[0] == '\0') ? sVoidField : playerOSBuf);   //c-os*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (playerOSVersBuf[0] == '\0') ? sVoidField : playerOSVersBuf);   //c-osversion
+	sprintf(tempLogBuffer, "%s ", (playerOSVersBuf[0] == '\0') ? sVoidField : playerOSVersBuf);   //c-osversion
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (playerCPUBuf[0] == '\0') ? sVoidField : playerCPUBuf); //c-cpu*
+	sprintf(tempLogBuffer, "%s ", (playerCPUBuf[0] == '\0') ? sVoidField : playerCPUBuf); //c-cpu*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%0.0f ", movieDuration == NULL ? zeroFloat : *movieDuration); //filelength in secs*
+	sprintf(tempLogBuffer, "%0.0f ", movieDuration == NULL ? zeroFloat : *movieDuration); //filelength in secs*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%" _64BITARG_ "d ", movieSizeInBytes == NULL ? zerouint64_t : *movieSizeInBytes); //filesize in bytes*
+	sprintf(tempLogBuffer, "%" _64BITARG_ "d ", movieSizeInBytes == NULL ? zerouint64_t : *movieSizeInBytes); //filesize in bytes*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", movieAverageBitRatePtr == NULL ? (uint32_t)0 : *movieAverageBitRatePtr);    //avgbandwidth in bits per second
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", movieAverageBitRatePtr == NULL ? (uint32_t)0 : *movieAverageBitRatePtr);    //avgbandwidth in bits per second
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", "RTP"); //protocol
+	sprintf(tempLogBuffer, "%s ", "RTP"); //protocol
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (theTransportType->Ptr[0] == '\0') ? sVoidField : theTransportType->Ptr);   //transport
+	sprintf(tempLogBuffer, "%s ", (theTransportType->Ptr[0] == '\0') ? sVoidField : theTransportType->Ptr);   //transport
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (audioPayloadName.Ptr[0] == '\0') ? sVoidField : audioPayloadName.Ptr); //audiocodec*
+	sprintf(tempLogBuffer, "%s ", (audioPayloadName.Ptr[0] == '\0') ? sVoidField : audioPayloadName.Ptr); //audiocodec*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (videoPayloadName.Ptr[0] == '\0') ? sVoidField : videoPayloadName.Ptr); //videocodec*
+	sprintf(tempLogBuffer, "%s ", (videoPayloadName.Ptr[0] == '\0') ? sVoidField : videoPayloadName.Ptr); //videocodec*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtpBytesSent == NULL ? (uint32_t)0 : *rtpBytesSent);    //sc-bytes*
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtpBytesSent == NULL ? (uint32_t)0 : *rtpBytesSent);    //sc-bytes*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtcpBytesRecv == NULL ? (uint32_t)0 : *rtcpBytesRecv);    //cs-bytes*
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtcpBytesRecv == NULL ? (uint32_t)0 : *rtcpBytesRecv);    //cs-bytes*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", clientBytesRecv);  //c-bytes
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", clientBytesRecv);  //c-bytes
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtpPacketsSent == NULL ? (uint32_t)0 : *rtpPacketsSent);   //s-pkts-sent*
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtpPacketsSent == NULL ? (uint32_t)0 : *rtpPacketsSent);   //s-pkts-sent*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", clientPacketsReceived);    //c-pkts-recieved
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", clientPacketsReceived);    //c-pkts-recieved
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", clientPacketsLost);    //c-pkts-lost-client*
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", clientPacketsLost);    //c-pkts-lost-client*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", (uint32_t)1);  //c-buffercount 
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", (uint32_t)1);  //c-buffercount 
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", clientBufferTime);     //c-totalbuffertime*
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", clientBufferTime);     //c-totalbuffertime*
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", qualityLevel); //c-quality 
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", qualityLevel); //c-quality 
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (localIPAddr.Ptr[0] == '\0') ? sVoidField : localIPAddr.Ptr);   //s-ip 
+	sprintf(tempLogBuffer, "%s ", (localIPAddr.Ptr[0] == '\0') ? sVoidField : localIPAddr.Ptr);   //s-ip 
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (localDNS.Ptr[0] == '\0') ? sVoidField : localDNS.Ptr); //s-dns
+	sprintf(tempLogBuffer, "%s ", (localDNS.Ptr[0] == '\0') ? sVoidField : localDNS.Ptr); //s-dns
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", numCurClients);    //s-totalclients
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", numCurClients);    //s-totalclients
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", cpuUtilized);  //s-cpu-util
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", cpuUtilized);  //s-cpu-util
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (urlQry.Ptr[0] == '\0') ? sVoidField : urlQry.Ptr); //cs-uri-query
+	sprintf(tempLogBuffer, "%s ", (urlQry.Ptr[0] == '\0') ? sVoidField : urlQry.Ptr); //cs-uri-query
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (lastUserName[0] == '\0') ? sVoidField : lastUserName); //c-username
+	sprintf(tempLogBuffer, "%s ", (lastUserName[0] == '\0') ? sVoidField : lastUserName); //c-username
 	::strcat(logBuffer, tempLogBuffer);
-	qtss_sprintf(tempLogBuffer, "%s ", (lastURLRealm[0] == '\0') ? sVoidField : lastURLRealm); //sc(Realm)
+	sprintf(tempLogBuffer, "%s ", (lastURLRealm[0] == '\0') ? sVoidField : lastURLRealm); //sc(Realm)
 	::strcat(logBuffer, tempLogBuffer);
 
 	::strcat(logBuffer, "\n");
@@ -909,7 +909,7 @@ time_t QTSSAccessLog::WriteLogHeader(FILE *inFile)
 		(void)QTSS_GetValuePtr(sServer, qtssSvrServerName, 0, (void**)&serverName.Ptr, &serverName.Len);
 		StrPtrLen serverVersion;
 		(void)QTSS_GetValuePtr(sServer, qtssSvrServerVersion, 0, (void**)&serverVersion.Ptr, &serverVersion.Len);
-		qtss_sprintf(tempBuffer, sLogHeader, serverName.Ptr, serverVersion.Ptr, theDateBuffer, sLogTimeInGMT ? "GMT" : "local time");
+		sprintf(tempBuffer, sLogHeader, serverName.Ptr, serverVersion.Ptr, theDateBuffer, sLogTimeInGMT ? "GMT" : "local time");
 		this->WriteToLog(tempBuffer, !kAllowLogToRoll);
 	}
 
@@ -930,7 +930,7 @@ void    WriteStartupMessage()
 
 	char tempBuffer[1024];
 	if (result)
-		qtss_sprintf(tempBuffer, "#Remark: Streaming beginning STARTUP %s\n", theDateBuffer);
+		sprintf(tempBuffer, "#Remark: Streaming beginning STARTUP %s\n", theDateBuffer);
 
 	// log startup message to error log as well.
 	if ((result) && (sAccessLog != NULL))
@@ -951,7 +951,7 @@ void    WriteShutdownMessage()
 
 	char tempBuffer[1024];
 	if (result)
-		qtss_sprintf(tempBuffer, "#Remark: Streaming beginning SHUTDOWN %s\n", theDateBuffer);
+		sprintf(tempBuffer, "#Remark: Streaming beginning SHUTDOWN %s\n", theDateBuffer);
 
 	if (result && sAccessLog != NULL)
 		sAccessLog->WriteToLog(tempBuffer, kAllowLogToRoll);

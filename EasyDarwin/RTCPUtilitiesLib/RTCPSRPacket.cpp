@@ -95,7 +95,7 @@ uint32_t RTCPSRPacket::GetACName(char* ioCNameBuffer)
 	ioCNameBuffer[0] = 1;
 
 	//Unique cname is constructed from the base name and the current time
-	qtss_sprintf(&ioCNameBuffer[1], " %s%" _64BITARG_ "d", sCNameBase, OS::Milliseconds() / 1000);
+	sprintf(&ioCNameBuffer[1], " %s%" _64BITARG_ "d", sCNameBase, OS::Milliseconds() / 1000);
 	uint32_t cNameLen = ::strlen(ioCNameBuffer);
 	//2nd byte of CName should be length
 	ioCNameBuffer[1] = (uint8_t)(cNameLen - 2);//don't count indicator or length byte
@@ -105,7 +105,7 @@ uint32_t RTCPSRPacket::GetACName(char* ioCNameBuffer)
 	// The RFC says that the item (the cName) should not be NULL terminated, but
 	// the chunk *must* be NULL terminated. And padded to a 32-bit boundary.
 	//
-	// qtss_sprintf already put a NULL terminator in the cName buffer. So all we have to
+	// sprintf already put a NULL terminator in the cName buffer. So all we have to
 	// do is pad out to the boundary.
 	cNameLen += 1; //add on the NULL character
 	uint32_t paddedLength = cNameLen + (4 - (cNameLen % 4));

@@ -1026,14 +1026,14 @@ void* QTSSCallbacks::Easy_GetRTSPPushSessions()
 
 	//char httpRoot[QTSS_MAX_NAME_LENGTH] = { 0 };
 
-	//qtss_sprintf(httpRoot, "%sMP4/%s/", rootdir, inSessionName);
+	//sprintf(httpRoot, "%sMP4/%s/", rootdir, inSessionName);
 
 	//char subDir[QTSS_MAX_NAME_LENGTH] = { 0 };
-	//qtss_sprintf(subDir, "%s/", inSessionName);
+	//sprintf(subDir, "%s/", inSessionName);
 
 	////char rootDir[QTSS_MAX_NAME_LENGTH] = { 0 };
-	////qtss_sprintf(rootDir,"%s/", movieFolder);
-	//qtss_sprintf(folder, "%sMP4/%s/", movieFolder, subDir);
+	////sprintf(rootDir,"%s/", movieFolder);
+	//sprintf(folder, "%sMP4/%s/", movieFolder, subDir);
 	//vector<FileAttributeInfo> list;
 
 	//vector<string> machList;

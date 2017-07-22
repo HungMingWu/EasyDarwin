@@ -251,7 +251,7 @@ QTSServerInterface::QTSServerInterface()
 	this->SetVal(qtssSvrNumThinned, &fNumThinned, sizeof(fNumThinned));
 	this->SetVal(qtssSvrNumThreads, &fNumThreads, sizeof(fNumThreads));
 
-	qtss_sprintf(fCloudServiceNodeID, "%s", EasyUtil::GetUUID().c_str());
+	sprintf(fCloudServiceNodeID, "%s", EasyUtil::GetUUID().c_str());
 
 	sServer = this;
 }

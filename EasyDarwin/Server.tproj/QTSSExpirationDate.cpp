@@ -53,7 +53,7 @@ void QTSSExpirationDate::PrintExpirationDate()
 void QTSSExpirationDate::sPrintExpirationDate(char* ioExpireMessage)
 {
 	if (sIsExpirationEnabled)
-		qtss_sprintf(ioExpireMessage, "Software expires on: %s\n", sExpirationDate);
+		sprintf(ioExpireMessage, "Software expires on: %s\n", sExpirationDate);
 }
 
 

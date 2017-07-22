@@ -39,8 +39,6 @@
 #include <net/if.h>
 #endif
 
-#include "ev.h"
-
 #include "OSHeaders.h"
 #include "MyAssert.h"
 #include "StrPtrLen.h"

@@ -41,7 +41,6 @@
 #endif
 
 #include "EventContext.h"
-#include "ev.h"
 
 #define SOCKET_DEBUG 0
 

@@ -14,12 +14,17 @@ include_directories(../../CommonUtilitiesLib
 					../
 					QTSSReflectorModule/
 					)
-
-add_subdirectory(QTSSAccessLogModule)
-add_subdirectory(QTSSFlowControlModule)
-add_subdirectory(QTSSReflectorModule)
-add_subdirectory(QTSSAccessModule)
+IF (MSVC)
+ELSE()
+add_subdirectory(QTSSAdminModule)
+add_subdirectory(QTSSWebDebugModule)
+ENDIF()
+# Common module
 add_subdirectory(EasyCMSModule)
 add_subdirectory(EasyRedisModule)
+add_subdirectory(QTSSAccessLogModule)
+add_subdirectory(QTSSAccessModule)
+add_subdirectory(QTSSFlowControlModule)
 add_subdirectory(QTSSPOSIXFileSysModule)
+add_subdirectory(QTSSReflectorModule)
 add_library (APIModules ${SRC})

@@ -34,7 +34,6 @@
 #include "OSThread.h"
 #include "Socket.h"
 #include "SocketUtils.h"
-#include "ev.h"
 #include "OSArrayObjectDeleter.h"
 #include "Task.h"
 #include "IdleTask.h"

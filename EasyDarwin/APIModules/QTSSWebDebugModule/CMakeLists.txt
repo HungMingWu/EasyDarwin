@@ -1,0 +1,3 @@
+set (SRC ${SRC} ${CMAKE_CURRENT_SOURCE_DIR}/QTSSWebDebugModule.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/QTSSWebDebugModule.h
+				PARENT_SCOPE) 

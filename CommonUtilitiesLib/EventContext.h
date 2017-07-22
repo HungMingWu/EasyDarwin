@@ -45,10 +45,8 @@
 #ifdef AVAILABLE_MAC_OS_X_VERSION_10_5_AND_LATER
 #include <sys/ev.h>
 #else
-#include "ev.h"
 #endif
 #else
-#include "ev.h"
 #include "epollEvent.h"
 #endif
 

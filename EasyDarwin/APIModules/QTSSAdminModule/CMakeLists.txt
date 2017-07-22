@@ -1,0 +1,11 @@
+set (SRC ${SRC} ${CMAKE_CURRENT_SOURCE_DIR}/AdminElementNode.cpp
+	 ${CMAKE_CURRENT_SOURCE_DIR}/AdminElementNode.h
+         ${CMAKE_CURRENT_SOURCE_DIR}/QTSSAdminModule.cpp
+         ${CMAKE_CURRENT_SOURCE_DIR}/QTSSAdminModule.h
+	 ${CMAKE_CURRENT_SOURCE_DIR}/AdminQuery.cpp
+	 ${CMAKE_CURRENT_SOURCE_DIR}/AdminQuery.h
+	 ${CMAKE_CURRENT_SOURCE_DIR}/frozen.c
+	 ${CMAKE_CURRENT_SOURCE_DIR}/frozen.h
+	 ${CMAKE_CURRENT_SOURCE_DIR}/mongoose.c
+	 ${CMAKE_CURRENT_SOURCE_DIR}/mongoose.h
+				PARENT_SCOPE) 

@@ -217,7 +217,7 @@ time_t QTSSMP3AccessLog::WriteLogHeader(FILE *inFile)
 		return -1;
 
 	char tempBuffer[1024] = { 0 };
-	qtss_strftime(tempBuffer, sizeof(tempBuffer), "#Log File Created On: %m/%d/%Y %H:%M:%S\n", theLocalTime);
+	strftime(tempBuffer, sizeof(tempBuffer), "#Log File Created On: %m/%d/%Y %H:%M:%S\n", theLocalTime);
 	this->WriteToLog(tempBuffer, !kAllowLogToRoll);
 	tempBuffer[0] = '\0';
 

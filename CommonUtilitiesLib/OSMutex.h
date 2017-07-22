@@ -53,7 +53,6 @@
 #include <unistd.h>
 
 #else
-#include "mymutex.h"
 #endif
 #endif
 

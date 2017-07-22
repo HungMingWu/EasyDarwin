@@ -77,8 +77,8 @@ void OSFileSource::SetLog(const char *inPath)
 		fFileLog = ::fopen(fFilePath, "w+");
 		if (fFileLog && IsValid())
 		{
-			qtss_fprintf(fFileLog, "%s", "QTFILE_READ_LOG\n");
-			qtss_fprintf(fFileLog, "size: %qu\n", GetLength());
+			fprintf(fFileLog, "%s", "QTFILE_READ_LOG\n");
+			fprintf(fFileLog, "size: %qu\n", GetLength());
 			printf("OSFileSource::SetLog=%s\n", fFilePath);
 
 		}
@@ -576,7 +576,7 @@ OS_Error OSFileSource::ReadFromPos(uint64_t inPosition, void* inBuffer, uint32_t
 		fFileLog = ::fopen(fFilePath, "a");
 		if (fFileLog)
 		{
-			qtss_fprintf(fFileLog, "read: %qu %"   _U32BITARG_   " %"   _U32BITARG_   "\n", inPosition, *outRcvLen, xTrackID);
+			fprintf(fFileLog, "read: %qu %"   _U32BITARG_   " %"   _U32BITARG_   "\n", inPosition, *outRcvLen, xTrackID);
 			::fclose(fFileLog);
 		}
 	}

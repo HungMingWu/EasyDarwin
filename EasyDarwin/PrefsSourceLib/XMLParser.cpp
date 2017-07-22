@@ -163,7 +163,7 @@ void XMLParser::WriteToFile(char** fileHeader)
 	if (theFile == NULL)
 		return;
 
-	qtss_fprintf(theFile, "%s", formatter.GetBufPtr());
+	fprintf(theFile, "%s", formatter.GetBufPtr());
 	::fclose(theFile);
 
 #if __MacOSX__

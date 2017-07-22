@@ -103,20 +103,20 @@ optiserr(int argc, char* const *argv, int oint, const char* optstr,
 {
 	if (opterr)
 	{
-		qtss_fprintf(stderr, "Error in argument %d, char %d: ", oint, optchr + 1);
+		fprintf(stderr, "Error in argument %d, char %d: ", oint, optchr + 1);
 		switch (err)
 		{
 		case OPTERRCOLON:
-			qtss_fprintf(stderr, ": in flags\n");
+			fprintf(stderr, ": in flags\n");
 			break;
 		case OPTERRNF:
-			qtss_fprintf(stderr, "option not found %c\n", argv[oint][optchr]);
+			fprintf(stderr, "option not found %c\n", argv[oint][optchr]);
 			break;
 		case OPTERRARG:
-			qtss_fprintf(stderr, "no argument for option %c\n", argv[oint][optchr]);
+			fprintf(stderr, "no argument for option %c\n", argv[oint][optchr]);
 			break;
 		default:
-			qtss_fprintf(stderr, "unknown\n");
+			fprintf(stderr, "unknown\n");
 			break;
 		}
 	}
@@ -241,7 +241,7 @@ main(int argc, char** argv)
 			errflg++;
 		}
 	if (errflg) {
-		(void)qtss_fprintf(stderr,
+		(void)fprintf(stderr,
 			"usage: cmd [-a|-b] [-o <filename>] files...\n");
 		exit(2);
 	}

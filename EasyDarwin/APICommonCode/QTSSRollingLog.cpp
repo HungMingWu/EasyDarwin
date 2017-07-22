@@ -91,7 +91,7 @@ void QTSSRollingLog::WriteToLog(char* inLogData, bool allowLogToRoll)
         
     if (fLog != nullptr)
     {
-        qtss_fprintf(fLog, "%s", inLogData);
+        fprintf(fLog, "%s", inLogData);
         ::fflush(fLog);
     }
     

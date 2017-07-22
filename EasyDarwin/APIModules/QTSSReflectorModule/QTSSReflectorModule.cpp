@@ -1101,8 +1101,8 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	FILE* theSDPFile = ::fopen(theFullPath.Ptr, "wb");//open 
 	if (theSDPFile != NULL)
 	{
-		qtss_fprintf(theSDPFile, "%s", sessionHeaders);
-		qtss_fprintf(theSDPFile, "%s", mediaHeaders);
+		fprintf(theSDPFile, "%s", sessionHeaders);
+		fprintf(theSDPFile, "%s", mediaHeaders);
 		::fflush(theSDPFile);
 		::fclose(theSDPFile);
 	}

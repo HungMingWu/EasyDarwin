@@ -354,11 +354,11 @@ void LogStatus(QTSS_ServerState theServerState)
 		::chmod(filePath, 0640);
 		for (i = 0; i < numHeaderLines; i++)
 		{
-			qtss_fprintf(statusFile, "%s\n", sPLISTHeader[i]);
+			fprintf(statusFile, "%s\n", sPLISTHeader[i]);
 		}
 
-		qtss_fprintf(statusFile, "%s\n", sPlistStart);
-		qtss_fprintf(statusFile, "%s\n", sDictStart);
+		fprintf(statusFile, "%s\n", sPlistStart);
+		fprintf(statusFile, "%s\n", sDictStart);
 
 		// show each element value
 		for (i = 0; i < numAttributes; i++)
@@ -366,15 +366,15 @@ void LogStatus(QTSS_ServerState theServerState)
 			(void)QTSS_GetValueAsString(sServer, QTSSModuleUtils::GetAttrID(sServer, sAttributes[i]), 0, &theAttributeValue);
 			if (theAttributeValue != NULL)
 			{
-				qtss_fprintf(statusFile, sKey, sAttributes[i]);
-				qtss_fprintf(statusFile, sValue, theAttributeValue);
+				fprintf(statusFile, sKey, sAttributes[i]);
+				fprintf(statusFile, sValue, theAttributeValue);
 				delete[] theAttributeValue;
 				theAttributeValue = NULL;
 			}
 		}
 
-		qtss_fprintf(statusFile, "%s\n", sDictEnd);
-		qtss_fprintf(statusFile, "%s\n\n", sPlistEnd);
+		fprintf(statusFile, "%s\n", sDictEnd);
+		fprintf(statusFile, "%s\n\n", sPlistEnd);
 
 		::fclose(statusFile);
 	}
@@ -383,8 +383,8 @@ void LogStatus(QTSS_ServerState theServerState)
 
 void print_status(FILE* file, FILE* console, char* format, char* theStr)
 {
-	if (file) qtss_fprintf(file, format, theStr);
-	if (console) qtss_fprintf(console, format, theStr);
+	if (file) fprintf(file, format, theStr);
+	if (console) fprintf(console, format, theStr);
 
 }
 

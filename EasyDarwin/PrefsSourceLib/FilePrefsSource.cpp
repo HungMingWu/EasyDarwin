@@ -355,7 +355,7 @@ void FilePrefsSource::WriteToConfigFile(const char* configFilePath)
 
 		while (keyValue != NULL)
 		{
-			(void)qtss_fprintf(fileDesc, "%s   %s\n\n", keyValue->fKey, keyValue->fValue);
+			(void)fprintf(fileDesc, "%s   %s\n\n", keyValue->fKey, keyValue->fValue);
 
 			keyValue = keyValue->fNext;
 		}

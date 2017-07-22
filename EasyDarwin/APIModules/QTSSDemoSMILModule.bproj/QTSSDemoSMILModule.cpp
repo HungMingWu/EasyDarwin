@@ -151,7 +151,7 @@ void WriteHitCountToFile()
     int i=0;
     for (i=0;gHitcountArray[i].url[0] && i<512; i++)
     {
-        qtss_fprintf(hitfile, "%s %d\n", gHitcountArray[i].url, gHitcountArray[i].hitcount);
+        fprintf(hitfile, "%s %d\n", gHitcountArray[i].url, gHitcountArray[i].hitcount);
     }
     
     fclose(hitfile);

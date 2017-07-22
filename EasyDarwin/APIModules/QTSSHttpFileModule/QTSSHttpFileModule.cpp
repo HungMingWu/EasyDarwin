@@ -513,7 +513,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
                                             ::memcpy(theFileBuffer, responseHeader->Ptr, responseHeader->Len);
                                             
                                             // We need content length string for logging purposes
-                                            qtss_sprintf(contentLength, "%"_64BITARG_"d", theFileLength);
+                                            sprintf(contentLength, "%"_64BITARG_"d", theFileLength);
                                             
                                             //Delete the http request object ...no use for it anymore
                                             delete httpRequest;
@@ -665,7 +665,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
                                             ::memcpy(theFileBuffer, responseHeader->Ptr, responseHeader->Len);  
                                             
                                             // We need content length string for logging purposes 
-                                            qtss_sprintf(contentLength, "%"_U32BITARG_"", moovLen);
+                                            sprintf(contentLength, "%"_U32BITARG_"", moovLen);
                                             
                                             //Delete the http request object ...no use for it anymore
                                             delete httpRequest;
@@ -716,7 +716,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
                                             ::memcpy(theFileBuffer + headerLength, refMovieBuf.GetObject(), index);
                                             
                                             // We need content length string for logging purposes 
-                                            qtss_sprintf(contentLength, "%"_U32BITARG_"", index);
+                                            sprintf(contentLength, "%"_U32BITARG_"", index);
                                             
                                             // Write the contents of the file buffer to the request stream and return
                                             QTSS_Write(theRequest, theFileBuffer, (headerLength + index), NULL, 0);
@@ -1231,7 +1231,7 @@ void LogRequest(QTSS_RTSPSessionObject inRTSPSession)
     contentLengthStr = *theContentLengthP;
     
     char tempLogBuffer[2048];
-    qtss_sprintf(tempLogBuffer, "%s %s %s %s \"%s\" %s %s\n",  
+    sprintf(tempLogBuffer, "%s %s %s %s \"%s\" %s %s\n",  
                                     (remoteAddr.Ptr[0] == '\0') ? sVoidField : remoteAddr.Ptr,
                                     sVoidField,
                                     sVoidField, 

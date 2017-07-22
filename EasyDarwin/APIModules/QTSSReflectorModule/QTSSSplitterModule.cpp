@@ -457,7 +457,7 @@ QTSS_Error HandleSourceInfoErr(QTSS_Error rtspSourceInfoErr, QTSS_StandardRTSP_P
     {
         // This happens if the remote host responded with an error.
         char tempBuf[20];
-        qtss_sprintf(tempBuf, "%"_U32BITARG_"", inClient->GetStatus());
+        sprintf(tempBuf, "%"_U32BITARG_"", inClient->GetStatus());
         StrPtrLen tempBufPtr(&tempBuf[0]);
         return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssServerGatewayTimeout,
                                                     sRemoteHostRespondedWithAnErrorErr, &tempBufPtr);

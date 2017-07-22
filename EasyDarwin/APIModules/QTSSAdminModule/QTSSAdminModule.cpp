@@ -461,7 +461,7 @@ void ReportErr(QTSS_Filter_Params* inParams, uint32_t err)
 
 	if (urlPtr && evalMessagePtr)
 	{
-		qtss_sprintf(temp, "(%"   _U32BITARG_   ")", err);
+		sprintf(temp, "(%"   _U32BITARG_   ")", err);
 		(void)QTSS_Write(inParams->inRTSPRequest, "error:", strlen("error:"), NULL, 0);
 		(void)QTSS_Write(inParams->inRTSPRequest, temp, strlen(temp), NULL, 0);
 		if (sQueryPtr->VerboseParam())

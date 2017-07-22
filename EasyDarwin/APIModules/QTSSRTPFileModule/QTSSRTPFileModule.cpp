@@ -661,7 +661,7 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParamBlock)
         //
         // If our speed is not 1, append the RTSP speed header in the response
         char speedBuf[32];
-        qtss_sprintf(speedBuf, "%10.5f", theSpeed);
+        sprintf(speedBuf, "%10.5f", theSpeed);
         StrPtrLen speedBufPtr(speedBuf);
         (void)QTSS_AppendRTSPHeader(inParamBlock->inRTSPRequest, qtssSpeedHeader,
                                     speedBufPtr.Ptr, speedBufPtr.Len);

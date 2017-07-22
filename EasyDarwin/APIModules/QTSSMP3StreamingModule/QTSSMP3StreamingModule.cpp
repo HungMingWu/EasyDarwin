@@ -231,7 +231,7 @@ time_t QTSSMP3AccessLog::WriteLogHeader(FILE *inFile)
 		(void)QTSS_GetValuePtr(sServer, qtssSvrServerName, 0, (void**)&serverName.Ptr, &serverName.Len);
 		StrPtrLen serverVersion;
 		(void)QTSS_GetValuePtr(sServer, qtssSvrServerVersion, 0, (void**)&serverVersion.Ptr, &serverVersion.Len);
-		qtss_sprintf(tempBuffer, sLogHeader, serverName.Ptr, serverVersion.Ptr,
+		sprintf(tempBuffer, sLogHeader, serverName.Ptr, serverVersion.Ptr,
 			theDateBuffer, sLogTimeInGMT ? "GMT" : "local time");
 		this->WriteToLog(tempBuffer, !kAllowLogToRoll);
 	}
@@ -757,7 +757,7 @@ QTSS_Error MP3ClientSession::SendResponse()
 		if (fWantsMetaData)
 		{
 			// add the "icy-metaint:xxxx" parameter to the header.
-			qtss_sprintf(buffer, "icy-metaint:%d\r\n", kClientMetaInt);
+			sprintf(buffer, "icy-metaint:%d\r\n", kClientMetaInt);
 			::strcat(fHeader, buffer);
 		}
 		len = ::strlen(fHeader);
@@ -977,7 +977,7 @@ QTSS_Error MP3ClientSession::SendMetaData()
 		// first value in the buffer is the number of 16 byte chunks
 		// to send.
 		char tmp[512];
-		qtss_sprintf(tmp, "StreamTitle='%s';StreamUrl='';", fSongName);
+		sprintf(tmp, "StreamTitle='%s';StreamUrl='';", fSongName);
 		bufferlen = ::strlen(tmp);
 		buffer[0] = (unsigned char)((bufferlen / 16) + 1);
 		::strcat(buffer, tmp);
@@ -1822,8 +1822,8 @@ QTSS_Error Initialize(QTSS_Initialize_Params* inParams)
 	sAtomicMutex = NEW OSMutex();
 
 	// pre-format the standard HTTP reply headers
-	qtss_sprintf(gClientAcceptHeader, kClientAcceptHeader, kVersionString, kBuildString);
-	qtss_sprintf(gM3UReplyHeader, kM3UReplyHeader, kVersionString, kBuildString);
+	sprintf(gClientAcceptHeader, kClientAcceptHeader, kVersionString, kBuildString);
+	sprintf(gM3UReplyHeader, kM3UReplyHeader, kVersionString, kBuildString);
 
 	sMP3AccessLog = NEW QTSSMP3AccessLog();
 
@@ -2533,7 +2533,7 @@ void    WriteStartupMessage()
 
 	char tempBuffer[1024];
 	if (result)
-		qtss_sprintf(tempBuffer, "#Remark: Streaming beginning STARTUP %s\n", theDateBuffer);
+		sprintf(tempBuffer, "#Remark: Streaming beginning STARTUP %s\n", theDateBuffer);
 
 	// log startup message to error log as well.
 	if ((result) && (sMP3AccessLog != NULL))
@@ -2553,7 +2553,7 @@ void    WriteShutdownMessage()
 
 	char tempBuffer[1024];
 	if (result)
-		qtss_sprintf(tempBuffer, "#Remark: Streaming beginning SHUTDOWN %s\n", theDateBuffer);
+		sprintf(tempBuffer, "#Remark: Streaming beginning SHUTDOWN %s\n", theDateBuffer);
 
 	if (result && sMP3AccessLog != NULL)
 		sMP3AccessLog->WriteToLog(tempBuffer, kAllowLogToRoll);
@@ -2615,7 +2615,7 @@ QTSS_Error LogRequest(QTSS_RTSPSessionObject inRTSPSession, MP3ClientSession* cl
 	reqResult = client->GetResult();
 
 	// Format the access log entry parameters here...
-	qtss_sprintf(logbuffer, "%s \"%s\" [%s] \"%s\" %d %" _S32BITARG_ " %" _S32BITARG_ "\n",
+	sprintf(logbuffer, "%s \"%s\" [%s] \"%s\" %d %" _S32BITARG_ " %" _S32BITARG_ "\n",
 		remoteAddress,
 		userAgent,
 		theDateBuffer,

@@ -310,11 +310,11 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 
 	if (refreshInterval > 0)
 	{
-		qtss_sprintf(buffer, "<META HTTP-EQUIV=Refresh CONTENT=%"   _U32BITARG_   ">\n", refreshInterval);
+		sprintf(buffer, "<META HTTP-EQUIV=Refresh CONTENT=%"   _U32BITARG_   ">\n", refreshInterval);
 		(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 	}
 
-	//qtss_sprintf(buffer, "<body text=\"#000000\" bgcolor=\"#C0C0C0\" link=\"#0000FF\" vlink=\"#551A8B\" alink=\"#0000FF\">\n");
+	//sprintf(buffer, "<body text=\"#000000\" bgcolor=\"#C0C0C0\" link=\"#0000FF\" vlink=\"#551A8B\" alink=\"#0000FF\">\n");
 	//(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 
 	char *theHTML = "<HTML><BODY>\n";
@@ -357,7 +357,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 
 		for (short i = 0; i < kMaxFieldNum; i++)
 		{
-			qtss_sprintf(buffer, "<DT><I>%s</I></DT>\n", kFieldIndexes[i].fieldName);
+			sprintf(buffer, "<DT><I>%s</I></DT>\n", kFieldIndexes[i].fieldName);
 			(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 		}
 
@@ -431,7 +431,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 
 				if (theDNS.Ptr != NULL)
 				{
-					qtss_sprintf(buffer, "<b>DNS Name (default): </b> %s<BR>\n", theDNS.Ptr);
+					sprintf(buffer, "<b>DNS Name (default): </b> %s<BR>\n", theDNS.Ptr);
 					(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 				}
 			}
@@ -441,7 +441,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 			{
 				char uptimebuffer[1024];
 				time_t curTime = ::time(NULL);
-				qtss_sprintf(uptimebuffer, "<b>Current Time: </b> %s<BR>\n", qtss_ctime(&curTime, buffer, sizeof(buffer)));
+				sprintf(uptimebuffer, "<b>Current Time: </b> %s<BR>\n", qtss_ctime(&curTime, buffer, sizeof(buffer)));
 				(void)QTSS_Write(inStream, uptimebuffer, ::strlen(uptimebuffer), NULL, 0);
 
 				time_t upTime = curTime - sStartupTime;
@@ -476,7 +476,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				Assert(theVersion.Ptr != NULL);
 				if (theVersion.Len > 7) //Skip the "Server:" text
 					theVersion.Ptr += 7;
-				qtss_sprintf(buffer, "<b>Server Version: </b>%s<BR>\n", theVersion.Ptr);
+				sprintf(buffer, "<b>Server Version: </b>%s<BR>\n", theVersion.Ptr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -486,7 +486,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				StrPtrLen theBuildDate;
 				(void)QTSS_GetValuePtr(sServer, qtssSvrServerBuildDate, 0, (void**)&theBuildDate.Ptr, &theBuildDate.Len);
 				Assert(theBuildDate.Ptr != NULL);
-				qtss_sprintf(buffer, "<b>Server Build Date: </b> %s<BR>\n", theBuildDate.Ptr);
+				sprintf(buffer, "<b>Server Build Date: </b> %s<BR>\n", theBuildDate.Ptr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -566,7 +566,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 14:
 			{
 				(void)QTSS_GetValueAsString(sServer, qtssRTPSvrCurConn, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Current RTP Connections: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Current RTP Connections: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -574,7 +574,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 15:
 			{
 				(void)QTSS_GetValueAsString(sServer, qtssRTSPCurrentSessionCount, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Current RTSP Connections: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Current RTSP Connections: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -582,7 +582,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 16:
 			{
 				(void)QTSS_GetValueAsString(sServer, qtssRTSPHTTPCurrentSessionCount, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Current RTSP over HTTP Connections: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Current RTSP over HTTP Connections: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -593,7 +593,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				theLen = sizeof(curBandwidth);
 				(void)QTSS_GetValue(sServer, qtssRTPSvrCurBandwidth, 0, &curBandwidth, &theLen);
 
-				qtss_sprintf(buffer, "<b>Current Throughput: </b> %"   _U32BITARG_   " kbits<BR>\n", curBandwidth / 1024);
+				sprintf(buffer, "<b>Current Throughput: </b> %"   _U32BITARG_   " kbits<BR>\n", curBandwidth / 1024);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -601,7 +601,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 18:
 			{
 				(void)QTSS_GetValueAsString(sServer, qtssRTPSvrCurPackets, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Current Packets Per Second: </b> %s <BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Current Packets Per Second: </b> %s <BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -609,7 +609,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 19:
 			{
 				(void)QTSS_GetValueAsString(sServer, qtssRTPSvrTotalBytes, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Total Bytes Served: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Total Bytes Served: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -617,7 +617,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 20:
 			{
 				(void)QTSS_GetValueAsString(sServer, qtssRTPSvrTotalConn, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Total Connections: </b> %s<BR>", thePrefStr);
+				sprintf(buffer, "<b>Total Connections: </b> %s<BR>", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -632,7 +632,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 22:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsMaximumConnections, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Maximum Connections: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Maximum Connections: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -640,7 +640,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 23:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsMaximumBandwidth, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Maximum Throughput: </b> %s Kbits<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Maximum Throughput: </b> %s Kbits<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -648,7 +648,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 24:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsMovieFolder, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Movie Folder Path: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Movie Folder Path: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -656,7 +656,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 25:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsRTSPIPAddr, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>RTSP IP Address: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>RTSP IP Address: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -675,7 +675,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 
 					Assert(thePort.Ptr != NULL);
 					char temp[20];
-					qtss_sprintf(temp, "%u ", *(UInt16*)thePort.Ptr);
+					sprintf(temp, "%u ", *(UInt16*)thePort.Ptr);
 					(void)QTSS_Write(inStream, temp, ::strlen(temp), NULL, 0);
 				}
 
@@ -687,7 +687,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 27:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsRTSPTimeout, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>RTP Timeout: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>RTP Timeout: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -695,7 +695,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 28:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsRTPSessionTimeout, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>RTP Timeout: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>RTP Timeout: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -717,7 +717,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				if (sAccessLogPrefs != NULL)
 				{
 					thePrefStr = GetPrefAsString(sAccessLogPrefs, "request_logging");
-					qtss_sprintf(buffer, "<b>Access Logging: </b> %s<BR>\n", thePrefStr);
+					sprintf(buffer, "<b>Access Logging: </b> %s<BR>\n", thePrefStr);
 					(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 				}
 			}
@@ -728,7 +728,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				if (sAccessLogPrefs != NULL)
 				{
 					thePrefStr = GetPrefAsString(sAccessLogPrefs, "request_logfile_dir");
-					qtss_sprintf(buffer, "<b>Access Log Directory: </b> %s<BR>\n", thePrefStr);
+					sprintf(buffer, "<b>Access Log Directory: </b> %s<BR>\n", thePrefStr);
 					(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 				}
 			}
@@ -739,7 +739,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				if (sAccessLogPrefs != NULL)
 				{
 					thePrefStr = GetPrefAsString(sAccessLogPrefs, "request_logfile_name");
-					qtss_sprintf(buffer, "<b>Access Log Name: </b> %s<BR>\n", thePrefStr);
+					sprintf(buffer, "<b>Access Log Name: </b> %s<BR>\n", thePrefStr);
 					(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 				}
 			}
@@ -750,7 +750,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				if (sAccessLogPrefs != NULL)
 				{
 					thePrefStr = GetPrefAsString(sAccessLogPrefs, "request_logfile_size");
-					qtss_sprintf(buffer, "<b>Access Log Roll Size: </b> %s<BR>\n", thePrefStr);
+					sprintf(buffer, "<b>Access Log Roll Size: </b> %s<BR>\n", thePrefStr);
 					(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 				}
 			}
@@ -761,7 +761,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				if (sAccessLogPrefs != NULL)
 				{
 					thePrefStr = GetPrefAsString(sAccessLogPrefs, "request_logfile_interval");
-					qtss_sprintf(buffer, "<b>Access Log Roll Interval (days): </b> %s<BR>", thePrefStr);
+					sprintf(buffer, "<b>Access Log Roll Interval (days): </b> %s<BR>", thePrefStr);
 					(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 				}
 			}
@@ -776,7 +776,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 37:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsErrorLogEnabled, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Error Logging: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Error Logging: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -784,7 +784,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 38:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsErrorLogDir, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Error Log Directory: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Error Log Directory: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -792,7 +792,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 39:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsErrorLogName, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Error Log Name: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Error Log Name: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -800,7 +800,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 40:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsMaxErrorLogSize, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Error Log Roll Size: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Error Log Roll Size: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -808,7 +808,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 41:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsErrorRollInterval, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Error Log Roll Interval (days): </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Error Log Roll Interval (days): </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -816,7 +816,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 42:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsErrorLogVerbosity, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Error Log Verbosity: </b> %s<BR>", thePrefStr);
+				sprintf(buffer, "<b>Error Log Verbosity: </b> %s<BR>", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -830,7 +830,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 44:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsBreakOnAssert, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Break On Assert: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Break On Assert: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -838,7 +838,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 45:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsAutoRestart, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>AutoStart: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>AutoStart: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -846,7 +846,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 46:
 			{
 				(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsTotalBytesUpdate, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Total Bytes Update Interval: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Total Bytes Update Interval: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -856,7 +856,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				if (sReflectorPrefs != NULL)
 				{
 					thePrefStr = GetPrefAsString(sReflectorPrefs, "reflector_delay");
-					qtss_sprintf(buffer, "<b>Reflector Delay Time: </b> %s<BR>\n", thePrefStr);
+					sprintf(buffer, "<b>Reflector Delay Time: </b> %s<BR>\n", thePrefStr);
 					(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 				}
 			}
@@ -867,7 +867,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				if (sReflectorPrefs != NULL)
 				{
 					thePrefStr = GetPrefAsString(sReflectorPrefs, "reflector_bucket_size");
-					qtss_sprintf(buffer, "<b>Reflector Bucket Size: </b> %s<BR>\n", thePrefStr);
+					sprintf(buffer, "<b>Reflector Bucket Size: </b> %s<BR>\n", thePrefStr);
 					(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 				}
 			}
@@ -878,7 +878,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				if (sSvrControlPrefs != NULL)
 				{
 					thePrefStr = GetPrefAsString(sSvrControlPrefs, "history_update_interval");
-					qtss_sprintf(buffer, "<b>History Update Interval: </b> %s<BR>\n", thePrefStr);
+					sprintf(buffer, "<b>History Update Interval: </b> %s<BR>\n", thePrefStr);
 					(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 				}
 			}
@@ -890,7 +890,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				theLen = sizeof(isOutOfDescriptors);
 				(void)QTSS_GetValue(sServer, qtssSvrIsOutOfDescriptors, 0, &isOutOfDescriptors, &theLen);
 
-				qtss_sprintf(buffer, "<b>Out of file descriptors: </b> %d<BR>\n", isOutOfDescriptors);
+				sprintf(buffer, "<b>Out of file descriptors: </b> %d<BR>\n", isOutOfDescriptors);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -898,7 +898,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 51:
 			{
 				(void)QTSS_GetValueAsString(sServer, qtssRTPSvrNumUDPSockets, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Number of UDP sockets: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Number of UDP sockets: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -908,7 +908,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				UInt32 apiVersion = 0;
 				UInt32 size = sizeof(UInt32);
 				(void)QTSS_GetValue(sServer, qtssServerAPIVersion, 0, &apiVersion, &size);
-				qtss_sprintf(buffer, "<b>API version: </b> %d.%d<BR>\n", (int)((UInt32)(apiVersion & (UInt32)0xFFFF0000L) >> 16), (int)(apiVersion &(UInt32)0x0000FFFFL));
+				sprintf(buffer, "<b>API version: </b> %d.%d<BR>\n", (int)((UInt32)(apiVersion & (UInt32)0xFFFF0000L) >> 16), (int)(apiVersion &(UInt32)0x0000FFFFL));
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -918,7 +918,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				UInt32 reliableUDPBuffers = 0;
 				UInt32 blahSize = sizeof(reliableUDPBuffers);
 				(void)QTSS_GetValue(sServer, qtssSvrNumReliableUDPBuffers, 0, &reliableUDPBuffers, &blahSize);
-				qtss_sprintf(buffer, "<b>Num Reliable UDP Retransmit Buffers: </b> %"   _U32BITARG_   "<BR>\n", reliableUDPBuffers);
+				sprintf(buffer, "<b>Num Reliable UDP Retransmit Buffers: </b> %"   _U32BITARG_   "<BR>\n", reliableUDPBuffers);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -928,7 +928,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				UInt32 wastedBufSpace = 0;
 				UInt32 blahSize2 = sizeof(wastedBufSpace);
 				(void)QTSS_GetValue(sServer, qtssSvrReliableUDPWastageInBytes, 0, &wastedBufSpace, &blahSize2);
-				qtss_sprintf(buffer, "<b>Amount of buffer space being wasted in UDP Retrans buffers: </b> %"   _U32BITARG_   "<BR>\n", wastedBufSpace);
+				sprintf(buffer, "<b>Amount of buffer space being wasted in UDP Retrans buffers: </b> %"   _U32BITARG_   "<BR>\n", wastedBufSpace);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;
@@ -936,7 +936,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 		case 55:
 			{
 				(void)QTSS_GetValueAsString(sServer, qtssSvrNumThreads, 0, &thePrefStr);
-				qtss_sprintf(buffer, "<b>Number of Task Threads: </b> %s<BR>\n", thePrefStr);
+				sprintf(buffer, "<b>Number of Task Threads: </b> %s<BR>\n", thePrefStr);
 				(void)QTSS_Write(inStream, buffer, ::strlen(buffer), NULL, 0);
 			}
 			break;

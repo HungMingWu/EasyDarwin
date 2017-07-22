@@ -239,20 +239,20 @@ int RTSPRecordSession::CreateNewMp4Writer(int sample_rate,int channels) {
 	GetLocalTime(&sys);
 	char fPlayName[QTSS_MAX_NAME_LENGTH] = { 0 };
 	char subDir[QTSS_MAX_NAME_LENGTH] = { 0 };
-	qtss_sprintf(subDir, "%s/", fSubName.c_str());
+	sprintf(subDir, "%s/", fSubName.c_str());
 
 	//char rootDir[QTSS_MAX_FILE_NAME_LENGTH] = { 0 };
-	//qtss_sprintf(rootDir,"%s/", movieFolder);
+	//sprintf(rootDir,"%s/", movieFolder);
 
 	memset(fPlayName, 0, QTSS_MAX_NAME_LENGTH);
 
-	//qtss_sprintf(rootDir,"%s/%s/%4d%02d%02d_%02d%02d%02d.mp4", movieFolder,subDir,sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond);
+	//sprintf(rootDir,"%s/%s/%4d%02d%02d_%02d%02d%02d.mp4", movieFolder,subDir,sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond);
 
-	qtss_sprintf(fPlayName, "%s/MP4/", movieFolder);
+	sprintf(fPlayName, "%s/MP4/", movieFolder);
 	mkdir(fPlayName);
-	qtss_sprintf(fPlayName, "%s/MP4/%s/", movieFolder, subDir);
+	sprintf(fPlayName, "%s/MP4/%s/", movieFolder, subDir);
 	mkdir(fPlayName);
-	qtss_sprintf(fPlayName, "%s/MP4/%s/%4d%02d%02d_%02d%02d%02d.mp4", movieFolder, subDir, sys.wYear, sys.wMonth, sys.wDay, sys.wHour, sys.wMinute, sys.wSecond);
+	sprintf(fPlayName, "%s/MP4/%s/%4d%02d%02d_%02d%02d%02d.mp4", movieFolder, subDir, sys.wYear, sys.wMonth, sys.wDay, sys.wHour, sys.wMinute, sys.wSecond);
 
 	//fileName("./xmgj_%4d%02d%02d_%02d%02d%02d.mp4",sys.wYear,sys.wMonth,sys.wDay,sys.wHour,sys.wMinute, sys.wSecond);
 	fCreateTime = OS::Milliseconds();

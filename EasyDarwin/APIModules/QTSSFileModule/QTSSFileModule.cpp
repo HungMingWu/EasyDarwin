@@ -785,7 +785,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParamBlock)
 
 		// the first number is the NTP time used for the session identifier (this changes for each request)
 		// the second number is the NTP date time of when the file was modified (this changes when the file changes)
-		qtss_sprintf(ownerLine, "o=StreamingServer %" _64BITARG_ "d %" _64BITARG_ "d IN IP4 %s", (SInt64)OS::UnixTime_Secs() + 2208988800LU, (SInt64)theFile->fFile.GetQTFile()->GetModDate(), ipCstr);
+		sprintf(ownerLine, "o=StreamingServer %" _64BITARG_ "d %" _64BITARG_ "d IN IP4 %s", (SInt64)OS::UnixTime_Secs() + 2208988800LU, (SInt64)theFile->fFile.GetQTFile()->GetModDate(), ipCstr);
 		Assert(ownerLine[sLineSize - 1] == 0);
 
 		StrPtrLen ownerStr(ownerLine);
@@ -849,7 +849,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParamBlock)
 			bufferDelay += sAddClientBufferDelaySecs;
 
 
-			qtss_sprintf(tempBufferDelay, "a=x-bufferdelay:%.2f", bufferDelay);
+			sprintf(tempBufferDelay, "a=x-bufferdelay:%.2f", bufferDelay);
 			bufferDelayStr.Set(tempBufferDelay);
 
 			theFullSDPBuffer.Put(bufferDelayStr);
@@ -1422,7 +1422,7 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParamBlock)
 		//
 		// If our speed is not 1, append the RTSP speed header in the response
 		char speedBuf[32];
-		qtss_sprintf(speedBuf, "%10.5f", theSpeed);
+		sprintf(speedBuf, "%10.5f", theSpeed);
 		StrPtrLen speedBufPtr(speedBuf);
 		(void)QTSS_AppendRTSPHeader(inParamBlock->inRTSPRequest, qtssSpeedHeader,
 			speedBufPtr.Ptr, speedBufPtr.Len);
@@ -1439,7 +1439,7 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParamBlock)
 	if (theBackupTime > 0)
 	{
 		char prebufferBuf[32];
-		qtss_sprintf(prebufferBuf, "time=%.5f", theBackupTime);
+		sprintf(prebufferBuf, "time=%.5f", theBackupTime);
 		StrPtrLen backupTimePtr(prebufferBuf);
 		(void)QTSS_AppendRTSPHeader(inParamBlock->inRTSPRequest, qtssXPreBufferHeader,
 			backupTimePtr.Ptr, backupTimePtr.Len);

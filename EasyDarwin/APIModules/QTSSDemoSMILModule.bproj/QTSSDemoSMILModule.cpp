@@ -247,7 +247,7 @@ void GenerateHotHitSMIL(char* buffer)
     {
         char saveCh = p[2];
         p[2] = '\0';
-        int len = qtss_sprintf(bufferCursor, templateCursor, gHitcountArray[hitNum++].url);
+        int len = sprintf(bufferCursor, templateCursor, gHitcountArray[hitNum++].url);
         p[2] = saveCh;
         bufferCursor += len;
         templateCursor = &p[2];
@@ -392,7 +392,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 
     GenerateHotHitSMIL(smilFileBuf);
                 
-    qtss_sprintf(contentLength, "%"_U32BITARG_"", (UInt32) ::strlen(smilFileBuf));
+    sprintf(contentLength, "%"_U32BITARG_"", (UInt32) ::strlen(smilFileBuf));
     // Allocate memory for theFileBuffer
     // Write the HTTP header prefix into the buffer
     ::strcpy(theFileBuffer, sRespHeaderPrefix.Ptr);

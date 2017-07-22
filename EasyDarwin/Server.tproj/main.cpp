@@ -573,7 +573,7 @@ int main(int argc, char * argv[])
 #ifdef __hpux__  
 	// Set Priority Type to Real Time, timeslice = 100 milliseconds. Change the timeslice upwards as needed. This keeps the server priority above the playlist broadcaster which is a time-share scheduling type.
 	char commandStr[64];
-	qtss_sprintf(commandStr, "/usr/bin/rtprio -t -%d", (int) getpid()); 
+	sprintf(commandStr, "/usr/bin/rtprio -t -%d", (int) getpid()); 
 #if DEBUG
 	printf("setting priority to Real Time: %s\n", commandStr);
 #endif
@@ -583,7 +583,7 @@ int main(int argc, char * argv[])
 #ifdef __solaris__  
     // Set Priority Type to Real Time, timeslice = 100 milliseconds. Change the timeslice upwards as needed. This keeps the server priority above the playlist broadcaster which is a time-share scheduling type.
     char commandStr[64];
-    qtss_sprintf(commandStr, "priocntl -s -c RT -t 10 -i pid %d", (int) getpid()); 
+    sprintf(commandStr, "priocntl -s -c RT -t 10 -i pid %d", (int) getpid()); 
     (void) ::system(commandStr);    
 #endif
 

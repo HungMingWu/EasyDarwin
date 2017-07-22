@@ -536,7 +536,7 @@ QTSS_Error  DoRequestPreProcessing(ProxyClientInfo* inProxyClientInfo,
         // Build a new Transport header
         UInt16 theRTPPort = theProxyDemuxerTask->GetSockets()->GetSocketA()->GetLocalPort();
         
-        qtss_sprintf(theTransportHeaderBuf, "Transport: RTP/AVP;unicast;client_port=%d-%d\r\n", theRTPPort, theRTPPort + 1);
+        sprintf(theTransportHeaderBuf, "Transport: RTP/AVP;unicast;client_port=%d-%d\r\n", theRTPPort, theRTPPort + 1);
         theTransportHeader.Len = ::strlen(theTransportHeaderBuf);
     }
     
@@ -592,7 +592,7 @@ QTSS_Error  DoRequestPostProcessing(ProxyClientInfo* inProxyClientInfo, QTSS_RTS
         Assert(theErr == QTSS_NoErr);
         theIPAddrStr[theLen] = '\0';
         
-        qtss_sprintf(theTransportHeader.Ptr, "Transport: RTP/AVP;unicast;client_port=%d-%d;server_port=%d-%d;source=%s\r\n",
+        sprintf(theTransportHeader.Ptr, "Transport: RTP/AVP;unicast;client_port=%d-%d;server_port=%d-%d;source=%s\r\n",
             theCliRTPPort, theCliRTPPort + 1, theSvrRTPPort, theSvrRTPPort + 1, theIPAddrStr);
         
         theTransportHeader.Len = ::strlen(theTransportHeader.Ptr);

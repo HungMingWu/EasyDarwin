@@ -382,7 +382,7 @@ uint32_t QueryURI::CheckInvalidIterator(char* evalMessageBuff)
 	{
 		result = 405;
 		static char *message = "* iterator not valid";
-		qtss_sprintf(evalMessageBuff, "%s", message);
+		sprintf(evalMessageBuff, "%s", message);
 	}
 
 	return result;
@@ -399,7 +399,7 @@ uint32_t QueryURI::CheckInvalidArrayIterator(char* evalMessageBuff)
 	{
 		result = 405;
 		static char *message = ": array iterator not valid";
-		qtss_sprintf(evalMessageBuff, "%s", message);
+		sprintf(evalMessageBuff, "%s", message);
 	}
 
 	return result;
@@ -414,7 +414,7 @@ uint32_t QueryURI::CheckInvalidRecurseParam(char* evalMessageBuff)
 	{
 		result = 405;
 		static char *message = "(r)ecurse parameter not valid";
-		qtss_sprintf(evalMessageBuff, "%s", message);
+		sprintf(evalMessageBuff, "%s", message);
 	}
 
 	return result;
@@ -435,7 +435,7 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 		switch (*forceResultPtr)
 		{
 		case 404:
-			qtss_sprintf(fQueryMessageBuff, "reason=\"No data found\"");
+			sprintf(fQueryMessageBuff, "reason=\"No data found\"");
 			fQueryEvalMessage.Set(fQueryMessageBuff, strlen(fQueryMessageBuff));
 			break;
 
@@ -446,12 +446,12 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 			{
 				if (commandPtr)
 				{
-					qtss_sprintf(fQueryMessageBuff, "reason=\"%s for command %s\"", forceMessagePtr, commandPtr->Ptr);
+					sprintf(fQueryMessageBuff, "reason=\"%s for command %s\"", forceMessagePtr, commandPtr->Ptr);
 				}
 			}
 			else
 			{
-				qtss_sprintf(fQueryMessageBuff, "reason=\"%s for command %s\"", forceMessagePtr, QueryURI::sCommandDefs[GetCommandID()]);
+				sprintf(fQueryMessageBuff, "reason=\"%s for command %s\"", forceMessagePtr, QueryURI::sCommandDefs[GetCommandID()]);
 			}
 			}
 
@@ -469,7 +469,7 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 				{
 					result = 400;
 					static char *message = "reason=\"command parameter is missing\"";
-					qtss_sprintf(evalMessageBuff, "%s", message);
+					sprintf(evalMessageBuff, "%s", message);
 					fQueryEvalMessage.Set(evalMessageBuff, strlen(evalMessageBuff));
 					fQueryEvalResult = result;
 					return result;
@@ -483,7 +483,7 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 				{
 					result = 400;
 					static char *message = "No value";
-					qtss_sprintf(evalMessageBuff, "%s", message);
+					sprintf(evalMessageBuff, "%s", message);
 					break;
 				}
 
@@ -509,7 +509,7 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 				{
 					result = 501;
 					static char *message = "No implementation";
-					qtss_sprintf(evalMessageBuff, "%s", message);
+					sprintf(evalMessageBuff, "%s", message);
 					break;
 				}
 
@@ -517,7 +517,7 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 				{
 					result = 400;
 					static char *message = "Attribute value not defined";
-					qtss_sprintf(evalMessageBuff, "%s", message);
+					sprintf(evalMessageBuff, "%s", message);
 					break;
 				}
 
@@ -558,7 +558,7 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 			{
 				result = 501;
 				static char *message = "No implementation";
-				qtss_sprintf(evalMessageBuff, "%s", message);
+				sprintf(evalMessageBuff, "%s", message);
 				break;
 			}
 
@@ -573,17 +573,17 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 			{
 				if (commandPtr)
 				{
-					qtss_sprintf(fQueryMessageBuff, "reason=\"%s for command %s\"", evalMessage.Ptr, commandPtr->Ptr);
+					sprintf(fQueryMessageBuff, "reason=\"%s for command %s\"", evalMessage.Ptr, commandPtr->Ptr);
 				}
 			}
 			else
 			{   //printf("Set fQueryMessageBuff=%s\n",evalMessage.Ptr);
-				qtss_sprintf(fQueryMessageBuff, "reason=\"%s for command %s\"", evalMessage.Ptr, QueryURI::sCommandDefs[GetCommandID()]);
+				sprintf(fQueryMessageBuff, "reason=\"%s for command %s\"", evalMessage.Ptr, QueryURI::sCommandDefs[GetCommandID()]);
 			}
 		}
 		else
 		{
-			qtss_sprintf(fQueryMessageBuff, "reason=\"OK\"");
+			sprintf(fQueryMessageBuff, "reason=\"OK\"");
 		}
 
 		fQueryEvalMessage.Set(fQueryMessageBuff, strlen(fQueryMessageBuff));

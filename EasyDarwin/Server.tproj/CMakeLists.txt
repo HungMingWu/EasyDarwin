@@ -46,12 +46,14 @@ set (SRC
 	 QTSSErrorLogModule.cpp QTSSErrorLogModule.h
 	 RTCPTask.cpp RTCPTask.h)
 
+link_libraries(APIModules HTTPUtilitiesLib RTCPUtilitiesLib RTSPUtilitiesLib PrefsSourceLib
+               APICommonCode APIStubLib SafeStdLib EasyRedisClient
+               EasyProtocol CommonUtilitiesLib RTPMetaInfoLib jsoncpp)
 IF (MSVC)
 link_libraries(Ws2_32 Winmm)
 set (SRC ${SRC} win32main.cpp)
+ELSE()
+	link_libraries(pthread dl crypt)
+	set (SRC ${SRC} main.cpp)
 ENDIF()
-
-link_libraries(HTTPUtilitiesLib RTCPUtilitiesLib RTSPUtilitiesLib PrefsSourceLib
-               APICommonCode APIModules APIStubLib SafeStdLib EasyRedisClient
-			   EasyProtocol CommonUtilitiesLib RTPMetaInfoLib jsoncpp)
 add_executable (EasyDarwin ${SRC})

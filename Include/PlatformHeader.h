@@ -100,12 +100,12 @@
 
 #elif __linux__ 
 
-#include <endian.h>
-#if __BYTE_ORDER == BIG_ENDIAN
-    #define BIGENDIAN      1
-#else
-    #define BIGENDIAN      0
-#endif
+//#include <endian.h>
+//#if __BYTE_ORDER == BIG_ENDIAN
+//    #define BIGENDIAN      1
+//#else
+//    #define BIGENDIAN      0
+//#endif
 
 #define USE_ATOMICLIB 0
 #define MACOSXEVENTQUEUE 0

@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.0)
-project (EasyDarwin)
+project (EasyDarwin C CXX)
 
 IF (MSVC)
 #add_definitions(-D__Win32__)
@@ -12,7 +12,8 @@ if(MSVC)
 	add_compile_options("/FI ${CMAKE_CURRENT_SOURCE_DIR}/Include/Win32header.h")
 else()
     # GCC or Clang
-    #add_definitions(-include foo.h)
+    add_definitions(-include "${CMAKE_CURRENT_SOURCE_DIR}/Include/PlatformHeader.h")
+    set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-O0 -ggdb -std=c99")
 endif()
 
 add_subdirectory (CommonUtilitiesLib)

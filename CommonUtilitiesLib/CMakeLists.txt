@@ -1,4 +1,6 @@
-include_directories(../EasyProtocol/Include)
+include_directories(../EasyProtocol/Include ../EasyDarwin/APICommonCode ../EasyDarwin/APIStubLib 
+                    ../RTSPUtilitiesLib ../HTTPUtilitiesLib 
+		    ../EasyDarwin/RTPMetaInfoLib/ .)
 set (SRC 
              getopt.c getopt.h 
 			 OSThread.cpp OSThread.h
@@ -45,6 +47,8 @@ set (SRC
 			 Format.cpp Format.h)
 IF (MSVC)
 set (SRC ${SRC} win32ev.cpp CreateDump.cpp)
+ELSE()
+set (SRC ${SRC} epollEvent.cpp epollEvent.h easy_gettimeofday.cpp easy_gettimeofday.h)
 ENDIF()
 
 add_library(CommonUtilitiesLib ${SRC})

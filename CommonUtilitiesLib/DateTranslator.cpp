@@ -142,7 +142,7 @@ void DateTranslator::UpdateDateBuffer(DateBuffer* inDateBuffer, const int64_t& i
 	Assert(gmt != NULL); //is it safe to assert this?
 	size_t size = 0;
 	if (0 == gmtoffset)
-		size = qtss_strftime(inDateBuffer->fDateBuffer, sizeof(inDateBuffer->fDateBuffer),
+		size = strftime(inDateBuffer->fDateBuffer, sizeof(inDateBuffer->fDateBuffer),
 			"%a, %d %b %Y %H:%M:%S GMT", gmt);
 
 	Assert(size == DateBuffer::kDateBufferLen);

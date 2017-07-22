@@ -229,8 +229,8 @@ bool QTSSRollingLog::FormatDate(char *ioDateBuffer, bool logTimeInGMT)
     // the format is YYYY-MM-DD HH:MM:SS
     // the date time is in GMT, unless logTimeInGMT is false, in which case
     // the time logged is local time
-    //qtss_strftime(ioDateBuffer, kMaxDateBufferSize, "%d/%b/%Y:%H:%M:%S", theLocalTime);
-    qtss_strftime(ioDateBuffer, kMaxDateBufferSizeInBytes, "%Y-%m-%d %H:%M:%S", theTime);  
+    //strftime(ioDateBuffer, kMaxDateBufferSize, "%d/%b/%Y:%H:%M:%S", theLocalTime);
+    strftime(ioDateBuffer, kMaxDateBufferSizeInBytes, "%Y-%m-%d %H:%M:%S", theTime);  
     return true;
 }
 
@@ -316,7 +316,7 @@ bool QTSSRollingLog::RenameLogFile(const char* inFileName)
     struct tm  timeResult;
     struct tm* theLocalTime = qtss_localtime(&fLogCreateTime, &timeResult);
     char timeString[10];
-    qtss_strftime(timeString,  10, ".%y%m%d", theLocalTime);
+    strftime(timeString,  10, ".%y%m%d", theLocalTime);
     ::strcat(theNewNameBuffer, timeString);
     
     int32_t theBaseNameLength = ::strlen(theNewNameBuffer);
@@ -399,7 +399,7 @@ time_t QTSSRollingLog::WriteLogHeader(FILE* inFile)
     //theLocalTime->tm_sec = 0;
 
     char tempbuf[1024];
-    qtss_strftime(tempbuf, sizeof(tempbuf), "#Log File Created On: %m/%d/%Y %H:%M:%S\n", theLocalTime);
+    strftime(tempbuf, sizeof(tempbuf), "#Log File Created On: %m/%d/%Y %H:%M:%S\n", theLocalTime);
     //sprintf(tempbuf, "#Log File Created On: %d/%d/%d %d:%d:%d %d:%d:%d GMT\n",
     //          theLocalTime->tm_mon, theLocalTime->tm_mday, theLocalTime->tm_year,
     //          theLocalTime->tm_hour, theLocalTime->tm_min, theLocalTime->tm_sec,

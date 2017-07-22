@@ -299,8 +299,8 @@ void TestUnixTime(time_t theTime, char *ioDateBuffer)
 
 	//date needs to look like this for common log format: 29/Sep/1998:11:34:54 -0700
 	//this wonderful ANSI routine just does it for you.
-	//qtss_strftime(ioDateBuffer, kMaxDateBufferSize, "%d/%b/%Y:%H:%M:%S", theLocalTime);
-	qtss_strftime(ioDateBuffer, QTSSRollingLog::kMaxDateBufferSizeInBytes, "%Y-%m-%d %H:%M:%S", theLocalTime);
+	//strftime(ioDateBuffer, kMaxDateBufferSize, "%d/%b/%Y:%H:%M:%S", theLocalTime);
+	strftime(ioDateBuffer, QTSSRollingLog::kMaxDateBufferSizeInBytes, "%Y-%m-%d %H:%M:%S", theLocalTime);
 	return;
 }
 #endif

@@ -471,8 +471,7 @@ time_t QTSSRollingLog::ReadLogHeader(FILE* inFile)
     if (-1 == calendarTime)
         return false;
         
-    struct tm  timeResult;
-    struct tm* theLocalTime = qtss_localtime(&calendarTime, &timeResult);
+    struct tm* theLocalTime = std::localtime(&calendarTime);
     Assert(nullptr != theLocalTime);
     if (nullptr == theLocalTime)
         return false;

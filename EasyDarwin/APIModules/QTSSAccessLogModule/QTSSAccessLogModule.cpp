@@ -42,6 +42,7 @@
 #include "StrPtrLen.h"
 #include "UserAgentParser.h"
 #include "Task.h"
+#include <ctime>
 
 #define TESTUNIXTIME 0
 
@@ -82,7 +83,7 @@ static LogCheckTask* sLogCheckTask = NULL;
 static char* sLogHeader = "#Software: %s\n"
 "#Version: %s\n"    //%s == version
 "#Date: %s\n"   //%s == date/time
-"#Remark: all time values are in %s.\n" //%s == qtss_localtime or GMT
+"#Remark: all time values are in %s.\n" //%s == std::localtime or GMT
 "#Fields: c-ip date time c-dns cs-uri-stem c-starttime x-duration c-rate c-status c-playerid"
 " c-playerversion c-playerlanguage cs(User-Agent) c-os"
 " c-osversion c-cpu filelength filesize avgbandwidth protocol transport audiocodec videocodec"
@@ -291,8 +292,7 @@ void TestUnixTime(time_t theTime, char *ioDateBuffer)
 	if (-1 == calendarTime)
 		return;
 
-	struct tm  timeResult;
-	struct tm* theLocalTime = qtss_localtime(&calendarTime, &timeResult);
+	struct tm* theLocalTime = std::localtime(&calendarTime);
 	Assert(NULL != theLocalTime);
 	if (NULL == theLocalTime)
 		return;

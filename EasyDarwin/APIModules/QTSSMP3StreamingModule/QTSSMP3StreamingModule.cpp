@@ -44,6 +44,7 @@
 #include "OSMemory.h"
 #include "OS.h"
 #include "OSBufferPool.h"
+#include <ctime>
 
 #define DEBUG_MP3STREAMING_MODULE 0
 
@@ -210,8 +211,7 @@ time_t QTSSMP3AccessLog::WriteLogHeader(FILE *inFile)
 	if (-1 == calendarTime)
 		return -1;
 
-	struct tm  timeResult;
-	struct tm* theLocalTime = qtss_localtime(&calendarTime, &timeResult);
+	struct tm* theLocalTime = std::localtime(&calendarTime);
 	Assert(NULL != theLocalTime);
 	if (NULL == theLocalTime)
 		return -1;

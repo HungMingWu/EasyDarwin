@@ -37,7 +37,6 @@
 #include <arpa/inet.h>
 #include <fcntl.h>
 #endif
-#include "SafeStdLib.h"
 #include "RTPStream.h"
 #include "RTPSessionInterface.h"
 

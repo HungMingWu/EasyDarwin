@@ -705,6 +705,7 @@ bool  QTSServer::SwitchPersonality()
 		struct group* gr = ::getgrnam(runGroupName.GetObject());
 		if (gr == nullptr || ::setgid(gr->gr_gid) == -1)
 		{
+#define kErrorStrSize 256
 			char buffer[kErrorStrSize];
 
 			::strncpy(buffer, ::strerror(OSThread::GetErrno()), kErrorStrSize);

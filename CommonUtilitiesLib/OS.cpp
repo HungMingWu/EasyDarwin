@@ -29,7 +29,6 @@
  */
 
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #include <string.h>
 
 #include <sys/stat.h>

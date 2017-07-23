@@ -34,7 +34,6 @@
 #define _QTSS_MODULE_UTILS_H_
 
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #include "QTSS.h"
 #include "StrPtrLen.h"
 #include "RTPMetaInfoPacket.h"

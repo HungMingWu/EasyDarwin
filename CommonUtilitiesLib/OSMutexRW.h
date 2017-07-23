@@ -35,7 +35,6 @@
 #define _OSMUTEXRW_H_
 
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #include "OSHeaders.h"
 #include "OSThread.h"
 #include "MyAssert.h"

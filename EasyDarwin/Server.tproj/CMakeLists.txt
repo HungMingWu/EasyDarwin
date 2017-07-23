@@ -47,7 +47,7 @@ set (SRC
 	 RTCPTask.cpp RTCPTask.h)
 
 link_libraries(APIModules HTTPUtilitiesLib RTCPUtilitiesLib RTSPUtilitiesLib PrefsSourceLib
-               APICommonCode APIStubLib SafeStdLib EasyRedisClient
+               APICommonCode APIStubLib EasyRedisClient
                EasyProtocol CommonUtilitiesLib RTPMetaInfoLib jsoncpp)
 IF (MSVC)
 link_libraries(Ws2_32 Winmm)

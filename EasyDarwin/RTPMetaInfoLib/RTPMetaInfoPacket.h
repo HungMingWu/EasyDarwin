@@ -30,7 +30,6 @@
 #define __QTRTP_META_INFO_PACKET_H__
 
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #include "OSHeaders.h"
 #include "StrPtrLen.h"
 

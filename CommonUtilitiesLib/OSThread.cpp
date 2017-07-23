@@ -33,7 +33,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #include <errno.h>
 
 #ifdef __MacOSX__

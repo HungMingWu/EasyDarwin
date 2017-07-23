@@ -27,7 +27,6 @@
 #define _MYASSERT_H_
 
 #include <stdio.h>
-#include "SafeStdLib.h"
 
 #ifdef __cplusplus
 class AssertLogger

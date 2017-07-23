@@ -40,7 +40,6 @@
 #include "ResizeableStringFormatter.h"
 #include "QTAccessFile.h"
 #include "StringParser.h"
-#include "SafeStdLib.h"
 #ifndef __Win32__
 #include <netinet/in.h>
 #endif

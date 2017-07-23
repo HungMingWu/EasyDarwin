@@ -39,7 +39,6 @@
 #define _QTSSDICTIONARY_H_
 
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #include "QTSS.h"
 #include "OSHeaders.h"
 #include "OSMutex.h"

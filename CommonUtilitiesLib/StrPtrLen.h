@@ -44,7 +44,6 @@
 #include "OSHeaders.h"
 #include <ctype.h> 
 #include "MyAssert.h"
-#include "SafeStdLib.h"
 
 #define STRPTRLENTESTING 0
 

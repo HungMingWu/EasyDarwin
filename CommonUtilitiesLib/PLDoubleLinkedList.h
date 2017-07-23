@@ -27,7 +27,6 @@
 #define __pldoublelinkedlist__
 
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #include <string.h>
 
 #include "OSHeaders.h"

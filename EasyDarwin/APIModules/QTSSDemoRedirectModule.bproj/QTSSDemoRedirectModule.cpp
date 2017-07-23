@@ -31,7 +31,6 @@
 #include "QTSSDemoRedirectModule.h"
 #include "StrPtrLen.h"
 #include "QTSSModuleUtils.h"
-#include "SafeStdLib.h"
 #include "QTSSMemoryDeleter.h"
 
 // STATIC DATA

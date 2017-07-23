@@ -31,7 +31,6 @@
  */
 
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #include <stdio.h>
 #include "MyAssert.h"
 

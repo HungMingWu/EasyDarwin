@@ -40,7 +40,6 @@
 #include "StrPtrLen.h"
 #include "QTSSModuleUtils.h"
 #include "OSArrayObjectDeleter.h"
-#include "SafeStdLib.h"
 #include "QTSSMemoryDeleter.h"
 #include "QTSS_Private.h"
 #include "OS.h"

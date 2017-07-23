@@ -29,7 +29,6 @@
 */
 
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #ifndef __Win32__
 #include <sys/types.h>
 #include <sys/uio.h>

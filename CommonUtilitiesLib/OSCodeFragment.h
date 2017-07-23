@@ -35,7 +35,6 @@
 #define _OS_CODEFRAGMENT_H_
 
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #include "OSHeaders.h"
 
 #ifdef __MacOSX__

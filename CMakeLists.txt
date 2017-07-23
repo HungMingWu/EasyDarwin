@@ -17,7 +17,6 @@ else()
 endif()
 
 add_subdirectory (CommonUtilitiesLib)
-add_subdirectory (SafeStdLib)
 add_subdirectory (RTSPUtilitiesLib)
 add_subdirectory (HTTPUtilitiesLib)
 add_subdirectory (EasyProtocol)

@@ -33,7 +33,6 @@
 #define _QT_ACCESS_FILE_H_
 
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #include "QTSS.h"
 #include "StrPtrLen.h"
 #include "OSHeaders.h"

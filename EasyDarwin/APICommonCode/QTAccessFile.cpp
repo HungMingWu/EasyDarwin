@@ -30,7 +30,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #include "QTSS.h"
 #include "OSHeaders.h"
 #include "StrPtrLen.h"

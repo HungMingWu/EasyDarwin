@@ -39,7 +39,6 @@
 #define _OSMUTEX_H_
 
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #ifndef __Win32__
 #include <sys/errno.h>
 #if __PTHREADS_MUTEXES__

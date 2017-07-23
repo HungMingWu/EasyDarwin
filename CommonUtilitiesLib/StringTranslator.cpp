@@ -36,7 +36,6 @@
 #include <stdio.h>
 #include "StringTranslator.h"
 #include "MyAssert.h"
-#include "SafeStdLib.h"
 
 int32_t StringTranslator::DecodeURL(const char* inSrc, int32_t inSrcLen, char* ioDest, int32_t inDestLen)
 {

@@ -86,7 +86,6 @@
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #define OPTERRCOLON (1)
 #define OPTERRNF (2)
 #define OPTERRARG (3)

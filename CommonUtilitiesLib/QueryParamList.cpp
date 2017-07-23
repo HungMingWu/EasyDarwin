@@ -30,7 +30,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "SafeStdLib.h"
 
 QueryParamList::QueryParamList(const std::string& queryString)
 {

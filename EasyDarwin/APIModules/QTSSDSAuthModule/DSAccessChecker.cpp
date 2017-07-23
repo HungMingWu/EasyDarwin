@@ -58,7 +58,6 @@
 
 
 // Project Headers
-#include "SafeStdLib.h"	
 #include "StrPtrLen.h"
 #include "StringParser.h"
 #include "ResizeableStringFormatter.h"

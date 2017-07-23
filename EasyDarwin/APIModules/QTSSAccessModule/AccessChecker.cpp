@@ -40,7 +40,6 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "SafeStdLib.h"
 #include "StringParser.h"
 #include "OSFileSource.h"
 #include "OSHeaders.h"

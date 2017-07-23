@@ -285,7 +285,7 @@ QTSS_Error LogError(QTSS_RoleParamPtr inParamBlock)
 					theDateBuffer[0] = '\0';
 
 				char tempBuffer[kMaxLogStringLen];
-				qtss_snprintf(tempBuffer, sizeof(tempBuffer), "%s: --last message repeated %d times\n", theDateBuffer, sDupErrorStringCount);
+				snprintf(tempBuffer, sizeof(tempBuffer), "%s: --last message repeated %d times\n", theDateBuffer, sDupErrorStringCount);
 
 				sErrorLog->WriteToLog(tempBuffer, kAllowLogToRoll);
 
@@ -317,7 +317,7 @@ QTSS_Error LogError(QTSS_RoleParamPtr inParamBlock)
 			theDateBuffer[0] = '\0';
 
 		char tempBuffer[kMaxLogStringLen];
-		qtss_snprintf(tempBuffer, sizeof(tempBuffer), "%s: %s %s\n", theDateBuffer, sErrorLevel[verbLvl], inParamBlock->errorParams.inBuffer);
+		snprintf(tempBuffer, sizeof(tempBuffer), "%s: %s %s\n", theDateBuffer, sErrorLevel[verbLvl], inParamBlock->errorParams.inBuffer);
 		tempBuffer[sizeof(tempBuffer) - 2] = '\n'; //make sure the entry has a line feed before the \0 terminator
 		tempBuffer[sizeof(tempBuffer) - 1] = '\0'; //make sure it is 0 terminated.
 
@@ -371,7 +371,7 @@ void    WriteStartupMessage()
 
 	char tempBuffer[kMaxLogStringLen];
 	if (result)
-		qtss_snprintf(tempBuffer, sizeof(tempBuffer), "# Streaming STARTUP %s\n", theDateBuffer);
+		snprintf(tempBuffer, sizeof(tempBuffer), "# Streaming STARTUP %s\n", theDateBuffer);
 
 	// log startup message to error log as well.
 	if ((result) && (sErrorLog != NULL))
@@ -399,7 +399,7 @@ void    WriteShutdownMessage()
 
 	char tempBuffer[kMaxLogStringLen];
 	if (result)
-		qtss_snprintf(tempBuffer, sizeof(tempBuffer), "# Streaming SHUTDOWN %s\n", theDateBuffer);
+		snprintf(tempBuffer, sizeof(tempBuffer), "# Streaming SHUTDOWN %s\n", theDateBuffer);
 
 	if (result && sErrorLog != NULL)
 		sErrorLog->WriteToLog(tempBuffer, kAllowLogToRoll);

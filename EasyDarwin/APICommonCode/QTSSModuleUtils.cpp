@@ -220,7 +220,7 @@ void QTSSModuleUtils::LogPrefErrorStr( QTSS_ErrorVerbosity inVerbosity, char*  p
 	}
 	char buffer[1024];
 	
-	qtss_snprintf(buffer,sizeof(buffer), "Server preference %s %s",  preference, inMessage);
+	snprintf(buffer,sizeof(buffer), "Server preference %s %s",  preference, inMessage);
    
 	(void)QTSS_Write(sErrorLog, buffer, ::strlen(buffer), NULL, inVerbosity);
 }
@@ -521,14 +521,14 @@ QTSS_Error	QTSSModuleUtils::SendHTTPErrorResponse( QTSS_RTSPRequestObject inRequ
     (void) QTSS_GetValue(sServer, qtssSvrRTSPServerHeader, 0,  (void*)serverHeaderBuffer,&len);
     serverHeaderBuffer[len] = 0; // terminate.
  
-    qtss_snprintf(messageLineBuffer,maxMessageBufferChars, "HTTP/1.1 %"   _U32BITARG_   " %s",realCode, errorMsg);
+    snprintf(messageLineBuffer,maxMessageBufferChars, "HTTP/1.1 %"   _U32BITARG_   " %s",realCode, errorMsg);
     theErrorMessage.Put(messageLineBuffer,::strlen(messageLineBuffer));
     theErrorMessage.PutEOL();
 
     theErrorMessage.Put(serverHeaderBuffer,::strlen(serverHeaderBuffer));
     theErrorMessage.PutEOL();
  
-    qtss_snprintf(messageLineBuffer,maxMessageBufferChars, "Date: %s",theDate.GetDateBuffer());
+    snprintf(messageLineBuffer,maxMessageBufferChars, "Date: %s",theDate.GetDateBuffer());
     theErrorMessage.Put(messageLineBuffer,::strlen(messageLineBuffer));
     theErrorMessage.PutEOL();
  
@@ -556,7 +556,7 @@ QTSS_Error	QTSSModuleUtils::SendHTTPErrorResponse( QTSS_RTSPRequestObject inRequ
         theErrorMessage.Put(bodyHeaderType.Ptr,bodyHeaderType.Len);
         theErrorMessage.PutEOL();
 
-        qtss_snprintf(messageLineBuffer,maxMessageBufferChars, "Content-Length: %"   _U32BITARG_   "", bodyMessage.GetBytesWritten());
+        snprintf(messageLineBuffer,maxMessageBufferChars, "Content-Length: %"   _U32BITARG_   "", bodyMessage.GetBytesWritten());
         theErrorMessage.Put(messageLineBuffer,::strlen(messageLineBuffer));        
         theErrorMessage.PutEOL();
     }

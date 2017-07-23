@@ -418,7 +418,7 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 	uint32_t curBandwidth = 0;
 	theLen = sizeof(curBandwidth);
 	(void)QTSS_GetValue(sServer, qtssRTPSvrCurBandwidth, 0, &curBandwidth, &theLen);
-	qtss_snprintf(numStr, 11, "%"   _U32BITARG_   "", curBandwidth / 1024);
+	snprintf(numStr, 11, "%"   _U32BITARG_   "", curBandwidth / 1024);
 	print_status(statusFile, stdOut, "%11s", numStr);
 
 	(void)QTSS_GetValueAsString(sServer, qtssRTPSvrCurPackets, 0, &thePrefStr);
@@ -427,7 +427,7 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 
 
 	uint32_t currentPlaying = sServer->GetNumRTPPlayingSessions();
-	qtss_snprintf(numStr, sizeof(numStr) - 1, "%"   _U32BITARG_   "", currentPlaying);
+	snprintf(numStr, sizeof(numStr) - 1, "%"   _U32BITARG_   "", currentPlaying);
 	print_status(statusFile, stdOut, "%14s", numStr);
 
 
@@ -448,23 +448,23 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 	sServer->ClearCurrentMaxLate();
 	sServer->ClearTotalQuality();
 
-	::qtss_snprintf(numStr, sizeof(numStr) - 1, "%s", "0");
+	::snprintf(numStr, sizeof(numStr) - 1, "%s", "0");
 	if (deltaPackets > 0)
-		qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)((int64_t)totalLate / (int64_t)deltaPackets));
+		snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)((int64_t)totalLate / (int64_t)deltaPackets));
 	print_status(statusFile, stdOut, "%11s", numStr);
 
-	qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)currentMaxLate);
+	snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)currentMaxLate);
 	print_status(statusFile, stdOut, "%11s", numStr);
 
-	qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)sServer->GetMaxLate());
+	snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)sServer->GetMaxLate());
 	print_status(statusFile, stdOut, "%11s", numStr);
 
-	::qtss_snprintf(numStr, sizeof(numStr) - 1, "%s", "0");
+	::snprintf(numStr, sizeof(numStr) - 1, "%s", "0");
 	if (deltaPackets > 0)
-		qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)((int64_t)deltaQuality / (int64_t)deltaPackets));
+		snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)((int64_t)deltaQuality / (int64_t)deltaPackets));
 	print_status(statusFile, stdOut, "%11s", numStr);
 
-	qtss_snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)sServer->GetNumThinned());
+	snprintf(numStr, sizeof(numStr) - 1, "%" _S32BITARG_ "", (int32_t)sServer->GetNumThinned());
 	print_status(statusFile, stdOut, "%11s", numStr);
 
 
@@ -472,7 +472,7 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 	char theDateBuffer[QTSSRollingLog::kMaxDateBufferSizeInBytes];
 	(void)QTSSRollingLog::FormatDate(theDateBuffer, false);
 
-	qtss_snprintf(dateStr, sizeof(dateStr) - 1, "%s", theDateBuffer);
+	snprintf(dateStr, sizeof(dateStr) - 1, "%s", theDateBuffer);
 	print_status(statusFile, stdOut, "%24s\n", dateStr);
 }
 
@@ -547,7 +547,7 @@ void FormattedTotalBytesBuffer(char *outBuffer, int outBufferLen, uint64_t total
 	}
 
 	outBuffer[outBufferLen - 1] = 0;
-	qtss_snprintf(outBuffer, outBufferLen - 1, format, displayBytes, sizeStr);
+	snprintf(outBuffer, outBufferLen - 1, format, displayBytes, sizeStr);
 }
 
 void PrintStatus(bool printHeader)

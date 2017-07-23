@@ -53,7 +53,7 @@ void MyAssert(char* s);
         {                                                       \
             char s[kAssertBuffSize];                            \
             s[kAssertBuffSize -1] = 0;                          \
-            qtss_snprintf (s,kAssertBuffSize -1, "_Assert: %s, %d",__FILE__, __LINE__ ); \
+            snprintf (s,kAssertBuffSize -1, "_Assert: %s, %d",__FILE__, __LINE__ ); \
             MyAssert(s);                                        \
         }   }
 
@@ -63,7 +63,7 @@ void MyAssert(char* s);
     {                                                       \
         char s[kAssertBuffSize];                            \
         s[kAssertBuffSize -1] = 0;                          \
-		qtss_snprintf (s,kAssertBuffSize -1, "_Assert: %s, %d, Msg:%s ",__FILE__, __LINE__, msg ); \
+		snprintf (s,kAssertBuffSize -1, "_Assert: %s, %d, Msg:%s ",__FILE__, __LINE__, msg ); \
         MyAssert(s);                                        \
     }   }
 
@@ -73,7 +73,7 @@ void MyAssert(char* s);
         {                                                                   \
             char s[kAssertBuffSize];                                        \
             s[kAssertBuffSize -1] = 0;                                      \
-            qtss_snprintf( s,kAssertBuffSize -1, "_AssertV: %s, %d (%d)",__FILE__, __LINE__, errNo );    \
+            snprintf( s,kAssertBuffSize -1, "_AssertV: %s, %d (%d)",__FILE__, __LINE__, errNo );    \
             MyAssert(s);                                                    \
         }   }
 

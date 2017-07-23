@@ -1013,7 +1013,7 @@ bool QTSServer::AddModule(QTSSModule* inModule)
 		char msgStr[2048];
 		char* moduleName = nullptr;
 		(void)inModule->GetValueAsString(qtssModName, 0, &moduleName);
-		qtss_snprintf(msgStr, sizeof(msgStr), "Loading Module [%s] Failed!", moduleName);
+		snprintf(msgStr, sizeof(msgStr), "Loading Module [%s] Failed!", moduleName);
 		delete moduleName;
 		QTSServerInterface::LogError(qtssMessageVerbosity, msgStr);
 		return false;

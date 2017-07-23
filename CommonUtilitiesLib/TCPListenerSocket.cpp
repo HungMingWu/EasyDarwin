@@ -137,7 +137,7 @@ void TCPListenerSocket::ProcessEvent(int /*eventBits*/)
 		{
 			char errStr[256];
 			errStr[sizeof(errStr) - 1] = 0;
-			qtss_snprintf(errStr, sizeof(errStr) - 1, "accept error = %d '%s' on socket. Clean up and continue.", acceptError, strerror(acceptError));
+			snprintf(errStr, sizeof(errStr) - 1, "accept error = %d '%s' on socket. Clean up and continue.", acceptError, strerror(acceptError));
 			WarnV((acceptError == 0), errStr);
 
 			theTask = this->GetSessionTask(&theSocket);

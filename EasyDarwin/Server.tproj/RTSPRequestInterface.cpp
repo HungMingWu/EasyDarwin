@@ -277,7 +277,7 @@ void RTSPRequestInterface::AppendContentLength(uint32_t contentLength)
 
 	char dataSize[10];
 	dataSize[sizeof(dataSize) - 1] = 0;
-	qtss_snprintf(dataSize, sizeof(dataSize) - 1, "%"   _U32BITARG_   "", contentLength);
+	snprintf(dataSize, sizeof(dataSize) - 1, "%"   _U32BITARG_   "", contentLength);
 	StrPtrLen contentLengthStr(dataSize);
 	this->AppendHeader(qtssContentLengthHeader, &contentLengthStr);
 

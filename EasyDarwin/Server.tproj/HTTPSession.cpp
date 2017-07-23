@@ -64,7 +64,7 @@ HTTPSession::~HTTPSession()
 	QTSS_GetValue(this, easyHTTPSesRemoteAddrStr, 0, static_cast<void*>(theIPAddressStr.Ptr), &theIPAddressStr.Len);
 
 	char msgStr[2048] = { 0 };
-	qtss_snprintf(msgStr, sizeof(msgStr), "HTTPSession offline from ip[%s]", remoteAddress);
+	snprintf(msgStr, sizeof(msgStr), "HTTPSession offline from ip[%s]", remoteAddress);
 	QTSServerInterface::LogError(qtssMessageVerbosity, msgStr);
 	QTSServerInterface::GetServer()->AlterCurrentRTSPHTTPSessionCount(-1);
 

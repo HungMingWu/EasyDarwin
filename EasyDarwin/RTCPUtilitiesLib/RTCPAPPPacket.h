@@ -38,7 +38,7 @@
 #include "StrPtrLen.h"
 #include "ResizeableStringFormatter.h"
 
-#define APPEND_TO_DUMP_ARRAY(f, v) {if (fDebug && mDumpArray != NULL) { (void)qtss_snprintf(mDumpArray,kmDumpArraySize, f, v); fDumpReport.Put(mDumpArray); }   }
+#define APPEND_TO_DUMP_ARRAY(f, v) {if (fDebug && mDumpArray != NULL) { (void)snprintf(mDumpArray,kmDumpArraySize, f, v); fDumpReport.Put(mDumpArray); }   }
 
 class RTCPAPPPacket : public RTCPPacket
 {

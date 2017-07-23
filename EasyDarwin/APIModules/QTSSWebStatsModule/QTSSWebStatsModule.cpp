@@ -33,7 +33,7 @@
 
  */
 
-#include <time.h>
+#include <ctime>
 
 #include <stdio.h>      /* for printf */
 #include <stdlib.h>     /* for getloadavg & other useful stuff */
@@ -439,9 +439,8 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 
 		case 3:
 			{
-				char uptimebuffer[1024];
 				time_t curTime = ::time(NULL);
-				sprintf(uptimebuffer, "<b>Current Time: </b> %s<BR>\n", qtss_ctime(&curTime, buffer, sizeof(buffer)));
+				sprintf(uptimebuffer, "<b>Current Time: </b> %s<BR>\n", std::ctime(&curTime));
 				(void)QTSS_Write(inStream, uptimebuffer, ::strlen(uptimebuffer), NULL, 0);
 
 				time_t upTime = curTime - sStartupTime;
@@ -506,7 +505,7 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 
 				if (theState == qtssRunningState)
 				{
-					qtss_snprintf(statusBuffer, sizeof(statusBuffer), "<b>Status: </b> %s since %s<BR>", states[theState], qtss_ctime(&sStartupTime, buffer, sizeof(buffer)));
+					qtss_snprintf(statusBuffer, sizeof(statusBuffer), "<b>Status: </b> %s since %s<BR>", states[theState], std::ctime(&sStartupTime));
 				}
 				else
 					qtss_snprintf(statusBuffer, sizeof(statusBuffer), "<b>Status: </b> %s<BR>", states[theState]);

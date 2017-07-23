@@ -31,6 +31,8 @@
 
 
 #include <stdlib.h>
+#include <ctime>
+
 #ifndef __Win32__
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -1735,7 +1737,6 @@ void RTPStream::PrintRTP(char* packetBuff, uint32_t inLen)
 void RTPStream::PrintRTCPSenderReport(char* packetBuff, uint32_t inLen)
 {
 
-	char timebuffer[kTimeStrSize];
 	uint32_t* theReport = (uint32_t*)packetBuff;
 
 	theReport++;
@@ -1770,7 +1771,7 @@ void RTPStream::PrintRTCPSenderReport(char* packetBuff, uint32_t inLen)
 		printf("?");
 
 	printf(" H_ssrc=%"   _U32BITARG_   " H_bytes=%"   _U32BITARG_   " H_ts=%"   _U32BITARG_   " H_pckts=%"   _U32BITARG_   " ts_secs=%.3f H_ntp=%s\n",
-		ssrc, bytecount, timestamp, packetcount, theTimeInSecs, ::qtss_ctime(&theTime, timebuffer, sizeof(timebuffer)));
+		ssrc, bytecount, timestamp, packetcount, theTimeInSecs, std::ctime(&theTime));
 }
 
 void RTPStream::PrintPacket(char *inBuffer, uint32_t inLen, int32_t inType)

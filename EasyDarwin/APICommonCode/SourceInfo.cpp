@@ -191,8 +191,8 @@ bool  SourceInfo::SetActiveNTPTimes(uint32_t startTimeNTP,uint32_t endTimeNTP)
     
     //char buffer[kTimeStrSize];
     //printf("SourceInfo::SetActiveNTPTimes fStartTimeUnixSecs=%"   _U32BITARG_   " fEndTimeUnixSecs=%"   _U32BITARG_   "\n",fStartTimeUnixSecs,fEndTimeUnixSecs);
-    //printf("SourceInfo::SetActiveNTPTimes start time = %s",qtss_ctime(&fStartTimeUnixSecs, buffer, sizeof(buffer)) );
-    //printf("SourceInfo::SetActiveNTPTimes end time = %s",qtss_ctime(&fEndTimeUnixSecs, buffer, sizeof(buffer)) );
+    //printf("SourceInfo::SetActiveNTPTimes start time = %s",std::ctime(&fStartTimeUnixSecs) );
+    //printf("SourceInfo::SetActiveNTPTimes end time = %s",std::ctime(&fEndTimeUnixSecs) );
     fHasValidTime = accepted;
     return accepted;
 }

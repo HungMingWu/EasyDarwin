@@ -89,8 +89,9 @@ void MyAssert(char* s);
 #define WarnVE(condition,msg,err)  {                           		\
         if (!(condition))                                               \
         {   char buffer[kAssertBuffSize];								\
+			::strncpy(buffer, ::strerror(errnum), kAssertBuffSize);      \
             buffer[kAssertBuffSize -1] = 0;                              \
-            printf ("_WarnV: %s, %d (%s, %s [err=%d])\n",__FILE__, __LINE__, msg, qtss_strerror(err,buffer,sizeof(buffer) -1), err );  \
+            printf ("_WarnV: %s, %d (%s, %s [err=%d])\n",__FILE__, __LINE__, msg, buffer, err );  \
         }	}
 
 #else

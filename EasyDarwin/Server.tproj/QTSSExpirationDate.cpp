@@ -37,7 +37,7 @@
 #include "MyAssert.h"
 #include "OSHeaders.h"
 #include "SafeStdLib.h"
-#include <time.h>
+#include <ctime>
 
 
 bool  QTSSExpirationDate::sIsExpirationEnabled = false;
@@ -87,8 +87,7 @@ bool QTSSExpirationDate::IsSoftwareExpired()
 	if (theCurrentTime == -1)
 		return true;
 
-	struct tm  timeResult;
-	struct tm* theLocalTime = qtss_localtime(&theCurrentTime, &timeResult);
+	struct tm* theLocalTime = std::localtime(&theCurrentTime);
 	Assert(theLocalTime != NULL);
 	if (theLocalTime == NULL)
 		return true;

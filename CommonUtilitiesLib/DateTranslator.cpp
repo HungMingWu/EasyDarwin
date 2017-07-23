@@ -33,7 +33,7 @@
 
 #include "DateTranslator.h"
 
-#include <time.h>
+#include <ctime>
 
 #include "OSHeaders.h"
 #include "OS.h"
@@ -131,12 +131,12 @@ void DateTranslator::UpdateDateBuffer(DateBuffer* inDateBuffer, const int64_t& i
 	if (inDate == 0)
 	{
 		time_t calendarTime = ::time(NULL) + gmtoffset;
-		gmt = ::qtss_gmtime(&calendarTime, &timeResult);
+		gmt = std::gmtime(&calendarTime);
 	}
 	else
 	{
 		time_t convertedTime = (time_t)(inDate / (int64_t)1000) + gmtoffset; // Convert from msec to sec
-		gmt = ::qtss_gmtime(&convertedTime, &timeResult);
+		gmt = std::gmtime(&convertedTime);
 	}
 
 	Assert(gmt != NULL); //is it safe to assert this?

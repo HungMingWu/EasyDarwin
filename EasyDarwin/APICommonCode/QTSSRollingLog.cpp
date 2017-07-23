@@ -37,9 +37,7 @@
 #include <math.h>
 #include <sys/stat.h>
 #include <errno.h> 
-#ifndef __Win32__
-#include <sys/time.h>
-#endif
+#include <ctime>
 #include "QTSSRollingLog.h"
 #include "OS.h"
 #include "OSArrayObjectDeleter.h"
@@ -212,13 +210,12 @@ bool QTSSRollingLog::FormatDate(char *ioDateBuffer, bool logTimeInGMT)
         return false;
         
     struct tm* theTime = nullptr;
-    struct tm  timeResult;
     
     if (logTimeInGMT)
-        theTime = ::qtss_gmtime(&calendarTime, &timeResult);
+        theTime = std::gmtime(&calendarTime);
     else
-        theTime = qtss_localtime(&calendarTime, &timeResult);
-    
+        theTime = std::localtime(&calendarTime);
+
     Assert(nullptr != theTime);
     
     if (nullptr == theTime)
@@ -313,8 +310,7 @@ bool QTSSRollingLog::RenameLogFile(const char* inFileName)
     ::strcat(theNewNameBuffer, logBaseName.GetObject());
 
     //append the date the file was created
-    struct tm  timeResult;
-    struct tm* theLocalTime = qtss_localtime(&fLogCreateTime, &timeResult);
+    struct tm* theLocalTime = std::localtime(&fLogCreateTime);
     char timeString[10];
     strftime(timeString,  10, ".%y%m%d", theLocalTime);
     ::strcat(theNewNameBuffer, timeString);
@@ -385,8 +381,7 @@ time_t QTSSRollingLog::WriteLogHeader(FILE* inFile)
     if (-1 == calendarTime)
         return -1;
 
-    struct tm  timeResult;
-    struct tm* theLocalTime = qtss_localtime(&calendarTime, &timeResult);
+    struct tm* theLocalTime = std::localtime(&calendarTime);
     Assert(nullptr != theLocalTime);
     if (nullptr == theLocalTime)
         return -1;
@@ -530,8 +525,7 @@ void QTSSRollingLog::ResetToMidnight(time_t* inTimePtr, time_t* outTimePtr)
         return;
     }
     
-    struct tm  timeResult;
-    struct tm* theLocalTime = qtss_localtime(inTimePtr, &timeResult);
+    struct tm* theLocalTime = std::localtime(inTimePtr);
     Assert(theLocalTime != nullptr);
 
     theLocalTime->tm_hour = 0;

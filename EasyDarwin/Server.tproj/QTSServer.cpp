@@ -710,7 +710,7 @@ bool  QTSServer::SwitchPersonality()
 			::strncpy(buffer, ::strerror(OSThread::GetErrno()), kErrorStrSize);
 			buffer[kErrorStrSize - 1] = 0;  //make sure it is null terminated even if truncated.
 			QTSSModuleUtils::LogError(qtssFatalVerbosity, qtssMsgCannotSetRunGroup, 0,
-				runGroupName.GetObject(), buffer));
+				runGroupName.GetObject(), buffer);
 			return false;
 		}
 		groupID = gr->gr_gid;

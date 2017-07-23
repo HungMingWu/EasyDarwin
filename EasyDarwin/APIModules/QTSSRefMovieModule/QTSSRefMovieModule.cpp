@@ -238,10 +238,10 @@ QTSS_Error SendTheResponse(QTSS_RTSPSessionObject theSession, QTSS_StreamRef str
     }
             
 	// construct the RTSP address reply string for the client.
-	qtss_snprintf(tmp,sizeof(tmp) -1, "rtsptext\r\nrtsp://%d.%d.%d.%d:%d%s\r\n", x1,x2,x3,x4, port, theMovieFile);
+	snprintf(tmp,sizeof(tmp) -1, "rtsptext\r\nrtsp://%d.%d.%d.%d:%d%s\r\n", x1,x2,x3,x4, port, theMovieFile);
     
     // send the 'Content-Length:' part of the HTTP reply
-    qtss_snprintf(tmp2, sizeof(tmp2) -1, "Content-Length: %d\r\n\r\n", (int) ::strlen(tmp));
+    snprintf(tmp2, sizeof(tmp2) -1, "Content-Length: %d\r\n\r\n", (int) ::strlen(tmp));
     err = QTSS_Write(stream, tmp2, ::strlen(tmp2), NULL, qtssWriteFlagsBufferData);
     if (err != QTSS_NoErr)
         return QTSS_NoErr;

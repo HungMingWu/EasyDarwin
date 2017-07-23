@@ -1452,7 +1452,7 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParamBlock)
 		if (-1 == (*theFile)->fStopTime)
 			(*theFile)->fStopTime = (*theFile)->fFile.GetMovieDuration();
 
-		qtss_snprintf(rangeHeader, sizeof(rangeHeader) - 1, "npt=%.5f-%.5f", (*theFile)->fStartTime, (*theFile)->fStopTime);
+		snprintf(rangeHeader, sizeof(rangeHeader) - 1, "npt=%.5f-%.5f", (*theFile)->fStartTime, (*theFile)->fStopTime);
 		rangeHeader[sizeof(rangeHeader) - 1] = 0;
 
 		StrPtrLen rangeHeaderPtr(rangeHeader);

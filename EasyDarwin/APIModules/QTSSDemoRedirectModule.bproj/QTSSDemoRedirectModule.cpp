@@ -180,27 +180,27 @@ QTSS_Error Authenticate(QTSS_StandardRTSP_Params* inParams)
     ::memset(theNewFilename, 0, kBuffSize);
     
     if (bandwidthBits <= 0) {
-        qtss_snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_50kbit.3gp", movieUrlTrunc, movieUrlFilename);
+        snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_50kbit.3gp", movieUrlTrunc, movieUrlFilename);
     } else if (bandwidthBits <= 28000) {
-        qtss_snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_50kbit.3gp", movieUrlTrunc, movieUrlFilename);
+        snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_50kbit.3gp", movieUrlTrunc, movieUrlFilename);
     } else if (bandwidthBits <= 56000) {
-        qtss_snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_50kbit.3gp", movieUrlTrunc, movieUrlFilename);
+        snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_50kbit.3gp", movieUrlTrunc, movieUrlFilename);
     } else if (bandwidthBits <= 112000) {
-        qtss_snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_100kbit.mov", movieUrlTrunc, movieUrlFilename);
+        snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_100kbit.mov", movieUrlTrunc, movieUrlFilename);
     } else if (bandwidthBits <= 256000) {
-        qtss_snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_100kbit.mov", movieUrlTrunc, movieUrlFilename);
+        snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_100kbit.mov", movieUrlTrunc, movieUrlFilename);
     } else if (bandwidthBits <= 384000) {
-        qtss_snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_300kbit.mov", movieUrlTrunc, movieUrlFilename);
+        snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_300kbit.mov", movieUrlTrunc, movieUrlFilename);
     } else if (bandwidthBits <= 512000) {
-        qtss_snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_300kbit.mov", movieUrlTrunc, movieUrlFilename);
+        snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_300kbit.mov", movieUrlTrunc, movieUrlFilename);
     } else if (bandwidthBits <= 768000) {
-        qtss_snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_300kbit.mov", movieUrlTrunc, movieUrlFilename);
+        snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_300kbit.mov", movieUrlTrunc, movieUrlFilename);
     } else if (bandwidthBits <= 1000000) {
-        qtss_snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_h264_1mbit.mp4", movieUrlTrunc, movieUrlFilename);
+        snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_h264_1mbit.mp4", movieUrlTrunc, movieUrlFilename);
     } else if (bandwidthBits <= 1500000) {
-        qtss_snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_h264_1mbit.mp4", movieUrlTrunc, movieUrlFilename);
+        snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_h264_1mbit.mp4", movieUrlTrunc, movieUrlFilename);
     } else {
-        qtss_snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_h264_1mbit.mp4", movieUrlTrunc, movieUrlFilename);
+        snprintf(theNewFilename, sizeof(theNewFilename), "%s/%s_h264_1mbit.mp4", movieUrlTrunc, movieUrlFilename);
     }
     
     // In order to send the redirect, we need to get a QTSS_StreamRef

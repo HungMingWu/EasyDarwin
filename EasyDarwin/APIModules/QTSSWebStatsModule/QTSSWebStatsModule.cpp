@@ -452,11 +452,11 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 				UInt32 upTimeHours = (upTime % kDaySeconds) / kHourSeconds;
 				UInt32 upTimeMinutes = (upTime % kHourSeconds) / kMinuteSeconds;
 				UInt32 upTimeSeconds = (upTime % kMinuteSeconds);
-				qtss_snprintf(uptimebuffer, sizeof(uptimebuffer), "<b>Up Time Total Seconds: </b> %"   _U32BITARG_   "<BR>\n", upTime);
+				snprintf(uptimebuffer, sizeof(uptimebuffer), "<b>Up Time Total Seconds: </b> %"   _U32BITARG_   "<BR>\n", upTime);
 				uptimebuffer[sizeof(uptimebuffer) - 1] = 0;
 				(void)QTSS_Write(inStream, uptimebuffer, ::strlen(uptimebuffer), NULL, 0);
 
-				qtss_snprintf(uptimebuffer, sizeof(uptimebuffer), "<b>Up Time: </b> %"   _U32BITARG_   " days %"   _U32BITARG_   " hours %"   _U32BITARG_   " minutes %"   _U32BITARG_   " seconds <BR>\n", upTimeDays, upTimeHours, upTimeMinutes, upTimeSeconds);
+				snprintf(uptimebuffer, sizeof(uptimebuffer), "<b>Up Time: </b> %"   _U32BITARG_   " days %"   _U32BITARG_   " hours %"   _U32BITARG_   " minutes %"   _U32BITARG_   " seconds <BR>\n", upTimeDays, upTimeHours, upTimeMinutes, upTimeSeconds);
 				uptimebuffer[sizeof(uptimebuffer) - 1] = 0;
 				(void)QTSS_Write(inStream, uptimebuffer, ::strlen(uptimebuffer), NULL, 0);
 			}
@@ -505,10 +505,10 @@ void SendStats(QTSS_StreamRef inStream, UInt32  refreshInterval, bool displayHel
 
 				if (theState == qtssRunningState)
 				{
-					qtss_snprintf(statusBuffer, sizeof(statusBuffer), "<b>Status: </b> %s since %s<BR>", states[theState], std::ctime(&sStartupTime));
+					snprintf(statusBuffer, sizeof(statusBuffer), "<b>Status: </b> %s since %s<BR>", states[theState], std::ctime(&sStartupTime));
 				}
 				else
-					qtss_snprintf(statusBuffer, sizeof(statusBuffer), "<b>Status: </b> %s<BR>", states[theState]);
+					snprintf(statusBuffer, sizeof(statusBuffer), "<b>Status: </b> %s<BR>", states[theState]);
 				(void)QTSS_Write(inStream, statusBuffer, ::strlen(statusBuffer), NULL, 0);
 			}
 			break;

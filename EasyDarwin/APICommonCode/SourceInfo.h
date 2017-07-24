@@ -125,7 +125,7 @@ class SourceInfo
         // the source is reflectable, this must be supported. It returns a newly
         // allocated buffer (that the caller is responsible for) containing an SDP
         // description of the source, stripped of all network info.
-        virtual char*   GetLocalSDP(uint32_t* /*newSDPLen*/) { return NULL; }
+		virtual std::string GetLocalSDP() { return {}; }
         
         // This is only supported by the RTSPSourceInfo sub class
         virtual bool IsRTSPSourceInfo() { return false; }

@@ -115,7 +115,6 @@ ReflectorSession::~ReflectorSession()
 	// We own this object when it is given to us, so delete it now
 	delete[] fStreamArray;
 	delete fSourceInfo;
-	fLocalSDP.Delete();
 	fSourceID.Delete();
 	fSessionName.Delete();
 }
@@ -150,8 +149,7 @@ QTSS_Error ReflectorSession::SetupReflectorSession(SourceInfo* inInfo, QTSS_Stan
 	fSourceInfo = inInfo;
 
 	// this must be set to the new SDP.
-	fLocalSDP.Delete();
-	fLocalSDP.Ptr = inInfo->GetLocalSDP(&fLocalSDP.Len);
+	fLocalSDP = inInfo->GetLocalSDP();
 
 	if (fStreamArray != nullptr)
 	{

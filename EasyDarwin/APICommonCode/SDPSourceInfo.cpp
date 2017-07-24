@@ -66,16 +66,14 @@ SDPSourceInfo::~SDPSourceInfo()
     fSDPData.Delete();
 }
 
-char* SDPSourceInfo::GetLocalSDP(uint32_t* newSDPLen)
+std::string SDPSourceInfo::GetLocalSDP()
 {
     Assert(fSDPData.Ptr != NULL);
 
     bool appendCLine = true;
     uint32_t trackIndex = 0;
     
-    char *localSDP = new char[fSDPData.Len * 2];
-    OSCharArrayDeleter charArrayPathDeleter(localSDP);
-    StringFormatter localSDPFormatter(localSDP, fSDPData.Len * 2);
+    std::string localSDP;
 
     StrPtrLen sdpLine;
     StringParser sdpParser(&fSDPData);
@@ -102,13 +100,12 @@ char* SDPSourceInfo::GetLocalSDP(uint32_t* newSDPLen)
                 //append new connection information right before the first 'm'
                 if (appendCLine)
                 {
-                    localSDPFormatter.Put(sCLine);
-                    localSDPFormatter.PutEOL();
+					localSDP += std::string(sCLine.Ptr, sCLine.Len) + "\r\n";
                    
                     if (!hasControlLine)
                     { 
-                      localSDPFormatter.Put(sControlLine);
-                      localSDPFormatter.PutEOL();
+						localSDP += std::string(sControlLine.Ptr, sControlLine.Len);
+						localSDP += "\r\n";
                     }
                     
                     appendCLine = false;
@@ -117,17 +114,17 @@ char* SDPSourceInfo::GetLocalSDP(uint32_t* newSDPLen)
                 if ((trackIndex > 0) && (!hasControlLine))
                 {
                     sprintf(trackIndexBuffer, "a=control:trackID=%" _S32BITARG_ "\r\n",trackIndex);
-                    localSDPFormatter.Put(trackIndexBuffer, ::strlen(trackIndexBuffer));
+					localSDP += std::string(trackIndexBuffer);
                 }
                 //now write the 'm' line, but strip off the port information
                 StringParser mParser(&sdpLine);
                 StrPtrLen mPrefix;
                 mParser.ConsumeUntil(&mPrefix, StringParser::sDigitMask);
-                localSDPFormatter.Put(mPrefix);
-                localSDPFormatter.Put("0", 1);
+                localSDP += std::string(mPrefix.Ptr, mPrefix.Len);
+                localSDP += '0';
                 (void)mParser.ConsumeInteger(NULL);
-                localSDPFormatter.Put(mParser.GetCurrentPosition(), mParser.GetDataRemaining());
-                localSDPFormatter.PutEOL();
+				localSDP += std::string(mParser.GetCurrentPosition(), mParser.GetDataRemaining());
+                localSDP += "\r\n";
                 trackIndex++;
                 break;
             }
@@ -146,22 +143,22 @@ char* SDPSourceInfo::GetLocalSDP(uint32_t* newSDPLen)
                    (void)aParser.ConsumeInteger(&aDigitType);
                     if (aDigitType.Len > 0)
                     {
-                      localSDPFormatter.Put("a=control:trackID=", 18);
-                      localSDPFormatter.Put(aDigitType);
-                      localSDPFormatter.PutEOL();
+                      localSDP += std::string("a=control:trackID=", 18);
+                      localSDP += std::string(aDigitType.Ptr, aDigitType.Len);
+					  localSDP += "\r\n";
                       hasControlLine = true;
                       break;
                     }
                 }
                
-                localSDPFormatter.Put(sdpLine);
-                localSDPFormatter.PutEOL();
+				localSDP += std::string(sdpLine.Ptr, sdpLine.Len);
+				localSDP += "\r\n";
                 break;
             }
             default:
             {
-                localSDPFormatter.Put(sdpLine);
-                localSDPFormatter.PutEOL();
+				localSDP += std::string(sdpLine.Ptr, sdpLine.Len);
+				localSDP += "\r\n";
             }
         }
     }
@@ -169,20 +166,18 @@ char* SDPSourceInfo::GetLocalSDP(uint32_t* newSDPLen)
     if ((trackIndex > 0) && (!hasControlLine))
     {
         sprintf(trackIndexBuffer, "a=control:trackID=%" _S32BITARG_ "\r\n",trackIndex);
-        localSDPFormatter.Put(trackIndexBuffer, ::strlen(trackIndexBuffer));
+        localSDP += std::string(trackIndexBuffer);
     }
-    *newSDPLen = (uint32_t)localSDPFormatter.GetCurrentOffset();
     
-    StrPtrLen theSDPStr(localSDP, *newSDPLen);//localSDP is not 0 terminated so initialize theSDPStr with the len.
     SDPContainer rawSDPContainer; 
-    (void) rawSDPContainer.SetSDPBuffer( &theSDPStr );    
-    SDPLineSorter sortedSDP(&rawSDPContainer);
+    (void) rawSDPContainer.SetSDPBuffer(localSDP);
+    SDPLineSorter sortedSDP(rawSDPContainer);
 
-    return sortedSDP.GetSortedSDPCopy(); // return a new copy of the sorted SDP
+    return sortedSDP.GetSortedSDPStr(); // return a new copy of the sorted SDP
 }
 
 
-void SDPSourceInfo::Parse(char* sdpData, uint32_t sdpLen)
+void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
 {
     //
     // There are some situations in which Parse can be called twice.

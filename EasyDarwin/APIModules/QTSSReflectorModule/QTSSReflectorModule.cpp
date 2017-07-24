@@ -819,15 +819,17 @@ ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, QTSS_Attrib
 	}
 }
 
-void DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ResizeableStringFormatter *editedSDP, char* theSDPPtr)
+std::string DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, char* theSDPPtr)
 {
+	std::string editedSDP;
 	SDPContainer checkedSDPContainer;
-	checkedSDPContainer.SetSDPBuffer(theSDPPtr);
+	boost::string_view SDPStr(theSDPPtr, strlen(theSDPPtr));
+	checkedSDPContainer.SetSDPBuffer(SDPStr);
 	if (!checkedSDPContainer.HasReqLines())
 	{
 		if (!checkedSDPContainer.HasLineType('v'))
 		{ // add v line
-			editedSDP->Put("v=0\r\n");
+			editedSDP += "v=0\r\n";
 		}
 
 		if (!checkedSDPContainer.HasLineType('s'))
@@ -837,23 +839,21 @@ void DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, Resizeabl
 			(void)QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqFilePath, 0, &theSDPName);
 			QTSSCharArrayDeleter thePathStrDeleter(theSDPName);
 			if (theSDPName == NULL)
-				editedSDP->Put("s=unknown\r\n");
+				editedSDP += "s=unknown\r\n";
 			else
 			{
-				editedSDP->Put("s=");
-				editedSDP->Put(theSDPName);
-				editedSDP->PutEOL();
+				editedSDP += "s=" + std::string(theSDPName) + "\r\n";
 			}
 		}
 
 		if (!checkedSDPContainer.HasLineType('t'))
 		{ // add t line
-			editedSDP->Put("t=0 0\r\n");
+			editedSDP += "t=0 0\r\n";
 		}
 
 		if (!checkedSDPContainer.HasLineType('o'))
 		{ // add o line
-			editedSDP->Put("o=");
+			editedSDP += "o=";
 			char tempBuff[256] = ""; tempBuff[255] = 0;
 			char *nameStr = tempBuff;
 			uint32_t buffLen = sizeof(tempBuff) - 1;
@@ -869,29 +869,30 @@ void DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, Resizeabl
 
 			buffLen = ::strlen(nameStr);
 			if (buffLen == 0)
-				editedSDP->Put("announced_broadcast");
+				editedSDP += "announced_broadcast";
 			else
-				editedSDP->Put(nameStr, buffLen);
+				editedSDP += std::string(nameStr, buffLen);
 
-			editedSDP->Put(" ");
+			editedSDP += " ";
 
 			buffLen = sizeof(tempBuff) - 1;
 			(void)QTSS_GetValue(inParams->inClientSession, qtssCliSesRTSPSessionID, 0, &tempBuff, &buffLen);
-			editedSDP->Put(tempBuff, buffLen);
+			editedSDP += std::string(tempBuff, buffLen);
 
-			editedSDP->Put(" ");
+			editedSDP += " ";
 			snprintf(tempBuff, sizeof(tempBuff) - 1, "%" _64BITARG_ "d", (int64_t)OS::UnixTime_Secs() + 2208988800LU);
-			editedSDP->Put(tempBuff);
+			editedSDP += tempBuff;
 
-			editedSDP->Put(" IN IP4 ");
+			editedSDP += " IN IP4 ";
 			(void)QTSS_GetValue(inParams->inClientSession, qtssCliRTSPSessRemoteAddrStr, 0, tempBuff, &buffLen);
-			editedSDP->Put(tempBuff, buffLen);
+			editedSDP += std::string(tempBuff, buffLen);
 
-			editedSDP->PutEOL();
+			editedSDP += "\r\n";
 		}
 	}
 
-	editedSDP->Put(theSDPPtr);
+	editedSDP += theSDPPtr;
+	return editedSDP;
 }
 
 
@@ -1060,20 +1061,18 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 
 	// ------------  Clean up missing required SDP lines
 
-	ResizeableStringFormatter editedSDP(NULL, 0);
-	DoAnnounceAddRequiredSDPLines(inParams, &editedSDP, theRequestBody);
-	StrPtrLen editedSDPSPL(editedSDP.GetBufPtr(), editedSDP.GetBytesWritten());
+	std::string editedSDP = DoAnnounceAddRequiredSDPLines(inParams, theRequestBody);
 
 	// ------------ Check the headers
 
 	SDPContainer checkedSDPContainer;
-	checkedSDPContainer.SetSDPBuffer(&editedSDPSPL);
+	checkedSDPContainer.SetSDPBuffer(editedSDP);
 	if (!checkedSDPContainer.IsSDPBufferValid())
 	{
 		return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssUnsupportedMediaType, &sSDPNotValidMessage);
 	}
 
-	SDPSourceInfo theSDPSourceInfo(editedSDPSPL.Ptr, editedSDPSPL.Len);
+	SDPSourceInfo theSDPSourceInfo(editedSDP.c_str(), editedSDP.length());
 	OSCharArrayDeleter charArrayPathDeleter(theRequestBody);
 
 	if (!InfoPortsOK(inParams, &theSDPSourceInfo, &theFullPath)) // All validity checks like this check should be done before touching the file.
@@ -1083,15 +1082,9 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 
 	// ------------ reorder the sdp headers to make them proper.
 
-	SDPLineSorter sortedSDP(&checkedSDPContainer);
+	SDPLineSorter sortedSDP(checkedSDPContainer);
 
 	// ------------ Write the SDP 
-
-	char* sessionHeaders = sortedSDP.GetSessionHeaders()->GetAsCString();
-	OSCharArrayDeleter sessionHeadersDeleter(sessionHeaders);
-
-	char* mediaHeaders = sortedSDP.GetMediaHeaders()->GetAsCString();
-	OSCharArrayDeleter mediaHeadersDeleter(mediaHeaders);
 
 	// sortedSDP.GetSessionHeaders()->PrintStrEOL();
 	// sortedSDP.GetMediaHeaders()->PrintStrEOL();
@@ -1111,9 +1104,8 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientForbidden, 0);
 	}
 #endif 
-	char sdpContext[1024] = { 0 };
-	sprintf(sdpContext, "%s%s", sessionHeaders, mediaHeaders);
-	CSdpCache::GetInstance()->setSdpMap(theStreamName, sdpContext);
+	std::string sdpContext = sortedSDP.GetSortedSDPStr();
+	CSdpCache::GetInstance()->setSdpMap(theStreamName, const_cast<char *>(sdpContext.c_str()));
 
 
 	//printf("QTSSReflectorModule:DoAnnounce SendResponse OK=200\n");
@@ -1121,15 +1113,17 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	return QTSS_SendStandardRTSPResponse(inParams->inRTSPRequest, inParams->inClientSession, 0);
 }
 
-void DoDescribeAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ReflectorSession* theSession, QTSS_TimeVal modDate, ResizeableStringFormatter *editedSDP, StrPtrLen* theSDPPtr)
+std::string DoDescribeAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ReflectorSession* theSession, 
+	QTSS_TimeVal modDate, boost::string_view theSDP)
 {
+	std::string editedSDP;
 	SDPContainer checkedSDPContainer;
-	checkedSDPContainer.SetSDPBuffer(theSDPPtr);
+	checkedSDPContainer.SetSDPBuffer(theSDP);
 	if (!checkedSDPContainer.HasReqLines())
 	{
 		if (!checkedSDPContainer.HasLineType('v'))
 		{ // add v line
-			editedSDP->Put("v=0\r\n");
+			editedSDP += "v=0\r\n";
 		}
 
 		if (!checkedSDPContainer.HasLineType('s'))
@@ -1137,40 +1131,40 @@ void DoDescribeAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, Reflector
 			char* theSDPName = NULL;
 			(void)QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqFilePath, 0, &theSDPName);
 			QTSSCharArrayDeleter thePathStrDeleter(theSDPName);
-			editedSDP->Put("s=");
-			editedSDP->Put(theSDPName);
-			editedSDP->PutEOL();
+			editedSDP += "s=";
+			editedSDP += theSDPName;
+			editedSDP += "\r\n";
 		}
 
 		if (!checkedSDPContainer.HasLineType('t'))
 		{ // add t line
-			editedSDP->Put("t=0 0\r\n");
+			editedSDP += "t=0 0\r\n";
 		}
 
 		if (!checkedSDPContainer.HasLineType('o'))
 		{ // add o line
-			editedSDP->Put("o=broadcast_sdp ");
+			editedSDP += "o=broadcast_sdp ";
 			char tempBuff[256] = "";
 			tempBuff[255] = 0;
 			snprintf(tempBuff, sizeof(tempBuff) - 1, "%"   _U32BITARG_   "", *(uint32_t *)&theSession);
-			editedSDP->Put(tempBuff);
+			editedSDP += tempBuff;
 
-			editedSDP->Put(" ");
+			editedSDP += " ";
 			// modified date is in milliseconds.  Convert to NTP seconds as recommended by rfc 2327
 			snprintf(tempBuff, sizeof(tempBuff) - 1, "%" _64BITARG_ "d", (int64_t)(modDate / 1000) + 2208988800LU);
-			editedSDP->Put(tempBuff);
+			editedSDP += tempBuff;
 
-			editedSDP->Put(" IN IP4 ");
+			editedSDP += " IN IP4 ";
 			uint32_t buffLen = sizeof(tempBuff) - 1;
 			(void)QTSS_GetValue(inParams->inClientSession, qtssCliSesHostName, 0, &tempBuff, &buffLen);
-			editedSDP->Put(tempBuff, buffLen);
+			editedSDP += std::string(tempBuff, buffLen);
 
-			editedSDP->PutEOL();
+			editedSDP += "\r\n";
 		}
 	}
 
-	editedSDP->Put(*theSDPPtr);
-
+	editedSDP += std::string(theSDP);
+	return editedSDP;
 }
 
 QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
@@ -1250,7 +1244,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	//above function has signalled that this request belongs to us, so let's respond
 	iovec theDescribeVec[3] = { {0 } };
 
-	Assert(theSession->GetLocalSDP()->Ptr != NULL);
+	Assert(!theSession->GetLocalSDP().empty());
 
 
 	StrPtrLen theFileData;
@@ -1261,28 +1255,21 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 
 	// -------------- process SDP to remove connection info and add track IDs, port info, and default c= line
 
-	StrPtrLen theSDPData;
 	SDPSourceInfo tempSDPSourceInfo(theFileData.Ptr, theFileData.Len); // will make a copy and delete in destructor
-	theSDPData.Ptr = tempSDPSourceInfo.GetLocalSDP(&theSDPData.Len); // returns a new buffer with processed sdp
-	OSCharArrayDeleter sdpDeleter(theSDPData.Ptr); // delete the temp sdp source info buffer returned by GetLocalSDP
+	std::string theSDPData = tempSDPSourceInfo.GetLocalSDP(); // returns a new buffer with processed sdp
 
-	if (theSDPData.Len <= 0) // can't find it on disk or it failed to parse just use the one in the session.
-	{
-		theSDPData.Ptr = theSession->GetLocalSDP()->Ptr; // this sdp isn't ours it must not be deleted
-		theSDPData.Len = theSession->GetLocalSDP()->Len;
-	}
+	if (theSDPData.empty()) // can't find it on disk or it failed to parse just use the one in the session.
+		theSDPData = std::string(theSession->GetLocalSDP());
 
 
 	// ------------  Clean up missing required SDP lines
 
-	ResizeableStringFormatter editedSDP(NULL, 0);
-	DoDescribeAddRequiredSDPLines(inParams, theSession, outModDate, &editedSDP, &theSDPData);
-	StrPtrLen editedSDPSPL(editedSDP.GetBufPtr(), editedSDP.GetBytesWritten());
+	std::string editedSDP = DoDescribeAddRequiredSDPLines(inParams, theSession, outModDate, theSDPData);
 
 	// ------------ Check the headers
 
 	SDPContainer checkedSDPContainer;
-	checkedSDPContainer.SetSDPBuffer(&editedSDPSPL);
+	checkedSDPContainer.SetSDPBuffer(editedSDP);
 	if (!checkedSDPContainer.IsSDPBufferValid())
 	{
 		if(theRefCount)
@@ -1302,20 +1289,17 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	if (adjustMediaBandwidth)
 		adjustMediaBandwidthPercent = (float)sAdjustMediaBandwidthPercent / 100.0;
 
-	ResizeableStringFormatter buffer;
-	SDPContainer* insertMediaLines = NULL;
-	SDPLineSorter sortedSDP(&checkedSDPContainer, adjustMediaBandwidthPercent, insertMediaLines);
-	delete insertMediaLines;
+	SDPLineSorter sortedSDP(checkedSDPContainer, adjustMediaBandwidthPercent);
 
 	// ------------ Write the SDP 
 
-	uint32_t sessLen = sortedSDP.GetSessionHeaders()->Len;
-	uint32_t mediaLen = sortedSDP.GetMediaHeaders()->Len;
-	theDescribeVec[1].iov_base = sortedSDP.GetSessionHeaders()->Ptr;
-	theDescribeVec[1].iov_len = sortedSDP.GetSessionHeaders()->Len;
+	uint32_t sessLen = sortedSDP.GetSessionHeaders().length();
+	uint32_t mediaLen = sortedSDP.GetMediaHeaders().length();
+	theDescribeVec[1].iov_base = const_cast<char *>(sortedSDP.GetSessionHeaders().data());
+	theDescribeVec[1].iov_len = sortedSDP.GetSessionHeaders().length();
 
-	theDescribeVec[2].iov_base = sortedSDP.GetMediaHeaders()->Ptr;
-	theDescribeVec[2].iov_len = sortedSDP.GetMediaHeaders()->Len;
+	theDescribeVec[2].iov_base = const_cast<char *>(sortedSDP.GetMediaHeaders().data());
+	theDescribeVec[2].iov_len = sortedSDP.GetMediaHeaders().length();
 
 	(void)QTSS_AppendRTSPHeader(inParams->inRTSPRequest, qtssCacheControlHeader,
 		kCacheControlHeader.Ptr, kCacheControlHeader.Len);

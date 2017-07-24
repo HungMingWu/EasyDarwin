@@ -33,9 +33,10 @@
 #ifndef __SDPUtilsH__
 #define __SDPUtilsH__
 
+#include <vector>
+#include <boost/utility/string_view.hpp>
 #include "OS.h"
 #include "StrPtrLen.h"
-#include "ResizeableStringFormatter.h"
 #include "StringParser.h"
 
 class SDPLine : public StrPtrLen
@@ -66,40 +67,29 @@ class SDPContainer
 		kAllReq = kV | kS | kT | kO
 	};
 
-
+	std::vector<boost::string_view> fSDPLines;
+	boost::string_view fSDPBuffer;
 public:
 
-	SDPContainer(uint32_t numStrPtrs = SDPContainer::kBaseLines) :
-		fNumSDPLines(numStrPtrs),
-		fSDPLineArray(NULL)
+	SDPContainer()
 	{
 		Initialize();
 	}
 
-	~SDPContainer() { delete[] fSDPLineArray; }
+	~SDPContainer() { }
 	void		Initialize();
-	int32_t      AddHeaderLine(StrPtrLen *theLinePtr);
-	int32_t      FindHeaderLineType(char id, int32_t start);
-	SDPLine*    GetNextLine();
-	SDPLine*    GetLine(int32_t lineIndex);
-	void        SetLine(int32_t index);
+	std::vector<boost::string_view> GetNonMediaLines() const;
+	boost::string_view GetMediaSDP() const;
+	boost::string_view GetFullSDP() const { return fSDPBuffer; }
 	void        Parse();
-	bool      SetSDPBuffer(char *sdpBuffer);
-	bool      SetSDPBuffer(StrPtrLen *sdpBufferPtr);
+	bool      SetSDPBuffer(boost::string_view sdpBuffer);
 	bool      IsSDPBufferValid() { return fValid; }
 	bool      HasReqLines() { return (bool)(fReqLines == kAllReq); }
 	bool      HasLineType(char lineType) { return (bool)(lineType == fFieldStr[(uint8_t)lineType]); }
 	char*       GetReqLinesArray;
-	void        PrintLine(int32_t lineIndex);
-	void        PrintAllLines();
-	int32_t      GetNumLines() { return  fNumUsedLines; }
-
-	int32_t      fCurrentLine;
-	int32_t      fNumSDPLines;
-	int32_t      fNumUsedLines;
-	SDPLine*    fSDPLineArray;
+	const std::vector<boost::string_view>& GetLines() const { return fSDPLines; }
+	
 	bool      fValid;
-	StrPtrLen   fSDPBuffer;
 	uint16_t      fReqLines;
 
 	char        fFieldStr[kLineTypeArraySize]; // 
@@ -109,30 +99,18 @@ public:
 
 
 class SDPLineSorter {
+	bool ValidateSessionHeader(boost::string_view theHeaderLine);
+	std::string fSessionHeaders;
+	std::string fMediaHeaders;
 
-public:
-	SDPLineSorter() : fSessionLineCount(0), fSDPSessionHeaders(NULL, 0), fSDPMediaHeaders(NULL, 0) {};
-	SDPLineSorter(SDPContainer *rawSDPContainerPtr, float adjustMediaBandwidthPercent = 1.0, SDPContainer *insertMediaLinesArray = NULL);
-
-	StrPtrLen* GetSessionHeaders() { return &fSessionHeaders; }
-	StrPtrLen* GetMediaHeaders() { return &fMediaHeaders; }
-	char* GetSortedSDPCopy();
-	bool ValidateSessionHeader(StrPtrLen *theHeaderLinePtr);
-
-
-	StrPtrLen fullSDPBuffSPL;
-	int32_t fSessionLineCount;
-	SDPContainer fSessionSDPContainer;
-	ResizeableStringFormatter fSDPSessionHeaders;
-	ResizeableStringFormatter fSDPMediaHeaders;
-	StrPtrLen fSessionHeaders;
-	StrPtrLen fMediaHeaders;
 	static char sSessionOrderedLines[];// = "vosiuepcbtrzka"; // chars are order dependent: declared by rfc 2327
 	static char sessionSingleLines[];//  = "vosiuepcbzk";    // return only 1 of each of these session field types
-	static StrPtrLen sEOL;
-	static StrPtrLen sMaxBandwidthTag;
+public:
+	SDPLineSorter(const SDPContainer &rawSDPContainer, float adjustMediaBandwidthPercent = 1.0);
+
+	boost::string_view GetSessionHeaders() { return fSessionHeaders; }
+	boost::string_view GetMediaHeaders() { return fMediaHeaders; }
+	std::string GetSortedSDPStr();
 };
 
-
 #endif
-

@@ -1,6 +1,6 @@
 include_directories(../EasyProtocol/Include ../EasyDarwin/APICommonCode ../EasyDarwin/APIStubLib 
                     ../RTSPUtilitiesLib ../HTTPUtilitiesLib 
-		    ../EasyDarwin/RTPMetaInfoLib/ .)
+		            ../EasyDarwin/RTPMetaInfoLib/ ../EasyProtocol/Include .)
 set (SRC 
              getopt.c getopt.h 
 			 OSThread.cpp OSThread.h

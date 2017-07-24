@@ -31,6 +31,8 @@
 				 the stream.
  */
 
+#include <boost/utility/string_view.hpp>
+
 #include "QTSS.h"
 #include "OSRef.h"
 #include "StrPtrLen.h"
@@ -114,7 +116,7 @@ public:
 	uint32_t          GetNumOutputs() { return fNumOutputs; }
 	uint32_t          GetNumStreams() { return fSourceInfo->GetNumStreams(); }
 	SourceInfo*     GetSourceInfo() { return fSourceInfo; }
-	StrPtrLen*      GetLocalSDP()	{ return &fLocalSDP; }
+	boost::string_view GetLocalSDP()	{ return fLocalSDP; }
 
 	StrPtrLen*      GetSourceID()	{ return &fSourceID; }
 	StrPtrLen*      GetStreamName() { return &fSessionName; }
@@ -184,7 +186,7 @@ private:
 	// The reflector session needs to hang onto the source info object
 	// for it's entire lifetime. Right now, this is used for reflector-as-client.
 	SourceInfo* fSourceInfo;
-	StrPtrLen fLocalSDP;
+	std::string fLocalSDP;
 
 	// For the QTSSSplitterModule, this object can cache a QTSS_StreamRef
 	QTSS_StreamRef fSocketStream;

@@ -1,6 +1,7 @@
 include_directories(../../CommonUtilitiesLib 
                     ../../RTSPUtilitiesLib
                     ../../HTTPUtilitiesLib
+					../../EasyProtocol/Include
                     ../RTPMetaInfoLib ../APIStubLib)
 add_library (APICommonCode QTSSRollingLog.h QTSSRollingLog.cpp
              QTSSModuleUtils.cpp QTSSModuleUtils.h

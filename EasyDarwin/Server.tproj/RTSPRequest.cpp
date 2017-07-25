@@ -28,6 +28,10 @@
 	 Contains:   Implementation of RTSPRequest class.
  */
 
+#include <map>
+#include <boost/utility/string_view.hpp>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/fusion/include/std_pair.hpp>
 
 #include "RTSPRequest.h"
 #include "RTSPProtocol.h"
@@ -92,11 +96,69 @@ static StrPtrLen    sEqualQuote("=\"", 2);
 static StrPtrLen    sQuoteCommaSpace("\", ", 3);
 static StrPtrLen    sStaleTrue("stale=\"true\", ", 14);
 
+typedef std::map<std::string, std::string> header_fields_t;
+
+struct RTSPRequestHeader
+{
+	std::string method;
+	std::string uri;
+	std::string rtsp_version;
+
+	header_fields_t header_fields;
+};
+
+namespace qi = boost::spirit::qi;
+
+BOOST_FUSION_ADAPT_STRUCT(RTSPRequestHeader, method, uri, rtsp_version, header_fields)
+
+template <typename Iterator, typename Skipper = qi::ascii::blank_type>
+struct RTSPHeaderGrammar : qi::grammar <Iterator, RTSPRequestHeader(), Skipper> {
+	RTSPHeaderGrammar() : RTSPHeaderGrammar::base_type(rtsp_header, "RTSPHeaderGrammar Grammar") {
+		method = +qi::alpha;
+		uri = +qi::graph;
+		rtsp_ver = "RTSP/" >> +qi::char_("0-9.");
+
+		field_key = +qi::char_("0-9a-zA-Z-");
+		field_value = +~qi::char_("\r\n");
+
+		fields = *(field_key >> ':' >> field_value >> qi::lexeme["\r\n"]);
+
+		rtsp_header = method >> uri >> rtsp_ver >> qi::lexeme["\r\n"] >> fields >> qi::lexeme["\r\n"];
+		BOOST_SPIRIT_DEBUG_NODES((method)(uri)(rtsp_ver)(fields)(rtsp_header))
+	}
+private:
+	qi::rule<Iterator, std::map<std::string, std::string>(), Skipper> fields;
+	qi::rule<Iterator, RTSPRequestHeader(), Skipper> rtsp_header;
+	// lexemes
+	qi::rule<Iterator, std::string()> method, uri, rtsp_ver;
+	qi::rule<Iterator, std::string()> field_key, field_value;
+};
+
 //Parses the request
 QTSS_Error RTSPRequest::Parse()
 {
 	StringParser parser(this->GetValue(qtssRTSPReqFullRequest));
 	Assert(this->GetValue(qtssRTSPReqFullRequest)->Ptr != NULL);
+
+	boost::string_view requestHeader(this->GetValue(qtssRTSPReqFullRequest)->Ptr, this->GetValue(qtssRTSPReqFullRequest)->Len);
+	typedef boost::string_view::const_iterator It;
+	RTSPHeaderGrammar<It> rtspGrammar;
+	It iter = requestHeader.begin(), end = requestHeader.end();
+	RTSPRequestHeader rtspHeader;
+	bool r = phrase_parse(iter, end, rtspGrammar, qi::ascii::blank, rtspHeader);
+
+	if (r && iter == end) {
+		std::cout << "Parsing succeeded\n";
+		//check the version
+		//fVersion = RTSPProtocol::GetVersion(rtspHeader.rtsp_version);
+		//if (fVersion != RTSPProtocol::RTSPVersion::k10Version)
+			//return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgBadRTSPRequest, nullptr);
+	}
+	else {
+		std::cout << "Parsing failed\n";
+		std::cout << "stopped at: \"" << std::string(iter, end) << "\"\n";
+		//return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgBadRTSPRequest, nullptr);
+	}
 
 	//parse status line.
 	QTSS_Error error = ParseFirstLine(parser);

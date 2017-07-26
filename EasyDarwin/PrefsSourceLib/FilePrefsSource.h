@@ -48,10 +48,10 @@ class FilePrefsSource : public PrefsSource
 public:
 
 	FilePrefsSource(bool allowDuplicates = false);
-	virtual ~FilePrefsSource();
+	~FilePrefsSource() override;
 
-	virtual int     GetValue(const char* inKey, char* ioValue);
-	virtual int     GetValueByIndex(const char* inKey, uint32_t inIndex, char* ioValue);
+	int     GetValue(const char* inKey, char* ioValue) override;
+	int     GetValueByIndex(const char* inKey, uint32_t inIndex, char* ioValue) override;
 
 	// Allows caller to iterate over all the values in the file.
 	char*           GetValueAtIndex(uint32_t inIndex);

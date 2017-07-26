@@ -64,20 +64,20 @@ public:
 	// Instead, it is assumed that the RTCP packet validation has already been
 	// done.
 	RTCPAckPacket() : fRTCPAckBuffer(NULL), fAckMaskSize(0) {}
-	virtual ~RTCPAckPacket() {}
+	~RTCPAckPacket() override {}
 
 	// Call to parse if you don't know what kind of packet this is
 	// Returns true if this is an Ack packet, false otherwise.
 	// Assumes that inPacketBuffer is a pointer to a valid RTCP packet header.
 	bool  ParseAckPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength);
 
-	virtual bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength);
+	bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength) override;
 
 	inline uint16_t GetAckSeqNum();
 	inline uint32_t GetAckMaskSizeInBits() { return fAckMaskSize * 8; }
 	inline bool IsNthBitEnabled(uint32_t inBitNumber);
 	inline uint16_t GetPacketLength();
-	void   Dump();
+	void   Dump() override;
 	static void GetTestPacket(StrPtrLen* resultPtr) {} //todo
 
 	enum

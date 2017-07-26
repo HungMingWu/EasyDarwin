@@ -53,7 +53,7 @@ public:
 	static void Initialize();
 
 	QTSSMessages(PrefsSource* inMessages);
-	virtual ~QTSSMessages() {
+	~QTSSMessages() override {
 		for (uint32_t x = 0; x < numAttrs; x++)
 			if (attrBuffer[x] != NULL)
 				delete[] attrBuffer[x];

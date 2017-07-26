@@ -68,7 +68,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgDSRegisterREQ(EasyDarwinTerminalType terminalType, EasyDarwinAppType appType, EasyNVR &nvr, size_t cseq = 1);
 		EasyMsgDSRegisterREQ(const string& msg);
-		virtual ~EasyMsgDSRegisterREQ() {}
+		~EasyMsgDSRegisterREQ() override {}
 
 	public:
 		EasyNVR& GetNVR() { return nvr_; }
@@ -83,7 +83,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSDRegisterACK(EasyJsonValue &body, size_t cseq = 1, size_t error = 200);
 		EasyMsgSDRegisterACK(const string& msg);
-		virtual ~EasyMsgSDRegisterACK() {}
+		~EasyMsgSDRegisterACK() override {}
 	};
 
 	// MSG_SD_PUSH_STREAM_REQ
@@ -92,7 +92,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSDPushStreamREQ(EasyJsonValue &body, size_t cseq);
 		EasyMsgSDPushStreamREQ(const string& msg);
-		virtual ~EasyMsgSDPushStreamREQ() {}
+		~EasyMsgSDPushStreamREQ() override {}
 	};
 
 	// MSG_DS_PUSH_STREAM_ACK
@@ -101,7 +101,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgDSPushSteamACK(EasyJsonValue &body, size_t cseq = 1, size_t error = 200);
 		EasyMsgDSPushSteamACK(const string& msg);
-		virtual ~EasyMsgDSPushSteamACK() {}
+		~EasyMsgDSPushSteamACK() override {}
 	};
 
 	// MSG_SD_STREAM_STOP_REQ
@@ -110,7 +110,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSDStopStreamREQ(EasyJsonValue &body, size_t cseq = 1);
 		EasyMsgSDStopStreamREQ(const string& msg);
-		virtual ~EasyMsgSDStopStreamREQ() {}
+		~EasyMsgSDStopStreamREQ() override {}
 	};
 
 	// MSG_DS_STREAM_STOP_ACK
@@ -119,7 +119,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgDSStopStreamACK(EasyJsonValue &body, size_t cseq = 1, size_t error = 200);
 		EasyMsgDSStopStreamACK(const string& msg);
-		virtual ~EasyMsgDSStopStreamACK() {}
+		~EasyMsgDSStopStreamACK() override {}
 	};
 
 	// MSG_SC_DEVICE_LIST_ACK
@@ -128,7 +128,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSCDeviceListACK(EasyDevices &devices, size_t cseq = 1, size_t error = 200);
 		EasyMsgSCDeviceListACK(const string& msg);
-		virtual ~EasyMsgSCDeviceListACK() {}
+		~EasyMsgSCDeviceListACK() override {}
 
 		EasyDevices& GetDevices() { return devices_; }
 
@@ -142,7 +142,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSCDeviceInfoACK(EasyDevices &cameras, const string& devcei_serial, size_t cseq = 1, size_t error = 200);
 		EasyMsgSCDeviceInfoACK(const string& msg);
-		~EasyMsgSCDeviceInfoACK() {}
+		~EasyMsgSCDeviceInfoACK() override {}
 
 		EasyDevices& GetCameras() { return channels_; }
 
@@ -156,7 +156,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSCGetStreamACK(EasyJsonValue &body, size_t cseq = 1, size_t error = 200);
 		EasyMsgSCGetStreamACK(const string& msg);
-		virtual ~EasyMsgSCGetStreamACK() {}
+		~EasyMsgSCGetStreamACK() override {}
 	};
 
 	// MSG_CS_FREE_STREAM_REQ
@@ -165,7 +165,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgCSFreeStreamREQ(EasyJsonValue &body, size_t cseq);
 		EasyMsgCSFreeStreamREQ(const string& msg);
-		virtual ~EasyMsgCSFreeStreamREQ() {}
+		~EasyMsgCSFreeStreamREQ() override {}
 	};
 
 	// MSG_SC_FREE_STREAM_ACK
@@ -174,7 +174,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSCFreeStreamACK(EasyJsonValue &body, size_t cseq = 1, size_t error = 200);
 		EasyMsgSCFreeStreamACK(const string& msg);
-		virtual ~EasyMsgSCFreeStreamACK() {}
+		~EasyMsgSCFreeStreamACK() override {}
 	};
 
 	// MSG_DS_POST_SNAP_REQ
@@ -183,7 +183,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgDSPostSnapREQ(EasyJsonValue &body, size_t cseq = 1);
 		EasyMsgDSPostSnapREQ(const string& msg);
-		virtual ~EasyMsgDSPostSnapREQ() {}
+		~EasyMsgDSPostSnapREQ() override {}
 	};
 
 	// MSG_SD_POST_SNAP_ACK
@@ -192,7 +192,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSDPostSnapACK(EasyJsonValue &body, size_t cseq = 1, size_t error = 200);
 		EasyMsgSDPostSnapACK(const string& msg);
-		virtual ~EasyMsgSDPostSnapACK() {}
+		~EasyMsgSDPostSnapACK() override {}
 	};
 
 	// MSG_CS_PTZ_CONTROL_REQ
@@ -201,7 +201,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgCSPTZControlREQ(EasyJsonValue& body, size_t cseq = 1);
 		EasyMsgCSPTZControlREQ(const string& msg);
-		virtual ~EasyMsgCSPTZControlREQ() {}
+		~EasyMsgCSPTZControlREQ() override {}
 	};
 
 	// MSG_SC_PTZ_CONTROL_ACK
@@ -210,7 +210,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSCPTZControlACK(EasyJsonValue& body, size_t cseq = 1, size_t error = 200);
 		EasyMsgSCPTZControlACK(const string& msg);
-		virtual ~EasyMsgSCPTZControlACK() {}
+		~EasyMsgSCPTZControlACK() override {}
 	};
 
 	// MSG_SD_CONTROL_PTZ_REQ
@@ -219,7 +219,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSDControlPTZREQ(EasyJsonValue& body, size_t cseq = 1);
 		EasyMsgSDControlPTZREQ(const string& msg);
-		virtual ~EasyMsgSDControlPTZREQ() {}
+		~EasyMsgSDControlPTZREQ() override {}
 	};
 
 	// MSG_DS_CONTROL_PTZ_ACK
@@ -228,7 +228,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgDSControlPTZACK(EasyJsonValue& body, size_t cseq = 1, size_t error = 200);
 		EasyMsgDSControlPTZACK(const string& msg);
-		virtual ~EasyMsgDSControlPTZACK() {}
+		~EasyMsgDSControlPTZACK() override {}
 	};
 
 	// MSG_CS_PRESET_CONTROL_REQ
@@ -237,7 +237,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgCSPresetControlREQ(EasyJsonValue& body, size_t cseq = 1);
 		EasyMsgCSPresetControlREQ(const string& msg);
-		virtual ~EasyMsgCSPresetControlREQ() {}
+		~EasyMsgCSPresetControlREQ() override {}
 	};
 
 	// MSG_SC_PRESET_CONTROL_ACK
@@ -246,7 +246,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSCPresetControlACK(EasyJsonValue& body, size_t cseq = 1, size_t error = 200);
 		EasyMsgSCPresetControlACK(const string& msg);
-		virtual ~EasyMsgSCPresetControlACK() {}
+		~EasyMsgSCPresetControlACK() override {}
 	};
 
 	// MSG_SD_CONTROL_PRESET_REQ
@@ -255,7 +255,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSDControlPresetREQ(EasyJsonValue& body, size_t cseq = 1);
 		EasyMsgSDControlPresetREQ(const string& msg);
-		virtual ~EasyMsgSDControlPresetREQ() {}
+		~EasyMsgSDControlPresetREQ() override {}
 	};
 
 	// MSG_DS_CONTROL_PRESET_ACK
@@ -264,7 +264,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgDSControlPresetACK(EasyJsonValue& body, size_t cseq = 1, size_t error = 200);
 		EasyMsgDSControlPresetACK(const string& msg);
-		virtual ~EasyMsgDSControlPresetACK() {}
+		~EasyMsgDSControlPresetACK() override {}
 	};
 
 	// MSG_CS_TALKBACK_CONTROL_REQ
@@ -273,7 +273,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgCSTalkbackControlREQ(EasyJsonValue& body, size_t cseq = 1);
 		EasyMsgCSTalkbackControlREQ(const string& msg);
-		virtual ~EasyMsgCSTalkbackControlREQ() {}
+		~EasyMsgCSTalkbackControlREQ() override {}
 	};
 
 	// MSG_SC_TALKBACK_CONTROL_ACK
@@ -282,7 +282,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSCTalkbackControlACK(EasyJsonValue& body, size_t cseq = 1, size_t error = 200);
 		EasyMsgSCTalkbackControlACK(const string& msg);
-		virtual ~EasyMsgSCTalkbackControlACK() {}
+		~EasyMsgSCTalkbackControlACK() override {}
 	};
 
 	// MSG_SD_CONTROL_TALKBACK_REQ
@@ -291,7 +291,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSDControlTalkbackREQ(EasyJsonValue& body, size_t cseq = 1);
 		EasyMsgSDControlTalkbackREQ(const string& msg);
-		virtual ~EasyMsgSDControlTalkbackREQ() {}
+		~EasyMsgSDControlTalkbackREQ() override {}
 	};
 
 	// MSG_DS_CONTROL_TALKBACK_ACK
@@ -300,14 +300,14 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgDSControlTalkbackACK(EasyJsonValue& body, size_t cseq = 1, size_t error = 200);
 		EasyMsgDSControlTalkbackACK(const string& msg);
-		virtual ~EasyMsgDSControlTalkbackACK() {}
+		~EasyMsgDSControlTalkbackACK() override {}
 	};
 
 	class EasyMsgExceptionACK : public EasyProtocol
 	{
 	public:
 		EasyMsgExceptionACK(size_t cseq = 1, size_t error = 400);
-		virtual ~EasyMsgExceptionACK() {}
+		~EasyMsgExceptionACK() override {}
 	};
 
 	class EasyDarwinHLSession
@@ -350,7 +350,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSCStartHLSACK();
 		EasyMsgSCStartHLSACK(const string& msg);
-		virtual ~EasyMsgSCStartHLSACK() {}
+		~EasyMsgSCStartHLSACK() override {}
 
 		void SetStreamName(const string& sName);
 		void SetStreamURL(const string& sURL);
@@ -362,7 +362,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSCHLSessionListACK();
 		EasyMsgSCHLSessionListACK(const string& msg);
-		virtual ~EasyMsgSCHLSessionListACK() {}
+		~EasyMsgSCHLSessionListACK() override {}
 
 	public:
 		bool AddSession(EasyDarwinHLSession &session);
@@ -379,7 +379,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSCRTSPLiveSessionsACK();
 		EasyMsgSCRTSPLiveSessionsACK(const string& msg);
-		virtual ~EasyMsgSCRTSPLiveSessionsACK() {}
+		~EasyMsgSCRTSPLiveSessionsACK() override {}
 
 	public:
 		bool AddSession(EasyDarwinRTSPSession& session);
@@ -396,7 +396,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSCListRecordACK();
 		EasyMsgSCListRecordACK(const string& msg);
-		virtual ~EasyMsgSCListRecordACK() {}
+		~EasyMsgSCListRecordACK() override {}
 
 	public:
 		bool AddRecord(const string& record);
@@ -446,7 +446,7 @@ namespace EasyDarwin { namespace Protocol
 	public:
 		EasyMsgSCRecordList();
 		EasyMsgSCRecordList(const string& msg);
-		virtual ~EasyMsgSCRecordList() {}
+		~EasyMsgSCRecordList() override {}
 
 	public:
 		bool AddRecord(EasyDarwinRecordSession& session);

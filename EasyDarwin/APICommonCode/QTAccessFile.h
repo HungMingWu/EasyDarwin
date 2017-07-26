@@ -100,13 +100,13 @@ class QTAccessFile
 class DSAccessFile : public QTAccessFile
 {
    public:
-        virtual   ~DSAccessFile() {}
-        virtual bool HaveGroups( char** groupArray, uint32_t numGroups, void* extraDataPtr) { return true; }
-        virtual bool TestGroup( StrPtrLen* accessGroup, char *userName, char**groupArray, uint32_t numGroups, void *extraDataPtr)
+          ~DSAccessFile() override {}
+        bool HaveGroups( char** groupArray, uint32_t numGroups, void* extraDataPtr) override { return true; }
+        bool TestGroup( StrPtrLen* accessGroup, char *userName, char**groupArray, uint32_t numGroups, void *extraDataPtr) override
         {   StrPtrLenDel deleter( accessGroup->GetAsCString() );
             return this->CheckGroupMembership(userName, deleter.Ptr );
         }
-       virtual bool ValidUser(char* userName, void* extraDataPtr);
+       bool ValidUser(char* userName, void* extraDataPtr) override;
 	   bool CheckGroupMembership(const char* inUsername, const char* inGroupName);
 
 };

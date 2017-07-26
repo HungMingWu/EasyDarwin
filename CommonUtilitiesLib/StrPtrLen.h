@@ -152,7 +152,7 @@ public:
 	StrPtrLenDel() : StrPtrLen() {}
 	StrPtrLenDel(char* sp) : StrPtrLen(sp) {}
 	StrPtrLenDel(char* sp, uint32_t len) : StrPtrLen(sp, len) {}
-	~StrPtrLenDel() { Delete(); }
+	~StrPtrLenDel() override { Delete(); }
 };
 
 #endif // __STRPTRLEN_H__

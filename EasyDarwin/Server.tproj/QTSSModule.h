@@ -74,7 +74,7 @@ public:
 	QTSS_Error  SetupModule(QTSS_CallbacksPtr inCallbacks, QTSS_MainEntryPointPtr inEntrypoint = NULL);
 
 	// Doesn't free up internally allocated stuff
-	virtual ~QTSSModule() {}
+	~QTSSModule() override {}
 
 	//
 	// MODIFIERS
@@ -172,7 +172,7 @@ public:
 	// This returns true if this module is supposed to run in the specified role.
 	bool  RunsInRole(RoleIndex inIndex) { Assert(inIndex < kNumRoles); return fRoleArray[inIndex]; }
 
-	int64_t Run();
+	int64_t Run() override;
 
 	QTSS_ModuleState* GetModuleState() { return &fModuleState; }
 

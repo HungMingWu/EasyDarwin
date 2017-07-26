@@ -154,7 +154,7 @@ public:
 
 	//bool IsValidPacket();
 
-	virtual void Dump(); //Override
+	void Dump() override; //Override
 
 protected:
 	inline int RecordOffset(int inReportNum);
@@ -183,7 +183,7 @@ protected:
 class RTCPSenderReportPacket : public RTCPReceiverPacket
 {
 public:
-	bool ParseReport(uint8_t* inPacketBuffer, uint32_t inPacketLength);
+	bool ParseReport(uint8_t* inPacketBuffer, uint32_t inPacketLength) override;
 	int64_t GetNTPTimeStamp()
 	{
 		uint32_t* fieldPtr = (uint32_t*)&fReceiverPacketBuffer[kSRPacketNTPTimeStampMSW];

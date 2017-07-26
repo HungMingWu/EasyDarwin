@@ -49,7 +49,7 @@ namespace boost { namespace spirit
           : from(src.name()), to(dest.name())
         {}
 
-        virtual const char* what() const throw() { return "bad any cast"; }
+        const char* what() const throw() override { return "bad any cast"; }
 
         const char* from;
         const char* to;

@@ -47,14 +47,14 @@ public:
 
 	//If we've been forced to increase the buffer size, fStartPut WILL be a dynamically allocated
 	//buffer, and it WON'T be equal to fOriginalBuffer (obviously).
-	virtual ~ResizeableStringFormatter() { if (fStartPut != fOriginalBuffer) delete[] fStartPut; }
+	~ResizeableStringFormatter() override { if (fStartPut != fOriginalBuffer) delete[] fStartPut; }
 
 private:
 
 	// This function will get called by StringFormatter if the current
 	// output buffer is full. This object allocates a buffer that's twice
 	// as big as the old one.
-	virtual bool    BufferIsFull(char* inBuffer, uint32_t inBufferLen);
+	bool    BufferIsFull(char* inBuffer, uint32_t inBufferLen) override;
 
 	char*           fOriginalBuffer;
 

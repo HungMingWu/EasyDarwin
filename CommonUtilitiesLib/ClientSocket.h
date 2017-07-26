@@ -113,15 +113,15 @@ class TCPClientSocket : public ClientSocket
 public:
 
 	TCPClientSocket(uint32_t inSocketType);
-	virtual ~TCPClientSocket() {}
+	~TCPClientSocket() override {}
 
 	//
 	// Implements the ClientSocket Send and Receive interface for a TCP connection
-	virtual OS_Error    SendV(iovec* inVec, uint32_t inNumVecs);
-	virtual OS_Error    Read(void* inBuffer, const uint32_t inLength, uint32_t* outRcvLen);
+	OS_Error    SendV(iovec* inVec, uint32_t inNumVecs) override;
+	OS_Error    Read(void* inBuffer, const uint32_t inLength, uint32_t* outRcvLen) override;
 
-	virtual uint32_t  GetLocalAddr() { return fSocket.GetLocalAddr(); }
-	virtual void    SetRcvSockBufSize(uint32_t inSize) { fSocket.SetSocketRcvBufSize(inSize); }
+	uint32_t  GetLocalAddr() override { return fSocket.GetLocalAddr(); }
+	void    SetRcvSockBufSize(uint32_t inSize) override { fSocket.SetSocketRcvBufSize(inSize); }
 	virtual void    SetOptions(int sndBufSize = 8192, int rcvBufSize = 1024);
 
 	virtual uint16_t  GetLocalPort() { return fSocket.GetLocalPort(); }
@@ -136,7 +136,7 @@ class HTTPClientSocket : public ClientSocket
 public:
 
 	HTTPClientSocket(const StrPtrLen& inURL, uint32_t inCookie, uint32_t inSocketType);
-	virtual ~HTTPClientSocket();
+	~HTTPClientSocket() override;
 
 	//
 	// Closes the POST half of the RTSP / HTTP connection
@@ -144,12 +144,12 @@ public:
 
 	//
 	// Implements the ClientSocket Send and Receive interface for an RTSP / HTTP connection
-	virtual OS_Error    SendV(iovec* inVec, uint32_t inNumVecs);
+	OS_Error    SendV(iovec* inVec, uint32_t inNumVecs) override;
 	// Both SendV and Read use the fSendBuffer; so you cannot have both operations be running at the same time.
-	virtual OS_Error    Read(void* inBuffer, const uint32_t inLength, uint32_t* outRcvLen);
+	OS_Error    Read(void* inBuffer, const uint32_t inLength, uint32_t* outRcvLen) override;
 
-	virtual uint32_t  GetLocalAddr() { return fGetSocket.GetLocalAddr(); }
-	virtual void    SetRcvSockBufSize(uint32_t inSize) { fGetSocket.SetSocketRcvBufSize(inSize); }
+	uint32_t  GetLocalAddr() override { return fGetSocket.GetLocalAddr(); }
+	void    SetRcvSockBufSize(uint32_t inSize) override { fGetSocket.SetSocketRcvBufSize(inSize); }
 
 private:
 	void        encodeVec(iovec* inVec, uint32_t inNumVecs);

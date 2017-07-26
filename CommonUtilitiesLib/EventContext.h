@@ -165,11 +165,11 @@ class EventThread : public OSThread
 public:
 
 	EventThread() : OSThread() {}
-	virtual ~EventThread() {}
+	~EventThread() override {}
 
 private:
 
-	virtual void Entry();
+	void Entry() override;
 	OSRefTable      fRefTable;
 
 	friend class EventContext;

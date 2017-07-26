@@ -100,10 +100,10 @@ class LogCheckTask : public Task
 {
 public:
 	LogCheckTask() : Task() { this->SetTaskName("LogCheckTask"); this->Signal(Task::kStartEvent); }
-	virtual ~LogCheckTask() {}
+	~LogCheckTask() override {}
 
 private:
-	virtual int64_t Run();
+	int64_t Run() override;
 };
 
 class QTSSAccessLog : public QTSSRollingLog
@@ -111,13 +111,13 @@ class QTSSAccessLog : public QTSSRollingLog
 public:
 
 	QTSSAccessLog() : QTSSRollingLog() { this->SetTaskName("QTSSAccessLog"); }
-	virtual ~QTSSAccessLog() {}
+	~QTSSAccessLog() override {}
 
-	virtual char* GetLogName() { return QTSSModuleUtils::GetStringAttribute(sPrefs, "request_logfile_name", sDefaultLogName); }
-	virtual char* GetLogDir() { return QTSSModuleUtils::GetStringAttribute(sPrefs, "request_logfile_dir", sDefaultLogDir); }
-	virtual uint32_t GetRollIntervalInDays() { return sRollInterval; }
-	virtual uint32_t GetMaxLogBytes() { return sMaxLogBytes; }
-	virtual time_t WriteLogHeader(FILE *inFile);
+	char* GetLogName() override { return QTSSModuleUtils::GetStringAttribute(sPrefs, "request_logfile_name", sDefaultLogName); }
+	char* GetLogDir() override { return QTSSModuleUtils::GetStringAttribute(sPrefs, "request_logfile_dir", sDefaultLogDir); }
+	uint32_t GetRollIntervalInDays() override { return sRollInterval; }
+	uint32_t GetMaxLogBytes() override { return sMaxLogBytes; }
+	time_t WriteLogHeader(FILE *inFile) override;
 
 };
 

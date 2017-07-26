@@ -56,7 +56,7 @@ public:
 
 	//All timeout tasks get timed out from this thread
 	TimeoutTaskThread() : IdleTask(), fMutex() { this->SetTaskName("TimeoutTask"); }
-	virtual     ~TimeoutTaskThread() {}
+	    ~TimeoutTaskThread() override {}
 
 private:
 
@@ -66,7 +66,7 @@ private:
 		kIntervalSeconds = 15   //UInt32
 	};
 
-	virtual int64_t          Run();
+	int64_t          Run() override;
 	OSMutex                 fMutex;
 	OSQueue                 fQueue;
 

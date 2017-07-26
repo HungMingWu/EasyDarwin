@@ -172,7 +172,7 @@ public:
 	{
 		fTaskThreadPoolElem.SetEnclosingObject(this);
 	}
-	virtual         ~TaskThread() { this->StopAndWaitForThread(); }
+	        ~TaskThread() override { this->StopAndWaitForThread(); }
 
 private:
 
@@ -181,7 +181,7 @@ private:
 		kMinWaitTimeInMilSecs = 10  //uint32_t
 	};
 
-	virtual void    Entry();
+	void    Entry() override;
 	Task*           WaitForTask();
 
 	OSQueueElem     fTaskThreadPoolElem;

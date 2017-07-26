@@ -47,7 +47,7 @@ public:
 		QTSSDictionaryMap* inMap,
 		bool areInstanceAttrsAllowed,
 		QTSSPrefs* parentDictionary = NULL);
-	virtual ~QTSSPrefs() { if (fPrefName != NULL) delete[] fPrefName; }
+	~QTSSPrefs() override { if (fPrefName != NULL) delete[] fPrefName; }
 
 	//This is callable at any time, and is thread safe wrt to the accessors
 	void        RereadPreferences();
@@ -94,15 +94,15 @@ protected:
 
 	//
 	// Completion routines for SetValue and RemoveValue write back to the config source
-	virtual void    RemoveValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
-		uint32_t inValueIndex);
+	void    RemoveValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
+		uint32_t inValueIndex) override;
 
-	virtual void    SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
-		uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen);
+	void    SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
+		uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen) override;
 
-	virtual void    RemoveInstanceAttrComplete(uint32_t inAttrindex, QTSSDictionaryMap* inMap);
+	void    RemoveInstanceAttrComplete(uint32_t inAttrindex, QTSSDictionaryMap* inMap) override;
 
-	virtual QTSSDictionary* CreateNewDictionary(QTSSDictionaryMap* inMap, OSMutex* inMutex);
+	QTSSDictionary* CreateNewDictionary(QTSSDictionaryMap* inMap, OSMutex* inMutex) override;
 
 private:
 

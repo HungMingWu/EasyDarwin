@@ -43,7 +43,7 @@ namespace boost { namespace spirit { namespace qi
           : std::runtime_error("boost::spirit::qi::expectation_failure")
           , first(first_), last(last_), what_(what)
         {}
-        ~expectation_failure() throw() {}
+        ~expectation_failure() throw() override {}
 
         Iterator first;
         Iterator last;

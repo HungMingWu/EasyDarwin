@@ -56,7 +56,7 @@ class RTPSession : public RTPSessionInterface
 public:
 
 	RTPSession();
-	virtual ~RTPSession();
+	~RTPSession() override;
 
 	//
 	//ACCESS FUNCTIONS
@@ -118,7 +118,7 @@ public:
 private:
 
 	//where timeouts, deletion conditions get processed
-	virtual int64_t  Run();
+	int64_t  Run() override;
 
 	// Utility function used by Play
 	uint32_t PowerOf2Floor(uint32_t inNumToFloor);

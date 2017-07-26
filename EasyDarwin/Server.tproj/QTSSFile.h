@@ -40,7 +40,7 @@ class QTSSFile : public QTSSDictionary
 public:
 
 	QTSSFile();
-	virtual ~QTSSFile() {}
+	~QTSSFile() override {}
 
 	static void     Initialize();
 
@@ -51,13 +51,13 @@ public:
 
 	//
 	// Implementation of stream functions.
-	virtual QTSS_Error  Read(void* ioBuffer, uint32_t inLen, uint32_t* outLen);
+	QTSS_Error  Read(void* ioBuffer, uint32_t inLen, uint32_t* outLen) override;
 
-	virtual QTSS_Error  Seek(uint64_t inNewPosition);
+	QTSS_Error  Seek(uint64_t inNewPosition) override;
 
-	virtual QTSS_Error  Advise(uint64_t inPosition, uint32_t inAdviseSize);
+	QTSS_Error  Advise(uint64_t inPosition, uint32_t inAdviseSize) override;
 
-	virtual QTSS_Error  RequestEvent(QTSS_EventType inEventMask);
+	QTSS_Error  RequestEvent(QTSS_EventType inEventMask) override;
 
 private:
 

@@ -54,12 +54,12 @@ class IdleTaskThread : private OSThread
 private:
 
 	IdleTaskThread() : OSThread(), fHeapMutex() {}
-	virtual ~IdleTaskThread() { Assert(fIdleHeap.CurrentHeapSize() == 0); }
+	~IdleTaskThread() override { Assert(fIdleHeap.CurrentHeapSize() == 0); }
 
 	void SetIdleTimer(IdleTask* idleObj, int64_t msec);
 	void CancelTimeout(IdleTask* idleObj);
 
-	virtual void Entry();
+	void Entry() override;
 	OSHeap  fIdleHeap;
 	OSMutex fHeapMutex;
 	OSCond  fHeapCond;
@@ -82,7 +82,7 @@ public:
 	//a timeout pending, and the destructor is called, things will get cleaned
 	//up. But callers must ensure that SetIdleTimer isn't called at the same
 	//time as the destructor, or all hell will break loose.
-	virtual ~IdleTask();
+	~IdleTask() override;
 
 	//SetIdleTimer:
 	//This object will receive an OS_IDLE event in the following number of milliseconds.

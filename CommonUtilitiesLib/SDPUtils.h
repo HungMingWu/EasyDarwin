@@ -43,7 +43,7 @@ class SDPLine : public StrPtrLen
 {
 public:
 	SDPLine() {}
-	virtual ~SDPLine() {}
+	~SDPLine() override {}
 
 	char    GetHeaderType() { if (Ptr && Len) return this->Ptr[0]; return 0; }
 };

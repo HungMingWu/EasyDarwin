@@ -72,7 +72,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         // CONSTRUCTOR / DESTRUCTOR
         
         RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession);
-        virtual ~RTPStream();
+        ~RTPStream() override;
         
         //
         //ACCESS uint8_t
@@ -94,8 +94,8 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         
         // Write sends RTP data to the client. Caller must specify
         // either qtssWriteFlagsIsRTP or qtssWriteFlagsIsRTCP
-        virtual QTSS_Error  Write(void* inBuffer, uint32_t inLen,
-                                        uint32_t* outLenWritten, QTSS_WriteFlags inFlags);
+        QTSS_Error  Write(void* inBuffer, uint32_t inLen,
+                                        uint32_t* outLenWritten, QTSS_WriteFlags inFlags) override;
         
         
         //UTILITY uint8_t_t:

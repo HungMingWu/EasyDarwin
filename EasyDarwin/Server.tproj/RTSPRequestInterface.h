@@ -59,7 +59,7 @@ public:
 
 	//CONSTRUCTOR:
 	RTSPRequestInterface(RTSPSessionInterface *session);
-	virtual ~RTSPRequestInterface()
+	~RTSPRequestInterface() override
 	{
 		if (fMovieFolderPtr != &fMovieFolderPath[0]) delete[] fMovieFolderPtr;
 	}
@@ -101,25 +101,25 @@ public:
 	// QTSS STREAM FUNCTIONS
 
 	// THE FIRST ENTRY OF THE IOVEC MUST BE BLANK!!!
-	virtual QTSS_Error WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten);
+	QTSS_Error WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten) override;
 
 	//Write
 	//A "buffered send" that can be used for sending small chunks of data at a time.
-	virtual QTSS_Error Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t inFlags);
+	QTSS_Error Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t inFlags) override;
 
 	// Flushes all currently buffered data to the network. This either returns
 	// QTSS_NoErr or EWOULDBLOCK. If it returns EWOULDBLOCK, you should wait for
 	// a EV_WR on the socket, and call flush again.
-	virtual QTSS_Error  Flush() { return fOutputStream->Flush(); }
+	QTSS_Error  Flush() override { return fOutputStream->Flush(); }
 
 	// Reads data off the stream. Same behavior as calling RTSPSessionInterface::Read
-	virtual QTSS_Error Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead)
+	QTSS_Error Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead) override
 	{
 		return fSession->Read(ioBuffer, inLength, outLenRead);
 	}
 
 	// Requests an event. Same behavior as calling RTSPSessionInterface::RequestEvent
-	virtual QTSS_Error RequestEvent(QTSS_EventType inEventMask)
+	QTSS_Error RequestEvent(QTSS_EventType inEventMask) override
 	{
 		return fSession->RequestEvent(inEventMask);
 	}

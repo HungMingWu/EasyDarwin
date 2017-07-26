@@ -64,7 +64,7 @@ public:
 	// CONSTRUCTOR / DESTRUCTOR
 
 	QTSSDictionary(QTSSDictionaryMap* inMap, OSMutex* inMutex = NULL);
-	virtual ~QTSSDictionary();
+	~QTSSDictionary() override;
 
 	//
 	// QTSS API CALLS
@@ -240,7 +240,7 @@ public:
 	};
 
 	QTSSAttrInfoDict();
-	virtual ~QTSSAttrInfoDict();
+	~QTSSAttrInfoDict() override;
 
 private:
 

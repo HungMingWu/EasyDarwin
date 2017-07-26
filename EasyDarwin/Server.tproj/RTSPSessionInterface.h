@@ -50,7 +50,7 @@ public:
 	static void     SetBase64Decoding(bool newVal) { sDoBase64Decoding = newVal; }
 
 	RTSPSessionInterface();
-	virtual ~RTSPSessionInterface();
+	~RTSPSessionInterface() override;
 
 	//Is this session alive? If this returns false, clean up and begone as
 	//fast as possible
@@ -104,10 +104,10 @@ public:
 	// Allows non-buffered writes to the client. These will flow control.
 
 	// THE FIRST ENTRY OF THE IOVEC MUST BE BLANK!!!
-	virtual QTSS_Error WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten);
-	virtual QTSS_Error Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t inFlags);
-	virtual QTSS_Error Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead);
-	virtual QTSS_Error RequestEvent(QTSS_EventType inEventMask);
+	QTSS_Error WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten) override;
+	QTSS_Error Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t inFlags) override;
+	QTSS_Error Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead) override;
+	QTSS_Error RequestEvent(QTSS_EventType inEventMask) override;
 
 	// performs RTP over RTSP
 	QTSS_Error  InterleavedWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, unsigned char channel);

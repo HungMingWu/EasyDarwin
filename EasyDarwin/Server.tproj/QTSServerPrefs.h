@@ -48,7 +48,7 @@ public:
 	static void Initialize();
 
 	QTSServerPrefs(XMLPrefsParser* inPrefsSource, bool inWriteMissingPrefs);
-	virtual ~QTSServerPrefs() {}
+	~QTSServerPrefs() override {}
 
 	//This is callable at any time, and is thread safe wrt to the accessors.
 	//Pass in true if you want this function to update the prefs file if

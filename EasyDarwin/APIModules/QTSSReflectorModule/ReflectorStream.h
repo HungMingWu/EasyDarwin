@@ -212,7 +212,7 @@ class ReflectorSocket : public IdleTask, public UDPSocket
 public:
 
 	ReflectorSocket();
-	virtual ~ReflectorSocket();
+	~ReflectorSocket() override;
 	void    AddBroadcasterSession(QTSS_ClientSessionObject inSession) { OSMutexLocker locker(this->GetDemuxer()->GetMutex()); fBroadcasterClientSession = inSession; }
 	void    RemoveBroadcasterSession(QTSS_ClientSessionObject inSession) { OSMutexLocker locker(this->GetDemuxer()->GetMutex()); if (inSession == fBroadcasterClientSession) fBroadcasterClientSession = NULL; }
 	void    AddSender(ReflectorSender* inSender);
@@ -220,7 +220,7 @@ public:
 	bool  HasSender() { return (this->GetDemuxer()->GetHashTable()->GetNumEntries() > 0); }
 	bool  ProcessPacket(const int64_t& inMilliseconds, ReflectorPacket* thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort);
 	ReflectorPacket*    GetPacket();
-	virtual int64_t      Run();
+	int64_t      Run() override;
 	void    SetSSRCFilter(bool state, uint32_t timeoutSecs) { fFilterSSRCs = state; fTimeoutSecs = timeoutSecs; }
 private:
 
@@ -261,11 +261,11 @@ class ReflectorSocketPool : public UDPSocketPool
 public:
 
 	ReflectorSocketPool() {}
-	virtual ~ReflectorSocketPool() {}
+	~ReflectorSocketPool() override {}
 
-	virtual UDPSocketPair*  ConstructUDPSocketPair();
-	virtual void            DestructUDPSocketPair(UDPSocketPair *inPair);
-	virtual void            SetUDPSocketOptions(UDPSocketPair* inPair);
+	UDPSocketPair*  ConstructUDPSocketPair() override;
+	void            DestructUDPSocketPair(UDPSocketPair *inPair) override;
+	void            SetUDPSocketOptions(UDPSocketPair* inPair) override;
 	void                    DestructUDPSocket(ReflectorSocket* socket);
 
 
@@ -275,7 +275,7 @@ class ReflectorSender : public UDPDemuxerTask
 {
 public:
 	ReflectorSender(ReflectorStream* inStream, uint32_t inWriteFlag);
-	virtual ~ReflectorSender();
+	~ReflectorSender() override;
 	// Queue of senders
 	OSQueue fSenderQueue;
 	int64_t  fSleepTime;

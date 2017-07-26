@@ -57,7 +57,7 @@ public:
 	TCPSocket(Task* notifytask, uint32_t inSocketType)
 		: Socket(notifytask, inSocketType),
 		fRemoteStr(fRemoteBuffer, kIPAddrBufSize) {}
-	virtual ~TCPSocket() {}
+	~TCPSocket() override {}
 
 	//Open
 	OS_Error    Open() { return Socket::Open(SOCK_STREAM); }

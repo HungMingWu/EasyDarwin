@@ -43,10 +43,10 @@ class RTCPCompressedQTSSPacket : public RTCPAPPPacket
 public:
 
 	RTCPCompressedQTSSPacket(bool debug = false);
-	virtual ~RTCPCompressedQTSSPacket() {}
+	~RTCPCompressedQTSSPacket() override {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
-	virtual bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength);
+	bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength) override;
 
 	// Call to parse if you don't know what kind of packet this is
 	bool ParseCompressedQTSSPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength);
@@ -75,7 +75,7 @@ public:
 	inline uint16_t GetExpectedFrameRate() { return fExpectedFrameRate; }
 	inline uint16_t GetAudioDryCount() { return fAudioDryCount; }
 
-	virtual void Dump(); //Override
+	void Dump() override; //Override
 
 	static void GetTestPacket(StrPtrLen* resultPtr) {}
 
@@ -195,10 +195,10 @@ class RTCPqtssPacket : public RTCPAPPPacket
 public:
 
 	RTCPqtssPacket() : RTCPAPPPacket() {}
-	virtual ~RTCPqtssPacket() {}
+	~RTCPqtssPacket() override {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
-	virtual bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength);
+	bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength) override;
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
 	bool ParseQTSSPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength);

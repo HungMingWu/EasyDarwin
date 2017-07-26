@@ -47,7 +47,7 @@ class QTSServer : public QTSServerInterface
 public:
 
 	QTSServer() {}
-	virtual ~QTSServer();
+	~QTSServer() override;
 
 	//
 	// Initialize
@@ -159,7 +159,7 @@ private:
 class RereadPrefsTask : public Task
 {
 public:
-	virtual int64_t Run()
+	int64_t Run() override
 	{
 		QTSServer::RereadPrefsService(NULL);
 		return -1;

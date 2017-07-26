@@ -104,10 +104,10 @@ class RTSPListenerSocket : public TCPListenerSocket
 public:
 
 	RTSPListenerSocket() {}
-	virtual ~RTSPListenerSocket() {}
+	~RTSPListenerSocket() override {}
 
 	//sole job of this object is to implement this function
-	virtual Task*   GetSessionTask(TCPSocket** outSocket);
+	Task*   GetSessionTask(TCPSocket** outSocket) override;
 
 	//check whether the Listener should be idling
 	bool OverMaxConnections(uint32_t buffer);
@@ -119,10 +119,10 @@ class HTTPListenerSocket : public TCPListenerSocket
 public:
 
 	HTTPListenerSocket() {}
-	virtual ~HTTPListenerSocket() {}
+	~HTTPListenerSocket() override {}
 
 	//sole job of this object is to implement this function
-	virtual Task*   GetSessionTask(TCPSocket** outSocket);
+	Task*   GetSessionTask(TCPSocket** outSocket) override;
 
 	//check whether the Listener should be idling
 	bool OverMaxConnections(uint32_t buffer);
@@ -136,12 +136,12 @@ public:
 	// Pool of UDP sockets for use by the RTP server
 
 	RTPSocketPool() {}
-	~RTPSocketPool() {}
+	~RTPSocketPool() override {}
 
-	virtual UDPSocketPair*  ConstructUDPSocketPair();
-	virtual void            DestructUDPSocketPair(UDPSocketPair* inPair);
+	UDPSocketPair*  ConstructUDPSocketPair() override;
+	void            DestructUDPSocketPair(UDPSocketPair* inPair) override;
 
-	virtual void            SetUDPSocketOptions(UDPSocketPair* inPair);
+	void            SetUDPSocketOptions(UDPSocketPair* inPair) override;
 };
 
 

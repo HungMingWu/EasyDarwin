@@ -42,10 +42,10 @@ public:
 	//This task handles all incoming RTCP data. It just polls, so make sure
 	//to start the polling process by signalling a start event.
 	RTCPTask() : Task() { this->SetTaskName("RTCPTask"); this->Signal(Task::kStartEvent); }
-	virtual ~RTCPTask() {}
+	~RTCPTask() override {}
 
 private:
-	virtual int64_t Run();
+	int64_t Run() override;
 };
 
 #endif //__RTCP_TASK_H__

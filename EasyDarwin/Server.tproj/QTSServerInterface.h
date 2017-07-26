@@ -67,10 +67,10 @@ public:
 	// This QTSSStream is used by modules to write to the error log
 
 	QTSSErrorLogStream() {}
-	virtual ~QTSSErrorLogStream() {}
+	~QTSSErrorLogStream() override {}
 
-	virtual QTSS_Error  Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags);
-	virtual void        LogAssert(char* inMessage);
+	QTSS_Error  Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags) override;
+	void        LogAssert(char* inMessage) override;
 };
 
 class QTSServerInterface : public QTSSDictionary
@@ -84,7 +84,7 @@ public:
 	// CONSTRUCTOR / DESTRUCTOR
 
 	QTSServerInterface();
-	virtual ~QTSServerInterface() {}
+	~QTSServerInterface() override {}
 
 	//
 	//
@@ -298,8 +298,8 @@ public:
 
 	//
 	// We need to override this. This is how we implement the QTSS_StateChange_Role
-	virtual void    SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
-		uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen);
+	void    SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
+		uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen) override;
 
 	//
 	// ERROR LOGGING
@@ -464,11 +464,11 @@ public:
 
 	// This class runs periodically to compute current totals & averages
 	RTPStatsUpdaterTask();
-	virtual ~RTPStatsUpdaterTask() {}
+	~RTPStatsUpdaterTask() override {}
 
 private:
 
-	virtual int64_t Run();
+	int64_t Run() override;
 	RTPSessionInterface* GetNewestSession(OSRefTable* inRTPSessionMap);
 	float GetCPUTimeInSeconds();
 

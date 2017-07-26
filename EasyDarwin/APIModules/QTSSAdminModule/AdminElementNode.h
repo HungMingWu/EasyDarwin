@@ -286,11 +286,11 @@ public:
 	QueryURI *fQueryPtr;
 	ElementNode *fNodePtr;
 
-	void SetUpSingleElement(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, int32_t index, QTSS_Initialize_Params *initParams);
-	void SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, int32_t index, QTSS_Initialize_Params *initParams);
+	void SetUpSingleElement(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, int32_t index, QTSS_Initialize_Params *initParams) override;
+	void SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, int32_t index, QTSS_Initialize_Params *initParams) override;
 	void Initialize(QTSS_Initialize_Params *initParams, QueryURI *queryPtr);
 	AdminClass() :fQueryPtr(NULL), fNodePtr(NULL) {};
-	~AdminClass();
+	~AdminClass() override;
 	static ElementNode::ElementDataFields sAdminSelf[];
 	static ElementNode::ElementDataFields sAdminFieldIDs[];
 	enum

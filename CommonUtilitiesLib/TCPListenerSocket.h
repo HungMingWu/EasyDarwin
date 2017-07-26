@@ -48,7 +48,7 @@ public:
 		fAddr(0), fPort(0), fOutOfDescriptors(false), fSleepBetweenAccepts(false) {
 		this->SetTaskName("TCPListenerSocket");
 	}
-	virtual ~TCPListenerSocket() {}
+	~TCPListenerSocket() override {}
 
 	//
 	// Send a TCPListenerObject a Kill event to delete it.
@@ -66,7 +66,7 @@ public:
 	//derived object must implement a way of getting tasks & sockets to this object 
 	virtual Task*   GetSessionTask(TCPSocket** outSocket) = 0;
 
-	virtual int64_t  Run();
+	int64_t  Run() override;
 
 private:
 
@@ -76,7 +76,7 @@ private:
 		kListenQueueLength = 128            //uint32_t
 	};
 
-	virtual void ProcessEvent(int eventBits);
+	void ProcessEvent(int eventBits) override;
 	OS_Error    listen(uint32_t queueLength);
 
 	uint32_t          fAddr;

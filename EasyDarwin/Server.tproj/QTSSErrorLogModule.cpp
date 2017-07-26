@@ -102,15 +102,15 @@ class QTSSErrorLog : public QTSSRollingLog
 public:
 
 	QTSSErrorLog() : QTSSRollingLog() { this->SetTaskName("QTSSErrorLog"); }
-	virtual ~QTSSErrorLog() {}
+	~QTSSErrorLog() override {}
 
-	virtual char* GetLogName() { return QTSServerInterface::GetServer()->GetPrefs()->GetErrorLogName(); }
+	char* GetLogName() override { return QTSServerInterface::GetServer()->GetPrefs()->GetErrorLogName(); }
 
-	virtual char* GetLogDir() { return QTSServerInterface::GetServer()->GetPrefs()->GetErrorLogDir(); }
+	char* GetLogDir() override { return QTSServerInterface::GetServer()->GetPrefs()->GetErrorLogDir(); }
 
-	virtual uint32_t GetRollIntervalInDays() { return QTSServerInterface::GetServer()->GetPrefs()->GetErrorRollIntervalInDays(); }
+	uint32_t GetRollIntervalInDays() override { return QTSServerInterface::GetServer()->GetPrefs()->GetErrorRollIntervalInDays(); }
 
-	virtual uint32_t GetMaxLogBytes() { return QTSServerInterface::GetServer()->GetPrefs()->GetMaxErrorLogBytes(); }
+	uint32_t GetMaxLogBytes() override { return QTSServerInterface::GetServer()->GetPrefs()->GetMaxErrorLogBytes(); }
 
 };
 
@@ -120,10 +120,10 @@ class ErrorLogCheckTask : public Task
 {
 public:
 	ErrorLogCheckTask() : Task() { this->SetTaskName("ErrorLogCheckTask"); this->Signal(Task::kStartEvent); }
-	virtual ~ErrorLogCheckTask() {}
+	~ErrorLogCheckTask() override {}
 
 private:
-	virtual int64_t Run();
+	int64_t Run() override;
 };
 
 const uint32_t kMaxLogStringLen = 2172;

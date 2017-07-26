@@ -16,7 +16,7 @@ class HTTPSession : public HTTPSessionInterface
 {
 public:
 	HTTPSession();
-	virtual ~HTTPSession();
+	~HTTPSession() override;
 
 	//Send HTTPPacket
 	QTSS_Error SendHTTPPacket(StrPtrLen* contentXML, bool connectionClose, bool decrement) override;

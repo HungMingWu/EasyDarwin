@@ -47,11 +47,11 @@ class QTSSSocket : public QTSSStream
 public:
 
 	QTSSSocket(int inFileDesc) : fEventContext(inFileDesc, Socket::GetEventThread()) {}
-	virtual ~QTSSSocket() {}
+	~QTSSSocket() override {}
 
 	//
 	// The only operation this stream supports is the requesting of events.
-	virtual QTSS_Error  RequestEvent(QTSS_EventType inEventMask);
+	QTSS_Error  RequestEvent(QTSS_EventType inEventMask) override;
 
 private:
 

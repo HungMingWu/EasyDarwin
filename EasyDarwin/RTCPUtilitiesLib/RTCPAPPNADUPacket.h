@@ -42,10 +42,10 @@ class RTCPNaduPacket : public RTCPAPPPacket
 public:
 
 	RTCPNaduPacket(bool debug = false);
-	virtual ~RTCPNaduPacket() {}
+	~RTCPNaduPacket() override {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
-	virtual bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength);
+	bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength) override;
 
 	// Call to parse if you don't know what kind of packet this is
 	bool ParseNaduPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength);
@@ -67,7 +67,7 @@ public:
 	void DumpNaduPacket();
 
 	static void GetTestPacket(StrPtrLen* resultPtr);
-	virtual void Dump(); //Override
+	void Dump() override; //Override
 
 	enum
 	{

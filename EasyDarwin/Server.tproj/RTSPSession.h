@@ -103,7 +103,7 @@ class RTSPSession : public RTSPSessionInterface
 public:
 
 	RTSPSession(bool doReportHTTPConnectionAddress);
-	virtual ~RTSPSession();
+	~RTSPSession() override;
 
 	// Call this before using this object
 	static void Initialize();
@@ -113,7 +113,7 @@ public:
 
 private:
 
-	int64_t Run();
+	int64_t Run() override;
 
 	// Gets & creates RTP session for this request.
 	QTSS_Error  FindRTPSession(OSRefTable* inTable);

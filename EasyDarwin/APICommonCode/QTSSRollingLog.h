@@ -105,7 +105,7 @@ class QTSSRollingLog : public Task
 
         //
         // Task object. Do not delete directly
-        virtual ~QTSSRollingLog();
+        ~QTSSRollingLog() override;
 
         //Derived class must provide a way to get the log & rolled log name
         virtual char* GetLogName() = 0;
@@ -121,7 +121,7 @@ class QTSSRollingLog : public Task
     
         //
         // Run function to roll log right at midnight   
-        virtual int64_t      Run();
+        int64_t      Run() override;
 
         FILE*           fLog;
         time_t          fLogCreateTime;

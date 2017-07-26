@@ -60,7 +60,7 @@ public:
 	// CONSTRUCTOR / DESTRUCTOR
 
 	RTPSessionInterface();
-	virtual ~RTPSessionInterface()
+	~RTPSessionInterface() override
 	{
 		if (GetQualityLevel() != 0)
 			QTSServerInterface::GetServer()->IncrementNumThinned(-1);
@@ -71,8 +71,8 @@ public:
 		delete[] fAuthOpaque.Ptr;
 	}
 
-	virtual void SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
-		uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen);
+	void SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
+		uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen) override;
 
 	//Timeouts. This allows clients to refresh the timeout on this session
 	void    RefreshTimeout() { fTimeoutTask.RefreshTimeout(); }

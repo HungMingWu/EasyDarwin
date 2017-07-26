@@ -31,7 +31,7 @@ class EasyCMSSession : public Task
 {
 public:
 	EasyCMSSession();
-	virtual ~EasyCMSSession();
+	~EasyCMSSession() override;
 
 	ClientSocket* fSocket;
 

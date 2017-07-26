@@ -25,7 +25,7 @@ public:
 	static void	Initialize();
 
 	HTTPSessionInterface();
-	virtual ~HTTPSessionInterface();
+	~HTTPSessionInterface() override;
 
 	bool IsLiveSession() { return fSocket.IsConnected() && fLiveSession; }
 
@@ -49,10 +49,10 @@ public:
 	// Allows non-buffered writes to the client. These will flow control.
 
 	// THE FIRST ENTRY OF THE IOVEC MUST BE BLANK!!!
-	virtual QTSS_Error WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten);
-	virtual QTSS_Error Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t inFlags);
-	virtual QTSS_Error Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead);
-	virtual QTSS_Error RequestEvent(QTSS_EventType inEventMask);
+	QTSS_Error WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten) override;
+	QTSS_Error Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t inFlags) override;
+	QTSS_Error Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead) override;
+	QTSS_Error RequestEvent(QTSS_EventType inEventMask) override;
 
 	virtual QTSS_Error SendHTTPPacket(StrPtrLen* contentXML, bool connectionClose, bool decrement);
 

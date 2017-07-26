@@ -52,7 +52,7 @@ public:
 
 	//CONSTRUCTOR & DESTRUCTOR
 	QTSSUserProfile();
-	virtual ~QTSSUserProfile() {}
+	~QTSSUserProfile() override {}
 
 protected:
 

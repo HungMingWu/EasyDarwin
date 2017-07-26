@@ -49,7 +49,7 @@ public:
 
 	RTPSessionOutput(QTSS_ClientSessionObject inRTPSession, ReflectorSession* inReflectorSession,
 		QTSS_Object serverPrefs, QTSS_AttributeID inCookieAddrID);
-	virtual ~RTPSessionOutput() {}
+	~RTPSessionOutput() override {}
 
 	ReflectorSession* GetReflectorSession() { return fReflectorSession; }
 	void InitializeStreams();
@@ -57,14 +57,14 @@ public:
 	// This writes the packet out to the proper QTSS_RTPStreamObject.
 	// If this function returns QTSS_WouldBlock, timeToSendThisPacketAgain will
 	// be set to # of msec in which the packet can be sent, or -1 if unknown
-	virtual QTSS_Error  WritePacket(StrPtrLen* inPacketData, void* inStreamCookie, uint32_t inFlags, int64_t packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSec, bool firstPacket);
-	virtual void TearDown();
+	QTSS_Error  WritePacket(StrPtrLen* inPacketData, void* inStreamCookie, uint32_t inFlags, int64_t packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSec, bool firstPacket) override;
+	void TearDown() override;
 
 	int64_t                  GetReflectorSessionInitTime() { return fReflectorSession->GetInitTimeMS(); }
 
-	virtual bool  IsUDP();
+	bool  IsUDP() override;
 
-	virtual bool  IsPlaying();
+	bool  IsPlaying() override;
 
 	void SetBufferDelay(uint32_t delay) { fBufferDelayMSecs = delay; }
 

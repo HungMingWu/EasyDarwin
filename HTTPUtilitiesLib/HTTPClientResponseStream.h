@@ -36,7 +36,7 @@ public:
 		: ResizeableStringFormatter(fOutputBuf, kOutputBufferSizeInBytes),
 		fSocket(inSocket), fBytesSentInBuffer(0), fTimeoutTask(inTimeoutTask), fPrintMsg(true) {}
 
-	virtual ~HTTPClientResponseStream() {}
+	~HTTPClientResponseStream() override {}
 
 	// WriteV
 	//

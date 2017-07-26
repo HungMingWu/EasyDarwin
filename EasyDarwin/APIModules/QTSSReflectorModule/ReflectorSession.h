@@ -77,7 +77,7 @@ public:
 	// Caller may also provide a SourceInfo object, though it is not needed and
 	// will also need to be provided to SetupReflectorSession when that is called.
 	ReflectorSession(StrPtrLen* inSourceID, uint32_t inChannelNum = 0, SourceInfo* inInfo = NULL);
-	virtual ~ReflectorSession();
+	~ReflectorSession() override;
 
 	//
 	// MODIFIERS
@@ -198,7 +198,7 @@ private:
 	bool		fHasVideoKeyFrameUpdate;
 
 private:
-	virtual int64_t Run();
+	int64_t Run() override;
 };
 
 #endif

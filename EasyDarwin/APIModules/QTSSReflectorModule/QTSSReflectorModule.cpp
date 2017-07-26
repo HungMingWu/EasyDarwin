@@ -1242,7 +1242,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	// send the DESCRIBE response
 
 	//above function has signalled that this request belongs to us, so let's respond
-	iovec theDescribeVec[3] = { {nullptr } };
+	iovec theDescribeVec[3] = { 0 };
 
 	Assert(!theSession->GetLocalSDP().empty());
 

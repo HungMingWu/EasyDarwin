@@ -833,7 +833,7 @@ QTSSAttrInfoDict::QTSSAttrInfoDict()
 	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kAttrInfoDictIndex)), fID(qtssIllegalAttrID)
 {}
 
-QTSSAttrInfoDict::~QTSSAttrInfoDict() {}
+QTSSAttrInfoDict::~QTSSAttrInfoDict() = default;
 
 
 

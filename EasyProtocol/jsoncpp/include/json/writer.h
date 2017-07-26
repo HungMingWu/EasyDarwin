@@ -154,7 +154,7 @@ class JSON_API FastWriter : public Writer {
 
 public:
   FastWriter();
-  ~FastWriter() override {}
+  ~FastWriter() override = default;
 
   void enableYAMLCompatibility();
 
@@ -206,7 +206,7 @@ private:
 class JSON_API StyledWriter : public Writer {
 public:
   StyledWriter();
-  ~StyledWriter() override {}
+  ~StyledWriter() override = default;
 
 public: // overridden from Writer
   /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.
@@ -268,7 +268,7 @@ private:
 class JSON_API StyledStreamWriter {
 public:
   StyledStreamWriter(std::string indentation = "\t");
-  ~StyledStreamWriter() {}
+  ~StyledStreamWriter() = default;
 
 public:
   /** \brief Serialize a Value in <a HREF="http://www.json.org">JSON</a> format.

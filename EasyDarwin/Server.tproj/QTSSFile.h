@@ -40,7 +40,7 @@ class QTSSFile : public QTSSDictionary
 public:
 
 	QTSSFile();
-	~QTSSFile() override {}
+	~QTSSFile() override = default;
 
 	static void     Initialize();
 

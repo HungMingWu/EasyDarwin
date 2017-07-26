@@ -34,7 +34,7 @@ class AssertLogger
 public:
 	// An interface so the MyAssert function can write a message
 	virtual void LogAssert(char* inMessage) = 0;
-	virtual ~AssertLogger() {};
+	virtual ~AssertLogger() = default;;
 };
 
 // If a logger is provided, asserts will be logged. Otherwise, asserts will cause a bus error

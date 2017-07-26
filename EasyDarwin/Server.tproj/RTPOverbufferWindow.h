@@ -45,7 +45,7 @@ public:
 
 	RTPOverbufferWindow(uint32_t inSendInterval, uint32_t inInitialWindowSize, uint32_t inMaxSendAheadTimeInSec,
 		float inOverbufferRate);
-	~RTPOverbufferWindow() { }
+	~RTPOverbufferWindow() = default;
 
 	void ResetOverBufferWindow();
 

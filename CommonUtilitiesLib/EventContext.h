@@ -165,7 +165,7 @@ class EventThread : public OSThread
 public:
 
 	EventThread() : OSThread() {}
-	~EventThread() override {}
+	~EventThread() override = default;
 
 private:
 

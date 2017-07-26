@@ -115,7 +115,7 @@ protected:
 	//                      to call Close or Disconnect, Snd & Rcv will fail.
 
 	Socket(Task *notifytask, uint32_t inSocketType);
-	~Socket() override {}
+	~Socket() override = default;
 
 	//returns QTSS_NoErr, or appropriate posix error
 	OS_Error    Open(int theType);

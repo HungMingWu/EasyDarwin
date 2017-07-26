@@ -45,7 +45,7 @@ class RTCPAPPPacket : public RTCPPacket
 
 public:
 	RTCPAPPPacket(bool debug = false);
-	~RTCPAPPPacket() override {};
+	~RTCPAPPPacket() override = default;;
 	void Dump() override;
 	virtual bool ParseAPPPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength); //default app header check
 	virtual bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength) { return false; }; //derived class implements

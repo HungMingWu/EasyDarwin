@@ -56,7 +56,7 @@ public:
 
 	//All timeout tasks get timed out from this thread
 	TimeoutTaskThread() : IdleTask(), fMutex() { this->SetTaskName("TimeoutTask"); }
-	    ~TimeoutTaskThread() override {}
+	    ~TimeoutTaskThread() override = default;
 
 private:
 

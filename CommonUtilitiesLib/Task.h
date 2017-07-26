@@ -80,7 +80,7 @@ public:
 	//CONSTRUCTOR / DESTRUCTOR
 	//You must assign priority at create time.
 	Task();
-	virtual                 ~Task() {}
+	virtual                 ~Task() = default;
 
 	//return:
 	// >0-> invoke me after this number of MilSecs with a kIdleEvent

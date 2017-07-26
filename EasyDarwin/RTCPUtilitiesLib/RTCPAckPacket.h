@@ -64,7 +64,7 @@ public:
 	// Instead, it is assumed that the RTCP packet validation has already been
 	// done.
 	RTCPAckPacket() : fRTCPAckBuffer(nullptr), fAckMaskSize(0) {}
-	~RTCPAckPacket() override {}
+	~RTCPAckPacket() override = default;
 
 	// Call to parse if you don't know what kind of packet this is
 	// Returns true if this is an Ack packet, false otherwise.

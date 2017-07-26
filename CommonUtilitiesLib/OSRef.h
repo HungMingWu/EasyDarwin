@@ -75,7 +75,7 @@ public:
 	{
 		Set(inString, inObjectP);
 	}
-	~OSRef() {}
+	~OSRef() = default;
 
 	void Set(const StrPtrLen& inString, void* inObjectP)
 	{
@@ -131,7 +131,7 @@ public:
 		fHashValue = OSRefTableUtils::HashString(inStringP);
 	}
 
-	~OSRefKey() {}
+	~OSRefKey() = default;
 
 
 	//ACCESSORS:
@@ -179,7 +179,7 @@ public:
 	//tableSize doesn't indicate the max number of Refs that can be added
 	//(it's unlimited), but is rather just how big to make the hash table
 	OSRefTable(uint32_t tableSize = kDefaultTableSize) : fTable(tableSize), fMutex() {}
-	~OSRefTable() {}
+	~OSRefTable() = default;
 
 	//Allows access to the mutex in case you need to lock the table down
 	//between operations

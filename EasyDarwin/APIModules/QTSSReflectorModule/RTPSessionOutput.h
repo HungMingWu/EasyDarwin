@@ -49,7 +49,7 @@ public:
 
 	RTPSessionOutput(QTSS_ClientSessionObject inRTPSession, ReflectorSession* inReflectorSession,
 		QTSS_Object serverPrefs, QTSS_AttributeID inCookieAddrID);
-	~RTPSessionOutput() override {}
+	~RTPSessionOutput() override = default;
 
 	ReflectorSession* GetReflectorSession() { return fReflectorSession; }
 	void InitializeStreams();

@@ -100,7 +100,7 @@ class LogCheckTask : public Task
 {
 public:
 	LogCheckTask() : Task() { this->SetTaskName("LogCheckTask"); this->Signal(Task::kStartEvent); }
-	~LogCheckTask() override {}
+	~LogCheckTask() override = default;
 
 private:
 	int64_t Run() override;
@@ -111,7 +111,7 @@ class QTSSAccessLog : public QTSSRollingLog
 public:
 
 	QTSSAccessLog() : QTSSRollingLog() { this->SetTaskName("QTSSAccessLog"); }
-	~QTSSAccessLog() override {}
+	~QTSSAccessLog() override = default;
 
 	char* GetLogName() override { return QTSSModuleUtils::GetStringAttribute(sPrefs, "request_logfile_name", sDefaultLogName); }
 	char* GetLogDir() override { return QTSSModuleUtils::GetStringAttribute(sPrefs, "request_logfile_dir", sDefaultLogDir); }

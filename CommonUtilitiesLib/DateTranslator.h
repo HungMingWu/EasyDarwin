@@ -71,7 +71,7 @@ public:
 	// be taken to protect against simultaneous access.
 
 	DateBuffer() : fLastDateUpdate(0) { fDateBuffer[0] = 0; }
-	~DateBuffer() {}
+	~DateBuffer() = default;
 
 	//SEE RFC 1123 for details on the date string format
 	//ex: Mon, 04 Nov 1996 21:42:17 GMT

@@ -56,7 +56,7 @@ public:
 	StrPtrLen() : Ptr(nullptr), Len(0) {}
 	StrPtrLen(char* sp) : Ptr(sp), Len(sp != nullptr ? strlen(sp) : 0) {}
 	StrPtrLen(char* sp, uint32_t len) : Ptr(sp), Len(len) {}
-	virtual ~StrPtrLen() {}
+	virtual ~StrPtrLen() = default;
 
 	//OPERATORS:
 	bool Equal(const StrPtrLen &compare) const;
@@ -105,10 +105,7 @@ public:
 	char* FindStringIgnoreCase(StrPtrLen& query) { return FindStringIgnoreCase(&query); }
 
 	StrPtrLen& operator=(const StrPtrLen& newStr)
-	{
-		Ptr = newStr.Ptr; Len = newStr.Len;
-		return *this;
-	}
+	= default;
 	StrPtrLen(const StrPtrLen& newStr) { Ptr = newStr.Ptr; Len = newStr.Len; }
 	char operator[](int i) { /*Assert(i<Len);i*/ return Ptr[i]; }
 	void Set(char* inPtr, uint32_t inLen) { Ptr = inPtr; Len = inLen; }

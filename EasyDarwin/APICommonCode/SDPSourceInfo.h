@@ -45,7 +45,7 @@ class SDPSourceInfo : public SourceInfo
     
         // Uses the SDP Data to build up the StreamInfo structures
         SDPSourceInfo(const char* sdpData, uint32_t sdpLen) { Parse(sdpData, sdpLen); }
-        SDPSourceInfo() {}
+        SDPSourceInfo() = default;
         ~SDPSourceInfo() override;
         
         // Parses out the SDP file provided, sets up the StreamInfo structures

@@ -56,7 +56,7 @@ void ElementNode_ShowPtrs();
 class ClientSession {
 public:
 	ClientSession(void) : fRTSPSessionID(0), fBitrate(0), fPacketLossPercent(0), fBytesSent(0), fTimeConnected(0) {};
-	~ClientSession() { };
+	~ClientSession() = default;;
 	uint32_t fRTSPSessionID;
 	char fIPAddressStr[32];
 	char fURLBuffer[512];

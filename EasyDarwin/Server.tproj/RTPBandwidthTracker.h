@@ -67,7 +67,7 @@ public:
 		fNumStatsSamples(0)
 	{}
 
-	~RTPBandwidthTracker() {}
+	~RTPBandwidthTracker() = default;
 
 	//
 	// Initialization - give the client's window size.

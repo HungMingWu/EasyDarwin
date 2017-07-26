@@ -47,7 +47,7 @@ class QTSSSocket : public QTSSStream
 public:
 
 	QTSSSocket(int inFileDesc) : fEventContext(inFileDesc, Socket::GetEventThread()) {}
-	~QTSSSocket() override {}
+	~QTSSSocket() override = default;
 
 	//
 	// The only operation this stream supports is the requesting of events.

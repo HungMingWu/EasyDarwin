@@ -49,7 +49,7 @@ class PrefsSource
     
         virtual int     GetValue(const char* inKey, char* ioValue) = 0;
         virtual int     GetValueByIndex(const char* inKey, uint32_t inIndex, char* ioValue) = 0;
-		virtual ~PrefsSource(){};
+		virtual ~PrefsSource()= default;;
 };
 
 #endif

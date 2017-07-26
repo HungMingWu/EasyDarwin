@@ -52,7 +52,7 @@ public:
 		fStream(inStream)
 	{
 	}
-	~StringParser() {}
+	~StringParser() = default;
 
 	// Built-in masks for common stop conditions
 	static uint8_t sDigitMask[];      // stop when you hit a digit

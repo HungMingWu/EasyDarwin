@@ -88,7 +88,7 @@ class OSHeapElem
 public:
 	OSHeapElem(void* enclosingObject = nullptr)
 		: fValue(0), fEnclosingObject(enclosingObject), fCurrentHeap(nullptr) {}
-	~OSHeapElem() {}
+	~OSHeapElem() = default;
 
 	//This data structure emphasizes performance over extensibility
 	//If it were properly object-oriented, the compare routine would

@@ -85,7 +85,7 @@ class QTAccessFile
         static QTSS_AuthScheme FindUsersAndGroupsFilesAndAuthScheme(char* inAccessFilePath, QTSS_ActionFlags inAction, char** outUsersFilePath, char** outGroupsFilePath);
                 
         QTSS_Error AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bool allowNoAccessFiles, QTSS_ActionFlags noAction, QTSS_ActionFlags authorizeAction,  bool *outAuthorizedPtr, bool* outAllowAnyUserPtr = nullptr);
-        virtual ~QTAccessFile() {};
+        virtual ~QTAccessFile() = default;;
         
     private:    
         static char* sQTAccessFileName; // managed by the QTAccess module
@@ -100,7 +100,7 @@ class QTAccessFile
 class DSAccessFile : public QTAccessFile
 {
    public:
-          ~DSAccessFile() override {}
+          ~DSAccessFile() override = default;
         bool HaveGroups( char** groupArray, uint32_t numGroups, void* extraDataPtr) override { return true; }
         bool TestGroup( StrPtrLen* accessGroup, char *userName, char**groupArray, uint32_t numGroups, void *extraDataPtr) override
         {   StrPtrLenDel deleter( accessGroup->GetAsCString() );

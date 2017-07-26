@@ -46,7 +46,7 @@ public:
 	//
 	// This object currently *does not* clean up for itself when
 	// you destruct it!
-	~OSBufferPool() {}
+	~OSBufferPool() = default;
 
 	//
 	// ACCESSORS

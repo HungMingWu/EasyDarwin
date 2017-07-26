@@ -101,7 +101,7 @@ public:
 		fMediaDataP(nullptr),
 		fMediaDataLen(0),
 		fSeqNum(0) {}
-	~RTPMetaInfoPacket() {}
+	~RTPMetaInfoPacket() = default;
 
 	//
 	// Call this to parse the RTP-Meta-Info packet.

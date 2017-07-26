@@ -102,7 +102,7 @@ class QTSSErrorLog : public QTSSRollingLog
 public:
 
 	QTSSErrorLog() : QTSSRollingLog() { this->SetTaskName("QTSSErrorLog"); }
-	~QTSSErrorLog() override {}
+	~QTSSErrorLog() override = default;
 
 	char* GetLogName() override { return QTSServerInterface::GetServer()->GetPrefs()->GetErrorLogName(); }
 
@@ -120,7 +120,7 @@ class ErrorLogCheckTask : public Task
 {
 public:
 	ErrorLogCheckTask() : Task() { this->SetTaskName("ErrorLogCheckTask"); this->Signal(Task::kStartEvent); }
-	~ErrorLogCheckTask() override {}
+	~ErrorLogCheckTask() override = default;
 
 private:
 	int64_t Run() override;

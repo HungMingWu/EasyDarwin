@@ -90,7 +90,7 @@ XMLPrefsParser::XMLPrefsParser(char* inPath)
 {}
 
 XMLPrefsParser::~XMLPrefsParser()
-{}
+= default;
 
 
 ContainerRef XMLPrefsParser::GetConfigurationTag()

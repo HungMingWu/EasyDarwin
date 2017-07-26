@@ -59,7 +59,7 @@ public:
 
 
 	RTCPPacket() : fReceiverPacketBuffer(nullptr) {}
-	virtual ~RTCPPacket() {}
+	virtual ~RTCPPacket() = default;
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
 	bool ParsePacket(uint8_t* inPacketBuffer, uint32_t inPacketLen);

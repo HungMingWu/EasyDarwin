@@ -42,8 +42,8 @@
 class SDPLine : public StrPtrLen
 {
 public:
-	SDPLine() {}
-	~SDPLine() override {}
+	SDPLine() = default;
+	~SDPLine() override = default;
 
 	char    GetHeaderType() { if (Ptr && Len) return this->Ptr[0]; return 0; }
 };
@@ -76,7 +76,7 @@ public:
 		Initialize();
 	}
 
-	~SDPContainer() { }
+	~SDPContainer() = default;
 	void		Initialize();
 	std::vector<boost::string_view> GetNonMediaLines() const;
 	boost::string_view GetMediaSDP() const;

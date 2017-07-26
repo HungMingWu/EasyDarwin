@@ -39,7 +39,7 @@ public:
 	virtual bool IsValidAttributeValue(char* tagName, char* attrName, char* attrValue) = 0;
 	virtual char* GetRequiredAttribute(char* tagName, int index) = 0;
 	virtual bool CanHaveValue(char* tagName) = 0;
-	virtual ~DTDVerifier() {};
+	virtual ~DTDVerifier() = default;;
 };
 
 class XMLTag

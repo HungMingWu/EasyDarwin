@@ -48,7 +48,7 @@ public:
 		fAddr(0), fPort(0), fOutOfDescriptors(false), fSleepBetweenAccepts(false) {
 		this->SetTaskName("TCPListenerSocket");
 	}
-	~TCPListenerSocket() override {}
+	~TCPListenerSocket() override = default;
 
 	//
 	// Send a TCPListenerObject a Kill event to delete it.

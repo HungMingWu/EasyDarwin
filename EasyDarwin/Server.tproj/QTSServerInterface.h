@@ -66,8 +66,8 @@ public:
 
 	// This QTSSStream is used by modules to write to the error log
 
-	QTSSErrorLogStream() {}
-	~QTSSErrorLogStream() override {}
+	QTSSErrorLogStream() = default;
+	~QTSSErrorLogStream() override = default;
 
 	QTSS_Error  Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags) override;
 	void        LogAssert(char* inMessage) override;
@@ -84,7 +84,7 @@ public:
 	// CONSTRUCTOR / DESTRUCTOR
 
 	QTSServerInterface();
-	~QTSServerInterface() override {}
+	~QTSServerInterface() override = default;
 
 	//
 	//
@@ -464,7 +464,7 @@ public:
 
 	// This class runs periodically to compute current totals & averages
 	RTPStatsUpdaterTask();
-	~RTPStatsUpdaterTask() override {}
+	~RTPStatsUpdaterTask() override = default;
 
 private:
 

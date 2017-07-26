@@ -236,8 +236,7 @@ namespace EasyDarwin { namespace Protocol
 
 
 	EasyProtocol::~EasyProtocol()
-	{
-	}
+	= default;
 
 	void EasyProtocol::Read(const std::string& msg, int iMsgType)
 	{

@@ -54,7 +54,7 @@ public:
 	};
 
 	RTCPSRPacket();
-	~RTCPSRPacket() {}
+	~RTCPSRPacket() = default;
 
 	// ACCESSORS
 

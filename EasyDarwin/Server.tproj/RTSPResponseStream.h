@@ -52,7 +52,7 @@ public:
 		: ResizeableStringFormatter(fOutputBuf, kOutputBufferSizeInBytes),
 		fSocket(inSocket), fBytesSentInBuffer(0), fTimeoutTask(inTimeoutTask), fPrintRTSP(false) {}
 
-	~RTSPResponseStream() override {}
+	~RTSPResponseStream() override = default;
 
 	// WriteV
 	//

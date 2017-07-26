@@ -103,8 +103,8 @@ class RTSPListenerSocket : public TCPListenerSocket
 {
 public:
 
-	RTSPListenerSocket() {}
-	~RTSPListenerSocket() override {}
+	RTSPListenerSocket() = default;
+	~RTSPListenerSocket() override = default;
 
 	//sole job of this object is to implement this function
 	Task*   GetSessionTask(TCPSocket** outSocket) override;
@@ -118,8 +118,8 @@ class HTTPListenerSocket : public TCPListenerSocket
 {
 public:
 
-	HTTPListenerSocket() {}
-	~HTTPListenerSocket() override {}
+	HTTPListenerSocket() = default;
+	~HTTPListenerSocket() override = default;
 
 	//sole job of this object is to implement this function
 	Task*   GetSessionTask(TCPSocket** outSocket) override;
@@ -135,8 +135,8 @@ public:
 
 	// Pool of UDP sockets for use by the RTP server
 
-	RTPSocketPool() {}
-	~RTPSocketPool() override {}
+	RTPSocketPool() = default;
+	~RTPSocketPool() override = default;
 
 	UDPSocketPair*  ConstructUDPSocketPair() override;
 	void            DestructUDPSocketPair(UDPSocketPair* inPair) override;

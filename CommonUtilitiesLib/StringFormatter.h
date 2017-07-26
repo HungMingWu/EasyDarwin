@@ -56,7 +56,7 @@ public:
 		fStartPut(buffer.Ptr),
 		fEndPut(buffer.Ptr + buffer.Len),
 		fBytesWritten(0) {}
-	virtual ~StringFormatter() {}
+	virtual ~StringFormatter() = default;
 
 	void Set(char* buffer, uint32_t length) {
 		fCurrentPut = buffer;

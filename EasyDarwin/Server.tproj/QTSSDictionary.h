@@ -202,7 +202,7 @@ private:
 			fAllocatedInternally(false), fIsDynamicDictionary(false) {}
 
 		// Does not delete! You Must call DeleteAttributeData for that
-		~DictValueElement() {}
+		~DictValueElement() = default;
 
 		StrPtrLen   fAttributeData; // The data
 		uint32_t      fAllocatedLen;  // How much space do we have allocated?

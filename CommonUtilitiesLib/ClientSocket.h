@@ -41,7 +41,7 @@ class ClientSocket
 public:
 
 	ClientSocket();
-	virtual ~ClientSocket() {}
+	virtual ~ClientSocket() = default;
 
 	void    Set(uint32_t hostAddr, uint16_t hostPort)
 	{
@@ -113,7 +113,7 @@ class TCPClientSocket : public ClientSocket
 public:
 
 	TCPClientSocket(uint32_t inSocketType);
-	~TCPClientSocket() override {}
+	~TCPClientSocket() override = default;
 
 	//
 	// Implements the ClientSocket Send and Receive interface for a TCP connection

@@ -72,7 +72,7 @@ private:
 class OSQueue {
 public:
 	OSQueue();
-	~OSQueue() {}
+	~OSQueue() = default;
 
 	void            EnQueue(OSQueueElem* object);
 	OSQueueElem*    DeQueue();
@@ -109,7 +109,7 @@ public:
 		else
 			fCurrentElemP = nullptr;
 	}
-	~OSQueueIter() {}
+	~OSQueueIter() = default;
 
 	void            Reset() { fCurrentElemP = fQueueP->GetHead(); }
 
@@ -127,8 +127,8 @@ private:
 class OSQueue_Blocking
 {
 public:
-	OSQueue_Blocking() {}
-	~OSQueue_Blocking() {}
+	OSQueue_Blocking() = default;
+	~OSQueue_Blocking() = default;
 
 	OSQueueElem*    DeQueueBlocking(OSThread* inCurThread, int32_t inTimeoutInMilSecs);
 	OSQueueElem*    DeQueue();//will not block

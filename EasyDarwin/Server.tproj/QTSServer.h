@@ -46,7 +46,7 @@ class QTSServer : public QTSServerInterface
 {
 public:
 
-	QTSServer() {}
+	QTSServer() = default;
 	~QTSServer() override;
 
 	//

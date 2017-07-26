@@ -66,7 +66,7 @@ public:
 	UDPDemuxerTask()
 		: fRemoteAddr(0), fRemotePort(0),
 		fHashValue(0), fNextHashEntry(nullptr) {}
-	virtual ~UDPDemuxerTask() {}
+	virtual ~UDPDemuxerTask() = default;
 
 	uint32_t  GetRemoteAddr() { return fRemoteAddr; }
 
@@ -105,7 +105,7 @@ private:
 		fHashValue = UDPDemuxerUtils::ComputeHashValue(inRemoteAddr, inRemotePort);
 	}
 
-	~UDPDemuxerKey() {}
+	~UDPDemuxerKey() = default;
 
 
 private:
@@ -143,7 +143,7 @@ class UDPDemuxer
 public:
 
 	UDPDemuxer() : fHashTable(kMaxHashTableSize), fMutex() {}
-	~UDPDemuxer() {}
+	~UDPDemuxer() = default;
 
 	//These functions grab the mutex and are therefore premptive safe
 

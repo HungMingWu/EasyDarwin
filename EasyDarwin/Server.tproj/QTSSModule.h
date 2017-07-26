@@ -74,7 +74,7 @@ public:
 	QTSS_Error  SetupModule(QTSS_CallbacksPtr inCallbacks, QTSS_MainEntryPointPtr inEntrypoint = nullptr);
 
 	// Doesn't free up internally allocated stuff
-	~QTSSModule() override {}
+	~QTSSModule() override = default;
 
 	//
 	// MODIFIERS

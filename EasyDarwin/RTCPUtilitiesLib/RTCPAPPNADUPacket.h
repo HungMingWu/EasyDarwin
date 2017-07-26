@@ -42,7 +42,7 @@ class RTCPNaduPacket : public RTCPAPPPacket
 public:
 
 	RTCPNaduPacket(bool debug = false);
-	~RTCPNaduPacket() override {}
+	~RTCPNaduPacket() override = default;
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
 	bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength) override;

@@ -8,10 +8,10 @@ class CSdpCache
 private:
 	static CSdpCache* cache;
 	CSdpCache()
-	{}
+	= default;
 public:
 	~CSdpCache()
-	{}
+	= default;
 
 	static CSdpCache* GetInstance();
 

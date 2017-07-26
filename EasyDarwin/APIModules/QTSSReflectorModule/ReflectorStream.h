@@ -99,7 +99,7 @@ public:
 		fNeededByOutput = false;
 	}
 
-	~ReflectorPacket() {}
+	~ReflectorPacket() = default;
 
 	void    SetPacketData(char *data, uint32_t len)
 	{
@@ -260,8 +260,8 @@ class ReflectorSocketPool : public UDPSocketPool
 {
 public:
 
-	ReflectorSocketPool() {}
-	~ReflectorSocketPool() override {}
+	ReflectorSocketPool() = default;
+	~ReflectorSocketPool() override = default;
 
 	UDPSocketPair*  ConstructUDPSocketPair() override;
 	void            DestructUDPSocketPair(UDPSocketPair *inPair) override;

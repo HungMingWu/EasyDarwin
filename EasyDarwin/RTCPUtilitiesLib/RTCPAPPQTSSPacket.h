@@ -43,7 +43,7 @@ class RTCPCompressedQTSSPacket : public RTCPAPPPacket
 public:
 
 	RTCPCompressedQTSSPacket(bool debug = false);
-	~RTCPCompressedQTSSPacket() override {}
+	~RTCPCompressedQTSSPacket() override = default;
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
 	bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength) override;
@@ -195,7 +195,7 @@ class RTCPqtssPacket : public RTCPAPPPacket
 public:
 
 	RTCPqtssPacket() : RTCPAPPPacket() {}
-	~RTCPqtssPacket() override {}
+	~RTCPqtssPacket() override = default;
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
 	bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength) override;

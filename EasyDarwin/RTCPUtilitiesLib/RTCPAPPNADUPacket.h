@@ -41,7 +41,7 @@ class RTCPNaduPacket : public RTCPAPPPacket
 {
 public:
 
-	RTCPNaduPacket(bool debug);
+	RTCPNaduPacket(bool debug = false);
 	virtual ~RTCPNaduPacket() {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise

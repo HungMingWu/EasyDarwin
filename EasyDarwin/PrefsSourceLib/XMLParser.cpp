@@ -655,7 +655,7 @@ void XMLTag::FormatData(ResizeableStringFormatter* formatter, uint32_t indent)
 
 	if (fEmbeddedTags.GetLength() == 0)
 	{
-		if (fValue > 0)
+		if (fValue)
 			formatter->Put(fValue);
 	}
 	else

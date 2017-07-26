@@ -373,7 +373,7 @@ void ElementNode::SetFields(uint32_t i, QTSS_Object attrInfoObject)
 	if (fFieldIDs[i].fFieldName[0] == 0)
 	{
 		fFieldIDs[i].fFieldLen = eMaxAttributeNameSize;
-		err = QTSS_GetValue(attrInfoObject, qtssAttrName, 0, &fFieldIDs[i].fFieldName, &fFieldIDs[i].fFieldLen);
+		err = QTSS_GetValue(attrInfoObject, qtssAttrName, 0, &fFieldIDs[i].fFieldName, (uint32_t *)&fFieldIDs[i].fFieldLen);
 		Assert(err == QTSS_NoErr);
 		if (fFieldIDs[i].fFieldName != NULL)
 			fFieldIDs[i].fFieldName[fFieldIDs[i].fFieldLen] = 0;

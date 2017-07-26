@@ -96,11 +96,11 @@ public:
 		uint32_t                  fIndex;
 
 		char                    fFieldName[eMaxAttributeNameSize + 1];
-		uint32_t                  fFieldLen;
+		size_t                  fFieldLen;
 
 		QTSS_AttrPermission     fAccessPermissions;
 		char                    fAccessData[eMaxAccessSize + 1];
-		uint32_t                  fAccessLen;
+		size_t                  fAccessLen;
 
 		uint32_t                  fAPI_Type;
 		uint32_t                  fFieldType;

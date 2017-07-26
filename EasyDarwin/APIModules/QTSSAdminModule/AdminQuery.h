@@ -58,7 +58,7 @@ public:
 	struct URIField
 	{
 		char                    fFieldName[eMaxAttributeSize + 1];
-		uint32_t                  fFieldLen;
+		size_t                  fFieldLen;
 		int32_t                  fID;
 		StrPtrLen*              fData;
 	};

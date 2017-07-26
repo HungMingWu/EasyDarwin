@@ -31,10 +31,10 @@
 
  */
 
+#include <memory>
 #include "QTSSPrefs.h"
 #include "MyAssert.h"
 #include "QTSSDataConverter.h"
-#include "OSArrayObjectDeleter.h"
 #include <APICommonCode/QTSSModuleUtils.h>
 
 
@@ -375,8 +375,8 @@ void QTSSPrefs::SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
 	}
 	else
 	{
-		OSCharArrayDeleter theValueAsString(QTSSDataConverter::ValueToString(inNewValue, inNewValueLen, inMap->GetAttrType(inAttrIndex)));
-		fPrefsSource->SetPrefValue(pref, inValueIndex, theValueAsString.GetObject());
+		std::unique_ptr<char[]> theValueAsString(QTSSDataConverter::ValueToString(inNewValue, inNewValueLen, inMap->GetAttrType(inAttrIndex)));
+		fPrefsSource->SetPrefValue(pref, inValueIndex, theValueAsString.get());
 	}
 
 	if (fPrefsSource->WritePrefsFile())

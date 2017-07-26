@@ -35,6 +35,8 @@
 #include <sys/uio.h>
 #endif
 
+#include <memory>
+
 #include "RTSPRequestInterface.h"
 #include "RTSPSessionInterface.h"
 #include "RTSPRequestStream.h"
@@ -43,14 +45,10 @@
 #include "OSThread.h"
 #include "DateTranslator.h"
 #include "QTSSDataConverter.h"
-#include "OSArrayObjectDeleter.h"
 #include "QTSServerInterface.h"
 
-char        RTSPRequestInterface::sPremadeHeader[kStaticHeaderSizeInBytes];
-StrPtrLen   RTSPRequestInterface::sPremadeHeaderPtr(sPremadeHeader, kStaticHeaderSizeInBytes);
-
-char        RTSPRequestInterface::sPremadeNoHeader[kStaticHeaderSizeInBytes];
-StrPtrLen   RTSPRequestInterface::sPremadeNoHeaderPtr(sPremadeNoHeader, kStaticHeaderSizeInBytes);
+std::string RTSPRequestInterface::sPremadeHeader;
+std::string RTSPRequestInterface::sPremadeNoHeader;
 
 
 StrPtrLen   RTSPRequestInterface::sColonSpace(": ", 2);
@@ -104,27 +102,31 @@ QTSSAttrInfoDict::AttrInfo  RTSPRequestInterface::sAttributes[] =
 	/* 42 */ { "qtssRTSPReqDigestResponse",     GetAuthDigestResponse,  qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe }
 };
 
-
+std::string PutStatusLine(QTSS_RTSPStatusCode status, RTSPProtocol::RTSPVersion version)
+{
+	std::string result;
+	StrPtrLen temp;
+	temp = RTSPProtocol::GetVersionString(version);
+	result += std::string(temp.Ptr, temp.Len) + " ";
+	temp = RTSPProtocol::GetStatusCodeAsString(status);
+	result += std::string(temp.Ptr, temp.Len) + " ";
+	temp = RTSPProtocol::GetStatusCodeString(status);
+	result += std::string(temp.Ptr, temp.Len) + "\r\n";
+	return result;
+}
 void  RTSPRequestInterface::Initialize(void)
 {
 	//make a partially complete header
-	StringFormatter headerFormatter(sPremadeHeaderPtr.Ptr, kStaticHeaderSizeInBytes);
-	PutStatusLine(&headerFormatter, qtssSuccessOK, RTSPProtocol::k10Version);
+	sPremadeHeader = ::PutStatusLine(qtssSuccessOK, RTSPProtocol::k10Version);
 
-	headerFormatter.Put(QTSServerInterface::GetServerHeader());
-	headerFormatter.PutEOL();
-	headerFormatter.Put(RTSPProtocol::GetHeaderString(qtssCSeqHeader));
-	headerFormatter.Put(sColonSpace);
-	sPremadeHeaderPtr.Len = headerFormatter.GetCurrentOffset();
-	Assert(sPremadeHeaderPtr.Len < kStaticHeaderSizeInBytes);
+	StrPtrLen temp = QTSServerInterface::GetServerHeader();
+	sPremadeHeader += std::string(temp.Ptr, temp.Len) + "\r\n";
+	temp = RTSPProtocol::GetHeaderString(qtssCSeqHeader);
+	sPremadeHeader += std::string(temp.Ptr, temp.Len) + ": ";
 
-
-	StringFormatter noServerInfoHeaderFormatter(sPremadeNoHeaderPtr.Ptr, kStaticHeaderSizeInBytes);
-	PutStatusLine(&noServerInfoHeaderFormatter, qtssSuccessOK, RTSPProtocol::k10Version);
-	noServerInfoHeaderFormatter.Put(RTSPProtocol::GetHeaderString(qtssCSeqHeader));
-	noServerInfoHeaderFormatter.Put(sColonSpace);
-	sPremadeNoHeaderPtr.Len = noServerInfoHeaderFormatter.GetCurrentOffset();
-	Assert(sPremadeNoHeaderPtr.Len < kStaticHeaderSizeInBytes);
+	sPremadeNoHeader = ::PutStatusLine(qtssSuccessOK, RTSPProtocol::k10Version);
+	temp = RTSPProtocol::GetHeaderString(qtssCSeqHeader);
+	sPremadeNoHeader += std::string(temp.Ptr, temp.Len) + ": ";
 
 	//Setup all the dictionary stuff
 	for (uint32_t x = 0; x < qtssRTSPReqNumParams; x++)
@@ -377,7 +379,7 @@ void RTSPRequestInterface::AppendTransportHeader(StrPtrLen* serverPortA,
 	fOutputStream->Put(sColonSpace);
 
 	StrPtrLen outFirstTransport(fFirstTransport.GetAsCString());
-	OSCharArrayDeleter outFirstTransportDeleter(outFirstTransport.Ptr);
+	std::unique_ptr<char[]> outFirstTransportDeleter(outFirstTransport.Ptr);
 	outFirstTransport.RemoveWhitespace();
 	while (outFirstTransport[outFirstTransport.Len - 1] == ';')
 		outFirstTransport.Len--;
@@ -439,14 +441,14 @@ void RTSPRequestInterface::AppendTransportHeader(StrPtrLen* serverPortA,
 	if (ssrc != nullptr && ssrc->Ptr != nullptr && ssrc->Len != 0 && fNetworkMode == qtssRTPNetworkModeUnicast && fTransportMode == qtssRTPTransportModePlay)
 	{
 		char* theCString = ssrc->GetAsCString();
-		OSCharArrayDeleter cStrDeleter(theCString);
+		std::unique_ptr<char[]> cStrDeleter(theCString);
 
 		uint32_t ssrcVal = 0;
 		::sscanf(theCString, "%"   _U32BITARG_   "", &ssrcVal);
 		ssrcVal = htonl(ssrcVal);
 
 		StrPtrLen hexSSRC(QTSSDataConverter::ValueToString(&ssrcVal, sizeof(ssrcVal), qtssAttrDataTypeUnknown));
-		OSCharArrayDeleter hexStrDeleter(hexSSRC.Ptr);
+		std::unique_ptr<char[]> hexStrDeleter(hexSSRC.Ptr);
 
 		fOutputStream->Put(sSSRC);
 		fOutputStream->Put(hexSSRC);
@@ -554,7 +556,6 @@ void RTSPRequestInterface::WriteStandardHeaders()
 {
 	static StrPtrLen    sCloseString("Close", 5);
 
-	Assert(sPremadeHeader != nullptr);
 	fStandardHeadersWritten = true; //must be done here to prevent recursive calls
 
 	//if this is a "200 OK" response (most HTTP responses), we have some special
@@ -565,11 +566,11 @@ void RTSPRequestInterface::WriteStandardHeaders()
 
 		if (sendServerInfo)
 		{
-			fOutputStream->Put(sPremadeHeaderPtr);
+			fOutputStream->Put((char *)sPremadeHeader.c_str());
 		}
 		else
 		{
-			fOutputStream->Put(sPremadeNoHeaderPtr);
+			fOutputStream->Put((char *)sPremadeNoHeader.c_str());
 		}
 		StrPtrLen* cSeq = fHeaderDictionary.GetValue(qtssCSeqHeader);
 		Assert(cSeq != nullptr);

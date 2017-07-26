@@ -33,6 +33,8 @@
 #define _QT_ACCESS_FILE_H_
 
 #include <stdlib.h>
+#include <string>
+#include <vector>
 #include "QTSS.h"
 #include "StrPtrLen.h"
 #include "OSHeaders.h"
@@ -54,10 +56,10 @@ class QTAccessFile
 
         //over ride these in a sub class
         virtual bool HaveUser(char *userName, void* extraDataPtr);
-        virtual bool HaveGroups( char** groupArray, uint32_t numGroups, void* extraDataPtr);
+        virtual bool HaveGroups(const std::vector<std::string> &groupArray, void* extraDataPtr);
         virtual bool HaveRealm(   char *userName, StrPtrLen* ioRealmNameStr, void *extraData );
         virtual bool TestUser(StrPtrLen* accessUser, char *userName,void *extraDataPtr );
-        virtual bool TestGroup( StrPtrLen* accessGroup, char *userName, char**groupArray, uint32_t numGroups, void *extraDataPtr);
+        virtual bool TestGroup( StrPtrLen* accessGroup, char *userName, const std::vector<std::string> &groupArray, void *extraDataPtr);
         virtual bool TestExtraData( StrPtrLen* wordPtr, StringParser* lineParserPtr, void* extraDataPtr);
         virtual void   GetRealm(StrPtrLen* accessRealm, StrPtrLen* ioRealmNameStr, char *userName,void *extraDataPtr );
         virtual bool ValidUser(char* userName, void* extraDataPtr) { return false; };
@@ -71,7 +73,7 @@ class QTAccessFile
         //                  To get a returned ioRealmNameStr value the ioRealmNameStr and ioRealmNameStr->Ptr must be non-NULL
         //                  valid pointers. The ioRealmNameStr.Len should be set to the ioRealmNameStr->Ptr's allocated len.
         // numGroups:       The number of groups in the groupArray. Use GetGroupsArrayCopy to create the groupArray.
-        bool AccessAllowed (   char *userName, char**groupArray, uint32_t numGroups, 
+        bool AccessAllowed (   char *userName, const std::vector<std::string> &groupArray, 
                                         StrPtrLen *accessFileBufPtr,QTSS_ActionFlags inFlags,StrPtrLen* ioRealmNameStr,
                                         bool* outAllowAnyUserPtr,
                                         void *extraDataPtr = nullptr
@@ -101,8 +103,8 @@ class DSAccessFile : public QTAccessFile
 {
    public:
           ~DSAccessFile() override = default;
-        bool HaveGroups( char** groupArray, uint32_t numGroups, void* extraDataPtr) override { return true; }
-        bool TestGroup( StrPtrLen* accessGroup, char *userName, char**groupArray, uint32_t numGroups, void *extraDataPtr) override
+        bool HaveGroups(const std::vector<std::string> &groupArray, void* extraDataPtr) override { return true; }
+        bool TestGroup( StrPtrLen* accessGroup, char *userName, const std::vector<std::string> &groupArray, void *extraDataPtr) override
         {   StrPtrLenDel deleter( accessGroup->GetAsCString() );
             return this->CheckGroupMembership(userName, deleter.Ptr );
         }

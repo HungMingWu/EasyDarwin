@@ -9,7 +9,6 @@
 	Contains:   Implementation of object defined in EasyCMSSession.h.
 */
 #include "EasyCMSSession.h"
-#include "OSArrayObjectDeleter.h"
 #include "SocketUtils.h"
 #include "QTSServerInterface.h"
 #include "EasyUtil.h"
@@ -281,7 +280,7 @@ QTSS_Error EasyCMSSession::ProcessMessage()
 
 		if (theErr == QTSS_RequestFailed)
 		{
-			OSCharArrayDeleter charArrayPathDeleter(fContentBuffer);
+			std::unique_ptr<char[]> charArrayPathDeleter(fContentBuffer);
 			fContentBufferOffset = 0;
 			fContentBuffer = nullptr;
 
@@ -302,7 +301,7 @@ QTSS_Error EasyCMSSession::ProcessMessage()
 		Assert(theErr == QTSS_NoErr);
 
 		// 处理完成报文后会自动进行Delete处理
-		OSCharArrayDeleter charArrayPathDeleter(fContentBuffer);
+		std::unique_ptr<char[]> charArrayPathDeleter(fContentBuffer);
 
 		printf("EasyCMSSession::ProcessMessage() Get Complete Msg:\n%s", fContentBuffer);
 

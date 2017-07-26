@@ -53,33 +53,6 @@ using namespace std;
 #define __QTSSCALLBACKS_DEBUG__ 0
 #define debug_printf if (__QTSSCALLBACKS_DEBUG__) printf
 
-
-void*   QTSSCallbacks::QTSS_New(FourCharCode /*inMemoryIdentifier*/, uint32_t inSize)
-{
-	//
-	// This callback is now deprecated because the server no longer uses FourCharCodes
-	// for memory debugging. For clients that still use it, the default, non-debugging
-	// version of New is used.
-
-	//return OSMemory::New(inSize, inMemoryIdentifier, false);
-	//return OSMemory::New(inSize);
-
-	auto temp = new int[inSize];
-	return temp;
-}
-
-void    QTSSCallbacks::QTSS_Delete(void* inMemory)
-{
-	//OSMemory::Delete(inMemory);
-	delete[] inMemory;
-}
-
-void    QTSSCallbacks::QTSS_Milliseconds(int64_t* outMilliseconds)
-{
-	if (outMilliseconds != nullptr)
-		*outMilliseconds = OS::Milliseconds();
-}
-
 void    QTSSCallbacks::QTSS_ConvertToUnixTime(int64_t *inQTSS_MilliSecondsPtr, time_t* outSecondsPtr)
 {
 	if ((nullptr != outSecondsPtr) && (nullptr != inQTSS_MilliSecondsPtr))

@@ -43,10 +43,11 @@
 #include <pwd.h>
 #endif
 
+#include <memory>
+
 #include "QTSServer.h"
 #include "Format.h"
 
-#include "OSArrayObjectDeleter.h"
 #include "SocketUtils.h"
 #include "TCPListenerSocket.h"
 #include "Task.h"
@@ -695,8 +696,8 @@ bool  QTSServer::SetupUDPSockets()
 bool  QTSServer::SwitchPersonality()
 {
 #ifndef __Win32__  //not supported
-	OSCharArrayDeleter runGroupName(fSrvrPrefs->GetRunGroupName());
-	OSCharArrayDeleter runUserName(fSrvrPrefs->GetRunUserName());
+	std::unique_ptr<char[]> runGroupName(fSrvrPrefs->GetRunGroupName());
+	std::unique_ptr<char[]> runUserName(fSrvrPrefs->GetRunUserName());
 
 	int groupID = 0;
 
@@ -807,9 +808,6 @@ void    QTSServer::LoadCompiledInModules()
 
 void    QTSServer::InitCallbacks()
 {
-	sCallbacks.addr[kNewCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_New;
-	sCallbacks.addr[kDeleteCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Delete;
-	sCallbacks.addr[kMillisecondsCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Milliseconds;
 	sCallbacks.addr[kConvertToUnixTimeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_ConvertToUnixTime;
 
 	sCallbacks.addr[kAddRoleCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AddRole;
@@ -894,16 +892,16 @@ void    QTSServer::InitCallbacks()
 void QTSServer::LoadModules(QTSServerPrefs* inPrefs)
 {
 	// Fetch the name of the module directory and open it.
-	OSCharArrayDeleter theModDirName(inPrefs->GetModuleDirectory());
+	std::unique_ptr<char[]> theModDirName(inPrefs->GetModuleDirectory());
 
 #ifdef __Win32__
 	// NT doesn't seem to have support for the POSIX directory parsing APIs.
-	OSCharArrayDeleter theLargeModDirName(new char[::strlen(theModDirName.GetObject()) + 3]);
-	::strcpy(theLargeModDirName.GetObject(), theModDirName.GetObject());
-	::strcat(theLargeModDirName.GetObject(), "\\*");
+	std::unique_ptr<char[]> theLargeModDirName(new char[::strlen(theModDirName.get()) + 3]);
+	::strcpy(theLargeModDirName.get(), theModDirName.get());
+	::strcat(theLargeModDirName.get(), "\\*");
 
 	WIN32_FIND_DATA theFindData;
-	HANDLE theSearchHandle = ::FindFirstFile(theLargeModDirName.GetObject(), &theFindData);
+	HANDLE theSearchHandle = ::FindFirstFile(theLargeModDirName.get(), &theFindData);
 
 	if (theSearchHandle == INVALID_HANDLE_VALUE)
 	{
@@ -913,7 +911,7 @@ void QTSServer::LoadModules(QTSServerPrefs* inPrefs)
 
 	while (theSearchHandle != INVALID_HANDLE_VALUE)
 	{
-		this->CreateModule(theModDirName.GetObject(), theFindData.cFileName);
+		this->CreateModule(theModDirName.get(), theFindData.cFileName);
 
 		if (!::FindNextFile(theSearchHandle, &theFindData))
 		{
@@ -965,14 +963,14 @@ void    QTSServer::CreateModule(char* inModuleFolderPath, char* inModuleName)
 	//
 	// Construct a full path to this module
 	uint32_t totPathLen = ::strlen(inModuleFolderPath) + ::strlen(inModuleName);
-	OSCharArrayDeleter theModPath(new char[totPathLen + 4]);
-	::strcpy(theModPath.GetObject(), inModuleFolderPath);
-	::strcat(theModPath.GetObject(), kPathDelimiterString);
-	::strcat(theModPath.GetObject(), inModuleName);
+	std::unique_ptr<char[]> theModPath(new char[totPathLen + 4]);
+	::strcpy(theModPath.get(), inModuleFolderPath);
+	::strcat(theModPath.get(), kPathDelimiterString);
+	::strcat(theModPath.get(), inModuleName);
 
 	//
 	// Construct a QTSSModule object, and attempt to initialize the module
-	auto* theNewModule = new QTSSModule(inModuleName, theModPath.GetObject());
+	auto* theNewModule = new QTSSModule(inModuleName, theModPath.get());
 	QTSS_Error theErr = theNewModule->SetupModule(&sCallbacks);
 
 	if (theErr != QTSS_NoErr)

@@ -11,8 +11,6 @@
 
 #include "HTTPSession.h"
 #include "QTSServerInterface.h"
-#include "OSArrayObjectDeleter.h"
-#include "QTSSMemoryDeleter.h"
 #include "QueryParamList.h"
 
 #include "EasyProtocolDef.h"
@@ -461,7 +459,7 @@ QTSS_Error HTTPSession::SetupRequest()
 
 		if (theErr == QTSS_RequestFailed)
 		{
-			OSCharArrayDeleter charArrayPathDeleter(theRequestBody);
+			std::unique_ptr<char[]> charArrayPathDeleter(theRequestBody);
 			//
 			// NEED TO RETURN HTTP ERROR RESPONSE
 			return QTSS_RequestFailed;
@@ -482,7 +480,7 @@ QTSS_Error HTTPSession::SetupRequest()
 
 		Assert(theErr == QTSS_NoErr);
 
-		OSCharArrayDeleter charArrayPathDeleter(theRequestBody);
+		std::unique_ptr<char[]> charArrayPathDeleter(theRequestBody);
 
 		////报文处理，不进入队列
 		//EasyDarwin::Protocol::EasyProtocol protocol(theRequestBody);
@@ -775,7 +773,7 @@ QTSS_Error HTTPSession::execNetMsgCSGetServerVersionReqRESTful(const char* query
 
 	char* serverHeader = nullptr;
 	(void)QTSS_GetValueAsString(QTSServerInterface::GetServer(), qtssSvrRTSPServerHeader, 0, &serverHeader);
-	QTSSCharArrayDeleter theFullPathStrDeleter(serverHeader);
+	std::unique_ptr<char[]> theFullPathStrDeleter(serverHeader);
 	body[EASY_TAG_SERVER_HEADER] = serverHeader;
 
 	int64_t timeNow = OS::Milliseconds();
@@ -1076,7 +1074,7 @@ QTSS_Error HTTPSession::execNetMsgCSGetDeviceStreamReqRESTful(const char* queryS
 
 	auto* outURL = new char[QTSS_MAX_URL_LENGTH];
 	outURL[0] = '\0';
-	QTSSCharArrayDeleter theHLSURLDeleter(outURL);
+	std::unique_ptr<char[]> theHLSURLDeleter(outURL);
 
 	bool outIsReady = false;
 

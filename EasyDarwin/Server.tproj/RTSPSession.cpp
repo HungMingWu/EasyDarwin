@@ -32,6 +32,8 @@
 #define __RTSP_AUTH_DEBUG__ 0
 #define debug_printf if (__RTSP_AUTH_DEBUG__) printf
 
+#include <memory>
+
 #include "RTSPSession.h"
 #include "RTSPRequest.h"
 #include "QTSServerInterface.h"
@@ -40,7 +42,6 @@
 
 #include "QTSS.h"
 #include "QTSSModuleUtils.h"
-#include "OSArrayObjectDeleter.h"
 #include "md5digest.h"
 #include "QTSSDataConverter.h"
 
@@ -2103,9 +2104,9 @@ void RTSPSession::SaveRequestAuthorizationParams(RTSPRequest *theRTSPRequest)
 		if (tempPtr->Len == 0)
 		{
 			// If there is no realm explicitly specified in the request, then let's get the default out of the prefs
-			OSCharArrayDeleter theDefaultRealm(QTSServerInterface::GetServer()->GetPrefs()->GetAuthorizationRealm());
-			char *realm = theDefaultRealm.GetObject();
-			uint32_t len = ::strlen(theDefaultRealm.GetObject());
+			std::unique_ptr<char[]> theDefaultRealm(QTSServerInterface::GetServer()->GetPrefs()->GetAuthorizationRealm());
+			char *realm = theDefaultRealm.get();
+			uint32_t len = ::strlen(theDefaultRealm.get());
 			(void)this->SetValue(qtssRTSPSesLastURLRealm, 0, realm, len, QTSSDictionary::kDontObeyReadOnly);
 			(void)fRTPSession->SetValue(qtssCliRTSPSesURLRealm, (uint32_t)0, realm, len, QTSSDictionary::kDontObeyReadOnly);
 		}

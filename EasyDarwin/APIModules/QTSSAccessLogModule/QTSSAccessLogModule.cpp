@@ -42,6 +42,7 @@
 #include "StrPtrLen.h"
 #include "UserAgentParser.h"
 #include "Task.h"
+#include "OS.h"
 #include <ctime>
 
 #define TESTUNIXTIME 0
@@ -679,7 +680,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 
 
 		// Find out what time it is
-	int64_t curTime = QTSS_Milliseconds();
+	int64_t curTime = OS::Milliseconds();
 
 	uint32_t numCurClients = 0;
 	theLen = sizeof(numCurClients);

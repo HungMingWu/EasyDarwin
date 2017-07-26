@@ -59,23 +59,6 @@ QTSS_Error _stublibrary_main(void* inPrivateArgs, QTSS_DispatchFuncPtr inDispatc
 
 // STUB FUNCTION DEFINITIONS
 
-void*           QTSS_New(FourCharCode inMemoryIdentifier, uint32_t inSize)
-{
-    return (void *) ((QTSS_CallbackPtrProcPtr) sCallbacks->addr [kNewCallback]) (inMemoryIdentifier, inSize);
-}
-
-void            QTSS_Delete(void* inMemory)
-{
-    (sCallbacks->addr [kDeleteCallback]) (inMemory);
-}
-
-int64_t          QTSS_Milliseconds(void)
-{
-    int64_t outMilliseconds = 0;
-    (sCallbacks->addr [kMillisecondsCallback]) (&outMilliseconds);
-    return outMilliseconds;
-}
-
 time_t          QTSS_MilliSecsTo1970Secs(int64_t inQTSS_MilliSeconds)
 {
     time_t outSeconds = 0;

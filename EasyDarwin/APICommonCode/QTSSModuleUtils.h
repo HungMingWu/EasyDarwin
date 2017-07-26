@@ -34,6 +34,8 @@
 #define _QTSS_MODULE_UTILS_H_
 
 #include <stdlib.h>
+#include <string>
+#include <vector>
 #include "QTSS.h"
 #include "StrPtrLen.h"
 #include "RTPMetaInfoPacket.h"
@@ -211,7 +213,7 @@ class QTSSModuleUtils
         static char* GetExtendedRights(QTSS_UserProfileObject theUserProfileObject, uint32_t index);
        
         static char*  GetUserName_Copy(QTSS_UserProfileObject inUserProfile);
-        static char** GetGroupsArray_Copy(QTSS_UserProfileObject inUserProfile, uint32_t *outNumGroupsPtr);
+        static std::vector<std::string> GetGroupsArray_Copy(QTSS_UserProfileObject inUserProfile);
         static bool UserInGroup(QTSS_UserProfileObject inUserProfile, char* inGroupName, uint32_t inGroupNameLen);
 
         static void SetEnableRTSPErrorMsg(bool enable) {QTSSModuleUtils::sEnableRTSPErrorMsg = enable; }

@@ -31,8 +31,6 @@
 #include "QTSSReflectorModule.h"
 #include "QTSSModuleUtils.h"
 #include "ReflectorSession.h"
-#include "OSArrayObjectDeleter.h"
-#include "QTSSMemoryDeleter.h"
 #include "OSRef.h"
 #include "OS.h"
 #include "ResizeableStringFormatter.h"
@@ -430,7 +428,7 @@ void SetMoviesRelativeDir()
 {
 	char* movieFolderString = nullptr;
 	(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsMovieFolder, 0, &movieFolderString);
-	OSCharArrayDeleter deleter(movieFolderString);
+	std::unique_ptr<char[]> deleter(movieFolderString);
 
 	ResizeableStringFormatter redirectPath(nullptr, 0);
 	redirectPath.Put(movieFolderString);
@@ -733,13 +731,13 @@ ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, QTSS_Attrib
 	char* theFileNameStr = nullptr;
 	QTSS_Error theErr = QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqFileName, 0, &theFileNameStr);
 	Assert(theErr == QTSS_NoErr);
-	QTSSCharArrayDeleter theFileNameStrDeleter(theFileNameStr);
+	std::unique_ptr<char[]> theFileNameStrDeleter(theFileNameStr);
 	if (theErr != QTSS_NoErr)
 		return nullptr;
 
 	char* theQueryString = nullptr;
 	theErr = QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqQueryString, 0, &theQueryString);
-	QTSSCharArrayDeleter theQueryStringDeleter(theQueryString);
+	std::unique_ptr<char[]> theQueryStringDeleter(theQueryString);
 
 	std::string queryTemp;
 	if (theQueryString)
@@ -770,21 +768,21 @@ ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, QTSS_Attrib
 	{
 		// Check and see if the full path to this file matches an existing ReflectorSession
 		StrPtrLen thePathPtr;
-		OSCharArrayDeleter sdpPath(QTSSModuleUtils::GetFullPath(inParams->inRTSPRequest,
+		std::unique_ptr<char[]> sdpPath(QTSSModuleUtils::GetFullPath(inParams->inRTSPRequest,
 			inPathType,
 			&thePathPtr.Len, &sSDPSuffix));
 
-		thePathPtr.Ptr = sdpPath.GetObject();
+		thePathPtr.Ptr = sdpPath.get();
 
 		// If the actual file path has a .sdp in it, first look for the URL without the extra .sdp
 		if (thePathPtr.Len > (sSDPSuffix.Len * 2))
 		{
 			// Check and see if there is a .sdp in the file path.
 			// If there is, truncate off our extra ".sdp", cuz it isn't needed
-			StrPtrLen endOfPath(&sdpPath.GetObject()[thePathPtr.Len - (sSDPSuffix.Len * 2)], sSDPSuffix.Len);
+			StrPtrLen endOfPath(&sdpPath.get()[thePathPtr.Len - (sSDPSuffix.Len * 2)], sSDPSuffix.Len);
 			if (endOfPath.Equal(sSDPSuffix))
 			{
-				sdpPath.GetObject()[thePathPtr.Len - sSDPSuffix.Len] = '\0';
+				sdpPath.get()[thePathPtr.Len - sSDPSuffix.Len] = '\0';
 				thePathPtr.Len -= sSDPSuffix.Len;
 			}
 		}
@@ -837,7 +835,7 @@ std::string DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ch
 			char* theSDPName = nullptr;
 
 			(void)QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqFilePath, 0, &theSDPName);
-			QTSSCharArrayDeleter thePathStrDeleter(theSDPName);
+			std::unique_ptr<char[]> thePathStrDeleter(theSDPName);
 			if (theSDPName == nullptr)
 				editedSDP += "s=unknown\r\n";
 			else
@@ -914,12 +912,12 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	// Get the full path to this file
 	char* theFileNameStr = nullptr;
 	(void)QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqFileName, 0, &theFileNameStr);
-	QTSSCharArrayDeleter theFileNameStrDeleter(theFileNameStr);
+	std::unique_ptr<char[]> theFileNameStrDeleter(theFileNameStr);
 	StrPtrLen theFullPath(theFileNameStr);
 
 	char* theQueryString = nullptr;
 	QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqQueryString, 0, &theQueryString);
-	QTSSCharArrayDeleter theQueryStringDeleter(theQueryString);
+	std::unique_ptr<char[]> theQueryStringDeleter(theQueryString);
 
 	std::string queryTemp;
 	if (theQueryString)
@@ -1022,7 +1020,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 
 	if (theErr == QTSS_RequestFailed)
 	{
-		OSCharArrayDeleter charArrayPathDeleter(theRequestBody);
+		std::unique_ptr<char[]> charArrayPathDeleter(theRequestBody);
 		//
 		// NEED TO RETURN RTSP ERROR RESPONSE
 		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest, 0);
@@ -1073,7 +1071,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	}
 
 	SDPSourceInfo theSDPSourceInfo(editedSDP.c_str(), editedSDP.length());
-	OSCharArrayDeleter charArrayPathDeleter(theRequestBody);
+	std::unique_ptr<char[]> charArrayPathDeleter(theRequestBody);
 
 	if (!InfoPortsOK(inParams, &theSDPSourceInfo, &theFullPath)) // All validity checks like this check should be done before touching the file.
 	{
@@ -1130,7 +1128,7 @@ std::string DoDescribeAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, Re
 		{ // add s line
 			char* theSDPName = nullptr;
 			(void)QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqFilePath, 0, &theSDPName);
-			QTSSCharArrayDeleter thePathStrDeleter(theSDPName);
+			std::unique_ptr<char[]> thePathStrDeleter(theSDPName);
 			editedSDP += "s=";
 			editedSDP += theSDPName;
 			editedSDP += "\r\n";
@@ -1172,7 +1170,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	uint32_t theRefCount = 0;
 	char *theFileName = nullptr;
 	ReflectorSession* theSession = DoSessionSetup(inParams, qtssRTSPReqFileName, false, nullptr, &theFileName);
-	OSCharArrayDeleter tempFilePath(theFileName);
+	std::unique_ptr<char[]> tempFilePath(theFileName);
 
 	if (theSession == nullptr)
 		return QTSS_RequestFailed;
@@ -1186,7 +1184,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	//		char* theFileNameStr = NULL;
 	//		QTSS_Error theErrEx = QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqLocalPath, 0, &theFileNameStr);
 	//		Assert(theErrEx == QTSS_NoErr);
-	//		QTSSCharArrayDeleter theFileNameStrDeleter(theFileNameStr);
+	//		std::unique_ptr<char[]> theFileNameStrDeleter(theFileNameStr);
 	//
 	//		//2.get SessionID
 	//		char chStreamId[64]={0};
@@ -1251,7 +1249,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	QTSS_TimeVal outModDate = 0;
 	QTSS_TimeVal inModDate = -1;
 	(void)QTSSModuleUtils::ReadEntireFile(theFileName, &theFileData, inModDate, &outModDate);
-	OSCharArrayDeleter fileDataDeleter(theFileData.Ptr);
+	std::unique_ptr<char[]> fileDataDeleter(theFileData.Ptr);
 
 	// -------------- process SDP to remove connection info and add track IDs, port info, and default c= line
 
@@ -1341,10 +1339,10 @@ bool InfoPortsOK(QTSS_StandardRTSP_Params* inParams, SDPSourceInfo* theInfo, Str
 				sprintf(thePort, "%u", theInfoPort);
 
 				char *thePath = inPath->GetAsCString();
-				OSCharArrayDeleter charArrayPathDeleter(thePath);
+				std::unique_ptr<char[]> charArrayPathDeleter(thePath);
 
 				auto *thePathPort = new char[inPath->Len + 32];
-				OSCharArrayDeleter charArrayPathPortDeleter(thePathPort);
+				std::unique_ptr<char[]> charArrayPathPortDeleter(thePathPort);
 
 				sprintf(thePathPort, "%s:%s", thePath, thePort);
 				(void)QTSSModuleUtils::LogError(qtssWarningVerbosity, theErrorMessageID, 0, thePathPort);
@@ -1391,7 +1389,7 @@ ReflectorSession* FindOrCreateSession(StrPtrLen* inName, QTSS_StandardRTSP_Param
 		{
 			theFileData = *inData;
 		}
-		OSCharArrayDeleter fileDataDeleter(theFileDeleteData.Ptr);
+		std::unique_ptr<char[]> fileDataDeleter(theFileDeleteData.Ptr);
 
 		if (theFileData.Len <= 0)
 			return nullptr;
@@ -1485,7 +1483,7 @@ ReflectorSession* FindOrCreateSession(StrPtrLen* inName, QTSS_StandardRTSP_Param
 
 			if (inData == nullptr)
 				(void)QTSSModuleUtils::ReadEntireFile(inPath.Ptr, &theFileData);
-			OSCharArrayDeleter charArrayDeleter(theFileData.Ptr);
+			std::unique_ptr<char[]> charArrayDeleter(theFileData.Ptr);
 
 			if (theFileData.Len <= 0)
 				break;
@@ -1639,7 +1637,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	//even bother with the request
 	char* theDigitStr = nullptr;
 	(void)QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqFileDigit, 0, &theDigitStr);
-	QTSSCharArrayDeleter theDigitStrDeleter(theDigitStr);
+	std::unique_ptr<char[]> theDigitStrDeleter(theDigitStr);
 	if (theDigitStr == nullptr)
 	{
 		if (isPush)
@@ -1880,11 +1878,11 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 		// this code needs to be cleaned up
 		// Check and see if the full path to this file matches an existing ReflectorSession
 		StrPtrLen thePathPtr;
-		OSCharArrayDeleter sdpPath(QTSSModuleUtils::GetFullPath(inParams->inRTSPRequest,
+		std::unique_ptr<char[]> sdpPath(QTSSModuleUtils::GetFullPath(inParams->inRTSPRequest,
 			qtssRTSPReqFilePath,
 			&thePathPtr.Len, &sSDPSuffix));
 
-		thePathPtr.Ptr = sdpPath.GetObject();
+		thePathPtr.Ptr = sdpPath.get();
 
 
 		// remove trackID designation from the path if it is there
@@ -1900,10 +1898,10 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 		{
 			// Check and see if there is a .sdp in the file path.
 			// If there is, truncate off our extra ".sdp", cuz it isn't needed
-			StrPtrLen endOfPath(&sdpPath.GetObject()[thePathPtr.Len - (sSDPSuffix.Len * 2)], sSDPSuffix.Len);
+			StrPtrLen endOfPath(&sdpPath.get()[thePathPtr.Len - (sSDPSuffix.Len * 2)], sSDPSuffix.Len);
 			if (endOfPath.Equal(sSDPSuffix))
 			{
-				sdpPath.GetObject()[thePathPtr.Len - sSDPSuffix.Len] = '\0';
+				sdpPath.get()[thePathPtr.Len - sSDPSuffix.Len] = '\0';
 				thePathPtr.Len -= sSDPSuffix.Len;
 			}
 		}
@@ -2246,7 +2244,7 @@ QTSS_Error RedirectBroadcast(QTSS_StandardRTSP_Params* inParams)
 
 	char* requestPathStr;
 	(void)QTSS_GetValueAsString(theRequest, qtssRTSPReqFilePath, 0, &requestPathStr);
-	QTSSCharArrayDeleter requestPathStrDeleter(requestPathStr);
+	std::unique_ptr<char[]> requestPathStrDeleter(requestPathStr);
 	StrPtrLen theRequestPath(requestPathStr);
 	StringParser theRequestPathParser(&theRequestPath);
 
@@ -2296,7 +2294,7 @@ bool InBroadcastDirList(QTSS_RTSPRequestObject inRTSPRequest)
 
 	char* theURIPathStr;
 	(void)QTSS_GetValueAsString(inRTSPRequest, qtssRTSPReqFilePath, 0, &theURIPathStr);
-	QTSSCharArrayDeleter requestPathStrDeleter(theURIPathStr);
+	std::unique_ptr<char[]> requestPathStrDeleter(theURIPathStr);
 
 	char* theLocalPathStr;
 	(void)QTSS_GetValueAsString(inRTSPRequest, qtssRTSPReqLocalPath, 0, &theLocalPathStr);
@@ -2341,7 +2339,7 @@ bool InBroadcastDirList(QTSS_RTSPRequestObject inRTSPRequest)
 		if (pathPrefix.Equal(theBroadcastDir))
 			allowed = true;
 
-		(void)QTSS_Delete(theBroadcastDirStr);
+		delete [] theBroadcastDirStr;
 
 		index++;
 	}
@@ -2390,7 +2388,7 @@ QTSS_Error GetDeviceStream(Easy_GetDeviceStream_Params* inParams)
 			{
 				char* theFullRequestURL = nullptr;
 				(void)QTSS_GetValueAsString(clientSession, qtssCliSesFullURL, 0, &theFullRequestURL);
-				QTSSCharArrayDeleter theFileNameStrDeleter(theFullRequestURL);
+				std::unique_ptr<char[]> theFileNameStrDeleter(theFullRequestURL);
 
 				if (theFullRequestURL && inParams->outUrl)
 				{

@@ -40,12 +40,12 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <memory>
 #include "StringParser.h"
 #include "OSFileSource.h"
 #include "OSHeaders.h"
 #include "AccessChecker.h"
 #include "QTSSModuleUtils.h"
-#include "OSArrayObjectDeleter.h"
 
 static StrPtrLen sAuthWord("realm", 5);
 
@@ -231,9 +231,9 @@ uint32_t AccessChecker::UpdateUserProfiles() {
 
 
 	// This will delete the memory allocated for userData when we return from this function
-	OSCharArrayDeleter userDataPtrDeleter(userData.Ptr);
+	std::unique_ptr<char[]> userDataPtrDeleter(userData.Ptr);
 	// This will delete the memory allocated for groupData when we return from this function
-	OSCharArrayDeleter groupDataPtrDeleter(groupData.Ptr);
+	std::unique_ptr<char[]> groupDataPtrDeleter(groupData.Ptr);
 
 	// Create the fProfiles array of size kDefaultNumProfiles
 	fProfiles = new UserProfile*[kDefaultNumProfiles];

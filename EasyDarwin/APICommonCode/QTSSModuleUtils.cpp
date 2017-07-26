@@ -30,11 +30,11 @@
 */
 
 #include <cstdint>
+#include <memory>
 #include "QTSSModuleUtils.h"
 #include "QTSS_Private.h"
 
 #include "StrPtrLen.h"
-#include "OSArrayObjectDeleter.h"
 #include "MyAssert.h"
 #include "StringFormatter.h"
 #include "ResizeableStringFormatter.h"
@@ -196,11 +196,10 @@ void    QTSSModuleUtils::LogError(  QTSS_ErrorVerbosity inVerbosity,
     
     uint32_t theMessageLen = theMessage.Len + ::strlen(inArgument) + ::strlen(inArg2);
 
-    OSCharArrayDeleter theLogString(new char[theMessageLen + 1]);
-    sprintf(theLogString.GetObject(), theMessage.Ptr, inArgument, inArg2);
-    Assert(theMessageLen >= ::strlen(theLogString.GetObject()));
+    std::unique_ptr<char[]> theLogString(new char[theMessageLen + 1]);
+    sprintf(theLogString.get(), theMessage.Ptr, inArgument, inArg2);
     
-    (void)QTSS_Write(sErrorLog, theLogString.GetObject(), ::strlen(theLogString.GetObject()),
+    (void)QTSS_Write(sErrorLog, theLogString.get(), ::strlen(theLogString.get()),
                         nullptr, inVerbosity);
 }
 
@@ -706,12 +705,12 @@ void    QTSSModuleUtils::GetAttribute(QTSS_Object inObject, char* inAttributeNam
             char* theValueAsString = nullptr;
             theErr = QTSS_ValueToString(inDefaultValue, inBufferLen, inType, &theValueAsString);
             Assert(theErr == QTSS_NoErr);
-            OSCharArrayDeleter theValueStr(theValueAsString);
+            std::unique_ptr<char[]> theValueStr(theValueAsString);
             QTSSModuleUtils::LogError(  sMissingPrefVerbosity, 
                                         qtssServerPrefMissing,
                                         0,
                                         inAttributeName,
-                                        theValueStr.GetObject());
+                                        theValueStr.get());
         }
         
         //
@@ -819,12 +818,12 @@ QTSS_AttributeID QTSSModuleUtils::CheckAttributeDataType(QTSS_Object inObject, c
         char* theValueAsString = nullptr;
         theErr = QTSS_ValueToString(inDefaultValue, inBufferLen, inType, &theValueAsString);
         Assert(theErr == QTSS_NoErr);
-        OSCharArrayDeleter theValueStr(theValueAsString);
+        std::unique_ptr<char[]> theValueStr(theValueAsString);
         QTSSModuleUtils::LogError(  qtssWarningVerbosity,
                                     qtssServerPrefWrongType,
                                     0,
                                     inAttributeName,
-                                    theValueStr.GetObject());
+                                    theValueStr.get());
                                     
         theErr = QTSS_RemoveInstanceAttribute( inObject, theID );
         Assert(theErr == QTSS_NoErr);
@@ -891,28 +890,27 @@ char *QTSSModuleUtils::GetUserName_Copy(QTSS_UserProfileObject inUserProfile)
     return username;
 }
 
-char**  QTSSModuleUtils::GetGroupsArray_Copy(QTSS_UserProfileObject inUserProfile, uint32_t *outNumGroupsPtr)
-{
-    Assert(nullptr != outNumGroupsPtr);
-
-    char** outGroupCharPtrArray = nullptr;
-    *outNumGroupsPtr = 0;
-    
+std::vector<std::string> QTSSModuleUtils::GetGroupsArray_Copy(QTSS_UserProfileObject inUserProfile)
+{   
     if (nullptr == inUserProfile)
-        return nullptr;
-    
-    QTSS_Error theErr = QTSS_GetNumValues (inUserProfile,qtssUserGroups, outNumGroupsPtr);
-    if (theErr != QTSS_NoErr || *outNumGroupsPtr == 0)
-        return nullptr;
-        
-    outGroupCharPtrArray = new char*[*outNumGroupsPtr]; // array of char *
-    uint32_t len = 0;
-    for (uint32_t index = 0; index < *outNumGroupsPtr; index++)
-    {   outGroupCharPtrArray[index] = nullptr;
-        QTSS_GetValuePtr(inUserProfile, qtssUserGroups, index,(void **) &outGroupCharPtrArray[index], &len);
+		return {};
+
+	uint32_t outNumGroups;
+    QTSS_Error theErr = QTSS_GetNumValues (inUserProfile,qtssUserGroups, &outNumGroups);
+    if (theErr != QTSS_NoErr || outNumGroups == 0)
+		return {};
+ 
+	std::vector<std::string> result(outNumGroups);
+    for (size_t index = 0; index < outNumGroups; index++)
+    {   
+		char *str = nullptr;
+		uint32_t len = 0;
+        QTSS_GetValuePtr(inUserProfile, qtssUserGroups, index,(void **) &str, &len);
+		result[index] = std::string(str, len);
+		delete[] str;
     }   
 
-    return outGroupCharPtrArray;
+    return result;
 }
 
 bool QTSSModuleUtils::UserInGroup(QTSS_UserProfileObject inUserProfile, char* inGroup, uint32_t inGroupLen)

@@ -37,9 +37,9 @@
 #include <sys/stat.h>
 #include <errno.h> 
 #include <ctime>
+#include <memory>
 #include "QTSSRollingLog.h"
 #include "OS.h"
-#include "OSArrayObjectDeleter.h"
 #include "ResizeableStringFormatter.h"
 
 static bool sCloseOnWrite = true;
@@ -116,11 +116,11 @@ char* QTSSRollingLog::GetLogPath(char *extension)
 {
     char *thePath = nullptr;
     
-    OSCharArrayDeleter logDir(this->GetLogDir()); //The string passed into this function is a copy
-    OSCharArrayDeleter logName(this->GetLogName());  //The string passed into this function is a copy
+    std::unique_ptr<char[]> logDir(this->GetLogDir()); //The string passed into this function is a copy
+    std::unique_ptr<char[]> logName(this->GetLogName());  //The string passed into this function is a copy
     
     ResizeableStringFormatter formatPath(nullptr,0); //allocate the buffer
-    formatPath.PutFilePath(logDir, logName);
+    formatPath.PutFilePath(logDir.get(), logName.get());
     
     if ( extension != nullptr)
         formatPath.Put(extension);
@@ -160,8 +160,8 @@ void QTSSRollingLog::EnableLog( bool appendDotLog )
     //create the log directory if it doesn't already exist
     if (!logExists)
     {
-       OSCharArrayDeleter tempDir(this->GetLogDir());
-       OS::RecursiveMakeDir(tempDir.GetObject());
+       std::unique_ptr<char[]> tempDir(this->GetLogDir());
+       OS::RecursiveMakeDir(tempDir.get());
     }
  
     fLog = ::fopen(fLogFullPath, "a+");//open for "append"
@@ -281,35 +281,35 @@ bool QTSSRollingLog::RenameLogFile(const char* inFileName)
     
     //fix 2287086. Rolled log name can be different than original log name
     //GetLogDir returns a copy of the log dir
-    OSCharArrayDeleter logDirectory(this->GetLogDir());
+    std::unique_ptr<char[]> logDirectory(this->GetLogDir());
 
     //create the log directory if it doesn't already exist
-    OS::RecursiveMakeDir(logDirectory.GetObject());
+    OS::RecursiveMakeDir(logDirectory.get());
     
     //GetLogName returns a copy of the log name
-    OSCharArrayDeleter logBaseName(this->GetLogName());
+    std::unique_ptr<char[]> logBaseName(this->GetLogName());
         
     //QTStreamingServer.981217003.log
     //format the new file name
-    OSCharArrayDeleter theNewNameBuffer(new char[::strlen(logDirectory) + kMaxFilenameLengthInBytes + 3]);
+    std::unique_ptr<char[]> theNewNameBuffer(new char[::strlen(logDirectory.get()) + kMaxFilenameLengthInBytes + 3]);
     
     //copy over the directory - append a '/' if it's missing
-    ::strcpy(theNewNameBuffer, logDirectory);
-    if (theNewNameBuffer[::strlen(theNewNameBuffer)-1] != kPathDelimiterChar)
+    ::strcpy(theNewNameBuffer.get(), logDirectory.get());
+    if (theNewNameBuffer.get()[::strlen(theNewNameBuffer.get())-1] != kPathDelimiterChar)
     {
-        ::strcat(theNewNameBuffer, kPathDelimiterString);
+        ::strcat(theNewNameBuffer.get(), kPathDelimiterString);
     }
     
     //copy over the base filename
-    ::strcat(theNewNameBuffer, logBaseName.GetObject());
+    ::strcat(theNewNameBuffer.get(), logBaseName.get());
 
     //append the date the file was created
     struct tm* theLocalTime = std::localtime(&fLogCreateTime);
     char timeString[10];
     strftime(timeString,  10, ".%y%m%d", theLocalTime);
-    ::strcat(theNewNameBuffer, timeString);
+    ::strcat(theNewNameBuffer.get(), timeString);
     
-    int32_t theBaseNameLength = ::strlen(theNewNameBuffer);
+    int32_t theBaseNameLength = ::strlen(theNewNameBuffer.get());
 
 
     //loop until we find a unique name to rename this file
@@ -320,24 +320,24 @@ bool QTSSRollingLog::RenameLogFile(const char* inFileName)
         if (x  == 1000) //we don't have any digits left, so just reuse the "---" until tomorrow...
         {
             //add a bogus log number and exit the loop
-            sprintf(theNewNameBuffer + theBaseNameLength, "---.log");
+            sprintf(theNewNameBuffer.get() + theBaseNameLength, "---.log");
             break;
         }
 
         //add the log number & suffix
-        sprintf(theNewNameBuffer + theBaseNameLength, "%03" _S32BITARG_ ".log", x);
+        sprintf(theNewNameBuffer.get() + theBaseNameLength, "%03" _S32BITARG_ ".log", x);
 
         //assume that when ::stat returns an error, it is becase
         //the file doesnt exist. Once that happens, we have a unique name
         // csl - shouldn't you watch for a ENOENT result?
         struct stat theIdontCare;
-        theErr = ::stat(theNewNameBuffer, &theIdontCare);
+        theErr = ::stat(theNewNameBuffer.get(), &theIdontCare);
         WarnV((theErr == 0 || OSThread::GetErrno() == ENOENT), "unexpected stat error in RenameLogFile");
         
     }
     
     //rename the file. Use posix rename function
-    int result = ::rename(inFileName, theNewNameBuffer);
+    int result = ::rename(inFileName, theNewNameBuffer.get());
     if (result == -1)
         theErr = (int32_t)OSThread::GetErrno();
     else

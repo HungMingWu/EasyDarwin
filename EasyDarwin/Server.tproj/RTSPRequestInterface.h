@@ -302,12 +302,6 @@ private:
 	RTSPSessionInterface*   fSession;
 	RTSPResponseStream*     fOutputStream;
 
-
-	enum
-	{
-		kStaticHeaderSizeInBytes = 512  //uint32_t
-	};
-
 	bool                  fStandardHeadersWritten;
 
 	void                    PutTransportStripped(StrPtrLen &outFirstTransport, StrPtrLen &outResultStr);
@@ -326,11 +320,9 @@ private:
 	static void* 		GetAuthDigestResponse(QTSSDictionary* inRequest, uint32_t* outLen);
 
 	//optimized preformatted response header strings
-	static char             sPremadeHeader[kStaticHeaderSizeInBytes];
-	static StrPtrLen        sPremadeHeaderPtr;
+	static std::string      sPremadeHeader;
 
-	static char             sPremadeNoHeader[kStaticHeaderSizeInBytes];
-	static StrPtrLen        sPremadeNoHeaderPtr;
+	static std::string      sPremadeNoHeader;
 
 	static StrPtrLen        sColonSpace;
 

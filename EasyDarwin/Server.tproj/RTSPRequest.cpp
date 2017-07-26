@@ -44,7 +44,6 @@
 #include "QTSS.h"
 #include "QTSSModuleUtils.h"
 #include "base64.h"
-#include "OSArrayObjectDeleter.h"
 #include "DateTranslator.h"
 #include "SocketUtils.h"
 
@@ -875,10 +874,10 @@ QTSS_Error RTSPRequest::ParseBasicHeader(StringParser *inParsedAuthLinePtr)
 		return theErr;
 
 	char* encodedStr = authWord.GetAsCString();
-	OSCharArrayDeleter encodedStrDeleter(encodedStr);
+	std::unique_ptr<char[]> encodedStrDeleter(encodedStr);
 
 	auto *decodedAuthWord = new char[Base64decode_len(encodedStr) + 1];
-	OSCharArrayDeleter decodedAuthWordDeleter(decodedAuthWord);
+	std::unique_ptr<char[]> decodedAuthWordDeleter(decodedAuthWord);
 
 	(void)Base64decode(decodedAuthWord, encodedStr);
 
@@ -1134,7 +1133,7 @@ QTSS_Error RTSPRequest::SendBasicChallenge(void)
 			test[sDefaultRealm.Len] = 0;
 			printf("the static realm =%s \n", test);
 
-			OSCharArrayDeleter prefDeleter(QTSServerInterface::GetServer()->GetPrefs()->GetAuthorizationRealm());
+			std::unique_ptr<char[]> prefDeleter(QTSServerInterface::GetServer()->GetPrefs()->GetAuthorizationRealm());
 			memcpy(test, prefDeleter.GetObject(), strlen(prefDeleter.GetObject()));
 			test[strlen(prefDeleter.GetObject())] = 0;
 			printf("the Pref realm =%s \n", test);

@@ -57,9 +57,6 @@ enum
     //            kLastCallback value. Inserting or changing the index order will break dynamic modules
     //            built with another release.
     
-    kNewCallback                    = 0,
-    kDeleteCallback                 = 1,
-    kMillisecondsCallback           = 2,
     kConvertToUnixTimeCallback      = 3,
     kAddRoleCallback                = 4,
     kAddAttributeCallback           = 5,

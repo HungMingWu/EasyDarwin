@@ -1288,27 +1288,6 @@ typedef QTSS_Error (*QTSS_DispatchFuncPtr)(QTSS_Role inRole, QTSS_RoleParamPtr i
 QTSS_Error _stublibrary_main(void* inPrivateArgs, QTSS_DispatchFuncPtr inDispatchFunc);
 
 /********************************************************************/
-//  QTSS_New
-//  QTSS_Delete
-//
-//  These should be used for all dynamic memory allocation done from
-//  within modules. The memoryIdentifier is used for debugging:
-//  the server can track this memory to make memory leak debugging easier.
-void*   QTSS_New(FourCharCode inMemoryIdentifier, uint32_t inSize);
-void    QTSS_Delete(void* inMemory);
-
-/********************************************************************/
-//  QTSS_Milliseconds
-//
-//  The server maintains a millisecond timer internally. The current
-//  value of that timer can be obtained from this function. This value
-//  is not valid between server executions.
-//
-//  All millisecond values used in QTSS API use this timer, unless otherwise noted
-QTSS_TimeVal    QTSS_Milliseconds();
-
-
-/********************************************************************/
 //  QTSS_MilliSecsTo1970Secs
 //
 //  Convert milliseconds from the QTSS_Milliseconds call to 

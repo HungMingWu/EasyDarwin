@@ -37,7 +37,6 @@
 #include "SocketUtils.h"
 #include "StrPtrLen.h"
 #include "SDPUtils.h"
-#include "OSArrayObjectDeleter.h"
 
 static StrPtrLen    sCLine("c=IN IP4 0.0.0.0");
 static StrPtrLen    sControlLine("a=control:*");

@@ -40,13 +40,7 @@ class QTSSCallbacks
 {
 public:
 
-	// MEMORY ROUTINES
-
-	static void*    QTSS_New(FourCharCode inMemoryIdentifier, uint32_t inSize);
-	static void     QTSS_Delete(void* inMemory);
-
 	// TIME ROUTINES
-	static void QTSS_Milliseconds(int64_t* outMilliseconds);
 	static void QTSS_ConvertToUnixTime(int64_t* inQTSS_MilliSecondsPtr, time_t* outSecondsPtr);
 
 	// STARTUP ROUTINES

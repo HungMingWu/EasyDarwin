@@ -30,13 +30,13 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <memory>
 #include "QTSS.h"
 #include "OSHeaders.h"
 #include "StrPtrLen.h"
 #include "StringParser.h"
 #include "QTSSModuleUtils.h"
 #include "QTAccessFile.h"
-#include "OSArrayObjectDeleter.h"
 
 #ifdef __MacOSX__
 #include <membership.h>
@@ -125,14 +125,9 @@ bool QTAccessFile::HaveUser(char *userName, void* extraDataPtr)
    return result;        
 }
 
-bool QTAccessFile::HaveGroups( char** groupArray, uint32_t numGroups, void* extraDataPtr)
+bool QTAccessFile::HaveGroups(const std::vector<std::string> &groupArray, void* extraDataPtr)
 {
-   bool result = false;
-
-   if (numGroups > 0 && groupArray != nullptr)
-        result = true;
-        
-   return result;   
+   return !groupArray.empty();
 }
 
 bool QTAccessFile::HaveRealm(   char *userName, StrPtrLen* ioRealmNameStr, void *extraData )
@@ -165,11 +160,11 @@ bool QTAccessFile::TestUser(StrPtrLen* accessUser, char *userName,void *extraDat
   return result;   
 }
 
-bool QTAccessFile::TestGroup( StrPtrLen* accessGroup, char *userName, char**groupArray, uint32_t numGroups, void *extraDataPtr)
+bool QTAccessFile::TestGroup( StrPtrLen* accessGroup, char *userName, const std::vector<std::string> &groupArray, void *extraDataPtr)
 {
    
-    for (uint32_t index = 0; index < numGroups; index ++)
-    {   if(accessGroup->Equal(groupArray[index])) 
+    for (const auto &group : groupArray)
+    {   if(accessGroup->Equal(group.c_str())) 
             return true;
     }
 
@@ -183,7 +178,7 @@ bool QTAccessFile::TestExtraData( StrPtrLen* wordPtr, StringParser* lineParserPt
 }
 
 
-bool QTAccessFile::AccessAllowed  (   char *userName, char**groupArray, uint32_t numGroups, StrPtrLen *accessFileBufPtr,
+bool QTAccessFile::AccessAllowed  (   char *userName, const std::vector<std::string> &groupArray, StrPtrLen *accessFileBufPtr,
                                         QTSS_ActionFlags inFlags,StrPtrLen* ioRealmNameStr, bool *outAllowAnyUserPtr, void *extraDataPtr
                                     )
 {       
@@ -205,7 +200,7 @@ bool QTAccessFile::AccessAllowed  (   char *userName, char**groupArray, uint32_t
         
     haveUserName = HaveUser(userName, extraDataPtr);
   
-    haveGroups = HaveGroups(groupArray, numGroups, extraDataPtr);
+    haveGroups = HaveGroups(groupArray, extraDataPtr);
 
     haveRealmResultBuffer =  HaveRealm(userName, ioRealmNameStr, extraDataPtr );
   
@@ -301,7 +296,7 @@ bool QTAccessFile::AccessAllowed  (   char *userName, char**groupArray, uint32_t
                 
                 while (word.Len != 0) // compare each word in the line
                 {   
-                    if (TestGroup(&word, userName, groupArray, numGroups, extraDataPtr) )
+                    if (TestGroup(&word, userName, groupArray, extraDataPtr) )
                         return true;
 
                     lineParser.ConsumeWhitespace();
@@ -394,7 +389,7 @@ QTSS_AuthScheme QTAccessFile::FindUsersAndGroupsFilesAndAuthScheme(char* inAcces
     
     StrPtrLen accessFileBuf;
     (void)QTSSModuleUtils::ReadEntireFile(inAccessFilePath, &accessFileBuf);
-    OSCharArrayDeleter accessFileBufDeleter(accessFileBuf.Ptr);
+    std::unique_ptr<char[]> accessFileBufDeleter(accessFileBuf.Ptr);
     
     StringParser accessFileParser(&accessFileBuf);
     StrPtrLen line;
@@ -509,13 +504,13 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     
     //get the local file path
     char*   pathBuffStr = QTSSModuleUtils::GetLocalPath_Copy(theRTSPRequest);
-    OSCharArrayDeleter pathBuffDeleter(pathBuffStr);
+    std::unique_ptr<char[]> pathBuffDeleter(pathBuffStr);
     if (nullptr == pathBuffStr)
         return QTSS_RequestFailed;
 
     //get the root movie directory
     char*   movieRootDirStr = QTSSModuleUtils::GetMoviesRootDir_Copy(theRTSPRequest);
-    OSCharArrayDeleter movieRootDeleter(movieRootDirStr);
+    std::unique_ptr<char[]> movieRootDeleter(movieRootDirStr);
     if (nullptr == movieRootDirStr)
         return QTSS_RequestFailed;
     
@@ -524,18 +519,16 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
         return QTSS_RequestFailed;
 
     char* accessFilePath = QTAccessFile::GetAccessFile_Copy(movieRootDirStr, pathBuffStr);
-    OSCharArrayDeleter accessFilePathDeleter(accessFilePath);
+    std::unique_ptr<char[]> accessFilePathDeleter(accessFilePath);
         
     char* username = QTSSModuleUtils::GetUserName_Copy(theUserProfile);
-    OSCharArrayDeleter usernameDeleter(username);
+    std::unique_ptr<char[]> usernameDeleter(username);
 
-    uint32_t numGroups = 0;
-    char** groupCharPtrArray =  QTSSModuleUtils::GetGroupsArray_Copy(theUserProfile, &numGroups);
-    OSCharPointerArrayDeleter groupCharPtrArrayDeleter(groupCharPtrArray);
+    std::vector<std::string> groupCharPtrArray =  QTSSModuleUtils::GetGroupsArray_Copy(theUserProfile);
     
     StrPtrLen accessFileBuf;
     (void)QTSSModuleUtils::ReadEntireFile(accessFilePath, &accessFileBuf);
-    OSCharArrayDeleter accessFileBufDeleter(accessFileBuf.Ptr);
+    std::unique_ptr<char[]> accessFileBufDeleter(accessFileBuf.Ptr);
         
     if (accessFileBuf.Len == 0 && !allowNoAccessFiles)
     {   accessFileBuf.Set(sAccessValidUser);
@@ -553,7 +546,7 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     StrPtrLen   realmNameStr(realmName,kBuffLen -1);
     
     //check if this user is allowed to see this movie
-    bool allowRequest = this->AccessAllowed(username, groupCharPtrArray, numGroups,  &accessFileBuf, authorizeAction,&realmNameStr, outAllowAnyUserPtr );
+    bool allowRequest = this->AccessAllowed(username, groupCharPtrArray,  &accessFileBuf, authorizeAction,&realmNameStr, outAllowAnyUserPtr );
     debug_printf("accessFile.AccessAllowed for user=%s returned %d\n", username, allowRequest);
     
     // Get the auth scheme
@@ -573,7 +566,7 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
         (void) QTSS_GetValueAsString(theUserProfile, qtssUserRealm, 0, &userRealm);
         if(userRealm != nullptr)
         {
-            OSCharArrayDeleter userRealmDeleter(userRealm);
+            std::unique_ptr<char[]> userRealmDeleter(userRealm);
             (void) QTSS_SetValue(theRTSPRequest,qtssRTSPReqURLRealm, 0, userRealm, ::strlen(userRealm));
         }
     }

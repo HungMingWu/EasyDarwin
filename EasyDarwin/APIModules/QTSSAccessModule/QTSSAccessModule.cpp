@@ -31,12 +31,13 @@
 
  */
 
+#include <memory>
+
 #include "QTSSAccessModule.h"
 
 #include "defaultPaths.h"
 
 
-#include "OSArrayObjectDeleter.h"
 #include "StrPtrLen.h"
 #include "MyAssert.h"
 #include "AccessChecker.h"
@@ -321,17 +322,17 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	// For this, first get local file path and root movie directory
 	//get the local file path
 	char*   pathBuffStr = QTSSModuleUtils::GetLocalPath_Copy(theRTSPRequest);
-	OSCharArrayDeleter pathBuffDeleter(pathBuffStr);
+	std::unique_ptr<char[]> pathBuffDeleter(pathBuffStr);
 	if (nullptr == pathBuffStr)
 		return QTSS_RequestFailed;
 	//get the root movie directory
 	char*   movieRootDirStr = QTSSModuleUtils::GetMoviesRootDir_Copy(theRTSPRequest);
-	OSCharArrayDeleter movieRootDeleter(movieRootDirStr);
+	std::unique_ptr<char[]> movieRootDeleter(movieRootDirStr);
 	if (nullptr == movieRootDirStr)
 		return QTSS_RequestFailed;
 	// Now get the access file path
 	char* accessFilePath = QTAccessFile::GetAccessFile_Copy(movieRootDirStr, pathBuffStr);
-	OSCharArrayDeleter accessFilePathDeleter(accessFilePath);
+	std::unique_ptr<char[]> accessFilePathDeleter(accessFilePath);
 	// Parse the access file for the AuthUserFile and AuthGroupFile keywords
 	char* usersFilePath = nullptr;
 	char* groupsFilePath = nullptr;
@@ -356,8 +357,8 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	if (groupsFilePath == nullptr)
 		groupsFilePath = strdup(sGroupsFilePath);
 
-	OSCharArrayDeleter userPathDeleter(usersFilePath);
-	OSCharArrayDeleter groupPathDeleter(groupsFilePath);
+	std::unique_ptr<char[]> userPathDeleter(usersFilePath);
+	std::unique_ptr<char[]> groupPathDeleter(groupsFilePath);
 
 	AccessChecker* currentChecker = nullptr;
 	uint32_t index;
@@ -470,7 +471,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	// Get the username from the user profile object
 	char*   usernameBuf = nullptr;
 	theErr = QTSS_GetValueAsString(theUserProfile, qtssUserName, 0, &usernameBuf);
-	OSCharArrayDeleter usernameBufDeleter(usernameBuf);
+	std::unique_ptr<char[]> usernameBufDeleter(usernameBuf);
 	StrPtrLen username(usernameBuf);
 	if (theErr != QTSS_NoErr)
 		return theErr;

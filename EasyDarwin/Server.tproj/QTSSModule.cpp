@@ -27,8 +27,8 @@
 	 Contains:   Implements object defined in QTSSModule.h
  */
 
+#include <memory>
 #include "QTSSModule.h"
-#include "OSArrayObjectDeleter.h"
 #include "StringParser.h"
 #include "QTSServerInterface.h"
 
@@ -204,12 +204,12 @@ QTSS_Error QTSSModule::LoadFromDisk(QTSS_MainEntryPointPtr* outEntrypoint)
 
 	// 
 	// The main entrypoint symbol name is the file name plus that _Main__ string up there.
-	OSCharArrayDeleter theSymbolName(new char[theFileName.Len + sMainEntrypointName.Len + 2]);
-	::memcpy(theSymbolName, theFileName.Ptr, theFileName.Len);
+	std::unique_ptr<char[]> theSymbolName(new char[theFileName.Len + sMainEntrypointName.Len + 2]);
+	::memcpy(theSymbolName.get(), theFileName.Ptr, theFileName.Len);
 	theSymbolName[theFileName.Len] = '\0';
 
-	::strcat(theSymbolName, sMainEntrypointName.Ptr);
-	*outEntrypoint = (QTSS_MainEntryPointPtr)fFragment->GetSymbol(theSymbolName.GetObject());
+	::strcat(theSymbolName.get(), sMainEntrypointName.Ptr);
+	*outEntrypoint = (QTSS_MainEntryPointPtr)fFragment->GetSymbol(theSymbolName.get());
 	return QTSS_NoErr;
 }
 

@@ -34,9 +34,8 @@
 #include "RTCPAckPacket.h"
 #include "RTCPPacket.h"
 #include "MyAssert.h"
-#include "OSArrayObjectDeleter.h"
 #include <stdio.h>
-
+#include <memory>
 
  // use if you don't know what kind of packet this is
 bool RTCPAckPacket::ParseAckPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength)
@@ -98,7 +97,7 @@ void   RTCPAckPacket::Dump()
 	::memcpy(name, &fRTCPAckBuffer[kAppPacketTypeOffset], 4);
 	auto numBufferBytes = (uint16_t)((7 * theAckMaskSizeInBits) + 1);
 	auto *maskBytesBuffer = new char[numBufferBytes];
-	OSCharArrayDeleter deleter(maskBytesBuffer);
+	std::unique_ptr<char[]> deleter(maskBytesBuffer);
 	maskBytesBuffer[0] = 0;
 	maskBytesBuffer[numBufferBytes - 1] = 0;
 	for (uint32_t maskCount = 0; maskCount < theAckMaskSizeInBits; maskCount++)

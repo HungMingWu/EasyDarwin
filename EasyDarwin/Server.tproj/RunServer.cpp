@@ -28,12 +28,12 @@
 	 Contains:   main function to drive streaming server.
  */
 
+#include <memory>
 #include "RunServer.h"
 #include "OS.h"
 #include "OSThread.h"
 #include "Socket.h"
 #include "SocketUtils.h"
-#include "OSArrayObjectDeleter.h"
 #include "Task.h"
 #include "IdleTask.h"
 #include "TimeoutTask.h"
@@ -111,9 +111,9 @@ QTSS_ServerState StartServer(XMLPrefsParser* inPrefsSource, PrefsSource* inMessa
 		return inInitialState;
 	}
 
-	OSCharArrayDeleter runGroupName(sServer->GetPrefs()->GetRunGroupName());
-	OSCharArrayDeleter runUserName(sServer->GetPrefs()->GetRunUserName());
-	OSThread::SetPersonality(runUserName.GetObject(), runGroupName.GetObject());
+	std::unique_ptr<char[]> runGroupName(sServer->GetPrefs()->GetRunGroupName());
+	std::unique_ptr<char[]> runUserName(sServer->GetPrefs()->GetRunUserName());
+	OSThread::SetPersonality(runUserName.get(), runGroupName.get());
 
 	if (sServer->GetServerState() != qtssFatalErrorState)
 	{
@@ -211,7 +211,7 @@ void WritePid(bool forked)
 {
 #ifndef __Win32__
 	// WRITE PID TO FILE
-	OSCharArrayDeleter thePidFileName(sServer->GetPrefs()->GetPidFilePath());
+	std::unique_ptr<char[]> thePidFileName(sServer->GetPrefs()->GetPidFilePath());
 	FILE *thePidFile = fopen(thePidFileName, "w");
 	if (thePidFile)
 	{
@@ -233,7 +233,7 @@ void CleanPid(bool force)
 #ifndef __Win32__
 	if (sHasPID || force)
 	{
-		OSCharArrayDeleter thePidFileName(sServer->GetPrefs()->GetPidFilePath());
+		std::unique_ptr<char[]> thePidFileName(sServer->GetPrefs()->GetPidFilePath());
 		unlink(thePidFileName);
 	}
 #endif

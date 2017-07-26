@@ -91,11 +91,11 @@ protected:
 
 	OS_Error    SendSendBuffer(TCPSocket* inSocket);
 
-	uint32_t      fHostAddr;
-	uint16_t      fHostPort;
+	uint32_t      fHostAddr{0};
+	uint16_t      fHostPort{0};
 
-	uint32_t      fEventMask;
-	Socket*     fSocketP;
+	uint32_t      fEventMask{0};
+	Socket*     fSocketP{nullptr};
 
 	enum
 	{
@@ -105,7 +105,7 @@ protected:
 	// Buffer for sends.
 	char        fSendBuf[kSendBufferLen + 1];
 	StrPtrLen   fSendBuffer;
-	uint32_t      fSentLength;
+	uint32_t      fSentLength{0};
 };
 
 class TCPClientSocket : public ClientSocket

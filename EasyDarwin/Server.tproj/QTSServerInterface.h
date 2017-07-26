@@ -322,30 +322,30 @@ protected:
 
 	//Sockets are allocated global to the server, and arbitrated through this pool here.
 	//RTCP data is processed completely within the following task.
-	UDPSocketPool*              fSocketPool;
+	UDPSocketPool*              fSocketPool{nullptr};
 
 	// All RTP sessions are put into this map
-	OSRefTable*                 fRTPMap;
-	OSRefTable*					fHLSMap;
-	OSRefTable*					fRTMPMap;
-	OSRefTable*					fReflectorSessionMap;
+	OSRefTable*                 fRTPMap{nullptr};
+	OSRefTable*					fHLSMap{nullptr};
+	OSRefTable*					fRTMPMap{nullptr};
+	OSRefTable*					fReflectorSessionMap{nullptr};
 
-	QTSServerPrefs*             fSrvrPrefs;
-	QTSSMessages*               fSrvrMessages;
+	QTSServerPrefs*             fSrvrPrefs{nullptr};
+	QTSSMessages*               fSrvrMessages{nullptr};
 
 	QTSServerPrefs*				fStubSrvrPrefs;
 	QTSSMessages*				fStubSrvrMessages;
 
-	QTSS_ServerState            fServerState;
-	uint32_t                      fDefaultIPAddr;
+	QTSS_ServerState            fServerState{qtssStartingUpState};
+	uint32_t                      fDefaultIPAddr{0};
 
 	// Array of pointers to TCPListenerSockets.
-	TCPListenerSocket**         fListeners;
-	uint32_t                      fNumListeners; // Number of elements in the array
+	TCPListenerSocket**         fListeners{nullptr};
+	uint32_t                      fNumListeners{0}; // Number of elements in the array
 
 	// startup time
-	int64_t						fStartupTime_UnixMilli;
-	int32_t						fGMTOffset;
+	int64_t						fStartupTime_UnixMilli{0};
+	int32_t						fGMTOffset{0};
 
 	static ResizeableStringFormatter    sPublicHeaderFormatter;
 	static StrPtrLen                    sPublicHeaderStr;
@@ -381,39 +381,39 @@ private:
 
 	OSMutex             fMutex;
 
-	uint32_t              fNumRTSPSessions;
-	uint32_t              fNumRTSPHTTPSessions;
-	uint32_t              fNumRTPSessions;
+	uint32_t              fNumRTSPSessions{0};
+	uint32_t              fNumRTSPHTTPSessions{0};
+	uint32_t              fNumRTPSessions{0};
 
 	//stores the current number of playing connections.
-	uint32_t              fNumRTPPlayingSessions;
+	uint32_t              fNumRTPPlayingSessions{0};
 
 	//stores the total number of connections since startup.
-	uint32_t              fTotalRTPSessions;
+	uint32_t              fTotalRTPSessions{0};
 	//stores the total number of bytes served since startup
-	uint64_t              fTotalRTPBytes;
+	uint64_t              fTotalRTPBytes{0};
 	//total number of rtp packets sent since startup
-	uint64_t              fTotalRTPPackets;
+	uint64_t              fTotalRTPPackets{0};
 	//stores the total number of bytes lost (as reported by clients) since startup
-	uint64_t              fTotalRTPPacketsLost;
+	uint64_t              fTotalRTPPacketsLost{0};
 
 	//because there is no 64 bit atomic add (for obvious reasons), we efficiently
 	//implement total byte counting by atomic adding to this variable, then every
 	//once in awhile updating the sTotalBytes.
 	
-	unsigned int        fPeriodicRTPBytes;
+	unsigned int        fPeriodicRTPBytes{0};
 
-	unsigned int        fPeriodicRTPPacketsLost;
+	unsigned int        fPeriodicRTPPacketsLost{0};
 
-	unsigned int        fPeriodicRTPPackets;
+	unsigned int        fPeriodicRTPPackets{0};
 
 	//stores the current served bandwidth in BITS per second
-	uint32_t              fCurrentRTPBandwidthInBits;
-	uint32_t              fAvgRTPBandwidthInBits;
-	uint32_t              fRTPPacketsPerSecond;
+	uint32_t              fCurrentRTPBandwidthInBits{0};
+	uint32_t              fAvgRTPBandwidthInBits{0};
+	uint32_t              fRTPPacketsPerSecond{0};
 
-	float             fCPUPercent;
-	float             fCPUTimeUsedInSec;
+	float             fCPUPercent{0};
+	float             fCPUTimeUsedInSec{0};
 
 	// stores # of UDP sockets in the server currently (gets updated lazily via.
 	// param retrieval function)
@@ -426,22 +426,22 @@ private:
 	int64_t              fCurrentTime_UnixMilli;
 
 	// Stats for UDP retransmits
-	uint32_t              fUDPWastageInBytes;
-	uint32_t              fNumUDPBuffers;
+	uint32_t              fUDPWastageInBytes{0};
+	uint32_t              fNumUDPBuffers{0};
 
-	bool              fSigInt;
-	bool              fSigTerm;
+	bool              fSigInt{false};
+	bool              fSigTerm{false};
 
-	uint32_t              fDebugLevel;
-	uint32_t              fDebugOptions;
+	uint32_t              fDebugLevel{0};
+	uint32_t              fDebugOptions{0};
 
 
-	int64_t          fMaxLate;
-	int64_t          fTotalLate;
-	int64_t          fCurrentMaxLate;
-	int64_t          fTotalQuality;
-	int32_t          fNumThinned;
-	uint32_t          fNumThreads;
+	int64_t          fMaxLate{0};
+	int64_t          fTotalLate{0};
+	int64_t          fCurrentMaxLate{0};
+	int64_t          fTotalQuality{0};
+	int32_t          fNumThinned{0};
+	uint32_t          fNumThreads{0};
 
 	// Param retrieval functions
 	static void* CurrentUnixTimeMilli(QTSSDictionary* inServer, uint32_t* outLen);
@@ -472,9 +472,9 @@ private:
 	RTPSessionInterface* GetNewestSession(OSRefTable* inRTPSessionMap);
 	float GetCPUTimeInSeconds();
 
-	int64_t fLastBandwidthTime;
-	int64_t fLastBandwidthAvg;
-	int64_t fLastBytesSent;
+	int64_t fLastBandwidthTime{0};
+	int64_t fLastBandwidthAvg{0};
+	int64_t fLastBytesSent{0};
 };
 
 #endif // __QTSSERVERINTERFACE_H__

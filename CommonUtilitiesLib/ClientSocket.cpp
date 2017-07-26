@@ -47,13 +47,7 @@
 #define CLIENT_SOCKET_DEBUG 0
 
 
-ClientSocket::ClientSocket()
-	: fHostAddr(0),
-	fHostPort(0),
-	fEventMask(0),
-	fSocketP(nullptr),
-	fSendBuffer(fSendBuf, 0),
-	fSentLength(0)
+ClientSocket::ClientSocket() : fSendBuffer(fSendBuf, 0)
 {
 }
 

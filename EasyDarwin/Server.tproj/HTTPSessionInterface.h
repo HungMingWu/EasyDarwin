@@ -90,18 +90,18 @@ protected:
 
 	void        SnarfInputSocket(HTTPSessionInterface* fromHTTPSession);
 
-	bool              fLiveSession;
-	unsigned int	fObjectHolders;
+	bool              fLiveSession{true};
+	unsigned int	fObjectHolders{0};
 
 	uint32_t              fSessionIndex;
 	uint32_t              fLocalAddr;
 	uint32_t              fRemoteAddr;
-	int32_t              fRequestBodyLen;
+	int32_t              fRequestBodyLen{-1};
 
 	uint16_t              fLocalPort;
 	uint16_t              fRemotePort;
 
-	bool				fAuthenticated;
+	bool				fAuthenticated{false};
 
 	static unsigned int	sSessionIndexCounter;
 

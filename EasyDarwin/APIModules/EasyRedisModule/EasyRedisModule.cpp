@@ -56,7 +56,7 @@ static QTSS_Error	RedisJudgeStreamID(QTSS_JudgeStreamID_Params* inParams);
 class RedisReplyObjectDeleter
 {
     public:
-		RedisReplyObjectDeleter() : fReply(nullptr) {}
+		RedisReplyObjectDeleter() {}
         RedisReplyObjectDeleter(redisReply* reply) : fReply(reply)  {}
         ~RedisReplyObjectDeleter() 
 		{ 
@@ -76,7 +76,7 @@ class RedisReplyObjectDeleter
     
     private:
     
-        redisReply* fReply;
+        redisReply* fReply{nullptr};
 };
 
 QTSS_Error EasyRedisModule_Main(void* inPrivateArgs)

@@ -30,7 +30,7 @@ namespace EasyDarwin { namespace Protocol
 	}
 
 
-	EasyNVR::EasyNVR() : object_(nullptr)
+	EasyNVR::EasyNVR()
 	{
 	}
 
@@ -692,7 +692,6 @@ namespace EasyDarwin { namespace Protocol
 	}
 
 	strDevice::strDevice()
-		: eDeviceType(), eAppType()
 	{
 		snapJpgPath_.clear();
 	}

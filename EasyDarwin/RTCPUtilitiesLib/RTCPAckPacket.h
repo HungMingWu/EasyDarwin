@@ -63,7 +63,7 @@ public:
 	// This class is not derived from RTCPPacket as a performance optimization.
 	// Instead, it is assumed that the RTCP packet validation has already been
 	// done.
-	RTCPAckPacket() : fRTCPAckBuffer(nullptr), fAckMaskSize(0) {}
+	RTCPAckPacket() {}
 	~RTCPAckPacket() override = default;
 
 	// Call to parse if you don't know what kind of packet this is
@@ -87,8 +87,8 @@ public:
 	};
 private:
 
-	uint8_t* fRTCPAckBuffer;
-	uint32_t fAckMaskSize;
+	uint8_t* fRTCPAckBuffer{nullptr};
+	uint32_t fAckMaskSize{0};
 
 	bool IsAckPacketType();
 

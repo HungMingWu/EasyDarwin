@@ -132,8 +132,8 @@ private:
 		kCantGetMutexIdleTime = 10
 	};
 
-	QTSSModule*         fModule;
-	bool              fHasAnRTPStream;
+	QTSSModule*         fModule{nullptr};
+	bool              fHasAnRTPStream{false};
 	int32_t              fSessionQualityLevel;
 
 	char        fRTPStreamArray[kRTPStreamArraySize];
@@ -147,21 +147,21 @@ private:
 		kSendingPackets = 1
 	};
 
-	uint32_t fCurrentModuleIndex;
-	uint32_t fCurrentState;
+	uint32_t fCurrentModuleIndex{0};
+	uint32_t fCurrentState{kStart};
 
 	QTSS_ModuleState    fModuleState;
-	QTSS_CliSesClosingReason fClosingReason;
+	QTSS_CliSesClosingReason fClosingReason{qtssCliSesCloseClientTeardown};
 
-	uint32_t              fCurrentModule;
+	uint32_t              fCurrentModule{0};
 	// This is here to give the ability to the ClientSessionClosing role to
 	// do asynchronous I/O
-	bool              fModuleDoingAsyncStuff;
+	bool              fModuleDoingAsyncStuff{false};
 
 #if DEBUG
 	bool fActivateCalled;
 #endif
-	int64_t              fLastBandwidthTrackerStatsUpdate;
+	int64_t              fLastBandwidthTrackerStatsUpdate{0};
 
 };
 

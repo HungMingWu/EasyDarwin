@@ -62,9 +62,7 @@ char RTCPNaduPacket::sRTCPTestBuffer[];
 
 
 RTCPNaduPacket::RTCPNaduPacket(bool debug) :
-	RTCPAPPPacket(debug),
-	fNaduDataBuffer(nullptr),
-	fNumBlocks(0)
+	RTCPAPPPacket(debug)
 {
 }
 

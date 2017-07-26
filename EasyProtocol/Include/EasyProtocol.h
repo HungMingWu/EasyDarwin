@@ -59,7 +59,7 @@ namespace EasyDarwin { namespace Protocol
 
 	public:
 		EasyDevices channels_;
-		EasyObject object_;
+		EasyObject object_{nullptr};
 	};
 
 	// MSG_DS_REGISTER_REQ
@@ -313,35 +313,35 @@ namespace EasyDarwin { namespace Protocol
 	class EasyDarwinHLSession
 	{
 	public:
-		EasyDarwinHLSession() : index(0), bitrate(0)
+		EasyDarwinHLSession() 
 		{
 		}
 
 		~EasyDarwinHLSession() = default;
 
 	public:
-		int index;
+		int index{0};
 		std::string SessionName;
 		std::string HlsUrl;
 		std::string sourceUrl;
-		int bitrate;
+		int bitrate{0};
 	};
 
 	class EasyDarwinRTSPSession
 	{
 	public:
-		EasyDarwinRTSPSession() : index(0), channel(0), numOutputs(0)
+		EasyDarwinRTSPSession()
 		{
 		}
 
 		~EasyDarwinRTSPSession() = default;
 
 	public:
-		int index;
+		int index{0};
 		std::string Url;
 		std::string Name;
-		int channel;
-		int numOutputs;
+		int channel{0};
+		int numOutputs{0};
 	};
 
 	// MSG_SC_START_HLS_ACK
@@ -426,18 +426,18 @@ namespace EasyDarwin { namespace Protocol
 	class EasyDarwinRecordSession
 	{
 	public:
-		EasyDarwinRecordSession() : index(0), startTime(0), endTime(0), numOutputs(0)
+		EasyDarwinRecordSession() 
 		{
 		}
 
 		~EasyDarwinRecordSession() = default;
 
 	public:
-		int index;
-		long long startTime;
-		long long endTime;
+		int index{0};
+		long long startTime{0};
+		long long endTime{0};
 		std::string Name;
-		int numOutputs;
+		int numOutputs{0};
 	};
 
 	class Easy_API EasyMsgSCRecordList : public EasyProtocol//封装录像列表回应
@@ -482,8 +482,8 @@ namespace EasyDarwin { namespace Protocol
 
 
 		EasyDevices channels_;//摄像头信息
-		EasyDarwinTerminalType eDeviceType;//设备类型
-		EasyDarwinAppType eAppType;//App类型
+		EasyDarwinTerminalType eDeviceType{};//设备类型
+		EasyDarwinAppType eAppType{};//App类型
 	};
 //add,Unisiot，end
 }}//namespace

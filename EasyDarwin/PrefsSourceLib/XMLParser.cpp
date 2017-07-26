@@ -205,10 +205,7 @@ uint8_t XMLTag::sNonNameMask[] =
 	1, 1, 1, 1, 1, 1             //250-255
 };
 
-XMLTag::XMLTag() :
-	fTag(nullptr),
-	fValue(nullptr),
-	fElem(nullptr)
+XMLTag::XMLTag() : fElem(nullptr)
 {
 	fElem = this;
 }
@@ -677,8 +674,6 @@ void XMLTag::FormatData(ResizeableStringFormatter* formatter, uint32_t indent)
 }
 
 XMLAttribute::XMLAttribute()
-	: fAttrName(nullptr),
-	fAttrValue(nullptr)
 {
 	fElem = this;
 }

@@ -53,7 +53,7 @@ public:
 
 	//CONSTRUCTORS/DESTRUCTOR
 	//These are so tiny they can all be inlined
-	StrPtrLen() : Ptr(nullptr), Len(0) {}
+	StrPtrLen() {}
 	StrPtrLen(char* sp) : Ptr(sp), Len(sp != nullptr ? strlen(sp) : 0) {}
 	StrPtrLen(char* sp, uint32_t len) : Ptr(sp), Len(len) {}
 	virtual ~StrPtrLen() = default;
@@ -113,8 +113,8 @@ public:
 
 	//This is a non-encapsulating interface. The class allows you to access its
 	//data.
-	char*       Ptr;
-	uint32_t      Len;
+	char*       Ptr{nullptr};
+	uint32_t      Len{0};
 
 	// convert to a "NEW'd" zero terminated char array
 	char*   GetAsCString() const;

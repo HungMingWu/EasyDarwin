@@ -175,48 +175,7 @@ void    QTSServerInterface::Initialize()
 }
 
 QTSServerInterface::QTSServerInterface()
-	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kServerDictIndex), &fMutex),
-	fSocketPool(nullptr),
-	fRTPMap(nullptr),
-	fHLSMap(nullptr),
-	fRTMPMap(nullptr),
-	fReflectorSessionMap(nullptr),
-	fSrvrPrefs(nullptr),
-	fSrvrMessages(nullptr),
-	fServerState(qtssStartingUpState),
-	fDefaultIPAddr(0),
-	fListeners(nullptr),
-	fNumListeners(0),
-	fStartupTime_UnixMilli(0),
-	fGMTOffset(0),
-	fNumRTSPSessions(0),
-	fNumRTSPHTTPSessions(0),
-	fNumRTPSessions(0),
-	fNumRTPPlayingSessions(0),
-	fTotalRTPSessions(0),
-	fTotalRTPBytes(0),
-	fTotalRTPPackets(0),
-	fTotalRTPPacketsLost(0),
-	fPeriodicRTPBytes(0),
-	fPeriodicRTPPacketsLost(0),
-	fPeriodicRTPPackets(0),
-	fCurrentRTPBandwidthInBits(0),
-	fAvgRTPBandwidthInBits(0),
-	fRTPPacketsPerSecond(0),
-	fCPUPercent(0),
-	fCPUTimeUsedInSec(0),
-	fUDPWastageInBytes(0),
-	fNumUDPBuffers(0),
-	fSigInt(false),
-	fSigTerm(false),
-	fDebugLevel(0),
-	fDebugOptions(0),
-	fMaxLate(0),
-	fTotalLate(0),
-	fCurrentMaxLate(0),
-	fTotalQuality(0),
-	fNumThinned(0),
-	fNumThreads(0)
+	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kServerDictIndex), &fMutex)
 {
 	for (uint32_t y = 0; y < QTSSModule::kNumRoles; y++)
 	{
@@ -323,7 +282,7 @@ void QTSServerInterface::SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMa
 
 
 RTPStatsUpdaterTask::RTPStatsUpdaterTask()
-	: Task(), fLastBandwidthTime(0), fLastBandwidthAvg(0), fLastBytesSent(0)
+	: Task()
 {
 	this->SetTaskName("RTPStatsUpdaterTask");
 	this->Signal(Task::kStartEvent);

@@ -61,14 +61,14 @@ public:
 
 private:
 
-	QTSSModule* fModule;
-	uint64_t      fPosition;
+	QTSSModule* fModule{nullptr};
+	uint64_t      fPosition{0};
 	QTSSFile*   fThisPtr;
 
 	//
 	// File attributes
-	uint64_t      fLength;
-	time_t      fModDate;
+	uint64_t      fLength{0};
+	time_t      fModDate{0};
 
 	static QTSSAttrInfoDict::AttrInfo   sAttributes[];
 };

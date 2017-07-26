@@ -235,23 +235,23 @@ private:
 		kRefreshBroadcastSessionIntervalMilliSecs = 10000,
 		kSSRCTimeOut = 30000 // milliseconds before clearing the SSRC if no new ssrcs have come in
 	};
-	QTSS_ClientSessionObject    fBroadcasterClientSession;
-	int64_t                      fLastBroadcasterTimeOutRefresh;
+	QTSS_ClientSessionObject    fBroadcasterClientSession{nullptr};
+	int64_t                      fLastBroadcasterTimeOutRefresh{0};
 	// Queue of available ReflectorPackets
 	OSQueue fFreeQueue;
 	// Queue of senders
 	OSQueue fSenderQueue;
-	int64_t  fSleepTime;
+	int64_t  fSleepTime{0};
 
-	uint32_t  fValidSSRC;
-	int64_t  fLastValidSSRCTime;
-	bool  fFilterSSRCs;
-	uint32_t  fTimeoutSecs;
+	uint32_t  fValidSSRC{0};
+	int64_t  fLastValidSSRCTime{0};
+	bool  fFilterSSRCs{true};
+	uint32_t  fTimeoutSecs{30};
 
-	bool  fHasReceiveTime;
-	uint64_t  fFirstReceiveTime;
-	int64_t  fFirstArrivalTime;
-	uint32_t  fCurrentSSRC;
+	bool  fHasReceiveTime{false};
+	uint64_t  fFirstReceiveTime{0};
+	int64_t  fFirstArrivalTime{0};
+	uint32_t  fCurrentSSRC{0};
 
 };
 

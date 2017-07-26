@@ -184,9 +184,9 @@ public:
 			QTSServerInterface::GetServer()->IncrementNumThinned(-1);
 		fSessionQualityLevel = level;
 	}
-	int64_t          fLastQualityCheckTime;
-	int64_t			fLastQualityCheckMediaTime;
-	bool			fStartedThinning;
+	int64_t          fLastQualityCheckTime{0};
+	int64_t			fLastQualityCheckMediaTime{0};
+	bool			fStartedThinning{false};
 
 	// Used by RTPStream to increment the RTCP packet and byte counts.
 	void            IncrTotalRTCPPacketsRecv() { fTotalRTCPPacketsRecv++; }
@@ -204,21 +204,21 @@ protected:
 	// Play and Pause get called
 
 	//Some stream related information that is shared amongst all streams
-	bool      fIsFirstPlay;
-	bool      fAllTracksInterleaved;
-	int64_t      fFirstPlayTime;//in milliseconds
-	int64_t      fPlayTime;
-	int64_t      fAdjustedPlayTime;
-	int64_t      fNTPPlayTime;
-	int64_t      fNextSendPacketsTime;
+	bool      fIsFirstPlay{true};
+	bool      fAllTracksInterleaved{true};
+	int64_t      fFirstPlayTime{0};//in milliseconds
+	int64_t      fPlayTime{0};
+	int64_t      fAdjustedPlayTime{0};
+	int64_t      fNTPPlayTime{0};
+	int64_t      fNextSendPacketsTime{0};
 
-	int32_t      fSessionQualityLevel;
+	int32_t      fSessionQualityLevel{0};
 
 	//keeps track of whether we are playing or not
-	QTSS_RTPSessionState fState;
+	QTSS_RTPSessionState fState{qtssPausedState};
 
 	// If we are playing, this are the play flags that were set on play
-	QTSS_PlayFlags  fPlayFlags;
+	QTSS_PlayFlags  fPlayFlags{0};
 
 	//Session mutex. This mutex should be grabbed before invoking the module
 	//responsible for managing this session. This allows the module to be
@@ -230,14 +230,14 @@ protected:
 	OSRef               fRTPMapElem;
 	char                fRTSPSessionIDBuf[QTSS_MAX_SESSION_ID_LENGTH + 4];
 
-	uint32_t      fLastBitRateBytes;
-	int64_t      fLastBitRateUpdateTime;
-	uint32_t      fMovieCurrentBitRate;
+	uint32_t      fLastBitRateBytes{0};
+	int64_t      fLastBitRateUpdateTime{0};
+	uint32_t      fMovieCurrentBitRate{0};
 
 	// In order to facilitate sending data over the RTSP channel from
 	// an RTP session, we store a pointer to the RTSP session used in
 	// the last RTSP request.
-	RTSPSessionInterface* fRTSPSession;
+	RTSPSessionInterface* fRTSPSession{nullptr};
 
 
 
@@ -290,7 +290,7 @@ private:
 	char        fUserNameBuf[RTSPSessionInterface::kMaxUserNameLen];
 	char        fUserPasswordBuf[RTSPSessionInterface::kMaxUserPasswordLen];
 	char        fUserRealmBuf[RTSPSessionInterface::kMaxUserRealmLen];
-	uint32_t      fLastRTSPReqRealStatusCode;
+	uint32_t      fLastRTSPReqRealStatusCode{200};
 
 	//for timing out this session
 	TimeoutTask fTimeoutTask;
@@ -301,25 +301,25 @@ private:
 
 	//Packet priority levels. Each stream has a current level, and
 	//the module that owns this session sets what the number of levels is.
-	uint32_t      fNumQualityLevels;
+	uint32_t      fNumQualityLevels{0};
 
 	//Statistics
-	uint32_t fBytesSent;
-	uint32_t fPacketsSent;
-	float fPacketLossPercent;
-	int64_t fTimeConnected;
-	uint32_t fTotalRTCPPacketsRecv;
-	uint32_t fTotalRTCPBytesRecv;
+	uint32_t fBytesSent{0};
+	uint32_t fPacketsSent{0};
+	float fPacketLossPercent{0.0};
+	int64_t fTimeConnected{0};
+	uint32_t fTotalRTCPPacketsRecv{0};
+	uint32_t fTotalRTCPBytesRecv{0};
 	// Movie size & movie duration. It may not be so good to associate these
 	// statistics with the movie, for a session MAY have multiple movies...
 	// however, the 1 movie assumption is in too many subsystems at this point
-	double     fMovieDuration;
-	uint64_t      fMovieSizeInBytes;
-	uint32_t      fMovieAverageBitRate;
+	double     fMovieDuration{0};
+	uint64_t      fMovieSizeInBytes{0};
+	uint32_t      fMovieAverageBitRate{0};
 
-	QTSS_CliSesTeardownReason fTeardownReason;
+	QTSS_CliSesTeardownReason fTeardownReason{0};
 	// So the streams can send sender reports
-	uint32_t      fUniqueID;
+	uint32_t      fUniqueID{0};
 
 	RTCPSRPacket        fRTCPSRPacket;
 	StrPtrLen           fSRBuffer;
@@ -335,14 +335,14 @@ private:
 	// for the duration of the session      
 	QTSS_AuthScheme             fAuthScheme;
 	StrPtrLen                   fAuthNonce;
-	uint32_t                      fAuthQop;
-	uint32_t                      fAuthNonceCount;
+	uint32_t                      fAuthQop{RTSPSessionInterface::kNoQop};
+	uint32_t                      fAuthNonceCount{0};
 	StrPtrLen                   fAuthOpaque;
 	uint32_t                      fQualityUpdate;
 
-	uint32_t                      fFramesSkipped;
+	uint32_t                      fFramesSkipped{0};
 
-	uint32_t                  fLastRTSPBandwidthHeaderBits;
+	uint32_t                  fLastRTSPBandwidthHeaderBits{0};
 };
 
 #endif //_RTPSESSIONINTERFACE_H_

@@ -34,11 +34,9 @@
 #include "SequenceNumberMap.h"
 
 SequenceNumberMap::SequenceNumberMap(uint32_t inSlidingWindowSize)
-	: fSlidingWindow(nullptr),
+	: 
 	fWindowSize((int32_t)inSlidingWindowSize),
-	fNegativeWindowSize((int32_t)inSlidingWindowSize - (int32_t)(2 * inSlidingWindowSize)),
-	fHighestSeqIndex(0),
-	fHighestSeqNumber(0)
+	fNegativeWindowSize((int32_t)inSlidingWindowSize - (int32_t)(2 * inSlidingWindowSize))
 {
 	Assert(fNegativeWindowSize < 0);
 	Assert(fWindowSize < 32768);//AddSequenceNumber makes this assumption

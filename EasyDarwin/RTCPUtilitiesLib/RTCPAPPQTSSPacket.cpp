@@ -37,25 +37,8 @@
 
 RTCPCompressedQTSSPacket::RTCPCompressedQTSSPacket(bool debug) :
 	RTCPAPPPacket(debug),
-	fReceiverBitRate(0),
-	fAverageLateMilliseconds(0),
-	fPercentPacketsLost(0),
-	fAverageBufferDelayMilliseconds(0),
-	fIsGettingBetter(false),
-	fIsGettingWorse(false),
-	fNumEyes(0),
-	fNumEyesActive(0),
-	fNumEyesPaused(0),
-	fOverbufferWindowSize(UINT32_MAX),
-
+	fOverbufferWindowSize(UINT32_MAX)
 	//Proposed - are these there yet?
-	fTotalPacketsReceived(0),
-	fTotalPacketsDropped(0),
-	fTotalPacketsLost(0),
-	fClientBufferFill(0),
-	fFrameRate(0),
-	fExpectedFrameRate(0),
-	fAudioDryCount(0)
 {
 }
 

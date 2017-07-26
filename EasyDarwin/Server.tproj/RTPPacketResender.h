@@ -119,19 +119,19 @@ public:
 private:
 
 	// Tracking the capacity of the network
-	RTPBandwidthTracker* fBandwidthTracker;
+	RTPBandwidthTracker* fBandwidthTracker{nullptr};
 
 	// Who to send to
-	UDPSocket*          fSocket;
-	uint32_t              fDestAddr;
-	uint16_t              fDestPort;
+	UDPSocket*          fSocket{nullptr};
+	uint32_t              fDestAddr{0};
+	uint16_t              fDestPort{0};
 
-	uint32_t              fMaxPacketsInList;
-	uint32_t              fPacketsInList;
-	uint32_t              fNumResends;                // how many total retransmitted packets
-	uint32_t              fNumExpired;                // how many total packets dropped
-	uint32_t              fNumAcksForMissingPackets;  // how many acks received in the case where the packet was not in the list
-	uint32_t              fNumSent;                   // how many packets sent
+	uint32_t              fMaxPacketsInList{0};
+	uint32_t              fPacketsInList{0};
+	uint32_t              fNumResends{0};                // how many total retransmitted packets
+	uint32_t              fNumExpired{0};                // how many total packets dropped
+	uint32_t              fNumAcksForMissingPackets{0};  // how many acks received in the case where the packet was not in the list
+	uint32_t              fNumSent{0};                   // how many packets sent
 
 #if RTP_PACKET_RESENDER_DEBUGGING
 	MyAckListLog        *fLogger;
@@ -142,12 +142,12 @@ private:
 	DssDurationTimer    fInfoDisplayTimer;
 #endif
 
-	RTPResenderEntry*   fPacketArray;
+	RTPResenderEntry*   fPacketArray{nullptr};
 	uint16_t              fStartSeqNum;
 	uint32_t              fPacketArraySize;
-	uint32_t              fPacketArrayMask;
-	uint16_t              fHighestSeqNum;
-	uint32_t              fLastUsed;
+	uint32_t              fPacketArrayMask{0};
+	uint16_t              fHighestSeqNum{0};
+	uint32_t              fLastUsed{0};
 	OSMutex             fPacketQMutex;
 
 	RTPResenderEntry*   GetEntryByIndex(uint16_t inIndex);

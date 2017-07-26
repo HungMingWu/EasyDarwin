@@ -70,7 +70,7 @@ public:
 	// simultaneously. Update & InexactUpdate rewrite the date buffer, so care should
 	// be taken to protect against simultaneous access.
 
-	DateBuffer() : fLastDateUpdate(0) { fDateBuffer[0] = 0; }
+	DateBuffer() { fDateBuffer[0] = 0; }
 	~DateBuffer() = default;
 
 	//SEE RFC 1123 for details on the date string format
@@ -102,7 +102,7 @@ private:
 
 	//+1 for terminator +1 for padding
 	char    fDateBuffer[kDateBufferLen + 2];
-	int64_t  fLastDateUpdate;
+	int64_t  fLastDateUpdate{0};
 
 	friend class DateTranslator;
 };

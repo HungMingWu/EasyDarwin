@@ -250,10 +250,10 @@ class IPComponentStr
     enum { kNumComponents = 4 };
     
     StrPtrLen   fAddressComponent[kNumComponents];
-    bool      fIsValid;
+    bool      fIsValid{false};
     static IPComponentStr sLocalIPCompStr;
 
-    IPComponentStr() : fIsValid(false) {}
+    IPComponentStr() {}
     IPComponentStr(char *theAddress);
     IPComponentStr(StrPtrLen *sourceStrPtr);
     

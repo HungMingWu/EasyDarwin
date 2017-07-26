@@ -100,8 +100,8 @@ public:
 
 private:
 	void ParseAndStore();
-	uint32_t* fNaduDataBuffer;
-	int32_t fNumBlocks;
+	uint32_t* fNaduDataBuffer{nullptr};
+	int32_t fNumBlocks{0};
 	static char sRTCPTestBuffer[256];
 
 };
@@ -195,7 +195,7 @@ public:
 class NaduList
 {
 public:
-	NaduList() : fNaduReportList(nullptr), fcurrentIndexCount(0), fListSize(0) {};
+	NaduList() {};
 	~NaduList() {
 		for (int i = 0; i < fListSize; i++) {
 			if (fNaduReportList[i] != nullptr) {
@@ -223,9 +223,9 @@ public:
 private:
 	uint32_t GetReportIndex(uint32_t id);
 	uint32_t IDtoIndex(uint32_t id) { return (id - 1) % fListSize; }
-	NaduReport**  fNaduReportList;
-	uint32_t fcurrentIndexCount;
-	uint32_t fListSize;
+	NaduReport**  fNaduReportList{nullptr};
+	uint32_t fcurrentIndexCount{0};
+	uint32_t fListSize{0};
 
 
 };

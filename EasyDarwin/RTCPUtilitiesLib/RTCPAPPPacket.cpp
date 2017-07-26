@@ -38,9 +38,6 @@
 
 
 RTCPAPPPacket::RTCPAPPPacket(bool debug) :
-	fRTCPAPPDataBuffer(nullptr),
-	fAPPDataBufferSize(0),
-	mDumpArray(nullptr),
 	mDumpArrayStrDeleter(nullptr),
 	fDumpReport(),
 	fDebug(debug)

@@ -46,7 +46,7 @@ class FileBlockBuffer
 {
 
 public:
-	FileBlockBuffer() : fArrayIndex(-1), fBufferSize(0), fBufferFillSize(0), fDataBuffer(nullptr), fDummy(0) {}
+	FileBlockBuffer(){}
 	~FileBlockBuffer();
 	void AllocateBuffer(uint32_t buffSize);
 	void TestBuffer();
@@ -56,12 +56,12 @@ public:
 	uint32_t GetFillSize() const
 	{ return fBufferFillSize; }
 	OSQueueElem* GetQElem() { return &fQElem; }
-	int64_t              fArrayIndex;
-	uint32_t              fBufferSize;
-	uint32_t              fBufferFillSize;
-	char*				fDataBuffer;
+	int64_t              fArrayIndex{-1};
+	uint32_t              fBufferSize{0};
+	uint32_t              fBufferFillSize{0};
+	char*				fDataBuffer{nullptr};
 	OSQueueElem         fQElem;
-	uint32_t              fDummy;
+	uint32_t              fDummy{0};
 };
 
 class FileBlockPool
@@ -73,7 +73,7 @@ class FileBlockPool
 	};
 
 public:
-	FileBlockPool() : fMaxBuffers(1), fNumCurrentBuffers(0), fBufferInc(0), fBufferUnitSizeBytes(kBufferUnitSize), fBufferDataSizeBytes(0)
+	FileBlockPool()
 	{}
 	~FileBlockPool();
 
@@ -99,11 +99,11 @@ public:
 
 private:
 	OSQueue fQueue;
-	uint32_t  fMaxBuffers;
-	uint32_t  fNumCurrentBuffers;
-	uint32_t  fBufferInc;
-	uint32_t  fBufferUnitSizeBytes;
-	uint32_t  fBufferDataSizeBytes;
+	uint32_t  fMaxBuffers{1};
+	uint32_t  fNumCurrentBuffers{0};
+	uint32_t  fBufferInc{0};
+	uint32_t  fBufferUnitSizeBytes{kBufferUnitSize};
+	uint32_t  fBufferDataSizeBytes{0};
 
 };
 
@@ -111,7 +111,7 @@ class FileMap
 {
 
 public:
-	FileMap() :fFileMapArray(nullptr), fDataBufferSize(0), fMapArraySize(0), fNumBuffSizeUnits(0) {}
+	FileMap() {}
 	~FileMap() { fFileMapArray = nullptr; }
 	void    AllocateBufferMap(uint32_t inUnitSizeInK, uint32_t inNumBuffSizeUnits, uint32_t inBufferIncCount, uint32_t inMaxBitRateBuffSizeInBlocks, uint64_t fileLen, uint32_t inBitRate);
 	char*   GetBuffer(int64_t bufIndex, bool* outIsEmptyBuff);
@@ -140,13 +140,13 @@ public:
 	{ return static_cast<uint64_t>(bufIndex * this->GetMaxBufSize()); }
 	FileBlockPool fBlockPool;
 
-	FileBlockBuffer**   fFileMapArray;
+	FileBlockBuffer**   fFileMapArray{nullptr};
 
 private:
 
-	uint32_t              fDataBufferSize;
-	int64_t              fMapArraySize;
-	uint32_t              fNumBuffSizeUnits;
+	uint32_t              fDataBufferSize{0};
+	int64_t              fMapArraySize{0};
+	uint32_t              fNumBuffSizeUnits{0};
 
 };
 
@@ -154,7 +154,7 @@ class OSFileSource
 {
 public:
 
-	OSFileSource() : fFile(-1), fLength(0), fPosition(0), fReadPos(0), fShouldClose(true), fIsDir(false), fModDate(0), fCacheEnabled(false)
+	OSFileSource()
 	{
 
 #if READ_LOG 
@@ -165,7 +165,7 @@ public:
 
 	}
 
-	OSFileSource(const char* inPath) : fFile(-1), fLength(0), fPosition(0), fReadPos(0), fShouldClose(true), fIsDir(false), fCacheEnabled(false)
+	OSFileSource(const char* inPath) : fLength(0), fPosition(0), fReadPos(0)
 	{
 		Set(inPath);
 
@@ -234,18 +234,18 @@ public:
 
 private:
 
-	int     fFile;
-	uint64_t  fLength;
-	uint64_t  fPosition;
-	uint64_t  fReadPos;
-	bool  fShouldClose;
-	bool  fIsDir;
-	time_t  fModDate;
+	int     fFile{-1};
+	uint64_t  fLength{0};
+	uint64_t  fPosition{0};
+	uint64_t  fReadPos{0};
+	bool  fShouldClose{true};
+	bool  fIsDir{false};
+	time_t  fModDate{0};
 
 
 	OSMutex fMutex;
 	FileMap fFileMap;
-	bool  fCacheEnabled;
+	bool  fCacheEnabled{false};
 #if READ_LOG
 	FILE*               fFileLog;
 	char                fFilePath[1024];

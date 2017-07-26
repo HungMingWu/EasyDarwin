@@ -43,7 +43,7 @@ OSMutexRW       TaskThreadPool::sMutexRW;
 static char* sTaskStateStr = "live_"; //Alive
 
 Task::Task()
-	: fEvents(0), fUseThisThread(nullptr), fDefaultThread(nullptr), fWriteLock(false), fTimerHeapElem(), fTaskQueueElem(), pickerToUse(&Task::sShortTaskThreadPicker)
+	: fTimerHeapElem(), fTaskQueueElem(), pickerToUse(&Task::sShortTaskThreadPicker)
 {
 #if DEBUG
 	fInRunCount = 0;

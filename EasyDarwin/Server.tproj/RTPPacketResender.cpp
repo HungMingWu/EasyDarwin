@@ -80,21 +80,7 @@ OSBufferPool RTPPacketResender::sBufferPool(kMaxDataBufferSize);
 unsigned int    RTPPacketResender::sNumWastedBytes = 0;
 
 RTPPacketResender::RTPPacketResender()
-	: fBandwidthTracker(nullptr),
-	fSocket(nullptr),
-	fDestAddr(0),
-	fDestPort(0),
-	fMaxPacketsInList(0),
-	fPacketsInList(0),
-	fNumResends(0),
-	fNumExpired(0),
-	fNumAcksForMissingPackets(0),
-	fNumSent(0),
-	fPacketArray(nullptr),
-	fPacketArraySize(kInitialPacketArraySize),
-	fPacketArrayMask(0),
-	fHighestSeqNum(0),
-	fLastUsed(0),
+	: fPacketArraySize(kInitialPacketArraySize),
 	fPacketQMutex()
 {
 	fPacketArray = (RTPResenderEntry*)new char[sizeof(RTPResenderEntry) * fPacketArraySize];

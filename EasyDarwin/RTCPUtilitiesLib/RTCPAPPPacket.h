@@ -53,8 +53,8 @@ public:
 	inline uint32_t GetAppPacketSSRC();
 
 
-	uint8_t* fRTCPAPPDataBuffer;  //points into RTCPPacket::fReceiverPacketBuffer should be set past the app header
-	uint32_t fAPPDataBufferSize;
+	uint8_t* fRTCPAPPDataBuffer{nullptr};  //points into RTCPPacket::fReceiverPacketBuffer should be set past the app header
+	uint32_t fAPPDataBufferSize{0};
 
 	enum
 	{
@@ -65,7 +65,7 @@ public:
 		kmDumpArraySize = 1024
 	};
 
-	char*           mDumpArray;
+	char*           mDumpArray{nullptr};
 	StrPtrLenDel    mDumpArrayStrDeleter;
 	ResizeableStringFormatter fDumpReport;
 	bool fDebug;

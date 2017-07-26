@@ -96,15 +96,15 @@ public:
 	};
 
 protected:
-	char*               fGroupsFilePath;
-	char*               fUsersFilePath;
-	QTSS_TimeVal        fUsersFileModDate;
-	QTSS_TimeVal        fGroupsFileModDate;
+	char*               fGroupsFilePath{nullptr};
+	char*               fUsersFilePath{nullptr};
+	QTSS_TimeVal        fUsersFileModDate{-1};
+	QTSS_TimeVal        fGroupsFileModDate{-1};
 	StrPtrLen           fAuthRealm;
 
-	UserProfile**       fProfiles;
-	uint32_t              fNumUsers;
-	uint32_t              fCurrentSize;
+	UserProfile**       fProfiles{nullptr};
+	uint32_t              fNumUsers{0};
+	uint32_t              fCurrentSize{0};
 
 	static const char*  kDefaultUsersFilePath;
 	static const char*  kDefaultGroupsFilePath;

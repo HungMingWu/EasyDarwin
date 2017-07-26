@@ -138,10 +138,10 @@ private:
 
 	void            SetTaskThread(TaskThread *thread);
 
-	EventFlags      fEvents;
-	TaskThread*     fUseThisThread;
-	TaskThread*     fDefaultThread;
-	bool          fWriteLock;
+	EventFlags      fEvents{0};
+	TaskThread*     fUseThisThread{nullptr};
+	TaskThread*     fDefaultThread{nullptr};
+	bool          fWriteLock{false};
 
 #if DEBUG
 	//The whole premise of a task is that the Run function cannot be re-entered.

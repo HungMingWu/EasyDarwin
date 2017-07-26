@@ -90,10 +90,7 @@ void KeyValuePair::ResetValue(const char* inValue)
 }
 
 
-FilePrefsSource::FilePrefsSource(bool allowDuplicates)
-	: fKeyValueList(nullptr),
-	fNumKeys(0),
-	fAllowDuplicates(allowDuplicates)
+FilePrefsSource::FilePrefsSource(bool allowDuplicates) : fAllowDuplicates(allowDuplicates)
 {
 
 }

@@ -63,7 +63,7 @@ class OSRef
 {
 public:
 
-	OSRef() : fObjectP(nullptr), fRefCount(0), fHashValue(0), fNextHashEntry(nullptr)
+	OSRef()
 	{
 #if DEBUG
 		fInATable = false;
@@ -97,20 +97,20 @@ public:
 private:
 
 	//value
-	void*   fObjectP;
+	void*   fObjectP{nullptr};
 	//key
 	StrPtrLen   fString;
 
 	//refcounting
-	uint32_t  fRefCount;
+	uint32_t  fRefCount{0};
 #if DEBUG
 	bool  fInATable;
 	bool  fSwapCalled;
 #endif
 	OSCond  fCond;//to block threads waiting for this ref.
 
-	uint32_t              fHashValue;
-	OSRef*              fNextHashEntry;
+	uint32_t              fHashValue{0};
+	OSRef*              fNextHashEntry{nullptr};
 
 	friend class OSRefKey;
 	friend class OSHashTable<OSRef, OSRefKey>;

@@ -109,9 +109,6 @@ void OSThread::Initialize()
 }
 
 OSThread::OSThread()
-	: fStopRequested(false),
-	fJoined(false),
-	fThreadData(nullptr)
 {
 }
 

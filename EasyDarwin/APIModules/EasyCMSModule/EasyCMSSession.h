@@ -46,7 +46,7 @@ public:
 		kCleaningUp = 4
 	};
 
-	uint32_t fState;
+	uint32_t fState{kIdle};
 
 	void CleanupRequest();
 
@@ -57,15 +57,15 @@ public:
 	HTTPClientRequestStream   fInputStream;
 	HTTPClientResponseStream  fOutputStream;
 
-	HTTPRequest*        fRequest;
+	HTTPRequest*        fRequest{nullptr};
 
 	OSMutex             fReadMutex;
 
 	OSMutex             fMutex;
 
-	char*				fContentBuffer;
+	char*				fContentBuffer{nullptr};
 
-	uint32_t				fContentBufferOffset;
+	uint32_t				fContentBufferOffset{0};
 
 	QTSS_Error FreeStream(const char * streamName, uint32_t streamChannel);
 
@@ -73,10 +73,10 @@ private:
 
 	int64_t Run() override;
 
-	char*	fStreamName;
-	uint32_t	fChannelNum;
+	char*	fStreamName{nullptr};
+	uint32_t	fChannelNum{1};
 	uint32_t	fEasyMsgType;
-	bool	fLiveSession;
+	bool	fLiveSession{true};
 
 	bool IsConnected() const { return fSocket->GetSocket()->IsConnected(); }
 };

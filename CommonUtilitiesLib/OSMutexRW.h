@@ -47,7 +47,7 @@ class OSMutexRW
 {
 public:
 
-	OSMutexRW() : fState(0), fWriteWaiters(0), fReadWaiters(0), fActiveReaders(0) {};
+	OSMutexRW() {};
 
 	void LockRead();
 	void LockWrite();
@@ -64,10 +64,10 @@ private:
 	OSMutex             fInternalLock;   // the internal lock         
 	OSCond              fReadersCond;    // the waiting readers             
 	OSCond              fWritersCond;    // the waiting writers             
-	int                 fState;          // -1:writer,0:free,>0:readers 
-	int                 fWriteWaiters;   // number of waiting writers   
-	int                 fReadWaiters;    // number of waiting readers
-	int                 fActiveReaders;  // number of active readers = fState >= 0;
+	int                 fState{0};          // -1:writer,0:free,>0:readers 
+	int                 fWriteWaiters{0};   // number of waiting writers   
+	int                 fReadWaiters{0};    // number of waiting readers
+	int                 fActiveReaders{0};  // number of active readers = fState >= 0;
 
 	inline void adjustState(int i) { fState += i; };
 	inline void adjustWriteWaiters(int i) { fWriteWaiters += i; };

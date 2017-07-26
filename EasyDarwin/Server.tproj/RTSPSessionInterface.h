@@ -168,8 +168,8 @@ protected:
 		, kTCPCoalesceDirectWriteSize = 0 // if > this # bytes bypass coalescing and make a direct write
 		, kInteleaveHeaderSize = 4  // '$ '+ 1 byte ch ID + 2 bytes length
 	};
-	char*       fTCPCoalesceBuffer;
-	int32_t      fNumInCoalesceBuffer;
+	char*       fTCPCoalesceBuffer{nullptr};
+	int32_t      fNumInCoalesceBuffer{0};
 
 
 	//+rt  socket we get from "accept()"
@@ -180,29 +180,29 @@ protected:
 	void        SnarfInputSocket(RTSPSessionInterface* fromRTSPSession);
 
 	// What session type are we?
-	QTSS_RTSPSessionType    fSessionType;
-	bool              fLiveSession;
-	unsigned int        fObjectHolders;
+	QTSS_RTSPSessionType    fSessionType{qtssRTSPSession};
+	bool              fLiveSession{true};
+	unsigned int        fObjectHolders{0};
 
-	uint8_t               fCurChannelNum;
-	StrPtrLen*          fChNumToSessIDMap;
+	uint8_t               fCurChannelNum{0};
+	StrPtrLen*          fChNumToSessIDMap{nullptr};
 
 	QTSS_StreamRef      fStreamRef;
 
 	uint32_t              fSessionID;
 	uint32_t              fLocalAddr;
 	uint32_t              fRemoteAddr;
-	int32_t              fRequestBodyLen;
+	int32_t              fRequestBodyLen{-1};
 
 	uint16_t              fLocalPort;
 	uint16_t              fRemotePort;
 
 	// For OPTIONS request
 	StrPtrLen				fOldOutputStreamBuffer;
-	bool					fSentOptionsRequest;
-	int64_t					fOptionsRequestSendTime;
-	int32_t					fRoundTripTime;
-	bool					fRoundTripTimeCalculation;
+	bool					fSentOptionsRequest{false};
+	int64_t					fOptionsRequestSendTime{-1};
+	int32_t					fRoundTripTime{-1};
+	bool					fRoundTripTimeCalculation{true};
 
 	static unsigned int sSessionIDCounter;
 

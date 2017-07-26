@@ -32,7 +32,7 @@
 
 #include "OSQueue.h"
 
-OSQueue::OSQueue() : fLength(0)
+OSQueue::OSQueue()
 {
 	fSentinel.fNext = &fSentinel;
 	fSentinel.fPrev = &fSentinel;

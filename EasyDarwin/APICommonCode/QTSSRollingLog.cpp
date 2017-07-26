@@ -44,12 +44,7 @@
 
 static bool sCloseOnWrite = true;
 
- QTSSRollingLog::QTSSRollingLog() :     
-    fLog(nullptr), 
-    fLogCreateTime(-1),
-    fLogFullPath(nullptr),
-    fAppendDotLog(true),
-    fLogging(true)
+ QTSSRollingLog::QTSSRollingLog()
 {
     this->SetTaskName("QTSSRollingLog");
 }

@@ -51,14 +51,7 @@ static StrPtrLen sAuthWord("realm", 5);
 
 // Constructor
 // Allocates no memory
-AccessChecker::AccessChecker() :
-	fGroupsFilePath(nullptr),
-	fUsersFilePath(nullptr),
-	fUsersFileModDate(-1),
-	fGroupsFileModDate(-1),
-	fProfiles(nullptr),
-	fNumUsers(0),
-	fCurrentSize(0)
+AccessChecker::AccessChecker()
 {
 }
 

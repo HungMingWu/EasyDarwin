@@ -58,7 +58,7 @@ public:
 	};
 
 
-	RTCPPacket() : fReceiverPacketBuffer(nullptr) {}
+	RTCPPacket() {}
 	virtual ~RTCPPacket() = default;
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
@@ -85,7 +85,7 @@ public:
 
 protected:
 
-	uint8_t* fReceiverPacketBuffer;
+	uint8_t* fReceiverPacketBuffer{nullptr};
 
 	enum
 	{
@@ -135,7 +135,7 @@ class RTCPReceiverPacket : public RTCPPacket
 {
 public:
 
-	RTCPReceiverPacket() : RTCPPacket(), fRTCPReceiverReportArray(nullptr) {}
+	RTCPReceiverPacket() : RTCPPacket() {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
 	virtual bool ParseReport(uint8_t* inPacketBuffer, uint32_t inPacketLength);
@@ -159,7 +159,7 @@ public:
 protected:
 	inline int RecordOffset(int inReportNum);
 
-	uint8_t* fRTCPReceiverReportArray;    //points into fReceiverPacketBuffer
+	uint8_t* fRTCPReceiverReportArray{nullptr};    //points into fReceiverPacketBuffer
 
 	enum
 	{

@@ -126,8 +126,8 @@ private:
 	static char sGroup[128];
 
 
-	bool fStopRequested;
-	bool fJoined;
+	bool fStopRequested{false};
+	bool fJoined{false};
 
 #ifdef __Win32__
 	HANDLE          fThreadID;
@@ -136,7 +136,7 @@ private:
 #else
 	uint32_t          fThreadID;
 #endif
-	void*           fThreadData;
+	void*           fThreadData{nullptr};
 	DateBuffer      fDateBuffer;
 
 	static void*    sMainThreadData;

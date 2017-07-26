@@ -75,8 +75,8 @@ public:
 private:
 	void ConsumeIfComment(StringParser* parser);
 
-	char* fTag;
-	char* fValue;
+	char* fTag{nullptr};
+	char* fValue{nullptr};
 	OSQueue fAttributes;
 	OSQueue fEmbeddedTags;
 
@@ -91,8 +91,8 @@ public:
 	XMLAttribute();
 	~XMLAttribute();
 
-	char* fAttrName;
-	char* fAttrValue;
+	char* fAttrName{nullptr};
+	char* fAttrValue{nullptr};
 
 	OSQueueElem fElem;
 };

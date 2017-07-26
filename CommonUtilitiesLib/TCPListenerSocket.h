@@ -44,8 +44,8 @@ class TCPListenerSocket : public TCPSocket, public IdleTask
 {
 public:
 
-	TCPListenerSocket() : TCPSocket(nullptr, Socket::kNonBlockingSocketType), IdleTask(),
-		fAddr(0), fPort(0), fOutOfDescriptors(false), fSleepBetweenAccepts(false) {
+	TCPListenerSocket() : TCPSocket(nullptr, Socket::kNonBlockingSocketType), IdleTask()
+	{
 		this->SetTaskName("TCPListenerSocket");
 	}
 	~TCPListenerSocket() override = default;
@@ -79,11 +79,11 @@ private:
 	void ProcessEvent(int eventBits) override;
 	OS_Error    listen(uint32_t queueLength);
 
-	uint32_t          fAddr;
-	uint16_t          fPort;
+	uint32_t          fAddr{0};
+	uint16_t          fPort{0};
 
-	bool          fOutOfDescriptors;
-	bool          fSleepBetweenAccepts;
+	bool          fOutOfDescriptors{false};
+	bool          fSleepBetweenAccepts{false};
 };
 #endif // __TCPLISTENERSOCKET_H__
 

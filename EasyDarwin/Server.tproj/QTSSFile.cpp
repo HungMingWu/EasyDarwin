@@ -48,11 +48,7 @@ void    QTSSFile::Initialize()
 }
 
 QTSSFile::QTSSFile()
-	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kFileDictIndex)),
-	fModule(nullptr),
-	fPosition(0),
-	fLength(0),
-	fModDate(0)
+	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kFileDictIndex))
 {
 	fThisPtr = this;
 	//

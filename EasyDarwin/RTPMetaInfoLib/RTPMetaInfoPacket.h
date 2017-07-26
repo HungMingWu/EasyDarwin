@@ -92,15 +92,7 @@ public:
 	//
 	// CONSTRUCTOR
 
-	RTPMetaInfoPacket() : fPacketBuffer(nullptr),
-		fPacketLen(0),
-		fTransmitTime(0),
-		fFrameType(kUnknownFrameType),
-		fPacketNumber(0),
-		fPacketPosition(0),
-		fMediaDataP(nullptr),
-		fMediaDataLen(0),
-		fSeqNum(0) {}
+	RTPMetaInfoPacket() {}
 	~RTPMetaInfoPacket() = default;
 
 	//
@@ -129,16 +121,16 @@ public:
 
 private:
 
-	uint8_t*          fPacketBuffer;
-	uint32_t          fPacketLen;
+	uint8_t*          fPacketBuffer{nullptr};
+	uint32_t          fPacketLen{0};
 
-	int64_t          fTransmitTime;
-	FrameTypeField  fFrameType;
-	uint64_t          fPacketNumber;
-	uint64_t          fPacketPosition;
-	uint8_t*          fMediaDataP;
-	uint32_t          fMediaDataLen;
-	uint16_t          fSeqNum;
+	int64_t          fTransmitTime{0};
+	FrameTypeField  fFrameType{kUnknownFrameType};
+	uint64_t          fPacketNumber{0};
+	uint64_t          fPacketPosition{0};
+	uint8_t*          fMediaDataP{nullptr};
+	uint32_t          fMediaDataLen{0};
+	uint16_t          fSeqNum{0};
 
 	static const FieldName kFieldNameMap[];
 	static const uint32_t kFieldLengthValidator[];

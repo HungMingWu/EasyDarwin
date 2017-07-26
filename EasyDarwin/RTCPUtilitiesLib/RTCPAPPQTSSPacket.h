@@ -79,25 +79,25 @@ public:
 
 	static void GetTestPacket(StrPtrLen* resultPtr) {}
 
-	uint32_t fReceiverBitRate;
-	uint16_t fAverageLateMilliseconds;
-	uint16_t fPercentPacketsLost;
-	uint16_t fAverageBufferDelayMilliseconds;
-	bool fIsGettingBetter;
-	bool fIsGettingWorse;
-	uint32_t fNumEyes;
-	uint32_t fNumEyesActive;
-	uint32_t fNumEyesPaused;
+	uint32_t fReceiverBitRate{0};
+	uint16_t fAverageLateMilliseconds{0};
+	uint16_t fPercentPacketsLost{0};
+	uint16_t fAverageBufferDelayMilliseconds{0};
+	bool fIsGettingBetter{false};
+	bool fIsGettingWorse{false};
+	uint32_t fNumEyes{0};
+	uint32_t fNumEyesActive{0};
+	uint32_t fNumEyesPaused{0};
 	uint32_t fOverbufferWindowSize;
 
 	//Proposed - are these there yet?
-	uint32_t fTotalPacketsReceived;
-	uint16_t fTotalPacketsDropped;
-	uint16_t fTotalPacketsLost;
-	uint16_t fClientBufferFill;
-	uint16_t fFrameRate;
-	uint16_t fExpectedFrameRate;
-	uint16_t fAudioDryCount;
+	uint32_t fTotalPacketsReceived{0};
+	uint16_t fTotalPacketsDropped{0};
+	uint16_t fTotalPacketsLost{0};
+	uint16_t fClientBufferFill{0};
+	uint16_t fFrameRate{0};
+	uint16_t fExpectedFrameRate{0};
+	uint16_t fAudioDryCount{0};
 
 	enum // QTSS App Header offsets
 	{

@@ -69,8 +69,8 @@ private:
 	static bool FilePrefsConfigSetter(const char* paramName, const char* paramValue[], void* userData);
 
 	KeyValuePair*   FindValue(const char* inKey, char* ioValue, uint32_t index = 0);
-	KeyValuePair*   fKeyValueList;
-	uint32_t          fNumKeys;
+	KeyValuePair*   fKeyValueList{nullptr};
+	uint32_t          fNumKeys{0};
 	bool fAllowDuplicates;
 };
 

@@ -123,11 +123,11 @@ class QTSSRollingLog : public Task
         // Run function to roll log right at midnight   
         int64_t      Run() override;
 
-        FILE*           fLog;
-        time_t          fLogCreateTime;
-        char*           fLogFullPath;
-        bool          fAppendDotLog;
-        bool          fLogging;
+        FILE*           fLog{nullptr};
+        time_t          fLogCreateTime{-1};
+        char*           fLogFullPath{nullptr};
+        bool          fAppendDotLog{true};
+        bool          fLogging{true};
         bool          RenameLogFile(const char* inFileName);
         bool          DoesFileExist(const char *inPath);
         static void     ResetToMidnight(time_t* inTimePtr, time_t* outTimePtr);

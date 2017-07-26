@@ -198,17 +198,16 @@ private:
 	{
 		// This stores all necessary information for each attribute value.
 
-		DictValueElement() : fAllocatedLen(0), fNumAttributes(0),
-			fAllocatedInternally(false), fIsDynamicDictionary(false) {}
+		DictValueElement() {}
 
 		// Does not delete! You Must call DeleteAttributeData for that
 		~DictValueElement() = default;
 
 		StrPtrLen   fAttributeData; // The data
-		uint32_t      fAllocatedLen;  // How much space do we have allocated?
-		uint32_t      fNumAttributes; // If this is an iterated attribute, how many?
-		bool      fAllocatedInternally; //Should we delete this memory?
-		bool      fIsDynamicDictionary; //is this a dictionary object?
+		uint32_t      fAllocatedLen{0};  // How much space do we have allocated?
+		uint32_t      fNumAttributes{0}; // If this is an iterated attribute, how many?
+		bool      fAllocatedInternally{false}; //Should we delete this memory?
+		bool      fIsDynamicDictionary{false}; //is this a dictionary object?
 	};
 
 	DictValueElement    fAttributes[QTSS_MAX_ATTRIBUTE_NUMS];
@@ -245,7 +244,7 @@ public:
 private:
 
 	AttrInfo fAttrInfo;
-	QTSS_AttributeID fID;
+	QTSS_AttributeID fID{qtssIllegalAttrID};
 
 	static AttrInfo sAttributes[];
 

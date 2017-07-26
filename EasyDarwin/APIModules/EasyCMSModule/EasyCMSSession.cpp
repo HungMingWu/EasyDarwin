@@ -18,17 +18,10 @@ EasyCMSSession::EasyCMSSession()
 	: Task(),
 	fSocket(new TCPClientSocket(Socket::kNonBlockingSocketType)),
 	fTimeoutTask(nullptr),
-	fState(kIdle),
 	fInputStream(fSocket),
 	fOutputStream(fSocket, &fTimeoutTask),
-	fRequest(nullptr),
 	fReadMutex(),
-	fMutex(),
-	fContentBuffer(nullptr),
-	fContentBufferOffset(0),
-	fStreamName(nullptr),
-	fLiveSession(true),
-	fChannelNum(1)
+	fMutex()
 {
 	this->SetTaskName("EasyCMSSession");
 	fTimeoutTask.SetTask(this);

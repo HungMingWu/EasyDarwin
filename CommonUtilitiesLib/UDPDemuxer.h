@@ -63,9 +63,7 @@ class UDPDemuxerTask
 {
 public:
 
-	UDPDemuxerTask()
-		: fRemoteAddr(0), fRemotePort(0),
-		fHashValue(0), fNextHashEntry(nullptr) {}
+	UDPDemuxerTask() {}
 	virtual ~UDPDemuxerTask() = default;
 
 	uint32_t  GetRemoteAddr() { return fRemoteAddr; }
@@ -79,13 +77,13 @@ private:
 	}
 
 	//key values
-	uint32_t fRemoteAddr;
-	uint16_t fRemotePort;
+	uint32_t fRemoteAddr{0};
+	uint16_t fRemotePort{0};
 
 	//precomputed for performance
-	uint32_t fHashValue;
+	uint32_t fHashValue{0};
 
-	UDPDemuxerTask  *fNextHashEntry;
+	UDPDemuxerTask  *fNextHashEntry{nullptr};
 
 	friend class UDPDemuxerKey;
 	friend class UDPDemuxer;

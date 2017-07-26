@@ -45,7 +45,7 @@ class OSQueue;
 
 class OSQueueElem {
 public:
-	OSQueueElem(void* enclosingObject = nullptr) : fNext(nullptr), fPrev(nullptr), fQueue(nullptr),
+	OSQueueElem(void* enclosingObject = nullptr) :
 		fEnclosingObject(enclosingObject) {}
 	virtual ~OSQueueElem() { Assert(fQueue == nullptr); }
 
@@ -61,9 +61,9 @@ public:
 
 private:
 
-	OSQueueElem*    fNext;
-	OSQueueElem*    fPrev;
-	OSQueue *       fQueue;
+	OSQueueElem*    fNext{nullptr};
+	OSQueueElem*    fPrev{nullptr};
+	OSQueue *       fQueue{nullptr};
 	void*           fEnclosingObject;
 
 	friend class    OSQueue;
@@ -91,7 +91,7 @@ protected:
 	OSMutex 			fMutex;
 
 	OSQueueElem     fSentinel;
-	uint32_t          fLength;
+	uint32_t          fLength{0};
 };
 
 class OSQueueIter

@@ -39,15 +39,7 @@
 #define RTPSESSION_DEBUGGING 0
 
 RTPSession::RTPSession() :
-	RTPSessionInterface(),
-	fModule(nullptr),
-	fHasAnRTPStream(false),
-	fCurrentModuleIndex(0),
-	fCurrentState(kStart),
-	fClosingReason(qtssCliSesCloseClientTeardown),
-	fCurrentModule(0),
-	fModuleDoingAsyncStuff(false),
-	fLastBandwidthTrackerStatsUpdate(0)
+	RTPSessionInterface()
 {
 #if DEBUG
 	fActivateCalled = false;

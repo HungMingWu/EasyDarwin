@@ -55,15 +55,15 @@ void ElementNode_ShowPtrs();
 
 class ClientSession {
 public:
-	ClientSession(void) : fRTSPSessionID(0), fBitrate(0), fPacketLossPercent(0), fBytesSent(0), fTimeConnected(0) {};
+	ClientSession(void) {};
 	~ClientSession() = default;;
-	uint32_t fRTSPSessionID;
+	uint32_t fRTSPSessionID{0};
 	char fIPAddressStr[32];
 	char fURLBuffer[512];
-	uint32_t fBitrate;
-	float fPacketLossPercent;
-	int64_t fBytesSent;
-	int64_t fTimeConnected;
+	uint32_t fBitrate{0};
+	float fPacketLossPercent{0};
+	int64_t fBytesSent{0};
+	int64_t fTimeConnected{0};
 
 };
 
@@ -283,13 +283,13 @@ private:
 class AdminClass : public ElementNode
 {
 public:
-	QueryURI *fQueryPtr;
-	ElementNode *fNodePtr;
+	QueryURI *fQueryPtr{nullptr};
+	ElementNode *fNodePtr{nullptr};
 
 	void SetUpSingleElement(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, int32_t index, QTSS_Initialize_Params *initParams) override;
 	void SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, int32_t index, QTSS_Initialize_Params *initParams) override;
 	void Initialize(QTSS_Initialize_Params *initParams, QueryURI *queryPtr);
-	AdminClass() :fQueryPtr(nullptr), fNodePtr(nullptr) {};
+	AdminClass() {};
 	~AdminClass() override;
 	static ElementNode::ElementDataFields sAdminSelf[];
 	static ElementNode::ElementDataFields sAdminFieldIDs[];

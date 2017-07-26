@@ -96,45 +96,12 @@ void    RTPSessionInterface::Initialize()
 RTPSessionInterface::RTPSessionInterface()
 	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kClientSessionDictIndex), nullptr),
 	Task(),
-	fLastQualityCheckTime(0),
-	fLastQualityCheckMediaTime(0),
-	fStartedThinning(false),
-	fIsFirstPlay(true),
-	fAllTracksInterleaved(true), // assume true until proven false!
-	fFirstPlayTime(0),
-	fPlayTime(0),
-	fAdjustedPlayTime(0),
-	fNTPPlayTime(0),
-	fNextSendPacketsTime(0),
-	fSessionQualityLevel(0),
-	fState(qtssPausedState),
-	fPlayFlags(0),
-	fLastBitRateBytes(0),
-	fLastBitRateUpdateTime(0),
-	fMovieCurrentBitRate(0),
-	fRTSPSession(nullptr),
-	fLastRTSPReqRealStatusCode(200),
+	// assume true until proven false!
 	fTimeoutTask(nullptr, QTSServerInterface::GetServer()->GetPrefs()->GetRTPSessionTimeoutInSecs() * 1000),
-	fNumQualityLevels(0),
-	fBytesSent(0),
-	fPacketsSent(0),
-	fPacketLossPercent(0.0),
-	fTimeConnected(0),
-	fTotalRTCPPacketsRecv(0),
-	fTotalRTCPBytesRecv(0),
-	fMovieDuration(0),
-	fMovieSizeInBytes(0),
-	fMovieAverageBitRate(0),
-	fTeardownReason(0),
-	fUniqueID(0),
 	fTracker(QTSServerInterface::GetServer()->GetPrefs()->IsSlowStartEnabled()),
 	fOverbufferWindow(QTSServerInterface::GetServer()->GetPrefs()->GetSendIntervalInMsec(), UINT32_MAX, QTSServerInterface::GetServer()->GetPrefs()->GetMaxSendAheadTimeInSecs(),
 		QTSServerInterface::GetServer()->GetPrefs()->GetOverbufferRate()),
-	fAuthScheme(QTSServerInterface::GetServer()->GetPrefs()->GetAuthScheme()),
-	fAuthQop(RTSPSessionInterface::kNoQop),
-	fAuthNonceCount(0),
-	fFramesSkipped(0),
-	fLastRTSPBandwidthHeaderBits(0)
+	fAuthScheme(QTSServerInterface::GetServer()->GetPrefs()->GetAuthScheme())
 {
 	//don't actually setup the fTimeoutTask until the session has been bound!
 	//(we don't want to get timeouts before the session gets bound)

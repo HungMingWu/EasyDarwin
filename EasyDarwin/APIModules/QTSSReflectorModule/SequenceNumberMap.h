@@ -62,13 +62,13 @@ public:
 
 private:
 
-	bool*         fSlidingWindow;
+	bool*         fSlidingWindow{nullptr};
 
 	const int32_t    fWindowSize;
 	const int32_t    fNegativeWindowSize;
 
-	uint16_t          fHighestSeqIndex;
-	uint16_t          fHighestSeqNumber;
+	uint16_t          fHighestSeqIndex{0};
+	uint16_t          fHighestSeqNumber{0};
 };
 
 

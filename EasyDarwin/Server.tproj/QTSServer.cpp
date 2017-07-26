@@ -383,11 +383,11 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 {
 	struct PortTracking
 	{
-		PortTracking() : fPort(0), fIPAddr(0), fNeedsCreating(true) {}
+		PortTracking() {}
 
-		uint16_t fPort;
-		uint32_t fIPAddr;
-		bool fNeedsCreating;
+		uint16_t fPort{0};
+		uint32_t fIPAddr{0};
+		bool fNeedsCreating{true};
 	};
 
 	PortTracking* theRTSPPortTrackers = nullptr;

@@ -82,11 +82,7 @@ HTTPSessionInterface::HTTPSessionInterface()
 	fSessionMutex(),
 	fSocket(nullptr, Socket::kNonBlockingSocketType),
 	fOutputSocketP(&fSocket),
-	fInputSocketP(&fSocket),
-	fLiveSession(true),
-	fObjectHolders(0),
-	fRequestBodyLen(-1),
-	fAuthenticated(false)
+	fInputSocketP(&fSocket)
 {
 
 	fTimeoutTask.SetTask(this);

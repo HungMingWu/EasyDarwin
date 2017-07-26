@@ -44,7 +44,7 @@ class QTSSStream
 {
     public:
 
-        QTSSStream() : fTask(nullptr) {}
+        QTSSStream() {}
         virtual ~QTSSStream() = default;
         
         //
@@ -74,7 +74,7 @@ class QTSSStream
     
     private:
     
-        Task* fTask;
+        Task* fTask{nullptr};
 };
 
 #endif //__QTSS_STREAM_H__

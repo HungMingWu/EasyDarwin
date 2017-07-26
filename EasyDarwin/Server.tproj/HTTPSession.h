@@ -50,7 +50,7 @@ private:
 
 	QTSS_Error dumpRequestData();
 
-	HTTPRequest*        fRequest;
+	HTTPRequest*        fRequest{nullptr};
 	OSMutex             fReadMutex;
 
 	enum
@@ -66,8 +66,8 @@ private:
 		kHaveCompleteMessage = 7
 	};
 
-	uint32_t fCurrentModule;
-	uint32_t fState;
+	uint32_t fCurrentModule{0};
+	uint32_t fState{kReadingFirstRequest};
 
 	QTSS_RoleParams     fRoleParams;//module param blocks for roles.
 	QTSS_ModuleState    fModuleState;

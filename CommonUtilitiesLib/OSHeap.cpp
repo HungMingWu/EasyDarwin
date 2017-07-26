@@ -36,7 +36,6 @@
 #include "OSHeap.h"
 
 OSHeap::OSHeap(uint32_t inStartSize)
-	: fFreeIndex(1)
 {
 	if (inStartSize < 2)
 		fArraySize = 2;

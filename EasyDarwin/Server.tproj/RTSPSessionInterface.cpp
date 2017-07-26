@@ -91,21 +91,9 @@ RTSPSessionInterface::RTSPSessionInterface()
 	fInputStream(&fSocket),
 	fOutputStream(&fSocket, &fTimeoutTask),
 	fSessionMutex(),
-	fTCPCoalesceBuffer(nullptr),
-	fNumInCoalesceBuffer(0),
 	fSocket(nullptr, Socket::kNonBlockingSocketType),
 	fOutputSocketP(&fSocket),
-	fInputSocketP(&fSocket),
-	fSessionType(qtssRTSPSession),
-	fLiveSession(true),
-	fObjectHolders(0),
-	fCurChannelNum(0),
-	fChNumToSessIDMap(nullptr),
-	fRequestBodyLen(-1),
-	fSentOptionsRequest(false),
-	fOptionsRequestSendTime(-1),
-	fRoundTripTime(-1),
-	fRoundTripTimeCalculation(true)
+	fInputSocketP(&fSocket)
 {
 	fTimeoutTask.SetTask(this);
 	fSocket.SetTask(this);

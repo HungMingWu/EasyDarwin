@@ -79,7 +79,7 @@ private:
 #endif
 
 	OSHeapElem**    fHeap;
-	uint32_t          fFreeIndex;
+	uint32_t          fFreeIndex{1};
 	uint32_t          fArraySize;
 };
 
@@ -87,7 +87,7 @@ class OSHeapElem
 {
 public:
 	OSHeapElem(void* enclosingObject = nullptr)
-		: fValue(0), fEnclosingObject(enclosingObject), fCurrentHeap(nullptr) {}
+		: fEnclosingObject(enclosingObject) {}
 	~OSHeapElem() = default;
 
 	//This data structure emphasizes performance over extensibility
@@ -103,9 +103,9 @@ public:
 
 private:
 
-	int64_t  fValue;
+	int64_t  fValue{0};
 	void* fEnclosingObject;
-	OSHeap* fCurrentHeap;
+	OSHeap* fCurrentHeap{nullptr};
 
 	friend class OSHeap;
 };

@@ -49,7 +49,7 @@ class ReflectorOutput
 {
 	public:
     
-		ReflectorOutput() : fBookmarkedPacketsElemsArray(nullptr), fNumBookmarks(0), fAvailPosition(0), fLastIntervalMilliSec(5), fLastPacketTransmitTime(0) {}   
+		ReflectorOutput() {}   
 
         virtual ~ReflectorOutput() 
         {
@@ -62,11 +62,11 @@ class ReflectorOutput
         
         // an array of packet elements ( from fPacketQueue in ReflectorSender )
         // possibly one for each ReflectorSender that sends data to this ReflectorOutput        
-        OSQueueElem         **fBookmarkedPacketsElemsArray;
-        uint32_t              fNumBookmarks;
-        int32_t              fAvailPosition;
-        QTSS_TimeVal        fLastIntervalMilliSec;
-        QTSS_TimeVal        fLastPacketTransmitTime;
+        OSQueueElem         **fBookmarkedPacketsElemsArray{nullptr};
+        uint32_t              fNumBookmarks{0};
+        int32_t              fAvailPosition{0};
+        QTSS_TimeVal        fLastIntervalMilliSec{5};
+        QTSS_TimeVal        fLastPacketTransmitTime{0};
 		OSMutex             fMutex;
 
 	//add by fantasy		

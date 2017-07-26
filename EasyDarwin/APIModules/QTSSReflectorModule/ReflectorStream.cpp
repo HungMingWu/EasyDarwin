@@ -1620,19 +1620,7 @@ void ReflectorSocketPool::DestructUDPSocketPair(UDPSocketPair *inPair)
 
 ReflectorSocket::ReflectorSocket()
 	: IdleTask(),
-	UDPSocket(nullptr, Socket::kNonBlockingSocketType | UDPSocket::kWantsDemuxer),
-	fBroadcasterClientSession(nullptr),
-	fLastBroadcasterTimeOutRefresh(0),
-	fSleepTime(0),
-	fValidSSRC(0),
-	fLastValidSSRCTime(0),
-	fFilterSSRCs(true),
-	fTimeoutSecs(30),
-	fHasReceiveTime(false),
-	fFirstReceiveTime(0),
-	fFirstArrivalTime(0),
-	fCurrentSSRC(0)
-
+	UDPSocket(nullptr, Socket::kNonBlockingSocketType | UDPSocket::kWantsDemuxer)
 {
 	//construct all the preallocated packets
 	this->SetTaskName("ReflectorSocket");

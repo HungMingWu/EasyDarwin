@@ -37,10 +37,7 @@ using namespace std;
 
 HTTPSession::HTTPSession()
 	: HTTPSessionInterface(),
-	fRequest(nullptr),
-	fReadMutex(),
-	fCurrentModule(0),
-	fState(kReadingFirstRequest)
+	fReadMutex()
 {
 	this->SetTaskName("HTTPSession");
 

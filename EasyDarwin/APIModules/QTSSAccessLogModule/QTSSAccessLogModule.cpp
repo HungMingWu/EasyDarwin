@@ -31,6 +31,7 @@
 
  */
 
+#include "QTSSDictionary.h"
 #include "QTSSAccessLogModule.h"
 #include "QTSSModuleUtils.h"
 #include "QTSSRollingLog.h"
@@ -216,7 +217,7 @@ QTSS_Error Initialize(QTSS_Initialize_Params* inParams)
 QTSS_Error RereadPrefs()
 {
 	delete[] sDefaultLogDir;
-	(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsErrorLogDir, 0, &sDefaultLogDir);
+	(void)((QTSSDictionary*)sServerPrefs)->GetValueAsString(qtssPrefsErrorLogDir, 0, &sDefaultLogDir);
 
 	QTSSModuleUtils::GetAttribute(sPrefs, "request_logging", qtssAttrDataTypeBool16,
 		&sLogEnabled, &sDefaultLogEnabled, sizeof(sLogEnabled));

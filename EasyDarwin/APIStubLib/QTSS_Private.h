@@ -95,7 +95,7 @@ enum
     kGetAttrInfoByIndexCallback     = 38,
     kGetAttrInfoByNameCallback      = 39,
     kGetAttrInfoByIDCallback        = 40,
-    kGetValueAsStringCallback       = 41,
+
     kTypeToTypeStringCallback       = 42,
     kTypeStringToTypeCallback       = 43,
     kStringToValueCallback          = 44,       
@@ -113,8 +113,7 @@ enum
     kUnlockObjectCallback           = 56,
     kSetAttributePtrCallback        = 57,
     kSetIntervalRoleTimerCallback   = 58,
-    kLockStdLibCallback             = 59,
-    kUnlockStdLibCallback           = 60,
+
 	kGetRTSPPushSessionsCallback	= 61,
 	kLastCallback                   = 62
 };

@@ -675,7 +675,7 @@ bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen
 		char* reqPassword = passwordPtr->GetAsCString();
 		std::unique_ptr<char[]> reqPasswordDeleter(reqPassword);
 		char* userPassword = nullptr;
-		(void)QTSS_GetValueAsString(theUserProfile, qtssUserPassword, 0, &userPassword);
+		(void)((QTSSDictionary*)theUserProfile)->GetValueAsString(qtssUserPassword, 0, &userPassword);
 		std::unique_ptr<char[]> userPasswordDeleter(userPassword);
 
 		if (userPassword == nullptr) {

@@ -45,6 +45,7 @@
 #include "OSMutex.h"
 #include "OSRef.h"
 #include "AdminElementNode.h"
+#include "QTSSDictionary.h"
  //#include "OSHeaders.h"
 
 static char* sParameterDelimeter = ";";
@@ -886,7 +887,7 @@ char *ElementNode::NewIndexElement(QTSS_Object inObject, QTSS_AttributeID inID, 
 
 	if (inObject != nullptr)
 	{
-		QTSS_Error err = QTSS_GetValueAsString(inObject, inID, inIndex, &resultPtr); ElementNode_InsertPtr(resultPtr, "ElementNode::NewIndexElement QTSS_GetValueAsString ");
+		QTSS_Error err = ((QTSSDictionary*)inObject)->GetValueAsString(inID, inIndex, &resultPtr); ElementNode_InsertPtr(resultPtr, "ElementNode::NewIndexElement QTSS_GetValueAsString ");
 		if (err != QTSS_NoErr)
 		{   //printf("ElementNode::NewIndexElement QTSS_GetValueAsString object= %p id=%"   _U32BITARG_   " index=%"   _U32BITARG_   " err= %" _S32BITARG_ " \n",inObject,inID, inIndex, err);
 		}
@@ -2212,7 +2213,7 @@ void ElementNode::GetFilteredAttributeName(ElementDataFields* fieldPtr, QTSS_Att
 {
 	fieldPtr->fFieldLen = 0;
 	char *theName = nullptr;
-	(void)QTSS_GetValueAsString(fieldPtr->fAPISource, theID, 0, &theName);
+	(void)((QTSSDictionary*)fieldPtr->fAPISource)->GetValueAsString(theID, 0, &theName);
 	std::unique_ptr<char[]> nameDeleter(theName);
 	if (theName != nullptr)
 	{

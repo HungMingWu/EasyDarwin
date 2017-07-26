@@ -37,6 +37,7 @@
 #include "StringParser.h"
 #include "QTSSModuleUtils.h"
 #include "QTAccessFile.h"
+#include "QTSSDictionary.h"
 
 #ifdef __MacOSX__
 #include <membership.h>
@@ -562,8 +563,8 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
         (void) QTSS_SetValue(theRTSPRequest,qtssRTSPReqURLRealm, 0, realmNameStr.Ptr, ::strlen(realmNameStr.Ptr));
     else // if auth scheme is basic and no realm is present, or if the auth scheme is digest, use the realm from the users file
     {  
-        char*   userRealm = nullptr;   
-        (void) QTSS_GetValueAsString(theUserProfile, qtssUserRealm, 0, &userRealm);
+        char*   userRealm = nullptr;
+		(void)((QTSSDictionary*)theUserProfile)->GetValueAsString(qtssUserRealm, 0, &userRealm);
         if(userRealm != nullptr)
         {
             std::unique_ptr<char[]> userRealmDeleter(userRealm);

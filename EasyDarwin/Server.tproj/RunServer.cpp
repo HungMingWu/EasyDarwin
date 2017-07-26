@@ -317,7 +317,7 @@ void LogStatus(QTSS_ServerState theServerState)
 	// we force the "server_status" file to be written at least once.
 	static int lastRTSPSessionCount = -1;
 	// Get the RTSP session count from the server.
-	(void)QTSS_GetValueAsString(sServer, qtssRTSPCurrentSessionCount, 0, &thePrefStr);
+	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTSPCurrentSessionCount, 0, &thePrefStr);
 	int currentRTSPSessionCount = ::atoi(thePrefStr);
 	delete[] thePrefStr; thePrefStr = nullptr;
 	if (currentRTSPSessionCount == 0 && currentRTSPSessionCount == lastRTSPSessionCount)
@@ -362,7 +362,7 @@ void LogStatus(QTSS_ServerState theServerState)
 		// show each element value
 		for (i = 0; i < numAttributes; i++)
 		{
-			(void)QTSS_GetValueAsString(sServer, QTSSModuleUtils::GetAttrID(sServer, sAttributes[i]), 0, &theAttributeValue);
+			(void)((QTSSDictionary*)sServer)->GetValueAsString(QTSSModuleUtils::GetAttrID(sServer, sAttributes[i]), 0, &theAttributeValue);
 			if (theAttributeValue != nullptr)
 			{
 				fprintf(statusFile, sKey, sAttributes[i]);
@@ -401,16 +401,16 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 
 	}
 
-	(void)QTSS_GetValueAsString(sServer, qtssRTPSvrCurConn, 0, &thePrefStr);
+	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTPSvrCurConn, 0, &thePrefStr);
 	print_status(statusFile, stdOut, "%11s", thePrefStr);
 
 	delete[] thePrefStr; thePrefStr = nullptr;
 
-	(void)QTSS_GetValueAsString(sServer, qtssRTSPCurrentSessionCount, 0, &thePrefStr);
+	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTSPCurrentSessionCount, 0, &thePrefStr);
 	print_status(statusFile, stdOut, "%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = nullptr;
 
-	(void)QTSS_GetValueAsString(sServer, qtssRTSPHTTPCurrentSessionCount, 0, &thePrefStr);
+	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTSPHTTPCurrentSessionCount, 0, &thePrefStr);
 	print_status(statusFile, stdOut, "%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = nullptr;
 
@@ -420,7 +420,7 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 	snprintf(numStr, 11, "%"   _U32BITARG_   "", curBandwidth / 1024);
 	print_status(statusFile, stdOut, "%11s", numStr);
 
-	(void)QTSS_GetValueAsString(sServer, qtssRTPSvrCurPackets, 0, &thePrefStr);
+	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTPSvrCurPackets, 0, &thePrefStr);
 	print_status(statusFile, stdOut, "%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = nullptr;
 
@@ -559,15 +559,15 @@ void PrintStatus(bool printHeader)
 		printf("     RTP-Conns RTSP-Conns HTTP-Conns  kBits/Sec   Pkts/Sec    TotConn     TotBytes   TotPktsLost          Time\n");
 	}
 
-	(void)QTSS_GetValueAsString(sServer, qtssRTPSvrCurConn, 0, &thePrefStr);
+	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTPSvrCurConn, 0, &thePrefStr);
 	printf("%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = nullptr;
 
-	(void)QTSS_GetValueAsString(sServer, qtssRTSPCurrentSessionCount, 0, &thePrefStr);
+	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTSPCurrentSessionCount, 0, &thePrefStr);
 	printf("%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = nullptr;
 
-	(void)QTSS_GetValueAsString(sServer, qtssRTSPHTTPCurrentSessionCount, 0, &thePrefStr);
+	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTSPHTTPCurrentSessionCount, 0, &thePrefStr);
 	printf("%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = nullptr;
 
@@ -576,11 +576,11 @@ void PrintStatus(bool printHeader)
 	(void)QTSS_GetValue(sServer, qtssRTPSvrCurBandwidth, 0, &curBandwidth, &theLen);
 	printf("%11"   _U32BITARG_, curBandwidth / 1024);
 
-	(void)QTSS_GetValueAsString(sServer, qtssRTPSvrCurPackets, 0, &thePrefStr);
+	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTPSvrCurPackets, 0, &thePrefStr);
 	printf("%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = nullptr;
 
-	(void)QTSS_GetValueAsString(sServer, qtssRTPSvrTotalConn, 0, &thePrefStr);
+	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTPSvrTotalConn, 0, &thePrefStr);
 	printf("%11s", thePrefStr);
 	delete[] thePrefStr; thePrefStr = nullptr;
 

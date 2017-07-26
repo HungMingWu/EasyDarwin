@@ -772,7 +772,7 @@ QTSS_Error HTTPSession::execNetMsgCSGetServerVersionReqRESTful(const char* query
 	header[EASY_TAG_ERROR_STRING] = EasyProtocol::GetErrorString(EASY_ERROR_SUCCESS_OK);
 
 	char* serverHeader = nullptr;
-	(void)QTSS_GetValueAsString(QTSServerInterface::GetServer(), qtssSvrRTSPServerHeader, 0, &serverHeader);
+	(void)((QTSSDictionary*)QTSServerInterface::GetServer())->GetValueAsString(qtssSvrRTSPServerHeader, 0, &serverHeader);
 	std::unique_ptr<char[]> theFullPathStrDeleter(serverHeader);
 	body[EASY_TAG_SERVER_HEADER] = serverHeader;
 

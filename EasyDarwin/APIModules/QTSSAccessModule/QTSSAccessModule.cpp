@@ -37,7 +37,7 @@
 
 #include "defaultPaths.h"
 
-
+#include "QTSSDictionary.h"
 #include "StrPtrLen.h"
 #include "MyAssert.h"
 #include "AccessChecker.h"
@@ -470,7 +470,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 
 	// Get the username from the user profile object
 	char*   usernameBuf = nullptr;
-	theErr = QTSS_GetValueAsString(theUserProfile, qtssUserName, 0, &usernameBuf);
+	theErr = ((QTSSDictionary*)theUserProfile)->GetValueAsString(qtssUserName, 0, &usernameBuf);
 	std::unique_ptr<char[]> usernameBufDeleter(usernameBuf);
 	StrPtrLen username(usernameBuf);
 	if (theErr != QTSS_NoErr)

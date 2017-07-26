@@ -33,7 +33,7 @@
 #include <memory>
 #include "QTSSModuleUtils.h"
 #include "QTSS_Private.h"
-
+#include "QTSSDictionary.h"
 #include "StrPtrLen.h"
 #include "MyAssert.h"
 #include "StringFormatter.h"
@@ -731,7 +731,7 @@ char*   QTSSModuleUtils::GetStringAttribute(QTSS_Object inObject, char* inAttrib
     QTSS_AttributeID theID = QTSSModuleUtils::CheckAttributeDataType(inObject, inAttributeName, qtssAttrDataTypeCharArray, inDefaultValue, theDefaultValLen);
 
     char* theString = nullptr;
-    (void)QTSS_GetValueAsString(inObject, theID, 0, &theString);
+    (void)((QTSSDictionary*)inObject)->GetValueAsString(theID, 0, &theString);
     if (theString != nullptr)
         return theString;
     
@@ -863,14 +863,14 @@ QTSS_ActionFlags QTSSModuleUtils::GetRequestActions(QTSS_RTSPRequestObject theRT
 
 char* QTSSModuleUtils::GetLocalPath_Copy(QTSS_RTSPRequestObject theRTSPRequest)
 {   char*   pathBuffStr = nullptr;
-    QTSS_Error theErr = QTSS_GetValueAsString(theRTSPRequest, qtssRTSPReqLocalPath, 0, &pathBuffStr);
+    QTSS_Error theErr = ((QTSSDictionary*)theRTSPRequest)->GetValueAsString(qtssRTSPReqLocalPath, 0, &pathBuffStr);
     Assert(theErr == QTSS_NoErr);
     return pathBuffStr;
 }
 
 char* QTSSModuleUtils::GetMoviesRootDir_Copy(QTSS_RTSPRequestObject theRTSPRequest)
 {   char*   movieRootDirStr = nullptr;
-    QTSS_Error theErr = QTSS_GetValueAsString(theRTSPRequest,qtssRTSPReqRootDir, 0, &movieRootDirStr);
+    QTSS_Error theErr = ((QTSSDictionary*)theRTSPRequest)->GetValueAsString(qtssRTSPReqRootDir, 0, &movieRootDirStr);
     Assert(theErr == QTSS_NoErr);
     return movieRootDirStr;
 }
@@ -886,7 +886,7 @@ QTSS_UserProfileObject QTSSModuleUtils::GetUserProfileObject(QTSS_RTSPRequestObj
 char *QTSSModuleUtils::GetUserName_Copy(QTSS_UserProfileObject inUserProfile)
 {
     char*   username = nullptr;    
-    (void) QTSS_GetValueAsString(inUserProfile, qtssUserName, 0, &username);
+    (void)((QTSSDictionary*)inUserProfile)->GetValueAsString(qtssUserName, 0, &username);
     return username;
 }
 
@@ -936,7 +936,7 @@ bool QTSSModuleUtils::UserInGroup(QTSS_UserProfileObject inUserProfile, char* in
 	for (uint32_t index = 0; index < numGroups; index++)
 	{  
 		userGroup = nullptr;
-		QTSS_GetValueAsString(inUserProfile, qtssUserGroups, index, &userGroup); //allocates string
+		((QTSSDictionary*)inUserProfile)->GetValueAsString(qtssUserGroups, index, &userGroup); //allocates string
 		userGroupStr.Delete();
 		userGroupStr.Set(userGroup);					
 		if(userGroupStr.Equal(inGroup))
@@ -967,7 +967,7 @@ bool QTSSModuleUtils::AddressInList(QTSS_Object inObject, QTSS_AttributeID listI
     for (uint32_t index = 0; index < numValues; index ++)
     { 
         strDeleter.Delete();
-        (void) QTSS_GetValueAsString(inObject, listID, index, &theAttributeString);
+        (void)((QTSSDictionary*)inObject)->GetValueAsString(listID, index, &theAttributeString);
         strDeleter.Set(theAttributeString);
  
         addressFromList.Set(&strDeleter);
@@ -991,7 +991,7 @@ bool QTSSModuleUtils::FindStringInAttributeList(QTSS_Object inObject, QTSS_Attri
     for (uint32_t index = 0; index < numValues; index ++)
     { 
         tempString.Delete();
-        (void) QTSS_GetValueAsString(inObject, listID, index, &tempString.Ptr);
+        (void)((QTSSDictionary*)inObject)->GetValueAsString(listID, index, &tempString.Ptr);
         tempString.Set(tempString.Ptr);
 		if (tempString.Ptr == nullptr)
 			return false;
@@ -1010,7 +1010,7 @@ bool QTSSModuleUtils::FindStringInAttributeList(QTSS_Object inObject, QTSS_Attri
 bool QTSSModuleUtils::HavePlayerProfile(QTSS_PrefsObject inPrefObjectToCheck, QTSS_StandardRTSP_Params* inParams, uint32_t feature)
 {
     StrPtrLenDel userAgentStr;    	
-    (void)QTSS_GetValueAsString(inParams->inClientSession, qtssCliSesFirstUserAgent, 0, &userAgentStr.Ptr);
+    (void)((QTSSDictionary*)inParams->inClientSession)->GetValueAsString(qtssCliSesFirstUserAgent, 0, &userAgentStr.Ptr);
     userAgentStr.Set(userAgentStr.Ptr);
     
     switch (feature)

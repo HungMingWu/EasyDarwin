@@ -860,8 +860,6 @@ void    QTSServer::InitCallbacks()
 	sCallbacks.addr[kGetAttrInfoByIDCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetAttrInfoByID;
 	sCallbacks.addr[kGetNumAttributesCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetNumAttributes;
 
-
-	sCallbacks.addr[kGetValueAsStringCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetValueAsString;
 	sCallbacks.addr[kTypeToTypeStringCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_TypeToTypeString;
 	sCallbacks.addr[kTypeStringToTypeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_TypeStringToType;
 	sCallbacks.addr[kStringToValueCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_StringToValue;
@@ -881,9 +879,6 @@ void    QTSServer::InitCallbacks()
 	sCallbacks.addr[kSetAttributePtrCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SetValuePtr;
 
 	sCallbacks.addr[kSetIntervalRoleTimerCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SetIdleRoleTimer;
-
-	sCallbacks.addr[kLockStdLibCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_LockStdLib;
-	sCallbacks.addr[kUnlockStdLibCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_UnlockStdLib;
 
 	sCallbacks.addr[kGetRTSPPushSessionsCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::Easy_GetRTSPPushSessions;
 

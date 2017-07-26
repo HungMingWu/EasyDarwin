@@ -427,7 +427,7 @@ char *GetTrimmedKeyWord(char *prefKeyWord)
 void SetMoviesRelativeDir()
 {
 	char* movieFolderString = nullptr;
-	(void)QTSS_GetValueAsString(sServerPrefs, qtssPrefsMovieFolder, 0, &movieFolderString);
+	(void)((QTSSDictionary*)sServerPrefs)->GetValueAsString(qtssPrefsMovieFolder, 0, &movieFolderString);
 	std::unique_ptr<char[]> deleter(movieFolderString);
 
 	ResizeableStringFormatter redirectPath(nullptr, 0);
@@ -729,14 +729,14 @@ QTSS_Error ProcessRTSPRequest(QTSS_StandardRTSP_Params* inParams)
 ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, QTSS_AttributeID inPathType, bool isPush, bool *foundSessionPtr, char** resultFilePath)
 {
 	char* theFileNameStr = nullptr;
-	QTSS_Error theErr = QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqFileName, 0, &theFileNameStr);
+	QTSS_Error theErr = ((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqFileName, 0, &theFileNameStr);
 	Assert(theErr == QTSS_NoErr);
 	std::unique_ptr<char[]> theFileNameStrDeleter(theFileNameStr);
 	if (theErr != QTSS_NoErr)
 		return nullptr;
 
 	char* theQueryString = nullptr;
-	theErr = QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqQueryString, 0, &theQueryString);
+	theErr = ((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqQueryString, 0, &theQueryString);
 	std::unique_ptr<char[]> theQueryStringDeleter(theQueryString);
 
 	std::string queryTemp;
@@ -834,7 +834,7 @@ std::string DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ch
 		{ // add s line
 			char* theSDPName = nullptr;
 
-			(void)QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqFilePath, 0, &theSDPName);
+			(void)((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqFilePath, 0, &theSDPName);
 			std::unique_ptr<char[]> thePathStrDeleter(theSDPName);
 			if (theSDPName == nullptr)
 				editedSDP += "s=unknown\r\n";
@@ -911,12 +911,12 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	//
 	// Get the full path to this file
 	char* theFileNameStr = nullptr;
-	(void)QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqFileName, 0, &theFileNameStr);
+	(void)((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqFileName, 0, &theFileNameStr);
 	std::unique_ptr<char[]> theFileNameStrDeleter(theFileNameStr);
 	StrPtrLen theFullPath(theFileNameStr);
 
 	char* theQueryString = nullptr;
-	QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqQueryString, 0, &theQueryString);
+	((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqQueryString, 0, &theQueryString);
 	std::unique_ptr<char[]> theQueryStringDeleter(theQueryString);
 
 	std::string queryTemp;
@@ -1127,7 +1127,7 @@ std::string DoDescribeAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, Re
 		if (!checkedSDPContainer.HasLineType('s'))
 		{ // add s line
 			char* theSDPName = nullptr;
-			(void)QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqFilePath, 0, &theSDPName);
+			(void)((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqFilePath, 0, &theSDPName);
 			std::unique_ptr<char[]> thePathStrDeleter(theSDPName);
 			editedSDP += "s=";
 			editedSDP += theSDPName;
@@ -1636,7 +1636,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	//unless there is a digit at the end of this path (representing trackID), don't
 	//even bother with the request
 	char* theDigitStr = nullptr;
-	(void)QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqFileDigit, 0, &theDigitStr);
+	(void)((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqFileDigit, 0, &theDigitStr);
 	std::unique_ptr<char[]> theDigitStrDeleter(theDigitStr);
 	if (theDigitStr == nullptr)
 	{
@@ -2243,7 +2243,7 @@ QTSS_Error RedirectBroadcast(QTSS_StandardRTSP_Params* inParams)
 	QTSS_RTSPRequestObject theRequest = inParams->inRTSPRequest;
 
 	char* requestPathStr;
-	(void)QTSS_GetValueAsString(theRequest, qtssRTSPReqFilePath, 0, &requestPathStr);
+	(void)((QTSSDictionary*)theRequest)->GetValueAsString(qtssRTSPReqFilePath, 0, &requestPathStr);
 	std::unique_ptr<char[]> requestPathStrDeleter(requestPathStr);
 	StrPtrLen theRequestPath(requestPathStr);
 	StringParser theRequestPathParser(&theRequestPath);
@@ -2293,11 +2293,11 @@ bool InBroadcastDirList(QTSS_RTSPRequestObject inRTSPRequest)
 	bool allowed = false;
 
 	char* theURIPathStr;
-	(void)QTSS_GetValueAsString(inRTSPRequest, qtssRTSPReqFilePath, 0, &theURIPathStr);
+	(void)((QTSSDictionary*)inRTSPRequest)->GetValueAsString(qtssRTSPReqFilePath, 0, &theURIPathStr);
 	std::unique_ptr<char[]> requestPathStrDeleter(theURIPathStr);
 
 	char* theLocalPathStr;
-	(void)QTSS_GetValueAsString(inRTSPRequest, qtssRTSPReqLocalPath, 0, &theLocalPathStr);
+	(void)((QTSSDictionary*)inRTSPRequest)->GetValueAsString(qtssRTSPReqLocalPath, 0, &theLocalPathStr);
 	StrPtrLenDel requestPath(theLocalPathStr);
 
 	char* theRequestPathStr = nullptr;
@@ -2314,7 +2314,7 @@ bool InBroadcastDirList(QTSS_RTSPRequestObject inRTSPRequest)
 
 	while (!allowed && (index < numValues))
 	{
-		(void)QTSS_GetValueAsString(sPrefs, sBroadcastDirListID, index, &theBroadcastDirStr);
+		(void)((QTSSDictionary*)sPrefs)->GetValueAsString(sBroadcastDirListID, index, &theBroadcastDirStr);
 		StrPtrLen theBroadcastDir(theBroadcastDirStr);
 
 		if (theBroadcastDir.Len == 0) // an empty dir matches all
@@ -2387,7 +2387,7 @@ QTSS_Error GetDeviceStream(Easy_GetDeviceStream_Params* inParams)
 			if (clientSession)
 			{
 				char* theFullRequestURL = nullptr;
-				(void)QTSS_GetValueAsString(clientSession, qtssCliSesFullURL, 0, &theFullRequestURL);
+				(void)((QTSSDictionary*)clientSession)->GetValueAsString(qtssCliSesFullURL, 0, &theFullRequestURL);
 				std::unique_ptr<char[]> theFileNameStrDeleter(theFullRequestURL);
 
 				if (theFullRequestURL && inParams->outUrl)

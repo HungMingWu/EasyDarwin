@@ -203,13 +203,6 @@ QTSS_Error  QTSSCallbacks::QTSS_GetValue(QTSS_Object inDictionary, QTSS_Attribut
 	return ((QTSSDictionary*)inDictionary)->GetValue(inID, inIndex, ioBuffer, ioLen);
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_GetValueAsString(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, char** outString)
-{
-	if (inDictionary == nullptr)
-		return QTSS_BadArgument;
-	return ((QTSSDictionary*)inDictionary)->GetValueAsString(inID, inIndex, outString);
-}
-
 QTSS_Error  QTSSCallbacks::QTSS_TypeToTypeString(const QTSS_AttrDataType inType, char** outTypeString)
 {
 	if (outTypeString == nullptr)
@@ -922,16 +915,6 @@ QTSS_Error	QTSSCallbacks::QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObj
 	*outAuthRealm = realm->GetAsCString();
 
 	return theErr;
-}
-
-void QTSSCallbacks::QTSS_LockStdLib()
-{
-	OS::GetStdLibMutex()->Lock();
-}
-
-void QTSSCallbacks::QTSS_UnlockStdLib()
-{
-	OS::GetStdLibMutex()->Unlock();
 }
 
 void* QTSSCallbacks::Easy_GetRTSPPushSessions()

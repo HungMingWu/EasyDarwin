@@ -86,7 +86,6 @@ public:
 
 	static QTSS_Error   QTSS_GetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, void** outBuffer, uint32_t* outLen);
 	static QTSS_Error   QTSS_GetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, void* ioBuffer, uint32_t* ioLen);
-	static QTSS_Error   QTSS_GetValueAsString(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, char** outString);
 
 	static QTSS_Error   QTSS_SetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, const void* inBuffer, uint32_t inLen);
 	static QTSS_Error   QTSS_SetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, const void* inBuffer, uint32_t inLen);
@@ -147,9 +146,6 @@ public:
 	// AUTHENTICATION AND AUTHORIZATION ROUTINE
 	static QTSS_Error   QTSS_Authenticate(const char* inAuthUserName, const char* inAuthResourceLocalPath, const char* inAuthMoviesDir, QTSS_ActionFlags inAuthRequestAction, QTSS_AuthScheme inAuthScheme, QTSS_RTSPRequestObject ioAuthRequestObject);
 	static QTSS_Error	QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObject, char** outAuthRealm, bool* outAuthUserAllowed);
-
-	static void   QTSS_LockStdLib();
-	static void   QTSS_UnlockStdLib();
 
 	static void* Easy_GetRTSPPushSessions();
 };

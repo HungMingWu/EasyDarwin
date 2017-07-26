@@ -1484,19 +1484,6 @@ QTSS_Error QTSS_GetValue (QTSS_Object inObject, QTSS_AttributeID inID, uint32_t 
                             void* ioBuffer, uint32_t* ioLen);
 
 /********************************************************************/
-//  QTSS_GetValueAsString
-//
-//  Returns the specified attribute converted to a C-string. This call allocates
-//  memory for the string which should be disposed of using QTSS_Delete.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-//              QTSS_BadIndex: Attempt to get non-existent index.
-QTSS_Error QTSS_GetValueAsString (QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex,
-                                    char** outString);
-
-
-/********************************************************************/
 //  QTSS_TypeStringToType
 //  QTSS_TypeToTypeString
 //
@@ -2010,9 +1997,6 @@ QTSS_Error  QTSS_Authenticate(  const char* inAuthUserName,
 //  Returns:            QTSS_NoErr
 //                      QTSS_BadArgument
 QTSS_Error    QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObject, char** outAuthRealm, bool* outAuthUserAllowed);
-
-void        QTSS_LockStdLib();
-void        QTSS_UnlockStdLib();
 
 // Get HLS Sessions(json)
 void*	Easy_GetRTSPPushSessions();

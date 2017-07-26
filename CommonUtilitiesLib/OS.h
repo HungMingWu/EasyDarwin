@@ -117,9 +117,6 @@ public:
 	// CPU Load
 	static float  GetCurrentCPULoadPercent();
 
-	// Mutex for StdLib calls
-	static OSMutex* GetStdLibMutex() { return &sStdLibOSMutex; }
-
 	static int64_t   InitialMSec() { return sInitialMsec; }
 	static float  StartTimeMilli_Float() { return (float)((double)((int64_t)OS::Milliseconds() - (int64_t)OS::InitialMSec()) / (double) 1000.0); }
 	static int64_t   StartTimeMilli_Int() { return (OS::Milliseconds() - OS::InitialMSec()); }

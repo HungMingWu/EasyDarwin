@@ -123,8 +123,8 @@ void RTCPNaduPacket::GetTestPacket(StrPtrLen* resultPtr)
 	*/
 
 #if 1 //full receiver report with SDES and Nadu
-	uint32_t  *theWriterStart = (uint32_t*)sRTCPTestBuffer;
-	uint32_t  *theWriter = (uint32_t*)sRTCPTestBuffer;
+	auto  *theWriterStart = (uint32_t*)sRTCPTestBuffer;
+	auto  *theWriter = (uint32_t*)sRTCPTestBuffer;
 
 	*(theWriter++) = htonl(0x81c90007);     // 1 RR  packet header, full report
 	*(theWriter++) = htonl(0x2935F2D6);     // 1 Sender SSRC = 691401430
@@ -300,7 +300,7 @@ bool RTCPNaduPacket::ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLeng
 	if (!this->ParseNaduPacket(inPacketBuffer, inPacketLength))
 		return false;
 
-	uint32_t *naduDataBuffer = (uint32_t *)(this->GetPacketBuffer() + kNaduDataOffset);
+	auto *naduDataBuffer = (uint32_t *)(this->GetPacketBuffer() + kNaduDataOffset);
 
 	int wordsLen = this->GetPacketLength() - 2;
 	if (wordsLen < 3) // min is 3
@@ -393,7 +393,7 @@ uint32_t RTCPNaduPacket::GetSSRC(int32_t index)
 		return 0;
 
 	uint32_t *blockBufferPtr = fNaduDataBuffer + (index * 3);
-	uint32_t ssrc = (uint32_t)ntohl(*(uint32_t*)&blockBufferPtr[kOffsetNaduSSRC]);
+	auto ssrc = (uint32_t)ntohl(*(uint32_t*)&blockBufferPtr[kOffsetNaduSSRC]);
 
 	return ssrc;
 
@@ -411,7 +411,7 @@ uint16_t RTCPNaduPacket::GetPlayOutDelay(int32_t index)
 		return 0;
 
 	uint32_t *blockBufferPtr = fNaduDataBuffer + (index * 3);
-	uint16_t delay = (uint16_t)((ntohl(*(uint32_t*)&blockBufferPtr[kOffsetNaduPlayoutDelay])  & kPlayoutMask) >> 16);
+	auto delay = (uint16_t)((ntohl(*(uint32_t*)&blockBufferPtr[kOffsetNaduPlayoutDelay])  & kPlayoutMask) >> 16);
 
 	return delay;
 }
@@ -428,7 +428,7 @@ uint16_t RTCPNaduPacket::GetNSN(int32_t index)
 		return 0;
 
 	uint32_t *blockBufferPtr = fNaduDataBuffer + (index * 3);
-	uint16_t nsn = (uint16_t)(ntohl(blockBufferPtr[kOffsetNSN]) & kNSNMask);
+	auto nsn = (uint16_t)(ntohl(blockBufferPtr[kOffsetNSN]) & kNSNMask);
 
 	return nsn;
 }
@@ -445,7 +445,7 @@ uint16_t RTCPNaduPacket::GetNUN(int32_t index)
 		return 0;
 
 	uint32_t *blockBufferPtr = fNaduDataBuffer + (index * 3);
-	uint16_t nun = (uint16_t)((ntohl(blockBufferPtr[kOffsetNUN]) & kNUNMask) >> 16);
+	auto nun = (uint16_t)((ntohl(blockBufferPtr[kOffsetNUN]) & kNUNMask) >> 16);
 
 	return nun;
 }

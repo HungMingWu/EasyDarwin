@@ -207,7 +207,7 @@ SDPLineSorter::SDPLineSorter(const SDPContainer &rawSDPContainer, float adjustMe
 			{
 				StringParser bLineParser(&sdpLine);
 				bLineParser.ConsumeUntilDigit();
-				uint32_t bandwidth = (uint32_t)(.5 + (adjustMediaBandwidthPercent * (float)bLineParser.ConsumeInteger()));
+				auto bandwidth = (uint32_t)(.5 + (adjustMediaBandwidthPercent * (float)bLineParser.ConsumeInteger()));
 				if (bandwidth < 1)
 					bandwidth = 1;
 

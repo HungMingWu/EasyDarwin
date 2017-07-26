@@ -284,7 +284,7 @@ void EasyUtil::DelChar(std::string & sInput, char ch)
 unsigned char* EasyUtil::Urldecode(unsigned char* encd, unsigned char* decd)
 {
 	int j, i;
-	char *cd = (char*)encd;
+	auto *cd = (char*)encd;
 	char p[2];
 	unsigned int num;
 	j = 0;

@@ -186,14 +186,14 @@ public:
 	bool ParseReport(uint8_t* inPacketBuffer, uint32_t inPacketLength) override;
 	int64_t GetNTPTimeStamp()
 	{
-		uint32_t* fieldPtr = (uint32_t*)&fReceiverPacketBuffer[kSRPacketNTPTimeStampMSW];
+		auto* fieldPtr = (uint32_t*)&fReceiverPacketBuffer[kSRPacketNTPTimeStampMSW];
 		int64_t timestamp = ntohl(*fieldPtr);
 		fieldPtr = (uint32_t*)&fReceiverPacketBuffer[kSRPacketNTPTimeStampLSW];
 		return (timestamp << 32) | ntohl(*fieldPtr);
 	}
 	uint32_t GetRTPTimeStamp()
 	{
-		uint32_t* fieldPtr = (uint32_t*)&fReceiverPacketBuffer[kSRPacketRTPTimeStamp];
+		auto* fieldPtr = (uint32_t*)&fReceiverPacketBuffer[kSRPacketRTPTimeStamp];
 		return ntohl(*fieldPtr);
 	}
 protected:
@@ -210,42 +210,42 @@ protected:
 /**************  RTCPPacket  inlines **************/
 inline int RTCPPacket::GetVersion()
 {
-	uint32_t* theVersionPtr = (uint32_t*)&fReceiverPacketBuffer[kVersionOffset];
+	auto* theVersionPtr = (uint32_t*)&fReceiverPacketBuffer[kVersionOffset];
 	uint32_t theVersion = ntohl(*theVersionPtr);
 	return (int)((theVersion  & kVersionMask) >> kVersionShift);
 }
 
 inline bool RTCPPacket::GetHasPadding()
 {
-	uint32_t* theHasPaddingPtr = (uint32_t*)&fReceiverPacketBuffer[kHasPaddingOffset];
+	auto* theHasPaddingPtr = (uint32_t*)&fReceiverPacketBuffer[kHasPaddingOffset];
 	uint32_t theHasPadding = ntohl(*theHasPaddingPtr);
 	return (bool)(theHasPadding & kHasPaddingMask);
 }
 
 inline int RTCPPacket::GetReportCount()
 {
-	uint32_t* theReportCountPtr = (uint32_t*)&fReceiverPacketBuffer[kReportCountOffset];
+	auto* theReportCountPtr = (uint32_t*)&fReceiverPacketBuffer[kReportCountOffset];
 	uint32_t theReportCount = ntohl(*theReportCountPtr);
 	return (int)((theReportCount & kReportCountMask) >> kReportCountShift);
 }
 
 inline uint8_t RTCPPacket::GetPacketType()
 {
-	uint32_t* thePacketTypePtr = (uint32_t*)&fReceiverPacketBuffer[kPacketTypeOffset];
+	auto* thePacketTypePtr = (uint32_t*)&fReceiverPacketBuffer[kPacketTypeOffset];
 	uint32_t thePacketType = ntohl(*thePacketTypePtr);
 	return (uint8_t)((thePacketType & kPacketTypeMask) >> kPacketTypeShift);
 }
 
 inline uint16_t RTCPPacket::GetPacketLength()
 {
-	uint32_t* fieldPtr = (uint32_t*)&fReceiverPacketBuffer[kPacketLengthOffset];
+	auto* fieldPtr = (uint32_t*)&fReceiverPacketBuffer[kPacketLengthOffset];
 	uint32_t field = ntohl(*fieldPtr);
 	return (uint16_t)(field & kPacketLengthMask);
 }
 
 inline uint32_t RTCPPacket::GetPacketSSRC()
 {
-	uint32_t* fieldPtr = (uint32_t*)&fReceiverPacketBuffer[kPacketSourceIDOffset];
+	auto* fieldPtr = (uint32_t*)&fReceiverPacketBuffer[kPacketSourceIDOffset];
 	uint32_t field = ntohl(*fieldPtr);
 	return field;
 }

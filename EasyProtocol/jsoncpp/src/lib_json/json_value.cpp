@@ -85,7 +85,7 @@ namespace Json {
 		if (length >= (size_t)Value::maxInt)
 			length = Value::maxInt - 1;
 
-		char* newString = static_cast<char*>(malloc(length + 1));
+		auto* newString = static_cast<char*>(malloc(length + 1));
 		if (newString == nullptr) {
 			throwRuntimeError(
 				"in Json::Value::duplicateStringValue(): "
@@ -108,7 +108,7 @@ namespace Json {
 			"in Json::Value::duplicateAndPrefixStringValue(): "
 			"length too big for prefixing");
 		unsigned actualLength = length + static_cast<unsigned>(sizeof(unsigned)) + 1U;
-		char* newString = static_cast<char*>(malloc(actualLength));
+		auto* newString = static_cast<char*>(malloc(actualLength));
 		if (newString == nullptr) {
 			throwRuntimeError(
 				"in Json::Value::duplicateAndPrefixStringValue(): "
@@ -517,7 +517,7 @@ namespace Json {
 			}
 		case arrayValue:
 		case objectValue: {
-				int delta = int(value_.map_->size() - other.value_.map_->size());
+				auto delta = int(value_.map_->size() - other.value_.map_->size());
 				if (delta)
 					return delta < 0;
 				return (*value_.map_) < (*other.value_.map_);
@@ -917,7 +917,7 @@ namespace Json {
 		if (type_ == nullValue)
 			*this = Value(arrayValue);
 		CZString key(index);
-		ObjectValues::iterator it = value_.map_->lower_bound(key);
+		auto it = value_.map_->lower_bound(key);
 		if (it != value_.map_->end() && (*it).first == key)
 			return (*it).second;
 
@@ -972,7 +972,7 @@ namespace Json {
 			*this = Value(objectValue);
 		CZString actualKey(
 			key, static_cast<unsigned>(strlen(key)), CZString::noDuplication); // NOTE!
-		ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
+		auto it = value_.map_->lower_bound(actualKey);
 		if (it != value_.map_->end() && (*it).first == actualKey)
 			return (*it).second;
 
@@ -992,7 +992,7 @@ namespace Json {
 			*this = Value(objectValue);
 		CZString actualKey(
 			key, static_cast<unsigned>(cend - key), CZString::duplicateOnCopy);
-		ObjectValues::iterator it = value_.map_->lower_bound(actualKey);
+		auto it = value_.map_->lower_bound(actualKey);
 		if (it != value_.map_->end() && (*it).first == actualKey)
 			return (*it).second;
 
@@ -1080,7 +1080,7 @@ namespace Json {
 			return false;
 		}
 		CZString actualKey(key, static_cast<unsigned>(cend - key), CZString::noDuplication);
-		ObjectValues::iterator it = value_.map_->find(actualKey);
+		auto it = value_.map_->find(actualKey);
 		if (it == value_.map_->end())
 			return false;
 		*removed = it->second;
@@ -1116,7 +1116,7 @@ namespace Json {
 			return false;
 		}
 		CZString key(index);
-		ObjectValues::iterator it = value_.map_->find(key);
+		auto it = value_.map_->find(key);
 		if (it == value_.map_->end()) {
 			return false;
 		}
@@ -1129,7 +1129,7 @@ namespace Json {
 		}
 		// erase the last one ("leftover")
 		CZString keyLast(oldSize - 1);
-		ObjectValues::iterator itLast = value_.map_->find(keyLast);
+		auto itLast = value_.map_->find(keyLast);
 		value_.map_->erase(itLast);
 		return true;
 	}
@@ -1428,7 +1428,7 @@ namespace Json {
 	void Path::makePath(const std::string& path, const InArgs& in) {
 		const char* current = path.c_str();
 		const char* end = current + path.length();
-		InArgs::const_iterator itInArg = in.begin();
+		auto itInArg = in.begin();
 		while (current != end) {
 			if (*current == '[') {
 				++current;
@@ -1480,7 +1480,7 @@ namespace Json {
 
 	const Value& Path::resolve(const Value& root) const {
 		const Value* node = &root;
-		for (Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
+		for (auto it = args_.begin(); it != args_.end(); ++it) {
 			const PathArgument& arg = *it;
 			if (arg.kind_ == PathArgument::kindIndex) {
 				if (!node->isArray() || !node->isValidIndex(arg.index_)) {
@@ -1504,7 +1504,7 @@ namespace Json {
 
 	Value Path::resolve(const Value& root, const Value& defaultValue) const {
 		const Value* node = &root;
-		for (Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
+		for (auto it = args_.begin(); it != args_.end(); ++it) {
 			const PathArgument& arg = *it;
 			if (arg.kind_ == PathArgument::kindIndex) {
 				if (!node->isArray() || !node->isValidIndex(arg.index_))
@@ -1524,7 +1524,7 @@ namespace Json {
 
 	Value& Path::make(Value& root) const {
 		Value* node = &root;
-		for (Args::const_iterator it = args_.begin(); it != args_.end(); ++it) {
+		for (auto it = args_.begin(); it != args_.end(); ++it) {
 			const PathArgument& arg = *it;
 			if (arg.kind_ == PathArgument::kindIndex) {
 				if (!node->isArray()) {

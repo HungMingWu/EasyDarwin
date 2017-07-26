@@ -146,7 +146,7 @@ const char* QueryParamList::DoFindCGIValueForParam(char* name)
 
 	if (node != nullptr)
 	{
-		QueryParamListElement* nvPair = (QueryParamListElement*)node->fElement;
+		auto* nvPair = (QueryParamListElement*)node->fElement;
 
 		return  nvPair->mValue;
 	}

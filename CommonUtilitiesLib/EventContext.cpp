@@ -304,7 +304,7 @@ void EventThread::Entry()
 			OSRef* ref = fRefTable.Resolve(&idStr);
 			if (ref != nullptr)
 			{
-				EventContext* theContext = (EventContext*)ref->GetObject();
+				auto* theContext = (EventContext*)ref->GetObject();
 #if DEBUG
 				theContext->fModwatched = false;
 #endif

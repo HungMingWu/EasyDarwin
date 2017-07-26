@@ -96,8 +96,8 @@ void   RTCPAckPacket::Dump()
 	name[4] = 0;
 
 	::memcpy(name, &fRTCPAckBuffer[kAppPacketTypeOffset], 4);
-	uint16_t numBufferBytes = (uint16_t)((7 * theAckMaskSizeInBits) + 1);
-	char *maskBytesBuffer = new char[numBufferBytes];
+	auto numBufferBytes = (uint16_t)((7 * theAckMaskSizeInBits) + 1);
+	auto *maskBytesBuffer = new char[numBufferBytes];
 	OSCharArrayDeleter deleter(maskBytesBuffer);
 	maskBytesBuffer[0] = 0;
 	maskBytesBuffer[numBufferBytes - 1] = 0;

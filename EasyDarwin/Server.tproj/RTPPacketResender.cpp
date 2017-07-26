@@ -241,7 +241,7 @@ RTPResenderEntry*   RTPPacketResender::GetEmptyEntry(uint16_t inSeqNum, uint32_t
 	if (fPacketsInList == fPacketArraySize) // allocate a new array
 	{
 		fPacketArraySize += kPacketArrayIncreaseInterval;
-		RTPResenderEntry* tempArray = (RTPResenderEntry*)new char[sizeof(RTPResenderEntry) * fPacketArraySize];
+		auto* tempArray = (RTPResenderEntry*)new char[sizeof(RTPResenderEntry) * fPacketArraySize];
 		::memset(tempArray, 0, sizeof(RTPResenderEntry) * fPacketArraySize);
 		::memcpy(tempArray, fPacketArray, sizeof(RTPResenderEntry) * fPacketsInList);
 		delete[] fPacketArray;
@@ -317,7 +317,7 @@ void RTPPacketResender::AddPacket(void * inRTPPacket, uint32_t packetSize, int32
 
 	// we compute a re-transmit timeout based on the Karns RTT esmitate
 
-	uint16_t* theSeqNumP = (uint16_t*)inRTPPacket;
+	auto* theSeqNumP = (uint16_t*)inRTPPacket;
 	uint16_t theSeqNum = ntohs(theSeqNumP[1]);
 
 	if (ageLimit > 0)

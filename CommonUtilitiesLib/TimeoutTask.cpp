@@ -83,7 +83,7 @@ int64_t TimeoutTaskThread::Run()
 
 	for (OSQueueIter iter(&fQueue); !iter.IsDone(); iter.Next())
 	{
-		TimeoutTask* theTimeoutTask = (TimeoutTask*)iter.GetCurrent()->GetEnclosingObject();
+		auto* theTimeoutTask = (TimeoutTask*)iter.GetCurrent()->GetEnclosingObject();
 
 		//if it's time to time this task out, signal it
 		if ((theTimeoutTask->fTimeoutAtThisTime > 0) && (curTime >= theTimeoutTask->fTimeoutAtThisTime))

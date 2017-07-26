@@ -40,7 +40,7 @@ void*   OSBufferPool::Get()
 	if (fQueue.GetLength() == 0)
 	{
 		fTotNumBuffers++;
-		char* theNewBuf = new char[fBufSize + sizeof(OSQueueElem)];
+		auto* theNewBuf = new char[fBufSize + sizeof(OSQueueElem)];
 
 		//
 		// We need to construct a Queue Element, but we don't actually need

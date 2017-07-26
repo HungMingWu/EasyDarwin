@@ -306,7 +306,7 @@ template <class T> class PLDoubleLinkedList
                         
         static void     DoClearList( PLDoubleLinkedListNode<T> *node, void * listPtr )
                         {
-                            PLDoubleLinkedList<T> *list = (PLDoubleLinkedList<T> *)listPtr;
+                            auto *list = (PLDoubleLinkedList<T> *)listPtr;
                             
                             list->RemoveNode( node );
                             

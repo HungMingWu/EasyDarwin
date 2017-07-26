@@ -496,7 +496,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 		uint32_t curLen = ::strlen(profile->groups[index]);
 		if (curLen < maxLen)
 		{
-			char* groupWithPaddedZeros = new char[maxLen];  // memory allocated
+			auto* groupWithPaddedZeros = new char[maxLen];  // memory allocated
 			::memcpy(groupWithPaddedZeros, profile->groups[index], curLen);
 			::memset(groupWithPaddedZeros + curLen, '\0', maxLen - curLen);
 			(void)QTSS_SetValue(theUserProfile, qtssUserGroups, index, (void*)groupWithPaddedZeros, maxLen);

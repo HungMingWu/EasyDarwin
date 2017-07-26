@@ -136,7 +136,7 @@ QTSS_Error HTTPClientRequestStream::ReadRequest()
 		{
 			if (fRequest.Len < 4)
 				continue;
-			uint16_t* dataLenP = (uint16_t*)fRequest.Ptr;
+			auto* dataLenP = (uint16_t*)fRequest.Ptr;
 			uint32_t interleavedPacketLen = ntohs(dataLenP[1]) + 4;
 			if (interleavedPacketLen > fRequest.Len)
 				continue;
@@ -246,7 +246,7 @@ QTSS_Error HTTPClientRequestStream::ReadRequest()
 QTSS_Error HTTPClientRequestStream::Read(void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead)
 {
 	uint32_t theLengthRead = 0;
-	uint8_t* theIoBuffer = (uint8_t*)ioBuffer;
+	auto* theIoBuffer = (uint8_t*)ioBuffer;
 
 	//
 	// If there are retreat bytes available, read them first.

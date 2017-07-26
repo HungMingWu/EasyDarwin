@@ -384,7 +384,7 @@ QTSS_Error  RTPSessionOutput::TrackRTCPBaseTime(QTSS_RTPStreamObject *theStreamP
 				return QTSS_NoErr;
 
 			int64_t arrivalTimeDiffMSecs = (firstStreamArrivalTime - fBaseArrivalTime);// + fBufferDelayMSecs;//add the buffer delay !! not sure about faster than real time arrival times....
-			uint32_t timeDiffStreamTime = (uint32_t)(((double)arrivalTimeDiffMSecs / (double) 1000.0) * (double)streamTimeScale);
+			auto timeDiffStreamTime = (uint32_t)(((double)arrivalTimeDiffMSecs / (double) 1000.0) * (double)streamTimeScale);
 			baseTimeStamp = firstStreamTime - timeDiffStreamTime;
 			if (QTSS_NoErr == QTSS_SetValue(*theStreamPtr, sBaseRTPTimeStampAttr, 0, (void*)&baseTimeStamp, sizeof(baseTimeStamp)))
 				haveBaseTime = true;
@@ -418,9 +418,9 @@ QTSS_Error  RTPSessionOutput::RewriteRTCP(QTSS_RTPStreamObject *theStreamPtr, St
 	QTSS_GetValue(*theStreamPtr, sFirstRTPTimeStampAttr, 0, (void*)&rtpTime, &theLen);
 
 
-	uint32_t* theReport = (uint32_t*)inPacketStrPtr->Ptr;
+	auto* theReport = (uint32_t*)inPacketStrPtr->Ptr;
 	theReport += 2; // point to the NTP time stamp
-	int64_t* theNTPTimestampP = (int64_t*)theReport;
+	auto* theNTPTimestampP = (int64_t*)theReport;
 	*theNTPTimestampP = OS::HostToNetworkSInt64(OS::TimeMilli_To_1900Fixed64Secs(*currentTimePtr)); // time now
 
 	uint32_t baseTimeStamp = 0;
@@ -437,7 +437,7 @@ QTSS_Error  RTPSessionOutput::RewriteRTCP(QTSS_RTPStreamObject *theStreamPtr, St
 		packetOffset = 0;
 
 	double rtpTimeFromStart = (double)packetOffset / (double) 1000.0;
-	uint32_t rtpTimeFromStartInScale = (uint32_t)(double)((double)streamTimeScale * rtpTimeFromStart);
+	auto rtpTimeFromStartInScale = (uint32_t)(double)((double)streamTimeScale * rtpTimeFromStart);
 	//printf("rtptime offset time =%f in scale =%"   _U32BITARG_   "\n", rtpTimeFromStart, rtpTimeFromStartInScale );
 
 	theReport += 2; // point to the rtp time stamp of "now" synched and scaled in stream time
@@ -667,7 +667,7 @@ uint16_t RTPSessionOutput::GetPacketSeqNumber(StrPtrLen* inPacket)
 		return 0;
 
 	//The RTP seq number is the second short of the packet
-	uint16_t* seqNumPtr = (uint16_t*)inPacket->Ptr;
+	auto* seqNumPtr = (uint16_t*)inPacket->Ptr;
 	return ntohs(seqNumPtr[1]);
 }
 
@@ -677,7 +677,7 @@ void RTPSessionOutput::SetPacketSeqNumber(StrPtrLen* inPacket, uint16_t inSeqNum
 		return;
 
 	//The RTP seq number is the second short of the packet
-	uint16_t* seqNumPtr = (uint16_t*)inPacket->Ptr;
+	auto* seqNumPtr = (uint16_t*)inPacket->Ptr;
 	seqNumPtr[1] = htons(inSeqNumber);
 }
 

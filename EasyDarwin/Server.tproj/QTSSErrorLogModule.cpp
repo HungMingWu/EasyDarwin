@@ -233,7 +233,7 @@ QTSS_Error LogError(QTSS_RoleParamPtr inParamBlock)
 	if (inParamBlock->errorParams.inBuffer == nullptr)
 		return QTSS_NoErr;
 
-	uint16_t verbLvl = (uint16_t)inParamBlock->errorParams.inVerbosity;
+	auto verbLvl = (uint16_t)inParamBlock->errorParams.inVerbosity;
 	if (verbLvl >= qtssIllegalVerbosity)
 		verbLvl = qtssFatalVerbosity;
 

@@ -226,7 +226,7 @@ uint8_t RTSPSessionInterface::GetTwoChannelNumbers(StrPtrLen* inRTSPSessionID)
 	//
 	// Reallocate the Ch# to Session ID Map
 	uint32_t numChannelEntries = fCurChannelNum >> 1;
-	StrPtrLen* newMap = new StrPtrLen[numChannelEntries];
+	auto* newMap = new StrPtrLen[numChannelEntries];
 	if (fChNumToSessIDMap != nullptr)
 	{
 		Assert(numChannelEntries > 1);
@@ -414,7 +414,7 @@ void    RTSPSessionInterface::SnarfInputSocket(RTSPSessionInterface* fromRTSPSes
 
 void* RTSPSessionInterface::SetupParams(QTSSDictionary* inSession, uint32_t* /*outLen*/)
 {
-	RTSPSessionInterface* theSession = (RTSPSessionInterface*)inSession;
+	auto* theSession = (RTSPSessionInterface*)inSession;
 
 	theSession->fLocalAddr = theSession->fSocket.GetLocalAddr();
 	theSession->fRemoteAddr = theSession->fSocket.GetRemoteAddr();

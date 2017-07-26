@@ -419,7 +419,7 @@ void SocketUtils::Initialize(bool lookupDNSName)
 
 	//allocate the IPAddrInfo array. Unfortunately we can't allocate this
 	//array the proper way due to a GCC bug
-	uint8_t* addrInfoMem = new uint8_t[sizeof(IPAddrInfo) * sNumIPAddrs];
+	auto* addrInfoMem = new uint8_t[sizeof(IPAddrInfo) * sNumIPAddrs];
 	::memset(addrInfoMem, 0, sizeof(IPAddrInfo) * sNumIPAddrs);
 	sIPAddrInfoArray = (IPAddrInfo*)addrInfoMem;
 
@@ -481,7 +481,7 @@ void SocketUtils::Initialize(bool lookupDNSName)
 		//Only count interfaces in the AF_INET family
 		if (ifr->ifr_addr.sa_family == AF_INET)
 		{
-			struct sockaddr_in* addrPtr = (struct sockaddr_in*)&ifr->ifr_addr;
+			auto* addrPtr = (struct sockaddr_in*)&ifr->ifr_addr;
 			char* theAddrStr = ::inet_ntoa(addrPtr->sin_addr);
 
 			//store the IP addr

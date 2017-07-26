@@ -267,7 +267,7 @@ char* QTSSModuleUtils::GetFullPath( QTSS_RTSPRequestObject inRequest,
     if (suffix != nullptr)
         *outLen += suffix->Len;
     
-    char* theFullPath = new char[*outLen];
+    auto* theFullPath = new char[*outLen];
     
     //write all the pieces of the path into this new buffer.
     StringFormatter thePathFormatter(theFullPath, *outLen);
@@ -305,7 +305,7 @@ QTSS_Error  QTSSModuleUtils::AppendRTPMetaInfoHeader(   QTSS_RTSPRequestObject i
     
     while (theHeader.Ptr <= (theEndP - sizeof(RTPMetaInfoPacket::FieldName)))
     {
-        RTPMetaInfoPacket::FieldName* theFieldName = (RTPMetaInfoPacket::FieldName*)theHeader.Ptr;
+        auto* theFieldName = (RTPMetaInfoPacket::FieldName*)theHeader.Ptr;
         ::memcpy (&fieldNameValue, theFieldName, sizeof(uint16_t));
 
         RTPMetaInfoPacket::FieldIndex theFieldIndex = RTPMetaInfoPacket::GetFieldIndexForName(ntohs(fieldNameValue));
@@ -617,7 +617,7 @@ char*   QTSSModuleUtils::CoalesceVectors(iovec* inVec, uint32_t inNumVectors, ui
     if (inTotalLength == 0)
         return nullptr;
     
-    char* buffer = new char[inTotalLength];
+    auto* buffer = new char[inTotalLength];
     uint32_t bufferOffset = 0;
     
     for (uint32_t index = 0; index < inNumVectors; index++)
@@ -770,7 +770,7 @@ char*   QTSSModuleUtils::GetStringAttribute(QTSS_Object inObject, char* inAttrib
 void    QTSSModuleUtils::GetIOAttribute(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType,
                             void* ioDefaultResultBuffer, uint32_t inBufferLen)
 {
-    char *defaultBuffPtr = new char[inBufferLen];
+    auto *defaultBuffPtr = new char[inBufferLen];
     ::memcpy(defaultBuffPtr,ioDefaultResultBuffer,inBufferLen);
     QTSSModuleUtils::GetAttribute(inObject, inAttributeName, inType, ioDefaultResultBuffer, defaultBuffPtr, inBufferLen);
     delete [] defaultBuffPtr;

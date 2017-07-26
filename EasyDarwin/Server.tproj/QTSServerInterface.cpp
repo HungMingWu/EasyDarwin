@@ -280,7 +280,7 @@ void QTSServerInterface::KillAllRTPSessions()
 	for (OSRefHashTableIter theIter(fRTPMap->GetHashTable()); !theIter.IsDone(); theIter.Next())
 	{
 		OSRef* theRef = theIter.GetCurrent();
-		RTPSessionInterface* theSession = (RTPSessionInterface*)theRef->GetObject();
+		auto* theSession = (RTPSessionInterface*)theRef->GetObject();
 		theSession->Signal(Task::kKillEvent);
 	}
 }
@@ -399,7 +399,7 @@ int64_t RTPStatsUpdaterTask::Run()
 	if (fLastBandwidthTime != 0)
 	{
 		Assert(curTime > fLastBandwidthTime);
-		uint32_t delta = (uint32_t)(curTime - fLastBandwidthTime);
+		auto delta = (uint32_t)(curTime - fLastBandwidthTime);
 		// Prevent divide by zero errror
 		if (delta < 1000) {
 			WarnV(delta >= 1000, "delta < 1000");
@@ -440,14 +440,14 @@ int64_t RTPStatsUpdaterTask::Run()
 	if ((fLastBandwidthAvg != 0) && (curTime > (fLastBandwidthAvg +
 		(theServer->GetPrefs()->GetAvgBandwidthUpdateTimeInSecs() * 1000))))
 	{
-		uint32_t delta = (uint32_t)(curTime - fLastBandwidthAvg);
+		auto delta = (uint32_t)(curTime - fLastBandwidthAvg);
 		int64_t bytesSent = theServer->fTotalRTPBytes - fLastBytesSent;
 		Assert(bytesSent >= 0);
 
 		//do the bandwidth computation using floating point divides
 		//for accuracy and speed.
-		float bits = (float)(bytesSent * 8);
-		float theAvgTime = (float)delta;
+		auto bits = (float)(bytesSent * 8);
+		auto theAvgTime = (float)delta;
 		theAvgTime /= 1000;
 		bits /= theAvgTime;
 		Assert(bits >= 0);
@@ -491,7 +491,7 @@ RTPSessionInterface* RTPStatsUpdaterTask::GetNewestSession(OSRefTable* inRTPSess
 	for (OSRefHashTableIter theIter(inRTPSessionMap->GetHashTable()); !theIter.IsDone(); theIter.Next())
 	{
 		OSRef* theRef = theIter.GetCurrent();
-		RTPSessionInterface* theSession = (RTPSessionInterface*)theRef->GetObject();
+		auto* theSession = (RTPSessionInterface*)theRef->GetObject();
 		Assert(theSession->GetSessionCreateTime() > 0);
 		if (theSession->GetSessionCreateTime() > theNewestPlayTime)
 		{
@@ -506,7 +506,7 @@ RTPSessionInterface* RTPStatsUpdaterTask::GetNewestSession(OSRefTable* inRTPSess
 
 void* QTSServerInterface::CurrentUnixTimeMilli(QTSSDictionary* inServer, uint32_t* outLen)
 {
-	QTSServerInterface* theServer = (QTSServerInterface*)inServer;
+	auto* theServer = (QTSServerInterface*)inServer;
 	theServer->fCurrentTime_UnixMilli = OS::TimeMilli_To_UnixTimeMilli(OS::Milliseconds());
 
 	// Return the result
@@ -516,7 +516,7 @@ void* QTSServerInterface::CurrentUnixTimeMilli(QTSSDictionary* inServer, uint32_
 
 void* QTSServerInterface::GetTotalUDPSockets(QTSSDictionary* inServer, uint32_t* outLen)
 {
-	QTSServerInterface* theServer = (QTSServerInterface*)inServer;
+	auto* theServer = (QTSServerInterface*)inServer;
 	// Multiply by 2 because this is returning the number of socket *pairs*
 	theServer->fTotalUDPSockets = theServer->fSocketPool->GetSocketQueue()->GetLength() * 2;
 
@@ -527,7 +527,7 @@ void* QTSServerInterface::GetTotalUDPSockets(QTSSDictionary* inServer, uint32_t*
 
 void* QTSServerInterface::IsOutOfDescriptors(QTSSDictionary* inServer, uint32_t* outLen)
 {
-	QTSServerInterface* theServer = (QTSServerInterface*)inServer;
+	auto* theServer = (QTSServerInterface*)inServer;
 
 	theServer->fIsOutOfDescriptors = false;
 	for (uint32_t x = 0; x < theServer->fNumListeners; x++)
@@ -547,7 +547,7 @@ void* QTSServerInterface::GetNumUDPBuffers(QTSSDictionary* inServer, uint32_t* o
 {
 	// This param retrieval function must be invoked each time it is called,
 	// because whether we are out of descriptors or not is continually changing
-	QTSServerInterface* theServer = (QTSServerInterface*)inServer;
+	auto* theServer = (QTSServerInterface*)inServer;
 
 	theServer->fNumUDPBuffers = RTPPacketResender::GetNumRetransmitBuffers();
 
@@ -560,7 +560,7 @@ void* QTSServerInterface::GetNumWastedBytes(QTSSDictionary* inServer, uint32_t* 
 {
 	// This param retrieval function must be invoked each time it is called,
 	// because whether we are out of descriptors or not is continually changing
-	QTSServerInterface* theServer = (QTSServerInterface*)inServer;
+	auto* theServer = (QTSServerInterface*)inServer;
 
 	theServer->fUDPWastageInBytes = RTPPacketResender::GetWastedBufferBytes();
 

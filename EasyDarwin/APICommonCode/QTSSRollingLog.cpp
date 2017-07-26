@@ -258,7 +258,7 @@ bool QTSSRollingLog::CheckRollLog()
         if (-1 != calendarTime)
         {
             double theExactInterval = ::difftime(calendarTime, logCreateTimeMidnight);
-            int32_t theCurInterval = (int32_t)::floor(theExactInterval);
+            auto theCurInterval = (int32_t)::floor(theExactInterval);
             
             //transfer_roll_interval is in days, theCurInterval is in seconds
             int32_t theRollInterval = this->GetRollIntervalInDays() * 60 * 60 * 24;
@@ -506,7 +506,7 @@ int64_t QTSSRollingLog::Run()
             Assert(-1 != calendarTime);
             double theExactInterval = ::difftime(calendarTime, logRollTimeMidnight);
             if(theExactInterval > 0) {
-                uint32_t theCurInterval = (uint32_t)::floor(theExactInterval);
+                auto theCurInterval = (uint32_t)::floor(theExactInterval);
                 if (theCurInterval >= theRollInterval)
                     this->RollLog();
             }

@@ -150,7 +150,7 @@ inline uint32_t RTCPCompressedQTSSPacket::GetQTSSReportSourceID()
 inline uint16_t RTCPCompressedQTSSPacket::GetQTSSPacketVersion()
 {
 	uint32_t field = ((uint32_t*)this->GetPacketBuffer())[kQTSSPacketVersionOffset];
-	uint16_t vers = (uint16_t)((ntohl(field) & kQTSSPacketVersionMask) >> kQTSSPacketVersionShift);
+	auto vers = (uint16_t)((ntohl(field) & kQTSSPacketVersionMask) >> kQTSSPacketVersionShift);
 	return vers;
 }
 

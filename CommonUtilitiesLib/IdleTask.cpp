@@ -78,7 +78,7 @@ IdleTaskThread::Entry()
 		//pop elements out of the heap as long as their timeout time has arrived
 		while ((fIdleHeap.CurrentHeapSize() > 0) && (fIdleHeap.PeekMin()->GetValue() <= msec))
 		{
-			IdleTask* elem = (IdleTask*)fIdleHeap.ExtractMin()->GetEnclosingObject();
+			auto* elem = (IdleTask*)fIdleHeap.ExtractMin()->GetEnclosingObject();
 			Assert(elem != nullptr);
 			elem->Signal(Task::kIdleEvent);
 		}
@@ -91,7 +91,7 @@ IdleTaskThread::Entry()
 			//because sleep takes a 32 bit number
 			timeoutTime -= msec;
 			Assert(timeoutTime > 0);
-			uint32_t smallTime = (uint32_t)timeoutTime;
+			auto smallTime = (uint32_t)timeoutTime;
 			fHeapCond.Wait(&fHeapMutex, smallTime);
 		}
 	}

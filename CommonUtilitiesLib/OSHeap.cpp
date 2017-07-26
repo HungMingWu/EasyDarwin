@@ -53,7 +53,7 @@ void OSHeap::Insert(OSHeapElem* inElem)
 	if ((fHeap == nullptr) || (fFreeIndex == fArraySize))
 	{
 		fArraySize *= 2;
-		OSHeapElem** tempArray = new OSHeapElem*[fArraySize];
+		auto** tempArray = new OSHeapElem*[fArraySize];
 		if ((fHeap != nullptr) && (fFreeIndex > 1))
 			memcpy(tempArray, fHeap, sizeof(OSHeapElem*) * fFreeIndex);
 

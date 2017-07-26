@@ -469,7 +469,7 @@ int64_t OS::TimeMilli_To_Fixed64Secs(int64_t inMilliseconds)
 	// 2**32, divide by 1000, effectively this gives (rem/1000) as a
 	// binary fraction.
 	double p = ldexp((double)(inMilliseconds % 1000), +32) / 1000.;
-	uint32_t frac = (uint32_t)p;
+	auto frac = (uint32_t)p;
 	result |= frac;
 	return result;
 }

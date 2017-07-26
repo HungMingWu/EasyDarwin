@@ -177,7 +177,7 @@ namespace EasyDarwin { namespace Protocol
 	{
 		SetHeaderValue(EASY_TAG_CSEQ, cseq);
 
-		for (EasyJsonValue::iterator it = body.begin(); it != body.end(); ++it)
+		for (auto it = body.begin(); it != body.end(); ++it)
 		{
 			SetBodyValue(it->first.c_str(), boost::apply_visitor(EasyJsonValueVisitor(), it->second));
 		}

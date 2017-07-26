@@ -77,7 +77,7 @@ StrPtrLen * QueryURI::NextSegment(StrPtrLen *currentPathPtr, StrPtrLen *outNextP
 			//printf("QueryURI::NextSegment currentPathPtr="); PRINT_STR(currentPathPtr);
 
 			uint32_t len = (PointerSizedInt)&(theURLPtr->Ptr[theURLPtr->Len - 1]) - ((PointerSizedInt)currentPathPtr->Ptr + (currentPathPtr->Len - 1));
-			char *startPtr = (char *)((PointerSizedInt)currentPathPtr->Ptr + currentPathPtr->Len);
+			auto *startPtr = (char *)((PointerSizedInt)currentPathPtr->Ptr + currentPathPtr->Len);
 			StrPtrLen tempPath(startPtr, len);
 
 
@@ -629,7 +629,7 @@ void QueryURI::ParseQueryString(StringParser *parserPtr, StrPtrLen *urlStreamPtr
 
 		}
 	}
-	uint32_t len = (uint32_t)((PointerSizedInt)stopCharPtr - (PointerSizedInt)startCharPtr);
+	auto len = (uint32_t)((PointerSizedInt)stopCharPtr - (PointerSizedInt)startCharPtr);
 	if (len < QueryURI::eMaxBufferSize)
 	{
 		if (len > 0)
@@ -667,7 +667,7 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 {
 	if (inStream != nullptr)
 	{
-		char * decodedRequest = new char[inStream->Len + 1];
+		auto * decodedRequest = new char[inStream->Len + 1];
 		Assert(decodedRequest != nullptr);
 		decodedRequest[inStream->Len] = 0;
 		OSCharArrayDeleter decodedRequestDeleter(decodedRequest);

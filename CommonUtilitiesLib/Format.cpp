@@ -536,8 +536,8 @@ void Format(std::string& result, const std::string& fmt, const std::vector<boost
 {
 	std::string::const_iterator itFmt = fmt.begin();
 	std::string::const_iterator endFmt = fmt.end();
-	std::vector<boost::any>::const_iterator itVal = values.begin();
-	std::vector<boost::any>::const_iterator endVal = values.end();
+	auto itVal = values.begin();
+	auto endVal = values.end();
 	while (itFmt != endFmt)
 	{
 		switch (*itFmt)
@@ -552,7 +552,7 @@ void Format(std::string& result, const std::string& fmt, const std::vector<boost
 					std::size_t index = parseIndex(itFmt, endFmt);
 					if (index < values.size())
 					{
-						std::vector<boost::any>::const_iterator it = values.begin() + index;
+						auto it = values.begin() + index;
 						FormatOne(result, itFmt, endFmt, it);
 					}
 					else throw std::invalid_argument("Format argument index out of range");

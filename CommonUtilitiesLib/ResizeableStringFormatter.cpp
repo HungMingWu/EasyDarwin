@@ -39,7 +39,7 @@ bool ResizeableStringFormatter::BufferIsFull(char* inBuffer, uint32_t inBufferLe
 	if (theNewBufferSize == 0)
 		theNewBufferSize = 64;
 
-	char* theNewBuffer = new char[theNewBufferSize];
+	auto* theNewBuffer = new char[theNewBufferSize];
 	::memcpy(theNewBuffer, inBuffer, inBufferLen);
 
 	//if the old buffer was dynamically allocated also, we'd better delete it.

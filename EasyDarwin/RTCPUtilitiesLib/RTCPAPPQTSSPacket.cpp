@@ -119,9 +119,9 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, uint32_t in
 		// individual APP packet fields can be 6 bytes or 4 bytes or 8 bytes. So we have to
 		// use the 4-byte align protection functions. Sparc and MIPS processors will crash otherwise
 		uint32_t theHeader = ntohl(OS::GetUInt32FromMemory((uint32_t*)&qtssDataBuffer[kQTSSItemTypeOffset]));
-		uint16_t itemType = (uint16_t)((theHeader & kQTSSItemTypeMask) >> kQTSSItemTypeShift);
-		uint8_t itemVersion = (uint8_t)((theHeader & kQTSSItemVersionMask) >> kQTSSItemVersionShift);
-		uint8_t itemLengthInBytes = (uint8_t)(theHeader & kQTSSItemLengthMask);
+		auto itemType = (uint16_t)((theHeader & kQTSSItemTypeMask) >> kQTSSItemTypeShift);
+		auto itemVersion = (uint8_t)((theHeader & kQTSSItemVersionMask) >> kQTSSItemVersionShift);
+		auto itemLengthInBytes = (uint8_t)(theHeader & kQTSSItemLengthMask);
 
 		APPEND_TO_DUMP_ARRAY("\n       h_type=%.2s(", (char*)&itemType);
 		APPEND_TO_DUMP_ARRAY(", h_vers=%u", itemVersion);

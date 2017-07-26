@@ -273,7 +273,7 @@ void RTPSessionInterface::UpdateBitRateInternal(const int64_t& curTime)
 
 void* RTPSessionInterface::TimeConnected(QTSSDictionary* inSession, uint32_t* outLen)
 {
-	RTPSessionInterface* theSession = (RTPSessionInterface*)inSession;
+	auto* theSession = (RTPSessionInterface*)inSession;
 	theSession->fTimeConnected = (OS::Milliseconds() - theSession->GetSessionCreateTime());
 
 	// Return the result
@@ -283,7 +283,7 @@ void* RTPSessionInterface::TimeConnected(QTSSDictionary* inSession, uint32_t* ou
 
 void* RTPSessionInterface::CurrentBitRate(QTSSDictionary* inSession, uint32_t* outLen)
 {
-	RTPSessionInterface* theSession = (RTPSessionInterface*)inSession;
+	auto* theSession = (RTPSessionInterface*)inSession;
 	theSession->UpdateBitRateInternal(OS::Milliseconds());
 
 	// Return the result
@@ -294,7 +294,7 @@ void* RTPSessionInterface::CurrentBitRate(QTSSDictionary* inSession, uint32_t* o
 
 void* RTPSessionInterface::PacketLossPercent(QTSSDictionary* inSession, uint32_t* outLen)
 {
-	RTPSessionInterface* theSession = (RTPSessionInterface*)inSession;
+	auto* theSession = (RTPSessionInterface*)inSession;
 	RTPStream* theStream = nullptr;
 	uint32_t theLen = sizeof(theStream);
 
@@ -345,7 +345,7 @@ void RTPSessionInterface::CreateDigestAuthenticationNonce() {
 
 	// Calculate nonce: MD5 of sessionid:timestamp
 	int64_t curTime = OS::Milliseconds();
-	char* curTimeStr = new char[128];
+	auto* curTimeStr = new char[128];
 	sprintf(curTimeStr, "%" _64BITARG_ "d", curTime);
 
 	// Delete old nonce before creating a new one
@@ -391,11 +391,11 @@ void RTPSessionInterface::SetChallengeParams(QTSS_AuthScheme scheme, uint32_t qo
 			int64_t theMicroseconds = OS::Microseconds();
 			::srand((unsigned int)theMicroseconds);
 			uint32_t randomNum = ::rand();
-			char* randomNumStr = new char[128];
+			auto* randomNumStr = new char[128];
 			sprintf(randomNumStr, "%"   _U32BITARG_   "", randomNum);
 			int len = ::strlen(randomNumStr);
 			fAuthOpaque.Len = Base64encode_len(len);
-			char *opaqueStr = new char[fAuthOpaque.Len];
+			auto *opaqueStr = new char[fAuthOpaque.Len];
 			(void)Base64encode(opaqueStr, randomNumStr, len);
 			delete[] randomNumStr;                 // Don't need this anymore
 			if (fAuthOpaque.Ptr != nullptr)             // Delete existing pointer before assigning new
@@ -427,11 +427,11 @@ void RTPSessionInterface::UpdateDigestAuthChallengeParams(bool newNonce, bool cr
 		int64_t theMicroseconds = OS::Microseconds();
 		::srand((unsigned int)theMicroseconds);
 		uint32_t randomNum = ::rand();
-		char* randomNumStr = new char[128];
+		auto* randomNumStr = new char[128];
 		sprintf(randomNumStr, "%"   _U32BITARG_   "", randomNum);
 		int len = ::strlen(randomNumStr);
 		fAuthOpaque.Len = Base64encode_len(len);
-		char *opaqueStr = new char[fAuthOpaque.Len];
+		auto *opaqueStr = new char[fAuthOpaque.Len];
 		(void)Base64encode(opaqueStr, randomNumStr, len);
 		delete[] randomNumStr;                 // Don't need this anymore
 		if (fAuthOpaque.Ptr != nullptr)             // Delete existing pointer before assigning new

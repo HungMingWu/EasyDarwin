@@ -257,7 +257,7 @@ void XMLPrefsParser::AddPrefValue(ContainerRef pref, char* inNewValue)
 		{
 			// it already has a value, so change the pref to be a list pref and go to code below
 			char* firstValue = pref->GetValue();
-			XMLTag* value = new XMLTag(kValue);
+			auto* value = new XMLTag(kValue);
 			value->SetValue(firstValue);
 
 			pref->SetTagName(kListPref);
@@ -269,7 +269,7 @@ void XMLPrefsParser::AddPrefValue(ContainerRef pref, char* inNewValue)
 	// we want to fall through from second case above, so this isn't an else
 	if (!strcmp(pref->GetTagName(), kListPref))
 	{
-		XMLTag* value = new XMLTag(kValue);
+		auto* value = new XMLTag(kValue);
 		value->SetValue(inNewValue);
 		pref->AddEmbeddedTag(value);
 	}
@@ -287,7 +287,7 @@ void XMLPrefsParser::AddNewObject(ContainerRef pref)
 	if (!strcmp(pref->GetTagName(), kObject))
 	{
 		// change the object to be an object list and go to code below
-		XMLTag* subObject = new XMLTag(kObject);
+		auto* subObject = new XMLTag(kObject);
 		XMLTag* objectPref;
 		// copy all this objects tags into the new listed object
 		while ((objectPref = pref->GetEmbeddedTag()) != nullptr)
@@ -303,7 +303,7 @@ void XMLPrefsParser::AddNewObject(ContainerRef pref)
 	// we want to fall through from second case above, so this isn't an else
 	if (!strcmp(pref->GetTagName(), kObjectList))
 	{
-		XMLTag* subObject = new XMLTag(kObject);
+		auto* subObject = new XMLTag(kObject);
 		pref->AddEmbeddedTag(subObject);
 	}
 }

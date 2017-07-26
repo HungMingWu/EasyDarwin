@@ -155,7 +155,7 @@ QTSS_Error QTSSDataConverter::StringToValue(char* inValueAsString,
 			return QTSS_NotEnoughSpace;
 		}
 
-		bool* it = (bool*)ioBuffer;
+		auto* it = (bool*)ioBuffer;
 		StrPtrLen theValuePtr(inValueAsString);
 		if (kEnabledStr.EqualIgnoreCase(inValueAsString, ::strlen(inValueAsString)))
 			*it = true;
@@ -262,7 +262,7 @@ QTSS_Error QTSSDataConverter::ConvertCHexStringToBytes(char* inValueAsString,
 		return QTSS_NotEnoughSpace;
 	}
 
-	uint8_t* dataPtr = (uint8_t*)ioBuffer;
+	auto* dataPtr = (uint8_t*)ioBuffer;
 	uint8_t char1, char2;
 	while (*inValueAsString)
 	{
@@ -280,10 +280,10 @@ QTSS_Error QTSSDataConverter::ConvertCHexStringToBytes(char* inValueAsString,
 
 char* QTSSDataConverter::ConvertBytesToCHexString(void* inValue, const uint32_t inValueLen)
 {
-	uint8_t* theDataPtr = (uint8_t*)inValue;
+	auto* theDataPtr = (uint8_t*)inValue;
 	uint32_t len = inValueLen * 2;
 
-	char *theString = new char[len + 1];
+	auto *theString = new char[len + 1];
 	char *resultStr = theString;
 	if (theString != nullptr)
 	{
@@ -314,7 +314,7 @@ char* QTSSDataConverter::ValueToString(void* inValue,
 	}
 	if (inType == qtssAttrDataTypeBool16)
 	{
-		bool* theBoolPtr = (bool*)inValue;
+		auto* theBoolPtr = (bool*)inValue;
 		if (*theBoolPtr)
 			return kEnabledStr.GetAsCString();
 		else
@@ -324,7 +324,7 @@ char* QTSSDataConverter::ValueToString(void* inValue,
 	//
 	// With these other types, its impossible to tell how big they'll
 	// be, so just allocate some buffer and hope we fit.
-	char* theString = new char[128];
+	auto* theString = new char[128];
 
 	//
 	// If this is another type, format the string into that type

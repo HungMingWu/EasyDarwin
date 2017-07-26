@@ -46,7 +46,7 @@ RTCPSRPacket::RTCPSRPacket()
 	uint32_t cNameLen = RTCPSRPacket::GetACName(theTempCName);
 
 	//write the SR & SDES headers
-	uint32_t* theSRWriter = (uint32_t*)&fSenderReportBuffer;
+	auto* theSRWriter = (uint32_t*)&fSenderReportBuffer;
 	*theSRWriter = htonl(0x80c80006);
 	theSRWriter += 7; //number of uint32_ts in an SR.
 
@@ -71,7 +71,7 @@ RTCPSRPacket::RTCPSRPacket()
 
 	//
 	// Write the SERVER INFO APP packet
-	uint32_t* theAckInfoWriter = (uint32_t*)&fSenderReportBuffer[fSenderReportSize];
+	auto* theAckInfoWriter = (uint32_t*)&fSenderReportBuffer[fSenderReportSize];
 	*theAckInfoWriter = htonl(0x81cc0006);
 	theAckInfoWriter += 2;
 	*(theAckInfoWriter++) = htonl(FOUR_CHARS_TO_INT('q', 't', 's', 'i')); // Ack Info APP name
@@ -80,7 +80,7 @@ RTCPSRPacket::RTCPSRPacket()
 	*(theAckInfoWriter++) = htonl(FOUR_CHARS_TO_INT('a', 't', 0, 4));
 	fSenderReportWithServerInfoSize = (char*)(theAckInfoWriter + 1) - fSenderReportBuffer;
 
-	uint32_t* theByeWriter = (uint32_t*)&fSenderReportBuffer[fSenderReportWithServerInfoSize];
+	auto* theByeWriter = (uint32_t*)&fSenderReportBuffer[fSenderReportWithServerInfoSize];
 	*theByeWriter = htonl(0x81cb0001);
 }
 

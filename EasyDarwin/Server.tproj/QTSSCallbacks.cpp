@@ -90,7 +90,7 @@ void    QTSSCallbacks::QTSS_ConvertToUnixTime(int64_t *inQTSS_MilliSecondsPtr, t
 
 QTSS_Error  QTSSCallbacks::QTSS_AddRole(QTSS_Role inRole)
 {
-	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
+	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
 	if (OSThread::GetCurrent() != nullptr)
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 
@@ -144,7 +144,7 @@ QTSS_Error  QTSSCallbacks::QTSS_AddAttribute(QTSS_ObjectType inType, const char*
 QTSS_Error  QTSSCallbacks::QTSS_AddStaticAttribute(QTSS_ObjectType inObjectType, const char* inAttrName, void* inUnused, QTSS_AttrDataType inAttrDataType)
 {
 	Assert(inUnused == nullptr);
-	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
+	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
 	if (OSThread::GetCurrent() != nullptr)
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 
@@ -437,7 +437,7 @@ QTSS_Error  QTSSCallbacks::QTSS_OpenFileObject(char* inPath, QTSS_OpenFileFlags 
 
 	//
 	// Create a new file object
-	QTSSFile* theNewFile = new QTSSFile();
+	auto* theNewFile = new QTSSFile();
 	QTSS_Error theErr = theNewFile->Open(inPath, inFlags);
 
 	if (theErr != QTSS_NoErr)
@@ -453,7 +453,7 @@ QTSS_Error  QTSSCallbacks::QTSS_CloseFileObject(QTSS_Object inFileObject)
 	if (inFileObject == nullptr)
 		return QTSS_BadArgument;
 
-	QTSSFile* theFile = (QTSSFile*)inFileObject;
+	auto* theFile = (QTSSFile*)inFileObject;
 
 	theFile->Close();
 	delete theFile;
@@ -483,7 +483,7 @@ QTSS_Error  QTSSCallbacks::QTSS_DestroySocketStream(QTSS_StreamRef inStream)
 	//
 	// Note that the QTSSSocket destructor will call close on its file descriptor.
 	// Calling module should not also close the file descriptor! (This is noted in the API)
-	QTSSSocket* theSocket = (QTSSSocket*)inStream;
+	auto* theSocket = (QTSSSocket*)inStream;
 	delete theSocket;
 	return QTSS_NoErr;
 }
@@ -491,7 +491,7 @@ QTSS_Error  QTSSCallbacks::QTSS_DestroySocketStream(QTSS_StreamRef inStream)
 
 QTSS_Error  QTSSCallbacks::QTSS_AddService(const char* inServiceName, QTSS_ServiceFunctionPtr inFunctionPtr)
 {
-	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
+	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
 	if (OSThread::GetCurrent() != nullptr)
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 
@@ -523,7 +523,7 @@ QTSS_Error  QTSSCallbacks::QTSS_DoService(QTSS_ServiceID inID, QTSS_ServiceFunct
 		return QTSS_IllegalService;
 
 	// Get the service function 
-	QTSS_ServiceFunctionPtr theFunction = (QTSS_ServiceFunctionPtr)theMap->GetAttrFunction(theIndex);
+	auto theFunction = (QTSS_ServiceFunctionPtr)theMap->GetAttrFunction(theIndex);
 
 	// Invoke it, return the result.    
 	return (theFunction)(inArgs);
@@ -652,7 +652,7 @@ QTSS_Error  QTSSCallbacks::QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_Event
 {
 	// First thing to do is to alter the thread's module state to reflect the fact
 	// that an event is outstanding.
-	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
+	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
 	if (OSThread::GetCurrent() != nullptr)
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 
@@ -665,7 +665,7 @@ QTSS_Error  QTSSCallbacks::QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_Event
 	theState->eventRequested = true;
 
 	// Now, tell this stream to be ready for the requested event
-	QTSSStream* theStream = (QTSSStream*)inStream;
+	auto* theStream = (QTSSStream*)inStream;
 	theStream->SetTask(theState->curTask);
 	theStream->RequestEvent(inEventMask);
 	return QTSS_NoErr;
@@ -676,7 +676,7 @@ QTSS_Error  QTSSCallbacks::QTSS_SignalStream(QTSS_StreamRef inStream)
 	if (inStream == nullptr)
 		return QTSS_BadArgument;
 
-	QTSSStream* theStream = (QTSSStream*)inStream;
+	auto* theStream = (QTSSStream*)inStream;
 	if (theStream->GetTask() != nullptr)
 		theStream->GetTask()->Signal(Task::kReadEvent);
 	return QTSS_NoErr;
@@ -684,7 +684,7 @@ QTSS_Error  QTSSCallbacks::QTSS_SignalStream(QTSS_StreamRef inStream)
 
 QTSS_Error  QTSSCallbacks::QTSS_SetIdleTimer(int64_t inMsecToWait)
 {
-	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
+	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
 	if (OSThread::GetCurrent() != nullptr)
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 
@@ -703,7 +703,7 @@ QTSS_Error  QTSSCallbacks::QTSS_SetIdleTimer(int64_t inMsecToWait)
 QTSS_Error  QTSSCallbacks::QTSS_SetIdleRoleTimer(int64_t inMsecToWait)
 {
 
-	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
+	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
 	if (OSThread::GetCurrent() != nullptr)
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 
@@ -726,7 +726,7 @@ QTSS_Error  QTSSCallbacks::QTSS_SetIdleRoleTimer(int64_t inMsecToWait)
 
 QTSS_Error  QTSSCallbacks::QTSS_RequestLockedCallback()
 {
-	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
+	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
 	if (OSThread::GetCurrent() != nullptr)
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 
@@ -744,7 +744,7 @@ QTSS_Error  QTSSCallbacks::QTSS_RequestLockedCallback()
 
 bool      QTSSCallbacks::QTSS_IsGlobalLocked()
 {
-	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
+	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
 	if (OSThread::GetCurrent() != nullptr)
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 
@@ -760,7 +760,7 @@ bool      QTSSCallbacks::QTSS_IsGlobalLocked()
 
 QTSS_Error  QTSSCallbacks::QTSS_UnlockGlobalLock()
 {
-	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
+	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
 	if (OSThread::GetCurrent() != nullptr)
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 
@@ -792,7 +792,7 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 
 	// First create a RTSPRequestInterface object 
 	// There is no session attached to it, so just pass in NULL for the RTSPSession
-	RTSPRequestInterface *request = (RTSPRequestInterface *)ioAuthRequestObject;
+	auto *request = (RTSPRequestInterface *)ioAuthRequestObject;
 	// Set all the attributes required by the authentication module, using the input values
 	(void)request->SetValue(qtssRTSPReqUserName, 0, inAuthUserName, ::strlen(inAuthUserName), QTSSDictionary::kDontObeyReadOnly);
 	(void)request->SetValue(qtssRTSPReqLocalPath, 0, inAuthResourceLocalPath, ::strlen(inAuthResourceLocalPath), QTSSDictionary::kDontObeyReadOnly);
@@ -806,7 +806,7 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 	// Because this is a role being executed from inside a callback, we need to
 	// make sure that QTSS_RequestEvent will not work.
 	Task* curTask = nullptr;
-	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
+	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
 	if (OSThread::GetCurrent() != nullptr)
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 
@@ -871,14 +871,14 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 
 QTSS_Error	QTSSCallbacks::QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObject, char** outAuthRealm, bool* outAuthUserAllowed)
 {
-	RTSPRequestInterface* request = (RTSPRequestInterface *)inAuthRequestObject;
+	auto* request = (RTSPRequestInterface *)inAuthRequestObject;
 	if (request == nullptr)
 		return QTSS_BadArgument;
 
 	// Because this is a role being executed from inside a callback, we need to
 	// make sure that QTSS_RequestEvent will not work.
 	Task* curTask = nullptr;
-	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
+	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
 	if (OSThread::GetCurrent() != nullptr)
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 
@@ -975,13 +975,13 @@ void* QTSSCallbacks::Easy_GetRTSPPushSessions()
 	for (OSRefHashTableIter theIter(reflectorSessionMap->GetHashTable()); !theIter.IsDone(); theIter.Next())
 	{
 		OSRef* theRef = theIter.GetCurrent();
-		ReflectorSession* theSession = (ReflectorSession*)theRef->GetObject();
+		auto* theSession = (ReflectorSession*)theRef->GetObject();
 
 		EasyDarwinRTSPSession session;
 		session.index = uIndex;
 		char* fullRequestURL = nullptr;
 
-		RTPSession* clientSession = (RTPSession*)theSession->GetBroadcasterSession();
+		auto* clientSession = (RTPSession*)theSession->GetBroadcasterSession();
 
 		if (clientSession == nullptr) continue;
 
@@ -1001,7 +1001,7 @@ void* QTSSCallbacks::Easy_GetRTSPPushSessions()
 	string msg = ack.GetMsg();
 
 	uint32_t theMsgLen = strlen(msg.c_str());
-	char* retMsg = new char[theMsgLen + 1];
+	auto* retMsg = new char[theMsgLen + 1];
 	retMsg[theMsgLen] = '\0';
 	strncpy(retMsg, msg.c_str(), strlen(msg.c_str()));
 	return (void*)retMsg;

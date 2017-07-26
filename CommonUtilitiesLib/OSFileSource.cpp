@@ -425,7 +425,7 @@ OS_Error OSFileSource::ReadFromCache(uint64_t inPosition, void* inBuffer, uint32
 	char* buffStart = nullptr;
 	int64_t buffCopyLen = inLength;
 	int64_t bytesToCopy = inLength;
-	char* buffOut = (char*)inBuffer;
+	auto* buffOut = (char*)inBuffer;
 	bool fillBuff = true;
 	char* buffOffset = nullptr;
 

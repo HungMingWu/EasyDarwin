@@ -1416,7 +1416,7 @@ QTSS_Error RTSPSession::PreFilterForHTTPProxyTunnel()
 	}
 
 	OSRefReleaser theRefReleaser(sHTTPProxyTunnelMap, rtspSessionRef); // auto release this ref
-	RTSPSession* theOtherSession = (RTSPSession*)theRefReleaser.GetRef()->GetObject();
+	auto* theOtherSession = (RTSPSession*)theRefReleaser.GetRef()->GetObject();
 
 	// We must lock down this session, for we (may) be manipulating its socket & input
 	// stream, and therefore it cannot be in the process of reading data or processing a request.
@@ -1477,7 +1477,7 @@ OSRef* RTSPSession::RegisterRTSPSessionIntoHTTPProxyTunnelMap(QTSS_RTSPSessionTy
 	if (theRef == nullptr)
 		return &fProxyRef;
 
-	RTSPSession* rtspSession = (RTSPSession*)theRef->GetObject();
+	auto* rtspSession = (RTSPSession*)theRef->GetObject();
 
 	// we can be the only user of the object right now
 	Assert(theRef->GetRefCount() > 0);
@@ -1994,7 +1994,7 @@ uint32_t RTSPSession::GenerateNewSessionID(char* ioBuffer)
 			for (uint32_t theCount = 0; theCount < theFirstRandom; theIter.Next(), theCount++)
 				Assert(!theIter.IsDone());
 
-			RTPSession* theSession = (RTPSession*)theIter.GetCurrent()->GetObject();
+			auto* theSession = (RTPSession*)theIter.GetCurrent()->GetObject();
 			theFirstRandom += theSession->GetPacketsSent();
 			theFirstRandom += (uint32_t)theSession->GetSessionCreateTime();
 			theFirstRandom += (uint32_t)theSession->GetPlayTime();
@@ -2016,7 +2016,7 @@ uint32_t RTSPSession::GenerateNewSessionID(char* ioBuffer)
 	::srand((unsigned int)theSecondRandom);
 	theSecondRandom = ::rand();
 
-	int64_t theSessionID = (int64_t)theFirstRandom;
+	auto theSessionID = (int64_t)theFirstRandom;
 	theSessionID <<= 32;
 	theSessionID += (int64_t)theSecondRandom;
 	sprintf(ioBuffer, "%" _64BITARG_ "d", theSessionID);
@@ -2132,7 +2132,7 @@ void RTSPSession::HandleIncomingDataPacket()
 {
 
 	// Attempt to find the RTP session for this request.
-	uint8_t   packetChannel = (uint8_t)fInputStream.GetRequestBuffer()->Ptr[1];
+	auto   packetChannel = (uint8_t)fInputStream.GetRequestBuffer()->Ptr[1];
 	StrPtrLen* theSessionID = this->GetSessionIDForChannelNum(packetChannel);
 
 	if (theSessionID == nullptr)

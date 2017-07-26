@@ -339,7 +339,7 @@ float StringParser::ConsumeFloat()
 	}
 	if ((fStartGet < fEndGet) && (*fStartGet == '.'))
 		advanceMark();
-	float multiplier = (float) .1;
+	auto multiplier = (float) .1;
 	while ((fStartGet < fEndGet) && (*fStartGet >= '0') && (*fStartGet <= '9'))
 	{
 		theFloat += (multiplier * (*fStartGet - '0'));

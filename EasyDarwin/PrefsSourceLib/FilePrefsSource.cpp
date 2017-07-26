@@ -210,7 +210,7 @@ bool FilePrefsSource::FilePrefsConfigSetter(const char* paramName, const char* p
 	*/
 	int     valueIndex = 0;
 
-	FilePrefsSource *theFilePrefs = (FilePrefsSource*)userData;
+	auto *theFilePrefs = (FilePrefsSource*)userData;
 
 	Assert(theFilePrefs);
 	Assert(paramName);

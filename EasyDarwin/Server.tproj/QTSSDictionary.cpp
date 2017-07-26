@@ -151,7 +151,7 @@ QTSS_Error QTSSDictionary::GetValuePtr(QTSS_AttributeID inAttrID, uint32_t inInd
 	// strings need an extra dereference - moved it up
 	if ((theMap->GetAttrType(theMapIndex) == qtssAttrDataTypeCharArray) && (theAttrs[theMapIndex].fNumAttributes > 1))
 	{
-		char** string = (char**)theBuffer;
+		auto** string = (char**)theBuffer;
 		*outValueBuffer = *string;
 		//*outValueLen = strlen(*string) + 1;
 		*outValueLen = strlen(*string);
@@ -330,7 +330,7 @@ QTSS_Error QTSSDictionary::SetValue(QTSS_AttributeID inAttrID, uint32_t inIndex,
 				// instead of directly using the old storage as the old storage didn't 
 				// have its string null terminated
 			uint32_t tempStringLen = theAttrs[theMapIndex].fAttributeData.Len;
-			char* temp = new char[tempStringLen + 1];
+			auto* temp = new char[tempStringLen + 1];
 			::memcpy(temp, theAttrs[theMapIndex].fAttributeData.Ptr, tempStringLen);
 			temp[tempStringLen] = '\0';
 			delete[] theAttrs[theMapIndex].fAttributeData.Ptr;
@@ -369,7 +369,7 @@ QTSS_Error QTSSDictionary::SetValue(QTSS_AttributeID inAttrID, uint32_t inIndex,
 			theLen = attrLen;   // most attributes are single valued, so allocate just enough space
 		else
 			theLen = 2 * (attrLen * (inIndex + 1));// Allocate twice as much as we need
-		char* theNewBuffer = new char[theLen];
+		auto* theNewBuffer = new char[theLen];
 		if (inIndex > 0)
 		{
 			// Copy out the old attribute data
@@ -403,12 +403,12 @@ QTSS_Error QTSSDictionary::SetValue(QTSS_AttributeID inAttrID, uint32_t inIndex,
 		//attributeBufferPtr = new char[inLen];
 		// allocating one extra so that we can null terminate the string
 		attributeBufferPtr = new char[inLen + 1];
-		char* tempBuffer = (char*)attributeBufferPtr;
+		auto* tempBuffer = (char*)attributeBufferPtr;
 		tempBuffer[inLen] = '\0';
 
 		//char** valuePtr = (char**)theAttrs[theMapIndex].fAttributeData.Ptr + (inLen * inIndex);
 		// The offset should be (attrLen * inIndex) and not (inLen * inIndex) 
-		char** valuePtr = (char**)(theAttrs[theMapIndex].fAttributeData.Ptr + (attrLen * inIndex));
+		auto** valuePtr = (char**)(theAttrs[theMapIndex].fAttributeData.Ptr + (attrLen * inIndex));
 		if (inIndex < numValues)    // we're replacing an existing string
 			delete[] * valuePtr;
 		*valuePtr = (char*)attributeBufferPtr;
@@ -698,7 +698,7 @@ QTSS_Error  QTSSDictionary::AddInstanceAttribute(const char* inAttrName,
 			theNewArraySize = QTSSDictionaryMap::kMinArraySize;
 		Assert(theNewArraySize > fInstanceMap->GetNumAttrs());
 
-		DictValueElement* theNewArray = new DictValueElement[theNewArraySize];
+		auto* theNewArray = new DictValueElement[theNewArraySize];
 		if (fInstanceAttrs != nullptr)
 		{
 			::memcpy(theNewArray, fInstanceAttrs, sizeof(DictValueElement) * fInstanceArraySize);
@@ -810,7 +810,7 @@ void QTSSDictionary::DeleteAttributeData(DictValueElement* inDictValues,
 			if ((theMap->GetAttrType(x) == qtssAttrDataTypeCharArray) &&
 				(inDictValues[x].fNumAttributes > 1)) {
 				uint32_t z = 0;
-				for (char **y = (char **)(inDictValues[x].fAttributeData.Ptr);
+				for (auto **y = (char **)(inDictValues[x].fAttributeData.Ptr);
 					z < inDictValues[x].fNumAttributes; z++)
 					delete[] y[z];
 			}
@@ -920,7 +920,7 @@ QTSS_Error QTSSDictionaryMap::AddAttribute(const char* inAttrName,
 		if (theNewArraySize == 0)
 			theNewArraySize = kMinArraySize;
 
-		QTSSAttrInfoDict** theNewArray = new QTSSAttrInfoDict*[theNewArraySize];
+		auto** theNewArray = new QTSSAttrInfoDict*[theNewArraySize];
 		::memset(theNewArray, 0, sizeof(QTSSAttrInfoDict*) * theNewArraySize);
 		if (fAttrArray != nullptr)
 		{
@@ -1141,7 +1141,7 @@ QTSS_ObjectType QTSSDictionaryMap::CreateNewMap()
 		return 0;
 
 	sDictionaryMaps[sNextDynamicMap] = new QTSSDictionaryMap(0);
-	QTSS_ObjectType result = (QTSS_ObjectType)sNextDynamicMap;
+	auto result = (QTSS_ObjectType)sNextDynamicMap;
 	sNextDynamicMap++;
 
 	return result;

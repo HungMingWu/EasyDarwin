@@ -206,7 +206,7 @@ void    HTTPSessionInterface::SnarfInputSocket(HTTPSessionInterface* fromRTSPSes
 
 void* HTTPSessionInterface::SetupParams(QTSSDictionary* inSession, uint32_t* /*outLen*/)
 {
-	HTTPSessionInterface* theSession = (HTTPSessionInterface*)inSession;
+	auto* theSession = (HTTPSessionInterface*)inSession;
 
 	theSession->fLocalAddr = theSession->fSocket.GetLocalAddr();
 	theSession->fRemoteAddr = theSession->fSocket.GetRemoteAddr();

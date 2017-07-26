@@ -156,13 +156,13 @@ QTSServer::~QTSServer()
 	//
 	// Grab the server mutex. This is to make sure all gets & set values on this
 	// object complete before we start deleting stuff
-	OSMutexLocker* serverlocker = new OSMutexLocker(this->GetServerObjectMutex());
+	auto* serverlocker = new OSMutexLocker(this->GetServerObjectMutex());
 
 	//
 	// Grab the prefs mutex. This is to make sure we can't reread prefs
 	// WHILE shutting down, which would cause some weirdness for QTSS API
 	// (some modules could get QTSS_RereadPrefs_Role after QTSS_Shutdown, which would be bad)
-	OSMutexLocker* locker = new OSMutexLocker(this->GetPrefs()->GetMutex());
+	auto* locker = new OSMutexLocker(this->GetPrefs()->GetMutex());
 
 	QTSS_ModuleState theModuleState;
 	theModuleState.curRole = QTSS_Shutdown_Role;
@@ -239,7 +239,7 @@ bool QTSServer::Initialize(XMLPrefsParser* inPrefsSource, PrefsSource* inMessage
 	//
 	// Load ERROR LOG module only. This is good in case there is a startup error.
 
-	QTSSModule* theLoggingModule = new QTSSModule("QTSSErrorLogModule");
+	auto* theLoggingModule = new QTSSModule("QTSSErrorLogModule");
 	(void)theLoggingModule->SetupModule(&sCallbacks, &QTSSErrorLogModule_Main);
 	(void)AddModule(theLoggingModule);
 	this->BuildModuleRoleArrays();
@@ -455,7 +455,7 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 	// Now figure out which of these ports we are *already* listening on.
 	// If we already are listening on that port, just move the pointer to the
 	// listener over to the new array
-	TCPListenerSocket** newListenerArray = new TCPListenerSocket*[theTotalRTSPPortTrackers + theTotalHTTPPortTrackers];
+	auto** newListenerArray = new TCPListenerSocket*[theTotalRTSPPortTrackers + theTotalHTTPPortTrackers];
 	uint32_t curPortIndex = 0;
 
 	// RTSPPortTrackers check
@@ -653,7 +653,7 @@ uint16_t* QTSServer::GetRTSPPorts(QTSServerPrefs* inPrefs, uint32_t* outNumPorts
 	if (*outNumPortsPtr == 0)
 		return nullptr;
 
-	uint16_t* thePortArray = new uint16_t[*outNumPortsPtr];
+	auto* thePortArray = new uint16_t[*outNumPortsPtr];
 
 	for (uint32_t theIndex = 0; theIndex < *outNumPortsPtr; theIndex++)
 	{
@@ -748,29 +748,29 @@ void    QTSServer::LoadCompiledInModules()
 	// (void)myModule->Initialize(&sCallbacks, &__MODULE_MAIN_ROUTINE__);
 	// (void)AddModule(myModule);
 
-	QTSSModule* theReflectorModule = new QTSSModule("QTSSReflectorModule");
+	auto* theReflectorModule = new QTSSModule("QTSSReflectorModule");
 	(void)theReflectorModule->SetupModule(&sCallbacks, &QTSSReflectorModule_Main);
 	(void)AddModule(theReflectorModule);
 
-	QTSSModule* theAccessLog = new QTSSModule("QTSSAccessLogModule");
+	auto* theAccessLog = new QTSSModule("QTSSAccessLogModule");
 	(void)theAccessLog->SetupModule(&sCallbacks, &QTSSAccessLogModule_Main);
 	(void)AddModule(theAccessLog);
 
-	QTSSModule* theFlowControl = new QTSSModule("QTSSFlowControlModule");
+	auto* theFlowControl = new QTSSModule("QTSSFlowControlModule");
 	(void)theFlowControl->SetupModule(&sCallbacks, &QTSSFlowControlModule_Main);
 	(void)AddModule(theFlowControl);
 
-	QTSSModule* theFileSysModule = new QTSSModule("QTSSPosixFileSysModule");
+	auto* theFileSysModule = new QTSSModule("QTSSPosixFileSysModule");
 	(void)theFileSysModule->SetupModule(&sCallbacks, &QTSSPosixFileSysModule_Main);
 	(void)AddModule(theFileSysModule);
 
 	if (this->GetPrefs()->CloudPlatformEnabled())
 	{
-		QTSSModule* theCMSModule = new QTSSModule("EasyCMSModule");
+		auto* theCMSModule = new QTSSModule("EasyCMSModule");
 		(void)theCMSModule->SetupModule(&sCallbacks, &EasyCMSModule_Main);
 		(void)AddModule(theCMSModule);
 
-		QTSSModule* theRedisModule = new QTSSModule("EasyRedisModule");
+		auto* theRedisModule = new QTSSModule("EasyRedisModule");
 		(void)theRedisModule->SetupModule(&sCallbacks, &EasyRedisModule_Main);
 		(void)AddModule(theRedisModule);
 	}
@@ -787,7 +787,7 @@ void    QTSServer::LoadCompiledInModules()
 	(void)AddModule(theQTSSDSAuthModule);
 #endif
 
-	QTSSModule* theQTACCESSmodule = new QTSSModule("QTSSAccessModule");
+	auto* theQTACCESSmodule = new QTSSModule("QTSSAccessModule");
 	(void)theQTACCESSmodule->SetupModule(&sCallbacks, &QTSSAccessModule_Main);
 	(void)AddModule(theQTACCESSmodule);
 
@@ -972,7 +972,7 @@ void    QTSServer::CreateModule(char* inModuleFolderPath, char* inModuleName)
 
 	//
 	// Construct a QTSSModule object, and attempt to initialize the module
-	QTSSModule* theNewModule = new QTSSModule(inModuleName, theModPath.GetObject());
+	auto* theNewModule = new QTSSModule(inModuleName, theModPath.GetObject());
 	QTSS_Error theErr = theNewModule->SetupModule(&sCallbacks);
 
 	if (theErr != QTSS_NoErr)
@@ -1030,7 +1030,7 @@ bool QTSServer::AddModule(QTSSModule* inModule)
 
 	//
 	// Give the module object a prefs dictionary. Instance attributes are allowed for these objects.
-	QTSSPrefs* thePrefs = new QTSSPrefs(sPrefsSource, inModule->GetValue(qtssModName), QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kModulePrefsDictIndex), true);
+	auto* thePrefs = new QTSSPrefs(sPrefsSource, inModule->GetValue(qtssModName), QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kModulePrefsDictIndex), true);
 	thePrefs->RereadPreferences();
 	inModule->SetPrefsDict(thePrefs);
 
@@ -1190,7 +1190,7 @@ Task*   RTSPListenerSocket::GetSessionTask(TCPSocket** outSocket)
 	// so that it can direct the "POST" half of the connection to the same machine when tunnelling RTSP thru HTTP
 	bool  doReportHTTPConnectionAddress = QTSServerInterface::GetServer()->GetPrefs()->GetDoReportHTTPConnectionAddress();
 
-	RTSPSession* theTask = new RTSPSession(doReportHTTPConnectionAddress);
+	auto* theTask = new RTSPSession(doReportHTTPConnectionAddress);
 	*outSocket = theTask->GetSocket();  // out socket is not attached to a unix socket yet.
 
 	if (this->OverMaxConnections(0))
@@ -1227,7 +1227,7 @@ Task*   HTTPListenerSocket::GetSessionTask(TCPSocket** outSocket)
 {
 	Assert(outSocket != nullptr);
 
-	HTTPSession* theTask = new HTTPSession();
+	auto* theTask = new HTTPSession();
 	*outSocket = theTask->GetSocket();  // out socket is not attached to a unix socket yet.
 
 	if (this->OverMaxConnections(0))

@@ -187,7 +187,7 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
         
     Assert(fStreamArray == nullptr);
     
-    char *sdpDataCopy = new char[sdpLen];
+    auto *sdpDataCopy = new char[sdpLen];
     Assert(sdpDataCopy != nullptr);
     
     memcpy(sdpDataCopy,sdpData, sdpLen);
@@ -408,7 +408,7 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
     }       
     
     // Add the default buffer delay
-    float bufferDelay = (float) eDefaultBufferDelay;
+    auto bufferDelay = (float) eDefaultBufferDelay;
     if (theGlobalStreamInfo.fBufferDelay != (float) eDefaultBufferDelay)
         bufferDelay = theGlobalStreamInfo.fBufferDelay;
     

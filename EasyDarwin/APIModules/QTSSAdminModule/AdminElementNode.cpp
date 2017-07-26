@@ -445,7 +445,7 @@ ElementNode* ElementNode::CreateArrayAttributeNode(uint32_t index, QTSS_Object s
 	SetFields(index, attributeInfo);
 	fFieldIDs[index].fFieldType = eArrayNode;
 
-	ElementNode* nodePtr = new ElementNode(); ElementNode_InsertPtr(nodePtr, "ElementNode::CreateArrayAttributeNode ElementNode*");
+	auto* nodePtr = new ElementNode(); ElementNode_InsertPtr(nodePtr, "ElementNode::CreateArrayAttributeNode ElementNode*");
 	this->SetElementDataPtr(index, (char *)nodePtr, true);
 	Assert(nodePtr != nullptr);
 	if (nullptr == nodePtr) return nullptr;
@@ -730,7 +730,7 @@ void ElementNode::SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentP
 
 		}
 
-		ElementNode* nodePtr = (ElementNode *)GetElementDataPtr(index);
+		auto* nodePtr = (ElementNode *)GetElementDataPtr(index);
 		if (nodePtr == nullptr)
 		{
 			//printf("ElementNode::SetUpSingleNode %s nodePtr == NULL make new nodePtr index = %" _S32BITARG_ "\n", GetMyName(),index);
@@ -1901,7 +1901,7 @@ void ElementNode::RespondWithSingleElement(QTSS_StreamRef inStream, QueryURI *qu
 
 	if (IsNodeElement(key))
 	{
-		ElementNode *theNodePtr = (ElementNode *)GetElementDataPtr(key);
+		auto *theNodePtr = (ElementNode *)GetElementDataPtr(key);
 		if (theNodePtr)
 		{
 			//printf("ElementNode::RespondWithSingleElement Current Node = %s Call RespondToQuery\n",GetNodeName() );
@@ -2002,7 +2002,7 @@ void ElementNode::RespondWithAllElements(QTSS_StreamRef inStream, QueryURI *quer
 			//printf("ElementNode::RespondWithAllElements FoundNode\n");
 			//printf("ElementNode::RespondWithAllElements currentSegmentPtr="); PRINT_STR(currentSegmentPtr);
 			//printf("ElementNode::RespondWithAllElements nextSegment="); PRINT_STR(&nextSegment);
-			ElementNode *theNodePtr = (ElementNode *)GetElementDataPtr(index);
+			auto *theNodePtr = (ElementNode *)GetElementDataPtr(index);
 
 			if (theNodePtr)
 			{
@@ -2051,7 +2051,7 @@ void ElementNode::RespondWithAllNodes(QTSS_StreamRef inStream, QueryURI *queryPt
 		{
 			//printf("ElementNode::RespondWithAllNodes FoundNode\n");
 			//printf("ElementNode::RespondWithAllNodes currentSegmentPtr="); PRINT_STR(currentSegmentPtr);
-			ElementNode *theNodePtr = (ElementNode *)GetElementDataPtr(index);
+			auto *theNodePtr = (ElementNode *)GetElementDataPtr(index);
 			//printf("ElementNode::RespondWithAllNodes nextSegment="); PRINT_STR(&nextSegment);
 			if (theNodePtr)
 			{

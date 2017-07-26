@@ -42,7 +42,7 @@ static QTSS_StreamRef       sErrorLogStream = nullptr;
 
 QTSS_Error _stublibrary_main(void* inPrivateArgs, QTSS_DispatchFuncPtr inDispatchFunc)
 {
-    QTSS_PrivateArgsPtr theArgs = (QTSS_PrivateArgsPtr)inPrivateArgs;
+    auto theArgs = (QTSS_PrivateArgsPtr)inPrivateArgs;
     
     // Setup
 

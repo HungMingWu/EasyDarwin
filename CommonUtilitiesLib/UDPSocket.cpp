@@ -140,7 +140,7 @@ OS_Error UDPSocket::JoinMulticast(uint32_t inRemoteAddr)
 OS_Error UDPSocket::SetTtl(uint16_t timeToLive)
 {
 	// set the ttl
-	u_char  nOptVal = (u_char)timeToLive;//cms - stevens pp. 496. bsd implementations barf
+	auto  nOptVal = (u_char)timeToLive;//cms - stevens pp. 496. bsd implementations barf
 											//unless this is a u_char
 	int err = setsockopt(fFileDesc, IPPROTO_IP, IP_MULTICAST_TTL, (char*)&nOptVal, sizeof(nOptVal));
 	if (err == -1)

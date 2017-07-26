@@ -335,7 +335,7 @@ void RTSPRequestInterface::PutTransportStripped(StrPtrLen &fullTransportHeader, 
 {
 
 	// skip the fieldToStrip and echo the rest back
-	uint32_t offset = (uint32_t)(fieldToStrip.Ptr - fullTransportHeader.Ptr);
+	auto offset = (uint32_t)(fieldToStrip.Ptr - fullTransportHeader.Ptr);
 	StrPtrLen transportStart(fullTransportHeader.Ptr, offset);
 	while (transportStart.Len > 0) // back up removing chars up to and including ;
 	{
@@ -515,8 +515,8 @@ void RTSPRequestInterface::AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 
 		if (true)
 		{
-			RTSPRequestInterface* theRequest = (RTSPRequestInterface*)this;
-			StrPtrLen *path = (StrPtrLen *)theRequest->GetValue(qtssRTSPReqAbsoluteURL);
+			auto* theRequest = (RTSPRequestInterface*)this;
+			auto *path = (StrPtrLen *)theRequest->GetValue(qtssRTSPReqAbsoluteURL);
 
 			if (path != nullptr && path->Len > 0)
 			{
@@ -645,7 +645,7 @@ void* RTSPRequestInterface::GetAbsTruncatedPath(QTSSDictionary* inRequest, uint3
 	// if qtssRTSPReqAbsoluteURL = rtsp://www.easydarwin.org:554/live.sdp?channel=1&token=888888/trackID=1 
 	// then qtssRTSPReqTruncAbsoluteURL = rtsp://www.easydarwin.org:554/live.sdp?channel=1&token=888888
 
-	RTSPRequestInterface* theRequest = (RTSPRequestInterface*)inRequest;
+	auto* theRequest = (RTSPRequestInterface*)inRequest;
 	theRequest->SetVal(qtssRTSPReqTruncAbsoluteURL, theRequest->GetValue(qtssRTSPReqAbsoluteURL));
 
 	//Adjust the length to truncate off the last file in the path
@@ -662,7 +662,7 @@ void* RTSPRequestInterface::GetTruncatedPath(QTSSDictionary* inRequest, uint32_t
 {
 	// This function always gets called
 
-	RTSPRequestInterface* theRequest = (RTSPRequestInterface*)inRequest;
+	auto* theRequest = (RTSPRequestInterface*)inRequest;
 	theRequest->SetVal(qtssRTSPReqFilePathTrunc, theRequest->GetValue(qtssRTSPReqFilePath));
 
 	//Adjust the length to truncate off the last file in the path
@@ -682,7 +682,7 @@ void* RTSPRequestInterface::GetFileName(QTSSDictionary* inRequest, uint32_t* /*o
 {
 	// This function always gets called
 
-	RTSPRequestInterface* theRequest = (RTSPRequestInterface*)inRequest;
+	auto* theRequest = (RTSPRequestInterface*)inRequest;
 	theRequest->SetVal(qtssRTSPReqFileName, theRequest->GetValue(qtssRTSPReqFilePath));
 
 	StrPtrLen* theFileNameParam = theRequest->GetValue(qtssRTSPReqFileName);
@@ -715,7 +715,7 @@ void* RTSPRequestInterface::GetFileDigit(QTSSDictionary* inRequest, uint32_t* /*
 {
 	// This function always gets called
 
-	RTSPRequestInterface* theRequest = (RTSPRequestInterface*)inRequest;
+	auto* theRequest = (RTSPRequestInterface*)inRequest;
 	theRequest->SetVal(qtssRTSPReqFileDigit, theRequest->GetValue(qtssRTSPReqAbsoluteURL));
 
 
@@ -744,7 +744,7 @@ void* RTSPRequestInterface::GetRealStatusCode(QTSSDictionary* inRequest, uint32_
 {
 	// Set the fRealStatusCode variable based on the current fStatusCode.
 	// This function always gets called
-	RTSPRequestInterface* theReq = (RTSPRequestInterface*)inRequest;
+	auto* theReq = (RTSPRequestInterface*)inRequest;
 	theReq->fRealStatusCode = RTSPProtocol::GetStatusCode(theReq->fStatus);
 	*outLen = sizeof(uint32_t);
 	return &theReq->fRealStatusCode;
@@ -753,7 +753,7 @@ void* RTSPRequestInterface::GetRealStatusCode(QTSSDictionary* inRequest, uint32_
 void* RTSPRequestInterface::GetLocalPath(QTSSDictionary* inRequest, uint32_t* outLen)
 {
 	// This function always gets called	
-	RTSPRequestInterface* theRequest = (RTSPRequestInterface*)inRequest;
+	auto* theRequest = (RTSPRequestInterface*)inRequest;
 	QTSS_AttributeID theID = qtssRTSPReqFilePath;
 
 	// Get the truncated path on a setup, because setups have the trackID appended
@@ -786,7 +786,7 @@ void* RTSPRequestInterface::GetLocalPath(QTSSDictionary* inRequest, uint32_t* ou
 	OS::RecursiveMakeDir(rootDir);
 
 	uint32_t fullPathLen = filePath.Len + theRootDir->Len;
-	char* theFullPath = new char[fullPathLen + 1];
+	auto* theFullPath = new char[fullPathLen + 1];
 	theFullPath[fullPathLen] = '\0';
 
 	::memcpy(theFullPath, theRootDir->Ptr, theRootDir->Len);
@@ -803,7 +803,7 @@ void* RTSPRequestInterface::GetLocalPath(QTSSDictionary* inRequest, uint32_t* ou
 
 void* RTSPRequestInterface::GetAuthDigestResponse(QTSSDictionary* inRequest, uint32_t*)
 {
-	RTSPRequestInterface* theRequest = (RTSPRequestInterface*)inRequest;
+	auto* theRequest = (RTSPRequestInterface*)inRequest;
 	(void)theRequest->SetValue(qtssRTSPReqDigestResponse, 0, theRequest->fAuthDigestResponse.Ptr, theRequest->fAuthDigestResponse.Len, QTSSDictionary::kDontObeyReadOnly);
 	return nullptr;
 }

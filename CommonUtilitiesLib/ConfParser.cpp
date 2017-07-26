@@ -180,7 +180,7 @@ int ParseConfigFile(
 								else
 									next = GetWord(wordBuff, next, wordBuffSize);
 
-								char* value = new char[strlen(wordBuff) + 1];
+								auto* value = new char[strlen(wordBuff) + 1];
 
 								Assert(value);
 
@@ -213,7 +213,7 @@ int ParseConfigFile(
 
 						while (values[maxValues])
 						{
-							char** tempValues = (char**)values; // Need to do this to delete a const
+							auto** tempValues = (char**)values; // Need to do this to delete a const
 							delete[] tempValues[maxValues];
 							maxValues++;
 						}

@@ -419,7 +419,7 @@ char *GetTrimmedKeyWord(char *prefKeyWord)
 	StrPtrLen theKeyWordStr;
 	theRequestPathParser.ConsumeUntil(&theKeyWordStr, kPathDelimiterChar); // stop when we see a / and don't include
 
-	char *keyword = new char[theKeyWordStr.Len + 1];
+	auto *keyword = new char[theKeyWordStr.Len + 1];
 	::memcpy(keyword, theKeyWordStr.Ptr, theKeyWordStr.Len);
 	keyword[theKeyWordStr.Len] = 0;
 
@@ -438,7 +438,7 @@ void SetMoviesRelativeDir()
 		redirectPath.PutChar(kPathDelimiterChar);
 	redirectPath.Put(sBroadcastsRedirectDir);
 
-	char *newMovieRelativeDir = new char[redirectPath.GetBytesWritten() + 1];
+	auto *newMovieRelativeDir = new char[redirectPath.GetBytesWritten() + 1];
 	::memcpy(newMovieRelativeDir, redirectPath.GetBufPtr(), redirectPath.GetBytesWritten());
 	newMovieRelativeDir[redirectPath.GetBytesWritten()] = 0;
 
@@ -1343,7 +1343,7 @@ bool InfoPortsOK(QTSS_StandardRTSP_Params* inParams, SDPSourceInfo* theInfo, Str
 				char *thePath = inPath->GetAsCString();
 				OSCharArrayDeleter charArrayPathDeleter(thePath);
 
-				char *thePathPort = new char[inPath->Len + 32];
+				auto *thePathPort = new char[inPath->Len + 32];
 				OSCharArrayDeleter charArrayPathPortDeleter(thePathPort);
 
 				sprintf(thePathPort, "%s:%s", thePath, thePort);
@@ -1396,7 +1396,7 @@ ReflectorSession* FindOrCreateSession(StrPtrLen* inName, QTSS_StandardRTSP_Param
 		if (theFileData.Len <= 0)
 			return nullptr;
 
-		SDPSourceInfo* theInfo = new SDPSourceInfo(theFileData.Ptr, theFileData.Len); // will make a copy
+		auto* theInfo = new SDPSourceInfo(theFileData.Ptr, theFileData.Len); // will make a copy
 
 		if (!theInfo->IsReflectable())
 		{
@@ -1490,7 +1490,7 @@ ReflectorSession* FindOrCreateSession(StrPtrLen* inName, QTSS_StandardRTSP_Param
 			if (theFileData.Len <= 0)
 				break;
 
-			SDPSourceInfo* theInfo = new SDPSourceInfo(theFileData.Ptr, theFileData.Len);
+			auto* theInfo = new SDPSourceInfo(theFileData.Ptr, theFileData.Len);
 			if (theInfo == nullptr)
 				break;
 
@@ -1601,7 +1601,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 			if (theSession == nullptr)
 				return QTSS_RequestFailed;
 
-			RTPSessionOutput* theNewOutput = new RTPSessionOutput(inParams->inClientSession, theSession, sServerPrefs, sStreamCookieAttr);
+			auto* theNewOutput = new RTPSessionOutput(inParams->inClientSession, theSession, sServerPrefs, sStreamCookieAttr);
 			theSession->AddOutput(theNewOutput, true);
 			(void)QTSS_SetValue(inParams->inClientSession, sOutputAttr, 0, &theNewOutput, sizeof(theNewOutput));
 		}
@@ -2012,7 +2012,7 @@ bool KillSession(StrPtrLen *sdpPathStr, bool killClients)
 	OSRef* theSessionRef = sSessionMap->Resolve(sdpPathStr);
 	if (theSessionRef != nullptr)
 	{
-		ReflectorSession*   theSession = (ReflectorSession*)theSessionRef->GetObject();
+		auto*   theSession = (ReflectorSession*)theSessionRef->GetObject();
 		RemoveOutput(nullptr, theSession, killClients);
 		(void)QTSS_Teardown(theSession->GetBroadcasterSession());
 		return true;

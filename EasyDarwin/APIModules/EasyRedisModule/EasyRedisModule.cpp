@@ -182,7 +182,7 @@ bool RedisConnect()
 		}
 
 		string auth = Format("auth %s", string(sRedisPassword));
-		redisReply* reply = static_cast<redisReply*>(redisCommand(redisContext_, auth.c_str()));
+		auto* reply = static_cast<redisReply*>(redisCommand(redisContext_, auth.c_str()));
 
 		RedisReplyObjectDeleter replyDeleter(reply);
 		if (!reply || string(reply->str) != string("OK"))

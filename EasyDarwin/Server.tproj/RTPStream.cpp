@@ -1057,7 +1057,7 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 
 	//
 	// Data passed into this version of write must be a QTSS_PacketStruct
-	QTSS_PacketStruct* thePacket = (QTSS_PacketStruct*)inBuffer;
+	auto* thePacket = (QTSS_PacketStruct*)inBuffer;
 	thePacket->suggestedWakeupTime = -1;
 	int64_t theCurrentPacketDelay = theTime - thePacket->packetTransmitTime;
 
@@ -1150,7 +1150,7 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 			if (err == QTSS_NoErr)
 				this->PrintPacketPrefEnabled((char*)thePacket->packetData, inLen, (int32_t)RTPStream::rtp);
 
-			uint16_t* theSeqNumP = (uint16_t*)thePacket->packetData;
+			auto* theSeqNumP = (uint16_t*)thePacket->packetData;
 			uint16_t theSeqNum = ntohs(theSeqNumP[1]);
 
 #if 0 // testing
@@ -1219,7 +1219,7 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 			QTSServerInterface::GetServer()->IncrementTotalQuality(this->GetQualityLevel());
 
 			// Record the RTP timestamp for RTCPs
-			uint32_t* timeStampP = (uint32_t*)(thePacket->packetData);
+			auto* timeStampP = (uint32_t*)(thePacket->packetData);
 			fLastRTPTimestamp = ntohl(timeStampP[1]);
 
 			//stream statistics
@@ -1569,7 +1569,7 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 				if (lsr != 0)
 				{
 					uint32_t diff = static_cast<uint32_t>(OS::TimeMilli_To_1900Fixed64Secs(curTime) >> 16) - lsr - dlsr;
-					uint32_t measuredRTT = static_cast<uint32_t>(OS::Fixed64Secs_To_TimeMilli(static_cast<int64_t>(diff) << 16));
+					auto measuredRTT = static_cast<uint32_t>(OS::Fixed64Secs_To_TimeMilli(static_cast<int64_t>(diff) << 16));
 
 					if (measuredRTT < 60000) //make sure that the RTT is not some ridiculously large value
 					{
@@ -1736,7 +1736,7 @@ void RTPStream::PrintRTP(char* packetBuff, uint32_t inLen)
 void RTPStream::PrintRTCPSenderReport(char* packetBuff, uint32_t inLen)
 {
 
-	uint32_t* theReport = (uint32_t*)packetBuff;
+	auto* theReport = (uint32_t*)packetBuff;
 
 	theReport++;
 	uint32_t ssrc = htonl(*theReport);

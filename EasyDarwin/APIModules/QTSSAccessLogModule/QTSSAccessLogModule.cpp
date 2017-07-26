@@ -489,7 +489,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	// sent to the server from the client. If those values are accurate then the above formula will not 
 	// be exactly correct but it will be nearly correct.
 
-	uint32_t clientBytesRecv = (uint32_t)((*rtpBytesSent * (100.0 - *packetLossPercent)) / 100.0);
+	auto clientBytesRecv = (uint32_t)((*rtpBytesSent * (100.0 - *packetLossPercent)) / 100.0);
 
 	tempLogStr.Ptr[0] = 0; tempLogStr.Len = eUserAgentSize;
 	(void)QTSS_GetValue(inClientSession, qtssCliSesFirstUserAgent, 0, tempLogStr.Ptr, &tempLogStr.Len);
@@ -704,7 +704,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 
 	theLen = sizeof(fcpuUtilized);
 	(void)QTSS_GetValue(sServer, qtssSvrCPULoadPercent, 0, &fcpuUtilized, &theLen);
-	uint32_t cpuUtilized = (uint32_t)fcpuUtilized;
+	auto cpuUtilized = (uint32_t)fcpuUtilized;
 
 	char lastUserName[eTempLogItemSize] = { 0 };
 	StrPtrLen lastUserNameStr(lastUserName, eTempLogItemSize);

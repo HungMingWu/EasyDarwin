@@ -164,12 +164,12 @@ ReflectorStream::ReflectorStream(SourceInfo::StreamInfo* inInfo)
 	// WRITE RTCP PACKET
 
 	//write as much of the RTCP RR as is possible right now (most of it never changes)
-	uint32_t theSsrc = (uint32_t)::rand();
+	auto theSsrc = (uint32_t)::rand();
 	char theTempCName[RTCPSRPacket::kMaxCNameLen];
 	uint32_t cNameLen = RTCPSRPacket::GetACName(theTempCName);
 
 	//write the RR (just header + ssrc)
-	uint32_t* theRRWriter = (uint32_t*)&fReceiverReportBuffer[0];
+	auto* theRRWriter = (uint32_t*)&fReceiverReportBuffer[0];
 	*theRRWriter = htonl(0x80c90001);
 	theRRWriter++;
 	*theRRWriter = htonl(theSsrc);
@@ -528,7 +528,7 @@ void ReflectorStream::SendReceiverReport()
 
 void ReflectorStream::PushPacket(char *packet, uint32_t packetLen, bool isRTCP)
 {
-	FU_Head *head = (FU_Head*)&packet[13];
+	auto *head = (FU_Head*)&packet[13];
 
 	if (packetLen > 0)
 	{
@@ -594,7 +594,7 @@ ReflectorSender::~ReflectorSender()
 	//dequeue and delete every buffer
 	while (fPacketQueue.GetLength() > 0)
 	{
-		ReflectorPacket* packet = (ReflectorPacket*)fPacketQueue.DeQueue()->GetEnclosingObject();
+		auto* packet = (ReflectorPacket*)fPacketQueue.DeQueue()->GetEnclosingObject();
 		delete packet;
 	}
 }
@@ -626,7 +626,7 @@ uint32_t ReflectorSender::GetOldestPacketRTPTime(bool *foundPtr)
 	if (packetElem == nullptr)
 		return 0;
 
-	ReflectorPacket* thePacket = (ReflectorPacket*)packetElem->GetEnclosingObject();
+	auto* thePacket = (ReflectorPacket*)packetElem->GetEnclosingObject();
 	if (thePacket == nullptr)
 		return 0;
 
@@ -648,7 +648,7 @@ uint16_t ReflectorSender::GetFirstPacketRTPSeqNum(bool *foundPtr)
 	if (packetElem == nullptr)
 		return 0;
 
-	ReflectorPacket* thePacket = (ReflectorPacket*)packetElem->GetEnclosingObject();
+	auto* thePacket = (ReflectorPacket*)packetElem->GetEnclosingObject();
 	if (thePacket == nullptr)
 		return 0;
 
@@ -677,7 +677,7 @@ OSQueueElem*    ReflectorSender::GetClientBufferNextPacketTime(uint32_t inRTPTim
 		if (requestedPacket == nullptr)
 			break;
 
-		ReflectorPacket* thePacket = (ReflectorPacket*)elem->GetEnclosingObject();
+		auto* thePacket = (ReflectorPacket*)elem->GetEnclosingObject();
 		Assert(thePacket);
 
 		if (thePacket->GetPacketRTPTime() > inRTPTime)
@@ -701,7 +701,7 @@ bool ReflectorSender::GetFirstRTPTimePacket(uint16_t* outSeqNumPtr, uint32_t* ou
 	if (packetElem == nullptr)
 		return false;
 
-	ReflectorPacket* thePacket = (ReflectorPacket*)packetElem->GetEnclosingObject();
+	auto* thePacket = (ReflectorPacket*)packetElem->GetEnclosingObject();
 	if (thePacket == nullptr)
 		return false;
 
@@ -734,7 +734,7 @@ bool ReflectorSender::GetFirstPacketInfo(uint16_t* outSeqNumPtr, uint32_t* outRT
 	if (packetElem == nullptr)
 		return false;
 
-	ReflectorPacket* thePacket = (ReflectorPacket*)packetElem->GetEnclosingObject();
+	auto* thePacket = (ReflectorPacket*)packetElem->GetEnclosingObject();
 	if (thePacket == nullptr)
 		return false;
 
@@ -897,7 +897,7 @@ void ReflectorSender::ReflectRelayPackets(int64_t* ioWakeupTime, OSQueue* inFree
 				{
 					packetElem = qIter.GetCurrent();
 
-					ReflectorPacket* 	thePacket = (ReflectorPacket*)packetElem->GetEnclosingObject();
+					auto* 	thePacket = (ReflectorPacket*)packetElem->GetEnclosingObject();
 					QTSS_Error			err = QTSS_NoErr;
 
 #if REFLECTOR_STREAM_DEBUGGING > 2
@@ -969,7 +969,7 @@ void ReflectorSender::ReflectRelayPackets(int64_t* ioWakeupTime, OSQueue* inFree
 		//the queue itself in the code below
 		removeIter.Next();
 
-		ReflectorPacket* thePacket = (ReflectorPacket*)elem->GetEnclosingObject();
+		auto* thePacket = (ReflectorPacket*)elem->GetEnclosingObject();
 		Assert(thePacket);
 
 		if (thePacket->fNeededByOutput == false)
@@ -1110,7 +1110,7 @@ void ReflectorSender::ReflectPackets(int64_t* ioWakeupTime, OSQueue* inFreeQueue
 					{
 						OSQueueElem* newElem = NeedRelocateBookMark(packetElem);
 
-						ReflectorPacket* thePacket = (ReflectorPacket*)newElem->GetEnclosingObject();
+						auto* thePacket = (ReflectorPacket*)newElem->GetEnclosingObject();
 						thePacket->fNeededByOutput = true; 				// flag to prevent removal in RemoveOldPackets
 						(void)theOutput->SetBookMarkPacket(newElem); 	// store a reference to the packet
 					}
@@ -1147,7 +1147,7 @@ OSQueueElem*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOutput,
 		currentPacket = qIter.GetCurrent();
 		lastPacket = currentPacket;
 
-		ReflectorPacket*    thePacket = (ReflectorPacket*)currentPacket->GetEnclosingObject();
+		auto*    thePacket = (ReflectorPacket*)currentPacket->GetEnclosingObject();
 		int64_t  packetLateness = bucketDelay;
 		int64_t timeToSendPacket = -1;
 
@@ -1212,7 +1212,7 @@ OSQueueElem* ReflectorSender::GetClientBufferStartPacketOffset(int64_t offsetMse
 		Assert(elem);
 		qIter.Next();
 
-		ReflectorPacket* thePacket = (ReflectorPacket*)elem->GetEnclosingObject();
+		auto* thePacket = (ReflectorPacket*)elem->GetEnclosingObject();
 		Assert(thePacket);
 
 		packetDelay = theCurrentTime - thePacket->fTimeArrived;
@@ -1251,7 +1251,7 @@ void    ReflectorSender::RemoveOldPackets(OSQueue* inFreeQueue)
 		//the queue itself in the code below
 		removeIter.Next();
 
-		ReflectorPacket* thePacket = (ReflectorPacket*)elem->GetEnclosingObject();
+		auto* thePacket = (ReflectorPacket*)elem->GetEnclosingObject();
 		Assert(thePacket);
 		//printf("ReflectorSender::RemoveOldPackets Packet %d in queue is %qd milliseconds old\n", DGetPacketSeqNumber( &thePacket->fPacketPtr ) ,theCurrentTime - thePacket->fTimeArrived);
 
@@ -1271,7 +1271,7 @@ void    ReflectorSender::RemoveOldPackets(OSQueue* inFreeQueue)
 
 			if (fKeyFrameStartPacketElementPointer)
 			{
-				ReflectorPacket* keyPacket = (ReflectorPacket*)(fKeyFrameStartPacketElementPointer->GetEnclosingObject());
+				auto* keyPacket = (ReflectorPacket*)(fKeyFrameStartPacketElementPointer->GetEnclosingObject());
 				if (keyPacket == thePacket)
 					break;
 			}
@@ -1301,7 +1301,7 @@ OSQueueElem* ReflectorSender::NeedRelocateBookMark(OSQueueElem* elem)
 	int64_t packetDelay = 0;
 	int64_t currentMaxPacketDelay = ReflectorStream::sRelocatePacketAgeMSec;
 
-	ReflectorPacket* thePacket = (ReflectorPacket*)elem->GetEnclosingObject();
+	auto* thePacket = (ReflectorPacket*)elem->GetEnclosingObject();
 	Assert(thePacket);
 
 	packetDelay = theCurrentTime - thePacket->fTimeArrived;
@@ -1310,7 +1310,7 @@ OSQueueElem* ReflectorSender::NeedRelocateBookMark(OSQueueElem* elem)
 	{
 		if (fKeyFrameStartPacketElementPointer)
 		{
-			ReflectorPacket* keyPacket = (ReflectorPacket*)(fKeyFrameStartPacketElementPointer->GetEnclosingObject());
+			auto* keyPacket = (ReflectorPacket*)(fKeyFrameStartPacketElementPointer->GetEnclosingObject());
 			if (keyPacket->fTimeArrived > thePacket->fTimeArrived)
 			{
 				this->fStream->GetMyReflectorSession()->SetHasVideoKeyFrameUpdate(true);
@@ -1365,7 +1365,7 @@ OSQueueElem*    ReflectorSender::GetNewestKeyFrameFirstPacket(OSQueueElem* curre
 		Assert(elem);
 		qIter.Next();
 
-		ReflectorPacket* thePacket = (ReflectorPacket*)elem->GetEnclosingObject();
+		auto* thePacket = (ReflectorPacket*)elem->GetEnclosingObject();
 		if (thePacket == nullptr)
 		{
 			break;
@@ -1642,7 +1642,7 @@ ReflectorSocket::ReflectorSocket()
 	{
 		//If the local port # of this socket is odd, then all the packets
 		//used for this socket are rtcp packets.
-		ReflectorPacket* packet = new ReflectorPacket();
+		auto* packet = new ReflectorPacket();
 		fFreeQueue.EnQueue(&packet->fQueueElem);//put this packet onto the free queue
 	}
 }
@@ -1652,7 +1652,7 @@ ReflectorSocket::~ReflectorSocket()
 	//printf("ReflectorSocket::~ReflectorSocket\n");
 	while (fFreeQueue.GetLength() > 0)
 	{
-		ReflectorPacket* packet = (ReflectorPacket*)fFreeQueue.DeQueue()->GetEnclosingObject();
+		auto* packet = (ReflectorPacket*)fFreeQueue.DeQueue()->GetEnclosingObject();
 		delete packet;
 	}
 }
@@ -1708,7 +1708,7 @@ int64_t ReflectorSocket::Run()
 	//Now that we've gotten all available packets, have the streams reflect
 	for (OSQueueIter iter2(&fSenderQueue); !iter2.IsDone(); iter2.Next())
 	{
-		ReflectorSender* theSender2 = (ReflectorSender*)iter2.GetCurrent()->GetEnclosingObject();
+		auto* theSender2 = (ReflectorSender*)iter2.GetCurrent()->GetEnclosingObject();
 		if (theSender2 != nullptr && theSender2->ShouldReflectNow(theMilliseconds, &fSleepTime))
 			theSender2->ReflectPackets(&fSleepTime, &fFreeQueue);
 	}
@@ -1820,7 +1820,7 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 			this->FilterInvalidSSRCs(thePacket, GetLocalPort() & 1);// thePacket->fPacketPtr.Len is set to 0 for invalid SSRCs.
 
 		// Find the appropriate ReflectorSender for this packet.
-		ReflectorSender* theSender = (ReflectorSender*)this->GetDemuxer()->GetTask(theRemoteAddr, 0);
+		auto* theSender = (ReflectorSender*)this->GetDemuxer()->GetTask(theRemoteAddr, 0);
 		// If there is a generic sender for this socket, use it.
 		if (theSender == nullptr)
 			theSender = (ReflectorSender*)this->GetDemuxer()->GetTask(0, 0);
@@ -1885,7 +1885,7 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 				//3、取消原来的fKeyFrameStartPacketElementPointer
 				if (theSender->fKeyFrameStartPacketElementPointer)
 				{
-					ReflectorPacket* oldKeyFramePacket = (ReflectorPacket*)theSender->fKeyFrameStartPacketElementPointer->GetEnclosingObject();
+					auto* oldKeyFramePacket = (ReflectorPacket*)theSender->fKeyFrameStartPacketElementPointer->GetEnclosingObject();
 					oldKeyFramePacket->fNeededByOutput = false;
 				}
 
@@ -1915,7 +1915,7 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 			//2、取消原来音频的fKeyFrameStartPacketElementPointer
 			if (theSender->fKeyFrameStartPacketElementPointer)
 			{
-				ReflectorPacket* oldKeyFramePacket = (ReflectorPacket*)theSender->fKeyFrameStartPacketElementPointer->GetEnclosingObject();
+				auto* oldKeyFramePacket = (ReflectorPacket*)theSender->fKeyFrameStartPacketElementPointer->GetEnclosingObject();
 				oldKeyFramePacket->fNeededByOutput = false;
 			}
 
@@ -1961,7 +1961,7 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 		{
 			uint32_t offset = thePacket->fPacketPtr.Len;
 			char* theTag = ((char*)thePacket->fPacketPtr.Ptr + offset) - 12;
-			uint64_t* theValue = (uint64_t*)((char*)((char*)thePacket->fPacketPtr.Ptr + offset) - 8);
+			auto* theValue = (uint64_t*)((char*)((char*)thePacket->fPacketPtr.Ptr + offset) - 8);
 
 			if (0 == ::strncmp(theTag, "aktt", 4))
 			{

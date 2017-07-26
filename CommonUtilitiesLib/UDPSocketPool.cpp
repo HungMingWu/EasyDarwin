@@ -42,7 +42,7 @@ UDPSocketPair* UDPSocketPool::GetUDPSocketPair(uint32_t inIPAddr, uint16_t inPor
 		{
 			//If we find a pair that is a) on the right IP address, and b) doesn't
 			//have this source IP & port in the demuxer already, we can return this pair
-			UDPSocketPair* theElem = (UDPSocketPair*)qIter.GetCurrent()->GetEnclosingObject();
+			auto* theElem = (UDPSocketPair*)qIter.GetCurrent()->GetEnclosingObject();
 			if ((theElem->fSocketA->GetLocalAddr() == inIPAddr) &&
 				((inPort == 0) || (theElem->fSocketA->GetLocalPort() == inPort)))
 			{

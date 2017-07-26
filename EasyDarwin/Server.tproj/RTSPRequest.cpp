@@ -266,7 +266,7 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 	// don't allow non-aggregate operations like a setup on a playing session
 	if (qtssSetupMethod == fMethod) // if it is a setup but we are playing don't allow it
 	{
-		RTSPSession*  theSession = (RTSPSession*)this->GetSession();
+		auto*  theSession = (RTSPSession*)this->GetSession();
 		if (theSession != nullptr && theSession->IsPlaying())
 			return QTSSModuleUtils::SendErrorResponse(this, qtssClientAggregateOptionAllowed, qtssMsgBadRTSPMethod, &theAbsURL);
 	}
@@ -877,7 +877,7 @@ QTSS_Error RTSPRequest::ParseBasicHeader(StringParser *inParsedAuthLinePtr)
 	char* encodedStr = authWord.GetAsCString();
 	OSCharArrayDeleter encodedStrDeleter(encodedStr);
 
-	char *decodedAuthWord = new char[Base64decode_len(encodedStr) + 1];
+	auto *decodedAuthWord = new char[Base64decode_len(encodedStr) + 1];
 	OSCharArrayDeleter decodedAuthWordDeleter(decodedAuthWord);
 
 	(void)Base64decode(decodedAuthWord, encodedStr);

@@ -117,14 +117,14 @@ QTSS_Error Initialize(QTSS_Initialize_Params* inParams)
 
 QTSS_Error  OpenFile(QTSS_OpenFile_Params* inParams)
 {
-	OSFileSource* theFileSource = new OSFileSource(inParams->inPath);
+	auto* theFileSource = new OSFileSource(inParams->inPath);
 
 	uint64_t theLength = theFileSource->GetLength();
 
 	//
 	// OSFileSource returns mod date as a time_t.
 	// This is the same as a QTSS_TimeVal, except the latter is in msec
-	QTSS_TimeVal theModDate = (QTSS_TimeVal)theFileSource->GetModDate();
+	auto theModDate = (QTSS_TimeVal)theFileSource->GetModDate();
 	theModDate *= 1000;
 
 	//
@@ -148,7 +148,7 @@ QTSS_Error  OpenFile(QTSS_OpenFile_Params* inParams)
 	// If caller wants async I/O, at this point we should set up the EventContext
 	if (inParams->inFlags & qtssOpenFileAsync)
 	{
-		EventContext* theEventContext = new EventContext(EventContext::kInvalidFileDesc, Socket::GetEventThread());
+		auto* theEventContext = new EventContext(EventContext::kInvalidFileDesc, Socket::GetEventThread());
 		theEventContext->InitNonBlocking(theFileSource->GetFD());
 
 		theErr = QTSS_SetValue(inParams->inFileObject, sEventContextAttr, 0, &theEventContext, sizeof(theEventContext));
@@ -222,7 +222,7 @@ QTSS_Error  CloseFile(QTSS_CloseFile_Params* inParams)
 
 QTSS_Error  RequestEventFile(QTSS_RequestEventFile_Params* inParams)
 {
-	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
+	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
 	if (OSThread::GetCurrent() != nullptr)
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 

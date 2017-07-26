@@ -44,7 +44,7 @@ uint32_t  OSRefTableUtils::HashString(StrPtrLen* inString)
 
 	//make sure to convert to unsigned here, as there may be binary
 	//data in this string
-	uint8_t* theData = (uint8_t*)inString->Ptr;
+	auto* theData = (uint8_t*)inString->Ptr;
 
 	//divide by 4 and take the characters at quarter points in the string,
 	//use those as the basis for the hash value

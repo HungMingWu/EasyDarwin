@@ -241,7 +241,7 @@ void RTPBandwidthTracker::UpdateAckTimeout(uint32_t bitsSentInInterval, int64_t 
 	//
 	// If we wait that long, that's too long because we need to actually wait for the ack to arrive.
 	// So, subtract 1/2 the rto - the last ack timeout
-	uint32_t rto = (uint32_t)fUnadjustedRTO;
+	auto rto = (uint32_t)fUnadjustedRTO;
 	if (rto < fAckTimeout)
 		rto = fAckTimeout;
 	uint32_t adjustment = (rto - fAckTimeout) / 2;

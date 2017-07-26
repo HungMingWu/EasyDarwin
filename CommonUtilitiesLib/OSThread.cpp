@@ -241,7 +241,7 @@ unsigned int WINAPI OSThread::_Entry(LPVOID inThread)
 void* OSThread::_Entry(void *inThread)  //static
 #endif
 {
-	OSThread* theThread = (OSThread*)inThread;
+	auto* theThread = (OSThread*)inThread;
 #ifdef __Win32__
 	BOOL theErr = ::TlsSetValue(sThreadStorageIndex, theThread);
 	Assert(theErr == TRUE);

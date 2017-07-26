@@ -82,7 +82,7 @@ private:
 inline FourCharCode RTCPAPPPacket::GetAppPacketName(char *outName, uint32_t len)
 {
 
-	uint32_t packetName = (uint32_t)(*(uint32_t*)&(GetPacketBuffer()[kAppNameOffset]));
+	auto packetName = (uint32_t)(*(uint32_t*)&(GetPacketBuffer()[kAppNameOffset]));
 
 	if (outName)
 	{

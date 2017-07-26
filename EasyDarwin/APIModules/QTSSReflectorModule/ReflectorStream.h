@@ -147,7 +147,7 @@ uint32_t ReflectorPacket::GetSSRC(bool isRTCP)
 	if (fPacketPtr.Ptr == nullptr || fPacketPtr.Len < 8)
 		return 0;
 
-	uint32_t* theSsrcPtr = (uint32_t*)fPacketPtr.Ptr;
+	auto* theSsrcPtr = (uint32_t*)fPacketPtr.Ptr;
 	if (isRTCP)// RTCP 
 		return ntohl(theSsrcPtr[1]);
 
@@ -195,7 +195,7 @@ int64_t  ReflectorPacket::GetPacketNTPTime()
 	if (fPacketPtr.Ptr == nullptr || fPacketPtr.Len < 16 || !fIsRTCP)
 		return 0;
 
-	uint32_t* theReport = (uint32_t*)fPacketPtr.Ptr;
+	auto* theReport = (uint32_t*)fPacketPtr.Ptr;
 	theReport += 2;
 	int64_t ntp = 0;
 	::memcpy(&ntp, theReport, sizeof(int64_t));

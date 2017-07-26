@@ -579,7 +579,7 @@ QTSS_Error HTTPSession::execNetMsgCSGetRTSPLiveSessionsRESTful(const char* query
 	do
 	{
 		// ªÒ»°œÏ”¶Content
-		char* msgContent = static_cast<char*>(Easy_GetRTSPPushSessions());
+		auto* msgContent = static_cast<char*>(Easy_GetRTSPPushSessions());
 
 		StrPtrLen msgJson(msgContent);
 
@@ -1077,7 +1077,7 @@ QTSS_Error HTTPSession::execNetMsgCSGetDeviceStreamReqRESTful(const char* queryS
 	uint32_t theChannelNum = 1;
 	EasyStreamType streamType = easyIllegalStreamType;
 
-	char* outURL = new char[QTSS_MAX_URL_LENGTH];
+	auto* outURL = new char[QTSS_MAX_URL_LENGTH];
 	outURL[0] = '\0';
 	QTSSCharArrayDeleter theHLSURLDeleter(outURL);
 

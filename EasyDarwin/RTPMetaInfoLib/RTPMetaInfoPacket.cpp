@@ -124,7 +124,7 @@ bool RTPMetaInfoPacket::ParsePacket(uint8_t* inPacketBuffer, uint32_t inPacketLe
 	{
 		FieldIndex theFieldIndex = kIllegalField;
 		uint32_t theFieldLen = 0;
-		FieldName* theFieldName = (FieldName*)theFieldP;
+		auto* theFieldName = (FieldName*)theFieldP;
 
 		if (*theFieldName & 0x8000)
 		{

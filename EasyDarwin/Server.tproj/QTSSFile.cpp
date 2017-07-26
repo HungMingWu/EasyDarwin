@@ -69,7 +69,7 @@ QTSS_Error  QTSSFile::Open(char* inPath, QTSS_OpenFileFlags inFlags)
 	// Because this is a role being executed from inside a callback, we need to
 	// make sure that QTSS_RequestEvent will not work.
 	Task* curTask = nullptr;
-	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
+	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
 	if (OSThread::GetCurrent() != nullptr)
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 

@@ -426,7 +426,7 @@ bool HTTPRequest::CreateResponseHeader(HTTPStatusCode statusCode, HTTPVersion ve
 	}
 
 	// Allocate memory for the response when you first create it
-	char* responseString = new char[kMinHeaderSizeInBytes];
+	auto* responseString = new char[kMinHeaderSizeInBytes];
 	fHTTPHeader = new StrPtrLen(responseString, kMinHeaderSizeInBytes);
 	fHTTPHeaderFormatter = new ResizeableStringFormatter(fHTTPHeader->Ptr, fHTTPHeader->Len);
 
@@ -458,7 +458,7 @@ bool HTTPRequest::CreateRequestHeader(HTTPMethod method, HTTPVersion version)
 	}
 
 	// Allocate memory for the response when you first create it
-	char* responseString = new char[kMinHeaderSizeInBytes];
+	auto* responseString = new char[kMinHeaderSizeInBytes];
 	fHTTPHeader = new StrPtrLen(responseString, kMinHeaderSizeInBytes);
 	fHTTPHeaderFormatter = new ResizeableStringFormatter(fHTTPHeader->Ptr, fHTTPHeader->Len);
 
@@ -540,6 +540,6 @@ void HTTPRequest::AppendDateField() const
 
 time_t HTTPRequest::ParseIfModSinceHeader()
 {
-	time_t theIfModSinceDate = static_cast<time_t>(DateTranslator::ParseDate(&fFieldValues[httpIfModifiedSinceHeader]));
+	auto theIfModSinceDate = static_cast<time_t>(DateTranslator::ParseDate(&fFieldValues[httpIfModifiedSinceHeader]));
 	return theIfModSinceDate;
 }

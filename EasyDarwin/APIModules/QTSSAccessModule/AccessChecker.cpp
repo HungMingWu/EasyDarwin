@@ -270,7 +270,7 @@ uint32_t AccessChecker::UpdateUserProfiles() {
 			resultErr |= kBadUsersFileErr;
 
 			// Create a new user profile for the first username
-			UserProfile* profile = new UserProfile;
+			auto* profile = new UserProfile;
 			profile->groups = new char*[kDefaultNumGroups];
 			profile->maxGroupNameLen = 0;
 			profile->numGroups = 0;
@@ -305,7 +305,7 @@ uint32_t AccessChecker::UpdateUserProfiles() {
 			continue;
 
 		// Create a new user profile for each username found
-		UserProfile* profile = new UserProfile;
+		auto* profile = new UserProfile;
 		profile->groups = new char*[kDefaultNumGroups];
 		profile->maxGroupNameLen = 0;
 		profile->numGroups = 0;

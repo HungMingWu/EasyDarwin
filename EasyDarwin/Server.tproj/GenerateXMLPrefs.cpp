@@ -95,7 +95,7 @@ int GenerateAllXMLPrefs(FilePrefsSource* inPrefsSource, XMLPrefsParser* inXMLPre
 			if (::strcmp(thePrefName, kPrefs[y].fPrefName) == 0)
 				break;
 
-		char* theTypeString = (char*)QTSSDataConverter::TypeToTypeString(kPrefs[y].fPrefType);
+		auto* theTypeString = (char*)QTSSDataConverter::TypeToTypeString(kPrefs[y].fPrefType);
 		ContainerRef module = inXMLPrefs->GetRefForModule(kPrefs[y].fModuleName);
 		ContainerRef pref = inXMLPrefs->AddPref(module, thePrefName, theTypeString);
 
@@ -126,7 +126,7 @@ int GenerateStandardXMLPrefs(PrefsSource* inPrefsSource, XMLPrefsParser* inXMLPr
 
 	for (uint32_t x = 0; kPrefs[x].fPrefName != nullptr; x++)
 	{
-		char* theTypeString = (char*)QTSSDataConverter::TypeToTypeString(kPrefs[x].fPrefType);
+		auto* theTypeString = (char*)QTSSDataConverter::TypeToTypeString(kPrefs[x].fPrefType);
 		ContainerRef module = inXMLPrefs->GetRefForModule(kPrefs[x].fModuleName);
 		ContainerRef pref = inXMLPrefs->AddPref(module, kPrefs[x].fPrefName, theTypeString);
 

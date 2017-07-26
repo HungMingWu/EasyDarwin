@@ -749,7 +749,7 @@ namespace Json {
 	}
 
 	bool Reader::recoverFromError(TokenType skipUntilToken) {
-		int errorCount = int(errors_.size());
+		auto errorCount = int(errors_.size());
 		Token skip;
 		for (;;) {
 			if (!readToken(skip))
@@ -823,7 +823,7 @@ namespace Json {
 
 	std::string Reader::getFormattedErrorMessages() const {
 		std::string formattedMessage;
-		for (Errors::const_iterator itError = errors_.begin();
+		for (auto itError = errors_.begin();
 			itError != errors_.end();
 			++itError) {
 			const ErrorInfo& error = *itError;
@@ -839,7 +839,7 @@ namespace Json {
 
 	std::vector<Reader::StructuredError> Reader::getStructuredErrors() const {
 		std::vector<Reader::StructuredError> allErrors;
-		for (Errors::const_iterator itError = errors_.begin();
+		for (auto itError = errors_.begin();
 			itError != errors_.end();
 			++itError) {
 			const ErrorInfo& error = *itError;
@@ -1553,7 +1553,7 @@ namespace Json {
 		double value = 0;
 		const int bufferSize = 32;
 		int count;
-		int length = int(token.end_ - token.start_);
+		auto length = int(token.end_ - token.start_);
 
 		// Sanity check to avoid buffer overflow exploits.
 		if (length < 0) {
@@ -1721,7 +1721,7 @@ namespace Json {
 	}
 
 	bool OurReader::recoverFromError(TokenType skipUntilToken) {
-		int errorCount = int(errors_.size());
+		auto errorCount = int(errors_.size());
 		Token skip;
 		for (;;) {
 			if (!readToken(skip))
@@ -1790,7 +1790,7 @@ namespace Json {
 
 	std::string OurReader::getFormattedErrorMessages() const {
 		std::string formattedMessage;
-		for (Errors::const_iterator itError = errors_.begin();
+		for (auto itError = errors_.begin();
 			itError != errors_.end();
 			++itError) {
 			const ErrorInfo& error = *itError;
@@ -1806,7 +1806,7 @@ namespace Json {
 
 	std::vector<OurReader::StructuredError> OurReader::getStructuredErrors() const {
 		std::vector<OurReader::StructuredError> allErrors;
-		for (Errors::const_iterator itError = errors_.begin();
+		for (auto itError = errors_.begin();
 			itError != errors_.end();
 			++itError) {
 			const ErrorInfo& error = *itError;

@@ -124,7 +124,7 @@ void sigcatcher(int sig, int /*sinfo*/, struct sigcontext* /*sctxt*/)
         {
             // This is the child process.
             // Re-read our preferences.
-            RereadPrefsTask* task = new RereadPrefsTask;
+            auto* task = new RereadPrefsTask;
             task->Signal(Task::kStartEvent);
 
         }
@@ -433,7 +433,7 @@ int main(int argc, char * argv[])
         
         if (theConfigFilePath != nullptr)
         {   
-            FilePrefsSource* filePrefsSource = new FilePrefsSource(true); // Allow dups
+            auto* filePrefsSource = new FilePrefsSource(true); // Allow dups
             
             if ( filePrefsSource->InitFromConfigFile(theConfigFilePath) )
             { 
@@ -505,7 +505,7 @@ int main(int argc, char * argv[])
                 while (status == 0) //loop on wait until status is != 0;
                 {	
                  	pid =::wait(&status);
-                 	int8_t exitStatus = (int8_t) WEXITSTATUS(status);
+                 	auto exitStatus = (int8_t) WEXITSTATUS(status);
                 	//printf("Child Process %d wait exited with pid=%d status=%d exit status=%d\n", processID, pid, status, exitStatus);
                 	
 					if (WIFEXITED(status) && pid > 0 && status != 0) // child exited with status -2 restart or -1 don't restart 

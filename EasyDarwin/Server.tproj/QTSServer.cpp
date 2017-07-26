@@ -701,9 +701,9 @@ bool  QTSServer::SwitchPersonality()
 
 	int groupID = 0;
 
-	if (::strlen(runGroupName.GetObject()) > 0)
+	if (::strlen(runGroupName.get()) > 0)
 	{
-		struct group* gr = ::getgrnam(runGroupName.GetObject());
+		struct group* gr = ::getgrnam(runGroupName.get());
 		if (gr == nullptr || ::setgid(gr->gr_gid) == -1)
 		{
 #define kErrorStrSize 256
@@ -712,25 +712,25 @@ bool  QTSServer::SwitchPersonality()
 			::strncpy(buffer, ::strerror(OSThread::GetErrno()), kErrorStrSize);
 			buffer[kErrorStrSize - 1] = 0;  //make sure it is null terminated even if truncated.
 			QTSSModuleUtils::LogError(qtssFatalVerbosity, qtssMsgCannotSetRunGroup, 0,
-				runGroupName.GetObject(), buffer);
+				runGroupName.get(), buffer);
 			return false;
 		}
 		groupID = gr->gr_gid;
 	}
 
-	if (::strlen(runUserName.GetObject()) > 0)
+	if (::strlen(runUserName.get()) > 0)
 	{
-		struct passwd* pw = ::getpwnam(runUserName.GetObject());
+		struct passwd* pw = ::getpwnam(runUserName.get());
 
 #if __MacOSX__
 		if (pw != nullptr && groupID != 0) //call initgroups before doing a setuid
-			(void) initgroups(runUserName.GetObject(), groupID);
+			(void) initgroups(runUserName.get(), groupID);
 #endif  
 
 		if (pw == nullptr || ::setuid(pw->pw_uid) == -1)
 		{
 			QTSSModuleUtils::LogError(qtssFatalVerbosity, qtssMsgCannotSetRunUser, 0,
-				runUserName.GetObject(), strerror(OSThread::GetErrno()));
+				runUserName.get(), strerror(OSThread::GetErrno()));
 			return false;
 		}
 	}
@@ -923,7 +923,7 @@ void QTSServer::LoadModules(QTSServerPrefs* inPrefs)
 
 	// POSIX version
 	// opendir mallocs memory for DIR* so call closedir to free the allocated memory
-	DIR* theDir = ::opendir(theModDirName.GetObject());
+	DIR* theDir = ::opendir(theModDirName.get());
 	if (theDir == nullptr)
 	{
 		QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssMsgNoModuleFolder, 0);
@@ -939,7 +939,7 @@ void QTSServer::LoadModules(QTSServerPrefs* inPrefs)
 		if (theFile == nullptr)
 			break;
 
-		this->CreateModule(theModDirName.GetObject(), theFile->d_name);
+		this->CreateModule(theModDirName.get(), theFile->d_name);
 	}
 
 	(void)::closedir(theDir);

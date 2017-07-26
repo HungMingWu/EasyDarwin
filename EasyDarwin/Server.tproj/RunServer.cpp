@@ -212,7 +212,7 @@ void WritePid(bool forked)
 #ifndef __Win32__
 	// WRITE PID TO FILE
 	std::unique_ptr<char[]> thePidFileName(sServer->GetPrefs()->GetPidFilePath());
-	FILE *thePidFile = fopen(thePidFileName, "w");
+	FILE *thePidFile = fopen(thePidFileName.get(), "w");
 	if (thePidFile)
 	{
 		if (!forked)
@@ -234,7 +234,7 @@ void CleanPid(bool force)
 	if (sHasPID || force)
 	{
 		std::unique_ptr<char[]> thePidFileName(sServer->GetPrefs()->GetPidFilePath());
-		unlink(thePidFileName);
+		unlink(thePidFileName.get());
 	}
 #endif
 }

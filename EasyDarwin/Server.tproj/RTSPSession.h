@@ -108,7 +108,7 @@ public:
 	// Call this before using this object
 	static void Initialize();
 
-	bool IsPlaying() { if (fRTPSession == NULL) return false; if (fRTPSession->GetSessionState() == qtssPlayingState) return true; return false; }
+	bool IsPlaying() { if (fRTPSession == nullptr) return false; if (fRTPSession->GetSessionState() == qtssPlayingState) return true; return false; }
 
 
 private:

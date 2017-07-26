@@ -79,7 +79,7 @@ struct clucall_vector clua_vectors[] = {
 #endif /* TRUCLUSTER */
 
 uint32_t                          SocketUtils::sNumIPAddrs = 0;
-SocketUtils::IPAddrInfo*        SocketUtils::sIPAddrInfoArray = NULL;
+SocketUtils::IPAddrInfo*        SocketUtils::sIPAddrInfoArray = nullptr;
 OSMutex SocketUtils::sMutex;
 
 #if __FreeBSD__
@@ -369,7 +369,7 @@ void SocketUtils::Initialize(bool lookupDNSName)
 
 	//walk through the list of IP addrs twice. Once to find out how many,
 	//the second time to actually grab their information
-	char* ifReqIter = NULL;
+	char* ifReqIter = nullptr;
 	sNumIPAddrs = 0;
 
 	for (ifReqIter = buffer; ifReqIter < (buffer + ifc.ifc_len);)
@@ -492,13 +492,13 @@ void SocketUtils::Initialize(bool lookupDNSName)
 			sIPAddrInfoArray[currentIndex].fIPAddrStr.Ptr = new char[sIPAddrInfoArray[currentIndex].fIPAddrStr.Len + 2];
 			::strcpy(sIPAddrInfoArray[currentIndex].fIPAddrStr.Ptr, theAddrStr);
 
-			struct hostent* theDNSName = NULL;
+			struct hostent* theDNSName = nullptr;
 			if (lookupDNSName) //convert this addr to a dns name, and store it
 			{
 				theDNSName = ::gethostbyaddr((char *)&addrPtr->sin_addr, sizeof(addrPtr->sin_addr), AF_INET);
 			}
 
-			if (theDNSName != NULL)
+			if (theDNSName != nullptr)
 			{
 				sIPAddrInfoArray[currentIndex].fDNSNameStr.Len = ::strlen(theDNSName->h_name);
 				sIPAddrInfoArray[currentIndex].fDNSNameStr.Ptr = new char[sIPAddrInfoArray[currentIndex].fDNSNameStr.Len + 2];
@@ -600,7 +600,7 @@ void SocketUtils::ConvertAddrToString(const struct in_addr& theAddr, StrPtrLen* 
 
 uint32_t SocketUtils::ConvertStringToAddr(const char* inAddrStr)
 {
-	if (inAddrStr == NULL)
+	if (inAddrStr == nullptr)
 		return 0;
 
 	return ntohl(::inet_addr(inAddrStr));

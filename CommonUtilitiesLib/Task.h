@@ -118,7 +118,7 @@ protected:
 	// next call to run.
 	void                    ForceSameThread() {
 		fUseThisThread = (TaskThread*)OSThread::GetCurrent();
-		Assert(fUseThisThread != NULL);
+		Assert(fUseThisThread != nullptr);
 		if (TASK_DEBUG) if (fTaskName[0] == 0) ::strcpy(fTaskName, " corrupt task");
 		if (TASK_DEBUG) printf("Task::ForceSameThread fUseThisThread %p task %s enque elem=%p enclosing %p\n", (void*)fUseThisThread, fTaskName, (void *)&fTaskQueueElem, (void *)this);
 	}
@@ -202,7 +202,7 @@ public:
 
 	//Adds some threads to the pool
 	static bool   AddThreads(uint32_t numToAdd); // creates the threads: takes NumShortTaskThreads + NumBLockingThreads,  sets num short task threads.
-	static void     SwitchPersonality(char *user = NULL, char *group = NULL);
+	static void     SwitchPersonality(char *user = nullptr, char *group = nullptr);
 	static void     RemoveThreads();
 	static TaskThread* GetThread(uint32_t index);
 	static uint32_t  GetNumThreads() { return sNumTaskThreads; }

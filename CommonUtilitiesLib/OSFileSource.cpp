@@ -100,7 +100,7 @@ void OSFileSource::SetLog(const char *inPath)
 
 FileBlockBuffer::~FileBlockBuffer()
 {
-	if (fDataBuffer != NULL)
+	if (fDataBuffer != nullptr)
 	{
 		Assert(fDataBuffer[fBufferSize] == 0);
 
@@ -109,7 +109,7 @@ FileBlockBuffer::~FileBlockBuffer()
 		printf("FileBlockBuffer::~FileBlockBuffer delete %" _U32BITARG_ " this=%" _U32BITARG_ "\n", fDataBuffer, this);
 #endif
 		delete fDataBuffer;
-		fDataBuffer = NULL;
+		fDataBuffer = nullptr;
 		fArrayIndex = -1;
 	}
 	else
@@ -141,7 +141,7 @@ void FileBlockBuffer::TestBuffer()
 
 void FileBlockPool::MarkUsed(FileBlockBuffer* inBuffPtr)
 {
-	if (NULL == inBuffPtr)
+	if (nullptr == inBuffPtr)
 		return;
 
 	if (fQueue.GetTail() != inBuffPtr->GetQElem()) // Least Recently Used tail is last accessed
@@ -153,7 +153,7 @@ void FileBlockPool::MarkUsed(FileBlockBuffer* inBuffPtr)
 
 FileBlockBuffer* FileBlockPool::GetBufferElement(uint32_t bufferSizeBytes)
 {
-	FileBlockBuffer* theNewBuf = NULL;
+	FileBlockBuffer* theNewBuf = nullptr;
 	if (fNumCurrentBuffers < fMaxBuffers)
 	{
 #if FILE_SOURCE_DEBUG
@@ -164,19 +164,19 @@ FileBlockBuffer* FileBlockPool::GetBufferElement(uint32_t bufferSizeBytes)
 		fNumCurrentBuffers++;
 		theNewBuf->fQElem.SetEnclosingObject(theNewBuf);
 		fQueue.EnQueue(theNewBuf->GetQElem()); // put on tail
-		Assert(theNewBuf != NULL);
+		Assert(theNewBuf != nullptr);
 		return theNewBuf;
 	}
 
 	OSQueueElem* theElem = fQueue.DeQueue(); // get head
 
-	Assert(theElem != NULL);
+	Assert(theElem != nullptr);
 
-	if (theElem == NULL)
-		return NULL;
+	if (theElem == nullptr)
+		return nullptr;
 
 	theNewBuf = (FileBlockBuffer*)theElem->GetEnclosingObject();
-	Assert(theNewBuf != NULL);
+	Assert(theNewBuf != nullptr);
 	//printf("FileBlockPool::GetBufferElement reuse buffer theNewBuf=%" _U32BITARG_ " fDataBuffer=%"   _U32BITARG_   " fArrayIndex=%" _S32BITARG_ "\n",theNewBuf,theNewBuf->fDataBuffer,theNewBuf->fArrayIndex);
 
 	return theNewBuf;
@@ -186,9 +186,9 @@ FileBlockBuffer* FileBlockPool::GetBufferElement(uint32_t bufferSizeBytes)
 void FileBlockPool::DeleteBlockPool()
 {
 
-	FileBlockBuffer* buffer = NULL;
+	FileBlockBuffer* buffer = nullptr;
 	OSQueueElem* theElem = fQueue.DeQueue();
-	while (theElem != NULL)
+	while (theElem != nullptr)
 	{
 		buffer = (FileBlockBuffer *)theElem->GetEnclosingObject();
 		delete buffer;
@@ -209,7 +209,7 @@ FileBlockPool::~FileBlockPool()
 void FileMap::AllocateBufferMap(uint32_t inUnitSizeInK, uint32_t inNumBuffSizeUnits, uint32_t inBufferIncCount, uint32_t inMaxBitRateBuffSizeInBlocks, uint64_t fileLen, uint32_t inBitRate)
 {
 
-	if (fFileMapArray != NULL && fNumBuffSizeUnits == inNumBuffSizeUnits && inBufferIncCount == fBlockPool.GetMaxBuffers())
+	if (fFileMapArray != nullptr && fNumBuffSizeUnits == inNumBuffSizeUnits && inBufferIncCount == fBlockPool.GetMaxBuffers())
 		return;
 
 	if (inUnitSizeInK < 1)
@@ -257,7 +257,7 @@ void FileMap::DeleteOldBuffs()
 	while (fBlockPool.GetNumCurrentBuffers() > fBlockPool.GetMaxBuffers()) // delete any old buffers
 	{
 		FileBlockBuffer* theElem = fBlockPool.GetBufferElement(fDataBufferSize);
-		fFileMapArray[theElem->fArrayIndex] = NULL;
+		fFileMapArray[theElem->fArrayIndex] = nullptr;
 		delete theElem;
 		fBlockPool.DecCurBuffers();
 	}
@@ -265,14 +265,14 @@ void FileMap::DeleteOldBuffs()
 
 char* FileMap::GetBuffer(int64_t buffIndex, bool* outFillBuff)
 {
-	Assert(outFillBuff != NULL);
+	Assert(outFillBuff != nullptr);
 	*outFillBuff = true; // we are re-using or just created a buff
 
 	this->DeleteOldBuffs();
 	Assert(buffIndex < (int32_t)fMapArraySize);
 
 	FileBlockBuffer *theElem = fFileMapArray[buffIndex];
-	if (NULL == theElem)
+	if (nullptr == theElem)
 	{
 #if FILE_SOURCE_DEBUG
 		printf("FileMap::GetBuffer call fBlockPool.GetBufferElement(); buffIndex=%" _S32BITARG_ "\n", buffIndex);
@@ -296,7 +296,7 @@ char* FileMap::GetBuffer(int64_t buffIndex, bool* outFillBuff)
 
 	if (theElem->fArrayIndex >= 0)
 	{
-		fFileMapArray[theElem->fArrayIndex] = NULL; // reset the old map location
+		fFileMapArray[theElem->fArrayIndex] = nullptr; // reset the old map location
 	}
 	fFileMapArray[buffIndex] = theElem; // a new buffer
 	theElem->fArrayIndex = buffIndex; // record the index
@@ -311,13 +311,13 @@ char* FileMap::GetBuffer(int64_t buffIndex, bool* outFillBuff)
 
 void FileMap::Clean()
 {
-	if (fFileMapArray != NULL)
+	if (fFileMapArray != nullptr)
 		::memset((char *)fFileMapArray, 0, (int32_t)(sizeof(FileBlockBuffer *) * fMapArraySize));
 }
 
 void FileMap::DeleteMap()
 {
-	if (NULL == fFileMapArray)
+	if (nullptr == fFileMapArray)
 		return;
 
 #if FILE_SOURCE_DEBUG
@@ -326,7 +326,7 @@ void FileMap::DeleteMap()
 #endif
 
 	delete fFileMapArray;
-	fFileMapArray = NULL;
+	fFileMapArray = nullptr;
 
 }
 
@@ -409,7 +409,7 @@ OS_Error OSFileSource::ReadFromCache(uint64_t inPosition, void* inBuffer, uint32
 		Assert(0);
 	}
 
-	Assert(outRcvLen != NULL);
+	Assert(outRcvLen != nullptr);
 	*outRcvLen = 0;
 
 	if (inPosition >= fLength) // eof
@@ -422,12 +422,12 @@ OS_Error OSFileSource::ReadFromCache(uint64_t inPosition, void* inBuffer, uint32
 	int64_t maxIndex = fFileMap.GetMaxBuffIndex();
 	int64_t buffPos = inPosition - fFileMap.GetBuffOffset(buffIndex);
 	int64_t buffOffsetLen = 0;
-	char* buffStart = NULL;
+	char* buffStart = nullptr;
 	int64_t buffCopyLen = inLength;
 	int64_t bytesToCopy = inLength;
 	char* buffOut = (char*)inBuffer;
 	bool fillBuff = true;
-	char* buffOffset = NULL;
+	char* buffOffset = nullptr;
 
 #if FILE_SOURCE_BUFFTEST
 	char testBuff[inLength + 1];
@@ -454,7 +454,7 @@ OS_Error OSFileSource::ReadFromCache(uint64_t inPosition, void* inBuffer, uint32
 #endif
 
 		buffStart = fFileMap.GetBuffer(buffIndex, &fillBuff);
-		Assert(buffStart != NULL);
+		Assert(buffStart != nullptr);
 
 		if (fillBuff)
 		{
@@ -546,7 +546,7 @@ OS_Error OSFileSource::ReadFromDisk(void* inBuffer, uint32_t inLength, uint32_t*
 	if (rcvLen == -1)
 		return OSThread::GetErrno();
 
-	if (outRcvLen != NULL)
+	if (outRcvLen != nullptr)
 		*outRcvLen = rcvLen;
 
 	fPosition += rcvLen;

@@ -63,7 +63,7 @@ public:
 	// This class is not derived from RTCPPacket as a performance optimization.
 	// Instead, it is assumed that the RTCP packet validation has already been
 	// done.
-	RTCPAckPacket() : fRTCPAckBuffer(NULL), fAckMaskSize(0) {}
+	RTCPAckPacket() : fRTCPAckBuffer(nullptr), fAckMaskSize(0) {}
 	~RTCPAckPacket() override {}
 
 	// Call to parse if you don't know what kind of packet this is

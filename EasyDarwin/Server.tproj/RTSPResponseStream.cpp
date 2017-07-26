@@ -97,7 +97,7 @@ QTSS_Error RTSPResponseStream::WriteV(iovec* inVec, uint32_t inNumVectors, uint3
 
 	// theLengthSent at this point is the amount of data passed into
 	// this function that was sent.
-	if (outLengthSent != NULL)
+	if (outLengthSent != nullptr)
 		*outLengthSent = theLengthSent;
 
 	// Update the StringFormatter fBytesWritten variable... this data
@@ -121,7 +121,7 @@ QTSS_Error RTSPResponseStream::WriteV(iovec* inVec, uint32_t inNumVectors, uint3
 	// buffer.
 
 	// The caller should consider this data sent.
-	if (outLengthSent != NULL)
+	if (outLengthSent != nullptr)
 		*outLengthSent = inTotalLength;
 
 	uint32_t curVec = 1;

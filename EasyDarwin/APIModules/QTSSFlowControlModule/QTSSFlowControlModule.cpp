@@ -46,9 +46,9 @@ static QTSS_AttributeID sNumWorsesAttr = qtssIllegalAttrID;
 
 // STATIC VARIABLES
 
-static QTSS_ModulePrefsObject sPrefs = NULL;
-static QTSS_PrefsObject     sServerPrefs = NULL;
-static QTSS_ServerObject    sServer = NULL;
+static QTSS_ModulePrefsObject sPrefs = nullptr;
+static QTSS_PrefsObject     sServerPrefs = nullptr;
+static QTSS_ServerObject    sServer = nullptr;
 
 // Default values for preferences
 static uint32_t   sDefaultLossThinTolerance = 30;
@@ -117,13 +117,13 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 	static char*        sNumLossesBelowToleranceName = "QTSSFlowControlModuleLossBelowTol";
 	static char*        sNumGettingWorsesName = "QTSSFlowControlModuleGettingWorses";
 
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sNumLossesAboveToleranceName, NULL, qtssAttrDataTypeUInt32);
+	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sNumLossesAboveToleranceName, nullptr, qtssAttrDataTypeUInt32);
 	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sNumLossesAboveToleranceName, &sNumLossesAboveTolAttr);
 
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sNumLossesBelowToleranceName, NULL, qtssAttrDataTypeUInt32);
+	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sNumLossesBelowToleranceName, nullptr, qtssAttrDataTypeUInt32);
 	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sNumLossesBelowToleranceName, &sNumLossesBelowTolAttr);
 
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sNumGettingWorsesName, NULL, qtssAttrDataTypeUInt32);
+	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sNumGettingWorsesName, nullptr, qtssAttrDataTypeUInt32);
 	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sNumGettingWorsesName, &sNumWorsesAttr);
 
 	// Tell the server our name!
@@ -228,8 +228,8 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	bool clearPercentLossThinCount = true;
 	bool clearPercentLossThickCount = true;
 
-	uint32_t* uint32_tPtr = NULL;
-	uint16_t* uint16_tPtr = NULL;
+	uint32_t* uint32_tPtr = nullptr;
+	uint16_t* uint16_tPtr = nullptr;
 	theLen = 0;
 
 	uint32_t theNumLossesAboveTol = 0;
@@ -239,21 +239,21 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	// Get our current counts for this stream. If any of these aren't present, something is seriously wrong
 	// with this dictionary, so we should probably just abort
 	(void)QTSS_GetValuePtr(theStream, sNumLossesAboveTolAttr, 0, (void**)&uint32_tPtr, &theLen);
-	if ((uint32_tPtr != NULL) && (theLen == sizeof(uint32_t)))
+	if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
 		theNumLossesAboveTol = *uint32_tPtr;
 
 	(void)QTSS_GetValuePtr(theStream, sNumLossesBelowTolAttr, 0, (void**)&uint32_tPtr, &theLen);
-	if ((uint32_tPtr != NULL) && (theLen == sizeof(uint32_t)))
+	if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
 		theNumLossesBelowTol = *uint32_tPtr;
 
 	(void)QTSS_GetValuePtr(theStream, sNumWorsesAttr, 0, (void**)&uint32_tPtr, &theLen);
-	if ((uint32_tPtr != NULL) && (theLen == sizeof(uint32_t)))
+	if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
 		theNumWorses = *uint32_tPtr;
 
 
 	//First take any action necessitated by the loss percent
 	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrPercentPacketsLost, 0, (void**)&uint16_tPtr, &theLen);
-	if ((uint16_tPtr != NULL) && (theLen == sizeof(uint16_t)))
+	if ((uint16_tPtr != nullptr) && (theLen == sizeof(uint16_t)))
 	{
 		uint16_t thePercentLoss = *uint16_tPtr;
 		thePercentLoss /= 256; //Hmmm... looks like the client reports loss percent in multiples of 256
@@ -308,7 +308,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 
 	//Now take a look at the getting worse heuristic
 	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrGettingWorse, 0, (void**)&uint16_tPtr, &theLen);
-	if ((uint16_tPtr != NULL) && (theLen == sizeof(uint16_t)))
+	if ((uint16_tPtr != nullptr) && (theLen == sizeof(uint16_t)))
 	{
 		uint16_t isGettingWorse = *uint16_tPtr;
 		if (isGettingWorse != 0)
@@ -336,7 +336,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 
 	//Finally, if we get a getting better, automatically ratchet up
 	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrGettingBetter, 0, (void**)&uint16_tPtr, &theLen);
-	if ((uint16_tPtr != NULL) && (theLen == sizeof(uint16_t)) && (*uint16_tPtr > 0))
+	if ((uint16_tPtr != nullptr) && (theLen == sizeof(uint16_t)) && (*uint16_tPtr > 0))
 		ratchetMore = true;
 
 	//For clearing out counts below
@@ -348,12 +348,12 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 
 		uint32_t curQuality = 0;
 		(void)QTSS_GetValuePtr(theStream, qtssRTPStrQualityLevel, 0, (void**)&uint32_tPtr, &theLen);
-		if ((uint32_tPtr != NULL) && (theLen == sizeof(uint32_t)))
+		if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
 			curQuality = *uint32_tPtr;
 
 		uint32_t numQualityLevels = 0;
 		(void)QTSS_GetValuePtr(theStream, qtssRTPStrNumQualityLevels, 0, (void**)&uint32_tPtr, &theLen);
-		if ((uint32_tPtr != NULL) && (theLen == sizeof(uint32_t)))
+		if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
 			numQualityLevels = *uint32_tPtr;
 
 		if ((ratchetLess) && (curQuality < numQualityLevels))
@@ -372,7 +372,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 		}
 
 
-		bool *startedThinningPtr = NULL;
+		bool *startedThinningPtr = nullptr;
 		int32_t numThinned = 0;
 		(void)QTSS_GetValuePtr(inParams->inClientSession, qtssCliSesStartedThinning, 0, (void**)&startedThinningPtr, &theLen);
 		if (false == *startedThinningPtr)
@@ -426,7 +426,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 
 void    InitializeDictionaryItems(QTSS_RTPStreamObject inStream)
 {
-	uint32_t* theValue = NULL;
+	uint32_t* theValue = nullptr;
 	uint32_t theValueLen = 0;
 
 	QTSS_Error theErr = QTSS_GetValuePtr(inStream, sNumLossesAboveTolAttr, 0, (void**)&theValue, &theValueLen);

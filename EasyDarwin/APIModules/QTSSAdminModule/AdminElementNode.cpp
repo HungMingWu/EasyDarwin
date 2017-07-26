@@ -189,7 +189,7 @@ void PRINT_STR(StrPtrLen *spl)
 
 void COPYBUFFER(char *dest, char *src, int8_t size)
 {
-	if ((dest != NULL) && (src != NULL) && (size > 0))
+	if ((dest != nullptr) && (src != nullptr) && (size > 0))
 		memcpy(dest, src, size);
 	else
 		Assert(0);
@@ -197,11 +197,11 @@ void COPYBUFFER(char *dest, char *src, int8_t size)
 
 char* NewCharArrayCopy(StrPtrLen *theStringPtr)
 {
-	char* newArray = NULL;
-	if (theStringPtr != NULL)
+	char* newArray = nullptr;
+	if (theStringPtr != nullptr)
 	{
 		newArray = new char[theStringPtr->Len + 1];
-		if (newArray != NULL)
+		if (newArray != nullptr)
 		{
 			memcpy(newArray, theStringPtr->Ptr, theStringPtr->Len);
 			newArray[theStringPtr->Len] = 0;
@@ -214,17 +214,17 @@ char* NewCharArrayCopy(StrPtrLen *theStringPtr)
 
 ElementNode::ElementNode()
 {
-	fDataSource = NULL;
+	fDataSource = nullptr;
 	fNumFields = 0;
 	fPathLen = 0;
 	fInitialized = false;
 
-	fFieldIDs = NULL;
-	fFieldDataPtrs = NULL;
-	fFieldOSRefPtrs = NULL;
-	fParentNodePtr = NULL;
-	fElementMap = NULL;
-	fSelfPtr = NULL;
+	fFieldIDs = nullptr;
+	fFieldDataPtrs = nullptr;
+	fFieldOSRefPtrs = nullptr;
+	fParentNodePtr = nullptr;
+	fElementMap = nullptr;
+	fSelfPtr = nullptr;
 	fPathBuffer[0] = 0;
 	fPathSPL.Set(fPathBuffer, 0);
 	fIsTop = false;
@@ -253,8 +253,8 @@ void ElementNode::Initialize(int32_t index, ElementNode *parentPtr, QueryURI *qu
 		(void)queryPtr->NextSegment(&nextSegment, &nextnextSegment);
 		bool forceAll = nextSegment.Equal(sDoAllIndexIteratorSPL) | nextnextSegment.Equal(sDoAllIndexIteratorSPL);
 
-		if (GetFields() == NULL)
-			InitializeAllFields(true, NULL, nodeSource, queryPtr, currentSegmentPtr, forceAll);
+		if (GetFields() == nullptr)
+			InitializeAllFields(true, nullptr, nodeSource, queryPtr, currentSegmentPtr, forceAll);
 
 		fInitialized = true;
 	}
@@ -271,49 +271,49 @@ ElementNode::~ElementNode()
 	for (int32_t index = 0; !IsStopItem(index); index++)
 	{
 		OSRef *theRefPtr = GetOSRef(index);
-		if (theRefPtr != NULL)
+		if (theRefPtr != nullptr)
 		{
 			//printf("deleting hash entry of %s \n", GetName(index));
-			SetOSRef(index, NULL);
+			SetOSRef(index, nullptr);
 			(fElementMap->GetHashTable())->Remove(theRefPtr);
 			delete (OSRef*)theRefPtr;  ElementNode_RemovePtr(theRefPtr, "ElementNode::~ElementNode OSRef *");
 		}
 
 		char *dataPtr = GetElementDataPtr(index);
-		if (dataPtr != NULL)
+		if (dataPtr != nullptr)
 		{
-			SetElementDataPtr(index, NULL, IsNodeElement(index));
+			SetElementDataPtr(index, nullptr, IsNodeElement(index));
 		}
 	}
 
 	delete fElementMap;  ElementNode_RemovePtr(fElementMap, "ElementNode::~ElementNode fElementMap");
 
-	fElementMap = NULL;
+	fElementMap = nullptr;
 
 	uint32_t i = 0;
 	for (i = 0; i < GetNumFields(); i++)
 	{
-		SetElementDataPtr(i, NULL, IsNodeElement(i));
-		fFieldDataPtrs[i] = NULL;
+		SetElementDataPtr(i, nullptr, IsNodeElement(i));
+		fFieldDataPtrs[i] = nullptr;
 	}
 	delete fFieldDataPtrs; ElementNode_RemovePtr(fFieldDataPtrs, "ElementNode::~ElementNode fFieldDataPtrs");
-	fFieldDataPtrs = NULL;
+	fFieldDataPtrs = nullptr;
 
 	for (i = 0; i < GetNumFields(); i++)
 	{
 		delete fFieldOSRefPtrs[i]; ElementNode_RemovePtr(fFieldOSRefPtrs[i], "ElementNode::~ElementNode fFieldOSRefPtrs");
-		fFieldOSRefPtrs[i] = NULL;
+		fFieldOSRefPtrs[i] = nullptr;
 	}
 	delete fFieldOSRefPtrs;  ElementNode_RemovePtr(fFieldOSRefPtrs, "ElementNode::~ElementNode fFieldOSRefPtrs");
-	fFieldOSRefPtrs = NULL;
+	fFieldOSRefPtrs = nullptr;
 
 	if (fDataFieldsType == eDynamic)
 	{
 		delete fFieldIDs;  ElementNode_RemovePtr(fFieldIDs, "ElementNode::~ElementNode fFieldIDs");
-		fFieldIDs = NULL;
+		fFieldIDs = nullptr;
 	}
 
-	SetNodeName(NULL);
+	SetNodeName(nullptr);
 
 };
 
@@ -329,27 +329,27 @@ QTSS_Error ElementNode::AllocateFields(uint32_t numFields)
 
 	if (numFields > 0) do
 	{
-		Assert(fFieldIDs == NULL);
+		Assert(fFieldIDs == nullptr);
 		fFieldIDs = new ElementNode::ElementDataFields[numFields]; ElementNode_InsertPtr(fFieldIDs, "ElementNode::AllocateFields fFieldIDs array");
-		Assert(fFieldIDs != NULL);
-		if (fFieldIDs == NULL) break;
+		Assert(fFieldIDs != nullptr);
+		if (fFieldIDs == nullptr) break;
 		memset(fFieldIDs, 0, numFields * sizeof(ElementNode::ElementDataFields));
 
-		Assert(fElementMap == NULL);
+		Assert(fElementMap == nullptr);
 		fElementMap = new OSRefTable();  ElementNode_InsertPtr(fElementMap, "ElementNode::AllocateFields fElementMap OSRefTable");
-		Assert(fElementMap != NULL);
-		if (fElementMap == NULL) break;
+		Assert(fElementMap != nullptr);
+		if (fElementMap == nullptr) break;
 
-		Assert(fFieldDataPtrs == NULL);
+		Assert(fFieldDataPtrs == nullptr);
 		fFieldDataPtrs = new char*[numFields]; ElementNode_InsertPtr(fFieldDataPtrs, "ElementNode::AllocateFields fFieldDataPtrs array");
-		Assert(fFieldDataPtrs != NULL);
-		if (fFieldDataPtrs == NULL) break;
+		Assert(fFieldDataPtrs != nullptr);
+		if (fFieldDataPtrs == nullptr) break;
 		memset(fFieldDataPtrs, 0, numFields * sizeof(char*));
 
-		Assert(fFieldOSRefPtrs == NULL);
+		Assert(fFieldOSRefPtrs == nullptr);
 		fFieldOSRefPtrs = new OSRef*[numFields];  ElementNode_InsertPtr(fFieldOSRefPtrs, "ElementNode::AllocateFields fFieldDataPtrs array");
-		Assert(fFieldOSRefPtrs != NULL);
-		if (fFieldOSRefPtrs == NULL) break;
+		Assert(fFieldOSRefPtrs != nullptr);
+		if (fFieldOSRefPtrs == nullptr) break;
 		memset(fFieldOSRefPtrs, 0, numFields * sizeof(OSRef*));
 
 		err = QTSS_NoErr;
@@ -375,7 +375,7 @@ void ElementNode::SetFields(uint32_t i, QTSS_Object attrInfoObject)
 		fFieldIDs[i].fFieldLen = eMaxAttributeNameSize;
 		err = QTSS_GetValue(attrInfoObject, qtssAttrName, 0, &fFieldIDs[i].fFieldName, (uint32_t *)&fFieldIDs[i].fFieldLen);
 		Assert(err == QTSS_NoErr);
-		if (fFieldIDs[i].fFieldName != NULL)
+		if (fFieldIDs[i].fFieldName != nullptr)
 			fFieldIDs[i].fFieldName[fFieldIDs[i].fFieldLen] = 0;
 	}
 
@@ -441,19 +441,19 @@ ElementNode* ElementNode::CreateArrayAttributeNode(uint32_t index, QTSS_Object s
 	//printf("------- ElementNode::CreateArrayAttributeNode --------\n");
 	//printf("ElementNode::CreateArrayAttributeNode name = %s index = %"   _U32BITARG_   " arraySize =%"   _U32BITARG_   " \n",fFieldIDs[index].fFieldName, index,arraySize);
 
-	ElementDataFields* fieldPtr = NULL;
+	ElementDataFields* fieldPtr = nullptr;
 	SetFields(index, attributeInfo);
 	fFieldIDs[index].fFieldType = eArrayNode;
 
 	ElementNode* nodePtr = new ElementNode(); ElementNode_InsertPtr(nodePtr, "ElementNode::CreateArrayAttributeNode ElementNode*");
 	this->SetElementDataPtr(index, (char *)nodePtr, true);
-	Assert(nodePtr != NULL);
-	if (NULL == nodePtr) return NULL;
+	Assert(nodePtr != nullptr);
+	if (nullptr == nodePtr) return nullptr;
 
 	nodePtr->SetSource(source); // the node's API source
 	nodePtr->AllocateFields(arraySize);
 
-	if (this->GetNodeInfoPtr(index) == NULL)
+	if (this->GetNodeInfoPtr(index) == nullptr)
 	{   //printf("ElementNode::CreateArrayAttributeNode index = %"   _U32BITARG_   " this->GetNodeInfoPtr(index) == NULL \n",index);
 	}
 	nodePtr->SetNodeInfo(this->GetNodeInfoPtr(index));
@@ -461,7 +461,7 @@ ElementNode* ElementNode::CreateArrayAttributeNode(uint32_t index, QTSS_Object s
 	for (uint32_t i = 0; !nodePtr->IsStopItem(i); i++)
 	{
 		fieldPtr = nodePtr->GetElementFieldPtr(i);
-		Assert(fieldPtr != NULL);
+		Assert(fieldPtr != nullptr);
 
 		nodePtr->SetFields(i, attributeInfo);
 
@@ -486,7 +486,7 @@ ElementNode* ElementNode::CreateArrayAttributeNode(uint32_t index, QTSS_Object s
 			Warn(err == QTSS_NoErr);
 			if (err != QTSS_NoErr)
 			{   //printf("Error Getting Value for %s type = qtssAttrDataTypeQTSS_Object err = %"   _U32BITARG_   "\n", fieldPtr->fFieldName,err);
-				fieldPtr->fAPISource = NULL;
+				fieldPtr->fAPISource = nullptr;
 			}
 
 			QTSS_AttributeID id;
@@ -530,7 +530,7 @@ void ElementNode::InitializeAllFields(bool allocateFields, QTSS_Object defaultAt
 
 		for (uint32_t i = 0; !IsStopItem(i); i++)
 		{
-			if (defaultAttributeInfo == NULL)
+			if (defaultAttributeInfo == nullptr)
 			{
 				err = QTSS_GetAttrInfoByIndex(source, i, &theAttributeInfo);
 				Assert(err == QTSS_NoErr);
@@ -560,7 +560,7 @@ void ElementNode::InitializeAllFields(bool allocateFields, QTSS_Object defaultAt
 			if (forceAll || nextSegment.Equal(sDoAllIndexIteratorSPL) || queryPtr->IndexParam() || numValues > 1 || foundFilteredAttribute)
 			{
 				ElementNode *nodePtr = CreateArrayAttributeNode(i, source, theAttributeInfo, numValues);
-				Assert(nodePtr != NULL);
+				Assert(nodePtr != nullptr);
 				/*
 				if (NULL == nodePtr)
 				{   //printf("ElementNode::InitializeAllFields(NULL == CreateArrayAttributeNode  nodePtr\n");
@@ -588,7 +588,7 @@ void ElementNode::InitializeAllFields(bool allocateFields, QTSS_Object defaultAt
 
 void ElementNode::SetNodeInfo(ElementDataFields *nodeInfoPtr)
 {
-	if (nodeInfoPtr == NULL)
+	if (nodeInfoPtr == nullptr)
 	{
 		//printf("---- SetNodeInfo nodeInfoPtr = NULL \n");
 	}
@@ -602,17 +602,17 @@ void ElementNode::SetNodeInfo(ElementDataFields *nodeInfoPtr)
 
 void ElementNode::SetNodeName(char *namePtr)
 {
-	if (namePtr == NULL)
+	if (namePtr == nullptr)
 	{
 		delete fNodeNameSPL.Ptr; ElementNode_RemovePtr(fNodeNameSPL.Ptr, "ElementNode::SetNodeName char* ");
-		fNodeNameSPL.Set(NULL, 0);
+		fNodeNameSPL.Set(nullptr, 0);
 		return;
 	}
 
-	if (fNodeNameSPL.Ptr != NULL)
+	if (fNodeNameSPL.Ptr != nullptr)
 	{
 		delete fNodeNameSPL.Ptr; ElementNode_RemovePtr(fNodeNameSPL.Ptr, "ElementNode::SetNodeName char* ");
-		fNodeNameSPL.Set(NULL, 0);
+		fNodeNameSPL.Set(nullptr, 0);
 	}
 	//printf(" ElementNode::SetNodeName new NodeName = %s \n",namePtr);
 	int len = ::strlen(namePtr);
@@ -624,8 +624,8 @@ void ElementNode::SetNodeName(char *namePtr)
 
 ElementNode::ElementDataFields *ElementNode::GetElementFieldPtr(int32_t index)
 {
-	ElementNode::ElementDataFields *resultPtr = NULL;
-	Assert(fFieldIDs != NULL);
+	ElementNode::ElementDataFields *resultPtr = nullptr;
+	Assert(fFieldIDs != nullptr);
 	Assert((index >= 0) && (index < (int32_t)fNumFields));
 	if ((index >= 0) && (index < (int32_t)fNumFields))
 		resultPtr = &fFieldIDs[index];
@@ -634,9 +634,9 @@ ElementNode::ElementDataFields *ElementNode::GetElementFieldPtr(int32_t index)
 
 char *ElementNode::GetElementDataPtr(int32_t index)
 {
-	char *resultPtr = NULL;
+	char *resultPtr = nullptr;
 	Assert((index >= 0) && (index < (int32_t)fNumFields));
-	if (fInitialized && (fFieldDataPtrs != NULL) && (index >= 0) && (index < (int32_t)fNumFields))
+	if (fInitialized && (fFieldDataPtrs != nullptr) && (index >= 0) && (index < (int32_t)fNumFields))
 	{
 		resultPtr = fFieldDataPtrs[index];
 	}
@@ -685,10 +685,10 @@ inline void ElementNode::DebugShowFieldValue(int32_t /*index*/)
 ElementNode::ElementDataFields *ElementNode::GetNodeInfoPtr(int32_t index)
 {
 	ElementNode::ElementDataFields *resultPtr = GetElementFieldPtr(index);
-	Assert(resultPtr != NULL);
+	Assert(resultPtr != nullptr);
 
-	if ((resultPtr != NULL) && ((eNode != resultPtr->fFieldType) && (eArrayNode != resultPtr->fFieldType)))
-		resultPtr = NULL;
+	if ((resultPtr != nullptr) && ((eNode != resultPtr->fFieldType) && (eArrayNode != resultPtr->fFieldType)))
+		resultPtr = nullptr;
 	return resultPtr;
 }
 
@@ -701,7 +701,7 @@ void ElementNode::SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentP
 		if (!queryPtr->RecurseParam() && (nextSegmentPtr->Len == 0)) break;
 
 		ElementNode::ElementDataFields *theNodePtr = GetNodeInfoPtr(index);
-		if (NULL == theNodePtr)
+		if (nullptr == theNodePtr)
 		{
 			//printf(" ElementNode::SetUpSingleNode (NULL == theNodePtr(%" _S32BITARG_ ")) name=%s \n",index,GetName(index));
 			break;
@@ -715,7 +715,7 @@ void ElementNode::SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentP
 
 		// filter unnecessary nodes     
 		char *nodeName = GetName(index);
-		if (nodeName != NULL)
+		if (nodeName != nullptr)
 		{
 			StrPtrLen nodeNameSPL(nodeName);
 			if ((!nodeNameSPL.Equal(*nextSegmentPtr) && !ElementNode_DoAll(nextSegmentPtr))
@@ -731,14 +731,14 @@ void ElementNode::SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentP
 		}
 
 		ElementNode* nodePtr = (ElementNode *)GetElementDataPtr(index);
-		if (nodePtr == NULL)
+		if (nodePtr == nullptr)
 		{
 			//printf("ElementNode::SetUpSingleNode %s nodePtr == NULL make new nodePtr index = %" _S32BITARG_ "\n", GetMyName(),index);
 			nodePtr = new ElementNode(); ElementNode_InsertPtr(nodePtr, "ElementNode::SetUpSingleNode ElementNode* new ElementNode() ");
 			SetElementDataPtr(index, (char *)nodePtr, true);
 		}
 
-		if (nodePtr != NULL)
+		if (nodePtr != nullptr)
 		{
 			StrPtrLen tempSegment;
 			(void)queryPtr->NextSegment(nextSegmentPtr, &tempSegment);
@@ -752,7 +752,7 @@ void ElementNode::SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentP
 				//printf("ElementNode::SetUpSingleNode GetValue source = %"   _U32BITARG_   " name = %s id = %"   _U32BITARG_   " \n",(uint32_t)  GetSource(),(uint32_t)  GetName(index),(uint32_t) GetAPI_ID(index));
 
 				ElementDataFields* fieldPtr = GetElementFieldPtr(index);
-				if (fieldPtr != NULL && fieldPtr->fAPI_Type == qtssAttrDataTypeQTSS_Object)
+				if (fieldPtr != nullptr && fieldPtr->fAPI_Type == qtssAttrDataTypeQTSS_Object)
 				{
 					uint32_t sourceLen = sizeof(fieldPtr->fAPISource);
 					(void)QTSS_GetValue(GetSource(), fieldPtr->fAPI_ID, fieldPtr->fIndex, &fieldPtr->fAPISource, &sourceLen);
@@ -788,7 +788,7 @@ bool ElementNode::SetUpOneDataField(uint32_t index)
 	bool isNodeResult = IsNodeElement(index);
 	char *testPtr = GetElementDataPtr(index);
 	//Warn(NULL == testPtr);
-	if (NULL != testPtr)
+	if (nullptr != testPtr)
 	{   //printf(" ElementNode::SetUpOneDataField skip field already setup parent = %s field name=%s\n",GetNodeName(), GetName(index)); 
 		return isNodeResult;
 	}
@@ -875,16 +875,16 @@ void ElementNode::SetUpAllNodes(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr
 
 QTSS_Error ElementNode::GetAttributeSize(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex, uint32_t* outLenPtr)
 {
-	return QTSS_GetValue(inObject, inID, inIndex, NULL, outLenPtr);
+	return QTSS_GetValue(inObject, inID, inIndex, nullptr, outLenPtr);
 }
 
 char *ElementNode::NewIndexElement(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex)
 {
-	char *resultPtr = NULL;
+	char *resultPtr = nullptr;
 
-	Assert(inObject != NULL);
+	Assert(inObject != nullptr);
 
-	if (inObject != NULL)
+	if (inObject != nullptr)
 	{
 		QTSS_Error err = QTSS_GetValueAsString(inObject, inID, inIndex, &resultPtr); ElementNode_InsertPtr(resultPtr, "ElementNode::NewIndexElement QTSS_GetValueAsString ");
 		if (err != QTSS_NoErr)
@@ -900,10 +900,10 @@ inline  int32_t ElementNode::ResolveSPLKeyToIndex(StrPtrLen *keyPtr)
 	int32_t index = -1;
 	PointerSizedInt object = 0;
 
-	if (fElementMap != NULL && keyPtr != NULL && keyPtr->Len > 0)
+	if (fElementMap != nullptr && keyPtr != nullptr && keyPtr->Len > 0)
 	{
 		OSRef* osrefptr = fElementMap->Resolve(keyPtr);
-		if (osrefptr != NULL)
+		if (osrefptr != nullptr)
 		{
 			object = (PointerSizedInt)osrefptr->GetObject();
 			index = (int32_t)object;
@@ -947,14 +947,14 @@ OSRef* ElementNode::GetOSRef(int32_t index)
 
 	OSRef* resultPtr = fFieldOSRefPtrs[index];
 	//      Assert(resultPtr != NULL);
-	if (resultPtr == NULL)
+	if (resultPtr == nullptr)
 	{
 		StrPtrLen theName;
-		fFieldOSRefPtrs[index] = new OSRef(); Assert(fFieldOSRefPtrs[index] != NULL); ElementNode_InsertPtr(fFieldOSRefPtrs[index], "ElementNode::GetOSRef new OSRef() fFieldOSRefPtrs ");
+		fFieldOSRefPtrs[index] = new OSRef(); Assert(fFieldOSRefPtrs[index] != nullptr); ElementNode_InsertPtr(fFieldOSRefPtrs[index], "ElementNode::GetOSRef new OSRef() fFieldOSRefPtrs ");
 		GetNameSPL(index, &theName); Assert(theName.Len != 0);
 		//printf("ElementNode::GetOSRef index = %" _S32BITARG_ " name = %s \n", index, theName.Ptr);
 		fFieldOSRefPtrs[index]->Set(theName, (void *)index);
-		if (0 != theName.Len && NULL != theName.Ptr) //return the ptr else NULL
+		if (0 != theName.Len && nullptr != theName.Ptr) //return the ptr else NULL
 			resultPtr = fFieldOSRefPtrs[index];
 	}
 
@@ -973,7 +973,7 @@ void ElementNode::GetFullPath(StrPtrLen *resultPtr)
 {
 	//printf("ElementNode::GetFullPath this node name %s \n",GetNodeName());
 
-	Assert(fPathSPL.Ptr != NULL);
+	Assert(fPathSPL.Ptr != nullptr);
 
 	if (fPathSPL.Len != 0)
 	{
@@ -983,7 +983,7 @@ void ElementNode::GetFullPath(StrPtrLen *resultPtr)
 	}
 
 	ElementNode *parentPtr = GetParentNode();
-	if (parentPtr != NULL)
+	if (parentPtr != nullptr)
 	{
 		StrPtrLen parentPath;
 		parentPtr->GetFullPath(&parentPath);
@@ -1021,12 +1021,12 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 	{   //printf("ElementNode::RespondWithSelfAdd not Initialized EXIT\n");
 		return;
 	}
-	if (NULL == queryPtr)
+	if (nullptr == queryPtr)
 	{   //printf("ElementNode::RespondWithSelfAdd NULL == queryPtr EXIT\n");
 		return;
 	}
 
-	if (NULL == inStream)
+	if (nullptr == inStream)
 	{   //printf("ElementNode::RespondWithSelfAdd NULL == inStream EXIT\n");
 		return;
 	}
@@ -1034,7 +1034,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 	char *dataPtr = GetMyElementDataPtr();
 	bool nullData = false;
 	static char *nullErr = "(null)";
-	if (NULL == dataPtr)
+	if (nullptr == dataPtr)
 	{   //printf("ElementNode::RespondWithSelfAdd NULL == dataPtr EXIT\n");
 		dataPtr = nullErr;
 		nullData = true;
@@ -1126,7 +1126,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 		return;
 	}
 
-	err = QTSS_AddInstanceAttribute(GetSource(), nameDeleter.GetObject(), NULL, attrDataType);
+	err = QTSS_AddInstanceAttribute(GetSource(), nameDeleter.GetObject(), nullptr, attrDataType);
 	//printf("QTSS_AddInstanceAttribute(source=%"   _U32BITARG_   ", name=%s, NULL, %d, %"   _U32BITARG_   ")\n",GetSource(),nameDeleter.GetObject(),attrDataType,accessFlags);
 	if (err)
 	{
@@ -1200,7 +1200,7 @@ void ElementNode::RespondWithSelf(QTSS_StreamRef inStream, QueryURI *queryPtr)
 	}
 
 
-	if (GetNodeName() == NULL)
+	if (GetNodeName() == nullptr)
 	{   //printf("ElementNode::RespondWithSelf Node = %s is Uninitialized no name so LEAVE\n",GetNodeName() );
 		return;
 	}
@@ -1210,7 +1210,7 @@ void ElementNode::RespondWithSelf(QTSS_StreamRef inStream, QueryURI *queryPtr)
 		return;
 	}
 
-	if (NULL == queryPtr)
+	if (nullptr == queryPtr)
 	{   //printf("ElementNode::RespondWithSelf NULL == queryPtr EXIT\n");
 		return;
 	}
@@ -1245,7 +1245,7 @@ void ElementNode::RespondWithSelf(QTSS_StreamRef inStream, QueryURI *queryPtr)
 	{
 		parameters &= ~QueryURI::kVerboseParam; // clear verbose flag
 		GetFullPath(&bufferSPL);
-		(void)QTSS_Write(inStream, bufferSPL.Ptr, ::strlen(bufferSPL.Ptr), NULL, 0);
+		(void)QTSS_Write(inStream, bufferSPL.Ptr, ::strlen(bufferSPL.Ptr), nullptr, 0);
 		//printf("ElementNode::RespondWithSelf Path=%s \n",bufferSPL.Ptr);
 	}
 
@@ -1253,25 +1253,25 @@ void ElementNode::RespondWithSelf(QTSS_StreamRef inStream, QueryURI *queryPtr)
 	{
 		if (!isVerbosePath) // this node name already in path
 		{
-			(void)QTSS_Write(inStream, GetNodeName(), GetNodeNameLen(), NULL, 0);
-			(void)QTSS_Write(inStream, "/", 1, NULL, 0);
+			(void)QTSS_Write(inStream, GetNodeName(), GetNodeNameLen(), nullptr, 0);
+			(void)QTSS_Write(inStream, "/", 1, nullptr, 0);
 			//printf("ElementNode::RespondWithSelf %s/ \n",GetNodeName());
 		}
 	}
 	else
 	{   //printf(" ****** ElementNode::RespondWithSelf NOT a node **** \n");
-		(void)QTSS_Write(inStream, GetNodeName(), GetNodeNameLen(), NULL, 0);
-		(void)QTSS_Write(inStream, "=", 1, NULL, 0);
+		(void)QTSS_Write(inStream, GetNodeName(), GetNodeNameLen(), nullptr, 0);
+		(void)QTSS_Write(inStream, "=", 1, nullptr, 0);
 		//printf(" %s=",GetNodeName());
 
 		char *dataPtr = GetMyElementDataPtr();
-		if (dataPtr == NULL)
+		if (dataPtr == nullptr)
 		{
-			(void)QTSS_Write(inStream, nullErr, ::strlen(nullErr), NULL, 0);
+			(void)QTSS_Write(inStream, nullErr, ::strlen(nullErr), nullptr, 0);
 		}
 		else
 		{
-			(void)QTSS_Write(inStream, dataPtr, ::strlen(dataPtr), NULL, 0);
+			(void)QTSS_Write(inStream, dataPtr, ::strlen(dataPtr), nullptr, 0);
 		}
 		//printf(" %s",buffer);
 
@@ -1279,37 +1279,37 @@ void ElementNode::RespondWithSelf(QTSS_StreamRef inStream, QueryURI *queryPtr)
 
 	if (parameters)
 	{
-		(void)QTSS_Write(inStream, sParameterDelimeter, 1, NULL, 0);
+		(void)QTSS_Write(inStream, sParameterDelimeter, 1, nullptr, 0);
 		//printf(" %s",sParameterDelimeter);
 	}
 
 	if (parameters & QueryURI::kAccessParam)
 	{
-		(void)QTSS_Write(inStream, sAccess, 2, NULL, 0);
+		(void)QTSS_Write(inStream, sAccess, 2, nullptr, 0);
 		//printf(" %s",sAccess);
-		(void)QTSS_Write(inStream, GetMyAccessData(), GetMyAccessLen(), NULL, 0);
+		(void)QTSS_Write(inStream, GetMyAccessData(), GetMyAccessLen(), nullptr, 0);
 		//printf("%s",GetMyAccessData());
 		parameters &= ~QueryURI::kAccessParam; // clear access flag
 
 		if (parameters)
 		{
-			(void)QTSS_Write(inStream, sListDelimeter, 1, NULL, 0);
+			(void)QTSS_Write(inStream, sListDelimeter, 1, nullptr, 0);
 			//printf("%s",sListDelimeter);
 		}
 	}
 
 	if (parameters & QueryURI::kTypeParam)
 	{
-		(void)QTSS_Write(inStream, sType, 2, NULL, 0);
+		(void)QTSS_Write(inStream, sType, 2, nullptr, 0);
 		//printf(" %s",sType);
 		char *theTypeString = GetMyAPI_TypeStr();
-		if (theTypeString == NULL)
+		if (theTypeString == nullptr)
 		{
-			(void)QTSS_Write(inStream, nullErr, ::strlen(nullErr), NULL, 0);
+			(void)QTSS_Write(inStream, nullErr, ::strlen(nullErr), nullptr, 0);
 		}
 		else
 		{
-			(void)QTSS_Write(inStream, theTypeString, strlen(theTypeString), NULL, 0);
+			(void)QTSS_Write(inStream, theTypeString, strlen(theTypeString), nullptr, 0);
 			//printf("%s",theTypeString);
 		}
 
@@ -1317,12 +1317,12 @@ void ElementNode::RespondWithSelf(QTSS_StreamRef inStream, QueryURI *queryPtr)
 
 		if (parameters)
 		{
-			(void)QTSS_Write(inStream, sListDelimeter, 1, NULL, 0);
+			(void)QTSS_Write(inStream, sListDelimeter, 1, nullptr, 0);
 			//printf("%s",sListDelimeter);
 		}
 	}
 	queryPtr->SetQueryHasResponse();
-	(void)QTSS_Write(inStream, "\n", 1, NULL, 0);
+	(void)QTSS_Write(inStream, "\n", 1, nullptr, 0);
 	//printf("\n");
 
 }
@@ -1357,18 +1357,18 @@ void    ElementNode::RespondToAdd(QTSS_StreamRef inStream, int32_t index, QueryU
 	{   //printf("ElementNode::RespondToAdd not Initialized EXIT\n");
 		return;
 	}
-	if (NULL == queryPtr)
+	if (nullptr == queryPtr)
 	{   //printf("ElementNode::RespondToAdd NULL == queryPtr EXIT\n");
 		return;
 	}
 
-	if (NULL == inStream)
+	if (nullptr == inStream)
 	{   //printf("ElementNode::RespondToAdd NULL == inStream EXIT\n");
 		return;
 	}
 
 	char *dataPtr = GetElementDataPtr(index);
-	if (NULL == dataPtr)
+	if (nullptr == dataPtr)
 	{   //printf("ElementNode::RespondToAdd NULL == dataPtr EXIT\n");
 		//  return;
 		dataPtr = nullErr;
@@ -1380,7 +1380,7 @@ void    ElementNode::RespondToAdd(QTSS_StreamRef inStream, int32_t index, QueryU
 
 	uint32_t accessFlags = 0;
 	StrPtrLen *accessParamsPtr = queryPtr->GetAccess();
-	if (accessParamsPtr != NULL)
+	if (accessParamsPtr != nullptr)
 		accessFlags = queryPtr->GetAccessFlags();
 	else
 		accessFlags = GetAccessPermissions(index);
@@ -1478,18 +1478,18 @@ void    ElementNode::RespondToSet(QTSS_StreamRef inStream, int32_t index, QueryU
 	{   //printf("ElementNode::RespondToSet not Initialized EXIT\n");
 		return;
 	}
-	if (NULL == queryPtr)
+	if (nullptr == queryPtr)
 	{   //printf("ElementNode::RespondToSet NULL == queryPtr EXIT\n");
 		return;
 	}
 
-	if (NULL == inStream)
+	if (nullptr == inStream)
 	{   //printf("ElementNode::RespondToSet NULL == inStream EXIT\n");
 		return;
 	}
 
 	char *dataPtr = GetElementDataPtr(index);
-	if (NULL == dataPtr)
+	if (nullptr == dataPtr)
 	{   //printf("ElementNode::RespondToSet NULL == dataPtr EXIT\n");
 		//  return;
 		dataPtr = nullErr;
@@ -1580,12 +1580,12 @@ void    ElementNode::RespondToDel(QTSS_StreamRef inStream, int32_t index, QueryU
 	{   //printf("ElementNode::RespondToDel not Initialized EXIT\n");
 		return;
 	}
-	if (NULL == queryPtr)
+	if (nullptr == queryPtr)
 	{   //printf("ElementNode::RespondToDel NULL == queryPtr EXIT\n");
 		return;
 	}
 
-	if (NULL == inStream)
+	if (nullptr == inStream)
 	{   //printf("ElementNode::RespondToDel NULL == inStream EXIT\n");
 		return;
 	}
@@ -1604,7 +1604,7 @@ void    ElementNode::RespondToDel(QTSS_StreamRef inStream, int32_t index, QueryU
 	}
 
 	char *dataPtr = GetElementDataPtr(index);
-	if (NULL == dataPtr)
+	if (nullptr == dataPtr)
 	{   //printf("ElementNode::RespondToDel NULL == dataPtr EXIT\n");
 		//  return;
 		dataPtr = nullErr;
@@ -1682,18 +1682,18 @@ void ElementNode::RespondToGet(QTSS_StreamRef inStream, int32_t index, QueryURI 
 	{   //printf("ElementNode::RespondToGet not Initialized EXIT\n");
 		return;
 	}
-	if (NULL == queryPtr)
+	if (nullptr == queryPtr)
 	{   //printf("ElementNode::RespondToGet NULL == queryPtr EXIT\n");
 		return;
 	}
 
-	if (NULL == inStream)
+	if (nullptr == inStream)
 	{   //printf("ElementNode::RespondToGet NULL == inStream EXIT\n");
 		return;
 	}
 
 	char *dataPtr = GetElementDataPtr(index);
-	if (NULL == dataPtr)
+	if (nullptr == dataPtr)
 	{   //printf("ElementNode::RespondToGet NULL == dataPtr EXIT\n");
 		//  return;
 		dataPtr = nullErr;
@@ -1714,31 +1714,31 @@ void ElementNode::RespondToGet(QTSS_StreamRef inStream, int32_t index, QueryURI 
 	{
 		parameters &= ~QueryURI::kVerboseParam; // clear verbose flag
 		GetFullPath(&bufferSPL);
-		(void)QTSS_Write(inStream, bufferSPL.Ptr, ::strlen(bufferSPL.Ptr), NULL, 0);
+		(void)QTSS_Write(inStream, bufferSPL.Ptr, ::strlen(bufferSPL.Ptr), nullptr, 0);
 		//printf("ElementNode::RespondToGet Path=%s \n",bufferSPL.Ptr);
 	}
 
 
-	(void)QTSS_Write(inStream, GetName(index), GetNameLen(index), NULL, 0);
+	(void)QTSS_Write(inStream, GetName(index), GetNameLen(index), nullptr, 0);
 	//printf("ElementNode::RespondToGet %s:len = %"   _U32BITARG_   "",GetName(index),(uint32_t) GetNameLen(index));
 
 	if (IsNodeElement(index))
 	{
-		(void)QTSS_Write(inStream, "/\"", 1, NULL, 0);
+		(void)QTSS_Write(inStream, "/\"", 1, nullptr, 0);
 		//printf(" %s/\"",GetNodeName());
 	}
 	else
 	{
 		if (nullData)
 		{
-			(void)QTSS_Write(inStream, "=", 1, NULL, 0);
-			(void)QTSS_Write(inStream, dataPtr, ::strlen(dataPtr), NULL, 0);
+			(void)QTSS_Write(inStream, "=", 1, nullptr, 0);
+			(void)QTSS_Write(inStream, dataPtr, ::strlen(dataPtr), nullptr, 0);
 		}
 		else
 		{
-			(void)QTSS_Write(inStream, "=\"", 2, NULL, 0);
-			(void)QTSS_Write(inStream, dataPtr, ::strlen(dataPtr), NULL, 0);
-			(void)QTSS_Write(inStream, "\"", 1, NULL, 0);
+			(void)QTSS_Write(inStream, "=\"", 2, nullptr, 0);
+			(void)QTSS_Write(inStream, dataPtr, ::strlen(dataPtr), nullptr, 0);
+			(void)QTSS_Write(inStream, "\"", 1, nullptr, 0);
 		}
 	}
 
@@ -1747,52 +1747,52 @@ void ElementNode::RespondToGet(QTSS_StreamRef inStream, int32_t index, QueryURI 
 
 	if (parameters)
 	{
-		(void)QTSS_Write(inStream, sParameterDelimeter, 1, NULL, 0);
+		(void)QTSS_Write(inStream, sParameterDelimeter, 1, nullptr, 0);
 		//printf(" %s",sParameterDelimeter);
 	}
 
 	if (parameters & QueryURI::kAccessParam)
 	{
-		(void)QTSS_Write(inStream, sAccess, 2, NULL, 0);
+		(void)QTSS_Write(inStream, sAccess, 2, nullptr, 0);
 		//printf(" %s",sAccess);
-		(void)QTSS_Write(inStream, GetAccessData(index), GetAccessLen(index), NULL, 0);
+		(void)QTSS_Write(inStream, GetAccessData(index), GetAccessLen(index), nullptr, 0);
 		//printf("%s",GetAccessData(index));
 		parameters &= ~QueryURI::kAccessParam; // clear access flag
 
 		if (parameters)
 		{
-			(void)QTSS_Write(inStream, sListDelimeter, 1, NULL, 0);
+			(void)QTSS_Write(inStream, sListDelimeter, 1, nullptr, 0);
 			//printf("%s",sListDelimeter);
 		}
 	}
 
 	if (parameters & QueryURI::kTypeParam)
 	{
-		(void)QTSS_Write(inStream, sType, 2, NULL, 0);
+		(void)QTSS_Write(inStream, sType, 2, nullptr, 0);
 		//printf(" %s",sType);
 		char* typeStringPtr = GetAPI_TypeStr(index);
-		if (typeStringPtr == NULL)
+		if (typeStringPtr == nullptr)
 		{
 			//printf("ElementNode::RespondToGet typeStringPtr is NULL for type = %s \n", typeStringPtr);
-			(void)QTSS_Write(inStream, nullErr, ::strlen(nullErr), NULL, 0);
+			(void)QTSS_Write(inStream, nullErr, ::strlen(nullErr), nullptr, 0);
 		}
 		else
 		{
 			//printf("ElementNode::RespondToGet type = %s \n", typeStringPtr);
-			(void)QTSS_Write(inStream, typeStringPtr, strlen(typeStringPtr), NULL, 0);
+			(void)QTSS_Write(inStream, typeStringPtr, strlen(typeStringPtr), nullptr, 0);
 		}
 
 		parameters &= ~QueryURI::kTypeParam; // clear type flag
 
 		if (parameters)
 		{
-			(void)QTSS_Write(inStream, sListDelimeter, 1, NULL, 0);
+			(void)QTSS_Write(inStream, sListDelimeter, 1, nullptr, 0);
 			//printf("%s",sListDelimeter);
 		}
 	}
 
 
-	(void)QTSS_Write(inStream, "\n", 1, NULL, 0);
+	(void)QTSS_Write(inStream, "\n", 1, nullptr, 0);
 	//printf(" %s","\n");
 
 	queryPtr->SetQueryHasResponse();
@@ -1834,15 +1834,15 @@ void ElementNode::RespondWithNodeName(QTSS_StreamRef inStream, QueryURI * /*unus
 	StrPtrLen fullPathSPL;
 	GetFullPath(&fullPathSPL);
 
-	(void)QTSS_Write(inStream, "Container=\"/", ::strlen("Container=\"/"), NULL, 0);
+	(void)QTSS_Write(inStream, "Container=\"/", ::strlen("Container=\"/"), nullptr, 0);
 
-	(void)QTSS_Write(inStream, fPathSPL.Ptr, ::strlen(fPathSPL.Ptr), NULL, 0);
+	(void)QTSS_Write(inStream, fPathSPL.Ptr, ::strlen(fPathSPL.Ptr), nullptr, 0);
 	//printf("ElementNode::RespondWithNodeName Path=%s \n",fPathSPL.Ptr);
 
-	(void)QTSS_Write(inStream, "\"", 1, NULL, 0);
+	(void)QTSS_Write(inStream, "\"", 1, nullptr, 0);
 	//printf("\"");     
 
-	(void)QTSS_Write(inStream, "\n", 1, NULL, 0);
+	(void)QTSS_Write(inStream, "\n", 1, nullptr, 0);
 	//printf("\n");
 
 }
@@ -1858,15 +1858,15 @@ void ElementNode::RespondWithSingleElement(QTSS_StreamRef inStream, QueryURI *qu
 		return;
 	}
 
-	if (GetNodeName() == NULL)
+	if (GetNodeName() == nullptr)
 	{
 		//printf("ElementNode::RespondWithSingleElement Node = %s is Uninitialized LEAVE\n",GetNodeName() );
 		return;
 	}
 
-	Assert(queryPtr != NULL);
-	Assert(currentSegmentPtr != NULL);
-	Assert(currentSegmentPtr->Ptr != 0);
+	Assert(queryPtr != nullptr);
+	Assert(currentSegmentPtr != nullptr);
+	Assert(currentSegmentPtr->Ptr != nullptr);
 	Assert(currentSegmentPtr->Len != 0);
 
 	int32_t key = ResolveSPLKeyToIndex(currentSegmentPtr);
@@ -1879,7 +1879,7 @@ void ElementNode::RespondWithSingleElement(QTSS_StreamRef inStream, QueryURI *qu
 		return;
 	}
 
-	if ((queryPtr == NULL) || (currentSegmentPtr == NULL) || (currentSegmentPtr->Ptr == NULL) || (currentSegmentPtr->Len == 0))
+	if ((queryPtr == nullptr) || (currentSegmentPtr == nullptr) || (currentSegmentPtr->Ptr == nullptr) || (currentSegmentPtr->Len == 0))
 	{
 		//printf("ElementNode::RespondWithSingleElement currentSegmentPtr || queryPtr = NULL\n");
 		return;
@@ -1940,7 +1940,7 @@ void ElementNode::RespondWithAllElements(QTSS_StreamRef inStream, QueryURI *quer
 	//printf("ElementNode::RespondWithAllElements %s\n",GetNodeName());
 	//printf("ElementNode::RespondWithAllElements fDataFieldsStop = %d \n",fDataFieldsStop);
 
-	if (GetNodeName() == NULL)
+	if (GetNodeName() == nullptr)
 	{   //printf("ElementNode::RespondWithAllElements %s is Uninitialized LEAVE\n",GetNodeName());
 		return;
 	}
@@ -1953,7 +1953,7 @@ void ElementNode::RespondWithAllElements(QTSS_StreamRef inStream, QueryURI *quer
 	StrPtrLen nextSegment;
 	(void)queryPtr->NextSegment(currentSegmentPtr, &nextSegment);
 
-	if ((nextSegment.Len == 0 || nextSegment.Ptr == 0))  // only respond if we are at the end of the path
+	if ((nextSegment.Len == 0 || nextSegment.Ptr == nullptr))  // only respond if we are at the end of the path
 		if (QueryURI::kGETCommand == queryPtr->GetCommandID())
 			RespondWithNodeName(inStream, queryPtr);
 
@@ -1967,7 +1967,7 @@ void ElementNode::RespondWithAllElements(QTSS_StreamRef inStream, QueryURI *quer
 			index = ResolveSPLKeyToIndex(theFilterPtr);
 			if (index < 0) continue;
 
-			if ((nextSegment.Len == 0 || nextSegment.Ptr == 0))
+			if ((nextSegment.Len == 0 || nextSegment.Ptr == nullptr))
 			{
 				if ((!IsNodeElement(index)) || (IsNodeElement(index) && queryPtr->RecurseParam()))    // only respond if we are at the end of the path 
 					RespondToKey(inStream, index, queryPtr);
@@ -1984,7 +1984,7 @@ void ElementNode::RespondWithAllElements(QTSS_StreamRef inStream, QueryURI *quer
 			//printf("RespondWithAllElements = %d \n",index);
 			//printf("ElementNode::RespondWithAllElements nextSegment="); PRINT_STR(&nextSegment);
 
-			if ((nextSegment.Len == 0 || nextSegment.Ptr == 0))
+			if ((nextSegment.Len == 0 || nextSegment.Ptr == nullptr))
 			{
 				if ((!IsNodeElement(index)) || (IsNodeElement(index) && queryPtr->RecurseParam()))   // only respond if we are at the end of the path
 					RespondToKey(inStream, index, queryPtr);
@@ -2030,7 +2030,7 @@ void ElementNode::RespondWithAllNodes(QTSS_StreamRef inStream, QueryURI *queryPt
 		return;
 	}
 
-	if (GetNodeName() == NULL)
+	if (GetNodeName() == nullptr)
 	{   //printf("ElementNode::RespondWithAllNodes %s is Uninitialized LEAVE\n",GetNodeName());
 		return;
 	}
@@ -2067,8 +2067,8 @@ void ElementNode::RespondToQuery(QTSS_StreamRef inStream, QueryURI *queryPtr, St
 	//printf("----- ElementNode::RespondToQuery ------\n");
 	//printf("ElementNode::RespondToQuery NODE = %s\n",GetNodeName());
 
-	Assert(NULL != queryPtr);
-	Assert(NULL != currentPathPtr);
+	Assert(nullptr != queryPtr);
+	Assert(nullptr != currentPathPtr);
 
 	if (!fInitialized)
 	{   //printf("ElementNode::RespondToQuery %s is Uninitialized LEAVE\n",GetNodeName());
@@ -2076,7 +2076,7 @@ void ElementNode::RespondToQuery(QTSS_StreamRef inStream, QueryURI *queryPtr, St
 
 	}
 
-	if (GetNodeName() == NULL)
+	if (GetNodeName() == nullptr)
 	{   //printf("ElementNode::RespondToQuery %s is Uninitialized LEAVE\n",GetNodeName());
 		return;
 	}
@@ -2114,7 +2114,7 @@ void ElementNode::RespondToQuery(QTSS_StreamRef inStream, QueryURI *queryPtr, St
 		{   // admin 
 			//printf("ElementNode::RespondToQuery 2)RespondToQuery -> RespondWithSelf ") ;PRINT_STR( GetNodeNameSPL());
 			if (fIsTop)
-				(void)QTSS_Write(inStream, "Container=\"/\"\n", ::strlen("Container=\"/\"\n"), NULL, 0);
+				(void)QTSS_Write(inStream, "Container=\"/\"\n", ::strlen("Container=\"/\"\n"), nullptr, 0);
 
 			RespondWithSelf(inStream, queryPtr);
 			break;
@@ -2154,7 +2154,7 @@ void ElementNode::RespondToQuery(QTSS_StreamRef inStream, QueryURI *queryPtr, St
 
 	if (QueryURI::kGETCommand != queryPtr->GetCommandID() && (!queryPtr->fIsPref))
 	{
-		queryPtr->fIsPref = IsPreferenceContainer(GetMyName(), NULL);
+		queryPtr->fIsPref = IsPreferenceContainer(GetMyName(), nullptr);
 	}
 	//printf("ElementNode::RespondToQuery LEAVE\n");
 }
@@ -2164,11 +2164,11 @@ void ElementNode::SetupNodes(QueryURI *queryPtr, StrPtrLen *currentPathPtr, QTSS
 {
 	//printf("----- ElementNode::SetupNodes ------ NODE = %s\n", GetNodeName()); 
 	//printf("ElementNode::SetupNodes currentPathPtr ="); PRINT_STR(currentPathPtr);
-	if (fSelfPtr == NULL)
+	if (fSelfPtr == nullptr)
 	{   //printf("******* ElementNode::SetupNodes (fSelfPtr == NULLL) \n");
 	}
-	Assert(NULL != queryPtr);
-	Assert(NULL != currentPathPtr);
+	Assert(nullptr != queryPtr);
+	Assert(nullptr != currentPathPtr);
 
 	if (queryPtr && currentPathPtr) do
 	{
@@ -2198,7 +2198,7 @@ void ElementNode::SetupNodes(QueryURI *queryPtr, StrPtrLen *currentPathPtr, QTSS
 
 		SetUpAllNodes(queryPtr, currentPathPtr, &nextSegment, initParams);
 
-		if (NULL == GetElementDataPtr(index))
+		if (nullptr == GetElementDataPtr(index))
 		{   //printf("ElementNode::SetupNodes call SetUpSingleElement index=%"   _U32BITARG_   " nextSegment=");PRINT_STR( &nextSegment);
 			SetUpSingleElement(queryPtr, currentPathPtr, &nextSegment, index, initParams);
 		}
@@ -2211,10 +2211,10 @@ void ElementNode::SetupNodes(QueryURI *queryPtr, StrPtrLen *currentPathPtr, QTSS
 void ElementNode::GetFilteredAttributeName(ElementDataFields* fieldPtr, QTSS_AttributeID theID)
 {
 	fieldPtr->fFieldLen = 0;
-	char *theName = NULL;
+	char *theName = nullptr;
 	(void)QTSS_GetValueAsString(fieldPtr->fAPISource, theID, 0, &theName);
 	OSCharArrayDeleter nameDeleter(theName);
-	if (theName != NULL)
+	if (theName != nullptr)
 	{
 		uint32_t len = strlen(theName);
 		if (len < eMaxAttributeNameSize)
@@ -2271,12 +2271,12 @@ bool ElementNode::IsPreferenceContainer(char *nodeName, QTSS_AttributeID* foundI
 
 ElementNode::ElementDataFields AdminClass::sAdminSelf[] = // special case of top of tree
 {   // key, API_ID,     fIndex,     Name,       Name_Len,       fAccessPermissions, Access, access_Len, fAPI_Type, fFieldType ,fAPISource
-	{0,     0,          0,          "admin",    strlen("admin"),    qtssAttrModeRead, "r", strlen("r"),0,   ElementNode::eNode, NULL    }
+	{0,     0,          0,          "admin",    strlen("admin"),    qtssAttrModeRead, "r", strlen("r"),0,   ElementNode::eNode, nullptr    }
 };
 
 ElementNode::ElementDataFields AdminClass::sAdminFieldIDs[] =
 {   // key, API_ID,     fIndex,     Name,       Name_Len,       fAccessPermissions, Access, access_Len, fAPI_Type, fFieldType ,fAPISource
-	{0,     0,          0,          "server",   strlen("server"),qtssAttrModeRead,  "r", strlen("r"),qtssAttrDataTypeQTSS_Object,   ElementNode::eNode, NULL    }
+	{0,     0,          0,          "server",   strlen("server"),qtssAttrModeRead,  "r", strlen("r"),qtssAttrDataTypeQTSS_Object,   ElementNode::eNode, nullptr    }
 };
 
 
@@ -2286,11 +2286,11 @@ void AdminClass::Initialize(QTSS_Initialize_Params *initParams, QueryURI *queryP
 
 	//printf("----- Initialize AdminClass ------\n");
 
-	SetParentNode(NULL);
+	SetParentNode(nullptr);
 	SetNodeInfo(&sAdminSelf[0]);// special case of this node as top of tree so it sets self
-	Assert(NULL != GetMyName());
+	Assert(nullptr != GetMyName());
 	SetNodeName(GetMyName());
-	SetSource(NULL);
+	SetSource(nullptr);
 	StrPtrLen *currentPathPtr = queryPtr->GetRootID();
 	uint32_t numFields = 1;
 	SetNumFields(numFields);
@@ -2302,21 +2302,21 @@ void AdminClass::Initialize(QTSS_Initialize_Params *initParams, QueryURI *queryP
 	fInitialized = true;
 	do
 	{
-		Assert(fElementMap == NULL);
+		Assert(fElementMap == nullptr);
 		fElementMap = new OSRefTable();  ElementNode_InsertPtr(fElementMap, "AdminClass::Initialize ElementNode* fElementMap ");
-		Assert(fElementMap != NULL);
-		if (fElementMap == NULL) break;
+		Assert(fElementMap != nullptr);
+		if (fElementMap == nullptr) break;
 
-		Assert(fFieldDataPtrs == NULL);
+		Assert(fFieldDataPtrs == nullptr);
 		fFieldDataPtrs = new char*[numFields];  ElementNode_InsertPtr(fFieldDataPtrs, "AdminClass::Initialize ElementNode* fFieldDataPtrs array ");
-		Assert(fFieldDataPtrs != NULL);
-		if (fFieldDataPtrs == NULL) break;
+		Assert(fFieldDataPtrs != nullptr);
+		if (fFieldDataPtrs == nullptr) break;
 		memset(fFieldDataPtrs, 0, numFields * sizeof(char*));
 
-		Assert(fFieldOSRefPtrs == NULL);
+		Assert(fFieldOSRefPtrs == nullptr);
 		fFieldOSRefPtrs = new OSRef *[numFields]; ElementNode_InsertPtr(fFieldOSRefPtrs, "AdminClass::Initialize ElementNode* fFieldOSRefPtrs array ");
-		Assert(fFieldOSRefPtrs != NULL);
-		if (fFieldOSRefPtrs == NULL) break;
+		Assert(fFieldOSRefPtrs != nullptr);
+		if (fFieldOSRefPtrs == nullptr) break;
 		memset(fFieldOSRefPtrs, 0, numFields * sizeof(OSRef*));
 
 		QTSS_Error err = fElementMap->Register(GetOSRef(0));
@@ -2360,6 +2360,6 @@ void AdminClass::SetUpSingleElement(QueryURI *queryPtr, StrPtrLen *currentSegmen
 AdminClass::~AdminClass()
 {   //printf("AdminClass::~AdminClass() \n");
 	delete (ElementNode*)fNodePtr; ElementNode_RemovePtr(fNodePtr, "AdminClass::~AdminClass ElementNode* fNodePtr");
-	fNodePtr = NULL;
+	fNodePtr = nullptr;
 }
 

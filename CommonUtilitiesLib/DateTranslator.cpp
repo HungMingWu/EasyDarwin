@@ -73,10 +73,10 @@ int64_t  DateTranslator::ParseDate(StrPtrLen* inDateString)
 	StringParser theDateParser(inDateString);
 
 	// the day of the week is redundant... we can skip it!
-	theDateParser.ConsumeLength(NULL, 5);
+	theDateParser.ConsumeLength(nullptr, 5);
 
 	// We are at the date now.
-	theDateStruct.tm_mday = theDateParser.ConsumeInteger(NULL);
+	theDateStruct.tm_mday = theDateParser.ConsumeInteger(nullptr);
 	theDateParser.ConsumeWhitespace();
 
 	// We are at the month now. Use our hand-crafted perfect hash table
@@ -98,22 +98,22 @@ int64_t  DateTranslator::ParseDate(StrPtrLen* inDateString)
 		return 0;
 
 	// Skip over the date
-	theDateParser.ConsumeLength(NULL, 4);
+	theDateParser.ConsumeLength(nullptr, 4);
 
 	// Grab the year (years since 1900 is what the tm struct wants)
-	theDateStruct.tm_year = theDateParser.ConsumeInteger(NULL) - 1900;
+	theDateStruct.tm_year = theDateParser.ConsumeInteger(nullptr) - 1900;
 	theDateParser.ConsumeWhitespace();
 
 	// Now just grab hour, minute, second
-	theDateStruct.tm_hour = theDateParser.ConsumeInteger(NULL);
+	theDateStruct.tm_hour = theDateParser.ConsumeInteger(nullptr);
 	theDateStruct.tm_hour += OS::GetGMTOffset();
 
-	theDateParser.ConsumeLength(NULL, 1); //skip over ':'   
+	theDateParser.ConsumeLength(nullptr, 1); //skip over ':'   
 
-	theDateStruct.tm_min = theDateParser.ConsumeInteger(NULL);
-	theDateParser.ConsumeLength(NULL, 1); //skip over ':'   
+	theDateStruct.tm_min = theDateParser.ConsumeInteger(nullptr);
+	theDateParser.ConsumeLength(nullptr, 1); //skip over ':'   
 
-	theDateStruct.tm_sec = theDateParser.ConsumeInteger(NULL);
+	theDateStruct.tm_sec = theDateParser.ConsumeInteger(nullptr);
 
 	// Ok, we've filled out the tm struct completely, now convert it to a time_t
 	time_t theTime = ::mktime(&theDateStruct);
@@ -122,15 +122,15 @@ int64_t  DateTranslator::ParseDate(StrPtrLen* inDateString)
 
 void DateTranslator::UpdateDateBuffer(DateBuffer* inDateBuffer, const int64_t& inDate, time_t gmtoffset)
 {
-	if (inDateBuffer == NULL)
+	if (inDateBuffer == nullptr)
 		return;
 
-	struct tm* gmt = NULL;
+	struct tm* gmt = nullptr;
 	struct tm  timeResult;
 
 	if (inDate == 0)
 	{
-		time_t calendarTime = ::time(NULL) + gmtoffset;
+		time_t calendarTime = ::time(nullptr) + gmtoffset;
 		gmt = std::gmtime(&calendarTime);
 	}
 	else
@@ -139,7 +139,7 @@ void DateTranslator::UpdateDateBuffer(DateBuffer* inDateBuffer, const int64_t& i
 		gmt = std::gmtime(&convertedTime);
 	}
 
-	Assert(gmt != NULL); //is it safe to assert this?
+	Assert(gmt != nullptr); //is it safe to assert this?
 	size_t size = 0;
 	if (0 == gmtoffset)
 		size = strftime(inDateBuffer->fDateBuffer, sizeof(inDateBuffer->fDateBuffer),

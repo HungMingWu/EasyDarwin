@@ -63,7 +63,7 @@ char RTCPNaduPacket::sRTCPTestBuffer[];
 
 RTCPNaduPacket::RTCPNaduPacket(bool debug) :
 	RTCPAPPPacket(debug),
-	fNaduDataBuffer(NULL),
+	fNaduDataBuffer(nullptr),
 	fNumBlocks(0)
 {
 }
@@ -360,11 +360,11 @@ void RTCPNaduPacket::DumpNaduPacket()
 
 int32_t RTCPNaduPacket::GetSSRCBlockIndex(uint32_t inSSRC)
 {
-	uint32_t *blockBuffer = NULL;
+	uint32_t *blockBuffer = nullptr;
 	int32_t count = 0;
 	uint32_t ssrc = 0;
 
-	if (NULL == fNaduDataBuffer)
+	if (nullptr == fNaduDataBuffer)
 		return -1;
 
 	for (; count < fNumBlocks; count++)
@@ -386,7 +386,7 @@ uint32_t RTCPNaduPacket::GetSSRC(int32_t index)
 	if (index < 0)
 		return 0;
 
-	if (NULL == fNaduDataBuffer)
+	if (nullptr == fNaduDataBuffer)
 		return 0;
 
 	if (index >= fNumBlocks)
@@ -404,7 +404,7 @@ uint16_t RTCPNaduPacket::GetPlayOutDelay(int32_t index)
 	if (index < 0)
 		return 0;
 
-	if (NULL == fNaduDataBuffer)
+	if (nullptr == fNaduDataBuffer)
 		return 0;
 
 	if (index >= fNumBlocks)
@@ -421,7 +421,7 @@ uint16_t RTCPNaduPacket::GetNSN(int32_t index)
 	if (index < 0)
 		return 0;
 
-	if (NULL == fNaduDataBuffer)
+	if (nullptr == fNaduDataBuffer)
 		return 0;
 
 	if (index >= fNumBlocks)
@@ -438,7 +438,7 @@ uint16_t RTCPNaduPacket::GetNUN(int32_t index)
 	if (index < 0)
 		return 0;
 
-	if (NULL == fNaduDataBuffer)
+	if (nullptr == fNaduDataBuffer)
 		return 0;
 
 	if (index >= fNumBlocks)
@@ -455,7 +455,7 @@ uint16_t RTCPNaduPacket::GetFBS(int32_t index)
 	if (index < 0)
 		return 0;
 
-	if (NULL == fNaduDataBuffer)
+	if (nullptr == fNaduDataBuffer)
 		return 0;
 
 	if (index >= fNumBlocks)
@@ -500,21 +500,21 @@ void NaduList::Initialize(uint32_t listSize)
 NaduReport* NaduList::GetReport(uint32_t id)
 {
 
-	if (NULL == fNaduReportList)
-		return NULL;
+	if (nullptr == fNaduReportList)
+		return nullptr;
 
 
 	NaduReport *result = fNaduReportList[this->IDtoIndex(id)];
 	if (result && result->getID() == id)
 		return result;
-	return NULL;
+	return nullptr;
 
 }
 
 uint32_t NaduList::GetReportIndex(uint32_t id)
 {
 
-	if (NULL == fNaduReportList)
+	if (nullptr == fNaduReportList)
 		return 0;
 
 	uint32_t index = this->IDtoIndex(id);
@@ -527,8 +527,8 @@ uint32_t NaduList::GetReportIndex(uint32_t id)
 
 NaduReport* NaduList::GetLastReport()
 {
-	if (NULL == fNaduReportList || fcurrentIndexCount == 0)
-		return NULL;
+	if (nullptr == fNaduReportList || fcurrentIndexCount == 0)
+		return nullptr;
 
 	uint32_t index = this->IDtoIndex(fcurrentIndexCount);
 	return fNaduReportList[index];
@@ -537,8 +537,8 @@ NaduReport* NaduList::GetLastReport()
 
 NaduReport* NaduList::GetPreviousReport(NaduReport* theReport)
 {
-	if (NULL == theReport)
-		return NULL;
+	if (nullptr == theReport)
+		return nullptr;
 
 	return this->GetReport(theReport->getID() - 1);
 
@@ -547,8 +547,8 @@ NaduReport* NaduList::GetPreviousReport(NaduReport* theReport)
 
 NaduReport* NaduList::GetNextReport(NaduReport* theReport)
 {
-	if (NULL == theReport)
-		return NULL;
+	if (nullptr == theReport)
+		return nullptr;
 
 	return this->GetReport(theReport->getID() + 1);
 
@@ -566,13 +566,13 @@ NaduReport* NaduList::GetEarliestReport()
 
 bool NaduList::AddReport(uint8_t* inPacketBuffer, uint32_t inPacketLength, uint32_t *outID)
 {
-	if (NULL == fNaduReportList)
+	if (nullptr == fNaduReportList)
 		return false;
 
 	uint32_t resultID = ++fcurrentIndexCount;
 	uint32_t index = this->IDtoIndex(fcurrentIndexCount);
 
-	if (fNaduReportList[index] != 0)
+	if (fNaduReportList[index] != nullptr)
 		delete fNaduReportList[index];
 
 	fNaduReportList[index] = new NaduReport(inPacketBuffer, inPacketLength, resultID);
@@ -589,11 +589,11 @@ bool NaduList::AddReport(uint8_t* inPacketBuffer, uint32_t inPacketLength, uint3
 uint32_t NaduList::LastReportedFreeBuffSizeBytes()
 {
 	NaduReport* currentReportPtr = this->GetLastReport();
-	if (NULL == currentReportPtr)
+	if (nullptr == currentReportPtr)
 		return 0;
 
 	RTCPNaduPacket *theNADUPacketData = currentReportPtr->GetNaduPacket();
-	if (NULL == theNADUPacketData)
+	if (nullptr == theNADUPacketData)
 		return 0;
 
 	return ((uint32_t)theNADUPacketData->GetFBS(0)) * 64; //64 byte blocks are in the report
@@ -602,11 +602,11 @@ uint32_t NaduList::LastReportedFreeBuffSizeBytes()
 uint32_t NaduList::LastReportedTimeDelayMilli()
 {
 	NaduReport* currentReportPtr = this->GetLastReport();
-	if (NULL == currentReportPtr)
+	if (nullptr == currentReportPtr)
 		return 0;
 
 	RTCPNaduPacket *theNADUPacketData = currentReportPtr->GetNaduPacket();
-	if (NULL == theNADUPacketData)
+	if (nullptr == theNADUPacketData)
 		return 0;
 
 	return theNADUPacketData->GetPlayOutDelay(0);
@@ -615,11 +615,11 @@ uint32_t NaduList::LastReportedTimeDelayMilli()
 uint16_t NaduList::GetLastReportedNSN()
 {
 	NaduReport* currentReportPtr = this->GetLastReport();
-	if (NULL == currentReportPtr)
+	if (nullptr == currentReportPtr)
 		return 0;
 
 	RTCPNaduPacket *theNADUPacketData = currentReportPtr->GetNaduPacket();
-	if (NULL == theNADUPacketData)
+	if (nullptr == theNADUPacketData)
 		return 0;
 
 	return theNADUPacketData->GetNSN(0);

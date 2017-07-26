@@ -65,7 +65,7 @@ public:
 
 	UDPDemuxerTask()
 		: fRemoteAddr(0), fRemotePort(0),
-		fHashValue(0), fNextHashEntry(NULL) {}
+		fHashValue(0), fNextHashEntry(nullptr) {}
 	virtual ~UDPDemuxerTask() {}
 
 	uint32_t  GetRemoteAddr() { return fRemoteAddr; }
@@ -162,7 +162,7 @@ public:
 
 	bool  AddrInMap(uint32_t inRemoteAddr, uint16_t inRemotePort)
 	{
-		return (this->GetTask(inRemoteAddr, inRemotePort) != NULL);
+		return (this->GetTask(inRemoteAddr, inRemotePort) != nullptr);
 	}
 
 	OSMutex*                GetMutex() { return &fMutex; }

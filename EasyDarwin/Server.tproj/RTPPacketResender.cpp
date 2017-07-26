@@ -80,8 +80,8 @@ OSBufferPool RTPPacketResender::sBufferPool(kMaxDataBufferSize);
 unsigned int    RTPPacketResender::sNumWastedBytes = 0;
 
 RTPPacketResender::RTPPacketResender()
-	: fBandwidthTracker(NULL),
-	fSocket(NULL),
+	: fBandwidthTracker(nullptr),
+	fSocket(nullptr),
 	fDestAddr(0),
 	fDestPort(0),
 	fMaxPacketsInList(0),
@@ -90,7 +90,7 @@ RTPPacketResender::RTPPacketResender()
 	fNumExpired(0),
 	fNumAcksForMissingPackets(0),
 	fNumSent(0),
-	fPacketArray(NULL),
+	fPacketArray(nullptr),
 	fPacketArraySize(kInitialPacketArraySize),
 	fPacketArrayMask(0),
 	fHighestSeqNum(0),
@@ -108,7 +108,7 @@ RTPPacketResender::~RTPPacketResender()
 	{
 		if (fPacketArray[x].fPacketSize > 0)
 			atomic_sub(&sNumWastedBytes, kMaxDataBufferSize - fPacketArray[x].fPacketSize);
-		if (fPacketArray[x].fPacketData != NULL)
+		if (fPacketArray[x].fPacketData != nullptr)
 		{
 			if (fPacketArray[x].fIsSpecialBuffer)
 				delete[](char*)fPacketArray[x].fPacketData;
@@ -228,13 +228,13 @@ void RTPPacketResender::SetDestination(UDPSocket* inOutputSocket, uint32_t inDes
 RTPResenderEntry*   RTPPacketResender::GetEmptyEntry(uint16_t inSeqNum, uint32_t inPacketSize)
 {
 
-	RTPResenderEntry* theEntry = NULL;
+	RTPResenderEntry* theEntry = nullptr;
 
 	for (uint32_t packetIndex = 0; packetIndex < fPacketsInList; packetIndex++) // see if packet is already in the array
 	{
 		if (inSeqNum == fPacketArray[packetIndex].fSeqNum)
 		{
-			return NULL;
+			return nullptr;
 		}
 	}
 
@@ -302,7 +302,7 @@ void RTPPacketResender::ClearOutstandingPackets()
 		this->RemovePacket(packetIndex, false);// don't move packets delete in place
 		Assert(fPacketArray[packetIndex].fPacketSize == 0);
 	}
-	if (fBandwidthTracker != NULL)
+	if (fBandwidthTracker != nullptr)
 		fBandwidthTracker->EmptyWindow(fBandwidthTracker->BytesInList()); //clean it out
 	fPacketsInList = 0; // deleting in place doesn't decrement
 
@@ -327,7 +327,7 @@ void RTPPacketResender::AddPacket(void * inRTPPacket, uint32_t packetSize, int32
 		//
 		// This may happen if this sequence number has already been added.
 		// That may happen if we have repeat packets in the stream.
-		if (theEntry == NULL || theEntry->fPacketSize > 0)
+		if (theEntry == nullptr || theEntry->fPacketSize > 0)
 			return;
 
 		//
@@ -372,12 +372,12 @@ void RTPPacketResender::AckPacket(uint16_t inSeqNum, int64_t& inCurTimeInMsec)
 		}
 	}
 
-	RTPResenderEntry* theEntry = NULL;
+	RTPResenderEntry* theEntry = nullptr;
 	if (foundIndex != -1)
 		theEntry = &fPacketArray[foundIndex];
 
 
-	if (theEntry == NULL || theEntry->fPacketSize == 0)
+	if (theEntry == nullptr || theEntry->fPacketSize == 0)
 	{   /*  we got an ack for a packet that has already expired or
 			for a packet whose re-transmit crossed with it's original ack
 
@@ -467,7 +467,7 @@ void RTPPacketResender::RemovePacket(uint32_t packetIndex, bool reuseIndex)
 	{
 		delete[](char*)theEntry->fPacketData;
 	}
-	else if (theEntry->fPacketData != NULL)
+	else if (theEntry->fPacketData != nullptr)
 		sBufferPool.Put(theEntry->fPacketData);
 
 
@@ -494,7 +494,7 @@ void RTPPacketResender::ResendDueEntries()
 	//OSMutexLocker packetQLocker(&fPacketQMutex);
 	//
 	int32_t numResends = 0;
-	RTPResenderEntry* theEntry = NULL;
+	RTPResenderEntry* theEntry = nullptr;
 	int64_t curTime = OS::Milliseconds();
 	for (int32_t packetIndex = fPacketsInList - 1; packetIndex >= 0; packetIndex--) // walk backwards because remove packet moves array members forward
 	{

@@ -129,7 +129,7 @@ public:
 		for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
 		{
 			QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRedisSetRTSPLoadRole, currentModule);
-			(void)theModule->CallDispatch(Easy_RedisSetRTSPLoad_Role, NULL);
+			(void)theModule->CallDispatch(Easy_RedisSetRTSPLoad_Role, nullptr);
 		}
 	}
 	void            AlterCurrentRTPSessionCount(int32_t inDifference)
@@ -139,7 +139,7 @@ public:
 		for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
 		{
 			QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRedisSetRTSPLoadRole, currentModule);
-			(void)theModule->CallDispatch(Easy_RedisSetRTSPLoad_Role, NULL);
+			(void)theModule->CallDispatch(Easy_RedisSetRTSPLoad_Role, nullptr);
 		}
 	}
 
@@ -287,11 +287,11 @@ public:
 		Assert(inIndex < sNumModulesInRole[inRole]);
 		if (inRole >= QTSSModule::kNumRoles) //index out of bounds, shouldn't happen
 		{
-			return NULL;
+			return nullptr;
 		}
 		if (inIndex >= sNumModulesInRole[inRole]) //index out of bounds, shouldn't happen
 		{
-			return NULL;
+			return nullptr;
 		}
 		return sModuleArray[inRole][inIndex];
 	}

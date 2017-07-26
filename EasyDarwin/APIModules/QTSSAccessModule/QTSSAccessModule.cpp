@@ -59,16 +59,16 @@
 #define MODPREFIX_ "modAccess_"
 
 static StrPtrLen    sSDPSuffix(".sdp");
-static OSMutex*     sUserMutex = NULL;
+static OSMutex*     sUserMutex = nullptr;
 
 static bool         sDefaultAuthenticationEnabled = true;
 static bool         sAuthenticationEnabled = true;
 
 static char* sDefaultUsersFilePath = DEFAULTPATHS_ETC_DIR "qtusers";
-static char* sUsersFilePath = NULL;
+static char* sUsersFilePath = nullptr;
 
 static char* sDefaultGroupsFilePath = DEFAULTPATHS_ETC_DIR "qtgroups";
-static char* sGroupsFilePath = NULL;
+static char* sGroupsFilePath = nullptr;
 
 static char* sDefaultAccessFileName = "qtaccess";
 
@@ -78,10 +78,10 @@ static QTSS_AttributeID sGroupsFileNotFoundMessageAttrID = qtssIllegalAttrID;
 static QTSS_AttributeID sBadUsersFileMessageAttrID = qtssIllegalAttrID;
 static QTSS_AttributeID sBadGroupsFileMessageAttrID = qtssIllegalAttrID;
 
-static QTSS_StreamRef           sErrorLogStream = NULL;
-static QTSS_TextMessagesObject  sMessages = NULL;
-static QTSS_ModulePrefsObject   sPrefs = NULL;
-static QTSS_PrefsObject         sServerPrefs = NULL;
+static QTSS_StreamRef           sErrorLogStream = nullptr;
+static QTSS_TextMessagesObject  sMessages = nullptr;
+static QTSS_ModulePrefsObject   sPrefs = nullptr;
+static QTSS_PrefsObject         sServerPrefs = nullptr;
 
 static AccessChecker**          sAccessCheckers;
 static uint32_t                   sNumAccessCheckers = 0;
@@ -156,19 +156,19 @@ QTSS_Error Register()
 	static char*        sBadUsersFile = "QTSSAccessModuleBadUsersFile";
 	static char*        sBadGroupsFile = "QTSSAccessModuleBadGroupsFile";
 
-	(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sBadAccessFileName, NULL, qtssAttrDataTypeCharArray);
+	(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sBadAccessFileName, nullptr, qtssAttrDataTypeCharArray);
 	(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sBadAccessFileName, &sBadNameMessageAttrID);
 
-	(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sUsersFileNotFound, NULL, qtssAttrDataTypeCharArray);
+	(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sUsersFileNotFound, nullptr, qtssAttrDataTypeCharArray);
 	(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sUsersFileNotFound, &sUsersFileNotFoundMessageAttrID);
 
-	(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sGroupsFileNotFound, NULL, qtssAttrDataTypeCharArray);
+	(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sGroupsFileNotFound, nullptr, qtssAttrDataTypeCharArray);
 	(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sGroupsFileNotFound, &sGroupsFileNotFoundMessageAttrID);
 
-	(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sBadUsersFile, NULL, qtssAttrDataTypeCharArray);
+	(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sBadUsersFile, nullptr, qtssAttrDataTypeCharArray);
 	(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sBadUsersFile, &sBadUsersFileMessageAttrID);
 
-	(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sBadGroupsFile, NULL, qtssAttrDataTypeCharArray);
+	(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sBadGroupsFile, nullptr, qtssAttrDataTypeCharArray);
 	(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sBadGroupsFile, &sBadGroupsFileMessageAttrID);
 
 	return QTSS_NoErr;
@@ -213,13 +213,13 @@ QTSS_Error Shutdown()
 	// sUsersFilePath is assigned by a call to QTSSModuleUtils::GetStringAttribute which always
 	// allocates memory even if it just returns the default value
 	delete[] sUsersFilePath;
-	sUsersFilePath = NULL;
+	sUsersFilePath = nullptr;
 
 	//if(sGroupsFilePath != sDefaultGroupsFilePath)
 	// sGroupsFilePath is assigned by a call to QTSSModuleUtils::GetStringAttribute which always
 	// allocates memory even if it just returns the default value
 	delete[] sGroupsFilePath;
-	sGroupsFilePath = NULL;
+	sGroupsFilePath = nullptr;
 
 	return QTSS_NoErr;
 }
@@ -232,7 +232,7 @@ char* GetCheckedFileName()
 	StrPtrLen searchStr(result);
 
 	char* theBadChar = strpbrk(searchStr.Ptr, badChars);
-	if (theBadChar != NULL)
+	if (theBadChar != nullptr)
 	{
 		theBadCharMessage[1] = theBadChar[0];
 		QTSSModuleUtils::LogError(qtssWarningVerbosity, sBadNameMessageAttrID, 0, theBadCharMessage, result);
@@ -258,14 +258,14 @@ QTSS_Error RereadPrefs()
 	// allocates memory even if it just returns the default value
 	// delete this old memory before reassigning it to new memory
 	delete[] sUsersFilePath;
-	sUsersFilePath = NULL;
+	sUsersFilePath = nullptr;
 
 	//if(sGroupsFilePath != sDefaultGroupsFilePath)
 	// sGroupsFilePath is assigned by a call to QTSSModuleUtils::GetStringAttribute which always
 	// allocates memory even if it just returns the default value
 	// delete this old memory before reassigning it to new memory
 	delete[] sGroupsFilePath;
-	sGroupsFilePath = NULL;
+	sGroupsFilePath = nullptr;
 
 	sUsersFilePath = QTSSModuleUtils::GetStringAttribute(sPrefs, MODPREFIX_"usersfilepath", sDefaultUsersFilePath);
 	sGroupsFilePath = QTSSModuleUtils::GetStringAttribute(sPrefs, MODPREFIX_"groupsfilepath", sDefaultGroupsFilePath);
@@ -282,13 +282,13 @@ QTSS_Error RereadPrefs()
 		uint32_t err;
 		err = sAccessCheckers[0]->UpdateUserProfiles();
 		if (err & AccessChecker::kUsersFileNotFoundErr)
-			QTSSModuleUtils::LogError(qtssWarningVerbosity, sUsersFileNotFoundMessageAttrID, 0, sUsersFilePath, NULL);
+			QTSSModuleUtils::LogError(qtssWarningVerbosity, sUsersFileNotFoundMessageAttrID, 0, sUsersFilePath, nullptr);
 		else if (err & AccessChecker::kBadUsersFileErr)
-			QTSSModuleUtils::LogError(qtssWarningVerbosity, sBadUsersFileMessageAttrID, 0, sUsersFilePath, NULL);
+			QTSSModuleUtils::LogError(qtssWarningVerbosity, sBadUsersFileMessageAttrID, 0, sUsersFilePath, nullptr);
 		if (err & AccessChecker::kGroupsFileNotFoundErr)
-			QTSSModuleUtils::LogError(qtssWarningVerbosity, sGroupsFileNotFoundMessageAttrID, 0, sGroupsFilePath, NULL);
+			QTSSModuleUtils::LogError(qtssWarningVerbosity, sGroupsFileNotFoundMessageAttrID, 0, sGroupsFilePath, nullptr);
 		else if (err & AccessChecker::kBadGroupsFileErr)
-			QTSSModuleUtils::LogError(qtssWarningVerbosity, sBadGroupsFileMessageAttrID, 0, sGroupsFilePath, NULL);
+			QTSSModuleUtils::LogError(qtssWarningVerbosity, sBadGroupsFileMessageAttrID, 0, sGroupsFilePath, nullptr);
 	}
 
 	QTSSModuleUtils::GetAttribute(sServerPrefs, "enable_allow_guest_default", qtssAttrDataTypeBool16,
@@ -305,11 +305,11 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 
 	OSMutexLocker locker(sUserMutex);
 
-	if ((NULL == inParams) || (NULL == inParams->inRTSPRequest))
+	if ((nullptr == inParams) || (nullptr == inParams->inRTSPRequest))
 		return QTSS_RequestFailed;
 
 	// Get the user profile object from the request object
-	QTSS_UserProfileObject theUserProfile = NULL;
+	QTSS_UserProfileObject theUserProfile = nullptr;
 	uint32_t len = sizeof(QTSS_UserProfileObject);
 	QTSS_Error theErr = QTSS_GetValue(theRTSPRequest, qtssRTSPReqUserProfile, 0, (void*)&theUserProfile, &len);
 	Assert(len == sizeof(QTSS_UserProfileObject));
@@ -322,19 +322,19 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	//get the local file path
 	char*   pathBuffStr = QTSSModuleUtils::GetLocalPath_Copy(theRTSPRequest);
 	OSCharArrayDeleter pathBuffDeleter(pathBuffStr);
-	if (NULL == pathBuffStr)
+	if (nullptr == pathBuffStr)
 		return QTSS_RequestFailed;
 	//get the root movie directory
 	char*   movieRootDirStr = QTSSModuleUtils::GetMoviesRootDir_Copy(theRTSPRequest);
 	OSCharArrayDeleter movieRootDeleter(movieRootDirStr);
-	if (NULL == movieRootDirStr)
+	if (nullptr == movieRootDirStr)
 		return QTSS_RequestFailed;
 	// Now get the access file path
 	char* accessFilePath = QTAccessFile::GetAccessFile_Copy(movieRootDirStr, pathBuffStr);
 	OSCharArrayDeleter accessFilePathDeleter(accessFilePath);
 	// Parse the access file for the AuthUserFile and AuthGroupFile keywords
-	char* usersFilePath = NULL;
-	char* groupsFilePath = NULL;
+	char* usersFilePath = nullptr;
+	char* groupsFilePath = nullptr;
 
 	// Get the request action from the request object
 	QTSS_ActionFlags action = qtssActionFlagsNoFlags;
@@ -347,19 +347,19 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	// Allocates memory for usersFilePath and groupsFilePath
 	QTSS_AuthScheme authScheme = QTAccessFile::FindUsersAndGroupsFilesAndAuthScheme(accessFilePath, action, &usersFilePath, &groupsFilePath);
 
-	if ((usersFilePath != NULL) || (groupsFilePath != NULL))
+	if ((usersFilePath != nullptr) || (groupsFilePath != nullptr))
 		defaultPaths = false;
 
-	if (usersFilePath == NULL)
+	if (usersFilePath == nullptr)
 		usersFilePath = strdup(sUsersFilePath);
 
-	if (groupsFilePath == NULL)
+	if (groupsFilePath == nullptr)
 		groupsFilePath = strdup(sGroupsFilePath);
 
 	OSCharArrayDeleter userPathDeleter(usersFilePath);
 	OSCharArrayDeleter groupPathDeleter(groupsFilePath);
 
-	AccessChecker* currentChecker = NULL;
+	AccessChecker* currentChecker = nullptr;
 	uint32_t index;
 
 	// If the default users and groups file are not the ones we need
@@ -377,7 +377,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 			}
 		}
 		// If an existing AccessChecker for the needed paths isn't found
-		if (currentChecker == NULL)
+		if (currentChecker == nullptr)
 		{
 			// Grow the AccessChecker array if needed
 			if (sNumAccessCheckers == sAccessCheckerArraySize)
@@ -398,13 +398,13 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 			fileErr = sAccessCheckers[sNumAccessCheckers]->UpdateUserProfiles();
 
 			if (fileErr & AccessChecker::kUsersFileNotFoundErr)
-				QTSSModuleUtils::LogError(qtssWarningVerbosity, sUsersFileNotFoundMessageAttrID, 0, usersFilePath, NULL);
+				QTSSModuleUtils::LogError(qtssWarningVerbosity, sUsersFileNotFoundMessageAttrID, 0, usersFilePath, nullptr);
 			else if (fileErr & AccessChecker::kBadUsersFileErr)
-				QTSSModuleUtils::LogError(qtssWarningVerbosity, sBadUsersFileMessageAttrID, 0, usersFilePath, NULL);
+				QTSSModuleUtils::LogError(qtssWarningVerbosity, sBadUsersFileMessageAttrID, 0, usersFilePath, nullptr);
 			if (fileErr & AccessChecker::kGroupsFileNotFoundErr)
-				QTSSModuleUtils::LogError(qtssWarningVerbosity, sGroupsFileNotFoundMessageAttrID, 0, groupsFilePath, NULL);
+				QTSSModuleUtils::LogError(qtssWarningVerbosity, sGroupsFileNotFoundMessageAttrID, 0, groupsFilePath, nullptr);
 			else if (fileErr & AccessChecker::kBadGroupsFileErr)
-				QTSSModuleUtils::LogError(qtssWarningVerbosity, sBadGroupsFileMessageAttrID, 0, groupsFilePath, NULL);
+				QTSSModuleUtils::LogError(qtssWarningVerbosity, sBadGroupsFileMessageAttrID, 0, groupsFilePath, nullptr);
 
 			currentChecker = sAccessCheckers[sNumAccessCheckers];
 			sNumAccessCheckers++;
@@ -468,7 +468,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 
 
 	// Get the username from the user profile object
-	char*   usernameBuf = NULL;
+	char*   usernameBuf = nullptr;
 	theErr = QTSS_GetValueAsString(theUserProfile, qtssUserName, 0, &usernameBuf);
 	OSCharArrayDeleter usernameBufDeleter(usernameBuf);
 	StrPtrLen username(usernameBuf);
@@ -478,7 +478,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	// No memory is allocated; just a pointer to the profile is returned
 	AccessChecker::UserProfile* profile = currentChecker->RetrieveUserProfile(&username);
 
-	if (profile == NULL)
+	if (profile == nullptr)
 		return QTSS_NoErr;
 
 	// Set the qtssUserPassword attribute to either the crypted password or the digest password

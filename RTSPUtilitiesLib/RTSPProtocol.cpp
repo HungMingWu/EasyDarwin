@@ -395,15 +395,15 @@ bool RTSPProtocol::ParseRTSPURL(char const* url, char* username, char* password,
 
 		// Check whether "<username>[:<password>]@" occurs next.
 		// We do this by checking whether '@' appears before the end of the URL, or before the first '/'.
-		char const* colonPasswordStart = NULL;
+		char const* colonPasswordStart = nullptr;
 		char const* p;
 		for (p = from; *p != '\0' && *p != '/'; ++p) {
-			if (*p == ':' && colonPasswordStart == NULL) {
+			if (*p == ':' && colonPasswordStart == nullptr) {
 				colonPasswordStart = p;
 			}
 			else if (*p == '@') {
 				// We found <username> (and perhaps <password>).  Copy them into newly-allocated result strings:
-				if (colonPasswordStart == NULL) colonPasswordStart = p;
+				if (colonPasswordStart == nullptr) colonPasswordStart = p;
 
 				char const* usernameStart = from;
 				unsigned usernameLen = colonPasswordStart - usernameStart;
@@ -457,7 +457,7 @@ bool RTSPProtocol::ParseRTSPURL(char const* url, char* username, char* password,
 		}
 
 		// The remainder of the URL is the suffix:
-		if (urlSuffix != NULL) *urlSuffix = from;
+		if (urlSuffix != nullptr) *urlSuffix = from;
 
 		return true;
 	} while (0);

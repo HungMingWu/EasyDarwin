@@ -153,10 +153,10 @@ namespace Json {
 	std::string valueToString(bool value) { return value ? "true" : "false"; }
 
 	std::string valueToQuotedString(const char* value) {
-		if (value == NULL)
+		if (value == nullptr)
 			return "";
 		// Not sure how to handle unicode...
-		if (strpbrk(value, "\"\\\b\f\n\r\t") == NULL &&
+		if (strpbrk(value, "\"\\\b\f\n\r\t") == nullptr &&
 			!containsControlCharacter(value))
 			return std::string("\"") + value + "\"";
 		// We have to walk value and escape any special characters.
@@ -228,13 +228,13 @@ namespace Json {
 				}
 			}
 		}
-		return NULL;
+		return nullptr;
 	}
 	static std::string valueToQuotedStringN(const char* value, unsigned length) {
-		if (value == NULL)
+		if (value == nullptr)
 			return "";
 		// Not sure how to handle unicode...
-		if (strnpbrk(value, "\"\\\b\f\n\r\t", length) == NULL &&
+		if (strnpbrk(value, "\"\\\b\f\n\r\t", length) == nullptr &&
 			!containsControlCharacter0(value, length))
 			return std::string("\"") + value + "\"";
 		// We have to walk value and escape any special characters.
@@ -592,7 +592,7 @@ namespace Json {
 	// //////////////////////////////////////////////////////////////////
 
 	StyledStreamWriter::StyledStreamWriter(std::string indentation)
-		: document_(NULL), rightMargin_(74), indentation_(indentation),
+		: document_(nullptr), rightMargin_(74), indentation_(indentation),
 		addChildValues_() {}
 
 	void StyledStreamWriter::write(std::ostream& out, const Value& root) {
@@ -606,7 +606,7 @@ namespace Json {
 		writeValue(root);
 		writeCommentAfterValueOnSameLine(root);
 		*document_ << "\n";
-		document_ = NULL; // Forget the stream, for safety.
+		document_ = nullptr; // Forget the stream, for safety.
 	}
 
 	void StyledStreamWriter::writeValue(const Value& value) {
@@ -881,7 +881,7 @@ namespace Json {
 		writeValue(root);
 		writeCommentAfterValueOnSameLine(root);
 		*sout_ << endingLineFeedSymbol_;
-		sout_ = NULL;
+		sout_ = nullptr;
 		return 0;
 	}
 	void BuiltStyledStreamWriter::writeValue(Value const& value) {
@@ -1092,7 +1092,7 @@ namespace Json {
 	// StreamWriter
 
 	StreamWriter::StreamWriter()
-		: sout_(NULL)
+		: sout_(nullptr)
 	{
 	}
 	StreamWriter::~StreamWriter()

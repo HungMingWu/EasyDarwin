@@ -624,7 +624,7 @@ QTSS_Error HTTPSession::execNetMsgCSGetRTSPRecordSessionsRESTful(const char* que
 
 	do
 	{
-		char* msgContent = NULL;
+		char* msgContent = nullptr;
 
 		StrPtrLen msgJson(msgContent);
 

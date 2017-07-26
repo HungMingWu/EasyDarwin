@@ -67,7 +67,7 @@
  //
  // OSThread.cp
  //
-void*   OSThread::sMainThreadData = NULL;
+void*   OSThread::sMainThreadData = nullptr;
 
 #ifdef __Win32__
 DWORD   OSThread::sThreadStorageIndex = 0;
@@ -93,7 +93,7 @@ void OSThread::Initialize()
 	sThreadStorageIndex = ::TlsAlloc();
 	Assert(sThreadStorageIndex >= 0);
 #elif __PTHREADS__
-	pthread_key_create(&OSThread::gMainKey, NULL);
+	pthread_key_create(&OSThread::gMainKey, nullptr);
 #ifdef _POSIX_THREAD_PRIORITY_SCHEDULING
 
 	//
@@ -111,7 +111,7 @@ void OSThread::Initialize()
 OSThread::OSThread()
 	: fStopRequested(false),
 	fJoined(false),
-	fThreadData(NULL)
+	fThreadData(nullptr)
 {
 }
 
@@ -135,7 +135,7 @@ void OSThread::Start()
 	pthread_attr_t* theAttrP;
 #ifdef _POSIX_THREAD_PRIORITY_SCHEDULING
 	//theAttrP = &sThreadAttr;
-	theAttrP = 0;
+	theAttrP = nullptr;
 #else
 	theAttrP = NULL;
 #endif
@@ -260,7 +260,7 @@ void* OSThread::_Entry(void *inThread)  //static
 #ifdef __Win32__
 	return 0;
 #else
-	return NULL;
+	return nullptr;
 #endif
 }
 
@@ -270,7 +270,7 @@ bool  OSThread::SwitchPersonality()
 	if (::strlen(sGroup) > 0)
 	{
 		struct group* gr = ::getgrnam(sGroup);
-		if (gr == NULL || ::setgid(gr->gr_gid) == -1)
+		if (gr == nullptr || ::setgid(gr->gr_gid) == -1)
 		{
 			//printf("thread %"   _U32BITARG_   " setgid  to group=%s FAILED \n", (uint32_t) this, sGroup);
 			return false;
@@ -283,7 +283,7 @@ bool  OSThread::SwitchPersonality()
 	if (::strlen(sUser) > 0)
 	{
 		struct passwd* pw = ::getpwnam(sUser);
-		if (pw == NULL || ::setuid(pw->pw_uid) == -1)
+		if (pw == nullptr || ::setuid(pw->pw_uid) == -1)
 		{
 			//printf("thread %"   _U32BITARG_   " setuid  to user=%s FAILED \n", (uint32_t) this, sUser);
 			return false;

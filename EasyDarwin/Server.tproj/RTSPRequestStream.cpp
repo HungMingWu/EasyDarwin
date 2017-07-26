@@ -45,7 +45,7 @@ RTSPRequestStream::RTSPRequestStream(TCPSocket* sock)
 	fCurOffset(0),
 	fEncodedBytesRemaining(0),
 	fRequest(fRequestBuffer, 0),
-	fRequestPtr(NULL),
+	fRequestPtr(nullptr),
 	fDecode(false),
 	fPrintRTSP(false)
 {}
@@ -54,7 +54,7 @@ void RTSPRequestStream::SnarfRetreat(RTSPRequestStream &fromRequest)
 {
 	// Simplest thing to do is to just completely blow away everything in this current
 	// stream, and replace it with the retreat bytes from the other stream.
-	fRequestPtr = NULL;
+	fRequestPtr = nullptr;
 	Assert(fRetreatBytes < kRequestBufferSizeInBytes);
 	fRetreatBytes = fromRequest.fRetreatBytes;
 	fEncodedBytesRemaining = fCurOffset = fRequest.Len = 0;
@@ -71,9 +71,9 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 		//with the request and want to move onto the next one. The first thing we should do
 		//is check whether there is any lingering data in the stream. If there is, the parent
 		//session believes that is part of a new request
-		if (fRequestPtr != NULL)
+		if (fRequestPtr != nullptr)
 		{
-			fRequestPtr = NULL;//flag that we no longer have a complete request
+			fRequestPtr = nullptr;//flag that we no longer have a complete request
 
 			// Take all the retreated leftover data and move it to the beginning of the buffer
 			if ((fRetreatBytes > 0) && (fRequest.Len > 0))
@@ -178,13 +178,13 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 			DateTranslator::UpdateDateBuffer(&theDate, 0); // get the current GMT date and time
 			printf("\n\n#C->S:\n#time: ms=%"   _U32BITARG_   " date=%s\n", (uint32_t)OS::StartTimeMilli_Int(), theDate.GetDateBuffer());
 
-			if (fSocket != NULL)
+			if (fSocket != nullptr)
 			{
 				uint16_t serverPort = fSocket->GetLocalPort();
 				uint16_t clientPort = fSocket->GetRemotePort();
 				StrPtrLen* theLocalAddrStr = fSocket->GetLocalAddrStr();
 				StrPtrLen* theRemoteAddrStr = fSocket->GetRemoteAddrStr();
-				if (theLocalAddrStr != NULL)
+				if (theLocalAddrStr != nullptr)
 				{
 					printf("#server: ip="); theLocalAddrStr->PrintStr(); printf(" port=%u\n", serverPort);
 				}
@@ -193,7 +193,7 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 					printf("#server: ip=NULL port=%u\n", serverPort);
 				}
 
-				if (theRemoteAddrStr != NULL)
+				if (theRemoteAddrStr != nullptr)
 				{
 					printf("#client: ip="); theRemoteAddrStr->PrintStr(); printf(" port=%u\n", clientPort);
 				}
@@ -214,7 +214,7 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 		StringParser headerParser(&fRequest);
 
 		uint16_t lcount = 0;
-		while (headerParser.GetThruEOL(NULL))
+		while (headerParser.GetThruEOL(nullptr))
 		{
 			lcount++;
 			if (headerParser.ExpectEOL())
@@ -298,7 +298,7 @@ QTSS_Error RTSPRequestStream::Read(void* ioBuffer, uint32_t inBufLen, uint32_t* 
 	// If there is still space available in ioBuffer, continue. Otherwise, we can return now
 	if (theLengthRead == inBufLen)
 	{
-		if (outLengthRead != NULL)
+		if (outLengthRead != nullptr)
 			*outLengthRead = theLengthRead;
 		return QTSS_NoErr;
 	}
@@ -310,7 +310,7 @@ QTSS_Error RTSPRequestStream::Read(void* ioBuffer, uint32_t inBufLen, uint32_t* 
 #if READ_DEBUGGING
 	printf("In RTSPRequestStream::Read: Got %d bytes off Socket\n", theNewOffset);
 #endif  
-	if (outLengthRead != NULL)
+	if (outLengthRead != nullptr)
 		*outLengthRead = theNewOffset + theLengthRead;
 
 	return theErr;

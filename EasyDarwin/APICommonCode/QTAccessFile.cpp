@@ -86,12 +86,12 @@ uint8_t QTAccessFile::sWhitespaceAndGreaterThanMask[] =
 
 char*       QTAccessFile::sQTAccessFileName = "qtaccess";
 bool      QTAccessFile::sAllocatedName = false;
-OSMutex*    QTAccessFile::sAccessFileMutex = NULL;//QTAccessFile isn't reentrant
+OSMutex*    QTAccessFile::sAccessFileMutex = nullptr;//QTAccessFile isn't reentrant
 const int kBuffLen = 512;
 
 void QTAccessFile::Initialize() // called by server at initialize never call again
 {
-    if (NULL == sAccessFileMutex)
+    if (nullptr == sAccessFileMutex)
     {   sAccessFileMutex = new OSMutex();
     }
 }
@@ -99,8 +99,8 @@ void QTAccessFile::Initialize() // called by server at initialize never call aga
 void QTAccessFile::SetAccessFileName(const char *inQTAccessFileName)
 {
     OSMutexLocker locker(sAccessFileMutex);
-    if (NULL == inQTAccessFileName)
-    {   Assert(NULL != inQTAccessFileName);
+    if (nullptr == inQTAccessFileName)
+    {   Assert(nullptr != inQTAccessFileName);
         return;
     }
     
@@ -119,7 +119,7 @@ bool QTAccessFile::HaveUser(char *userName, void* extraDataPtr)
 {
     bool result = false;
 
-    if (NULL != userName && 0 != userName[0])
+    if (nullptr != userName && 0 != userName[0])
         result = true;
 
    return result;        
@@ -129,7 +129,7 @@ bool QTAccessFile::HaveGroups( char** groupArray, uint32_t numGroups, void* extr
 {
    bool result = false;
 
-   if (numGroups > 0 && groupArray != NULL)
+   if (numGroups > 0 && groupArray != nullptr)
         result = true;
         
    return result;   
@@ -139,7 +139,7 @@ bool QTAccessFile::HaveRealm(   char *userName, StrPtrLen* ioRealmNameStr, void 
 {
     bool result = false;
 
-    if (ioRealmNameStr != NULL && ioRealmNameStr->Ptr != NULL && ioRealmNameStr->Len > 0)
+    if (ioRealmNameStr != nullptr && ioRealmNameStr->Ptr != nullptr && ioRealmNameStr->Len > 0)
         result = true;
        
     return result;   
@@ -187,10 +187,10 @@ bool QTAccessFile::AccessAllowed  (   char *userName, char**groupArray, uint32_t
                                         QTSS_ActionFlags inFlags,StrPtrLen* ioRealmNameStr, bool *outAllowAnyUserPtr, void *extraDataPtr
                                     )
 {       
-    if (NULL == accessFileBufPtr || NULL == accessFileBufPtr->Ptr || 0 == accessFileBufPtr->Len)
+    if (nullptr == accessFileBufPtr || nullptr == accessFileBufPtr->Ptr || 0 == accessFileBufPtr->Len)
         return true; // nothing to check
         
-    if (ioRealmNameStr != NULL && ioRealmNameStr->Ptr != NULL && ioRealmNameStr->Len > 0)
+    if (ioRealmNameStr != nullptr && ioRealmNameStr->Ptr != nullptr && ioRealmNameStr->Len > 0)
         ioRealmNameStr->Ptr[0] = 0;
         
     StringParser            accessFileParser(accessFileBufPtr);
@@ -326,8 +326,8 @@ char*  QTAccessFile::GetAccessFile_Copy( const char* movieRootDir, const char* d
 {   
     OSMutexLocker locker(sAccessFileMutex);
 
-    char* currentDir= NULL;
-    char* lastSlash = NULL;
+    char* currentDir= nullptr;
+    char* lastSlash = nullptr;
     int movieRootDirLen = ::strlen(movieRootDir);
     int maxLen = strlen(dirPath)+strlen(sQTAccessFileName) + strlen(kPathDelimiterString) + 1;
     currentDir = new char[maxLen];
@@ -336,7 +336,7 @@ char*  QTAccessFile::GetAccessFile_Copy( const char* movieRootDir, const char* d
 
     //strip off filename
     lastSlash = ::strrchr(currentDir, kPathDelimiterChar);
-    if (lastSlash != NULL)
+    if (lastSlash != nullptr)
         lastSlash[0] = '\0';
     
     //check qtaccess files
@@ -351,7 +351,7 @@ char*  QTAccessFile::GetAccessFile_Copy( const char* movieRootDir, const char* d
         ::strcat(currentDir, kPathDelimiterString);
         ::strcat(currentDir, sQTAccessFileName);
     
-        QTSS_Object fileObject = NULL;
+        QTSS_Object fileObject = nullptr;
         if( QTSS_OpenFileObject(currentDir, qtssOpenFileNoFlags, &fileObject) == QTSS_NoErr) 
         {
             (void)QTSS_CloseFileObject(fileObject);
@@ -364,7 +364,7 @@ char*  QTAccessFile::GetAccessFile_Copy( const char* movieRootDir, const char* d
             
         //strip of the tailing directory
         lastSlash = ::strrchr(currentDir, kPathDelimiterChar);
-        if (lastSlash == NULL)
+        if (lastSlash == nullptr)
             break;
         else
             lastSlash[0] = '\0';
@@ -374,7 +374,7 @@ char*  QTAccessFile::GetAccessFile_Copy( const char* movieRootDir, const char* d
     }
     
     delete[] currentDir;
-    return NULL;
+    return nullptr;
 }
 
 // allocates memory for outUsersFilePath and outGroupsFilePath - remember to delete
@@ -384,11 +384,11 @@ QTSS_AuthScheme QTAccessFile::FindUsersAndGroupsFilesAndAuthScheme(char* inAcces
     QTSS_AuthScheme authScheme = qtssAuthNone;
     QTSS_ActionFlags currentFlags = qtssActionFlagsRead;
     
-    if (inAccessFilePath == NULL)
+    if (inAccessFilePath == nullptr)
     return authScheme;
         
-    *outUsersFilePath = NULL;
-    *outGroupsFilePath = NULL;
+    *outUsersFilePath = nullptr;
+    *outGroupsFilePath = nullptr;
     //Assert(outUsersFilePath == NULL);
     //Assert(outGroupsFilePath == NULL);
     
@@ -449,7 +449,7 @@ QTSS_AuthScheme QTAccessFile::FindUsersAndGroupsFilesAndAuthScheme(char* inAcces
             lineParser.GetThruEOL(&word);
             StringParser::UnQuote(&word);// if the parsed string is surrounded by quotes then remove them.
     
-            if(*outUsersFilePath != NULL)       // we are encountering the AuthUserFile keyword twice!
+            if(*outUsersFilePath != nullptr)       // we are encountering the AuthUserFile keyword twice!
                 delete[] *outUsersFilePath; // The last one found takes precedence...delete the previous path
             
             *outUsersFilePath = word.GetAsCString();
@@ -462,7 +462,7 @@ QTSS_AuthScheme QTAccessFile::FindUsersAndGroupsFilesAndAuthScheme(char* inAcces
             lineParser.GetThruEOL(&word);
             StringParser::UnQuote(&word);// if the parsed string is surrounded by quotes then remove them.
 
-            if(*outGroupsFilePath != NULL)      // we are encountering the AuthGroupFile keyword twice!
+            if(*outGroupsFilePath != nullptr)      // we are encountering the AuthGroupFile keyword twice!
                 delete[] *outGroupsFilePath;    // The last one found takes precedence...delete the previous path       
             
             *outGroupsFilePath = word.GetAsCString();
@@ -490,7 +490,7 @@ QTSS_AuthScheme QTAccessFile::FindUsersAndGroupsFilesAndAuthScheme(char* inAcces
 
 QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bool allowNoAccessFiles, QTSS_ActionFlags noAction, QTSS_ActionFlags authorizeAction, bool *outAuthorizedPtr, bool *outAllowAnyUserPtr)
 {
-    if  ( (NULL == inParams) || (NULL == inParams->inRTSPRequest) || (NULL == outAllowAnyUserPtr) || (NULL == outAuthorizedPtr)  )
+    if  ( (nullptr == inParams) || (nullptr == inParams->inRTSPRequest) || (nullptr == outAllowAnyUserPtr) || (nullptr == outAuthorizedPtr)  )
         return QTSS_RequestFailed;
 
     *outAllowAnyUserPtr = false;
@@ -510,17 +510,17 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     //get the local file path
     char*   pathBuffStr = QTSSModuleUtils::GetLocalPath_Copy(theRTSPRequest);
     OSCharArrayDeleter pathBuffDeleter(pathBuffStr);
-    if (NULL == pathBuffStr)
+    if (nullptr == pathBuffStr)
         return QTSS_RequestFailed;
 
     //get the root movie directory
     char*   movieRootDirStr = QTSSModuleUtils::GetMoviesRootDir_Copy(theRTSPRequest);
     OSCharArrayDeleter movieRootDeleter(movieRootDirStr);
-    if (NULL == movieRootDirStr)
+    if (nullptr == movieRootDirStr)
         return QTSS_RequestFailed;
     
     QTSS_UserProfileObject theUserProfile = QTSSModuleUtils::GetUserProfileObject(theRTSPRequest);
-    if (NULL == theUserProfile)
+    if (nullptr == theUserProfile)
         return QTSS_RequestFailed;
 
     char* accessFilePath = QTAccessFile::GetAccessFile_Copy(movieRootDirStr, pathBuffStr);
@@ -569,9 +569,9 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
         (void) QTSS_SetValue(theRTSPRequest,qtssRTSPReqURLRealm, 0, realmNameStr.Ptr, ::strlen(realmNameStr.Ptr));
     else // if auth scheme is basic and no realm is present, or if the auth scheme is digest, use the realm from the users file
     {  
-        char*   userRealm = NULL;   
+        char*   userRealm = nullptr;   
         (void) QTSS_GetValueAsString(theUserProfile, qtssUserRealm, 0, &userRealm);
-        if(userRealm != NULL)
+        if(userRealm != nullptr)
         {
             OSCharArrayDeleter userRealmDeleter(userRealm);
             (void) QTSS_SetValue(theRTSPRequest,qtssRTSPReqURLRealm, 0, userRealm, ::strlen(userRealm));
@@ -580,7 +580,7 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     
     *outAuthorizedPtr = allowRequest;
     
-    bool founduser = this->HaveUser(username, NULL);
+    bool founduser = this->HaveUser(username, nullptr);
     bool authContinue = true;
     char nameBuff[256];
     StrPtrLen reqNameStr(nameBuff, kBuffLen);
@@ -658,7 +658,7 @@ bool DSAccessFile::ValidUser( char*userName, void* extraDataPtr)
 #ifndef __Win32__
     struct passwd	*user = getpwnam(userName);
     bool result =true;
-    if ( user == NULL )
+    if ( user == nullptr )
     {    
          return result;
     }

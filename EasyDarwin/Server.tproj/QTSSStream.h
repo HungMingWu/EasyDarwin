@@ -44,7 +44,7 @@ class QTSSStream
 {
     public:
 
-        QTSSStream() : fTask(NULL) {}
+        QTSSStream() : fTask(nullptr) {}
         virtual ~QTSSStream() {}
         
         //

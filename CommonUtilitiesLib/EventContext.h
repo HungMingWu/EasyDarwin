@@ -91,7 +91,7 @@ public:
 		fTask = inTask;
 		if (EVENTCONTEXT_DEBUG)
 		{
-			if (fTask == NULL)
+			if (fTask == nullptr)
 				printf("EventContext::SetTask context=%p task= NULL\n", (void *) this);
 			else
 				printf("EventContext::SetTask context=%p task= %p name=%s\n", (void *) this, (void *)fTask, fTask->fTaskName);
@@ -127,13 +127,13 @@ protected:
 	{
 		if (EVENTCONTEXT_DEBUG)
 		{
-			if (fTask == NULL)
+			if (fTask == nullptr)
 				printf("EventContext::ProcessEvent context=%p task=NULL\n", (void *) this);
 			else
 				printf("EventContext::ProcessEvent context=%p task=%p TaskName=%s\n", (void *)this, (void *)fTask, fTask->fTaskName);
 		}
 
-		if (fTask != NULL)
+		if (fTask != nullptr)
 			fTask->Signal(Task::kReadEvent);
 	}
 

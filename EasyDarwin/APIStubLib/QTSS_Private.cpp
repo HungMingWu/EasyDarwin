@@ -37,8 +37,8 @@
 #include "QTSS.h"
 #include "QTSS_Private.h"
 
-static QTSS_CallbacksPtr    sCallbacks = NULL;
-static QTSS_StreamRef       sErrorLogStream = NULL;
+static QTSS_CallbacksPtr    sCallbacks = nullptr;
+static QTSS_StreamRef       sErrorLogStream = nullptr;
 
 QTSS_Error _stublibrary_main(void* inPrivateArgs, QTSS_DispatchFuncPtr inDispatchFunc)
 {

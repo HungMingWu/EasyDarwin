@@ -62,10 +62,10 @@
 
 StrPtrLen * QueryURI::NextSegment(StrPtrLen *currentPathPtr, StrPtrLen *outNextPtr)
 {
-	StrPtrLen *result = NULL;
+	StrPtrLen *result = nullptr;
 	StrPtrLen *theURLPtr = GetURL();
 	if (outNextPtr)
-		outNextPtr->Set(NULL, 0);
+		outNextPtr->Set(nullptr, 0);
 
 	if (currentPathPtr && outNextPtr && theURLPtr && currentPathPtr->Len > 0)
 	{
@@ -82,7 +82,7 @@ StrPtrLen * QueryURI::NextSegment(StrPtrLen *currentPathPtr, StrPtrLen *outNextP
 
 
 			StringParser URLparser(&tempPath);
-			URLparser.ConsumeLength(NULL, 1);
+			URLparser.ConsumeLength(nullptr, 1);
 			URLparser.ConsumeUntil(outNextPtr, (uint8_t*)sNotQueryData);
 			result = outNextPtr;
 
@@ -97,28 +97,28 @@ StrPtrLen * QueryURI::NextSegment(StrPtrLen *currentPathPtr, StrPtrLen *outNextP
 
 QueryURI::URIField QueryURI::sURIFields[] =
 {   /* fAttrName, len, id, fDataptr*/
-	{ "modules",    strlen("modules"),      eModuleID,  NULL    },
-	{ "admin",      strlen("admin"),        eRootID,    NULL    },
-	{ "URL",        strlen("URL"),          eURL,       NULL    },
-	{ "QUERY",      strlen("QUERY"),        eQuery,     NULL    },
-	{ "parameters", strlen("parameters"),   eParameters,NULL    },
-	{ "snapshot",   strlen("snapshot"),     eSnapshot,  NULL    },
-	{ "command",    strlen("command"),      eCommand,   NULL    },
-	{ "value",      strlen("value"),        eValue,     NULL    },
-	{ "type",       strlen("type"),         eType,      NULL    },
-	{ "access",     strlen("access"),       eAccess,    NULL    },
-	{ "name",       strlen("name"),         eName,      NULL    },
-	{ "filter1",    strlen("filter1"),      eFilter1,   NULL    },
-	{ "filter2",    strlen("filter2"),      eFilter2,   NULL    },
-	{ "filter3",    strlen("filter3"),      eFilter3,   NULL    },
-	{ "filter4",    strlen("filter4"),      eFilter4,   NULL    },
-	{ "filter5",    strlen("filter5"),      eFilter5,   NULL    },
-	{ "filter6",    strlen("filter6"),      eFilter6,   NULL    },
-	{ "filter7",    strlen("filter7"),      eFilter7,   NULL    },
-	{ "filter8",    strlen("filter8"),      eFilter8,   NULL    },
-	{ "filter9",    strlen("filter9"),      eFilter9,   NULL    },
-	{ "filter10",   strlen("filter10"),     eFilter10,  NULL    },
-	{ "",   0,      -1,     NULL    }
+	{ "modules",    strlen("modules"),      eModuleID,  nullptr    },
+	{ "admin",      strlen("admin"),        eRootID,    nullptr    },
+	{ "URL",        strlen("URL"),          eURL,       nullptr    },
+	{ "QUERY",      strlen("QUERY"),        eQuery,     nullptr    },
+	{ "parameters", strlen("parameters"),   eParameters,nullptr    },
+	{ "snapshot",   strlen("snapshot"),     eSnapshot,  nullptr    },
+	{ "command",    strlen("command"),      eCommand,   nullptr    },
+	{ "value",      strlen("value"),        eValue,     nullptr    },
+	{ "type",       strlen("type"),         eType,      nullptr    },
+	{ "access",     strlen("access"),       eAccess,    nullptr    },
+	{ "name",       strlen("name"),         eName,      nullptr    },
+	{ "filter1",    strlen("filter1"),      eFilter1,   nullptr    },
+	{ "filter2",    strlen("filter2"),      eFilter2,   nullptr    },
+	{ "filter3",    strlen("filter3"),      eFilter3,   nullptr    },
+	{ "filter4",    strlen("filter4"),      eFilter4,   nullptr    },
+	{ "filter5",    strlen("filter5"),      eFilter5,   nullptr    },
+	{ "filter6",    strlen("filter6"),      eFilter6,   nullptr    },
+	{ "filter7",    strlen("filter7"),      eFilter7,   nullptr    },
+	{ "filter8",    strlen("filter8"),      eFilter8,   nullptr    },
+	{ "filter9",    strlen("filter9"),      eFilter9,   nullptr    },
+	{ "filter10",   strlen("filter10"),     eFilter10,  nullptr    },
+	{ "",   0,      -1,     nullptr    }
 };
 
 char *QueryURI::sCommandDefs[] =
@@ -230,7 +230,7 @@ QueryURI::QueryURI(StrPtrLen *inStream)
 	fTheCommand = -1;
 
 	for (short testField = 0; testField < eNumAttributes; testField++)
-		fURIFieldsPtr[testField].fData = NULL;
+		fURIFieldsPtr[testField].fData = nullptr;
 
 	memset(fURIBuffer, 0, QueryURI::eMaxBufferSize);
 	memset(fQueryBuffer, 0, QueryURI::eMaxBufferSize);
@@ -251,10 +251,10 @@ QueryURI::QueryURI(StrPtrLen *inStream)
 void QueryURI::SetSnapShot()
 {
 	StrPtrLen *snapshotSPL = GetSnapshot();
-	if (snapshotSPL != NULL)
+	if (snapshotSPL != nullptr)
 	{
 		StringParser parser(snapshotSPL);
-		fSnapshotID = parser.ConsumeInteger(NULL);
+		fSnapshotID = parser.ConsumeInteger(nullptr);
 		fUseSnapShot = true;
 	}
 };
@@ -266,7 +266,7 @@ void QueryURI::SetCommand()
 	int16_t commandIndex;
 
 	queryCommandPtr = this->GetCommand();
-	if (queryCommandPtr == NULL || queryCommandPtr->Len == 0) // Default command
+	if (queryCommandPtr == nullptr || queryCommandPtr->Len == 0) // Default command
 	{
 		fTheCommand = kGETCommand;
 		return;
@@ -377,7 +377,7 @@ uint32_t QueryURI::CheckInvalidIterator(char* evalMessageBuff)
 	uint32_t result = 0;
 
 	StringParser parser(GetURL());
-	parser.ConsumeUntil(NULL, '*');
+	parser.ConsumeUntil(nullptr, '*');
 	if (parser.PeekFast() == '*')
 	{
 		result = 405;
@@ -394,7 +394,7 @@ uint32_t QueryURI::CheckInvalidArrayIterator(char* evalMessageBuff)
 	uint32_t result = 0;
 
 	StringParser parser(GetURL());
-	parser.ConsumeUntil(NULL, ':');
+	parser.ConsumeUntil(nullptr, ':');
 	if (parser.PeekFast() == ':')
 	{
 		result = 405;
@@ -429,7 +429,7 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 	char evalMessageBuff[messageLen] = { 0 };
 	StrPtrLen evalMessage;
 	evalMessage.Set(evalMessageBuff, messageLen);
-	if (forceResultPtr != NULL)
+	if (forceResultPtr != nullptr)
 	{
 		result = *forceResultPtr;
 		switch (*forceResultPtr)
@@ -465,7 +465,7 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 		{
 		case kGETCommand:
 			{   // special case test. A query with no parameters is a get. A query with parameters requires a command.
-				if (fHasQuery && (this->GetCommand() == NULL || this->GetCommand()->Len == 0))
+				if (fHasQuery && (this->GetCommand() == nullptr || this->GetCommand()->Len == 0))
 				{
 					result = 400;
 					static char *message = "reason=\"command parameter is missing\"";
@@ -479,7 +479,7 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 
 		case kSETCommand:
 			{
-				if (NULL == GetValue())
+				if (nullptr == GetValue())
 				{
 					result = 400;
 					static char *message = "No value";
@@ -513,7 +513,7 @@ uint32_t  QueryURI::EvalQuery(uint32_t *forceResultPtr, char *forceMessagePtr)
 					break;
 				}
 
-				if (NULL == GetValue())
+				if (nullptr == GetValue())
 				{
 					result = 400;
 					static char *message = "Attribute value not defined";
@@ -597,23 +597,23 @@ void QueryURI::ParseQueryString(StringParser *parserPtr, StrPtrLen *urlStreamPtr
 {
 	StrPtrLen queryStr;
 	StringParser tempQueryParse(parserPtr->GetStream());// point to local copy xx
-	char *stopCharPtr = NULL;
-	tempQueryParse.ConsumeUntil(NULL, sWhiteQuoteOrEOL); // stop on whitespace '"' 
+	char *stopCharPtr = nullptr;
+	tempQueryParse.ConsumeUntil(nullptr, sWhiteQuoteOrEOL); // stop on whitespace '"' 
 	tempQueryParse.ConsumeWhitespace();
-	tempQueryParse.ConsumeUntil(NULL, '?'); // stop at start of query
+	tempQueryParse.ConsumeUntil(nullptr, '?'); // stop at start of query
 	tempQueryParse.Expect('?');
 	char* startCharPtr = tempQueryParse.GetCurrentPosition();
 	//printf("QueryURI::ParseQueryString start Position = '%s'\n",startCharPtr);
 	while (tempQueryParse.GetDataRemaining() > 0)
 	{
 
-		tempQueryParse.ConsumeUntil(NULL, sWhiteQuoteOrEOL); // stop on whitespace '"' 
+		tempQueryParse.ConsumeUntil(nullptr, sWhiteQuoteOrEOL); // stop on whitespace '"' 
 		stopCharPtr = tempQueryParse.GetCurrentPosition();
 		if (*stopCharPtr == '"') // if quote read to next quote
 		{
-			tempQueryParse.ConsumeLength(NULL, 1);
-			tempQueryParse.ConsumeUntil(NULL, '"');
-			tempQueryParse.ConsumeLength(NULL, 1);
+			tempQueryParse.ConsumeLength(nullptr, 1);
+			tempQueryParse.ConsumeUntil(nullptr, '"');
+			tempQueryParse.ConsumeLength(nullptr, 1);
 			//printf("QueryURI::ParseQueryString is quote GetCurrentPosition = '%s' len = %"   _U32BITARG_   "\n",stopCharPtr, strlen(stopCharPtr));
 		}
 		else
@@ -665,10 +665,10 @@ void QueryURI::ParseURLString(StringParser *parserPtr, StrPtrLen *urlStreamPtr)
 
 void QueryURI::URLParse(StrPtrLen *inStream)
 {
-	if (inStream != NULL)
+	if (inStream != nullptr)
 	{
 		char * decodedRequest = new char[inStream->Len + 1];
-		Assert(decodedRequest != NULL);
+		Assert(decodedRequest != nullptr);
 		decodedRequest[inStream->Len] = 0;
 		OSCharArrayDeleter decodedRequestDeleter(decodedRequest);
 
@@ -679,7 +679,7 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 		if (inStream->Len > 0)
 		{   // skip past the HTTP command for the StringTranslator::DecodeURL but keep it in our decoded Request buffer
 			tempParser.ConsumeWhitespace();
-			tempParser.ConsumeWord(NULL);
+			tempParser.ConsumeWord(nullptr);
 			tempParser.ConsumeWhitespace();
 			URLToParse.Set(tempParser.GetCurrentPosition(), tempParser.GetDataRemaining());  // this should be a '/' and is required by the DecodeURL routine
 			URLoffset = tempParser.GetDataParsedLen();
@@ -774,29 +774,29 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 				//printf("queryParser=");PRINT_STR(fURIFieldsPtr[eQuery].fData);
 				while (queryParser.GetDataRemaining() != 0)
 				{
-					tempData.Set(NULL, 0);
+					tempData.Set(nullptr, 0);
 					if (queryParser.GetDataRemaining())queryParser.ConsumeWhitespace();
 					if (queryParser.GetDataRemaining())queryParser.ConsumeUntil(&tempStr, (uint8_t*)sNotQueryData);
 					if (tempStr.Len == 0)
 					{
 						//printf("no query name\n");
-						if (queryParser.GetDataRemaining())queryParser.ConsumeLength(NULL, 1);
+						if (queryParser.GetDataRemaining())queryParser.ConsumeLength(nullptr, 1);
 						continue;
 					}
 					if (queryParser.GetDataRemaining())queryParser.ConsumeWhitespace();
 					if (!queryParser.Expect('='))
 					{
 						//printf("no '=' for query name ");PRINT_STR(&tempStr);
-						if (queryParser.GetDataRemaining())queryParser.ConsumeLength(NULL, 1);
+						if (queryParser.GetDataRemaining())queryParser.ConsumeLength(nullptr, 1);
 						continue;
 					}
 					if (queryParser.GetDataRemaining())queryParser.ConsumeWhitespace();
 					char testQuote = queryParser.PeekFast();
 					if (testQuote == '"')
 					{
-						if (queryParser.GetDataRemaining())queryParser.ConsumeLength(NULL, 1);
+						if (queryParser.GetDataRemaining())queryParser.ConsumeLength(nullptr, 1);
 						if (queryParser.GetDataRemaining())queryParser.ConsumeUntil(&tempData, '"');
-						if (queryParser.GetDataRemaining())queryParser.ConsumeLength(NULL, 1);
+						if (queryParser.GetDataRemaining())queryParser.ConsumeLength(nullptr, 1);
 					}
 					else
 					{

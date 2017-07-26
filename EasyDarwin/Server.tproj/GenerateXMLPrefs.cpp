@@ -41,43 +41,43 @@ struct PrefConversionInfo
 
 static const PrefConversionInfo kPrefs[] =
 {
-	{ "rtsp_timeout",							NULL,	qtssAttrDataTypeUInt32 },
-	{ "rtsp_session_timeout",					NULL,	qtssAttrDataTypeUInt32 },
-	{ "rtp_session_timeout",					NULL,	qtssAttrDataTypeUInt32 },
-	{ "maximum_connections",					NULL,	qtssAttrDataTypeint32_t },
-	{ "maximum_bandwidth",						NULL,	qtssAttrDataTypeint32_t },
-	{ "movie_folder",						NULL,	qtssAttrDataTypeCharArray },
-	{ "bind_ip_addr",							NULL,	qtssAttrDataTypeCharArray },
-	{ "break_on_assert",						NULL,	qtssAttrDataTypeBool16 },
-	{ "auto_restart",							NULL,	qtssAttrDataTypeBool16 },
-	{ "total_bytes_update",						NULL,	qtssAttrDataTypeUInt32 },
-	{ "average_bandwidth_update",				NULL,	qtssAttrDataTypeUInt32 },
-	{ "safe_play_duration",                     NULL,   qtssAttrDataTypeUInt32 },
-	{ "module_folder",                          NULL,   qtssAttrDataTypeCharArray },
-	{ "error_logfile_name",                     NULL,   qtssAttrDataTypeCharArray },
-	{ "error_logfile_dir",                      NULL,   qtssAttrDataTypeCharArray },
-	{ "error_logfile_interval",                 NULL,   qtssAttrDataTypeUInt32 },
-	{ "error_logfile_size",                     NULL,   qtssAttrDataTypeUInt32 },
-	{ "error_logfile_verbosity",                NULL,   qtssAttrDataTypeUInt32 },
-	{ "screen_logging",                         NULL,   qtssAttrDataTypeBool16 },
-	{ "error_logging",                          NULL,   qtssAttrDataTypeBool16 },
-	{ "drop_all_video_delay",                   NULL,   qtssAttrDataTypeint32_t },
-	{ "start_thinning_delay",                   NULL,   qtssAttrDataTypeint32_t },
-	{ "large_window_size",                      NULL,   qtssAttrDataTypeint32_t },
-	{ "window_size_threshold",                  NULL,   qtssAttrDataTypeint32_t },
-	{ "min_tcp_buffer_size",                    NULL,   qtssAttrDataTypeUInt32 },
-	{ "max_tcp_buffer_size",                    NULL,   qtssAttrDataTypeUInt32 },
-	{ "tcp_seconds_to_buffer",                  NULL,   qtssAttrDataTypeFloat32 },
-	{ "do_report_http_connection_ip_address",   NULL,   qtssAttrDataTypeBool16 },
-	{ "default_authorization_realm",            NULL,   qtssAttrDataTypeCharArray },
-	{ "run_user_name",                          NULL,   qtssAttrDataTypeCharArray },
-	{ "run_group_name",                         NULL,   qtssAttrDataTypeCharArray },
-	{ "append_source_addr_in_transport",        NULL,   qtssAttrDataTypeBool16 },
-	{ "rtsp_port",                              NULL,   qtssAttrDataTypeUInt16 },
+	{ "rtsp_timeout",							nullptr,	qtssAttrDataTypeUInt32 },
+	{ "rtsp_session_timeout",					nullptr,	qtssAttrDataTypeUInt32 },
+	{ "rtp_session_timeout",					nullptr,	qtssAttrDataTypeUInt32 },
+	{ "maximum_connections",					nullptr,	qtssAttrDataTypeint32_t },
+	{ "maximum_bandwidth",						nullptr,	qtssAttrDataTypeint32_t },
+	{ "movie_folder",						nullptr,	qtssAttrDataTypeCharArray },
+	{ "bind_ip_addr",							nullptr,	qtssAttrDataTypeCharArray },
+	{ "break_on_assert",						nullptr,	qtssAttrDataTypeBool16 },
+	{ "auto_restart",							nullptr,	qtssAttrDataTypeBool16 },
+	{ "total_bytes_update",						nullptr,	qtssAttrDataTypeUInt32 },
+	{ "average_bandwidth_update",				nullptr,	qtssAttrDataTypeUInt32 },
+	{ "safe_play_duration",                     nullptr,   qtssAttrDataTypeUInt32 },
+	{ "module_folder",                          nullptr,   qtssAttrDataTypeCharArray },
+	{ "error_logfile_name",                     nullptr,   qtssAttrDataTypeCharArray },
+	{ "error_logfile_dir",                      nullptr,   qtssAttrDataTypeCharArray },
+	{ "error_logfile_interval",                 nullptr,   qtssAttrDataTypeUInt32 },
+	{ "error_logfile_size",                     nullptr,   qtssAttrDataTypeUInt32 },
+	{ "error_logfile_verbosity",                nullptr,   qtssAttrDataTypeUInt32 },
+	{ "screen_logging",                         nullptr,   qtssAttrDataTypeBool16 },
+	{ "error_logging",                          nullptr,   qtssAttrDataTypeBool16 },
+	{ "drop_all_video_delay",                   nullptr,   qtssAttrDataTypeint32_t },
+	{ "start_thinning_delay",                   nullptr,   qtssAttrDataTypeint32_t },
+	{ "large_window_size",                      nullptr,   qtssAttrDataTypeint32_t },
+	{ "window_size_threshold",                  nullptr,   qtssAttrDataTypeint32_t },
+	{ "min_tcp_buffer_size",                    nullptr,   qtssAttrDataTypeUInt32 },
+	{ "max_tcp_buffer_size",                    nullptr,   qtssAttrDataTypeUInt32 },
+	{ "tcp_seconds_to_buffer",                  nullptr,   qtssAttrDataTypeFloat32 },
+	{ "do_report_http_connection_ip_address",   nullptr,   qtssAttrDataTypeBool16 },
+	{ "default_authorization_realm",            nullptr,   qtssAttrDataTypeCharArray },
+	{ "run_user_name",                          nullptr,   qtssAttrDataTypeCharArray },
+	{ "run_group_name",                         nullptr,   qtssAttrDataTypeCharArray },
+	{ "append_source_addr_in_transport",        nullptr,   qtssAttrDataTypeBool16 },
+	{ "rtsp_port",                              nullptr,   qtssAttrDataTypeUInt16 },
 
 	// This element will be used if the pref is something we don't know about.
 	// Just have unknown prefs default to be server prefs with a type of char
-	{ NULL,                                     NULL,	qtssAttrDataTypeCharArray }
+	{ nullptr,                                     nullptr,	qtssAttrDataTypeCharArray }
 };
 
 int GenerateAllXMLPrefs(FilePrefsSource* inPrefsSource, XMLPrefsParser* inXMLPrefs)
@@ -91,7 +91,7 @@ int GenerateAllXMLPrefs(FilePrefsSource* inPrefsSource, XMLPrefsParser* inXMLPre
 		//
 		// Find the information corresponding to this pref in the above array
 		uint32_t y = 0;
-		for (; kPrefs[y].fPrefName != NULL; y++)
+		for (; kPrefs[y].fPrefName != nullptr; y++)
 			if (::strcmp(thePrefName, kPrefs[y].fPrefName) == 0)
 				break;
 
@@ -124,7 +124,7 @@ int GenerateStandardXMLPrefs(PrefsSource* inPrefsSource, XMLPrefsParser* inXMLPr
 {
 	char thePrefBuf[1024];
 
-	for (uint32_t x = 0; kPrefs[x].fPrefName != NULL; x++)
+	for (uint32_t x = 0; kPrefs[x].fPrefName != nullptr; x++)
 	{
 		char* theTypeString = (char*)QTSSDataConverter::TypeToTypeString(kPrefs[x].fPrefType);
 		ContainerRef module = inXMLPrefs->GetRefForModule(kPrefs[x].fModuleName);

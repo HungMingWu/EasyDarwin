@@ -86,7 +86,7 @@ namespace Json {
 			length = Value::maxInt - 1;
 
 		char* newString = static_cast<char*>(malloc(length + 1));
-		if (newString == NULL) {
+		if (newString == nullptr) {
 			throwRuntimeError(
 				"in Json::Value::duplicateStringValue(): "
 				"Failed to allocate string value buffer");
@@ -109,7 +109,7 @@ namespace Json {
 			"length too big for prefixing");
 		unsigned actualLength = length + static_cast<unsigned>(sizeof(unsigned)) + 1U;
 		char* newString = static_cast<char*>(malloc(actualLength));
-		if (newString == 0) {
+		if (newString == nullptr) {
 			throwRuntimeError(
 				"in Json::Value::duplicateAndPrefixStringValue(): "
 				"Failed to allocate string value buffer");
@@ -184,7 +184,7 @@ namespace Json {
 	// //////////////////////////////////////////////////////////////////
 	// //////////////////////////////////////////////////////////////////
 
-	Value::CommentInfo::CommentInfo() : comment_(0) {}
+	Value::CommentInfo::CommentInfo() : comment_(nullptr) {}
 
 	Value::CommentInfo::~CommentInfo() {
 		if (comment_)
@@ -194,9 +194,9 @@ namespace Json {
 	void Value::CommentInfo::setComment(const char* text, size_t len) {
 		if (comment_) {
 			releaseStringValue(comment_);
-			comment_ = 0;
+			comment_ = nullptr;
 		}
-		JSON_ASSERT(text != 0);
+		JSON_ASSERT(text != nullptr);
 		JSON_ASSERT_MESSAGE(
 			text[0] == '\0' || text[0] == '/',
 			"in Json::Value::setComment(): Comments must start with /");
@@ -215,7 +215,7 @@ namespace Json {
 	// Notes: policy_ indicates if the string was allocated when
 	// a string is stored.
 
-	Value::CZString::CZString(ArrayIndex aindex) : cstr_(0), index_(aindex) {}
+	Value::CZString::CZString(ArrayIndex aindex) : cstr_(nullptr), index_(aindex) {}
 
 	Value::CZString::CZString(char const* str, unsigned ulength, DuplicationPolicy allocate)
 		: cstr_(str)
@@ -226,7 +226,7 @@ namespace Json {
 	}
 
 	Value::CZString::CZString(const CZString& other)
-		: cstr_(other.storage_.policy_ != noDuplication && other.cstr_ != 0
+		: cstr_(other.storage_.policy_ != noDuplication && other.cstr_ != nullptr
 			? duplicateStringValue(other.cstr_, other.storage_.length_)
 			: other.cstr_)
 	{
@@ -308,7 +308,7 @@ namespace Json {
 			value_.real_ = 0.0;
 			break;
 		case stringValue:
-			value_.string_ = 0;
+			value_.string_ = nullptr;
 			break;
 		case arrayValue:
 		case objectValue:
@@ -384,7 +384,7 @@ namespace Json {
 	Value::Value(Value const& other)
 		: type_(other.type_), allocated_(false)
 		,
-		comments_(0), start_(other.start_), limit_(other.limit_)
+		comments_(nullptr), start_(other.start_), limit_(other.limit_)
 	{
 		switch (type_) {
 		case nullValue:
@@ -499,7 +499,7 @@ namespace Json {
 			return value_.bool_ < other.value_.bool_;
 		case stringValue:
 			{
-				if ((value_.string_ == 0) || (other.value_.string_ == 0)) {
+				if ((value_.string_ == nullptr) || (other.value_.string_ == nullptr)) {
 					if (other.value_.string_) return true;
 					else return false;
 				}
@@ -555,7 +555,7 @@ namespace Json {
 			return value_.bool_ == other.value_.bool_;
 		case stringValue:
 			{
-				if ((value_.string_ == 0) || (other.value_.string_ == 0)) {
+				if ((value_.string_ == nullptr) || (other.value_.string_ == nullptr)) {
 					return (value_.string_ == other.value_.string_);
 				}
 				unsigned this_len;
@@ -583,7 +583,7 @@ namespace Json {
 	const char* Value::asCString() const {
 		JSON_ASSERT_MESSAGE(type_ == stringValue,
 			"in Json::Value::asCString(): requires stringValue");
-		if (value_.string_ == 0) return 0;
+		if (value_.string_ == nullptr) return nullptr;
 		unsigned this_len;
 		char const* this_str;
 		decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
@@ -592,7 +592,7 @@ namespace Json {
 
 	bool Value::getString(char const** str, char const** cend) const {
 		if (type_ != stringValue) return false;
-		if (value_.string_ == 0) return false;
+		if (value_.string_ == nullptr) return false;
 		unsigned length;
 		decodePrefixedString(this->allocated_, this->value_.string_, &length, str);
 		*cend = *str + length;
@@ -605,7 +605,7 @@ namespace Json {
 			return "";
 		case stringValue:
 			{
-				if (value_.string_ == 0) return "";
+				if (value_.string_ == nullptr) return "";
 				unsigned this_len;
 				char const* this_str;
 				decodePrefixedString(this->allocated_, this->value_.string_, &this_len, &this_str);
@@ -956,7 +956,7 @@ namespace Json {
 	void Value::initBasic(ValueType vtype, bool allocated) {
 		type_ = vtype;
 		allocated_ = allocated;
-		comments_ = 0;
+		comments_ = nullptr;
 		start_ = 0;
 		limit_ = 0;
 	}
@@ -1014,10 +1014,10 @@ namespace Json {
 		JSON_ASSERT_MESSAGE(
 			type_ == nullValue || type_ == objectValue,
 			"in Json::Value::find(key, end, found): requires objectValue or nullValue");
-		if (type_ == nullValue) return NULL;
+		if (type_ == nullValue) return nullptr;
 		CZString actualKey(key, static_cast<unsigned>(cend - key), CZString::noDuplication);
 		ObjectValues::const_iterator it = value_.map_->find(actualKey);
-		if (it == value_.map_->end()) return NULL;
+		if (it == value_.map_->end()) return nullptr;
 		return &(*it).second;
 	}
 	const Value& Value::operator[](const char* key) const
@@ -1144,7 +1144,7 @@ namespace Json {
 	bool Value::isMember(char const* key, char const* cend) const
 	{
 		Value const* value = find(key, cend);
-		return NULL != value;
+		return nullptr != value;
 	}
 	bool Value::isMember(char const* key) const
 	{
@@ -1319,7 +1319,7 @@ namespace Json {
 	}
 
 	bool Value::hasComment(CommentPlacement placement) const {
-		return comments_ != 0 && comments_[placement].comment_ != 0;
+		return comments_ != nullptr && comments_[placement].comment_ != nullptr;
 	}
 
 	std::string Value::getComment(CommentPlacement placement) const {

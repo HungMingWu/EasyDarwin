@@ -47,8 +47,8 @@ template <class S> class PLDoubleLinkedListNode
         {
                 // the node takes ownership of "element"
                 fElement = element;
-                fNext = NULL;
-                fPrev = NULL;
+                fNext = nullptr;
+                fPrev = nullptr;
         }
         virtual ~PLDoubleLinkedListNode()
                 {
@@ -74,8 +74,8 @@ template <class T> class PLDoubleLinkedList
     public:
         PLDoubleLinkedList()
         {
-            fHead = NULL;
-            fTail = NULL;
+            fHead = nullptr;
+            fTail = nullptr;
             fNumNodes = 0;
         }
         
@@ -188,7 +188,7 @@ template <class T> class PLDoubleLinkedList
                                         fHead->fPrev = node;
 
                                     
-                                    node->fPrev = NULL;
+                                    node->fPrev = nullptr;
                                     node->fNext = fHead;
                                     
                                     fHead = node;
@@ -227,8 +227,8 @@ template <class T> class PLDoubleLinkedList
                                         node->fNext->fPrev = node->fPrev;
 
                                     
-                                    node->fPrev = NULL;
-                                    node->fNext = NULL;
+                                    node->fPrev = nullptr;
+                                    node->fNext = nullptr;
 
                                     
                                     

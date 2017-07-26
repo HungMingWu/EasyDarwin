@@ -57,7 +57,7 @@ class QTSSModuleUtils
     
         // Read the complete contents of the file at inPath into the StrPtrLen.
         // This function allocates memory for the file data.
-        static QTSS_Error   ReadEntireFile(char* inPath, StrPtrLen* outData, QTSS_TimeVal inModDate = -1, QTSS_TimeVal* outModDate = NULL);
+        static QTSS_Error   ReadEntireFile(char* inPath, StrPtrLen* outData, QTSS_TimeVal inModDate = -1, QTSS_TimeVal* outModDate = nullptr);
 
         // If your module supports RTSP methods, call this function from your QTSS_Initialize
         // role to tell the server what those methods are.
@@ -72,8 +72,8 @@ class QTSSModuleUtils
         static void     LogError(   QTSS_ErrorVerbosity inVerbosity,
                                     QTSS_AttributeID inTextMessage,
                                     uint32_t inErrNumber,
-                                    char* inArgument = NULL,
-                                    char* inArg2 = NULL);
+                                    char* inArgument = nullptr,
+                                    char* inArg2 = nullptr);
                                     
         static void   LogErrorStr( QTSS_ErrorVerbosity inVerbosity, char* inMessage);
         static void   LogPrefErrorStr( QTSS_ErrorVerbosity inVerbosity, char*  preference, char* inMessage);
@@ -85,7 +85,7 @@ class QTSSModuleUtils
         static char* GetFullPath(   QTSS_RTSPRequestObject inRequest,
                                     QTSS_AttributeID whichFileType,
                                     uint32_t* outLen,
-                                    StrPtrLen* suffix = NULL);
+                                    StrPtrLen* suffix = nullptr);
 
         //
         // This function does 2 things:
@@ -106,7 +106,7 @@ class QTSSModuleUtils
         static QTSS_Error   SendErrorResponse(  QTSS_RTSPRequestObject inRequest,
                                                         QTSS_RTSPStatusCode inStatusCode,
                                                         QTSS_AttributeID inTextMessage,
-                                                        StrPtrLen* inStringArg = NULL);
+                                                        StrPtrLen* inStringArg = nullptr);
 														
 		// This function sends an error to the RTSP client. You don't have to provide
 		// a text message ID, but instead you need to provide the error message in a
@@ -280,7 +280,7 @@ StrPtrLen* IPComponentStr::GetComponent(uint16_t which)
         return &fAddressComponent[which]; 
    
    Assert(0);
-   return NULL; 
+   return nullptr; 
 }
 
 #endif //_QTSS_MODULE_UTILS_H_

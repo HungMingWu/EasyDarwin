@@ -63,7 +63,7 @@ public:
 	//
 	// CONSTRUCTOR / DESTRUCTOR
 
-	QTSSDictionary(QTSSDictionaryMap* inMap, OSMutex* inMutex = NULL);
+	QTSSDictionary(QTSSDictionaryMap* inMap, OSMutex* inMutex = nullptr);
 	~QTSSDictionary() override;
 
 	//
@@ -109,7 +109,7 @@ public:
 
 	// Returns:     QTSS_BadArgument, QTSS_ReadOnly (if attribute is read only),
 	QTSS_Error CreateObjectValue(QTSS_AttributeID inAttrID, uint32_t* outIndex,
-		QTSSDictionary** newObject, QTSSDictionaryMap* inMap = NULL,
+		QTSSDictionary** newObject, QTSSDictionaryMap* inMap = nullptr,
 		uint32_t inFlags = kNoFlags);
 
 	// Returns:     QTSS_BadArgument, QTSS_ReadOnly, QTSS_BadIndex

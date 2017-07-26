@@ -34,21 +34,21 @@
 #include "SocketUtils.h"
 
 SourceInfo::SourceInfo(const SourceInfo& copy)
-:   fStreamArray(NULL), fNumStreams(copy.fNumStreams), 
-    fOutputArray(NULL), fNumOutputs(copy.fNumOutputs),
+:   fStreamArray(nullptr), fNumStreams(copy.fNumStreams), 
+    fOutputArray(nullptr), fNumOutputs(copy.fNumOutputs),
     fTimeSet(copy.fTimeSet),fStartTimeUnixSecs(copy.fStartTimeUnixSecs),
     fEndTimeUnixSecs(copy.fEndTimeUnixSecs), fSessionControlType(copy.fSessionControlType),
     fHasValidTime(false)
 {   
     
-    if(copy.fStreamArray != NULL && fNumStreams != 0)
+    if(copy.fStreamArray != nullptr && fNumStreams != 0)
     {
         fStreamArray = new StreamInfo[fNumStreams];
         for (uint32_t index=0; index < fNumStreams; index++)
             fStreamArray[index].Copy(copy.fStreamArray[index]);
     }
     
-    if(copy.fOutputArray != NULL && fNumOutputs != 0)
+    if(copy.fOutputArray != nullptr && fNumOutputs != 0)
     {
         fOutputArray = new OutputInfo[fNumOutputs];
         for (uint32_t index2=0; index2 < fNumOutputs; index2++)
@@ -59,17 +59,17 @@ SourceInfo::SourceInfo(const SourceInfo& copy)
 
 SourceInfo::~SourceInfo()
 {
-    if(fStreamArray != NULL)
+    if(fStreamArray != nullptr)
         delete [] fStreamArray;
 
-    if(fOutputArray != NULL)
+    if(fOutputArray != nullptr)
         delete [] fOutputArray;
         
 }
 
 bool  SourceInfo::IsReflectable()
 {
-    if (fStreamArray == NULL)
+    if (fStreamArray == nullptr)
         return false;
     if (fNumStreams == 0)
         return false;
@@ -120,35 +120,35 @@ bool  SourceInfo::HasIncomingBroacast()
 SourceInfo::StreamInfo* SourceInfo::GetStreamInfo(uint32_t inIndex)
 {
     Assert(inIndex < fNumStreams);
-    if (fStreamArray == NULL)
-        return NULL;
+    if (fStreamArray == nullptr)
+        return nullptr;
     if (inIndex < fNumStreams)
         return &fStreamArray[inIndex];
     else
-        return NULL;
+        return nullptr;
 }
 
 SourceInfo::StreamInfo* SourceInfo::GetStreamInfoByTrackID(uint32_t inTrackID)
 {
-    if (fStreamArray == NULL)
-        return NULL;
+    if (fStreamArray == nullptr)
+        return nullptr;
     for (uint32_t x = 0; x < fNumStreams; x++)
     {
         if (fStreamArray[x].fTrackID == inTrackID)
             return &fStreamArray[x];
     }
-    return NULL;
+    return nullptr;
 }
 
 SourceInfo::OutputInfo* SourceInfo::GetOutputInfo(uint32_t inIndex)
 {
     Assert(inIndex < fNumOutputs);
-    if (fOutputArray == NULL)
-        return NULL;
+    if (fOutputArray == nullptr)
+        return nullptr;
     if (inIndex < fNumOutputs)
         return &fOutputArray[inIndex];
     else
-        return NULL;
+        return nullptr;
 }
 
 uint32_t SourceInfo::GetNumNewOutputs()
@@ -276,10 +276,10 @@ void SourceInfo::StreamInfo::Copy(const StreamInfo& copy)
     fPort = copy.fPort;
     fTimeToLive = copy.fTimeToLive;
     fPayloadType = copy.fPayloadType;
-    if ((copy.fPayloadName).Ptr != NULL)
+    if ((copy.fPayloadName).Ptr != nullptr)
         fPayloadName.Set((copy.fPayloadName).GetAsCString(), (copy.fPayloadName).Len);
     fTrackID = copy.fTrackID;
-	if ((copy.fTrackName).Ptr != NULL)
+	if ((copy.fTrackName).Ptr != nullptr)
 		fTrackName.Set((copy.fTrackName).GetAsCString(), (copy.fTrackName).Len);
     fBufferDelay = copy.fBufferDelay;
     fIsTCP = copy.fIsTCP;
@@ -289,11 +289,11 @@ void SourceInfo::StreamInfo::Copy(const StreamInfo& copy)
 
 SourceInfo::StreamInfo::~StreamInfo()
 {
-    if (fPayloadName.Ptr != NULL)
+    if (fPayloadName.Ptr != nullptr)
         delete fPayloadName.Ptr;
     fPayloadName.Len = 0;
 
-	if (fTrackName.Ptr != NULL)
+	if (fTrackName.Ptr != nullptr)
         delete fTrackName.Ptr;
 	fTrackName.Len = 0;
 }
@@ -315,7 +315,7 @@ void SourceInfo::OutputInfo::Copy(const OutputInfo& copy)
 
 SourceInfo::OutputInfo::~OutputInfo()
 {
-    if (fPortArray != NULL)
+    if (fPortArray != nullptr)
         delete [] fPortArray;
 }
 

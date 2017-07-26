@@ -102,7 +102,7 @@ public:
 		return sVersionString[version];
 	}
 
-	static bool				ParseRTSPURL(char const* url, char* username, char* password, char* ip, uint16_t* port, char const** urlSuffix = NULL);
+	static bool				ParseRTSPURL(char const* url, char* username, char* password, char* ip, uint16_t* port, char const** urlSuffix = nullptr);
 
 private:
 

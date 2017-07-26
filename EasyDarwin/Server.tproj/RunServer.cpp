@@ -52,7 +52,7 @@
 
 void select_startevents();
 
-QTSServer* sServer = NULL;
+QTSServer* sServer = nullptr;
 int sStatusUpdateInterval = 0;
 bool sHasPID = false;
 uint64_t sLastStatusPackets = 0;
@@ -312,14 +312,14 @@ void LogStatus(QTSS_ServerState theServerState)
 
 	// If the total number of RTSP sessions is 0  then we 
 	// might not need to update the "server_status" file.
-	char* thePrefStr = NULL;
+	char* thePrefStr = nullptr;
 	// We start lastRTSPSessionCount off with an impossible value so that
 	// we force the "server_status" file to be written at least once.
 	static int lastRTSPSessionCount = -1;
 	// Get the RTSP session count from the server.
 	(void)QTSS_GetValueAsString(sServer, qtssRTSPCurrentSessionCount, 0, &thePrefStr);
 	int currentRTSPSessionCount = ::atoi(thePrefStr);
-	delete[] thePrefStr; thePrefStr = NULL;
+	delete[] thePrefStr; thePrefStr = nullptr;
 	if (currentRTSPSessionCount == 0 && currentRTSPSessionCount == lastRTSPSessionCount)
 	{
 		// we don't need to update the "server_status" file except the
@@ -339,16 +339,16 @@ void LogStatus(QTSS_ServerState theServerState)
 
 	StrPtrLenDel pathStr(sServer->GetPrefs()->GetErrorLogDir());
 	StrPtrLenDel fileNameStr(sServer->GetPrefs()->GetStatsMonitorFileName());
-	ResizeableStringFormatter pathBuffer(NULL, 0);
+	ResizeableStringFormatter pathBuffer(nullptr, 0);
 	pathBuffer.PutFilePath(&pathStr, &fileNameStr);
 	pathBuffer.PutTerminator();
 
 	char*   filePath = pathBuffer.GetBufPtr();
 	FILE*   statusFile = ::fopen(filePath, "w");
-	char*   theAttributeValue = NULL;
+	char*   theAttributeValue = nullptr;
 	int     i;
 
-	if (statusFile != NULL)
+	if (statusFile != nullptr)
 	{
 		::chmod(filePath, 0640);
 		for (i = 0; i < numHeaderLines; i++)
@@ -363,12 +363,12 @@ void LogStatus(QTSS_ServerState theServerState)
 		for (i = 0; i < numAttributes; i++)
 		{
 			(void)QTSS_GetValueAsString(sServer, QTSSModuleUtils::GetAttrID(sServer, sAttributes[i]), 0, &theAttributeValue);
-			if (theAttributeValue != NULL)
+			if (theAttributeValue != nullptr)
 			{
 				fprintf(statusFile, sKey, sAttributes[i]);
 				fprintf(statusFile, sValue, theAttributeValue);
 				delete[] theAttributeValue;
-				theAttributeValue = NULL;
+				theAttributeValue = nullptr;
 			}
 		}
 
@@ -389,7 +389,7 @@ void print_status(FILE* file, FILE* console, char* format, char* theStr)
 
 void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 {
-	char*  thePrefStr = NULL;
+	char*  thePrefStr = nullptr;
 	static char numStr[12] = "";
 	static char dateStr[25] = "";
 	uint32_t theLen = 0;
@@ -404,15 +404,15 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 	(void)QTSS_GetValueAsString(sServer, qtssRTPSvrCurConn, 0, &thePrefStr);
 	print_status(statusFile, stdOut, "%11s", thePrefStr);
 
-	delete[] thePrefStr; thePrefStr = NULL;
+	delete[] thePrefStr; thePrefStr = nullptr;
 
 	(void)QTSS_GetValueAsString(sServer, qtssRTSPCurrentSessionCount, 0, &thePrefStr);
 	print_status(statusFile, stdOut, "%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = NULL;
+	delete[] thePrefStr; thePrefStr = nullptr;
 
 	(void)QTSS_GetValueAsString(sServer, qtssRTSPHTTPCurrentSessionCount, 0, &thePrefStr);
 	print_status(statusFile, stdOut, "%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = NULL;
+	delete[] thePrefStr; thePrefStr = nullptr;
 
 	uint32_t curBandwidth = 0;
 	theLen = sizeof(curBandwidth);
@@ -422,7 +422,7 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 
 	(void)QTSS_GetValueAsString(sServer, qtssRTPSvrCurPackets, 0, &thePrefStr);
 	print_status(statusFile, stdOut, "%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = NULL;
+	delete[] thePrefStr; thePrefStr = nullptr;
 
 
 	uint32_t currentPlaying = sServer->GetNumRTPPlayingSessions();
@@ -483,7 +483,7 @@ FILE* LogDebugEnabled()
 		static StrPtrLen statsFileNameStr("server_debug_status");
 
 		StrPtrLenDel pathStr(sServer->GetPrefs()->GetErrorLogDir());
-		ResizeableStringFormatter pathBuffer(NULL, 0);
+		ResizeableStringFormatter pathBuffer(nullptr, 0);
 		pathBuffer.PutFilePath(&pathStr, &statsFileNameStr);
 		pathBuffer.PutTerminator();
 
@@ -491,13 +491,13 @@ FILE* LogDebugEnabled()
 		return ::fopen(filePath, "a");
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 
 FILE* DisplayDebugEnabled()
 {
-	return (DebugDisplayOn(sServer)) ? stdout : NULL;
+	return (DebugDisplayOn(sServer)) ? stdout : nullptr;
 }
 
 
@@ -518,7 +518,7 @@ void FormattedTotalBytesBuffer(char *outBuffer, int outBufferLen, uint64_t total
 {
 	float displayBytes = 0.0;
 	char  sizeStr[] = "B";
-	char* format = NULL;
+	char* format = nullptr;
 
 	if (totalBytes > 1073741824) //GBytes
 	{
@@ -551,7 +551,7 @@ void FormattedTotalBytesBuffer(char *outBuffer, int outBufferLen, uint64_t total
 
 void PrintStatus(bool printHeader)
 {
-	char* thePrefStr = NULL;
+	char* thePrefStr = nullptr;
 	uint32_t theLen = 0;
 
 	if (printHeader)
@@ -561,15 +561,15 @@ void PrintStatus(bool printHeader)
 
 	(void)QTSS_GetValueAsString(sServer, qtssRTPSvrCurConn, 0, &thePrefStr);
 	printf("%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = NULL;
+	delete[] thePrefStr; thePrefStr = nullptr;
 
 	(void)QTSS_GetValueAsString(sServer, qtssRTSPCurrentSessionCount, 0, &thePrefStr);
 	printf("%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = NULL;
+	delete[] thePrefStr; thePrefStr = nullptr;
 
 	(void)QTSS_GetValueAsString(sServer, qtssRTSPHTTPCurrentSessionCount, 0, &thePrefStr);
 	printf("%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = NULL;
+	delete[] thePrefStr; thePrefStr = nullptr;
 
 	uint32_t curBandwidth = 0;
 	theLen = sizeof(curBandwidth);
@@ -578,11 +578,11 @@ void PrintStatus(bool printHeader)
 
 	(void)QTSS_GetValueAsString(sServer, qtssRTPSvrCurPackets, 0, &thePrefStr);
 	printf("%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = NULL;
+	delete[] thePrefStr; thePrefStr = nullptr;
 
 	(void)QTSS_GetValueAsString(sServer, qtssRTPSvrTotalConn, 0, &thePrefStr);
 	printf("%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = NULL;
+	delete[] thePrefStr; thePrefStr = nullptr;
 
 	uint64_t totalBytes = sServer->GetTotalRTPBytes();
 	char  displayBuff[32] = "";
@@ -640,7 +640,7 @@ void RunServer()
 			for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
 			{
 				QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRedisTTLRole, currentModule);
-				(void)theModule->CallDispatch(Easy_RedisTTL_Role, NULL);
+				(void)theModule->CallDispatch(Easy_RedisTTL_Role, nullptr);
 			}
 		}
 		//

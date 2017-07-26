@@ -42,16 +42,16 @@ QTSSPrefs::QTSSPrefs(XMLPrefsParser* inPrefsSource, StrPtrLen* inModuleName, QTS
 	bool areInstanceAttrsAllowed, QTSSPrefs* parentDictionary)
 	: QTSSDictionary(inMap, &fPrefsMutex),
 	fPrefsSource(inPrefsSource),
-	fPrefName(NULL),
+	fPrefName(nullptr),
 	fParentDictionary(parentDictionary)
 {
-	if (inModuleName != NULL)
+	if (inModuleName != nullptr)
 		fPrefName = inModuleName->GetAsCString();
 }
 
 QTSSDictionary* QTSSPrefs::CreateNewDictionary(QTSSDictionaryMap* inMap, OSMutex* /* inMutex */)
 {
-	return new QTSSPrefs(fPrefsSource, NULL, inMap, true, this);
+	return new QTSSPrefs(fPrefsSource, nullptr, inMap, true, this);
 }
 
 void QTSSPrefs::RereadPreferences()
@@ -68,7 +68,7 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 	// will be removed.
 	// This routine uses names because it adds and deletes attributes. This means attribute indexes,positions and counts are constantly changing.
 	uint32_t initialNumAttrs = 0;
-	if (this->GetInstanceDictMap() != NULL)
+	if (this->GetInstanceDictMap() != nullptr)
 	{
 		initialNumAttrs = this->GetInstanceDictMap()->GetNumAttrs();
 	};
@@ -81,7 +81,7 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 	}
 	else
 	{
-		modulePrefInServer = NULL;
+		modulePrefInServer = nullptr;
 	}
 
 	OSMutexLocker locker(&fPrefsMutex);
@@ -89,7 +89,7 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 
 	for (uint32_t i = 0; i < initialNumAttrs; i++) // pull out all the names in the server 
 	{
-		QTSSAttrInfoDict* theAttrInfoPtr = NULL;
+		QTSSAttrInfoDict* theAttrInfoPtr = nullptr;
 		theErr = this->GetInstanceDictMap()->GetAttrInfoByIndex(i, &theAttrInfoPtr);
 		if (theErr != QTSS_NoErr)
 			continue;
@@ -105,8 +105,8 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 
 	for (uint32_t x = 0; x < theNumPrefs; x++)
 	{
-		char* thePrefTypeStr = NULL;
-		char* thePrefName = NULL;
+		char* thePrefTypeStr = nullptr;
+		char* thePrefName = nullptr;
 		(void)fPrefsSource->GetPrefValueByIndex(container, x, 0, &thePrefName, &thePrefTypeStr);
 
 		// What type is this data type?
@@ -115,8 +115,8 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 		//
 		// Check to see if there is an attribute with this name already in the
 		// instance map. If one matches, then we don't need to add this attribute.
-		QTSSAttrInfoDict* theAttrInfo = NULL;
-		if (this->GetInstanceDictMap() != NULL)
+		QTSSAttrInfoDict* theAttrInfo = nullptr;
+		if (this->GetInstanceDictMap() != nullptr)
 			(void)this->GetInstanceDictMap()->GetAttrInfoByName(thePrefName,
 				&theAttrInfo,
 				false); // false=don't return info on deleted attributes
@@ -125,14 +125,14 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 
 		for (uint32_t i = 0; i < initialNumAttrs; i++) // see if this name is in the server
 		{
-			if (modulePrefInServer[i] != NULL && thePrefName != NULL && 0 == ::strcmp(modulePrefInServer[i], thePrefName))
+			if (modulePrefInServer[i] != nullptr && thePrefName != nullptr && 0 == ::strcmp(modulePrefInServer[i], thePrefName))
 			{
-				modulePrefInServer[i] = NULL; // in the server so don't delete later
+				modulePrefInServer[i] = nullptr; // in the server so don't delete later
 			 //printf("QTSSPrefs::RereadPreferences modulePrefInServer in file and in server=%s\n",thePrefName);
 			}
 		}
 
-		if (theAttrInfo == NULL)
+		if (theAttrInfo == nullptr)
 		{
 			theAttrID = this->addPrefAttribute(thePrefName, thePrefType); // not present or deleted
 			this->SetPrefValuesFromFile(container, x, theAttrID, 0); // will add another or replace a deleted attribute
@@ -172,13 +172,13 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 	}
 
 	// Remove all attributes that no longer apply
-	if (this->GetInstanceDictMap() != NULL && initialNumAttrs > 0)
+	if (this->GetInstanceDictMap() != nullptr && initialNumAttrs > 0)
 	{
 		for (uint32_t a = 0; a < initialNumAttrs; a++)
 		{
-			if (NULL != modulePrefInServer[a]) // found a pref in the server that wasn't in the file
+			if (nullptr != modulePrefInServer[a]) // found a pref in the server that wasn't in the file
 			{
-				QTSSAttrInfoDict* theAttrInfoPtr = NULL;
+				QTSSAttrInfoDict* theAttrInfoPtr = nullptr;
 				theErr = this->GetInstanceDictMap()->GetAttrInfoByName(modulePrefInServer[a], &theAttrInfoPtr);
 				Assert(theErr == QTSS_NoErr);
 				if (theErr != QTSS_NoErr) continue;
@@ -191,7 +191,7 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 
 				if (0)
 				{
-					char* theName = NULL;
+					char* theName = nullptr;
 					uint32_t nameLen = 0;
 					theAttrInfoPtr->GetValuePtr(qtssAttrName, 0, (void **)&theName, &nameLen);
 					printf("QTSSPrefs::RereadPreferences about to delete modulePrefInServer=%s attr=%s id=%"   _U32BITARG_   "\n", modulePrefInServer[a], theName, theAttrID);
@@ -199,7 +199,7 @@ void QTSSPrefs::RereadObjectPreferences(ContainerRef container)
 
 
 				this->GetInstanceDictMap()->RemoveAttribute(theAttrID);
-				modulePrefInServer[a] = NULL;
+				modulePrefInServer[a] = nullptr;
 			}
 		}
 	}
@@ -218,15 +218,15 @@ void QTSSPrefs::SetPrefValuesFromFileWithRef(ContainerRef pref, QTSS_AttributeID
 	//
 	// We have an attribute ID for this pref, it is in the map and everything.
 	// Now, let's add all the values that are in the pref file.
-	if (pref == 0)
+	if (pref == nullptr)
 		return;
 
 	uint32_t numPrefValues = inNumValues;
 	if (inNumValues == 0)
 		numPrefValues = fPrefsSource->GetNumPrefValues(pref);
 
-	char* thePrefName = NULL;
-	char* thePrefTypeStr = NULL;
+	char* thePrefName = nullptr;
+	char* thePrefTypeStr = nullptr;
 	QTSS_AttrDataType thePrefType = qtssAttrDataTypeUnknown;
 
 	// find the type.  If this is a QTSSObject, then we need to call a different routine
@@ -252,7 +252,7 @@ void QTSSPrefs::SetPrefValuesFromFileWithRef(ContainerRef pref, QTSS_AttributeID
 		thePrefValue = fPrefsSource->GetPrefValueByRef(pref, y, &thePrefName, &thePrefTypeStr);
 
 		theErr = QTSSDataConverter::StringToValue(thePrefValue, thePrefType,
-			NULL, &tempMaxPrefValueSize);
+			nullptr, &tempMaxPrefValueSize);
 		Assert(theErr == QTSS_NotEnoughSpace);
 
 		if (tempMaxPrefValueSize > maxPrefValueSize)
@@ -283,7 +283,7 @@ void QTSSPrefs::SetObjectValuesFromFile(ContainerRef pref, QTSS_AttributeID inAt
 		if (err != QTSS_NoErr)
 		{
 			uint32_t tempIndex;
-			err = CreateObjectValue(inAttrID, &tempIndex, (QTSSDictionary**)&prefObject, NULL, QTSSDictionary::kDontObeyReadOnly | QTSSDictionary::kDontCallCompletionRoutine);
+			err = CreateObjectValue(inAttrID, &tempIndex, (QTSSDictionary**)&prefObject, nullptr, QTSSDictionary::kDontObeyReadOnly | QTSSDictionary::kDontCallCompletionRoutine);
 			Assert(err == QTSS_NoErr);
 			Assert(tempIndex == z);
 			if (err != QTSS_NoErr)  // this shouldn't happen
@@ -323,7 +323,7 @@ void    QTSSPrefs::SetPrefValue(QTSS_AttributeID inAttrID, uint32_t inAttrIndex,
 
 QTSS_AttributeID QTSSPrefs::addPrefAttribute(const char* inAttrName, QTSS_AttrDataType inDataType)
 {
-	QTSS_Error theErr = this->AddInstanceAttribute(inAttrName, NULL, inDataType, qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModeDelete);
+	QTSS_Error theErr = this->AddInstanceAttribute(inAttrName, nullptr, inDataType, qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModeDelete);
 	Assert(theErr == QTSS_NoErr);
 
 	QTSS_AttributeID theID = qtssIllegalAttrID;
@@ -338,8 +338,8 @@ void    QTSSPrefs::RemoveValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* 
 {
 	ContainerRef objectRef = GetContainerRef();
 	ContainerRef pref = fPrefsSource->GetPrefRefByName(objectRef, inMap->GetAttrName(inAttrIndex));
-	Assert(pref != NULL);
-	if (pref != NULL)
+	Assert(pref != nullptr);
+	if (pref != nullptr)
 		fPrefsSource->RemovePrefValue(pref, inValueIndex);
 
 	if (fPrefsSource->WritePrefsFile())
@@ -350,8 +350,8 @@ void    QTSSPrefs::RemoveInstanceAttrComplete(uint32_t inAttrIndex, QTSSDictiona
 {
 	ContainerRef objectRef = GetContainerRef();
 	ContainerRef pref = fPrefsSource->GetPrefRefByName(objectRef, inMap->GetAttrName(inAttrIndex));
-	Assert(pref != NULL);
-	if (pref != NULL)
+	Assert(pref != nullptr);
+	if (pref != nullptr)
 	{
 		fPrefsSource->RemovePref(pref);
 	}
@@ -387,21 +387,21 @@ ContainerRef QTSSPrefs::GetContainerRefForObject(QTSSPrefs* object)
 {
 	ContainerRef thisContainer = GetContainerRef();
 	ContainerRef pref = fPrefsSource->GetPrefRefByName(thisContainer, object->fPrefName);
-	if (pref == NULL)
-		return NULL;
+	if (pref == nullptr)
+		return nullptr;
 
 	if (fPrefsSource->GetNumPrefValues(pref) <= 1)
 		return fPrefsSource->GetObjectValue(pref, 0);
 
-	QTSSAttrInfoDict* theAttrInfoPtr = NULL;
+	QTSSAttrInfoDict* theAttrInfoPtr = nullptr;
 	QTSS_Error theErr = this->GetInstanceDictMap()->GetAttrInfoByName(object->fPrefName, &theAttrInfoPtr);
 	Assert(theErr == QTSS_NoErr);
-	if (theErr != QTSS_NoErr) return NULL;
+	if (theErr != QTSS_NoErr) return nullptr;
 	QTSS_AttributeID theAttrID = qtssIllegalAttrID;
 	uint32_t len = sizeof(theAttrID);
 	theErr = theAttrInfoPtr->GetValue(qtssAttrID, 0, &theAttrID, &len);
 	Assert(theErr == QTSS_NoErr);
-	if (theErr != QTSS_NoErr) return NULL;
+	if (theErr != QTSS_NoErr) return nullptr;
 
 	uint32_t index = 0;
 	QTSSPrefs* prefObject;
@@ -414,12 +414,12 @@ ContainerRef QTSSPrefs::GetContainerRefForObject(QTSSPrefs* object)
 		}
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 ContainerRef QTSSPrefs::GetContainerRef()
 {
-	if (fParentDictionary == NULL)  // this is a top level Pref, so it must be a module
+	if (fParentDictionary == nullptr)  // this is a top level Pref, so it must be a module
 		return fPrefsSource->GetRefForModule(fPrefName);
 	else
 		return fParentDictionary->GetContainerRefForObject(this);

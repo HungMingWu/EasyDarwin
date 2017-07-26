@@ -105,7 +105,7 @@ void OS::Initialize()
 
 	sInitialMsec = OS::Milliseconds(); //Milliseconds uses sInitialMsec so this assignment is valid only once.
 
-	sMsecSince1970 = ::time(NULL);  // POSIX time always returns seconds since 1970
+	sMsecSince1970 = ::time(nullptr);  // POSIX time always returns seconds since 1970
 	sMsecSince1970 *= 1000;         // Convert to msec
 
 
@@ -223,7 +223,7 @@ int32_t OS::GetGMTOffset()
 
 	time_t clock = 0; //Make 'clock' initialized for valgrind
 	struct tm  *tmptr = localtime(&clock);
-	if (tmptr == NULL)
+	if (tmptr == nullptr)
 		return 0;
 
 	return tmptr->tm_gmtoff / 3600;//convert seconds to  hours before or after GMT
@@ -286,7 +286,7 @@ OS_Error OS::MakeDir(char* inPath)
 
 OS_Error OS::RecursiveMakeDir(char* inPath)
 {
-	Assert(inPath != NULL);
+	Assert(inPath != nullptr);
 
 	//iterate through the path, replacing '/' with '\0' as we go
 	char *thePathTraverser = inPath;

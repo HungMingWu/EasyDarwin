@@ -102,8 +102,8 @@ void RTPMetaInfoPacket::ConstructFieldIDArrayFromHeader(StrPtrLen* inHeader, Fie
 		if (theFieldP.Len > 3)
 		{
 			StringParser theIDExtractor(&theFieldP);
-			theIDExtractor.ConsumeLength(NULL, 3);
-			theID = theIDExtractor.ConsumeInteger(NULL);
+			theIDExtractor.ConsumeLength(nullptr, 3);
+			theID = theIDExtractor.ConsumeInteger(nullptr);
 		}
 
 		if (theIndex != kIllegalField)
@@ -128,7 +128,7 @@ bool RTPMetaInfoPacket::ParsePacket(uint8_t* inPacketBuffer, uint32_t inPacketLe
 
 		if (*theFieldName & 0x8000)
 		{
-			Assert(inFieldIDArray != NULL);
+			Assert(inFieldIDArray != nullptr);
 
 			// If this is a compressed field, find to which field the ID maps
 			uint8_t theFieldID = *theFieldP & 0x7F;
@@ -223,8 +223,8 @@ bool RTPMetaInfoPacket::ParsePacket(uint8_t* inPacketBuffer, uint32_t inPacketLe
 
 uint8_t* RTPMetaInfoPacket::MakeRTPPacket(uint32_t* outPacketLen)
 {
-	if (fMediaDataP == NULL)
-		return NULL;
+	if (fMediaDataP == nullptr)
+		return nullptr;
 
 	//
 	// Just move the RTP header to right before the media data.
@@ -232,7 +232,7 @@ uint8_t* RTPMetaInfoPacket::MakeRTPPacket(uint32_t* outPacketLen)
 
 	//
 	// Report the length of the resulting RTP packet 
-	if (outPacketLen != NULL)
+	if (outPacketLen != nullptr)
 		*outPacketLen = fMediaDataLen + 12;
 
 	return fMediaDataP - 12;

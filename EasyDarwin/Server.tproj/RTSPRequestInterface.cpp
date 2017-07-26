@@ -57,50 +57,50 @@ StrPtrLen   RTSPRequestInterface::sColonSpace(": ", 2);
 
 QTSSAttrInfoDict::AttrInfo  RTSPRequestInterface::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
-	/* 0 */ { "qtssRTSPReqFullRequest",         NULL,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 1 */ { "qtssRTSPReqMethodStr",           NULL,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 2 */ { "qtssRTSPReqFilePath",            NULL,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModeWrite },
-	/* 3 */ { "qtssRTSPReqURI",                 NULL,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 0 */ { "qtssRTSPReqFullRequest",         nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 1 */ { "qtssRTSPReqMethodStr",           nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 2 */ { "qtssRTSPReqFilePath",            nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModeWrite },
+	/* 3 */ { "qtssRTSPReqURI",                 nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 4 */ { "qtssRTSPReqFilePathTrunc",       GetTruncatedPath,       qtssAttrDataTypeCharArray,  qtssAttrModeRead },
 	/* 5 */ { "qtssRTSPReqFileName",            GetFileName,            qtssAttrDataTypeCharArray,  qtssAttrModeRead },
 	/* 6 */ { "qtssRTSPReqFileDigit",           GetFileDigit,           qtssAttrDataTypeCharArray,  qtssAttrModeRead },
-	/* 7 */ { "qtssRTSPReqAbsoluteURL",         NULL,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 7 */ { "qtssRTSPReqAbsoluteURL",         nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 8 */ { "qtssRTSPReqTruncAbsoluteURL",    GetAbsTruncatedPath,    qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
-	/* 9 */ { "qtssRTSPReqMethod",              NULL,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 10 */ { "qtssRTSPReqStatusCode",         NULL,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 11 */ { "qtssRTSPReqStartTime",          NULL,                   qtssAttrDataTypeFloat64,    qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 12 */ { "qtssRTSPReqStopTime",           NULL,                   qtssAttrDataTypeFloat64,    qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 13 */ { "qtssRTSPReqRespKeepAlive",      NULL,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 14 */ { "qtssRTSPReqRootDir",            NULL,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModeWrite },
+	/* 9 */ { "qtssRTSPReqMethod",              nullptr,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 10 */ { "qtssRTSPReqStatusCode",         nullptr,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 11 */ { "qtssRTSPReqStartTime",          nullptr,                   qtssAttrDataTypeFloat64,    qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 12 */ { "qtssRTSPReqStopTime",           nullptr,                   qtssAttrDataTypeFloat64,    qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 13 */ { "qtssRTSPReqRespKeepAlive",      nullptr,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 14 */ { "qtssRTSPReqRootDir",            nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModeWrite },
 	/* 15 */ { "qtssRTSPReqRealStatusCode",     GetRealStatusCode,      qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 16 */ { "qtssRTSPReqStreamRef",          NULL,                   qtssAttrDataTypeQTSS_StreamRef, qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 16 */ { "qtssRTSPReqStreamRef",          nullptr,                   qtssAttrDataTypeQTSS_StreamRef, qtssAttrModeRead | qtssAttrModePreempSafe },
 
-	/* 17 */ { "qtssRTSPReqUserName",           NULL,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 18 */ { "qtssRTSPReqUserPassword",       NULL,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 19 */ { "qtssRTSPReqUserAllowed",        NULL,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 20 */ { "qtssRTSPReqURLRealm",           NULL,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 17 */ { "qtssRTSPReqUserName",           nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 18 */ { "qtssRTSPReqUserPassword",       nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 19 */ { "qtssRTSPReqUserAllowed",        nullptr,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 20 */ { "qtssRTSPReqURLRealm",           nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
 	/* 21 */ { "qtssRTSPReqLocalPath",          GetLocalPath,			qtssAttrDataTypeCharArray,  qtssAttrModeRead },
-	/* 22 */ { "qtssRTSPReqIfModSinceDate",     NULL,                   qtssAttrDataTypeTimeVal,    qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 23 */ { "qtssRTSPReqQueryString",        NULL,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 24 */ { "qtssRTSPReqRespMsg",            NULL,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 25 */ { "qtssRTSPReqContentLen",         NULL,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 26 */ { "qtssRTSPReqSpeed",              NULL,                   qtssAttrDataTypeFloat32,    qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 27 */ { "qtssRTSPReqLateTolerance",      NULL,                   qtssAttrDataTypeFloat32,    qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 28 */ { "qtssRTSPReqTransportType",      NULL,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 29 */ { "qtssRTSPReqTransportMode",      NULL,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 30 */ { "qtssRTSPReqSetUpServerPort",    NULL,                   qtssAttrDataTypeUInt16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite},
-	/* 31 */ { "qtssRTSPReqAction",             NULL,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 32 */ { "qtssRTSPReqUserProfile",        NULL,                   qtssAttrDataTypeQTSS_Object, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 33 */ { "qtssRTSPReqPrebufferMaxTime",   NULL,                   qtssAttrDataTypeFloat32,    qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 34 */ { "qtssRTSPReqAuthScheme",         NULL,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 35 */ { "qtssRTSPReqSkipAuthorization",  NULL,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 36 */ { "qtssRTSPReqNetworkMode",		NULL,					qtssAttrDataTypeUInt32,		qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 37 */ { "qtssRTSPReqDynamicRateValue",	NULL,					qtssAttrDataTypeint32_t,		qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 22 */ { "qtssRTSPReqIfModSinceDate",     nullptr,                   qtssAttrDataTypeTimeVal,    qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 23 */ { "qtssRTSPReqQueryString",        nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 24 */ { "qtssRTSPReqRespMsg",            nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 25 */ { "qtssRTSPReqContentLen",         nullptr,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 26 */ { "qtssRTSPReqSpeed",              nullptr,                   qtssAttrDataTypeFloat32,    qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 27 */ { "qtssRTSPReqLateTolerance",      nullptr,                   qtssAttrDataTypeFloat32,    qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 28 */ { "qtssRTSPReqTransportType",      nullptr,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 29 */ { "qtssRTSPReqTransportMode",      nullptr,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 30 */ { "qtssRTSPReqSetUpServerPort",    nullptr,                   qtssAttrDataTypeUInt16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite},
+	/* 31 */ { "qtssRTSPReqAction",             nullptr,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 32 */ { "qtssRTSPReqUserProfile",        nullptr,                   qtssAttrDataTypeQTSS_Object, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 33 */ { "qtssRTSPReqPrebufferMaxTime",   nullptr,                   qtssAttrDataTypeFloat32,    qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 34 */ { "qtssRTSPReqAuthScheme",         nullptr,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 35 */ { "qtssRTSPReqSkipAuthorization",  nullptr,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 36 */ { "qtssRTSPReqNetworkMode",		nullptr,					qtssAttrDataTypeUInt32,		qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 37 */ { "qtssRTSPReqDynamicRateValue",	nullptr,					qtssAttrDataTypeint32_t,		qtssAttrModeRead | qtssAttrModePreempSafe },
 
-	/* 39 */ { "qtssRTSPReqBandwidthBits",	    NULL,					qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 39 */ { "qtssRTSPReqUserFound",          NULL,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 40 */ { "qtssRTSPReqAuthHandled",        NULL,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 41 */ { "qtssRTSPReqDigestChallenge",    NULL,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 39 */ { "qtssRTSPReqBandwidthBits",	    nullptr,					qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 39 */ { "qtssRTSPReqUserFound",          nullptr,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 40 */ { "qtssRTSPReqAuthHandled",        nullptr,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 41 */ { "qtssRTSPReqDigestChallenge",    nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 42 */ { "qtssRTSPReqDigestResponse",     GetAuthDigestResponse,  qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe }
 };
 
@@ -134,7 +134,7 @@ void  RTSPRequestInterface::Initialize(void)
 
 	QTSSDictionaryMap* theHeaderMap = QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTSPHeaderDictIndex);
 	for (uint32_t y = 0; y < qtssNumHeaders; y++)
-		theHeaderMap->SetAttribute(y, RTSPProtocol::GetHeaderString(y).Ptr, NULL, qtssAttrDataTypeCharArray, qtssAttrModeRead | qtssAttrModePreempSafe);
+		theHeaderMap->SetAttribute(y, RTSPProtocol::GetHeaderString(y).Ptr, nullptr, qtssAttrDataTypeCharArray, qtssAttrModeRead | qtssAttrModePreempSafe);
 }
 
 void RTSPRequestInterface::ReInit(RTSPSessionInterface *session)
@@ -147,7 +147,7 @@ void RTSPRequestInterface::ReInit(RTSPSessionInterface *session)
 	this->SetVal(qtssRTSPReqFullRequest, input->GetRequestBuffer()->Ptr, input->GetRequestBuffer()->Len);
 
 	// klaus(20170223):fix ffplay cant pull stream from easydarwin
-	fHeaderDictionary.SetVal(qtssSessionHeader, NULL, 0);
+	fHeaderDictionary.SetVal(qtssSessionHeader, nullptr, 0);
 	fHeaderDictionary.SetNumValues(qtssSessionHeader, 0);
 }
 
@@ -288,7 +288,7 @@ void RTSPRequestInterface::AppendDateAndExpires()
 	if (!fStandardHeadersWritten)
 		this->WriteStandardHeaders();
 
-	Assert(OSThread::GetCurrent() != NULL);
+	Assert(OSThread::GetCurrent() != nullptr);
 	DateBuffer* theDateBuffer = OSThread::GetCurrent()->GetDateBuffer();
 	theDateBuffer->InexactUpdate(); // Update the date buffer to the current date & time
 	StrPtrLen theDate(theDateBuffer->GetDateBuffer(), DateBuffer::kDateBufferLen);
@@ -311,14 +311,14 @@ void RTSPRequestInterface::AppendSessionHeaderWithTimeout(StrPtrLen* inSessionID
 		static StrPtrLen    sTimeoutString(";timeout=");
 
 		// Just write out the session header and session ID
-		if (inSessionID != NULL && inSessionID->Len > 0)
+		if (inSessionID != nullptr && inSessionID->Len > 0)
 		{
 			fOutputStream->Put(RTSPProtocol::GetHeaderString(qtssSessionHeader));
 			fOutputStream->Put(sColonSpace);
 			fOutputStream->Put(*inSessionID);
 
 
-			if (inTimeout != NULL && inTimeout->Len != 0)
+			if (inTimeout != nullptr && inTimeout->Len != 0)
 			{
 				fOutputStream->Put(sTimeoutString);
 				fOutputStream->Put(*inTimeout);
@@ -398,7 +398,7 @@ void RTSPRequestInterface::AppendTransportHeader(StrPtrLen* serverPortA,
 
 
 	//The source IP addr is optional, only append it if it is provided
-	if (serverIPAddr != NULL)
+	if (serverIPAddr != nullptr)
 	{
 		fOutputStream->Put(sSourceString);
 		fOutputStream->Put(*serverIPAddr);
@@ -419,7 +419,7 @@ void RTSPRequestInterface::AppendTransportHeader(StrPtrLen* serverPortA,
 	}
 
 	// Append the server ports, if provided.
-	if (serverPortA != NULL)
+	if (serverPortA != nullptr)
 	{
 		fOutputStream->Put(sServerPortString);
 		fOutputStream->Put(*serverPortA);
@@ -428,7 +428,7 @@ void RTSPRequestInterface::AppendTransportHeader(StrPtrLen* serverPortA,
 	}
 
 	// Append channel #'s, if provided
-	if (channelA != NULL)
+	if (channelA != nullptr)
 	{
 		fOutputStream->Put(sInterleavedString);
 		fOutputStream->Put(*channelA);
@@ -436,7 +436,7 @@ void RTSPRequestInterface::AppendTransportHeader(StrPtrLen* serverPortA,
 		fOutputStream->Put(*channelB);
 	}
 
-	if (ssrc != NULL && ssrc->Ptr != NULL && ssrc->Len != 0 && fNetworkMode == qtssRTPNetworkModeUnicast && fTransportMode == qtssRTPTransportModePlay)
+	if (ssrc != nullptr && ssrc->Ptr != nullptr && ssrc->Len != 0 && fNetworkMode == qtssRTPNetworkModeUnicast && fTransportMode == qtssRTPTransportModePlay)
 	{
 		char* theCString = ssrc->GetAsCString();
 		OSCharArrayDeleter cStrDeleter(theCString);
@@ -509,7 +509,7 @@ void RTSPRequestInterface::AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 
 	//Only append the various bits of RTP information if they actually have been
 	//providied
-	if ((url != NULL) && (url->Len > 0))
+	if ((url != nullptr) && (url->Len > 0))
 	{
 		fOutputStream->Put(sURL);
 
@@ -518,7 +518,7 @@ void RTSPRequestInterface::AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 			RTSPRequestInterface* theRequest = (RTSPRequestInterface*)this;
 			StrPtrLen *path = (StrPtrLen *)theRequest->GetValue(qtssRTSPReqAbsoluteURL);
 
-			if (path != NULL && path->Len > 0)
+			if (path != nullptr && path->Len > 0)
 			{
 				fOutputStream->Put(*path);
 				if (path->Ptr[path->Len - 1] != '/')
@@ -528,17 +528,17 @@ void RTSPRequestInterface::AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 
 		fOutputStream->Put(*url);
 	}
-	if ((seqNumber != NULL) && (seqNumber->Len > 0))
+	if ((seqNumber != nullptr) && (seqNumber->Len > 0))
 	{
 		fOutputStream->Put(sSeq);
 		fOutputStream->Put(*seqNumber);
 	}
-	if ((ssrc != NULL) && (ssrc->Len > 0))
+	if ((ssrc != nullptr) && (ssrc->Len > 0))
 	{
 		fOutputStream->Put(sSsrc);
 		fOutputStream->Put(*ssrc);
 	}
-	if ((rtpTime != NULL) && (rtpTime->Len > 0))
+	if ((rtpTime != nullptr) && (rtpTime->Len > 0))
 	{
 		fOutputStream->Put(sRTPTime);
 		fOutputStream->Put(*rtpTime);
@@ -554,7 +554,7 @@ void RTSPRequestInterface::WriteStandardHeaders()
 {
 	static StrPtrLen    sCloseString("Close", 5);
 
-	Assert(sPremadeHeader != NULL);
+	Assert(sPremadeHeader != nullptr);
 	fStandardHeadersWritten = true; //must be done here to prevent recursive calls
 
 	//if this is a "200 OK" response (most HTTP responses), we have some special
@@ -572,7 +572,7 @@ void RTSPRequestInterface::WriteStandardHeaders()
 			fOutputStream->Put(sPremadeNoHeaderPtr);
 		}
 		StrPtrLen* cSeq = fHeaderDictionary.GetValue(qtssCSeqHeader);
-		Assert(cSeq != NULL);
+		Assert(cSeq != nullptr);
 		if (cSeq->Len > 1)
 			fOutputStream->Put(*cSeq);
 		else if (cSeq->Len == 1)
@@ -600,7 +600,7 @@ void RTSPRequestInterface::WriteStandardHeaders()
 
 	//append sessionID header
 	StrPtrLen* incomingID = fHeaderDictionary.GetValue(qtssSessionHeader);
-	if ((incomingID != NULL) && (incomingID->Len > 0))
+	if ((incomingID != nullptr) && (incomingID->Len > 0))
 		AppendHeader(qtssSessionHeader, incomingID);
 
 	//follows the HTTP/1.1 convention: if server wants to close the connection, it
@@ -622,7 +622,7 @@ RTSPRequestInterface::Write(void* inBuffer, uint32_t inLength, uint32_t* outLenW
 	//now just write whatever remains into the output buffer
 	fOutputStream->Put((char*)inBuffer, inLength);
 
-	if (outLenWritten != NULL)
+	if (outLenWritten != nullptr)
 		*outLenWritten = inLength;
 
 	return QTSS_NoErr;
@@ -631,9 +631,9 @@ RTSPRequestInterface::Write(void* inBuffer, uint32_t inLength, uint32_t* outLenW
 QTSS_Error
 RTSPRequestInterface::WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten)
 {
-	(void)fOutputStream->WriteV(inVec, inNumVectors, inTotalLength, NULL,
+	(void)fOutputStream->WriteV(inVec, inNumVectors, inTotalLength, nullptr,
 		RTSPResponseStream::kAlwaysBuffer);
-	if (outLenWritten != NULL)
+	if (outLenWritten != nullptr)
 		*outLenWritten = inTotalLength;
 	return QTSS_NoErr;
 }
@@ -655,7 +655,7 @@ void* RTSPRequestInterface::GetAbsTruncatedPath(QTSSDictionary* inRequest, uint3
 	while (theAbsTruncPathParam->Ptr[theAbsTruncPathParam->Len] != kPathDelimiterChar)
 		theAbsTruncPathParam->Len--;
 
-	return NULL;
+	return nullptr;
 }
 
 void* RTSPRequestInterface::GetTruncatedPath(QTSSDictionary* inRequest, uint32_t* /*outLen*/)
@@ -675,7 +675,7 @@ void* RTSPRequestInterface::GetTruncatedPath(QTSSDictionary* inRequest, uint32_t
 			theTruncPathParam->Len--;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void* RTSPRequestInterface::GetFileName(QTSSDictionary* inRequest, uint32_t* /*outLen*/)
@@ -707,7 +707,7 @@ void* RTSPRequestInterface::GetFileName(QTSSDictionary* inRequest, uint32_t* /*o
 	//and adjust the length accordingly
 	theFileNameParam->Len = x;
 
-	return NULL;
+	return nullptr;
 }
 
 
@@ -737,7 +737,7 @@ void* RTSPRequestInterface::GetFileDigit(QTSSDictionary* inRequest, uint32_t* /*
 	//Move pointer back onto the digit
 	theFileDigit->Ptr++;
 
-	return NULL;
+	return nullptr;
 }
 
 void* RTSPRequestInterface::GetRealStatusCode(QTSSDictionary* inRequest, uint32_t* outLen)
@@ -798,13 +798,13 @@ void* RTSPRequestInterface::GetLocalPath(QTSSDictionary* inRequest, uint32_t* ou
 	delete[] theFullPath;
 	*outLen = 0;
 
-	return NULL;
+	return nullptr;
 }
 
 void* RTSPRequestInterface::GetAuthDigestResponse(QTSSDictionary* inRequest, uint32_t*)
 {
 	RTSPRequestInterface* theRequest = (RTSPRequestInterface*)inRequest;
 	(void)theRequest->SetValue(qtssRTSPReqDigestResponse, 0, theRequest->fAuthDigestResponse.Ptr, theRequest->fAuthDigestResponse.Len, QTSSDictionary::kDontObeyReadOnly);
-	return NULL;
+	return nullptr;
 }
 

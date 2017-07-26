@@ -57,18 +57,18 @@ int64_t RTCPTask::Run()
 			uint16_t theRemotePort = 0;
 
 			UDPSocketPair* thePair = (UDPSocketPair*)iter.GetCurrent()->GetEnclosingObject();
-			Assert(thePair != NULL);
+			Assert(thePair != nullptr);
 
 			for (uint32_t x = 0; x < 2; x++)
 			{
-				UDPSocket* theSocket = NULL;
+				UDPSocket* theSocket = nullptr;
 				if (x == 0)
 					theSocket = thePair->GetSocketA();
 				else
 					theSocket = thePair->GetSocketB();
 
 				UDPDemuxer* theDemuxer = theSocket->GetDemuxer();
-				if (theDemuxer == NULL)
+				if (theDemuxer == nullptr)
 					continue;
 				else
 				{
@@ -85,10 +85,10 @@ int64_t RTCPTask::Run()
 						}
 
 						//if this socket has a demuxer, find the target RTPStream
-						if (theDemuxer != NULL)
+						if (theDemuxer != nullptr)
 						{
 							RTPStream* theStream = (RTPStream*)theDemuxer->GetTask(theRemoteAddr, theRemotePort);
-							if (theStream != NULL)
+							if (theStream != nullptr)
 								theStream->ProcessIncomingRTCPPacket(&thePacket);
 						}
 					}

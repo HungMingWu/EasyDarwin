@@ -73,47 +73,47 @@
 
 QTSSAttrInfoDict::AttrInfo  RTPStream::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
-	/* 0  */ { "qtssRTPStrTrackID",                 NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 1  */ { "qtssRTPStrSSRC",                    NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 2  */ { "qtssRTPStrPayloadName",             NULL,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
-	/* 3  */ { "qtssRTPStrPayloadType",             NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
-	/* 4  */ { "qtssRTPStrFirstSeqNumber",          NULL,   qtssAttrDataTypeSInt16, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
-	/* 5  */ { "qtssRTPStrFirstTimestamp",          NULL,   qtssAttrDataTypeint32_t, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
-	/* 6  */ { "qtssRTPStrTimescale",               NULL,   qtssAttrDataTypeint32_t, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
-	/* 7  */ { "qtssRTPStrQualityLevel",            NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
-	/* 8  */ { "qtssRTPStrNumQualityLevels",        NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
-	/* 9  */ { "qtssRTPStrBufferDelayInSecs",       NULL,   qtssAttrDataTypeFloat32,    qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
+	/* 0  */ { "qtssRTPStrTrackID",                 nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 1  */ { "qtssRTPStrSSRC",                    nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 2  */ { "qtssRTPStrPayloadName",             nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
+	/* 3  */ { "qtssRTPStrPayloadType",             nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
+	/* 4  */ { "qtssRTPStrFirstSeqNumber",          nullptr,   qtssAttrDataTypeSInt16, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
+	/* 5  */ { "qtssRTPStrFirstTimestamp",          nullptr,   qtssAttrDataTypeint32_t, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
+	/* 6  */ { "qtssRTPStrTimescale",               nullptr,   qtssAttrDataTypeint32_t, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
+	/* 7  */ { "qtssRTPStrQualityLevel",            nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
+	/* 8  */ { "qtssRTPStrNumQualityLevels",        nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
+	/* 9  */ { "qtssRTPStrBufferDelayInSecs",       nullptr,   qtssAttrDataTypeFloat32,    qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
 
-	/* 10 */ { "qtssRTPStrFractionLostPackets",     NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 11 */ { "qtssRTPStrTotalLostPackets",        NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 12 */ { "qtssRTPStrJitter",                  NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 13 */ { "qtssRTPStrRecvBitRate",             NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 14 */ { "qtssRTPStrAvgLateMilliseconds",     NULL,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 15 */ { "qtssRTPStrPercentPacketsLost",      NULL,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 16 */ { "qtssRTPStrAvgBufDelayInMsec",       NULL,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 17 */ { "qtssRTPStrGettingBetter",           NULL,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 18 */ { "qtssRTPStrGettingWorse",            NULL,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 19 */ { "qtssRTPStrNumEyes",                 NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 20 */ { "qtssRTPStrNumEyesActive",           NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 21 */ { "qtssRTPStrNumEyesPaused",           NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 22 */ { "qtssRTPStrTotPacketsRecv",          NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 23 */ { "qtssRTPStrTotPacketsDropped",       NULL,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 24 */ { "qtssRTPStrTotPacketsLost",          NULL,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 25 */ { "qtssRTPStrClientBufFill",           NULL,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 26 */ { "qtssRTPStrFrameRate",               NULL,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 27 */ { "qtssRTPStrExpFrameRate",            NULL,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 28 */ { "qtssRTPStrAudioDryCount",           NULL,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 29 */ { "qtssRTPStrIsTCP",                   NULL,   qtssAttrDataTypeBool16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 30 */ { "qtssRTPStrStreamRef",               NULL,   qtssAttrDataTypeQTSS_StreamRef, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 31 */ { "qtssRTPStrTransportType",           NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 32 */ { "qtssRTPStrStalePacketsDropped",     NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 33 */ { "qtssRTPStrCurrentAckTimeout",       NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 34 */ { "qtssRTPStrCurPacketsLostInRTCPInterval",    NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 35 */ { "qtssRTPStrPacketCountInRTCPInterval",       NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 36 */ { "qtssRTPStrSvrRTPPort",              NULL,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 37 */ { "qtssRTPStrClientRTPPort",           NULL,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 38 */ { "qtssRTPStrNetworkMode",             NULL,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 39 */ { "qtssRTPStrThinningDisabled",        NULL,   qtssAttrDataTypeBool16, qtssAttrModeRead | qtssAttrModePreempSafe  }
+	/* 10 */ { "qtssRTPStrFractionLostPackets",     nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 11 */ { "qtssRTPStrTotalLostPackets",        nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 12 */ { "qtssRTPStrJitter",                  nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 13 */ { "qtssRTPStrRecvBitRate",             nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 14 */ { "qtssRTPStrAvgLateMilliseconds",     nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 15 */ { "qtssRTPStrPercentPacketsLost",      nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 16 */ { "qtssRTPStrAvgBufDelayInMsec",       nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 17 */ { "qtssRTPStrGettingBetter",           nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 18 */ { "qtssRTPStrGettingWorse",            nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 19 */ { "qtssRTPStrNumEyes",                 nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 20 */ { "qtssRTPStrNumEyesActive",           nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 21 */ { "qtssRTPStrNumEyesPaused",           nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 22 */ { "qtssRTPStrTotPacketsRecv",          nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 23 */ { "qtssRTPStrTotPacketsDropped",       nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 24 */ { "qtssRTPStrTotPacketsLost",          nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 25 */ { "qtssRTPStrClientBufFill",           nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 26 */ { "qtssRTPStrFrameRate",               nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 27 */ { "qtssRTPStrExpFrameRate",            nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 28 */ { "qtssRTPStrAudioDryCount",           nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 29 */ { "qtssRTPStrIsTCP",                   nullptr,   qtssAttrDataTypeBool16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 30 */ { "qtssRTPStrStreamRef",               nullptr,   qtssAttrDataTypeQTSS_StreamRef, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 31 */ { "qtssRTPStrTransportType",           nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 32 */ { "qtssRTPStrStalePacketsDropped",     nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 33 */ { "qtssRTPStrCurrentAckTimeout",       nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 34 */ { "qtssRTPStrCurPacketsLostInRTCPInterval",    nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 35 */ { "qtssRTPStrPacketCountInRTCPInterval",       nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 36 */ { "qtssRTPStrSvrRTPPort",              nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 37 */ { "qtssRTPStrClientRTPPort",           nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 38 */ { "qtssRTPStrNetworkMode",             nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 39 */ { "qtssRTPStrThinningDisabled",        nullptr,   qtssAttrDataTypeBool16, qtssAttrModeRead | qtssAttrModePreempSafe  }
 
 };
 
@@ -136,7 +136,7 @@ char *RTPStream::UDP = "UDP";
 char *RTPStream::RUDP = "RUDP";
 char *RTPStream::TCP = "TCP";
 
-QTSS_ModuleState RTPStream::sRTCPProcessModuleState = { NULL, 0, NULL, false };
+QTSS_ModuleState RTPStream::sRTCPProcessModuleState = { nullptr, 0, nullptr, false };
 
 void RTPStream::Initialize()
 {
@@ -147,14 +147,14 @@ void RTPStream::Initialize()
 }
 
 RTPStream::RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession)
-	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTPStreamDictIndex), NULL),
+	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTPStreamDictIndex), nullptr),
 	fLastQualityChange(0),
-	fSockets(NULL),
+	fSockets(nullptr),
 	fSession(inSession),
 	fBytesSentThisInterval(0),
 	fDisplayCount(0),
 	fSawFirstPacket(false),
-	fTracker(NULL),
+	fTracker(nullptr),
 	fRemoteAddr(0),
 	fRemoteRTPPort(0),
 	fRemoteRTCPPort(0),
@@ -321,10 +321,10 @@ RTPStream::RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession)
 RTPStream::~RTPStream()
 {
 	QTSS_Error err = QTSS_NoErr;
-	if (fSockets != NULL)
+	if (fSockets != nullptr)
 	{
 		// If there is an UDP socket pair associated with this stream, make sure to free it up
-		Assert(fSockets->GetSocketB()->GetDemuxer() != NULL);
+		Assert(fSockets->GetSocketB()->GetDemuxer() != nullptr);
 		fSockets->GetSocketB()->GetDemuxer()->
 			UnregisterTask(fRemoteAddr, fRemoteRTCPPort, this);
 		Assert(err == QTSS_NoErr);
@@ -528,7 +528,7 @@ QTSS_Error RTPStream::Setup(RTSPRequestInterface* request, QTSS_AddStreamFlags i
 	{
 		fSockets = QTSServerInterface::GetServer()->GetSocketPool()->CreateUDPSocketPair(sourceAddr, 0);
 
-		if (fSockets != NULL)
+		if (fSockets != nullptr)
 		{
 			//Set options on both sockets. Not really sure why we need to specify an
 			//outgoing interface, because these sockets are already bound to an interface!
@@ -547,7 +547,7 @@ QTSS_Error RTPStream::Setup(RTSPRequestInterface* request, QTSS_AddStreamFlags i
 		fSockets = QTSServerInterface::GetServer()->GetSocketPool()->GetUDPSocketPair(sourceAddr, 0, fRemoteAddr,
 			fRemoteRTCPPort);
 
-	if (fSockets == NULL)
+	if (fSockets == nullptr)
 		return QTSSModuleUtils::SendErrorResponse(request, qtssServerInternal, qtssMsgOutOfPorts);
 
 	else if (fTransportType == qtssRTPTransportTypeReliableUDP)
@@ -590,7 +590,7 @@ QTSS_Error RTPStream::Setup(RTSPRequestInterface* request, QTSS_AddStreamFlags i
 	fLocalRTPPort = fSockets->GetSocketA()->GetLocalPort();
 
 	//finally, register with the demuxer to get RTCP packets from the proper address
-	Assert(fSockets->GetSocketB()->GetDemuxer() != NULL);
+	Assert(fSockets->GetSocketB()->GetDemuxer() != nullptr);
 	QTSS_Error err = fSockets->GetSocketB()->GetDemuxer()->RegisterTask(fRemoteAddr, fRemoteRTCPPort, this);
 	//errors should only be returned if there is a routing problem, there should be none
 	Assert(err == QTSS_NoErr);
@@ -637,7 +637,7 @@ void RTPStream::SendSetupResponse(RTSPRequestInterface* inRequest)
 void RTPStream::AppendTransport(RTSPRequestInterface* request)
 {
 
-	StrPtrLen* ssrcPtr = NULL;
+	StrPtrLen* ssrcPtr = nullptr;
 	if (fEnableSSRC)
 		ssrcPtr = &fSsrcStringPtr;
 
@@ -667,20 +667,20 @@ void RTPStream::AppendTransport(RTSPRequestInterface* request)
 			StrPtrLen rtpSPL(rtpPortStr);
 			StrPtrLen rtcpSPL(rtcpPortStr);
 			// Append UDP socket port numbers.
-			request->AppendTransportHeader(&rtpSPL, &rtcpSPL, NULL, NULL, &theSrcIPAddress, ssrcPtr);
+			request->AppendTransportHeader(&rtpSPL, &rtcpSPL, nullptr, nullptr, &theSrcIPAddress, ssrcPtr);
 		}
 		else
 		{
 			// Append UDP socket port numbers.
 			UDPSocket* theRTPSocket = fSockets->GetSocketA();
 			UDPSocket* theRTCPSocket = fSockets->GetSocketB();
-			request->AppendTransportHeader(theRTPSocket->GetLocalPortStr(), theRTCPSocket->GetLocalPortStr(), NULL, NULL, &theSrcIPAddress, ssrcPtr);
+			request->AppendTransportHeader(theRTPSocket->GetLocalPortStr(), theRTCPSocket->GetLocalPortStr(), nullptr, nullptr, &theSrcIPAddress, ssrcPtr);
 		}
 	}
 	else if (fRTCPChannel < kNumPrebuiltChNums)
 		// We keep a certain number of channel number strings prebuilt, so most of the time
 		// we won't have to call sprintf
-		request->AppendTransportHeader(NULL, NULL, &sChannelNums[fRTPChannel], &sChannelNums[fRTCPChannel], NULL, ssrcPtr);
+		request->AppendTransportHeader(nullptr, nullptr, &sChannelNums[fRTPChannel], &sChannelNums[fRTCPChannel], nullptr, ssrcPtr);
 	else
 	{
 		// If these channel numbers fall outside prebuilt range, we will have to call sprintf.
@@ -692,7 +692,7 @@ void RTPStream::AppendTransport(RTSPRequestInterface* request)
 		StrPtrLen rtpChannel(rtpChannelBuf);
 		StrPtrLen rtcpChannel(rtcpChannelBuf);
 
-		request->AppendTransportHeader(NULL, NULL, &rtpChannel, &rtcpChannel, NULL, ssrcPtr);
+		request->AppendTransportHeader(nullptr, nullptr, &rtpChannel, &rtcpChannel, nullptr, ssrcPtr);
 	}
 }
 
@@ -717,7 +717,7 @@ void    RTPStream::AppendRTPInfo(QTSS_RTSPHeader inHeader, RTSPRequestInterface*
 		Assert(seqNumberBufPtr.Len < 20);
 	}
 
-	StrPtrLen *nullSSRCPtr = NULL; // There is no SSRC in RTP-Info header, it goes in the transport header.
+	StrPtrLen *nullSSRCPtr = nullptr; // There is no SSRC in RTP-Info header, it goes in the transport header.
 	request->AppendRTPInfoHeader(inHeader, &fStreamURLPtr, &seqNumberBufPtr, nullSSRCPtr, &rtpTimeBufPtr, lastInfo);
 
 }
@@ -726,7 +726,7 @@ void    RTPStream::AppendRTPInfo(QTSS_RTSPHeader inHeader, RTSPRequestInterface*
 //UDP Monitor reflected  write
 void RTPStream::UDPMonitorWrite(void* thePacketData, uint32_t inLen, bool isRTCP)
 {
-	if (false == fUDPMonitorEnabled || 0 == fMonitorSocket || NULL == thePacketData)
+	if (false == fUDPMonitorEnabled || 0 == fMonitorSocket || nullptr == thePacketData)
 		return;
 
 	if ((0 != fPlayerToMonitorAddr) && (this->fRemoteAddr != fPlayerToMonitorAddr))
@@ -772,7 +772,7 @@ void RTPStream::UDPMonitorWrite(void* thePacketData, uint32_t inLen, bool isRTCP
 QTSS_Error  RTPStream::InterleavedWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, unsigned char channel)
 {
 
-	if (fSession->GetRTSPSession() == NULL) // RTSPSession required for interleaved write
+	if (fSession->GetRTSPSession() == nullptr) // RTSPSession required for interleaved write
 	{
 		return EAGAIN;
 	}
@@ -833,7 +833,7 @@ QTSS_Error RTPStream::ReliableRTPWrite(void* inBuffer, uint32_t inLen, const int
 	// until this is a schedulable task
 
 	// Send retransmits for all streams on this session
-	RTPStream** retransStream = NULL;
+	RTPStream** retransStream = nullptr;
 	uint32_t retransStreamLen = 0;
 
 	//
@@ -842,7 +842,7 @@ QTSS_Error RTPStream::ReliableRTPWrite(void* inBuffer, uint32_t inLen, const int
 	{
 		//printf("Resending packets for stream: %d\n",(*retransStream)->fTrackID);
 		//printf("RTPStream::ReliableRTPWrite. Calling ResendDueEntries\n");
-		if (retransStream != NULL && *retransStream != NULL)
+		if (retransStream != nullptr && *retransStream != nullptr)
 			(*retransStream)->fResender.ResendDueEntries();
 	}
 
@@ -1047,7 +1047,7 @@ bool RTPStream::UpdateQualityLevel(const int64_t& inTransmitTime, const int64_t&
 
 QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags)
 {
-	Assert(fSession != NULL);
+	Assert(fSession != nullptr);
 	if (!fSession->GetSessionMutex()->TryLock())
 		return EAGAIN;
 
@@ -1251,7 +1251,7 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 		return QTSS_BadArgument;//qtssWriteFlagsIsRTCP or qtssWriteFlagsIsRTP wasn't specified
 	}
 
-	if (outLenWritten != NULL)
+	if (outLenWritten != nullptr)
 		*outLenWritten = inLen;
 
 	fSession->GetSessionMutex()->Unlock();// Make sure to unlock the mutex
@@ -1390,7 +1390,7 @@ bool RTPStream::ProcessAckPacket(RTCPPacket &rtcpPacket, int64_t &curTime)
 	if (!theAckPacket.ParseAPPData(packetBuffer, packetLen))
 		return false;
 
-	if (NULL != fTracker && false == fTracker->ReadyForAckProcessing()) // this stream must be ready to receive acks.  Between RTSP setup and sending of first packet on stream we must protect against a bad ack.
+	if (nullptr != fTracker && false == fTracker->ReadyForAckProcessing()) // this stream must be ready to receive acks.  Between RTSP setup and sending of first packet on stream we must protect against a bad ack.
 		return false;//abort if we receive an ack when we haven't sent anything.
 
 
@@ -1484,7 +1484,7 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 
 	//no matter what happens (whether or not this is a valid packet) reset the timeouts
 	fSession->RefreshTimeout();
-	if (fSession->GetRTSPSession() != NULL)
+	if (fSession->GetRTSPSession() != nullptr)
 		fSession->GetRTSPSession()->RefreshTimeout();
 
 	this->TestRTCPPackets(&currentPtr, 0);
@@ -1673,7 +1673,7 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 	theParams.rtcpProcessParams.inRTCPPacketDataLen = inPacket->Len;
 
 	// We don't allow async events from this role, so just set an empty module state.
-	OSThreadDataSetter theSetter(&sRTCPProcessModuleState, NULL);
+	OSThreadDataSetter theSetter(&sRTCPProcessModuleState, nullptr);
 
 	// Invoke RTCP processing modules
 	for (uint32_t x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTCPProcessRole); x++)
@@ -1684,7 +1684,7 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 
 char* RTPStream::GetStreamTypeStr()
 {
-	char *streamType = NULL;
+	char *streamType = nullptr;
 
 	switch (fTransportType)
 	{

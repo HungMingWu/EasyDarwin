@@ -64,7 +64,7 @@ public:
 	{
 		if (GetQualityLevel() != 0)
 			QTSServerInterface::GetServer()->IncrementNumThinned(-1);
-		if (fRTSPSession != NULL)
+		if (fRTSPSession != nullptr)
 			fRTSPSession->DecrementObjectHolderCount();
 		delete[] fSRBuffer.Ptr;
 		delete[] fAuthNonce.Ptr;
@@ -76,7 +76,7 @@ public:
 
 	//Timeouts. This allows clients to refresh the timeout on this session
 	void    RefreshTimeout() { fTimeoutTask.RefreshTimeout(); }
-	void    RefreshRTSPTimeout() { if (fRTSPSession != NULL) fRTSPSession->RefreshTimeout(); }
+	void    RefreshRTSPTimeout() { if (fRTSPSession != nullptr) fRTSPSession->RefreshTimeout(); }
 	void    RefreshTimeouts() { RefreshTimeout(); RefreshRTSPTimeout(); }
 
 	//

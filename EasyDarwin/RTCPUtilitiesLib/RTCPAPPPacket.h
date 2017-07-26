@@ -49,7 +49,7 @@ public:
 	void Dump() override;
 	virtual bool ParseAPPPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength); //default app header check
 	virtual bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength) { return false; }; //derived class implements
-	inline FourCharCode GetAppPacketName(char *outName = NULL, uint32_t len = 0);
+	inline FourCharCode GetAppPacketName(char *outName = nullptr, uint32_t len = 0);
 	inline uint32_t GetAppPacketSSRC();
 
 

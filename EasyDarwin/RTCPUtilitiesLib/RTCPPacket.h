@@ -58,7 +58,7 @@ public:
 	};
 
 
-	RTCPPacket() : fReceiverPacketBuffer(NULL) {}
+	RTCPPacket() : fReceiverPacketBuffer(nullptr) {}
 	virtual ~RTCPPacket() {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
@@ -135,7 +135,7 @@ class RTCPReceiverPacket : public RTCPPacket
 {
 public:
 
-	RTCPReceiverPacket() : RTCPPacket(), fRTCPReceiverReportArray(NULL) {}
+	RTCPReceiverPacket() : RTCPPacket(), fRTCPReceiverReportArray(nullptr) {}
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
 	virtual bool ParseReport(uint8_t* inPacketBuffer, uint32_t inPacketLength);

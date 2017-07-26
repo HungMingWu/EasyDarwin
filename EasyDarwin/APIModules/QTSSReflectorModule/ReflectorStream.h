@@ -144,7 +144,7 @@ private:
 
 uint32_t ReflectorPacket::GetSSRC(bool isRTCP)
 {
-	if (fPacketPtr.Ptr == NULL || fPacketPtr.Len < 8)
+	if (fPacketPtr.Ptr == nullptr || fPacketPtr.Len < 8)
 		return 0;
 
 	uint32_t* theSsrcPtr = (uint32_t*)fPacketPtr.Ptr;
@@ -164,13 +164,13 @@ uint32_t ReflectorPacket::GetPacketRTPTime()
 	if (!fIsRTCP)
 	{
 		//The RTP timestamp number is the second long of the packet
-		if (fPacketPtr.Ptr == NULL || fPacketPtr.Len < 8)
+		if (fPacketPtr.Ptr == nullptr || fPacketPtr.Len < 8)
 			return 0;
 		timestamp = ntohl(((uint32_t*)fPacketPtr.Ptr)[1]);
 	}
 	else
 	{
-		if (fPacketPtr.Ptr == NULL || fPacketPtr.Len < 20)
+		if (fPacketPtr.Ptr == nullptr || fPacketPtr.Len < 20)
 			return 0;
 		timestamp = ntohl(((uint32_t*)fPacketPtr.Ptr)[4]);
 	}
@@ -181,7 +181,7 @@ uint16_t ReflectorPacket::GetPacketRTPSeqNum()
 {
 	Assert(!fIsRTCP); // not a supported type
 
-	if (fPacketPtr.Ptr == NULL || fPacketPtr.Len < 4 || fIsRTCP)
+	if (fPacketPtr.Ptr == nullptr || fPacketPtr.Len < 4 || fIsRTCP)
 		return 0;
 
 	uint16_t sequence = ntohs(((uint16_t*)fPacketPtr.Ptr)[1]); //The RTP sequenc number is the second short of the packet
@@ -192,7 +192,7 @@ uint16_t ReflectorPacket::GetPacketRTPSeqNum()
 int64_t  ReflectorPacket::GetPacketNTPTime()
 {
 	Assert(fIsRTCP); // not a supported type
-	if (fPacketPtr.Ptr == NULL || fPacketPtr.Len < 16 || !fIsRTCP)
+	if (fPacketPtr.Ptr == nullptr || fPacketPtr.Len < 16 || !fIsRTCP)
 		return 0;
 
 	uint32_t* theReport = (uint32_t*)fPacketPtr.Ptr;
@@ -214,7 +214,7 @@ public:
 	ReflectorSocket();
 	~ReflectorSocket() override;
 	void    AddBroadcasterSession(QTSS_ClientSessionObject inSession) { OSMutexLocker locker(this->GetDemuxer()->GetMutex()); fBroadcasterClientSession = inSession; }
-	void    RemoveBroadcasterSession(QTSS_ClientSessionObject inSession) { OSMutexLocker locker(this->GetDemuxer()->GetMutex()); if (inSession == fBroadcasterClientSession) fBroadcasterClientSession = NULL; }
+	void    RemoveBroadcasterSession(QTSS_ClientSessionObject inSession) { OSMutexLocker locker(this->GetDemuxer()->GetMutex()); if (inSession == fBroadcasterClientSession) fBroadcasterClientSession = nullptr; }
 	void    AddSender(ReflectorSender* inSender);
 	void    RemoveSender(ReflectorSender* inStreamElem);
 	bool  HasSender() { return (this->GetDemuxer()->GetHashTable()->GetNumEntries() > 0); }

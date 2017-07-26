@@ -176,7 +176,7 @@ bool RunInForeground()
 {
 
     #if __linux__ || __MacOSX__
-         (void) setvbuf(stdout, NULL, _IOLBF, 0);
+         (void) setvbuf(stdout, nullptr, _IOLBF, 0);
          OSThread::WrapSleep(true);
     #endif
     
@@ -192,12 +192,12 @@ bool RestartServer(char* theXMLFilePath)
 	
 	ContainerRef server = theXMLParser.GetRefForServer();
 	ContainerRef pref = theXMLParser.GetPrefRefByName( server, "auto_restart" );
-	char* autoStartSetting = NULL;
+	char* autoStartSetting = nullptr;
 	
-	if (pref != NULL)
-		autoStartSetting = theXMLParser.GetPrefValueByRef( pref, 0, NULL, NULL );
+	if (pref != nullptr)
+		autoStartSetting = theXMLParser.GetPrefValueByRef( pref, 0, nullptr, nullptr );
 		
-	if ( (autoStartSetting != NULL) && (::strcmp(autoStartSetting, "false") == 0) )
+	if ( (autoStartSetting != nullptr) && (::strcmp(autoStartSetting, "false") == 0) )
 		autoRestart = false;
 		
 	return autoRestart;
@@ -242,12 +242,12 @@ int main(int argc, char * argv[])
     act.sa_flags = 0;
     act.sa_handler = (void(*)(...))&sigcatcher;
 #endif
-    (void)::sigaction(SIGPIPE, &act, NULL);
-    (void)::sigaction(SIGHUP, &act, NULL);
-    (void)::sigaction(SIGINT, &act, NULL);
-    (void)::sigaction(SIGTERM, &act, NULL);
-    (void)::sigaction(SIGQUIT, &act, NULL);
-    (void)::sigaction(SIGALRM, &act, NULL);
+    (void)::sigaction(SIGPIPE, &act, nullptr);
+    (void)::sigaction(SIGHUP, &act, nullptr);
+    (void)::sigaction(SIGINT, &act, nullptr);
+    (void)::sigaction(SIGTERM, &act, nullptr);
+    (void)::sigaction(SIGQUIT, &act, nullptr);
+    (void)::sigaction(SIGALRM, &act, nullptr);
 
 
 #if __solaris__ || __linux__ || __hpux__
@@ -343,7 +343,7 @@ int main(int argc, char * argv[])
                     
                break;            
             case 'Z':
-                Assert(optarg != NULL);// this means we didn't declare getopt options correctly or there is a bug in getopt.
+                Assert(optarg != nullptr);// this means we didn't declare getopt options correctly or there is a bug in getopt.
                 debugLevel = (uint32_t) ::atoi(optarg);
                                 
                 break;
@@ -351,20 +351,20 @@ int main(int argc, char * argv[])
 				theXMLFilePath  = DEFAULTPATHS_ETC_DIR "easydarwin.xml";
                 break;
             case 'p':
-                Assert(optarg != NULL);// this means we didn't declare getopt options correctly or there is a bug in getopt.
+                Assert(optarg != nullptr);// this means we didn't declare getopt options correctly or there is a bug in getopt.
                 thePort = ::atoi(optarg);
                 break;
             case 'S':
                 dontFork = RunInForeground();
-                Assert(optarg != NULL);// this means we didn't declare getopt options correctly or there is a bug in getopt.
+                Assert(optarg != nullptr);// this means we didn't declare getopt options correctly or there is a bug in getopt.
                 statsUpdateInterval = ::atoi(optarg);
                 break;
             case 'c':
-                Assert(optarg != NULL);// this means we didn't declare getopt options correctly or there is a bug in getopt.
+                Assert(optarg != nullptr);// this means we didn't declare getopt options correctly or there is a bug in getopt.
                 theXMLFilePath = optarg;
                 break;
             case 'o':
-                Assert(optarg != NULL);// this means we didn't declare getopt options correctly or there is a bug in getopt.
+                Assert(optarg != nullptr);// this means we didn't declare getopt options correctly or there is a bug in getopt.
                 theConfigFilePath = optarg;
                 break;
             case 'x':
@@ -431,7 +431,7 @@ int main(int argc, char * argv[])
         // The XML prefs file doesn't exist, so let's create an old-style
         // prefs source in order to generate a fresh XML prefs file.
         
-        if (theConfigFilePath != NULL)
+        if (theConfigFilePath != nullptr)
         {   
             FilePrefsSource* filePrefsSource = new FilePrefsSource(true); // Allow dups
             
@@ -563,11 +563,11 @@ int main(int argc, char * argv[])
     sChildPID = 0;
     //we have to do this again for the child process, because sigaction states
     //do not span multiple processes.
-    (void)::sigaction(SIGPIPE, &act, NULL);
-    (void)::sigaction(SIGHUP, &act, NULL);
-    (void)::sigaction(SIGINT, &act, NULL);
-    (void)::sigaction(SIGTERM, &act, NULL);
-    (void)::sigaction(SIGQUIT, &act, NULL);
+    (void)::sigaction(SIGPIPE, &act, nullptr);
+    (void)::sigaction(SIGHUP, &act, nullptr);
+    (void)::sigaction(SIGINT, &act, nullptr);
+    (void)::sigaction(SIGTERM, &act, nullptr);
+    (void)::sigaction(SIGQUIT, &act, nullptr);
 
 #ifdef __hpux__  
 	// Set Priority Type to Real Time, timeslice = 100 milliseconds. Change the timeslice upwards as needed. This keeps the server priority above the playlist broadcaster which is a time-share scheduling type.

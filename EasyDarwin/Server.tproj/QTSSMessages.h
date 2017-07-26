@@ -55,7 +55,7 @@ public:
 	QTSSMessages(PrefsSource* inMessages);
 	~QTSSMessages() override {
 		for (uint32_t x = 0; x < numAttrs; x++)
-			if (attrBuffer[x] != NULL)
+			if (attrBuffer[x] != nullptr)
 				delete[] attrBuffer[x];
 		delete[] attrBuffer;
 	}

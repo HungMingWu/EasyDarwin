@@ -51,7 +51,7 @@ void OSCodeFragment::Initialize()
 }
 
 OSCodeFragment::OSCodeFragment(const char* inPath)
-	: fFragmentP(NULL)
+	: fFragmentP(nullptr)
 {
 #if defined(HPUX) || defined(HPUX10)
 	shl_t handle;
@@ -102,7 +102,7 @@ OSCodeFragment::OSCodeFragment(const char* inPath)
 
 OSCodeFragment::~OSCodeFragment()
 {
-	if (fFragmentP == NULL)
+	if (fFragmentP == nullptr)
 		return;
 
 #if defined(HPUX) || defined(HPUX10)
@@ -120,8 +120,8 @@ OSCodeFragment::~OSCodeFragment()
 
 void* OSCodeFragment::GetSymbol(const char* inSymbolName)
 {
-	if (fFragmentP == NULL)
-		return NULL;
+	if (fFragmentP == nullptr)
+		return nullptr;
 
 #if defined(HPUX) || defined(HPUX10)
 	void *symaddr = NULL;

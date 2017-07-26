@@ -16,7 +16,7 @@ using namespace std;
 #define MAX_EPOLL_FD	20000
 
 static int epollfd = 0; 	//epoll 描述符
-static epoll_event* _events = NULL; //epoll事件接收数组
+static epoll_event* _events = nullptr; //epoll事件接收数组
 static int m_curEventReadPos = 0;  //当前读事件位置，在epoll事件数组中的位置
 static int m_curTotalEvents = 0;   //总的事件个数，每次epoll_wait之后更新
 static OSMutex sMaxFDPosMutex;		//锁
@@ -30,11 +30,11 @@ int epollInit()
 {
     epollfd = epoll_create(MAX_EPOLL_FD);
     
-    if(_events == NULL)
+    if(_events == nullptr)
     {
         _events = new epoll_event[MAX_EPOLL_FD];//we only listen the read event
     }
-    if(_events == NULL)
+    if(_events == nullptr)
     {
         perror("new epoll_event error:");
         exit(1);
@@ -50,7 +50,7 @@ int epollInit()
 */
 int addEpollEvent(struct eventreq *req,int event)
 {
-    if(req == NULL)
+    if(req == nullptr)
     {
         return -1;
     }
@@ -75,7 +75,7 @@ int addEpollEvent(struct eventreq *req,int event)
     }
     else if(event == EV_RM)
     {
-        ret = epoll_ctl(epollfd,EPOLL_CTL_DEL,req->er_handle,NULL);//remove all this fd events
+        ret = epoll_ctl(epollfd,EPOLL_CTL_DEL,req->er_handle,nullptr);//remove all this fd events
     }
     else//epoll can not listen RESET
     {//we dont needed
@@ -95,7 +95,7 @@ int deleteEpollEvent(int& fd)
 {
     int ret = -1;
     OSMutexLocker locker(&sMaxFDPosMutex);    
-    ret = epoll_ctl(epollfd,EPOLL_CTL_DEL,fd,NULL);//remove all this fd events
+    ret = epoll_ctl(epollfd,EPOLL_CTL_DEL,fd,nullptr);//remove all this fd events
     canEpoll = true;//每删除一个fd后，可以马上执行epoll_wait，可能在删除掉的fd上出现读异常
     return 0;
 }

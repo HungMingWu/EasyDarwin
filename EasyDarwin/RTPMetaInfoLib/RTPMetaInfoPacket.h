@@ -92,13 +92,13 @@ public:
 	//
 	// CONSTRUCTOR
 
-	RTPMetaInfoPacket() : fPacketBuffer(NULL),
+	RTPMetaInfoPacket() : fPacketBuffer(nullptr),
 		fPacketLen(0),
 		fTransmitTime(0),
 		fFrameType(kUnknownFrameType),
 		fPacketNumber(0),
 		fPacketPosition(0),
-		fMediaDataP(NULL),
+		fMediaDataP(nullptr),
 		fMediaDataLen(0),
 		fSeqNum(0) {}
 	~RTPMetaInfoPacket() {}

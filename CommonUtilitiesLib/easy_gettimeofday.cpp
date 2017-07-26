@@ -32,7 +32,7 @@ static inline int getcpuspeed_mhz(unsigned int wait_us)
         rdtscll(tsc1);
 
         // If sleep failed, result is unexpected, the caller should retry
-        if(nanosleep(&t, NULL))
+        if(nanosleep(&t, nullptr))
                 return -1;
          rdtscll(tsc2);
          return (tsc2 - tsc1)/(wait_us);
@@ -62,7 +62,7 @@ int easy_gettimeofday(struct timeval *tv)
                         max_ticks = cpuspeed_mhz*RELOAD_TIME_US;
                 }
 				//printf("gettimeofday again\n");
-                gettimeofday(tv, NULL);
+                gettimeofday(tv, nullptr);
                 memcpy(&walltime, tv, sizeof(walltime));
                 rdtscll(walltick);
                 return 0;

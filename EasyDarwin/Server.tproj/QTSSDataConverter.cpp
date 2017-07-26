@@ -118,9 +118,9 @@ QTSS_Error QTSSDataConverter::StringToValue(char* inValueAsString,
 	uint32_t* ioBufSize)
 {
 	uint32_t theBufSize = 0;
-	char* theFormat = NULL;
+	char* theFormat = nullptr;
 
-	if (inValueAsString == NULL || ioBufSize == NULL)
+	if (inValueAsString == nullptr || ioBufSize == nullptr)
 		return QTSS_BadArgument;
 
 	if (inType == qtssAttrDataTypeCharArray)
@@ -132,7 +132,7 @@ QTSS_Error QTSSDataConverter::StringToValue(char* inValueAsString,
 
 		//
 		// First check to see if the destination is big enough
-		if ((ioBuffer == NULL) || (*ioBufSize < theLen))
+		if ((ioBuffer == nullptr) || (*ioBufSize < theLen))
 		{
 			*ioBufSize = theLen;
 			return QTSS_NotEnoughSpace;
@@ -237,7 +237,7 @@ QTSS_Error QTSSDataConverter::StringToValue(char* inValueAsString,
 		return ConvertCHexStringToBytes(inValueAsString, ioBuffer, ioBufSize);
 	}
 
-	if ((ioBuffer == NULL) || (*ioBufSize < theBufSize))
+	if ((ioBuffer == nullptr) || (*ioBufSize < theBufSize))
 	{
 		*ioBufSize = theBufSize;
 		return QTSS_NotEnoughSpace;
@@ -256,7 +256,7 @@ QTSS_Error QTSSDataConverter::ConvertCHexStringToBytes(char* inValueAsString,
 	uint32_t dataLen = (stringLen + (stringLen & 1 ? 1 : 0)) / 2;
 
 	// First check to see if the destination is big enough
-	if ((ioBuffer == NULL) || (*ioBufSize < dataLen))
+	if ((ioBuffer == nullptr) || (*ioBufSize < dataLen))
 	{
 		*ioBufSize = dataLen;
 		return QTSS_NotEnoughSpace;
@@ -285,7 +285,7 @@ char* QTSSDataConverter::ConvertBytesToCHexString(void* inValue, const uint32_t 
 
 	char *theString = new char[len + 1];
 	char *resultStr = theString;
-	if (theString != NULL)
+	if (theString != nullptr)
 	{
 		uint8_t temp;
 		uint32_t count = 0;
@@ -304,8 +304,8 @@ char* QTSSDataConverter::ValueToString(void* inValue,
 	const uint32_t inValueLen,
 	const QTSS_AttrDataType inType)
 {
-	if (inValue == NULL)
-		return NULL;
+	if (inValue == nullptr)
+		return nullptr;
 
 	if (inType == qtssAttrDataTypeCharArray)
 	{

@@ -43,46 +43,46 @@ unsigned int            RTPSessionInterface::sRTPSessionIDCounter = 0;
 
 QTSSAttrInfoDict::AttrInfo  RTPSessionInterface::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
-	/* 0  */ { "qtssCliSesStreamObjects",           NULL,   qtssAttrDataTypeQTSS_Object,    qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 1  */ { "qtssCliSesCreateTimeInMsec",        NULL,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 2  */ { "qtssCliSesFirstPlayTimeInMsec",     NULL,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 3  */ { "qtssCliSesPlayTimeInMsec",          NULL,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 4  */ { "qtssCliSesAdjustedPlayTimeInMsec",  NULL,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 5  */ { "qtssCliSesRTPBytesSent",            NULL,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 6  */ { "qtssCliSesRTPPacketsSent",          NULL,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 7  */ { "qtssCliSesState",                   NULL,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 8  */ { "qtssCliSesPresentationURL",         NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 9  */ { "qtssCliSesFirstUserAgent",          NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 10 */ { "qtssCliStrMovieDurationInSecs",     NULL,   qtssAttrDataTypeFloat64,        qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 11 */ { "qtssCliStrMovieSizeInBytes",        NULL,   qtssAttrDataTypeuint64_t,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 12 */ { "qtssCliSesMovieAverageBitRate",     NULL,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 13 */ { "qtssCliSesLastRTSPSession",         NULL,   qtssAttrDataTypeQTSS_Object,    qtssAttrModeRead | qtssAttrModePreempSafe } ,
-	/* 14 */ { "qtssCliSesFullURL",                 NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe } ,
-	/* 15 */ { "qtssCliSesHostName",                NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 0  */ { "qtssCliSesStreamObjects",           nullptr,   qtssAttrDataTypeQTSS_Object,    qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 1  */ { "qtssCliSesCreateTimeInMsec",        nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 2  */ { "qtssCliSesFirstPlayTimeInMsec",     nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 3  */ { "qtssCliSesPlayTimeInMsec",          nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 4  */ { "qtssCliSesAdjustedPlayTimeInMsec",  nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 5  */ { "qtssCliSesRTPBytesSent",            nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 6  */ { "qtssCliSesRTPPacketsSent",          nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 7  */ { "qtssCliSesState",                   nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 8  */ { "qtssCliSesPresentationURL",         nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 9  */ { "qtssCliSesFirstUserAgent",          nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 10 */ { "qtssCliStrMovieDurationInSecs",     nullptr,   qtssAttrDataTypeFloat64,        qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 11 */ { "qtssCliStrMovieSizeInBytes",        nullptr,   qtssAttrDataTypeuint64_t,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 12 */ { "qtssCliSesMovieAverageBitRate",     nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 13 */ { "qtssCliSesLastRTSPSession",         nullptr,   qtssAttrDataTypeQTSS_Object,    qtssAttrModeRead | qtssAttrModePreempSafe } ,
+	/* 14 */ { "qtssCliSesFullURL",                 nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe } ,
+	/* 15 */ { "qtssCliSesHostName",                nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
 
-	/* 16 */ { "qtssCliRTSPSessRemoteAddrStr",      NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 17 */ { "qtssCliRTSPSessLocalDNS",           NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 18 */ { "qtssCliRTSPSessLocalAddrStr",       NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 19 */ { "qtssCliRTSPSesUserName",            NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 20 */ { "qtssCliRTSPSesUserPassword",        NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 21 */ { "qtssCliRTSPSesURLRealm",            NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 22 */ { "qtssCliRTSPReqRealStatusCode",      NULL,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 23 */ { "qtssCliTeardownReason",             NULL,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 24 */ { "qtssCliSesReqQueryString",          NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 25 */ { "qtssCliRTSPReqRespMsg",             NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 16 */ { "qtssCliRTSPSessRemoteAddrStr",      nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 17 */ { "qtssCliRTSPSessLocalDNS",           nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 18 */ { "qtssCliRTSPSessLocalAddrStr",       nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 19 */ { "qtssCliRTSPSesUserName",            nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 20 */ { "qtssCliRTSPSesUserPassword",        nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 21 */ { "qtssCliRTSPSesURLRealm",            nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 22 */ { "qtssCliRTSPReqRealStatusCode",      nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 23 */ { "qtssCliTeardownReason",             nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 24 */ { "qtssCliSesReqQueryString",          nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 25 */ { "qtssCliRTSPReqRespMsg",             nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
 
 	/* 26 */ { "qtssCliSesCurrentBitRate",          CurrentBitRate,     qtssAttrDataTypeUInt32,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 27 */ { "qtssCliSesPacketLossPercent",       PacketLossPercent,  qtssAttrDataTypeFloat32, qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 28 */ { "qtssCliSesTimeConnectedinMsec",     TimeConnected,      qtssAttrDataTypeint64_t,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 29 */ { "qtssCliSesCounterID",               NULL,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 30 */ { "qtssCliSesRTSPSessionID",           NULL,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 31 */ { "qtssCliSesFramesSkipped",           NULL,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 32 */ { "qtssCliSesTimeoutMsec", 			NULL, 	qtssAttrDataTypeUInt32,		qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 33 */ { "qtssCliSesOverBufferEnabled",       NULL, 	qtssAttrDataTypeBool16,		qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 34 */ { "qtssCliSesRTCPPacketsRecv",         NULL,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 35 */ { "qtssCliSesRTCPBytesRecv",           NULL,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 36 */ { "qtssCliSesStartedThinning",         NULL, 	qtssAttrDataTypeBool16,		qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 37 */ { "qtssCliSessLastRTSPBandwidth",      NULL, 	qtssAttrDataTypeUInt32,		qtssAttrModeRead | qtssAttrModePreempSafe }
+	/* 29 */ { "qtssCliSesCounterID",               nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 30 */ { "qtssCliSesRTSPSessionID",           nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 31 */ { "qtssCliSesFramesSkipped",           nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
+	/* 32 */ { "qtssCliSesTimeoutMsec", 			nullptr, 	qtssAttrDataTypeUInt32,		qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
+	/* 33 */ { "qtssCliSesOverBufferEnabled",       nullptr, 	qtssAttrDataTypeBool16,		qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
+	/* 34 */ { "qtssCliSesRTCPPacketsRecv",         nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 35 */ { "qtssCliSesRTCPBytesRecv",           nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 36 */ { "qtssCliSesStartedThinning",         nullptr, 	qtssAttrDataTypeBool16,		qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
+	/* 37 */ { "qtssCliSessLastRTSPBandwidth",      nullptr, 	qtssAttrDataTypeUInt32,		qtssAttrModeRead | qtssAttrModePreempSafe }
 };
 
 void    RTPSessionInterface::Initialize()
@@ -94,7 +94,7 @@ void    RTPSessionInterface::Initialize()
 }
 
 RTPSessionInterface::RTPSessionInterface()
-	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kClientSessionDictIndex), NULL),
+	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kClientSessionDictIndex), nullptr),
 	Task(),
 	fLastQualityCheckTime(0),
 	fLastQualityCheckMediaTime(0),
@@ -112,9 +112,9 @@ RTPSessionInterface::RTPSessionInterface()
 	fLastBitRateBytes(0),
 	fLastBitRateUpdateTime(0),
 	fMovieCurrentBitRate(0),
-	fRTSPSession(NULL),
+	fRTSPSession(nullptr),
 	fLastRTSPReqRealStatusCode(200),
-	fTimeoutTask(NULL, QTSServerInterface::GetServer()->GetPrefs()->GetRTPSessionTimeoutInSecs() * 1000),
+	fTimeoutTask(nullptr, QTSServerInterface::GetServer()->GetPrefs()->GetRTPSessionTimeoutInSecs() * 1000),
 	fNumQualityLevels(0),
 	fBytesSent(0),
 	fPacketsSent(0),
@@ -212,7 +212,7 @@ void RTPSessionInterface::UpdateRTSPSession(RTSPSessionInterface* inNewRTSPSessi
 	if (inNewRTSPSession != fRTSPSession)
 	{
 		// If there was an old session, let it know that we are done
-		if (fRTSPSession != NULL)
+		if (fRTSPSession != nullptr)
 			fRTSPSession->DecrementObjectHolderCount();
 
 		// Increment this count to prevent the RTSP session from being deleted
@@ -239,7 +239,7 @@ QTSS_Error RTPSessionInterface::DoSessionSetupResponse(RTSPRequestInterface* inR
 	if (QTSServerInterface::GetServer()->GetPrefs()->GetRTSPTimeoutInSecs() > 0)  // adv the timeout
 		inRequest->AppendSessionHeaderWithTimeout(this->GetValue(qtssCliSesRTSPSessionID), QTSServerInterface::GetServer()->GetPrefs()->GetRTSPTimeoutAsString());
 	else
-		inRequest->AppendSessionHeaderWithTimeout(this->GetValue(qtssCliSesRTSPSessionID), NULL); // no timeout in resp.
+		inRequest->AppendSessionHeaderWithTimeout(this->GetValue(qtssCliSesRTSPSessionID), nullptr); // no timeout in resp.
 
 	if (inRequest->GetStatus() == qtssRedirectNotModified)
 	{
@@ -295,7 +295,7 @@ void* RTPSessionInterface::CurrentBitRate(QTSSDictionary* inSession, uint32_t* o
 void* RTPSessionInterface::PacketLossPercent(QTSSDictionary* inSession, uint32_t* outLen)
 {
 	RTPSessionInterface* theSession = (RTPSessionInterface*)inSession;
-	RTPStream* theStream = NULL;
+	RTPStream* theStream = nullptr;
 	uint32_t theLen = sizeof(theStream);
 
 	int64_t packetsLost = 0;
@@ -303,7 +303,7 @@ void* RTPSessionInterface::PacketLossPercent(QTSSDictionary* inSession, uint32_t
 
 	for (int x = 0; theSession->GetValue(qtssCliSesStreamObjects, x, (void*)&theStream, &theLen) == QTSS_NoErr; x++)
 	{
-		if (theStream != NULL)
+		if (theStream != nullptr)
 		{
 			uint32_t streamCurPacketsLost = 0;
 			theLen = sizeof(uint32_t);
@@ -321,7 +321,7 @@ void* RTPSessionInterface::PacketLossPercent(QTSSDictionary* inSession, uint32_t
 
 		}
 
-		theStream = NULL;
+		theStream = nullptr;
 		theLen = sizeof(uint32_t);
 	}
 
@@ -349,7 +349,7 @@ void RTPSessionInterface::CreateDigestAuthenticationNonce() {
 	sprintf(curTimeStr, "%" _64BITARG_ "d", curTime);
 
 	// Delete old nonce before creating a new one
-	if (fAuthNonce.Ptr != NULL)
+	if (fAuthNonce.Ptr != nullptr)
 		delete[] fAuthNonce.Ptr;
 
 	MD5_CTX ctxt;
@@ -382,7 +382,7 @@ void RTPSessionInterface::SetChallengeParams(QTSS_AuthScheme scheme, uint32_t qo
 		// auth-int (Authentication with integrity) not supported yet
 		fAuthQop = qop;
 
-		if (newNonce || (fAuthNonce.Ptr == NULL))
+		if (newNonce || (fAuthNonce.Ptr == nullptr))
 			this->CreateDigestAuthenticationNonce();
 
 		if (createOpaque) {
@@ -398,12 +398,12 @@ void RTPSessionInterface::SetChallengeParams(QTSS_AuthScheme scheme, uint32_t qo
 			char *opaqueStr = new char[fAuthOpaque.Len];
 			(void)Base64encode(opaqueStr, randomNumStr, len);
 			delete[] randomNumStr;                 // Don't need this anymore
-			if (fAuthOpaque.Ptr != NULL)             // Delete existing pointer before assigning new
+			if (fAuthOpaque.Ptr != nullptr)             // Delete existing pointer before assigning new
 				delete[] fAuthOpaque.Ptr;              // one
 			fAuthOpaque.Ptr = opaqueStr;
 		}
 		else {
-			if (fAuthOpaque.Ptr != NULL)
+			if (fAuthOpaque.Ptr != nullptr)
 				delete[] fAuthOpaque.Ptr;
 			fAuthOpaque.Len = 0;
 		}
@@ -417,7 +417,7 @@ void RTPSessionInterface::SetChallengeParams(QTSS_AuthScheme scheme, uint32_t qo
 }
 
 void RTPSessionInterface::UpdateDigestAuthChallengeParams(bool newNonce, bool createOpaque, uint32_t qop) {
-	if (newNonce || (fAuthNonce.Ptr == NULL))
+	if (newNonce || (fAuthNonce.Ptr == nullptr))
 		this->CreateDigestAuthenticationNonce();
 
 
@@ -434,13 +434,13 @@ void RTPSessionInterface::UpdateDigestAuthChallengeParams(bool newNonce, bool cr
 		char *opaqueStr = new char[fAuthOpaque.Len];
 		(void)Base64encode(opaqueStr, randomNumStr, len);
 		delete[] randomNumStr;                 // Don't need this anymore
-		if (fAuthOpaque.Ptr != NULL)             // Delete existing pointer before assigning new
+		if (fAuthOpaque.Ptr != nullptr)             // Delete existing pointer before assigning new
 			delete[] fAuthOpaque.Ptr;              // one
 		fAuthOpaque.Ptr = opaqueStr;
 		fAuthOpaque.Len = ::strlen(opaqueStr);
 	}
 	else {
-		if (fAuthOpaque.Ptr != NULL)
+		if (fAuthOpaque.Ptr != nullptr)
 			delete[] fAuthOpaque.Ptr;
 		fAuthOpaque.Len = 0;
 	}

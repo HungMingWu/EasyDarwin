@@ -40,7 +40,7 @@ static void DisplayConfigErr(const char* fname, int lineCount, const char* lineB
 
 void TestParseConfigFile()
 {
-	ParseConfigFile(false, "qtss.conf", SampleConfigSetter, NULL);
+	ParseConfigFile(false, "qtss.conf", SampleConfigSetter, nullptr);
 
 }
 
@@ -121,7 +121,7 @@ int ParseConfigFile(
 
 			// get a line ( fgets adds \n+ 0x00 )
 
-			if (fgets(lineBuff, lineBuffSize, configFile) == NULL)
+			if (fgets(lineBuff, lineBuffSize, configFile) == nullptr)
 				break;
 
 			++lineCount;
@@ -166,7 +166,7 @@ int ParseConfigFile(
 
 						strcpy(param, wordBuff);
 
-						values[maxValues] = NULL;
+						values[maxValues] = nullptr;
 
 						while (maxValues < kConfParserMaxParamValues && *next)
 						{
@@ -189,7 +189,7 @@ int ParseConfigFile(
 									strcpy(value, wordBuff);
 
 									values[maxValues++] = value;
-									values[maxValues] = 0;
+									values[maxValues] = nullptr;
 								}
 
 							}

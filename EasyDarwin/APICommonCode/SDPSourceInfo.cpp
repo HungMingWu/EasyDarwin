@@ -68,7 +68,7 @@ SDPSourceInfo::~SDPSourceInfo()
 
 std::string SDPSourceInfo::GetLocalSDP()
 {
-    Assert(fSDPData.Ptr != NULL);
+    Assert(fSDPData.Ptr != nullptr);
 
     bool appendCLine = true;
     uint32_t trackIndex = 0;
@@ -122,7 +122,7 @@ std::string SDPSourceInfo::GetLocalSDP()
                 mParser.ConsumeUntil(&mPrefix, StringParser::sDigitMask);
                 localSDP += std::string(mPrefix.Ptr, mPrefix.Len);
                 localSDP += '0';
-                (void)mParser.ConsumeInteger(NULL);
+                (void)mParser.ConsumeInteger(nullptr);
 				localSDP += std::string(mParser.GetCurrentPosition(), mParser.GetDataRemaining());
                 localSDP += "\r\n";
                 trackIndex++;
@@ -131,13 +131,13 @@ std::string SDPSourceInfo::GetLocalSDP()
             case 'a':
             {
                 StringParser aParser(&sdpLine);
-                aParser.ConsumeLength(NULL, 2);//go past 'a='
+                aParser.ConsumeLength(nullptr, 2);//go past 'a='
                 StrPtrLen aLineType;
                 aParser.ConsumeWord(&aLineType);
                 if (aLineType.Equal(sControlStr))
                 {
-                    aParser.ConsumeUntil(NULL, '=');
-                    aParser.ConsumeUntil(NULL, StringParser::sDigitMask);
+                    aParser.ConsumeUntil(nullptr, '=');
+                    aParser.ConsumeUntil(nullptr, StringParser::sDigitMask);
                     
                    StrPtrLen aDigitType;                
                    (void)aParser.ConsumeInteger(&aDigitType);
@@ -182,13 +182,13 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
     //
     // There are some situations in which Parse can be called twice.
     // If that happens, just return and don't do anything the second time.
-    if (fSDPData.Ptr != NULL)
+    if (fSDPData.Ptr != nullptr)
         return;
         
-    Assert(fStreamArray == NULL);
+    Assert(fStreamArray == nullptr);
     
     char *sdpDataCopy = new char[sdpLen];
-    Assert(sdpDataCopy != NULL);
+    Assert(sdpDataCopy != nullptr);
     
     memcpy(sdpDataCopy,sdpData, sdpLen);
     fSDPData.Set(sdpDataCopy, sdpLen);
@@ -242,11 +242,11 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
             {
                 StringParser mParser(&sdpLine);
                                 
-                mParser.ConsumeUntil(NULL, StringParser::sDigitMask);
-                uint32_t ntpStart = mParser.ConsumeInteger(NULL);
+                mParser.ConsumeUntil(nullptr, StringParser::sDigitMask);
+                uint32_t ntpStart = mParser.ConsumeInteger(nullptr);
                 
-                mParser.ConsumeUntil(NULL, StringParser::sDigitMask);               
-                uint32_t ntpEnd = mParser.ConsumeInteger(NULL);
+                mParser.ConsumeUntil(nullptr, StringParser::sDigitMask);               
+                uint32_t ntpEnd = mParser.ConsumeInteger(nullptr);
                 
                 SetActiveNTPTimes(ntpStart,ntpEnd);
             }
@@ -265,7 +265,7 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
                 StringParser mParser(&sdpLine);
                 
                 //find out what type of track this is
-                mParser.ConsumeLength(NULL, 2);//go past 'm='
+                mParser.ConsumeLength(nullptr, 2);//go past 'm='
                 StrPtrLen theStreamType;
                 mParser.ConsumeWord(&theStreamType);
                 if (theStreamType.Equal(sVideoStr))
@@ -274,8 +274,8 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
                     fStreamArray[theStreamIndex].fPayloadType = qtssAudioPayloadType;
                     
                 //find the port for this stream
-                mParser.ConsumeUntil(NULL, StringParser::sDigitMask);
-                int32_t tempPort = mParser.ConsumeInteger(NULL);
+                mParser.ConsumeUntil(nullptr, StringParser::sDigitMask);
+                int32_t tempPort = mParser.ConsumeInteger(nullptr);
                 if ((tempPort > 0) && (tempPort < 65536))
                     fStreamArray[theStreamIndex].fPort = (uint16_t) tempPort;
                     
@@ -295,7 +295,7 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
             {
                 StringParser aParser(&sdpLine);
 
-                aParser.ConsumeLength(NULL, 2);//go past 'a='
+                aParser.ConsumeLength(nullptr, 2);//go past 'a='
 
                 StrPtrLen aLineType;
 
@@ -309,7 +309,7 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
 
                     // printf("found =%s\n",sBroadcastControlStr);
 
-                    aParser.ConsumeUntil(NULL,StringParser::sWordMask);
+                    aParser.ConsumeUntil(nullptr,StringParser::sWordMask);
 
                     StrPtrLen sessionControlType;
 
@@ -336,7 +336,7 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
                     //mark the codec type if this line has a codec name on it. If we already
                     //have a codec type for this track, just ignore this line
                     if ((fStreamArray[theStreamIndex - 1].fPayloadName.Len == 0) &&
-                        (aParser.GetThru(NULL, ' ')))
+                        (aParser.GetThru(nullptr, ' ')))
                     {
                         StrPtrLen payloadNameFromParser;
                         (void)aParser.GetThruEOL(&payloadNameFromParser);
@@ -353,8 +353,8 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
      //                   (aParser.GetThru(NULL, ' ')))
 					{
 						StrPtrLen trackNameFromParser;
-						aParser.ConsumeUntil(NULL,':');
-						aParser.ConsumeLength(NULL,1);
+						aParser.ConsumeUntil(nullptr,':');
+						aParser.ConsumeLength(nullptr,1);
 						aParser.GetThruEOL(&trackNameFromParser);
 
 						char* temp = trackNameFromParser.GetAsCString();
@@ -363,14 +363,14 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
 //                                                printf("%s\n", fStreamArray[theStreamIndex - 1].fTrackName.Ptr);
 					
 						StringParser tParser(&trackNameFromParser);
-						tParser.ConsumeUntil(NULL, '=');
-						tParser.ConsumeUntil(NULL, StringParser::sDigitMask);
-						fStreamArray[theStreamIndex - 1].fTrackID = tParser.ConsumeInteger(NULL);
+						tParser.ConsumeUntil(nullptr, '=');
+						tParser.ConsumeUntil(nullptr, StringParser::sDigitMask);
+						fStreamArray[theStreamIndex - 1].fTrackID = tParser.ConsumeInteger(nullptr);
 					}
                 }
                 else if (aLineType.Equal(sBufferDelayStr))
                 {   // if a BufferDelay is found then set all of the streams to the same buffer delay (it's global)
-                    aParser.ConsumeUntil(NULL, StringParser::sDigitMask);
+                    aParser.ConsumeUntil(nullptr, StringParser::sDigitMask);
                     theGlobalStreamInfo.fBufferDelay = aParser.ConsumeFloat();
                 }
 
@@ -380,14 +380,14 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
             {
                 //get the IP address off this header
                 StringParser cParser(&sdpLine);
-                cParser.ConsumeLength(NULL, 9);//strip off "c=in ip4 "
+                cParser.ConsumeLength(nullptr, 9);//strip off "c=in ip4 "
                 uint32_t tempIPAddr = SDPSourceInfo::GetIPAddr(&cParser, '/');
                                 
                 //grab the ttl
                 int32_t tempTtl = kDefaultTTL;
-                if (cParser.GetThru(NULL, '/'))
+                if (cParser.GetThru(nullptr, '/'))
                 {
-                    tempTtl = cParser.ConsumeInteger(NULL);
+                    tempTtl = cParser.ConsumeInteger(nullptr);
                     Assert(tempTtl >= 0);
                     Assert(tempTtl < 65536);
                 }

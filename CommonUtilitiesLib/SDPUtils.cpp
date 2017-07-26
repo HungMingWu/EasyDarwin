@@ -111,7 +111,7 @@ void SDPContainer::Parse()
 		}
 
 		lineParser.ConsumeUntil(&fieldName, nameValueSeparator);
-		if ((fieldName.Len != 1) || (::strchr(validChars, fieldName.Ptr[0]) == NULL))
+		if ((fieldName.Len != 1) || (::strchr(validChars, fieldName.Ptr[0]) == nullptr))
 		{
 			valid = false; // line doesn't begin with one of the valid characters followed by an "="
 			break;
@@ -245,7 +245,7 @@ SDPLineSorter::SDPLineSorter(const SDPContainer &rawSDPContainer, float adjustMe
 				fSessionHeaders += std::string(sEOL);
 			}
 
-			if (NULL != ::strchr(sessionSingleLines, line[0])) // allow 1 of this type: use first found
+			if (nullptr != ::strchr(sessionSingleLines, line[0])) // allow 1 of this type: use first found
 				break; // move on to next line type
 
 		}

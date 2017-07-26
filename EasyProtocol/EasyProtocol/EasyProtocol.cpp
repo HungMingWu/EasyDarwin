@@ -30,12 +30,12 @@ namespace EasyDarwin { namespace Protocol
 	}
 
 
-	EasyNVR::EasyNVR() : object_(NULL)
+	EasyNVR::EasyNVR() : object_(nullptr)
 	{
 	}
 
 	EasyNVR::EasyNVR(const string& serial, const string& name, const string& password, const string& tag, EasyDevices &channel)
-		: channels_(channel), object_(NULL)
+		: channels_(channel), object_(nullptr)
 	{
 		serial_ = serial;
 		name_ = name;

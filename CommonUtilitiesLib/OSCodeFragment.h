@@ -50,7 +50,7 @@ public:
 	OSCodeFragment(const char* inPath);
 	~OSCodeFragment();
 
-	bool  IsValid() { return (fFragmentP != NULL); }
+	bool  IsValid() { return (fFragmentP != nullptr); }
 	void*   GetSymbol(const char* inSymbolName);
 
 private:

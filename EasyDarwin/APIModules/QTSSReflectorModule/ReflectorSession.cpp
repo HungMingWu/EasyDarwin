@@ -145,7 +145,7 @@ QTSS_Error ReflectorSession::SetupReflectorSession(SourceInfo* inInfo, QTSS_Stan
 		inInfo = fSourceInfo;
 
 	// Store a reference to this sourceInfo permanently
-	Assert((fSourceInfo == NULL) || (inInfo == fSourceInfo));
+	Assert((fSourceInfo == nullptr) || (inInfo == fSourceInfo));
 	fSourceInfo = inInfo;
 
 	// this must be set to the new SDP.
@@ -190,7 +190,7 @@ QTSS_Error ReflectorSession::SetupReflectorSession(SourceInfo* inInfo, QTSS_Stan
 
 void ReflectorSession::AddBroadcasterClientSession(QTSS_StandardRTSP_Params* inParams)
 {
-	if (NULL == fStreamArray || NULL == inParams)
+	if (nullptr == fStreamArray || nullptr == inParams)
 		return;
 
 	for (uint32_t x = 0; x < fSourceInfo->GetNumStreams(); x++)

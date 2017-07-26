@@ -32,11 +32,11 @@
 
 #include "TimeoutTask.h"
 
-TimeoutTaskThread* TimeoutTask::sThread = NULL;
+TimeoutTaskThread* TimeoutTask::sThread = nullptr;
 
 void TimeoutTask::Initialize()
 {
-	if (sThread == NULL)
+	if (sThread == nullptr)
 	{
 		sThread = new TimeoutTaskThread();
 		sThread->Signal(Task::kStartEvent);
@@ -50,9 +50,9 @@ TimeoutTask::TimeoutTask(Task* inTask, int64_t inTimeoutInMilSecs)
 {
 	fQueueElem.SetEnclosingObject(this);
 	this->SetTimeout(inTimeoutInMilSecs);
-	if (NULL == inTask)
+	if (nullptr == inTask)
 		fTask = (Task *) this;
-	Assert(sThread != NULL); // this can happen if RunServer intializes tasks in the wrong order
+	Assert(sThread != nullptr); // this can happen if RunServer intializes tasks in the wrong order
 
 	OSMutexLocker locker(&sThread->fMutex);
 	sThread->fQueue.EnQueue(&fQueueElem);

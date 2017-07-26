@@ -57,7 +57,7 @@ public:
 	};
 
 	UDPSocket(Task* inTask, uint32_t inSocketType);
-	~UDPSocket() override { if (fDemuxer != NULL) delete fDemuxer; }
+	~UDPSocket() override { if (fDemuxer != nullptr) delete fDemuxer; }
 
 	//Open
 	OS_Error    Open() { return Socket::Open(SOCK_DGRAM); }

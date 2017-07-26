@@ -40,7 +40,7 @@
 
 RTPSession::RTPSession() :
 	RTPSessionInterface(),
-	fModule(NULL),
+	fModule(nullptr),
 	fHasAnRTPStream(false),
 	fCurrentModuleIndex(0),
 	fCurrentState(kStart),
@@ -54,7 +54,7 @@ RTPSession::RTPSession() :
 #endif
 
 	this->SetTaskName("RTPSession");
-	fModuleState.curModule = NULL;
+	fModuleState.curModule = nullptr;
 	fModuleState.curTask = this;
 	fModuleState.curRole = 0;
 }
@@ -62,7 +62,7 @@ RTPSession::RTPSession() :
 RTPSession::~RTPSession()
 {
 	// Delete all the streams
-	RTPStream** theStream = NULL;
+	RTPStream** theStream = nullptr;
 	uint32_t theLen = 0;
 
 	if (QTSServerInterface::GetServer()->GetPrefs()->GetReliableUDPPrintfsEnabled())
@@ -72,18 +72,18 @@ RTPSession::~RTPSession()
 
 		for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
 		{
-			Assert(theStream != NULL);
+			Assert(theStream != nullptr);
 			Assert(theLen == sizeof(RTPStream*));
-			if (*theStream != NULL)
+			if (*theStream != nullptr)
 			{
 				theNumLatePacketsDropped += (*theStream)->GetStalePacketsDropped();
 				theNumResends += (*theStream)->GetResender()->GetNumResends();
 			}
 		}
 
-		char* theURL = NULL;
+		char* theURL = nullptr;
 		(void)this->GetValueAsString(qtssCliSesFullURL, 0, &theURL);
-		Assert(theURL != NULL);
+		Assert(theURL != nullptr);
 
 		RTPBandwidthTracker* tracker = this->GetBandwidthTracker();
 
@@ -97,10 +97,10 @@ RTPSession::~RTPSession()
 
 	for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
 	{
-		Assert(theStream != NULL);
+		Assert(theStream != nullptr);
 		Assert(theLen == sizeof(RTPStream*));
 
-		if (*theStream != NULL)
+		if (*theStream != nullptr)
 			delete *theStream;
 	}
 
@@ -109,7 +109,7 @@ RTPSession::~RTPSession()
 	{
 		OSMutexLocker theLocker(theServer->GetMutex());
 
-		RTPSession** theSession = NULL;
+		RTPSession** theSession = nullptr;
 		//
 		// Remove this session from the qtssSvrClientSessions attribute
 		uint32_t y = 0;
@@ -182,25 +182,25 @@ QTSS_Error  RTPSession::Activate(const StrPtrLen& inSessionID)
 
 RTPStream*  RTPSession::FindRTPStreamForChannelNum(uint8_t inChannelNum)
 {
-	RTPStream** theStream = NULL;
+	RTPStream** theStream = nullptr;
 	uint32_t theLen = 0;
 
 	for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
 	{
-		Assert(theStream != NULL);
+		Assert(theStream != nullptr);
 		Assert(theLen == sizeof(RTPStream*));
 
-		if (*theStream != NULL)
+		if (*theStream != nullptr)
 			if (((*theStream)->GetRTPChannelNum() == inChannelNum) || ((*theStream)->GetRTCPChannelNum() == inChannelNum))
 				return *theStream;
 	}
-	return NULL; // Couldn't find a matching stream
+	return nullptr; // Couldn't find a matching stream
 }
 
 QTSS_Error RTPSession::AddStream(RTSPRequestInterface* request, RTPStream** outStream,
 	QTSS_AddStreamFlags inFlags)
 {
-	Assert(outStream != NULL);
+	Assert(outStream != nullptr);
 
 	// Create a new SSRC for this stream. This should just be a random number unique
 	// to all the streams in the session
@@ -209,15 +209,15 @@ QTSS_Error RTPSession::AddStream(RTSPRequestInterface* request, RTPStream** outS
 	{
 		theSSRC = (int32_t)::rand();
 
-		RTPStream** theStream = NULL;
+		RTPStream** theStream = nullptr;
 		uint32_t theLen = 0;
 
 		for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
 		{
-			Assert(theStream != NULL);
+			Assert(theStream != nullptr);
 			Assert(theLen == sizeof(RTPStream*));
 
-			if (*theStream != NULL)
+			if (*theStream != nullptr)
 				if ((*theStream)->GetSSRC() == theSSRC)
 					theSSRC = 0;
 		}
@@ -244,14 +244,14 @@ void RTPSession::SetStreamThinningParams(float inLateTolerance)
 {
 	// Set the thinning params in all the RTPStreams of the RTPSession
 	// Go through all the streams, setting their thinning params
-	RTPStream** theStream = NULL;
+	RTPStream** theStream = nullptr;
 	uint32_t theLen = 0;
 
 	for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
 	{
-		Assert(theStream != NULL);
+		Assert(theStream != nullptr);
 		Assert(theLen == sizeof(RTPStream*));
-		if (*theStream != NULL)
+		if (*theStream != nullptr)
 		{
 			(*theStream)->SetLateTolerance(inLateTolerance);
 			(*theStream)->SetThinningParams();
@@ -262,8 +262,8 @@ void RTPSession::SetStreamThinningParams(float inLateTolerance)
 QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFlags)
 {
 	//first setup the play associated session interface variables
-	Assert(request != NULL);
-	if (fModule == NULL)
+	Assert(request != nullptr);
+	if (fModule == nullptr)
 		return QTSS_RequestFailed;//Can't play if there are no associated streams
 
 	//what time is this play being issued at?
@@ -296,14 +296,14 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 
 	//
 	// Go through all the streams, setting their thinning params
-	RTPStream** theStream = NULL;
+	RTPStream** theStream = nullptr;
 	uint32_t theLen = 0;
 
 	for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
 	{
-		Assert(theStream != NULL);
+		Assert(theStream != nullptr);
 		Assert(theLen == sizeof(RTPStream*));
-		if (*theStream != NULL)
+		if (*theStream != nullptr)
 		{
 			(*theStream)->SetThinningParams();
 			(*theStream)->ResetThinningDelayParams();
@@ -355,8 +355,8 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 
 	}
 
-	Assert(fRTSPSession != NULL); // can this ever happen?
-	if (fRTSPSession != NULL)
+	Assert(fRTSPSession != nullptr); // can this ever happen?
+	if (fRTSPSession != nullptr)
 		fRTSPSession->GetSocket()->SetSocketBufSize(theBufferSize);
 
 
@@ -371,12 +371,12 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 void RTPSession::Pause()
 {
 	fState = qtssPausedState;
-	RTPStream** theStream = NULL;
+	RTPStream** theStream = nullptr;
 	uint32_t theLen = 0;
 
 	for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
 	{
-		Assert(theStream != NULL);
+		Assert(theStream != nullptr);
 		Assert(theLen == sizeof(RTPStream*));
 		//(*theStream)->Pause();
 	}
@@ -403,9 +403,9 @@ void RTPSession::Teardown()
 	// Note that this function relies on the session mutex being grabbed, because
 	// this fRTSPSession pointer could otherwise be being used simultaneously by
 	// an RTP stream.
-	if (fRTSPSession != NULL)
+	if (fRTSPSession != nullptr)
 		fRTSPSession->DecrementObjectHolderCount();
-	fRTSPSession = NULL;
+	fRTSPSession = nullptr;
 	fState = qtssPausedState;
 	this->Signal(Task::kKillEvent);
 }
@@ -414,17 +414,17 @@ void RTPSession::SendPlayResponse(RTSPRequestInterface* request, uint32_t inFlag
 {
 	QTSS_RTSPHeader theHeader = qtssRTPInfoHeader;
 
-	RTPStream** theStream = NULL;
+	RTPStream** theStream = nullptr;
 	uint32_t theLen = 0;
 	uint32_t valueCount = this->GetNumValues(qtssCliSesStreamObjects);
 	bool lastValue = false;
 	for (uint32_t x = 0; x < valueCount; x++)
 	{
 		this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen);
-		Assert(theStream != NULL);
+		Assert(theStream != nullptr);
 		Assert(theLen == sizeof(RTPStream*));
 
-		if (*theStream != NULL)
+		if (*theStream != nullptr)
 		{
 			if (x == (valueCount - 1))
 				lastValue = true;
@@ -489,7 +489,7 @@ int64_t RTPSession::Run()
 	printf("RTPSession %" _S32BITARG_ ": In Run. Events %" _S32BITARG_ "\n", (int32_t)this, (int32_t)events);
 #endif
 	// Some callbacks look for this struct in the thread object
-	OSThreadDataSetter theSetter(&fModuleState, NULL);
+	OSThreadDataSetter theSetter(&fModuleState, nullptr);
 
 	//if we have been instructed to go away, then let's delete ourselves
 	if ((events & Task::kKillEvent) || (events & Task::kTimeoutEvent) || (fModuleDoingAsyncStuff))
@@ -511,7 +511,7 @@ int64_t RTPSession::Run()
 			// We cannot block waiting to UnRegister, because we have to
 			// give the RTSPSessionTask a chance to release the RTPSession.
 			OSRefTable* sessionTable = QTSServerInterface::GetServer()->GetRTPSessionMap();
-			Assert(sessionTable != NULL);
+			Assert(sessionTable != nullptr);
 			if (!sessionTable->TryUnRegister(&fRTPMapElem))
 			{
 				this->Signal(Task::kKillEvent);// So that we get back to this place in the code
@@ -528,14 +528,14 @@ int64_t RTPSession::Run()
 
 			// If RTCP packets are being generated internally for this stream, 
 			// Send a BYE now.
-			RTPStream** theStream = NULL;
+			RTPStream** theStream = nullptr;
 			uint32_t theLen = 0;
 
 			if (this->GetPlayFlags() & qtssPlayFlagsSendRTCP)
 			{
 				int64_t byePacketTime = OS::Milliseconds();
 				for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)
-					if (theStream && *theStream != NULL)
+					if (theStream && *theStream != nullptr)
 						(*theStream)->SendRTCPSR(byePacketTime, true);
 			}
 		}
@@ -565,7 +565,7 @@ int64_t RTPSession::Run()
 
 	//if the stream is currently paused, just return without doing anything.
 	//We'll get woken up again when a play is issued
-	if ((fState == qtssPausedState) || (fModule == NULL))
+	if ((fState == qtssPausedState) || (fModule == nullptr))
 		return 0;
 
 	//Make sure to grab the session mutex here, to protect the module against
@@ -579,7 +579,7 @@ int64_t RTPSession::Run()
 		theParams.rtpSendPacketsParams.inCurrentTime = OS::Milliseconds();
 		if (fNextSendPacketsTime > theParams.rtpSendPacketsParams.inCurrentTime)
 		{
-			RTPStream** retransStream = NULL;
+			RTPStream** retransStream = nullptr;
 			uint32_t retransStreamLen = 0;
 
 			//
@@ -601,7 +601,7 @@ int64_t RTPSession::Run()
 			theParams.rtpSendPacketsParams.outNextPacketTime = 0;
 			// Async event registration is definitely allowed from this role.
 			fModuleState.eventRequested = false;
-			Assert(fModule != NULL);
+			Assert(fModule != nullptr);
 			(void)fModule->CallDispatch(QTSS_RTPSendPackets_Role, &theParams);
 #if RTPSESSION_DEBUGGING
 			printf("RTPSession %" _S32BITARG_ ": back from sendPackets, nextPacketTime = %" _64BITARG_ "d\n", (int32_t)this, theParams.rtpSendPacketsParams.outNextPacketTime);

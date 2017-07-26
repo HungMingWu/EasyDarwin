@@ -57,13 +57,13 @@ typedef int socklen_t; // missing from some platform includes
 #endif
 
 
-EventThread* Socket::sEventThread = NULL;
+EventThread* Socket::sEventThread = nullptr;
 
 Socket::Socket(Task *notifytask, uint32_t inSocketType)
 	: EventContext(EventContext::kInvalidFileDesc, sEventThread),
 	fState(inSocketType),
-	fLocalAddrStrPtr(NULL),
-	fLocalDNSStrPtr(NULL),
+	fLocalAddrStrPtr(nullptr),
+	fLocalDNSStrPtr(nullptr),
 	fPortStr(fPortBuffer, kPortBufSizeInBytes)
 {
 	fLocalAddr.sin_addr.s_addr = 0;
@@ -226,7 +226,7 @@ StrPtrLen*  Socket::GetLocalAddrStr()
 {
 	//Use the array of IP addr strings to locate the string formatted version
 	//of this IP address.
-	if (fLocalAddrStrPtr == NULL)
+	if (fLocalAddrStrPtr == nullptr)
 	{
 		for (uint32_t x = 0; x < SocketUtils::GetNumIPAddrs(); x++)
 		{
@@ -260,7 +260,7 @@ StrPtrLen*  Socket::GetLocalAddrStr()
 	}
 #endif 
 
-	Assert(fLocalAddrStrPtr != NULL);
+	Assert(fLocalAddrStrPtr != nullptr);
 	return fLocalAddrStrPtr;
 }
 
@@ -268,7 +268,7 @@ StrPtrLen*  Socket::GetLocalDNSStr()
 {
 	//Do the same thing as the above function, but for DNS names
 	Assert(fLocalAddr.sin_addr.s_addr != INADDR_ANY);
-	if (fLocalDNSStrPtr == NULL)
+	if (fLocalDNSStrPtr == nullptr)
 	{
 		for (uint32_t x = 0; x < SocketUtils::GetNumIPAddrs(); x++)
 		{
@@ -281,10 +281,10 @@ StrPtrLen*  Socket::GetLocalDNSStr()
 	}
 
 	//if we weren't able to get this DNS name, make the DNS name the same as the IP addr str.
-	if (fLocalDNSStrPtr == NULL)
+	if (fLocalDNSStrPtr == nullptr)
 		fLocalDNSStrPtr = this->GetLocalAddrStr();
 
-	Assert(fLocalDNSStrPtr != NULL);
+	Assert(fLocalDNSStrPtr != nullptr);
 	return fLocalDNSStrPtr;
 }
 
@@ -301,7 +301,7 @@ StrPtrLen*  Socket::GetLocalPortStr()
 
 OS_Error Socket::Send(const char* inData, const uint32_t inLength, uint32_t* outLengthSent)
 {
-	Assert(inData != NULL);
+	Assert(inData != nullptr);
 
 	if (!(fState & kConnected))
 		return (OS_Error)ENOTCONN;
@@ -326,7 +326,7 @@ OS_Error Socket::Send(const char* inData, const uint32_t inLength, uint32_t* out
 
 OS_Error Socket::WriteV(const struct iovec* iov, const uint32_t numIOvecs, uint32_t* outLenSent)
 {
-	Assert(iov != NULL);
+	Assert(iov != nullptr);
 
 	if (!(fState & kConnected))
 		return (OS_Error)ENOTCONN;
@@ -351,7 +351,7 @@ OS_Error Socket::WriteV(const struct iovec* iov, const uint32_t numIOvecs, uint3
 			fState ^= kConnected;//turn off connected state flag
 		return (OS_Error)theErr;
 	}
-	if (outLenSent != NULL)
+	if (outLenSent != nullptr)
 		*outLenSent = (uint32_t)err;
 
 	return OS_NoErr;
@@ -359,8 +359,8 @@ OS_Error Socket::WriteV(const struct iovec* iov, const uint32_t numIOvecs, uint3
 
 OS_Error Socket::Read(void *buffer, const uint32_t length, uint32_t *outRecvLenP)
 {
-	Assert(outRecvLenP != NULL);
-	Assert(buffer != NULL);
+	Assert(outRecvLenP != nullptr);
+	Assert(buffer != nullptr);
 
 	if (!(fState & kConnected))
 		return (OS_Error)ENOTCONN;

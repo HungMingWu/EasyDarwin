@@ -39,7 +39,7 @@
 #include "OS.h"
 
  //IDLETASKTHREAD IMPLEMENTATION:
-IdleTaskThread*     IdleTask::sIdleThread = NULL;
+IdleTaskThread*     IdleTask::sIdleThread = nullptr;
 
 void IdleTaskThread::SetIdleTimer(IdleTask* activeObj, int64_t msec)
 {
@@ -58,7 +58,7 @@ void IdleTaskThread::SetIdleTimer(IdleTask* activeObj, int64_t msec)
 
 void IdleTaskThread::CancelTimeout(IdleTask* idleObj)
 {
-	Assert(idleObj != NULL);
+	Assert(idleObj != nullptr);
 	OSMutexLocker locker(&fHeapMutex);
 	fIdleHeap.Remove(&idleObj->fIdleElem);
 }
@@ -79,7 +79,7 @@ IdleTaskThread::Entry()
 		while ((fIdleHeap.CurrentHeapSize() > 0) && (fIdleHeap.PeekMin()->GetValue() <= msec))
 		{
 			IdleTask* elem = (IdleTask*)fIdleHeap.ExtractMin()->GetEnclosingObject();
-			Assert(elem != NULL);
+			Assert(elem != nullptr);
 			elem->Signal(Task::kIdleEvent);
 		}
 
@@ -99,7 +99,7 @@ IdleTaskThread::Entry()
 
 void IdleTask::Initialize()
 {
-	if (sIdleThread == NULL)
+	if (sIdleThread == nullptr)
 	{
 		sIdleThread = new IdleTaskThread();
 		sIdleThread->Start();
@@ -109,7 +109,7 @@ void IdleTask::Initialize()
 IdleTask::~IdleTask()
 {
 	//clean up stuff used by idle thread routines
-	Assert(sIdleThread != NULL);
+	Assert(sIdleThread != nullptr);
 
 	OSMutexLocker locker(&sIdleThread->fHeapMutex);
 

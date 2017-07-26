@@ -112,8 +112,8 @@ namespace Json {
 		end_ = endDoc;
 		collectComments_ = collectComments;
 		current_ = begin_;
-		lastValueEnd_ = 0;
-		lastValue_ = 0;
+		lastValueEnd_ = nullptr;
+		lastValue_ = nullptr;
 		commentsBefore_ = "";
 		errors_.clear();
 		while (!nodes_.empty())
@@ -377,7 +377,7 @@ namespace Json {
 		assert(collectComments_);
 		const std::string& normalized = normalizeEOL(begin, end);
 		if (placement == commentAfterOnSameLine) {
-			assert(lastValue_ != 0);
+			assert(lastValue_ != nullptr);
 			lastValue_->setComment(normalized, placement);
 		}
 		else {
@@ -864,7 +864,7 @@ namespace Json {
 		ErrorInfo info;
 		info.token_ = token;
 		info.message_ = message;
-		info.extra_ = 0;
+		info.extra_ = nullptr;
 		errors_.push_back(info);
 		return true;
 	}
@@ -1007,7 +1007,7 @@ namespace Json {
 			Location& current,
 			Location end,
 			unsigned int& unicode);
-		bool addError(const std::string& message, Token& token, Location extra = 0);
+		bool addError(const std::string& message, Token& token, Location extra = nullptr);
 		bool recoverFromError(TokenType skipUntilToken);
 		bool addErrorAndRecover(const std::string& message,
 			Token& token,
@@ -1056,8 +1056,8 @@ namespace Json {
 		end_ = endDoc;
 		collectComments_ = collectComments;
 		current_ = begin_;
-		lastValueEnd_ = 0;
-		lastValue_ = 0;
+		lastValueEnd_ = nullptr;
+		lastValue_ = nullptr;
 		commentsBefore_ = "";
 		errors_.clear();
 		while (!nodes_.empty())
@@ -1308,7 +1308,7 @@ namespace Json {
 		assert(collectComments_);
 		const std::string& normalized = normalizeEOL(begin, end);
 		if (placement == commentAfterOnSameLine) {
-			assert(lastValue_ != 0);
+			assert(lastValue_ != nullptr);
 			lastValue_->setComment(normalized, placement);
 		}
 		else {
@@ -1831,7 +1831,7 @@ namespace Json {
 		ErrorInfo info;
 		info.token_ = token;
 		info.message_ = message;
-		info.extra_ = 0;
+		info.extra_ = nullptr;
 		errors_.push_back(info);
 		return true;
 	}

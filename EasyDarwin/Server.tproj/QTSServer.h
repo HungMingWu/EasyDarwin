@@ -161,7 +161,7 @@ class RereadPrefsTask : public Task
 public:
 	int64_t Run() override
 	{
-		QTSServer::RereadPrefsService(NULL);
+		QTSServer::RereadPrefsService(nullptr);
 		return -1;
 	}
 };

@@ -78,8 +78,8 @@ public:
 		StrPtrLen* serverPortB,
 		StrPtrLen* channelA,
 		StrPtrLen* channelB,
-		StrPtrLen* serverIPAddr = NULL,
-		StrPtrLen* ssrc = NULL);
+		StrPtrLen* serverIPAddr = nullptr,
+		StrPtrLen* ssrc = nullptr);
 	void    AppendContentBaseHeader(StrPtrLen* theURL);
 	void    AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 		StrPtrLen* url, StrPtrLen* seqNumber,

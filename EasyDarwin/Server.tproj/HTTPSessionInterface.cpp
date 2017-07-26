@@ -48,21 +48,21 @@ unsigned int	HTTPSessionInterface::sSessionIndexCounter = kFirstHTTPSessionID;
 
 QTSSAttrInfoDict::AttrInfo  HTTPSessionInterface::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
-	/* 0 */ { "easyHTTPSesID",				NULL,          qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 0 */ { "easyHTTPSesID",				nullptr,          qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 1 */ { "easyHTTPSesLocalAddr",       SetupParams,    qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
 	/* 2 */ { "easyHTTPSesLocalAddrStr",    SetupParams,    qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
 	/* 3 */ { "easyHTTPSesLocalDNS",        SetupParams,    qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
 	/* 4 */ { "easyHTTPSesRemoteAddr",      SetupParams,    qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
 	/* 5 */ { "easyHTTPSesRemoteAddrStr",   SetupParams,    qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
-	/* 6 */ { "easyHTTPSesEventCntxt",      NULL,           qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 7 */ { "easyHTTPSesLastUserName",    NULL,           qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 8 */	{ "easyHTTPSesLastUserPassword",NULL,           qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 9 */	{ "easyHTTPSesLastURLRealm",	NULL,			qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 6 */ { "easyHTTPSesEventCntxt",      nullptr,           qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 7 */ { "easyHTTPSesLastUserName",    nullptr,           qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 8 */	{ "easyHTTPSesLastUserPassword",nullptr,           qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 9 */	{ "easyHTTPSesLastURLRealm",	nullptr,			qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe  },
 	/* 10 */{ "easyHTTPSesLocalPort",       SetupParams,    qtssAttrDataTypeUInt16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
 	/* 11 */{ "easyHTTPSesRemotePort",      SetupParams,    qtssAttrDataTypeUInt16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
-	/* 12 */{ "easyHTTPSesLastToken",		NULL,			qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 13 */{ "easyHTTPSesContentBody",		NULL,           qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 14 */{ "easyHTTPSesContentBodyOffset",NULL,          qtssAttrDataTypeUInt32,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite }
+	/* 12 */{ "easyHTTPSesLastToken",		nullptr,			qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 13 */{ "easyHTTPSesContentBody",		nullptr,           qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 14 */{ "easyHTTPSesContentBodyOffset",nullptr,          qtssAttrDataTypeUInt32,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite }
 };
 
 
@@ -76,11 +76,11 @@ void    HTTPSessionInterface::Initialize()
 HTTPSessionInterface::HTTPSessionInterface()
 	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kHTTPSessionDictIndex)),
 	Task(),
-	fTimeoutTask(NULL, QTSServerInterface::GetServer()->GetPrefs()->GetRTSPSessionTimeoutInSecs() * 1000),
+	fTimeoutTask(nullptr, QTSServerInterface::GetServer()->GetPrefs()->GetRTSPSessionTimeoutInSecs() * 1000),
 	fInputStream(&fSocket),
 	fOutputStream(&fSocket, &fTimeoutTask),
 	fSessionMutex(),
-	fSocket(NULL, Socket::kNonBlockingSocketType),
+	fSocket(nullptr, Socket::kNonBlockingSocketType),
 	fOutputSocketP(&fSocket),
 	fInputSocketP(&fSocket),
 	fLiveSession(true),
@@ -164,7 +164,7 @@ QTSS_Error HTTPSessionInterface::Read(void* ioBuffer, uint32_t inLength, uint32_
 	if (fRequestBodyLen >= 0)
 		fRequestBodyLen -= theLenRead;
 
-	if (outLenRead != NULL)
+	if (outLenRead != nullptr)
 		*outLenRead = theLenRead;
 
 	return theErr;
@@ -187,8 +187,8 @@ QTSS_Error HTTPSessionInterface::RequestEvent(QTSS_EventType inEventMask)
 
 void    HTTPSessionInterface::SnarfInputSocket(HTTPSessionInterface* fromRTSPSession)
 {
-	Assert(fromRTSPSession != NULL);
-	Assert(fromRTSPSession->fOutputSocketP != NULL);
+	Assert(fromRTSPSession != nullptr);
+	Assert(fromRTSPSession->fOutputSocketP != nullptr);
 
 	fInputStream.SnarfRetreat(fromRTSPSession->fInputStream);
 
@@ -217,11 +217,11 @@ void* HTTPSessionInterface::SetupParams(QTSSDictionary* inSession, uint32_t* /*o
 	StrPtrLen* theLocalAddrStr = theSession->fSocket.GetLocalAddrStr();
 	StrPtrLen* theLocalDNSStr = theSession->fSocket.GetLocalDNSStr();
 	StrPtrLen* theRemoteAddrStr = theSession->fSocket.GetRemoteAddrStr();
-	if (theLocalAddrStr == NULL || theLocalDNSStr == NULL || theRemoteAddrStr == NULL)
+	if (theLocalAddrStr == nullptr || theLocalDNSStr == nullptr || theRemoteAddrStr == nullptr)
 	{    //the socket is bad most likely values are all 0. If the socket had an error we shouldn't even be here.
 		 //theLocalDNSStr is set to localAddr if it is unavailable, so it should be present at this point as well.
 		Assert(0);   //for debugging
-		return NULL; //nothing to set
+		return nullptr; //nothing to set
 	}
 	theSession->SetVal(easyHTTPSesLocalAddr, &theSession->fLocalAddr, sizeof(theSession->fLocalAddr));
 	theSession->SetVal(easyHTTPSesLocalAddrStr, theLocalAddrStr->Ptr, theLocalAddrStr->Len);
@@ -231,7 +231,7 @@ void* HTTPSessionInterface::SetupParams(QTSSDictionary* inSession, uint32_t* /*o
 
 	theSession->SetVal(easyHTTPSesLocalPort, &theSession->fLocalPort, sizeof(theSession->fLocalPort));
 	theSession->SetVal(easyHTTPSesRemotePort, &theSession->fRemotePort, sizeof(theSession->fRemotePort));
-	return NULL;
+	return nullptr;
 }
 
 QTSS_Error HTTPSessionInterface::SendHTTPPacket(StrPtrLen* contentXML, bool connectionClose, bool decrement)

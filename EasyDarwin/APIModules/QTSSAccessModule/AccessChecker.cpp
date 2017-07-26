@@ -52,11 +52,11 @@ static StrPtrLen sAuthWord("realm", 5);
 // Constructor
 // Allocates no memory
 AccessChecker::AccessChecker() :
-	fGroupsFilePath(NULL),
-	fUsersFilePath(NULL),
+	fGroupsFilePath(nullptr),
+	fUsersFilePath(nullptr),
 	fUsersFileModDate(-1),
 	fGroupsFileModDate(-1),
-	fProfiles(NULL),
+	fProfiles(nullptr),
 	fNumUsers(0),
 	fCurrentSize(0)
 {
@@ -79,8 +79,8 @@ AccessChecker::~AccessChecker()
 // or that memory will be orphaned!
 void AccessChecker::UpdateFilePaths(const char* inUsersFilePath, const char* inGroupsFilePath) {
 	// Assert input arguments are not null
-	Assert(inUsersFilePath != NULL);
-	Assert(inGroupsFilePath != NULL);
+	Assert(inUsersFilePath != nullptr);
+	Assert(inGroupsFilePath != nullptr);
 
 	// Before reassigning, delete old paths
 	delete[] fGroupsFilePath;
@@ -105,7 +105,7 @@ void AccessChecker::deleteProfilesAndRealm()
 	uint32_t i, j;
 
 	// delete the profiles
-	if (fProfiles != NULL)
+	if (fProfiles != nullptr)
 	{
 		// For each profile
 		for (i = 0; i < fNumUsers; i++)
@@ -141,7 +141,7 @@ void AccessChecker::deleteProfilesAndRealm()
 			// delete the array of pointers to the group names
 			delete[] profile->groups;
 
-			profile->groups = NULL;
+			profile->groups = nullptr;
 			profile->maxGroupNameLen = 0;
 			profile->numGroups = 0;
 			profile->groupsSize = 0;
@@ -150,7 +150,7 @@ void AccessChecker::deleteProfilesAndRealm()
 
 		// delete the array of profile pointers
 		delete[] fProfiles;
-		fProfiles = NULL;
+		fProfiles = nullptr;
 	}
 
 	// delete the fAuthRealm field
@@ -232,9 +232,9 @@ uint32_t AccessChecker::UpdateUserProfiles() {
 
 	// Since one or both of the files has changed, reread the files and create user profiles    
 	if (userData.Len == 0)
-		(void)QTSSModuleUtils::ReadEntireFile(fUsersFilePath, &userData, -1, NULL);
+		(void)QTSSModuleUtils::ReadEntireFile(fUsersFilePath, &userData, -1, nullptr);
 	if (groupData.Len == 0 && !groupFileErrors)
-		(void)QTSSModuleUtils::ReadEntireFile(fGroupsFilePath, &groupData, -1, NULL);
+		(void)QTSSModuleUtils::ReadEntireFile(fGroupsFilePath, &groupData, -1, nullptr);
 
 
 	// This will delete the memory allocated for userData when we return from this function
@@ -253,7 +253,7 @@ uint32_t AccessChecker::UpdateUserProfiles() {
 		userDataParser.GetThruEOL(&line);
 		StringParser authLineParser(&line);
 		// Skip over leading whitespace
-		authLineParser.ConsumeUntil(NULL, StringParser::sWhitespaceMask);
+		authLineParser.ConsumeUntil(nullptr, StringParser::sWhitespaceMask);
 		// Skip over comments and blank lines
 		if ((authLineParser.GetDataRemaining() == 0) || (authLineParser[0] == '#') || (authLineParser[0] == '\0'))
 			continue;
@@ -298,7 +298,7 @@ uint32_t AccessChecker::UpdateUserProfiles() {
 		StringParser userLineParser(&line);
 		//parse the line
 		//skip over leading whitespace
-		userLineParser.ConsumeUntil(NULL, StringParser::sWhitespaceMask);
+		userLineParser.ConsumeUntil(nullptr, StringParser::sWhitespaceMask);
 
 		//skip over comments and blank lines
 		if ((userLineParser.GetDataRemaining() == 0) || (userLineParser[0] == '#') || (userLineParser[0] == '\0'))
@@ -350,7 +350,7 @@ uint32_t AccessChecker::UpdateUserProfiles() {
 			StringParser groupLineParser(&line);
 			//parse the line
 			//skip over leading whitespace
-			groupLineParser.ConsumeUntil(NULL, StringParser::sWhitespaceMask);
+			groupLineParser.ConsumeUntil(nullptr, StringParser::sWhitespaceMask);
 
 			//skip over comments and blank lines
 			if ((groupLineParser.GetDataRemaining() == 0) || (groupLineParser[0] == '#') || (groupLineParser[0] == '\0'))
@@ -401,7 +401,7 @@ uint32_t AccessChecker::UpdateUserProfiles() {
 bool AccessChecker::HaveFilePathsChanged(const char* inUsersFilePath, const char* inGroupsFilePath)
 {
 	bool changed = true;
-	if ((inUsersFilePath != NULL) && (inGroupsFilePath != NULL) && (fUsersFilePath != NULL) && (fGroupsFilePath != NULL)) {
+	if ((inUsersFilePath != nullptr) && (inGroupsFilePath != nullptr) && (fUsersFilePath != nullptr) && (fGroupsFilePath != nullptr)) {
 		if ((strcmp(inUsersFilePath, fUsersFilePath) == 0) && (strcmp(inGroupsFilePath, fGroupsFilePath) == 0))
 			changed = false;
 	}
@@ -416,6 +416,6 @@ AccessChecker::UserProfile* AccessChecker::RetrieveUserProfile(const StrPtrLen* 
 		if (fProfiles[index]->username.Equal(*inUserName))
 			return fProfiles[index];
 	}
-	return NULL;
+	return nullptr;
 }
 

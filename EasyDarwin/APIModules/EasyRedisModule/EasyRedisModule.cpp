@@ -56,7 +56,7 @@ static QTSS_Error	RedisJudgeStreamID(QTSS_JudgeStreamID_Params* inParams);
 class RedisReplyObjectDeleter
 {
     public:
-		RedisReplyObjectDeleter() : fReply(NULL) {}
+		RedisReplyObjectDeleter() : fReply(nullptr) {}
         RedisReplyObjectDeleter(redisReply* reply) : fReply(reply)  {}
         ~RedisReplyObjectDeleter() 
 		{ 
@@ -66,7 +66,7 @@ class RedisReplyObjectDeleter
 			}
 		}
         
-        void ClearObject() { fReply = NULL; }
+        void ClearObject() { fReply = nullptr; }
 
         void SetObject(redisReply* reply) 
         {
@@ -533,5 +533,5 @@ static void RedisErrorHandler()
 		printf("Connection error: %s\n", redisContext_->errstr);
 		redisFree(redisContext_);
 	}
-	redisContext_ = NULL;
+	redisContext_ = nullptr;
 }

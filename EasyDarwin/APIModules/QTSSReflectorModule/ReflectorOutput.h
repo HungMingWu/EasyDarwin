@@ -49,7 +49,7 @@ class ReflectorOutput
 {
 	public:
     
-		ReflectorOutput() : fBookmarkedPacketsElemsArray(NULL), fNumBookmarks(0), fAvailPosition(0), fLastIntervalMilliSec(5), fLastPacketTransmitTime(0) {}   
+		ReflectorOutput() : fBookmarkedPacketsElemsArray(nullptr), fNumBookmarks(0), fAvailPosition(0), fLastIntervalMilliSec(5), fLastPacketTransmitTime(0) {}   
 
         virtual ~ReflectorOutput() 
         {
@@ -142,7 +142,7 @@ bool  ReflectorOutput::SetBookMarkPacket(OSQueueElem* thePacketElemPtr)
         
         for (uint32_t i = 0; i < fNumBookmarks; i++)
         {                   
-            if (fBookmarkedPacketsElemsArray[i] == NULL)
+            if (fBookmarkedPacketsElemsArray[i] == nullptr)
             {   
                 fAvailPosition = i;
                 return true;
@@ -156,9 +156,9 @@ bool  ReflectorOutput::SetBookMarkPacket(OSQueueElem* thePacketElemPtr)
 
 OSQueueElem*    ReflectorOutput::GetBookMarkedPacket(OSQueue *thePacketQueue)
 {
-    Assert(thePacketQueue != NULL);    
+    Assert(thePacketQueue != nullptr);    
         
-    OSQueueElem*        packetElem = NULL;              
+    OSQueueElem*        packetElem = nullptr;              
     uint32_t              curBookmark = 0;
 
     fAvailPosition = -1;       
@@ -175,7 +175,7 @@ OSQueueElem*    ReflectorOutput::GetBookMarkedPacket(OSQueue *thePacketQueue)
                 // this packet was previously bookmarked for this specific queue
                 // remove if from the bookmark list and use it
                 // to jump ahead into the Sender's over all packet queue                        
-                fBookmarkedPacketsElemsArray[curBookmark] = NULL;  
+                fBookmarkedPacketsElemsArray[curBookmark] = nullptr;  
                 fAvailPosition = curBookmark;
                 packetElem = bookmarkedElem;
                 break;

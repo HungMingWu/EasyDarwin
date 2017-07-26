@@ -138,7 +138,7 @@ private:
 QTSS_Error RTSPRequest::Parse()
 {
 	StringParser parser(this->GetValue(qtssRTSPReqFullRequest));
-	Assert(this->GetValue(qtssRTSPReqFullRequest)->Ptr != NULL);
+	Assert(this->GetValue(qtssRTSPReqFullRequest)->Ptr != nullptr);
 
 	boost::string_view requestHeader(this->GetValue(qtssRTSPReqFullRequest)->Ptr, this->GetValue(qtssRTSPReqFullRequest)->Len);
 	typedef boost::string_view::const_iterator It;
@@ -267,7 +267,7 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 	if (qtssSetupMethod == fMethod) // if it is a setup but we are playing don't allow it
 	{
 		RTSPSession*  theSession = (RTSPSession*)this->GetSession();
-		if (theSession != NULL && theSession->IsPlaying())
+		if (theSession != nullptr && theSession->IsPlaying())
 			return QTSSModuleUtils::SendErrorResponse(this, qtssClientAggregateOptionAllowed, qtssMsgBadRTSPMethod, &theAbsURL);
 	}
 
@@ -439,7 +439,7 @@ QTSS_Error RTSPRequest::ParseHeaders(StringParser& parser)
 	{
 		StringParser theHeaderParser(fHeaderDictionary.GetValue(qtssContentLengthHeader));
 		theHeaderParser.ConsumeWhitespace();
-		this->GetSession()->SetRequestBodyLength(theHeaderParser.ConsumeInteger(NULL));
+		this->GetSession()->SetRequestBodyLength(theHeaderParser.ConsumeInteger(nullptr));
 	}
 
 	isStreamOK = parser.ExpectEOL();
@@ -577,13 +577,13 @@ void  RTSPRequest::ParseRangeHeader()
 	this->SetVal(qtssRTSPReqStartTime, &fStartTime, sizeof(fStartTime));
 	this->SetVal(qtssRTSPReqStopTime, &fStopTime, sizeof(fStopTime));
 
-	theRangeParser.GetThru(NULL, '=');//consume "npt="
+	theRangeParser.GetThru(nullptr, '=');//consume "npt="
 	theRangeParser.ConsumeWhitespace();
 	fStartTime = (double)theRangeParser.ConsumeNPT();
 	//see if there is a stop time as well.
 	if (theRangeParser.GetDataRemaining() > 1)
 	{
-		theRangeParser.GetThru(NULL, '-');
+		theRangeParser.GetThru(nullptr, '-');
 		theRangeParser.ConsumeWhitespace();
 		fStopTime = (double)theRangeParser.ConsumeNPT();
 	}
@@ -602,7 +602,7 @@ void  RTSPRequest::ParseRetransmitHeader()
 		theProtName.TrimTrailingWhitespace();
 		foundRetransmitProt = theProtName.EqualIgnoreCase(RTSPProtocol::GetRetransmitProtocolName());
 	} while ((!foundRetransmitProt) &&
-		(theRetransmitParser.GetThru(NULL, ',')));
+		(theRetransmitParser.GetThru(nullptr, ',')));
 
 	if (!foundRetransmitProt)
 		return;
@@ -625,7 +625,7 @@ void  RTSPRequest::ParseRetransmitHeader()
 		if (theProtArg.EqualIgnoreCase(kWindow))
 		{
 			theRetransmitParser.ConsumeWhitespace();
-			fWindowSize = theRetransmitParser.ConsumeInteger(NULL);
+			fWindowSize = theRetransmitParser.ConsumeInteger(nullptr);
 
 			// Save out the window size argument as a string so we
 			// can easily put it into the response
@@ -634,7 +634,7 @@ void  RTSPRequest::ParseRetransmitHeader()
 			fWindowSizeStr.Len = theRetransmitParser.GetCurrentPosition() - theProtArg.Ptr;
 		}
 
-		theRetransmitParser.GetThru(NULL, ';'); //Skip past ';'
+		theRetransmitParser.GetThru(nullptr, ';'); //Skip past ';'
 	}
 }
 
@@ -642,7 +642,7 @@ void  RTSPRequest::ParseContentLengthHeader()
 {
 	StringParser theContentLenParser(fHeaderDictionary.GetValue(qtssContentLengthHeader));
 	theContentLenParser.ConsumeWhitespace();
-	fContentLength = theContentLenParser.ConsumeInteger(NULL);
+	fContentLength = theContentLenParser.ConsumeInteger(nullptr);
 }
 
 void  RTSPRequest::ParsePrebufferHeader()
@@ -661,7 +661,7 @@ void  RTSPRequest::ParsePrebufferHeader()
 			fPrebufferAmt = thePrebufferParser.ConsumeFloat();
 		}
 
-		thePrebufferParser.GetThru(NULL, ';'); //Skip past ';'
+		thePrebufferParser.GetThru(nullptr, ';'); //Skip past ';'
 
 	}
 }
@@ -670,7 +670,7 @@ void  RTSPRequest::ParseDynamicRateHeader()
 {
 	StringParser theParser(fHeaderDictionary.GetValue(qtssXDynamicRateHeader));
 	theParser.ConsumeWhitespace();
-	int32_t value = theParser.ConsumeInteger(NULL);
+	int32_t value = theParser.ConsumeInteger(nullptr);
 
 	// fEnableDynamicRate: < 0 undefined, 0 disable, > 0 enable
 	if (value > 0)
@@ -707,7 +707,7 @@ void RTSPRequest::ParseTransportOptionsHeader()
 		if (theRTPOptionsSubHeader.NumEqualIgnoreCase(sLateTolerance.Ptr, sLateTolerance.Len))
 		{
 			StringParser theLateTolParser(&theRTPOptionsSubHeader);
-			theLateTolParser.GetThru(NULL, '=');
+			theLateTolParser.GetThru(nullptr, '=');
 			theLateTolParser.ConsumeWhitespace();
 			fLateTolerance = theLateTolParser.ConsumeFloat();
 			fLateToleranceStr = theRTPOptionsSubHeader;
@@ -798,22 +798,22 @@ void RTSPRequest::ParseClientPortSubHeader(StrPtrLen* inClientPortSubHeader)
 
 	// Store the two client ports as integers
 	theSubHeaderParser.ConsumeWhitespace();
-	fClientPortA = (uint16_t)theSubHeaderParser.ConsumeInteger(NULL);
-	theSubHeaderParser.GetThru(NULL, '-');
+	fClientPortA = (uint16_t)theSubHeaderParser.ConsumeInteger(nullptr);
+	theSubHeaderParser.GetThru(nullptr, '-');
 	theSubHeaderParser.ConsumeWhitespace();
-	fClientPortB = (uint16_t)theSubHeaderParser.ConsumeInteger(NULL);
+	fClientPortB = (uint16_t)theSubHeaderParser.ConsumeInteger(nullptr);
 	if (fClientPortB != fClientPortA + 1) // an error in the port values
 	{
 		// The following to setup and log the error as a message level 2.
 		StrPtrLen *userAgentPtr = fHeaderDictionary.GetValue(qtssUserAgentHeader);
 		ResizeableStringFormatter errorPortMessage;
 		errorPortMessage.Put(sErrorMessage);
-		if (userAgentPtr != NULL)
+		if (userAgentPtr != nullptr)
 			errorPortMessage.Put(*userAgentPtr);
 		errorPortMessage.PutSpace();
 		errorPortMessage.Put(*inClientPortSubHeader);
 		errorPortMessage.PutTerminator();
-		QTSSModuleUtils::LogError(qtssMessageVerbosity, qtssMsgNoMessage, 0, errorPortMessage.GetBufPtr(), NULL);
+		QTSSModuleUtils::LogError(qtssMessageVerbosity, qtssMsgNoMessage, 0, errorPortMessage.GetBufPtr(), nullptr);
 
 
 		//fix the rtcp port and hope it works.
@@ -837,7 +837,7 @@ void RTSPRequest::ParseTimeToLiveSubHeader(StrPtrLen* inTimeToLiveSubHeader)
 
 	// Parse out the time to live...
 	theSubHeaderParser.ConsumeWhitespace();
-	fTtl = (uint16_t)theSubHeaderParser.ConsumeInteger(NULL);
+	fTtl = (uint16_t)theSubHeaderParser.ConsumeInteger(nullptr);
 }
 
 // DJM PROTOTYPE
@@ -845,7 +845,7 @@ void  RTSPRequest::ParseRandomDataSizeHeader()
 {
 	StringParser theContentLenParser(fHeaderDictionary.GetValue(qtssXRandomDataSizeHeader));
 	theContentLenParser.ConsumeWhitespace();
-	fRandomDataSize = theContentLenParser.ConsumeInteger(NULL);
+	fRandomDataSize = theContentLenParser.ConsumeInteger(nullptr);
 
 	if (fRandomDataSize > RTSPSessionInterface::kMaxRandomDataSize) {
 		fRandomDataSize = RTSPSessionInterface::kMaxRandomDataSize;
@@ -856,7 +856,7 @@ void  RTSPRequest::ParseBandwidthHeader()
 {
 	StringParser theContentLenParser(fHeaderDictionary.GetValue(qtssBandwidthHeader));
 	theContentLenParser.ConsumeWhitespace();
-	fBandwidthBits = theContentLenParser.ConsumeInteger(NULL);
+	fBandwidthBits = theContentLenParser.ConsumeInteger(nullptr);
 
 }
 
@@ -890,7 +890,7 @@ QTSS_Error RTSPRequest::ParseBasicHeader(StringParser *inParsedAuthLinePtr)
 	StringParser parsedNameAndPassword(&nameAndPassword);
 
 	parsedNameAndPassword.ConsumeUntil(&name, ':');
-	parsedNameAndPassword.ConsumeLength(NULL, 1);
+	parsedNameAndPassword.ConsumeLength(nullptr, 1);
 	parsedNameAndPassword.GetThruEOL(&password);
 
 
@@ -911,10 +911,10 @@ QTSS_Error RTSPRequest::ParseDigestHeader(StringParser *inParsedAuthLinePtr)
 
 	inParsedAuthLinePtr->ConsumeWhitespace();
 	StrPtrLen   *authLine = inParsedAuthLinePtr->GetStream();
-	if (NULL != authLine)
+	if (nullptr != authLine)
 	{
 		StringParser digestAuthLine(authLine);
-		digestAuthLine.GetThru(NULL, '=');
+		digestAuthLine.GetThru(nullptr, '=');
 		digestAuthLine.ConsumeWhitespace();
 
 		fAuthDigestResponse.Set(authLine->Ptr, authLine->Len);
@@ -930,7 +930,7 @@ QTSS_Error RTSPRequest::ParseDigestHeader(StringParser *inParsedAuthLinePtr)
 
 		//Parse name="value" pair fields in the auth line
 		parsedNameAndValue.ConsumeUntil(&fieldName, '=');
-		parsedNameAndValue.ConsumeLength(NULL, 1);
+		parsedNameAndValue.ConsumeLength(nullptr, 1);
 		parsedNameAndValue.GetThruEOL(&fieldValue);
 		StringParser::UnQuote(&fieldValue);
 
@@ -983,7 +983,7 @@ QTSS_Error RTSPRequest::ParseAuthHeader(void)
 	QTSS_Error  theErr = QTSS_NoErr;
 	QTSSDictionary *theRTSPHeaders = this->GetHeaderDictionary();
 	StrPtrLen   *authLine = theRTSPHeaders->GetValue(qtssAuthorizationHeader);
-	if ((authLine == NULL) || (0 == authLine->Len))
+	if ((authLine == nullptr) || (0 == authLine->Len))
 		return theErr;
 
 	StrPtrLen   authWord("");
@@ -1009,7 +1009,7 @@ void RTSPRequest::SetupAuthLocalPath(void)
 		theID = qtssRTSPReqFilePathTrunc;
 
 	uint32_t theLen = 0;
-	char* theFullPath = QTSSModuleUtils::GetFullPath(this, theID, &theLen, NULL);
+	char* theFullPath = QTSSModuleUtils::GetFullPath(this, theID, &theLen, nullptr);
 	this->SetValue(qtssRTSPReqLocalPath, 0, theFullPath, theLen, QTSSDictionary::kDontObeyReadOnly);
 	delete[] theFullPath;
 }
@@ -1022,7 +1022,7 @@ QTSS_Error RTSPRequest::SendDigestChallenge(uint32_t qop, StrPtrLen *nonce, StrP
 	ResizeableStringFormatter challengeFormatter(challengeBuf, kAuthChallengeHeaderBufSize);
 
 	StrPtrLen realm;
-	char *prefRealmPtr = NULL;
+	char *prefRealmPtr = nullptr;
 	StrPtrLen *realmPtr = this->GetValue(qtssRTSPReqURLRealm);              // Get auth realm set by the module
 	if (realmPtr->Len > 0) {
 		realm = *realmPtr;
@@ -1030,8 +1030,8 @@ QTSS_Error RTSPRequest::SendDigestChallenge(uint32_t qop, StrPtrLen *nonce, StrP
 	else {                                                                  // If module hasn't set the realm
 		QTSServerInterface* theServer = QTSServerInterface::GetServer();    // get the realm from prefs
 		prefRealmPtr = theServer->GetPrefs()->GetAuthorizationRealm();      // allocates memory
-		Assert(prefRealmPtr != NULL);
-		if (prefRealmPtr != NULL) {
+		Assert(prefRealmPtr != nullptr);
+		if (prefRealmPtr != nullptr) {
 			realm.Set(prefRealmPtr, strlen(prefRealmPtr));
 		}
 		else {
@@ -1070,7 +1070,7 @@ QTSS_Error RTSPRequest::SendDigestChallenge(uint32_t qop, StrPtrLen *nonce, StrP
 	this->SendHeader();
 
 	// deleting the memory that was allocated in GetPrefs call above
-	if (prefRealmPtr != NULL)
+	if (prefRealmPtr != nullptr)
 	{
 		delete[] prefRealmPtr;
 	}
@@ -1081,7 +1081,7 @@ QTSS_Error RTSPRequest::SendDigestChallenge(uint32_t qop, StrPtrLen *nonce, StrP
 QTSS_Error RTSPRequest::SendBasicChallenge(void)
 {
 	QTSS_Error theErr = QTSS_NoErr;
-	char *prefRealmPtr = NULL;
+	char *prefRealmPtr = nullptr;
 
 	do
 	{
@@ -1102,8 +1102,8 @@ QTSS_Error RTSPRequest::SendBasicChallenge(void)
 			// Get the default realm from the config file or use the static default if config realm is not found
 			QTSServerInterface* theServer = QTSServerInterface::GetServer();
 			prefRealmPtr = theServer->GetPrefs()->GetAuthorizationRealm(); // allocates memory
-			Assert(prefRealmPtr != NULL);
-			if (prefRealmPtr != NULL)
+			Assert(prefRealmPtr != nullptr);
+			if (prefRealmPtr != nullptr)
 			{
 				whichRealm.Set(prefRealmPtr, strlen(prefRealmPtr));
 			}
@@ -1161,7 +1161,7 @@ QTSS_Error RTSPRequest::SendBasicChallenge(void)
 
 	} while (false);
 
-	if (prefRealmPtr != NULL)
+	if (prefRealmPtr != nullptr)
 	{
 		delete[] prefRealmPtr;
 	}

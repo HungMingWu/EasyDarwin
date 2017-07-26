@@ -24,7 +24,7 @@ HTTPClientRequestStream::HTTPClientRequestStream(ClientSocket* sock)
 	fCurOffset(0),
 	fEncodedBytesRemaining(0),
 	fRequest(fRequestBuffer, 0),
-	fRequestPtr(NULL),
+	fRequestPtr(nullptr),
 	fDecode(false),
 	fPrintMsg(false),
 	fIsDataPacket(false)
@@ -34,7 +34,7 @@ void HTTPClientRequestStream::SnarfRetreat(HTTPClientRequestStream &fromRequest)
 {
 	// Simplest thing to do is to just completely blow away everything in this current
 	// stream, and replace it with the retreat bytes from the other stream.
-	fRequestPtr = NULL;
+	fRequestPtr = nullptr;
 	Assert(fRetreatBytes < QTSS_MAX_REQUEST_BUFFER_SIZE);
 	fRetreatBytes = fromRequest.fRetreatBytes;
 	fEncodedBytesRemaining = fCurOffset = fRequest.Len = 0;
@@ -51,9 +51,9 @@ QTSS_Error HTTPClientRequestStream::ReadRequest()
 		//with the request and want to move onto the next one. The first thing we should do
 		//is check whether there is any lingering data in the stream. If there is, the parent
 		//session believes that is part of a new request
-		if (fRequestPtr != NULL)
+		if (fRequestPtr != nullptr)
 		{
-			fRequestPtr = NULL;//flag that we no longer have a complete request
+			fRequestPtr = nullptr;//flag that we no longer have a complete request
 
 			// Take all the retreated leftover data and move it to the beginning of the buffer
 			if ((fRetreatBytes > 0) && (fRequest.Len > 0))
@@ -189,7 +189,7 @@ QTSS_Error HTTPClientRequestStream::ReadRequest()
 		StringParser headerParser(&fRequest);
 
 		uint16_t lcount = 0;
-		while (headerParser.GetThruEOL(NULL))
+		while (headerParser.GetThruEOL(nullptr))
 		{
 			lcount++;
 			if (headerParser.ExpectEOL())
@@ -273,7 +273,7 @@ QTSS_Error HTTPClientRequestStream::Read(void* ioBuffer, uint32_t inBufLen, uint
 	// If there is still space available in ioBuffer, continue. Otherwise, we can return now
 	if (theLengthRead == inBufLen)
 	{
-		if (outLengthRead != NULL)
+		if (outLengthRead != nullptr)
 			*outLengthRead = theLengthRead;
 		return QTSS_NoErr;
 	}
@@ -285,7 +285,7 @@ QTSS_Error HTTPClientRequestStream::Read(void* ioBuffer, uint32_t inBufLen, uint
 #if READ_DEBUGGING
 	printf("In HTTPClientRequestStream::Read: Got %d bytes off Socket\n", theNewOffset);
 #endif  
-	if (outLengthRead != NULL)
+	if (outLengthRead != nullptr)
 		*outLengthRead = theNewOffset + theLengthRead;
 
 	return theErr;

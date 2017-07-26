@@ -176,7 +176,7 @@ int64_t EasyCMSSession::Run()
 		{
 			// 处理网络报文
 			Assert(fInputStream.GetRequestBuffer());
-			Assert(fRequest == NULL);
+			Assert(fRequest == nullptr);
 
 			// 根据具体请求报文构造HTTPRequest请求类
 			fRequest = new HTTPRequest(&QTSServerInterface::GetServerHeader(), fInputStream.GetRequestBuffer());
@@ -257,7 +257,7 @@ int64_t EasyCMSSession::Run()
 
 QTSS_Error EasyCMSSession::ProcessMessage()
 {
-	if (NULL == fRequest) return QTSS_BadArgument;
+	if (nullptr == fRequest) return QTSS_BadArgument;
 
 	//解析HTTPRequest报文
 	QTSS_Error theErr = fRequest->Parse();

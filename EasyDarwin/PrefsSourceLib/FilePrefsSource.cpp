@@ -63,9 +63,9 @@ private:
 
 
 KeyValuePair::KeyValuePair(const char* inKey, const char* inValue, KeyValuePair* inNext) :
-	fKey(NULL),
-	fValue(NULL),
-	fNext(NULL)
+	fKey(nullptr),
+	fValue(nullptr),
+	fNext(nullptr)
 {
 	fKey = new char[::strlen(inKey) + 1];
 	::strcpy(fKey, inKey);
@@ -91,7 +91,7 @@ void KeyValuePair::ResetValue(const char* inValue)
 
 
 FilePrefsSource::FilePrefsSource(bool allowDuplicates)
-	: fKeyValueList(NULL),
+	: fKeyValueList(nullptr),
 	fNumKeys(0),
 	fAllowDuplicates(allowDuplicates)
 {
@@ -100,7 +100,7 @@ FilePrefsSource::FilePrefsSource(bool allowDuplicates)
 
 FilePrefsSource::~FilePrefsSource()
 {
-	while (fKeyValueList != NULL)
+	while (fKeyValueList != nullptr)
 	{
 		KeyValuePair* keyValue = fKeyValueList;
 		fKeyValueList = fKeyValueList->fNext;
@@ -111,7 +111,7 @@ FilePrefsSource::~FilePrefsSource()
 
 int FilePrefsSource::GetValue(const char* inKey, char* ioValue)
 {
-	return (this->FindValue(inKey, ioValue) != NULL);
+	return (this->FindValue(inKey, ioValue) != nullptr);
 }
 
 
@@ -119,7 +119,7 @@ int FilePrefsSource::GetValueByIndex(const char* inKey, uint32_t inIndex, char* 
 {
 	KeyValuePair* thePair = this->FindValue(inKey, ioValue, inIndex);
 
-	if (thePair == NULL)
+	if (thePair == nullptr)
 		return false;
 
 	return true;
@@ -164,33 +164,33 @@ char* FilePrefsSource::GetValueAtIndex(uint32_t inIndex)
 {
 	// Iterate through the queue until we have the right entry
 	KeyValuePair* thePair = fKeyValueList;
-	while ((thePair != NULL) && (inIndex-- > 0))
+	while ((thePair != nullptr) && (inIndex-- > 0))
 		thePair = thePair->fNext;
 
-	if (thePair != NULL)
+	if (thePair != nullptr)
 		return thePair->fValue;
-	return NULL;
+	return nullptr;
 }
 
 char* FilePrefsSource::GetKeyAtIndex(uint32_t inIndex)
 {
 	// Iterate through the queue until we have the right entry
 	KeyValuePair* thePair = fKeyValueList;
-	while ((thePair != NULL) && (inIndex-- > 0))
+	while ((thePair != nullptr) && (inIndex-- > 0))
 		thePair = thePair->fNext;
 
-	if (thePair != NULL)
+	if (thePair != nullptr)
 		return thePair->fKey;
-	return NULL;
+	return nullptr;
 }
 
 void FilePrefsSource::SetValue(const char* inKey, const char* inValue)
 {
-	KeyValuePair* keyValue = NULL;
+	KeyValuePair* keyValue = nullptr;
 
 	// If the key/value already exists update the value.
 	// If duplicate keys are allowed, however, add a new entry regardless
-	if ((!fAllowDuplicates) && ((keyValue = this->FindValue(inKey, NULL)) != NULL))
+	if ((!fAllowDuplicates) && ((keyValue = this->FindValue(inKey, nullptr)) != nullptr))
 	{
 		keyValue->ResetValue(inValue);
 	}
@@ -218,7 +218,7 @@ bool FilePrefsSource::FilePrefsConfigSetter(const char* paramName, const char* p
 
 
 		// multiple values are passed in the paramValue array as distinct strs
-	while (paramValue[valueIndex] != NULL)
+	while (paramValue[valueIndex] != nullptr)
 	{
 		//printf("Adding config setting  <key=\"%s\", value=\"%s\">\n", paramName,  paramValue[valueIndex] );
 		theFilePrefs->SetValue(paramName, paramValue[valueIndex]);
@@ -316,13 +316,13 @@ int FilePrefsSource::InitFromConfigFile(const char* configFilePath)
 void FilePrefsSource::DeleteValue(const char* inKey)
 {
 	KeyValuePair* keyValue = fKeyValueList;
-	KeyValuePair* prevKeyValue = NULL;
+	KeyValuePair* prevKeyValue = nullptr;
 
-	while (keyValue != NULL)
+	while (keyValue != nullptr)
 	{
 		if (::strcmp(inKey, keyValue->fKey) == 0)
 		{
-			if (prevKeyValue != NULL)
+			if (prevKeyValue != nullptr)
 			{
 				prevKeyValue->fNext = keyValue->fNext;
 				delete keyValue;
@@ -346,14 +346,14 @@ void FilePrefsSource::WriteToConfigFile(const char* configFilePath)
 	int err = 0;
 	FILE* fileDesc = ::fopen(configFilePath, "w");
 
-	if (fileDesc != NULL)
+	if (fileDesc != nullptr)
 	{
 		err = ::fseek(fileDesc, 0, SEEK_END);
 		Assert(err == 0);
 
 		KeyValuePair* keyValue = fKeyValueList;
 
-		while (keyValue != NULL)
+		while (keyValue != nullptr)
 		{
 			(void)fprintf(fileDesc, "%s   %s\n\n", keyValue->fKey, keyValue->fValue);
 
@@ -371,16 +371,16 @@ KeyValuePair* FilePrefsSource::FindValue(const char* inKey, char* ioValue, uint3
 	KeyValuePair    *keyValue = fKeyValueList;
 	uint32_t          foundIndex = 0;
 
-	if (ioValue != NULL)
+	if (ioValue != nullptr)
 		ioValue[0] = '\0';
 
-	while (keyValue != NULL)
+	while (keyValue != nullptr)
 	{
 		if (::strcmp(inKey, keyValue->fKey) == 0)
 		{
 			if (foundIndex == index)
 			{
-				if (ioValue != NULL)
+				if (ioValue != nullptr)
 					::strcpy(ioValue, keyValue->fValue);
 				return keyValue;
 			}
@@ -389,5 +389,5 @@ KeyValuePair* FilePrefsSource::FindValue(const char* inKey, char* ioValue, uint3
 		keyValue = keyValue->fNext;
 	}
 
-	return NULL;
+	return nullptr;
 }

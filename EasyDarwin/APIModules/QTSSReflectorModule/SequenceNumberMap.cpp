@@ -34,7 +34,7 @@
 #include "SequenceNumberMap.h"
 
 SequenceNumberMap::SequenceNumberMap(uint32_t inSlidingWindowSize)
-	: fSlidingWindow(NULL),
+	: fSlidingWindow(nullptr),
 	fWindowSize((int32_t)inSlidingWindowSize),
 	fNegativeWindowSize((int32_t)inSlidingWindowSize - (int32_t)(2 * inSlidingWindowSize)),
 	fHighestSeqIndex(0),
@@ -50,7 +50,7 @@ bool SequenceNumberMap::AddSequenceNumber(uint16_t inSeqNumber)
 	// Returns whether sequence number has already been added.
 
 	//Check to see if object has been initialized
-	if (fSlidingWindow == NULL)
+	if (fSlidingWindow == nullptr)
 	{
 		fSlidingWindow = new bool[fWindowSize + 1];
 		::memset(fSlidingWindow, 0, fWindowSize * sizeof(bool));

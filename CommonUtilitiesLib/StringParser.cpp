@@ -255,7 +255,7 @@ void StringParser::ConsumeUntil(StrPtrLen* outString, char inStop)
 	while ((fStartGet < fEndGet) && (*fStartGet != inStop))
 		advanceMark();
 
-	if (outString != NULL)
+	if (outString != nullptr)
 	{
 		outString->Ptr = originalStartGet;
 		outString->Len = fStartGet - originalStartGet;
@@ -272,7 +272,7 @@ void StringParser::ConsumeUntil(StrPtrLen* outString, uint8_t* inMask)
 	while ((fStartGet < fEndGet) && (!inMask[(unsigned char)(*fStartGet)]))//make sure inMask is indexed with an unsigned char
 		advanceMark();
 
-	if (outString != NULL)
+	if (outString != nullptr)
 	{
 		outString->Ptr = originalStartGet;
 		outString->Len = fStartGet - originalStartGet;
@@ -289,7 +289,7 @@ void StringParser::ConsumeLength(StrPtrLen* spl, int32_t inLength)
 	if ((fEndGet - fStartGet) < inLength)
 		inLength = fEndGet - fStartGet;
 
-	if (spl != NULL)
+	if (spl != nullptr)
 	{
 		spl->Ptr = fStartGet;
 		spl->Len = inLength;
@@ -318,7 +318,7 @@ uint32_t StringParser::ConsumeInteger(StrPtrLen* outString)
 		advanceMark();
 	}
 
-	if (outString != NULL)
+	if (outString != nullptr)
 	{
 		outString->Ptr = originalStartGet;
 		outString->Len = fStartGet - originalStartGet;
@@ -328,7 +328,7 @@ uint32_t StringParser::ConsumeInteger(StrPtrLen* outString)
 
 float StringParser::ConsumeFloat()
 {
-	if (this->ParserIsEmpty(NULL))
+	if (this->ParserIsEmpty(nullptr))
 		return 0.0;
 
 	float theFloat = 0;
@@ -352,7 +352,7 @@ float StringParser::ConsumeFloat()
 
 float StringParser::ConsumeNPT()
 {
-	if (this->ParserIsEmpty(NULL))
+	if (this->ParserIsEmpty(nullptr))
 		return 0.0;
 
 	float valArray[4] = { 0, 0, 0, 0 };
@@ -392,7 +392,7 @@ float StringParser::ConsumeNPT()
 
 bool StringParser::Expect(char stopChar)
 {
-	if (this->ParserIsEmpty(NULL))
+	if (this->ParserIsEmpty(nullptr))
 		return false;
 
 	if (fStartGet >= fEndGet)
@@ -409,7 +409,7 @@ bool StringParser::Expect(char stopChar)
 }
 bool StringParser::ExpectEOL()
 {
-	if (this->ParserIsEmpty(NULL))
+	if (this->ParserIsEmpty(nullptr))
 		return false;
 
 	//This function processes all legal forms of HTTP / RTSP eols.
@@ -443,7 +443,7 @@ void StringParser::ConsumeEOL(StrPtrLen* outString)
 			advanceMark();
 	}
 
-	if (outString != NULL)
+	if (outString != nullptr)
 	{
 		outString->Ptr = originalStartGet;
 		outString->Len = fStartGet - originalStartGet;
@@ -456,7 +456,7 @@ void StringParser::UnQuote(StrPtrLen* outString)
 	// then UnQuote() will remove them. - [sfu]
 
 	// sanity check
-	if (outString->Ptr == NULL || outString->Len < 2)
+	if (outString->Ptr == nullptr || outString->Len < 2)
 		return;
 
 	// remove begining quote if it's there.
@@ -474,7 +474,7 @@ void StringParser::UnQuote(StrPtrLen* outString)
 
 void StringParser::advanceMark()
 {
-	if (this->ParserIsEmpty(NULL))
+	if (this->ParserIsEmpty(nullptr))
 		return;
 
 	if ((*fStartGet == '\n') || ((*fStartGet == '\r') && (fStartGet[1] != '\n')))

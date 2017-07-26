@@ -42,10 +42,10 @@ void OSQueue::EnQueue(OSQueueElem* elem)
 {
 	OSMutexLocker theLocker(&fMutex);
 
-	Assert(elem != NULL);
+	Assert(elem != nullptr);
 	if (elem->fQueue == this)
 		return;
-	Assert(elem->fQueue == NULL);
+	Assert(elem->fQueue == nullptr);
 	elem->fNext = fSentinel.fNext;
 	elem->fPrev = &fSentinel;
 	elem->fQueue = this;
@@ -64,26 +64,26 @@ OSQueueElem* OSQueue::DeQueue()
 		Assert(fSentinel.fPrev != &fSentinel);
 		elem->fPrev->fNext = &fSentinel;
 		fSentinel.fPrev = elem->fPrev;
-		elem->fQueue = NULL;
+		elem->fQueue = nullptr;
 		fLength--;
 		return elem;
 	}
 
-	return NULL;
+	return nullptr;
 }
 
 void OSQueue::Remove(OSQueueElem* elem)
 {
 	OSMutexLocker theLocker(&fMutex);
 
-	Assert(elem != NULL);
+	Assert(elem != nullptr);
 	Assert(elem != &fSentinel);
 
 	if (elem->fQueue == this)
 	{
 		elem->fNext->fPrev = elem->fPrev;
 		elem->fPrev->fNext = elem->fNext;
-		elem->fQueue = NULL;
+		elem->fQueue = nullptr;
 		fLength--;
 	}
 }
@@ -226,7 +226,7 @@ bool OSQueue::Test()
 void OSQueueIter::Next()
 {
 	if (fCurrentElemP == fQueueP->GetTail())
-		fCurrentElemP = NULL;
+		fCurrentElemP = nullptr;
 	else
 		fCurrentElemP = fCurrentElemP->Prev();
 }

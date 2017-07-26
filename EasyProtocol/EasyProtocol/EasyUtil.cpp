@@ -72,7 +72,7 @@ unsigned long EasyUtil::String2TimeT(EasyDarwinTimeFormat whatFormat, const std:
 {
 	struct tm local;
 
-	time_t now = time(NULL);
+	time_t now = time(nullptr);
 #ifdef _WIN32
 	localtime_s(&local, &now);
 #else
@@ -118,7 +118,7 @@ std::string EasyUtil::NowTime(EasyDarwinTimeFormat whatFormat)
 
 unsigned long EasyUtil::NowTime()
 {
-	time_t now = time(NULL);
+	time_t now = time(nullptr);
 	return (unsigned long)now;
 }
 

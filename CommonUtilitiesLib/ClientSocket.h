@@ -140,7 +140,7 @@ public:
 
 	//
 	// Closes the POST half of the RTSP / HTTP connection
-	void                ClosePost() { delete fPostSocket; fPostSocket = NULL; }
+	void                ClosePost() { delete fPostSocket; fPostSocket = nullptr; }
 
 	//
 	// Implements the ClientSocket Send and Receive interface for an RTSP / HTTP connection

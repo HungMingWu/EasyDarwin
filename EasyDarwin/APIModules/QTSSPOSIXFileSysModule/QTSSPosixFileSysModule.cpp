@@ -94,11 +94,11 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 
 	// Add an attribute to the file object type to store a pointer to our OSFileSource  
 	static char*        sOSFileSourceName = "QTSSPosixFileSysModuleOSFileSource";
-	(void)QTSS_AddStaticAttribute(qtssFileObjectType, sOSFileSourceName, NULL, qtssAttrDataTypeVoidPointer);
+	(void)QTSS_AddStaticAttribute(qtssFileObjectType, sOSFileSourceName, nullptr, qtssAttrDataTypeVoidPointer);
 	(void)QTSS_IDForAttr(qtssFileObjectType, sOSFileSourceName, &sOSFileSourceAttr);
 
 	static char*        sEventContextName = "QTSSPosixFileSysModuleEventContext";
-	(void)QTSS_AddStaticAttribute(qtssFileObjectType, sEventContextName, NULL, qtssAttrDataTypeVoidPointer);
+	(void)QTSS_AddStaticAttribute(qtssFileObjectType, sEventContextName, nullptr, qtssAttrDataTypeVoidPointer);
 	(void)QTSS_IDForAttr(qtssFileObjectType, sEventContextName, &sEventContextAttr);
 
 	// Tell the server our name!
@@ -170,7 +170,7 @@ QTSS_Error  OpenFile(QTSS_OpenFile_Params* inParams)
 
 QTSS_Error  AdviseFile(QTSS_AdviseFile_Params* inParams)
 {
-	OSFileSource** theFile = NULL;
+	OSFileSource** theFile = nullptr;
 	uint32_t theLen = 0;
 
 	(void)QTSS_GetValuePtr(inParams->inFileObject, sOSFileSourceAttr, 0, (void**)&theFile, &theLen);
@@ -182,7 +182,7 @@ QTSS_Error  AdviseFile(QTSS_AdviseFile_Params* inParams)
 
 QTSS_Error  ReadFile(QTSS_ReadFile_Params* inParams)
 {
-	OSFileSource** theFile = NULL;
+	OSFileSource** theFile = nullptr;
 	uint32_t theLen = 0;
 
 	(void)QTSS_GetValuePtr(inParams->inFileObject, sOSFileSourceAttr, 0, (void**)&theFile, &theLen);
@@ -199,8 +199,8 @@ QTSS_Error  ReadFile(QTSS_ReadFile_Params* inParams)
 
 QTSS_Error  CloseFile(QTSS_CloseFile_Params* inParams)
 {
-	OSFileSource** theFile = NULL;
-	EventContext** theContext = NULL;
+	OSFileSource** theFile = nullptr;
+	EventContext** theContext = nullptr;
 	uint32_t theLen = 0;
 
 	QTSS_Error theErr = QTSS_GetValuePtr(inParams->inFileObject, sOSFileSourceAttr, 0, (void**)&theFile, &theLen);
@@ -223,12 +223,12 @@ QTSS_Error  CloseFile(QTSS_CloseFile_Params* inParams)
 QTSS_Error  RequestEventFile(QTSS_RequestEventFile_Params* inParams)
 {
 	QTSS_ModuleState* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
-	if (OSThread::GetCurrent() != NULL)
+	if (OSThread::GetCurrent() != nullptr)
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 
-	Assert(theState->curTask != NULL);
+	Assert(theState->curTask != nullptr);
 
-	EventContext** theContext = NULL;
+	EventContext** theContext = nullptr;
 	uint32_t theLen = 0;
 
 	QTSS_Error theErr = QTSS_GetValuePtr(inParams->inFileObject, sEventContextAttr, 0, (void**)&theContext, &theLen);

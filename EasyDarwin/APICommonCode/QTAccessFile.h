@@ -74,7 +74,7 @@ class QTAccessFile
         bool AccessAllowed (   char *userName, char**groupArray, uint32_t numGroups, 
                                         StrPtrLen *accessFileBufPtr,QTSS_ActionFlags inFlags,StrPtrLen* ioRealmNameStr,
                                         bool* outAllowAnyUserPtr,
-                                        void *extraDataPtr = NULL
+                                        void *extraDataPtr = nullptr
                                     );
 
         static void SetAccessFileName(const char *inQTAccessFileName); //makes a copy and stores it
@@ -84,7 +84,7 @@ class QTAccessFile
         // returns the auth scheme
         static QTSS_AuthScheme FindUsersAndGroupsFilesAndAuthScheme(char* inAccessFilePath, QTSS_ActionFlags inAction, char** outUsersFilePath, char** outGroupsFilePath);
                 
-        QTSS_Error AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bool allowNoAccessFiles, QTSS_ActionFlags noAction, QTSS_ActionFlags authorizeAction,  bool *outAuthorizedPtr, bool* outAllowAnyUserPtr = NULL);
+        QTSS_Error AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bool allowNoAccessFiles, QTSS_ActionFlags noAction, QTSS_ActionFlags authorizeAction,  bool *outAuthorizedPtr, bool* outAllowAnyUserPtr = nullptr);
         virtual ~QTAccessFile() {};
         
     private:    

@@ -74,7 +74,7 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 
 	// Register an attribute
 	static char*        sStateName = "QTSSWebDebugModuleState";
-	(void)QTSS_AddStaticAttribute(qtssRTSPRequestObjectType, sStateName, NULL, qtssAttrDataTypeUInt32);
+	(void)QTSS_AddStaticAttribute(qtssRTSPRequestObjectType, sStateName, nullptr, qtssAttrDataTypeUInt32);
 	(void)QTSS_IDForAttr(qtssRTSPRequestObjectType, sStateName, &sStateAttr);
 
 	// Tell the server our name!
@@ -87,10 +87,10 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 QTSS_Error Filter(QTSS_Filter_Params* inParams)
 {
 	uint32_t theLen = 0;
-	char* theFullRequest = NULL;
+	char* theFullRequest = nullptr;
 	(void)QTSS_GetValuePtr(inParams->inRTSPRequest, qtssRTSPReqFullRequest, 0, (void**)&theFullRequest, &theLen);
 
-	if ((theFullRequest == NULL) || (theLen < sRequestHeader.Len))
+	if ((theFullRequest == nullptr) || (theLen < sRequestHeader.Len))
 		return QTSS_NoErr;
 	if (::memcmp(theFullRequest, sRequestHeader.Ptr, sRequestHeader.Len) != 0)
 		return QTSS_NoErr;

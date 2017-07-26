@@ -195,12 +195,12 @@ public:
 class NaduList
 {
 public:
-	NaduList() : fNaduReportList(NULL), fcurrentIndexCount(0), fListSize(0) {};
+	NaduList() : fNaduReportList(nullptr), fcurrentIndexCount(0), fListSize(0) {};
 	~NaduList() {
 		for (int i = 0; i < fListSize; i++) {
-			if (fNaduReportList[i] != 0) {
+			if (fNaduReportList[i] != nullptr) {
 				delete fNaduReportList[i];
-				fNaduReportList[i] = 0;
+				fNaduReportList[i] = nullptr;
 			}
 		}
 		delete[] fNaduReportList;

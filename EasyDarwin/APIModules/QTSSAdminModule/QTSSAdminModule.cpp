@@ -88,7 +88,7 @@ static char* sUnauthorizedResponseHeader = "HTTP/1.1 401 Unauthorized\r\nWWW-Aut
 static char* sPermissionDeniedHeader = "HTTP/1.1 403 Forbidden\r\nConnection: Close\r\nContent-Type: text/html\r\n\r\n";
 static char* sHTMLBody = "<HTML><BODY>\n<P><b>Your request was denied by the server.</b></P>\n</BODY></HTML>\r\n\r\n";
 
-static char* sVersionHeader = NULL;
+static char* sVersionHeader = nullptr;
 static char* sConnectionHeader = "Connection: Close";
 static char* kDefaultHeader = "Server: EasyDarwin";
 static char* sContentType = "Content-Type: text/plain";
@@ -97,17 +97,17 @@ static char* sEOM = "\r\n\r\n";
 static char* sAuthRealm = "QTSS/modules/admin";
 static char* sAuthResourceLocalPath = "/modules/admin/";
 
-static QTSS_ServerObject        sServer = NULL;
-static QTSS_ModuleObject        sModule = NULL;
-static QTSS_ModulePrefsObject   sAdminPrefs = NULL;
-static QTSS_ModulePrefsObject   sAccessLogPrefs = NULL;
-static QTSS_ModulePrefsObject   sReflectorPrefs = NULL;
-static QTSS_ModulePrefsObject	sHLSModulePrefs = NULL;
+static QTSS_ServerObject        sServer = nullptr;
+static QTSS_ModuleObject        sModule = nullptr;
+static QTSS_ModulePrefsObject   sAdminPrefs = nullptr;
+static QTSS_ModulePrefsObject   sAccessLogPrefs = nullptr;
+static QTSS_ModulePrefsObject   sReflectorPrefs = nullptr;
+static QTSS_ModulePrefsObject	sHLSModulePrefs = nullptr;
 
-static QTSS_PrefsObject         sServerPrefs = NULL;
-static AdminClass               *sAdminPtr = NULL;
-static QueryURI                 *sQueryPtr = NULL;
-static OSMutex*                 sAdminMutex = NULL;//admin module isn't reentrant
+static QTSS_PrefsObject         sServerPrefs = nullptr;
+static AdminClass               *sAdminPtr = nullptr;
+static QueryURI                 *sQueryPtr = nullptr;
+static OSMutex*                 sAdminMutex = nullptr;//admin module isn't reentrant
 static uint32_t                   sVersion = 20030306;
 static char *sDesc = "Implements HTTP based Admin Protocol for accessing server attributes";
 static char decodedLine[kAuthNameAndPasswordBuffSize] = { 0 };
@@ -143,10 +143,10 @@ static bool sEnableRemoteAdmin = true;
 static bool sDefaultEnableRemoteAdmin = true;
 
 static QTSS_AttributeID sIPAccessListID = qtssIllegalAttrID;
-static char*            sIPAccessList = NULL;
+static char*            sIPAccessList = nullptr;
 static char*            sLocalLoopBackAddress = "127.0.0.*";
 
-static char*            sAdministratorGroup = NULL;
+static char*            sAdministratorGroup = nullptr;
 static char*            sDefaultAdministratorGroup = "admin";
 
 static bool           sFlushing = false;
@@ -388,10 +388,10 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 	(void)QTSS_AddRole(QTSS_RereadPrefs_Role);
 	(void)QTSS_AddRole(QTSS_RTSPAuthorize_Role);
 
-	(void)QTSS_AddStaticAttribute(qtssRTSPRequestObjectType, sFlushingName, NULL, qtssAttrDataTypeBool16);
+	(void)QTSS_AddStaticAttribute(qtssRTSPRequestObjectType, sFlushingName, nullptr, qtssAttrDataTypeBool16);
 	(void)QTSS_IDForAttr(qtssRTSPRequestObjectType, sFlushingName, &sFlushingID);
 
-	(void)QTSS_AddStaticAttribute(qtssRTSPRequestObjectType, sAuthenticatedName, NULL, qtssAttrDataTypeBool16);
+	(void)QTSS_AddStaticAttribute(qtssRTSPRequestObjectType, sAuthenticatedName, nullptr, qtssAttrDataTypeBool16);
 	(void)QTSS_IDForAttr(qtssRTSPRequestObjectType, sAuthenticatedName, &sAuthenticatedID);
 
 	// Tell the server our name!
@@ -462,19 +462,19 @@ void ReportErr(QTSS_Filter_Params* inParams, uint32_t err)
 	if (urlPtr && evalMessagePtr)
 	{
 		sprintf(temp, "(%"   _U32BITARG_   ")", err);
-		(void)QTSS_Write(inParams->inRTSPRequest, "error:", strlen("error:"), NULL, 0);
-		(void)QTSS_Write(inParams->inRTSPRequest, temp, strlen(temp), NULL, 0);
+		(void)QTSS_Write(inParams->inRTSPRequest, "error:", strlen("error:"), nullptr, 0);
+		(void)QTSS_Write(inParams->inRTSPRequest, temp, strlen(temp), nullptr, 0);
 		if (sQueryPtr->VerboseParam())
 		{
-			(void)QTSS_Write(inParams->inRTSPRequest, ";URL=", strlen(";URL="), NULL, 0);
-			if (urlPtr) (void)QTSS_Write(inParams->inRTSPRequest, urlPtr->Ptr, urlPtr->Len, NULL, 0);
+			(void)QTSS_Write(inParams->inRTSPRequest, ";URL=", strlen(";URL="), nullptr, 0);
+			if (urlPtr) (void)QTSS_Write(inParams->inRTSPRequest, urlPtr->Ptr, urlPtr->Len, nullptr, 0);
 		}
 		if (sQueryPtr->DebugParam())
 		{
-			(void)QTSS_Write(inParams->inRTSPRequest, ";", strlen(";"), NULL, 0);
-			(void)QTSS_Write(inParams->inRTSPRequest, evalMessagePtr->Ptr, evalMessagePtr->Len, NULL, 0);
+			(void)QTSS_Write(inParams->inRTSPRequest, ";", strlen(";"), nullptr, 0);
+			(void)QTSS_Write(inParams->inRTSPRequest, evalMessagePtr->Ptr, evalMessagePtr->Len, nullptr, 0);
 		}
-		(void)QTSS_Write(inParams->inRTSPRequest, "\r\n\r\n", 4, NULL, 0);
+		(void)QTSS_Write(inParams->inRTSPRequest, "\r\n\r\n", 4, nullptr, 0);
 	}
 }
 
@@ -499,7 +499,7 @@ inline bool AcceptAddress(StrPtrLen *theAddressPtr)
 inline bool IsAdminRequest(StringParser *theFullRequestPtr)
 {
 	bool handleRequest = false;
-	if (theFullRequestPtr != NULL) do
+	if (theFullRequestPtr != nullptr) do
 	{
 		StrPtrLen   strPtr;
 		theFullRequestPtr->ConsumeWord(&strPtr);
@@ -541,7 +541,7 @@ inline void ParseAuthNameAndPassword(StrPtrLen *codedStrPtr, StrPtrLen* namePtr,
 	StringParser parsedNameAndPassword(&nameAndPassword);
 
 	parsedNameAndPassword.ConsumeUntil(namePtr, ':');
-	parsedNameAndPassword.ConsumeLength(NULL, 1);
+	parsedNameAndPassword.ConsumeLength(nullptr, 1);
 
 	// password can have whitespace, so read until the end of the line, not just until whitespace
 	parsedNameAndPassword.ConsumeUntil(passwordPtr, StringParser::sEOLMask);
@@ -623,7 +623,7 @@ inline bool HasAuthentication(StringParser *theFullRequestPtr, StrPtrLen* namePt
 		if (authString.Len == 0)
 			continue;
 
-		if (outAuthTypePtr != NULL)
+		if (outAuthTypePtr != nullptr)
 			outAuthTypePtr->Set(authType.Ptr, authType.Len);
 
 		if (authType.Equal(StrPtrLen("Basic")))
@@ -637,7 +637,7 @@ inline bool HasAuthentication(StringParser *theFullRequestPtr, StrPtrLen* namePt
 		}
 		else if (authType.Equal(sAuthRef))
 		{
-			namePtr->Set(NULL, 0);
+			namePtr->Set(nullptr, 0);
 			passwordPtr->Set(authString.Ptr, authString.Len);
 			hasAuthentication = true;
 			break;
@@ -663,7 +663,7 @@ bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen
 	}
 
 	// Get the user profile object from the request object that was created in the authenticate callback
-	QTSS_UserProfileObject theUserProfile = NULL;
+	QTSS_UserProfileObject theUserProfile = nullptr;
 	uint32_t len = sizeof(QTSS_UserProfileObject);
 	err = QTSS_GetValue(request, qtssRTSPReqUserProfile, 0, (void*)&theUserProfile, &len);
 	Assert(len == sizeof(QTSS_UserProfileObject));
@@ -673,11 +673,11 @@ bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen
 	if (err == QTSS_NoErr) {
 		char* reqPassword = passwordPtr->GetAsCString();
 		OSCharArrayDeleter reqPasswordDeleter(reqPassword);
-		char* userPassword = NULL;
+		char* userPassword = nullptr;
 		(void)QTSS_GetValueAsString(theUserProfile, qtssUserPassword, 0, &userPassword);
 		OSCharArrayDeleter userPasswordDeleter(userPassword);
 
-		if (userPassword == NULL) {
+		if (userPassword == nullptr) {
 			authenticated = false;
 		}
 		else {
@@ -694,7 +694,7 @@ bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen
 		}
 	}
 
-	char* realm = NULL;
+	char* realm = nullptr;
 	bool allowed = true;
 	//authorize callback to check authorization
 	// allocates memory for realm
@@ -735,7 +735,7 @@ QTSS_Error AuthorizeAdminRequest(QTSS_RTSPRequestObject request)
 		return QTSS_RequestFailed;
 
 	QTSS_UserProfileObject theUserProfile = QTSSModuleUtils::GetUserProfileObject(request);
-	if (NULL == theUserProfile)
+	if (nullptr == theUserProfile)
 		return QTSS_RequestFailed;
 
 	(void)QTSS_SetValue(request, qtssRTSPReqURLRealm, 0, sAuthRealm, ::strlen(sAuthRealm));
@@ -744,7 +744,7 @@ QTSS_Error AuthorizeAdminRequest(QTSS_RTSPRequestObject request)
 	uint32_t numGroups = 0;
 	char** groupsArray = QTSSModuleUtils::GetGroupsArray_Copy(theUserProfile, &numGroups);
 
-	if ((groupsArray != NULL) && (numGroups != 0))
+	if ((groupsArray != nullptr) && (numGroups != 0))
 	{
 		uint32_t index = 0;
 		for (index = 0; index < numGroups; index++)
@@ -872,12 +872,12 @@ inline bool InWaitInterval(QTSS_Filter_Params* inParams)
 inline void GetQueryData(QTSS_RTSPRequestObject theRequest)
 {
 	sAdminPtr = new AdminClass();
-	Assert(sAdminPtr != NULL);
-	if (sAdminPtr == NULL)
+	Assert(sAdminPtr != nullptr);
+	if (sAdminPtr == nullptr)
 	{   //printf ("new AdminClass() failed!! \n");
 		return;
 	}
-	if (sAdminPtr != NULL)
+	if (sAdminPtr != nullptr)
 	{
 		sAdminPtr->Initialize(&sQTSSparams, sQueryPtr);  // Get theData
 	}
@@ -885,20 +885,20 @@ inline void GetQueryData(QTSS_RTSPRequestObject theRequest)
 
 inline void SendHeader(QTSS_StreamRef inStream)
 {
-	(void)QTSS_Write(inStream, sResponseHeader, ::strlen(sResponseHeader), NULL, 0);
-	(void)QTSS_Write(inStream, sEOL, ::strlen(sEOL), NULL, 0);
-	(void)QTSS_Write(inStream, sVersionHeader, ::strlen(sVersionHeader), NULL, 0);
-	(void)QTSS_Write(inStream, sEOL, ::strlen(sEOL), NULL, 0);
-	(void)QTSS_Write(inStream, sConnectionHeader, ::strlen(sConnectionHeader), NULL, 0);
-	(void)QTSS_Write(inStream, sEOL, ::strlen(sEOL), NULL, 0);
-	(void)QTSS_Write(inStream, sContentType, ::strlen(sContentType), NULL, 0);
-	(void)QTSS_Write(inStream, sEOM, ::strlen(sEOM), NULL, 0);
+	(void)QTSS_Write(inStream, sResponseHeader, ::strlen(sResponseHeader), nullptr, 0);
+	(void)QTSS_Write(inStream, sEOL, ::strlen(sEOL), nullptr, 0);
+	(void)QTSS_Write(inStream, sVersionHeader, ::strlen(sVersionHeader), nullptr, 0);
+	(void)QTSS_Write(inStream, sEOL, ::strlen(sEOL), nullptr, 0);
+	(void)QTSS_Write(inStream, sConnectionHeader, ::strlen(sConnectionHeader), nullptr, 0);
+	(void)QTSS_Write(inStream, sEOL, ::strlen(sEOL), nullptr, 0);
+	(void)QTSS_Write(inStream, sContentType, ::strlen(sContentType), nullptr, 0);
+	(void)QTSS_Write(inStream, sEOM, ::strlen(sEOM), nullptr, 0);
 }
 
 inline void SendResult(QTSS_StreamRef inStream)
 {
 	SendHeader(inStream);
-	if (sAdminPtr != NULL)
+	if (sAdminPtr != nullptr)
 		sAdminPtr->RespondToQuery(inStream, sQueryPtr, sQueryPtr->GetRootID());
 
 }
@@ -935,7 +935,7 @@ inline bool GetRequestFlushState(QTSS_Filter_Params* inParams)
 
 QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 {
-	if (NULL == inParams || NULL == inParams->inRTSPSession || NULL == inParams->inRTSPRequest)
+	if (nullptr == inParams || nullptr == inParams->inRTSPSession || nullptr == inParams->inRTSPRequest)
 	{
 		Assert(0);
 		return QTSS_NoErr;
@@ -965,8 +965,8 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 
 	if (!AcceptSession(inParams->inRTSPSession))
 	{
-		(void)QTSS_Write(inParams->inRTSPRequest, sPermissionDeniedHeader, ::strlen(sPermissionDeniedHeader), NULL, 0);
-		(void)QTSS_Write(inParams->inRTSPRequest, sHTMLBody, ::strlen(sHTMLBody), NULL, 0);
+		(void)QTSS_Write(inParams->inRTSPRequest, sPermissionDeniedHeader, ::strlen(sPermissionDeniedHeader), nullptr, 0);
+		(void)QTSS_Write(inParams->inRTSPRequest, sHTMLBody, ::strlen(sHTMLBody), nullptr, 0);
 		KeepSession(theRequest, false);
 		return QTSS_NoErr;
 	}
@@ -978,8 +978,8 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 
 		if (!IsAuthentic(inParams, &fullRequest))
 		{
-			(void)QTSS_Write(inParams->inRTSPRequest, sUnauthorizedResponseHeader, ::strlen(sUnauthorizedResponseHeader), NULL, 0);
-			(void)QTSS_Write(inParams->inRTSPRequest, sHTMLBody, ::strlen(sHTMLBody), NULL, 0);
+			(void)QTSS_Write(inParams->inRTSPRequest, sUnauthorizedResponseHeader, ::strlen(sUnauthorizedResponseHeader), nullptr, 0);
+			(void)QTSS_Write(inParams->inRTSPRequest, sHTMLBody, ::strlen(sHTMLBody), nullptr, 0);
 			KeepSession(theRequest, false);
 			return QTSS_NoErr;
 		}
@@ -1006,22 +1006,22 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 	//printf("Handle request session=%"   _U32BITARG_   "\n",sSessID);
 	APITests_DEBUG();
 
-	if (sQueryPtr != NULL)
+	if (sQueryPtr != nullptr)
 	{
 		delete sQueryPtr;
-		sQueryPtr = NULL;
+		sQueryPtr = nullptr;
 	}
 	sQueryPtr = new QueryURI(&theFullRequest);
-	if (sQueryPtr == NULL) return QTSS_NoErr;
+	if (sQueryPtr == nullptr) return QTSS_NoErr;
 
 	ShowQuery_DEBUG();
 
-	if (sAdminPtr != NULL)
+	if (sAdminPtr != nullptr)
 	{
 		delete sAdminPtr;
-		sAdminPtr = NULL;
+		sAdminPtr = nullptr;
 	}
-	uint32_t result = sQueryPtr->EvalQuery(NULL, NULL);
+	uint32_t result = sQueryPtr->EvalQuery(nullptr, nullptr);
 	if (result == 0) do
 	{
 		if (ElementNode_CountPtrs() > 0)
@@ -1034,12 +1034,12 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 
 		SendResult(theRequest);
 		delete sAdminPtr;
-		sAdminPtr = NULL;
+		sAdminPtr = nullptr;
 
 		if (sQueryPtr && !sQueryPtr->QueryHasReponse())
 		{
 			uint32_t err = 404;
-			(void)sQueryPtr->EvalQuery(&err, NULL);
+			(void)sQueryPtr->EvalQuery(&err, nullptr);
 			ReportErr(inParams, err);
 			break;
 		}
@@ -1053,7 +1053,7 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 		{
 			QTSS_ServiceID id;
 			(void)QTSS_IDForService(QTSS_REREAD_PREFS_SERVICE, &id);
-			(void)QTSS_DoService(id, NULL);
+			(void)QTSS_DoService(id, nullptr);
 		}
 	} while (false);
 	else
@@ -1062,10 +1062,10 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 		ReportErr(inParams, sQueryPtr->GetEvaluResult());
 	}
 
-	if (sQueryPtr != NULL)
+	if (sQueryPtr != nullptr)
 	{
 		delete sQueryPtr;
-		sQueryPtr = NULL;
+		sQueryPtr = nullptr;
 	}
 
 	(void)StillFlushing(inParams, true);

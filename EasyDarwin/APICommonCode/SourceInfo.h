@@ -48,8 +48,8 @@ class SourceInfo
 {
     public:
     
-        SourceInfo() :  fStreamArray(NULL), fNumStreams(0),
-                        fOutputArray(NULL), fNumOutputs(0),
+        SourceInfo() :  fStreamArray(nullptr), fNumStreams(0),
+                        fOutputArray(nullptr), fNumOutputs(0),
                         fTimeSet(false),fStartTimeUnixSecs(0),fEndTimeUnixSecs(0),
                         fSessionControlType(kRTSPSessionControl)  {}
         SourceInfo(const SourceInfo& copy);// Does copy dynamically allocated data
@@ -67,7 +67,7 @@ class SourceInfo
         // the following metadata.
         struct StreamInfo
         {
-            StreamInfo() : fSrcIPAddr(0), fDestIPAddr(0), fPort(0), fTimeToLive(0), fPayloadType(0), fPayloadName(NULL), fTrackID(0), fTrackName(NULL), fBufferDelay((float) eDefaultBufferDelay), fIsTCP(false),fSetupToReceive(false), fTimeScale(0){}
+            StreamInfo() : fSrcIPAddr(0), fDestIPAddr(0), fPort(0), fTimeToLive(0), fPayloadType(0), fPayloadName(nullptr), fTrackID(0), fTrackName(nullptr), fBufferDelay((float) eDefaultBufferDelay), fIsTCP(false),fSetupToReceive(false), fTimeScale(0){}
             ~StreamInfo(); // Deletes the memory allocated for the fPayloadName string 
             
             void Copy(const StreamInfo& copy);// Does copy dynamically allocated data
@@ -98,7 +98,7 @@ class SourceInfo
         // contains one RTP port for each incoming stream.
         struct OutputInfo
         {
-            OutputInfo() : fDestAddr(0), fLocalAddr(0), fTimeToLive(0), fPortArray(NULL), fNumPorts(0), fBasePort(0), fAlreadySetup(false) {}
+            OutputInfo() : fDestAddr(0), fLocalAddr(0), fTimeToLive(0), fPortArray(nullptr), fNumPorts(0), fBasePort(0), fAlreadySetup(false) {}
             ~OutputInfo(); // Deletes the memory allocated for fPortArray
             
             // Returns true if the two are equal
@@ -131,7 +131,7 @@ class SourceInfo
         virtual bool IsRTSPSourceInfo() { return false; }
         
                 // This is only supported by the RCFSourceInfo sub class and its derived classes
-                virtual char*   Name()  { return NULL; }
+                virtual char*   Name()  { return nullptr; }
                 
         virtual bool Equal(SourceInfo* inInfo);
         

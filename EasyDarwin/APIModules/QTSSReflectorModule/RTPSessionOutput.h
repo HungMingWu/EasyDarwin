@@ -99,11 +99,11 @@ private:
 
 bool RTPSessionOutput::PacketMatchesStream(void* inStreamCookie, QTSS_RTPStreamObject *theStreamPtr)
 {
-	void** theStreamCookie = NULL;
+	void** theStreamCookie = nullptr;
 	uint32_t theLen = 0;
 	(void)QTSS_GetValuePtr(*theStreamPtr, fCookieAttrID, 0, (void**)&theStreamCookie, &theLen);
 
-	if ((theStreamCookie != NULL) && (*theStreamCookie == inStreamCookie))
+	if ((theStreamCookie != nullptr) && (*theStreamCookie == inStreamCookie))
 		return true;
 
 	return false;

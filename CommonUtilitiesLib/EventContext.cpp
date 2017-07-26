@@ -67,7 +67,7 @@ EventContext::EventContext(int inFileDesc, EventThread* inThread)
 	fWatchEventCalled(false),
 	fEventBits(0),
 	fAutoCleanup(true),
-	fTask(NULL)
+	fTask(nullptr)
 {}
 
 void EventContext::InitNonBlocking(int inFileDesc)
@@ -227,7 +227,7 @@ void EventContext::RequestEvent(int theMask)
 
 			//If the fUniqueID is used, find a new one until it's free
 			OSRef * ref = fEventThread->fRefTable.Resolve(&fUniqueIDStr);
-			if (ref != NULL)
+			if (ref != nullptr)
 			{
 				fEventThread->fRefTable.Release(ref);
 			}
@@ -279,7 +279,7 @@ void EventThread::Entry()
 #else
 
 #if defined(__linux__) && !defined(EASY_DEVICE)
-			int theReturnValue = epoll_waitevent(&theCurrentEvent, NULL);
+			int theReturnValue = epoll_waitevent(&theCurrentEvent, nullptr);
 #else
 			int theReturnValue = select_waitevent(&theCurrentEvent, NULL);
 #endif
@@ -295,14 +295,14 @@ void EventThread::Entry()
 		AssertV(theErrno == 0, theErrno);
 
 		//ok, there's data waiting on this socket. Send a wakeup.
-		if (theCurrentEvent.er_data != NULL)
+		if (theCurrentEvent.er_data != nullptr)
 		{
 			//The cookie in this event is an ObjectID. Resolve that objectID into
 			//a pointer.
 			//StrPtrLen idStr((char*)&theCurrentEvent.er_data, sizeof(theCurrentEvent.er_data));
 			StrPtrLen idStr((char*)&theCurrentEvent.er_data, sizeof(PointerSizedInt));
 			OSRef* ref = fRefTable.Resolve(&idStr);
-			if (ref != NULL)
+			if (ref != nullptr)
 			{
 				EventContext* theContext = (EventContext*)ref->GetObject();
 #if DEBUG

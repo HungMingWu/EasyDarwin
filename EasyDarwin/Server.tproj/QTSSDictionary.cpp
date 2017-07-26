@@ -40,10 +40,10 @@
 #include "QTSSDataConverter.h"
 
 QTSSDictionary::QTSSDictionary(QTSSDictionaryMap* inMap, OSMutex* inMutex)
-	: fInstanceAttrs(NULL), fInstanceArraySize(0),
-	fMap(inMap), fInstanceMap(NULL), fMutexP(inMutex), fMyMutex(false), fLocked(false)
+	: fInstanceAttrs(nullptr), fInstanceArraySize(0),
+	fMap(inMap), fInstanceMap(nullptr), fMutexP(inMutex), fMyMutex(false), fLocked(false)
 {
-	if (fMap != NULL)
+	if (fMap != nullptr)
 	{
 		if (fMap->GetNumAttrs() > QTSS_MAX_ATTRIBUTE_NUMS)
 		{
@@ -52,7 +52,7 @@ QTSSDictionary::QTSSDictionary(QTSSDictionaryMap* inMap, OSMutex* inMutex)
 		}
 	}
 	//    fAttributes = new DictValueElement[inMap->GetNumAttrs()];
-	if (fMutexP == NULL)
+	if (fMutexP == nullptr)
 	{
 		fMyMutex = true;
 		fMutexP = new OSMutex();
@@ -61,7 +61,7 @@ QTSSDictionary::QTSSDictionary(QTSSDictionaryMap* inMap, OSMutex* inMutex)
 
 QTSSDictionary::~QTSSDictionary()
 {
-	if (fMap != NULL)
+	if (fMap != nullptr)
 		this->DeleteAttributeData(fAttributes, fMap->GetNumAttrs(), fMap);
 	//  if (fAttributes != NULL)
 	//      delete [] fAttributes;
@@ -90,7 +90,7 @@ QTSS_Error QTSSDictionary::GetValuePtr(QTSS_AttributeID inAttrID, uint32_t inInd
 		theAttrs = fInstanceAttrs;
 	}
 
-	if (theMap == NULL)
+	if (theMap == nullptr)
 		return QTSS_AttrDoesntExist;
 
 	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
@@ -102,7 +102,7 @@ QTSS_Error QTSSDictionary::GetValuePtr(QTSS_AttributeID inAttrID, uint32_t inInd
 	if ((!isInternal) && (!theMap->IsPreemptiveSafe(theMapIndex)) && !this->IsLocked())
 		return QTSS_NotPreemptiveSafe;
 	// An iterated attribute cannot have a param retrieval function
-	if ((inIndex > 0) && (theMap->GetAttrFunction(theMapIndex) != NULL))
+	if ((inIndex > 0) && (theMap->GetAttrFunction(theMapIndex) != nullptr))
 		return QTSS_BadIndex;
 	// Check to make sure the index parameter is legal
 	if ((inIndex > 0) && (inIndex >= theAttrs[theMapIndex].fNumAttributes))
@@ -114,7 +114,7 @@ QTSS_Error QTSSDictionary::GetValuePtr(QTSS_AttributeID inAttrID, uint32_t inInd
 	*outValueLen = theAttrs[theMapIndex].fAttributeData.Len;
 
 	bool cacheable = theMap->IsCacheable(theMapIndex);
-	if ((theMap->GetAttrFunction(theMapIndex) != NULL) && ((cacheable && (*outValueLen == 0)) || !cacheable))
+	if ((theMap->GetAttrFunction(theMapIndex) != nullptr) && ((cacheable && (*outValueLen == 0)) || !cacheable))
 	{
 		// If function is cacheable: 
 		// If the parameter doesn't have a value assigned yet, and there is an attribute
@@ -127,7 +127,7 @@ QTSS_Error QTSSDictionary::GetValuePtr(QTSS_AttributeID inAttrID, uint32_t inInd
 		//If the param retrieval function didn't return an explicit value for this attribute,
 		//refetch the parameter out of the array, in case the function modified it.
 
-		if (theBuffer == NULL)
+		if (theBuffer == nullptr)
 		{
 			theBuffer = theAttrs[theMapIndex].fAttributeData.Ptr;
 			*outValueLen = theAttrs[theMapIndex].fAttributeData.Len;
@@ -168,7 +168,7 @@ QTSS_Error QTSSDictionary::GetValue(QTSS_AttributeID inAttrID, uint32_t inIndex,
 	// If there is a mutex, lock it and get a pointer to the proper attribute
 	OSMutexLocker locker(fMutexP);
 
-	void* tempValueBuffer = NULL;
+	void* tempValueBuffer = nullptr;
 	uint32_t tempValueLen = 0;
 	QTSS_Error theErr = this->GetValuePtr(inAttrID, inIndex, &tempValueBuffer, &tempValueLen, true);
 	if (theErr != QTSS_NoErr)
@@ -181,7 +181,7 @@ QTSS_Error QTSSDictionary::GetValue(QTSS_AttributeID inAttrID, uint32_t inIndex,
 			theErr = QTSS_NotEnoughSpace;
 
 		// Only copy out the attribute if the buffer is big enough
-		if ((ioValueBuffer != NULL) && (theErr == QTSS_NoErr))
+		if ((ioValueBuffer != nullptr) && (theErr == QTSS_NoErr))
 			::memcpy(ioValueBuffer, tempValueBuffer, tempValueLen);
 
 		// Always set the ioValueLen to be the actual length of the attribute.
@@ -196,7 +196,7 @@ QTSS_Error QTSSDictionary::GetValueAsString(QTSS_AttributeID inAttrID, uint32_t 
 	void* tempValueBuffer;
 	uint32_t tempValueLen = 0;
 
-	if (outString == NULL)
+	if (outString == nullptr)
 		return QTSS_BadArgument;
 
 	OSMutexLocker locker(fMutexP);
@@ -209,7 +209,7 @@ QTSS_Error QTSSDictionary::GetValueAsString(QTSS_AttributeID inAttrID, uint32_t 
 	if (QTSSDictionaryMap::IsInstanceAttrID(inAttrID))
 		theMap = fInstanceMap;
 
-	if (theMap == NULL)
+	if (theMap == nullptr)
 		return QTSS_AttrDoesntExist;
 
 	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
@@ -233,7 +233,7 @@ QTSS_Error QTSSDictionary::CreateObjectValue(QTSS_AttributeID inAttrID, uint32_t
 		theAttrs = fInstanceAttrs;
 	}
 
-	if (theMap == NULL)
+	if (theMap == nullptr)
 		return QTSS_AttrDoesntExist;
 
 	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
@@ -256,7 +256,7 @@ QTSS_Error QTSSDictionary::CreateObjectValue(QTSS_AttributeID inAttrID, uint32_t
 	if (!theAttrs[theMapIndex].fIsDynamicDictionary && (numValues > 0))
 		return QTSS_ReadOnly;
 
-	QTSSDictionary* oldDict = NULL;
+	QTSSDictionary* oldDict = nullptr;
 	*outIndex = numValues;  // add the object into the next spot
 
 	uint32_t len = sizeof(QTSSDictionary*);
@@ -271,7 +271,7 @@ QTSS_Error QTSSDictionary::CreateObjectValue(QTSS_AttributeID inAttrID, uint32_t
 		return err;
 	}
 
-	if (oldDict != NULL)
+	if (oldDict != nullptr)
 	{
 		delete oldDict;
 	}
@@ -295,7 +295,7 @@ QTSS_Error QTSSDictionary::SetValue(QTSS_AttributeID inAttrID, uint32_t inIndex,
 		theAttrs = fInstanceAttrs;
 	}
 
-	if (theMap == NULL)
+	if (theMap == nullptr)
 		return QTSS_AttrDoesntExist;
 
 	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
@@ -428,7 +428,7 @@ QTSS_Error QTSSDictionary::SetValue(QTSS_AttributeID inAttrID, uint32_t inIndex,
 
 	//
 	// Call the completion routine
-	if (((fMap == NULL) || fMap->CompleteFunctionsAllowed()) && !(inFlags & kDontCallCompletionRoutine))
+	if (((fMap == nullptr) || fMap->CompleteFunctionsAllowed()) && !(inFlags & kDontCallCompletionRoutine))
 		this->SetValueComplete(theMapIndex, theMap, inIndex, attributeBufferPtr, inLen);
 
 	return QTSS_NoErr;
@@ -448,7 +448,7 @@ QTSS_Error QTSSDictionary::SetValuePtr(QTSS_AttributeID inAttrID,
 		theAttrs = fInstanceAttrs;
 	}
 
-	if (theMap == NULL)
+	if (theMap == nullptr)
 		return QTSS_AttrDoesntExist;
 
 	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
@@ -466,7 +466,7 @@ QTSS_Error QTSSDictionary::SetValuePtr(QTSS_AttributeID inAttrID,
 		return QTSS_ReadOnly;
 
 	uint32_t numValues = theAttrs[theMapIndex].fNumAttributes;
-	if ((numValues > 0) || (theAttrs[theMapIndex].fAttributeData.Ptr != NULL))
+	if ((numValues > 0) || (theAttrs[theMapIndex].fAttributeData.Ptr != nullptr))
 		return QTSS_BadArgument;    // you can only set the pointer if you haven't done set value
 
 	theAttrs[theMapIndex].fAttributeData.Ptr = (char*)inBuffer;
@@ -490,7 +490,7 @@ QTSS_Error QTSSDictionary::RemoveValue(QTSS_AttributeID inAttrID, uint32_t inInd
 		theAttrs = fInstanceAttrs;
 	}
 
-	if (theMap == NULL)
+	if (theMap == nullptr)
 		return QTSS_AttrDoesntExist;
 
 	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
@@ -504,7 +504,7 @@ QTSS_Error QTSSDictionary::RemoveValue(QTSS_AttributeID inAttrID, uint32_t inInd
 		return QTSS_ReadOnly;
 	if (theMap->IsRemoved(theMapIndex))
 		return QTSS_AttrDoesntExist;
-	if ((theMap->GetAttrFunction(theMapIndex) != NULL) && (inIndex > 0))
+	if ((theMap->GetAttrFunction(theMapIndex) != nullptr) && (inIndex > 0))
 		return QTSS_BadIndex;
 
 	uint32_t numValues = theAttrs[theMapIndex].fNumAttributes;
@@ -554,7 +554,7 @@ QTSS_Error QTSSDictionary::RemoveValue(QTSS_AttributeID inAttrID, uint32_t inInd
 
 	//
 	// Call the completion routine
-	if (((fMap == NULL) || fMap->CompleteFunctionsAllowed()) && !(inFlags & kDontCallCompletionRoutine))
+	if (((fMap == nullptr) || fMap->CompleteFunctionsAllowed()) && !(inFlags & kDontCallCompletionRoutine))
 		this->RemoveValueComplete(theMapIndex, theMap, inIndex);
 
 	return QTSS_NoErr;
@@ -571,7 +571,7 @@ uint32_t  QTSSDictionary::GetNumValues(QTSS_AttributeID inAttrID)
 		theAttrs = fInstanceAttrs;
 	}
 
-	if (theMap == NULL)
+	if (theMap == nullptr)
 		return 0;
 
 	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
@@ -592,7 +592,7 @@ void    QTSSDictionary::SetNumValues(QTSS_AttributeID inAttrID, uint32_t inNumVa
 		theAttrs = fInstanceAttrs;
 	}
 
-	if (theMap == NULL)
+	if (theMap == nullptr)
 		return;
 
 	int32_t theMapIndex = theMap->ConvertAttrIDToArrayIndex(inAttrID);
@@ -657,7 +657,7 @@ QTSS_Error  QTSSDictionary::AddInstanceAttribute(const char* inAttrName,
 	QTSS_AttrDataType inDataType,
 	QTSS_AttrPermission inPermission)
 {
-	if ((fMap != NULL) && !fMap->InstanceAttrsAllowed())
+	if ((fMap != nullptr) && !fMap->InstanceAttrsAllowed())
 		return QTSS_InstanceAttrsNotAllowed;
 
 	OSMutexLocker locker(fMutexP);
@@ -665,19 +665,19 @@ QTSS_Error  QTSSDictionary::AddInstanceAttribute(const char* inAttrName,
 	//
 	// Check to see if this attribute exists in the static map. If it does,
 	// we can't add it as an instance attribute, so return an error
-	QTSSAttrInfoDict* throwAway = NULL;
+	QTSSAttrInfoDict* throwAway = nullptr;
 	QTSS_Error theErr;
-	if (fMap != NULL)
+	if (fMap != nullptr)
 	{
 		theErr = fMap->GetAttrInfoByName(inAttrName, &throwAway);
 		if (theErr == QTSS_NoErr)
 			return QTSS_AttrNameExists;
 	}
 
-	if (fInstanceMap == NULL)
+	if (fInstanceMap == nullptr)
 	{
 		uint32_t theFlags = QTSSDictionaryMap::kAllowRemoval | QTSSDictionaryMap::kIsInstanceMap;
-		if ((fMap == NULL) || fMap->CompleteFunctionsAllowed())
+		if ((fMap == nullptr) || fMap->CompleteFunctionsAllowed())
 			theFlags |= QTSSDictionaryMap::kCompleteFunctionsAllowed;
 
 		fInstanceMap = new QTSSDictionaryMap(0, theFlags);
@@ -699,7 +699,7 @@ QTSS_Error  QTSSDictionary::AddInstanceAttribute(const char* inAttrName,
 		Assert(theNewArraySize > fInstanceMap->GetNumAttrs());
 
 		DictValueElement* theNewArray = new DictValueElement[theNewArraySize];
-		if (fInstanceAttrs != NULL)
+		if (fInstanceAttrs != nullptr)
 		{
 			::memcpy(theNewArray, fInstanceAttrs, sizeof(DictValueElement) * fInstanceArraySize);
 
@@ -716,7 +716,7 @@ QTSS_Error  QTSSDictionary::RemoveInstanceAttribute(QTSS_AttributeID inAttr)
 {
 	OSMutexLocker locker(fMutexP);
 
-	if (fInstanceMap != NULL)
+	if (fInstanceMap != nullptr)
 	{
 		QTSS_Error theErr = fInstanceMap->CheckRemovePermission(inAttr);
 		if (theErr != QTSS_NoErr)
@@ -738,7 +738,7 @@ QTSS_Error  QTSSDictionary::RemoveInstanceAttribute(QTSS_AttributeID inAttr)
 
 QTSS_Error QTSSDictionary::GetAttrInfoByIndex(uint32_t inIndex, QTSSAttrInfoDict** outAttrInfoDict)
 {
-	if (outAttrInfoDict == NULL)
+	if (outAttrInfoDict == nullptr)
 		return QTSS_BadArgument;
 
 	OSMutexLocker locker(fMutexP);
@@ -746,10 +746,10 @@ QTSS_Error QTSSDictionary::GetAttrInfoByIndex(uint32_t inIndex, QTSSAttrInfoDict
 	uint32_t numInstanceValues = 0;
 	uint32_t numStaticValues = 0;
 
-	if (fMap != NULL)
+	if (fMap != nullptr)
 		numStaticValues = fMap->GetNumNonRemovedAttrs();
 
-	if (fInstanceMap != NULL)
+	if (fInstanceMap != nullptr)
 		numInstanceValues = fInstanceMap->GetNumNonRemovedAttrs();
 
 	if (inIndex >= (numStaticValues + numInstanceValues))
@@ -758,25 +758,25 @@ QTSS_Error QTSSDictionary::GetAttrInfoByIndex(uint32_t inIndex, QTSSAttrInfoDict
 	if ((numStaticValues > 0) && (inIndex < numStaticValues))
 		return fMap->GetAttrInfoByIndex(inIndex, outAttrInfoDict);
 
-	Assert(fInstanceMap != NULL);
+	Assert(fInstanceMap != nullptr);
 	return fInstanceMap->GetAttrInfoByIndex(inIndex - numStaticValues, outAttrInfoDict);
 
 }
 
 QTSS_Error QTSSDictionary::GetAttrInfoByID(QTSS_AttributeID inAttrID, QTSSAttrInfoDict** outAttrInfoDict)
 {
-	if (outAttrInfoDict == NULL)
+	if (outAttrInfoDict == nullptr)
 		return QTSS_BadArgument;
 
 	if (QTSSDictionaryMap::IsInstanceAttrID(inAttrID))
 	{
 		OSMutexLocker locker(fMutexP);
 
-		if (fInstanceMap != NULL)
+		if (fInstanceMap != nullptr)
 			return fInstanceMap->GetAttrInfoByID(inAttrID, outAttrInfoDict);
 	}
 	else
-		if (fMap != NULL) return fMap->GetAttrInfoByID(inAttrID, outAttrInfoDict);
+		if (fMap != nullptr) return fMap->GetAttrInfoByID(inAttrID, outAttrInfoDict);
 
 	return QTSS_AttrDoesntExist;
 }
@@ -784,17 +784,17 @@ QTSS_Error QTSSDictionary::GetAttrInfoByID(QTSS_AttributeID inAttrID, QTSSAttrIn
 QTSS_Error QTSSDictionary::GetAttrInfoByName(const char* inAttrName, QTSSAttrInfoDict** outAttrInfoDict)
 {
 	QTSS_Error theErr = QTSS_AttrDoesntExist;
-	if (outAttrInfoDict == NULL)
+	if (outAttrInfoDict == nullptr)
 		return QTSS_BadArgument;
 
 	// Retrieve the Dictionary Map for this object type
-	if (fMap != NULL)
+	if (fMap != nullptr)
 		theErr = fMap->GetAttrInfoByName(inAttrName, outAttrInfoDict);
 
 	if (theErr == QTSS_AttrDoesntExist)
 	{
 		OSMutexLocker locker(fMutexP);
-		if (fInstanceMap != NULL)
+		if (fInstanceMap != nullptr)
 			theErr = fInstanceMap->GetAttrInfoByName(inAttrName, outAttrInfoDict);
 	}
 	return theErr;
@@ -823,10 +823,10 @@ void QTSSDictionary::DeleteAttributeData(DictValueElement* inDictValues,
 
 QTSSAttrInfoDict::AttrInfo  QTSSAttrInfoDict::sAttributes[] =
 {
-	/* 0 */ { "qtssAttrName",       NULL,       qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 1 */ { "qtssAttrID",         NULL,       qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 2 */ { "qtssAttrDataType",   NULL,       qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 3 */ { "qtssAttrPermissions",NULL,       qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe }
+	/* 0 */ { "qtssAttrName",       nullptr,       qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 1 */ { "qtssAttrID",         nullptr,       qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 2 */ { "qtssAttrDataType",   nullptr,       qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 3 */ { "qtssAttrPermissions",nullptr,       qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe }
 };
 
 QTSSAttrInfoDict::QTSSAttrInfoDict()
@@ -885,7 +885,7 @@ QTSS_Error QTSSDictionaryMap::AddAttribute(const char* inAttrName,
 	QTSS_AttrDataType inDataType,
 	QTSS_AttrPermission inPermission)
 {
-	if (inAttrName == NULL || ::strlen(inAttrName) > QTSS_MAX_ATTRIBUTE_NAME_SIZE)
+	if (inAttrName == nullptr || ::strlen(inAttrName) > QTSS_MAX_ATTRIBUTE_NAME_SIZE)
 		return QTSS_BadArgument;
 
 	for (uint32_t count = 0; count < fNextAvailableID; count++)
@@ -922,7 +922,7 @@ QTSS_Error QTSSDictionaryMap::AddAttribute(const char* inAttrName,
 
 		QTSSAttrInfoDict** theNewArray = new QTSSAttrInfoDict*[theNewArraySize];
 		::memset(theNewArray, 0, sizeof(QTSSAttrInfoDict*) * theNewArraySize);
-		if (fAttrArray != NULL)
+		if (fAttrArray != nullptr)
 		{
 			::memcpy(theNewArray, fAttrArray, sizeof(QTSSAttrInfoDict*) * fAttrArraySize);
 			delete[] fAttrArray;
@@ -952,7 +952,7 @@ void QTSSDictionaryMap::SetAttribute(QTSS_AttributeID inID,
 	uint32_t theIndex = QTSSDictionaryMap::ConvertAttrIDToArrayIndex(inID);
 	uint32_t theNameLen = ::strlen(inAttrName);
 	Assert(theNameLen < QTSS_MAX_ATTRIBUTE_NAME_SIZE);
-	Assert(fAttrArray[theIndex] == NULL);
+	Assert(fAttrArray[theIndex] == nullptr);
 
 	fAttrArray[theIndex] = new QTSSAttrInfoDict;
 
@@ -1023,7 +1023,7 @@ QTSS_Error  QTSSDictionaryMap::UnRemoveAttribute(QTSS_AttributeID inAttrID)
 QTSS_Error  QTSSDictionaryMap::GetAttrInfoByName(const char* inAttrName, QTSSAttrInfoDict** outAttrInfoObject,
 	bool returnRemovedAttr)
 {
-	if (outAttrInfoObject == NULL)
+	if (outAttrInfoObject == nullptr)
 		return QTSS_BadArgument;
 
 	for (uint32_t count = 0; count < fNextAvailableID; count++)
@@ -1042,7 +1042,7 @@ QTSS_Error  QTSSDictionaryMap::GetAttrInfoByName(const char* inAttrName, QTSSAtt
 
 QTSS_Error  QTSSDictionaryMap::GetAttrInfoByID(QTSS_AttributeID inID, QTSSAttrInfoDict** outAttrInfoObject)
 {
-	if (outAttrInfoObject == NULL)
+	if (outAttrInfoObject == nullptr)
 		return QTSS_BadArgument;
 
 	int32_t theIndex = this->ConvertAttrIDToArrayIndex(inID);
@@ -1058,7 +1058,7 @@ QTSS_Error  QTSSDictionaryMap::GetAttrInfoByID(QTSS_AttributeID inID, QTSSAttrIn
 
 QTSS_Error  QTSSDictionaryMap::GetAttrInfoByIndex(uint32_t inIndex, QTSSAttrInfoDict** outAttrInfoObject)
 {
-	if (outAttrInfoObject == NULL)
+	if (outAttrInfoObject == nullptr)
 		return QTSS_BadArgument;
 	if (inIndex >= this->GetNumNonRemovedAttrs())
 		return QTSS_AttrDoesntExist;
@@ -1095,10 +1095,10 @@ QTSS_Error  QTSSDictionaryMap::GetAttrInfoByIndex(uint32_t inIndex, QTSSAttrInfo
 
 QTSS_Error  QTSSDictionaryMap::GetAttrID(const char* inAttrName, QTSS_AttributeID* outID)
 {
-	if (outID == NULL)
+	if (outID == nullptr)
 		return QTSS_BadArgument;
 
-	QTSSAttrInfoDict* theAttrInfo = NULL;
+	QTSSAttrInfoDict* theAttrInfo = nullptr;
 	QTSS_Error theErr = this->GetAttrInfoByName(inAttrName, &theAttrInfo);
 	if (theErr == QTSS_NoErr)
 		*outID = theAttrInfo->fID;

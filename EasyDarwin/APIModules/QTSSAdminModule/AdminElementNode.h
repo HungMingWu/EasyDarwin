@@ -121,17 +121,17 @@ public:
 	uint32_t  GetMyIndex() { Assert(fSelfPtr); return fSelfPtr->fIndex; };
 
 	uint32_t  GetMyAPI_Type() { Assert(fSelfPtr); return fSelfPtr->fAPI_Type; };
-	char*   GetMyAPI_TypeStr() { Assert(fSelfPtr); char* theTypeString = NULL; (void)QTSS_TypeToTypeString(GetMyAPI_Type(), &theTypeString); return theTypeString; };
+	char*   GetMyAPI_TypeStr() { Assert(fSelfPtr); char* theTypeString = nullptr; (void)QTSS_TypeToTypeString(GetMyAPI_Type(), &theTypeString); return theTypeString; };
 	uint32_t  GetMyFieldType() { Assert(fSelfPtr); return fSelfPtr->fFieldType; };
 
 	char*   GetMyAccessData() { Assert(fSelfPtr); return fSelfPtr->fAccessData; };
 	uint32_t  GetMyAccessLen() { Assert(fSelfPtr); return fSelfPtr->fAccessLen; };
 	uint32_t  GetMyAccessPermissions() { Assert(fSelfPtr); return fSelfPtr->fAccessPermissions; };
 
-	void    GetMyNameSPL(StrPtrLen* str) { Assert(str); if (str != NULL) str->Set(fSelfPtr->fFieldName, fSelfPtr->fFieldLen); };
-	void    GetMyAccess(StrPtrLen* str) { Assert(str); if (str != NULL) str->Set(fSelfPtr->fAccessData, fSelfPtr->fAccessLen); };
+	void    GetMyNameSPL(StrPtrLen* str) { Assert(str); if (str != nullptr) str->Set(fSelfPtr->fFieldName, fSelfPtr->fFieldLen); };
+	void    GetMyAccess(StrPtrLen* str) { Assert(str); if (str != nullptr) str->Set(fSelfPtr->fAccessData, fSelfPtr->fAccessLen); };
 	QTSS_Object GetMySource() {
-		Assert(fSelfPtr != NULL);
+		Assert(fSelfPtr != nullptr);
 		//printf("GetMySource fSelfPtr->fAPISource = %"_U32BITARG_" \n", fSelfPtr->fAPISource); 
 		return fSelfPtr->fAPISource;
 	};
@@ -146,13 +146,13 @@ public:
 	uint32_t  GetAPI_ID(int32_t index) { return fFieldIDs[index].fAPI_ID; };
 	uint32_t  GetAttributeIndex(int32_t index) { return fFieldIDs[index].fIndex; };
 	uint32_t  GetAPI_Type(int32_t index) { return fFieldIDs[index].fAPI_Type; };
-	char*   GetAPI_TypeStr(int32_t index) { char* theTypeStr = NULL; (void)QTSS_TypeToTypeString(GetAPI_Type(index), &theTypeStr); return theTypeStr; };
+	char*   GetAPI_TypeStr(int32_t index) { char* theTypeStr = nullptr; (void)QTSS_TypeToTypeString(GetAPI_Type(index), &theTypeStr); return theTypeStr; };
 	uint32_t  GetFieldType(int32_t index) { return fFieldIDs[index].fFieldType; };
 	char*   GetAccessData(int32_t index) { return fFieldIDs[index].fAccessData; };
 	uint32_t  GetAccessLen(int32_t index) { return fFieldIDs[index].fAccessLen; };
 	uint32_t  GetAccessPermissions(int32_t index) { return fFieldIDs[index].fAccessPermissions; };
-	void    GetNameSPL(int32_t index, StrPtrLen* str) { if (str != NULL) str->Set(fFieldIDs[index].fFieldName, fFieldIDs[index].fFieldLen); };
-	void    GetAccess(int32_t index, StrPtrLen* str) { if (str != NULL) str->Set(fFieldIDs[index].fAccessData, fFieldIDs[index].fAccessLen); };
+	void    GetNameSPL(int32_t index, StrPtrLen* str) { if (str != nullptr) str->Set(fFieldIDs[index].fFieldName, fFieldIDs[index].fFieldLen); };
+	void    GetAccess(int32_t index, StrPtrLen* str) { if (str != nullptr) str->Set(fFieldIDs[index].fAccessData, fFieldIDs[index].fAccessLen); };
 	QTSS_Object GetAPISource(int32_t index) { return fFieldIDs[index].fAPISource; };
 	bool  IsNodeElement(int32_t index) { return (GetFieldType(index) == eNode || GetFieldType(index) == eArrayNode); }
 
@@ -197,7 +197,7 @@ public:
 	void    SetSource(void * dataSource) { fDataSource = dataSource; };
 	void *  GetSource() {
 		QTSS_Object source = GetMySource();
-		if (source != NULL)
+		if (source != nullptr)
 			return source;
 		else
 		{   //printf("GetSource return fDataSource = %"_U32BITARG_" \n",fDataSource);
@@ -289,7 +289,7 @@ public:
 	void SetUpSingleElement(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, int32_t index, QTSS_Initialize_Params *initParams) override;
 	void SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr, StrPtrLen *nextSegmentPtr, int32_t index, QTSS_Initialize_Params *initParams) override;
 	void Initialize(QTSS_Initialize_Params *initParams, QueryURI *queryPtr);
-	AdminClass() :fQueryPtr(NULL), fNodePtr(NULL) {};
+	AdminClass() :fQueryPtr(nullptr), fNodePtr(nullptr) {};
 	~AdminClass() override;
 	static ElementNode::ElementDataFields sAdminSelf[];
 	static ElementNode::ElementDataFields sAdminFieldIDs[];

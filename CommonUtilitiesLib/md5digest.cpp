@@ -70,7 +70,7 @@ void CalcMD5HA1(StrPtrLen* userName,
 	Assert(realm);
 	Assert(userPassword);
 	Assert(hashA1Hex16Bit);
-	Assert(hashA1Hex16Bit->Ptr == NULL); //This is the result. A Ptr here will be replaced. Value should be NULL.
+	Assert(hashA1Hex16Bit->Ptr == nullptr); //This is the result. A Ptr here will be replaced. Value should be NULL.
 
 	MD5_CTX context;
 	unsigned char* aHash = new unsigned char[kHashLen];
@@ -108,7 +108,7 @@ void CalcHA1(StrPtrLen* algorithm,
 	Assert(nonce);
 	Assert(cNonce);
 	Assert(hA1);
-	Assert(hA1->Ptr == NULL); //This is the result. A Ptr here will be replaced. Value should be NULL.
+	Assert(hA1->Ptr == nullptr); //This is the result. A Ptr here will be replaced. Value should be NULL.
 
 	MD5_CTX context;
 	unsigned char aHash[kHashLen];
@@ -147,7 +147,7 @@ void CalcHA1Md5Sess(StrPtrLen* hashA1Hex16Bit, StrPtrLen* nonce, StrPtrLen* cNon
 	Assert(nonce);
 	Assert(cNonce);
 	Assert(hA1);
-	Assert(hA1->Ptr == NULL); //This is the result. A Ptr here will be replaced. Value should be NULL.
+	Assert(hA1->Ptr == nullptr); //This is the result. A Ptr here will be replaced. Value should be NULL.
 
 	MD5_CTX context;
 	unsigned char aHash[kHashLen];
@@ -187,7 +187,7 @@ void CalcRequestDigest(StrPtrLen* hA1,
 	Assert(digestUri);
 	Assert(hEntity);
 	Assert(requestDigest);
-	Assert(requestDigest->Ptr == NULL); //This is the result. A Ptr here will be replaced. Value should be NULL.
+	Assert(requestDigest->Ptr == nullptr); //This is the result. A Ptr here will be replaced. Value should be NULL.
 
 	unsigned char aHash[kHashLen], requestHash[kHashLen];
 	StrPtrLen hA2;
@@ -224,7 +224,7 @@ void CalcRequestDigest(StrPtrLen* hA1,
 	MD5_Update(&context, (unsigned char *)sColon.Ptr, sColon.Len);
 	MD5_Update(&context, (unsigned char *)nonce->Ptr, nonce->Len);
 	MD5_Update(&context, (unsigned char *)sColon.Ptr, sColon.Len);
-	if (qop->Ptr != NULL) {
+	if (qop->Ptr != nullptr) {
 		MD5_Update(&context, (unsigned char *)nonceCount->Ptr, nonceCount->Len);
 		MD5_Update(&context, (unsigned char *)sColon.Ptr, sColon.Len);
 		MD5_Update(&context, (unsigned char *)cNonce->Ptr, cNonce->Len);

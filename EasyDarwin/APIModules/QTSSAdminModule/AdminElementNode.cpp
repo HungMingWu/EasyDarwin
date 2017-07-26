@@ -38,8 +38,8 @@
 
 #include <stdio.h>      /* for //printf */
 #include <stdlib.h>     /* for getloadavg & other useful stuff */
+#include <memory>
 #include "QTSS.h"
-#include "OSArrayObjectDeleter.h"
 #include "StrPtrLen.h"
 #include "OSHashTable.h"
 #include "OSMutex.h"
@@ -1068,7 +1068,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 
 
 	StrPtrLen* valuePtr = queryPtr->GetValue();
-	OSCharArrayDeleter value(NewCharArrayCopy(valuePtr));
+	std::unique_ptr<char[]> value(NewCharArrayCopy(valuePtr));
 	if (!valuePtr || !valuePtr->Ptr)
 	{
 		uint32_t result = 400;
@@ -1079,7 +1079,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 
 
 	StrPtrLen *typePtr = queryPtr->GetType();
-	OSCharArrayDeleter dataType(NewCharArrayCopy(typePtr));
+	std::unique_ptr<char[]> dataType(NewCharArrayCopy(typePtr));
 	if (!typePtr || !typePtr->Ptr)
 	{
 		uint32_t result = 400;
@@ -1091,7 +1091,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 	QTSS_AttrDataType attrDataType = qtssAttrDataTypeUnknown;
 	if (typePtr && typePtr->Len > 0)
 	{
-		err = QTSS_TypeStringToType(dataType.GetObject(), &attrDataType);
+		err = QTSS_TypeStringToType(dataType.get(), &attrDataType);
 		Assert(err == QTSS_NoErr);
 		//printf("ElementNode::RespondWithSelfAdd theType=%s typeID=%"   _U32BITARG_   " \n",dataType.GetObject(), attrDataType);
 	}
@@ -1099,7 +1099,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 	//printf("ElementNode::RespondWithSelfAdd theValue= %s theType=%s typeID=%"   _U32BITARG_   " \n",value.GetObject(), typePtr->Ptr, attrDataType);
 	char valueBuff[2048] = "";
 	uint32_t len = 2048;
-	err = QTSS_StringToValue(value.GetObject(), attrDataType, valueBuff, &len);
+	err = QTSS_StringToValue(value.get(), attrDataType, valueBuff, &len);
 	if (err)
 	{
 		uint32_t result = 400;
@@ -1117,7 +1117,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 	}
 
 	StrPtrLen *namePtr = queryPtr->GetName();
-	OSCharArrayDeleter nameDeleter(NewCharArrayCopy(namePtr));
+	std::unique_ptr<char[]> nameDeleter(NewCharArrayCopy(namePtr));
 	if (!namePtr || !namePtr->Ptr || namePtr->Len == 0)
 	{
 		uint32_t result = 400;
@@ -1126,14 +1126,14 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 		return;
 	}
 
-	err = QTSS_AddInstanceAttribute(GetSource(), nameDeleter.GetObject(), nullptr, attrDataType);
+	err = QTSS_AddInstanceAttribute(GetSource(), nameDeleter.get(), nullptr, attrDataType);
 	//printf("QTSS_AddInstanceAttribute(source=%"   _U32BITARG_   ", name=%s, NULL, %d, %"   _U32BITARG_   ")\n",GetSource(),nameDeleter.GetObject(),attrDataType,accessFlags);
 	if (err)
 	{
 		uint32_t result = 400;
 		if (err == QTSS_AttrNameExists)
 		{
-			sprintf(messageBuffer, "The name %s already exists QTSS_Error=%" _S32BITARG_ " from QTSS_AddInstanceAttribute", nameDeleter.GetObject(), err);
+			sprintf(messageBuffer, "The name %s already exists QTSS_Error=%" _S32BITARG_ " from QTSS_AddInstanceAttribute", nameDeleter.get(), err);
 		}
 		else
 		{
@@ -1143,7 +1143,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 		return;
 	}
 	QTSS_Object attrInfoObject;
-	err = QTSS_GetAttrInfoByName(GetSource(), nameDeleter.GetObject(), &attrInfoObject);
+	err = QTSS_GetAttrInfoByName(GetSource(), nameDeleter.get(), &attrInfoObject);
 	if (err)
 	{
 		uint32_t result = 400;
@@ -1388,7 +1388,7 @@ void    ElementNode::RespondToAdd(QTSS_StreamRef inStream, int32_t index, QueryU
 
 
 	StrPtrLen* valuePtr = queryPtr->GetValue();
-	OSCharArrayDeleter value(NewCharArrayCopy(valuePtr));
+	std::unique_ptr<char[]> value(NewCharArrayCopy(valuePtr));
 	if (!valuePtr || !valuePtr->Ptr)
 	{
 		uint32_t result = 400;
@@ -1400,7 +1400,7 @@ void    ElementNode::RespondToAdd(QTSS_StreamRef inStream, int32_t index, QueryU
 	//printf("ElementNode::RespondToAdd theValue= %s theType=%s typeID=%"   _U32BITARG_   " \n",value.GetObject(), GetAPI_TypeStr(index), GetAPI_Type(index));
 	char valueBuff[2048] = "";
 	uint32_t len = 2048;
-	err = QTSS_StringToValue(value.GetObject(), GetAPI_Type(index), valueBuff, &len);
+	err = QTSS_StringToValue(value.get(), GetAPI_Type(index), valueBuff, &len);
 	if (err)
 	{
 		uint32_t result = 400;
@@ -1411,16 +1411,16 @@ void    ElementNode::RespondToAdd(QTSS_StreamRef inStream, int32_t index, QueryU
 
 	if (GetFieldType(index) != eNode)
 	{
-		OSCharArrayDeleter typeDeleter(NewCharArrayCopy(queryPtr->GetType()));
-		StrPtrLen theQueryType(typeDeleter.GetObject());
+		std::unique_ptr<char[]> typeDeleter(NewCharArrayCopy(queryPtr->GetType()));
+		StrPtrLen theQueryType(typeDeleter.get());
 
-		if (typeDeleter.GetObject())
+		if (typeDeleter.get())
 		{
 			StrPtrLen attributeString(GetAPI_TypeStr(index));
 			if (!attributeString.Equal(theQueryType))
 			{
 				uint32_t result = 400;
-				sprintf(messageBuffer, "Type %s does not match attribute type %s", typeDeleter.GetObject(), attributeString.Ptr);
+				sprintf(messageBuffer, "Type %s does not match attribute type %s", typeDeleter.get(), attributeString.Ptr);
 				(void)queryPtr->EvalQuery(&result, messageBuffer);
 				return;
 			}
@@ -1498,8 +1498,8 @@ void    ElementNode::RespondToSet(QTSS_StreamRef inStream, int32_t index, QueryU
 
 	queryPtr->SetQueryHasResponse();
 
-	OSCharArrayDeleter typeDeleter(NewCharArrayCopy(queryPtr->GetType()));
-	StrPtrLen theQueryType(typeDeleter.GetObject());
+	std::unique_ptr<char[]> typeDeleter(NewCharArrayCopy(queryPtr->GetType()));
+	StrPtrLen theQueryType(typeDeleter.get());
 
 	if (theQueryType.Len > 0)
 	{
@@ -1507,7 +1507,7 @@ void    ElementNode::RespondToSet(QTSS_StreamRef inStream, int32_t index, QueryU
 		if (!attributeString.Equal(theQueryType))
 		{
 			uint32_t result = 400;
-			sprintf(messageBuffer, "Type %s does not match attribute type %s", typeDeleter.GetObject(), attributeString.Ptr);
+			sprintf(messageBuffer, "Type %s does not match attribute type %s", typeDeleter.get(), attributeString.Ptr);
 			(void)queryPtr->EvalQuery(&result, messageBuffer);
 			return;
 		}
@@ -1524,7 +1524,7 @@ void    ElementNode::RespondToSet(QTSS_StreamRef inStream, int32_t index, QueryU
 	if (GetFieldType(index) == eNode)
 	{
 		uint32_t result = 400;
-		sprintf(messageBuffer, "Set of type %s not allowed", typeDeleter.GetObject());
+		sprintf(messageBuffer, "Set of type %s not allowed", typeDeleter.get());
 		//printf("ElementNode::RespondToSet (GetFieldType(index) == eNode) %s\n",messageBuffer);
 		(void)queryPtr->EvalQuery(&result, messageBuffer);
 		return;
@@ -1537,11 +1537,11 @@ void    ElementNode::RespondToSet(QTSS_StreamRef inStream, int32_t index, QueryU
 
 		char valueBuff[2048] = "";
 		uint32_t len = 2048;
-		OSCharArrayDeleter value(NewCharArrayCopy(valuePtr));
+		std::unique_ptr<char[]> value(NewCharArrayCopy(valuePtr));
 
 		//printf("ElementNode::RespondToSet valuePtr->Ptr= %s\n",value.GetObject());
 
-		err = QTSS_StringToValue(value.GetObject(), GetAPI_Type(index), valueBuff, &len);
+		err = QTSS_StringToValue(value.get(), GetAPI_Type(index), valueBuff, &len);
 		if (err)
 		{   //sprintf(messageBuffer,  "QTSS_Error=%" _S32BITARG_ " from QTSS_ConvertStringToType",err);
 			break;
@@ -2213,7 +2213,7 @@ void ElementNode::GetFilteredAttributeName(ElementDataFields* fieldPtr, QTSS_Att
 	fieldPtr->fFieldLen = 0;
 	char *theName = nullptr;
 	(void)QTSS_GetValueAsString(fieldPtr->fAPISource, theID, 0, &theName);
-	OSCharArrayDeleter nameDeleter(theName);
+	std::unique_ptr<char[]> nameDeleter(theName);
 	if (theName != nullptr)
 	{
 		uint32_t len = strlen(theName);

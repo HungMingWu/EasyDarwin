@@ -38,8 +38,8 @@
 #include <time.h>
 #include <stdio.h>      /* for //printf */
 #include <stdlib.h>     /* for getloadavg & other useful stuff */
+#include <memory>
 #include "QTSSAdminModule.h"
-#include "OSArrayObjectDeleter.h"
 #include "StringParser.h"
 #include "StrPtrLen.h"
 #include "OSMutex.h"
@@ -670,7 +670,7 @@ void QueryURI::URLParse(StrPtrLen *inStream)
 		auto * decodedRequest = new char[inStream->Len + 1];
 		Assert(decodedRequest != nullptr);
 		decodedRequest[inStream->Len] = 0;
-		OSCharArrayDeleter decodedRequestDeleter(decodedRequest);
+		std::unique_ptr<char[]> decodedRequestDeleter(decodedRequest);
 
 		StringParser tempParser(inStream);
 		StrPtrLen URLToParse;

@@ -39,7 +39,6 @@
 #endif
 
 #include <stdio.h>      /* for //printf */
-#include "OSArrayObjectDeleter.h"
 #include "StrPtrLen.h"
 #include "OSRef.h"
 #include "AdminQuery.h"

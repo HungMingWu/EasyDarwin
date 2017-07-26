@@ -39,6 +39,8 @@
 #include <direct.h>
 #endif // _WIN32
 
+#include <memory>
+
 #ifndef __Win32__
 #include <unistd.h>     /* for getopt() et al */
 #endif
@@ -47,7 +49,6 @@
 #include <stdio.h>      /* for printf */
 #include <stdlib.h>     /* for getloadavg & other useful stuff */
 #include "QTSSAdminModule.h"
-#include "OSArrayObjectDeleter.h"
 #include "StringParser.h"
 #include "StrPtrLen.h"
 #include "QTSSModuleUtils.h"
@@ -567,10 +568,10 @@ inline bool OSXAuthenticate(StrPtrLen *keyStrPtr)
 		return result;
 
 	char *encodedKey = keyStrPtr->GetAsCString();
-	OSCharArrayDeleter encodedKeyDeleter(encodedKey);
+	std::unique_ptr<char[]> encodedKeyDeleter(encodedKey);
 
 	char *decodedKey = new char[Base64decode_len(encodedKey) + 1];
-	OSCharArrayDeleter decodedKeyDeleter(decodedKey);
+	std::unique_ptr<char[]> decodedKeyDeleter(decodedKey);
 
 	(void)Base64decode(decodedKey, encodedKey);
 
@@ -652,7 +653,7 @@ bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen
 	bool authenticated = true;
 
 	char* authName = namePtr->GetAsCString();
-	OSCharArrayDeleter authNameDeleter(authName);
+	std::unique_ptr<char[]> authNameDeleter(authName);
 
 	QTSS_ActionFlags authAction = qtssActionFlagsAdmin;
 
@@ -672,10 +673,10 @@ bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen
 
 	if (err == QTSS_NoErr) {
 		char* reqPassword = passwordPtr->GetAsCString();
-		OSCharArrayDeleter reqPasswordDeleter(reqPassword);
+		std::unique_ptr<char[]> reqPasswordDeleter(reqPassword);
 		char* userPassword = nullptr;
 		(void)QTSS_GetValueAsString(theUserProfile, qtssUserPassword, 0, &userPassword);
-		OSCharArrayDeleter userPasswordDeleter(userPassword);
+		std::unique_ptr<char[]> userPasswordDeleter(userPassword);
 
 		if (userPassword == nullptr) {
 			authenticated = false;
@@ -703,7 +704,7 @@ bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen
 	// we don't use the realm returned by the callback, but instead 
 	// use our own.
 	// delete the memory allocated for realm because we don't need it!
-	OSCharArrayDeleter realmDeleter(realm);
+	std::unique_ptr<char[]> realmDeleter(realm);
 
 	if (err != QTSS_NoErr) {
 		printf("QTSSAdminModule::Authenticate: QTSS_Authorize failed\n");
@@ -724,7 +725,7 @@ QTSS_Error AuthorizeAdminRequest(QTSS_RTSPRequestObject request)
 	// get the resource path
 	// if the path does not match the admin path, don't handle the request
 	char* resourcePath = QTSSModuleUtils::GetLocalPath_Copy(request);
-	OSCharArrayDeleter resourcePathDeleter(resourcePath);
+	std::unique_ptr<char[]> resourcePathDeleter(resourcePath);
 
 	if (strcmp(sAuthResourceLocalPath, resourcePath) != 0)
 		return QTSS_NoErr;
@@ -741,23 +742,19 @@ QTSS_Error AuthorizeAdminRequest(QTSS_RTSPRequestObject request)
 	(void)QTSS_SetValue(request, qtssRTSPReqURLRealm, 0, sAuthRealm, ::strlen(sAuthRealm));
 
 	// Authorize the user if the user belongs to the AdministratorGroup (this is an admin module pref)
-	uint32_t numGroups = 0;
-	char** groupsArray = QTSSModuleUtils::GetGroupsArray_Copy(theUserProfile, &numGroups);
+	std::vector<std::string> groupsArray = QTSSModuleUtils::GetGroupsArray_Copy(theUserProfile);
 
-	if ((groupsArray != nullptr) && (numGroups != 0))
+	if (!groupsArray.empty())
 	{
 		uint32_t index = 0;
-		for (index = 0; index < numGroups; index++)
+		for (index = 0; index < groupsArray.size(); index++)
 		{
-			if (strcmp(sAdministratorGroup, groupsArray[index]) == 0)
+			if (strcmp(sAdministratorGroup, groupsArray[index].c_str()) == 0)
 			{
 				allowed = true;
 				break;
 			}
 		}
-
-		// delete the memory allocated in QTSSModuleUtils::GetGroupsArray_Copy call 
-		delete[] groupsArray;
 	}
 
 	if (!allowed)
@@ -805,7 +802,7 @@ bool StillFlushing(QTSS_Filter_Params* inParams, bool flushing)
 
 		if (flushing) // we were flushing so reset the LastRequestTime
 		{
-			sLastRequestTime = QTSS_Milliseconds();
+			sLastRequestTime = OS::Milliseconds();
 			//printf("Done Flushing session=%"   _U32BITARG_   "\n",sSessID);
 			return true;
 		}
@@ -853,7 +850,7 @@ bool IsAuthentic(QTSS_Filter_Params* inParams, StringParser *fullRequestPtr)
 inline bool InWaitInterval(QTSS_Filter_Params* inParams)
 {
 	QTSS_TimeVal nextExecuteTime = sLastRequestTime + sRequestTimeIntervalMilli;
-	QTSS_TimeVal currentTime = QTSS_Milliseconds();
+	QTSS_TimeVal currentTime = OS::Milliseconds();
 	if (currentTime < nextExecuteTime)
 	{
 		int32_t waitTime = (int32_t)(nextExecuteTime - currentTime) + 1;
@@ -864,7 +861,7 @@ inline bool InWaitInterval(QTSS_Filter_Params* inParams)
 		//printf("-- call me again after %" _S32BITARG_ " millisecs session=%"   _U32BITARG_   " \n",waitTime,sSessID);
 		return true;
 	}
-	sLastRequestTime = QTSS_Milliseconds();
+	sLastRequestTime = OS::Milliseconds();
 	//printf("handle sessID=%"   _U32BITARG_   " time=%qd \n",sSessID,currentTime);
 	return false;
 }

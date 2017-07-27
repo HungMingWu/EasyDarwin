@@ -265,7 +265,8 @@ QTSS_Error PostProcess(QTSS_StandardRTSP_Params* inParams)
 
 	uint32_t* theStatus = nullptr;
 	uint32_t theLen = 0;
-	QTSS_Error theErr = QTSS_GetValuePtr(inParams->inRTSPRequest, qtssRTSPReqRealStatusCode, 0, (void**)&theStatus, &theLen);
+	QTSSDictionary *dict = (QTSSDictionary *)inParams->inRTSPRequest;
+	QTSS_Error theErr = dict->GetValuePtr(qtssRTSPReqRealStatusCode, 0, (void**)&theStatus, &theLen);
 	if (theErr != QTSS_NoErr)
 		return theErr;
 
@@ -391,7 +392,8 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 
 	uint32_t theLen = 0;
 	uint32_t* authorizationFailed = nullptr;
-	(void)QTSS_GetValuePtr(inClientSession, sLoggedAuthorizationAttrID, 0, (void**)&authorizationFailed, &theLen);
+	QTSSDictionary *dict = (QTSSDictionary *)inClientSession;
+	dict->GetValuePtr(sLoggedAuthorizationAttrID, 0, (void**)&authorizationFailed, &theLen);
 	if ((authorizationFailed != nullptr) && (*authorizationFailed > 0))
 		return QTSS_NoErr;
 
@@ -415,7 +417,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	theLen = sizeof(QTSS_RTSPSessionObject);
 	QTSS_RTSPSessionObject theRTSPSession = inRTSPSession;
 	if (theRTSPSession == nullptr)
-		(void)QTSS_GetValue(inClientSession, qtssCliSesLastRTSPSession, 0, (void*)&theRTSPSession, &theLen);
+		dict->GetValue(qtssCliSesLastRTSPSession, 0, (void*)&theRTSPSession, &theLen);
 
 	// Get lots of neat info to log from the various dictionaries
 
@@ -451,11 +453,11 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	StrPtrLen playerID(playerIDBuf, ePlayerIDSize - 1);
 
 	// First, get networking info from the RTSP session
-	(void)QTSS_GetValue(inClientSession, qtssCliRTSPSessLocalAddrStr, 0, localIPAddr.Ptr, &localIPAddr.Len);
-	(void)QTSS_GetValue(inClientSession, qtssCliRTSPSessLocalDNS, 0, localDNS.Ptr, &localDNS.Len);
-	(void)QTSS_GetValue(inClientSession, qtssCliSesHostName, 0, remoteDNS.Ptr, &remoteDNS.Len);
-	(void)QTSS_GetValue(inClientSession, qtssCliRTSPSessRemoteAddrStr, 0, remoteAddr.Ptr, &remoteAddr.Len);
-	(void)QTSS_GetValue(inClientSession, qtssCliRTSPSessRemoteAddrStr, 0, playerID.Ptr, &playerID.Len);
+	dict->GetValue(qtssCliRTSPSessLocalAddrStr, 0, localIPAddr.Ptr, &localIPAddr.Len);
+	dict->GetValue(qtssCliRTSPSessLocalDNS, 0, localDNS.Ptr, &localDNS.Len);
+	dict->GetValue(qtssCliSesHostName, 0, remoteDNS.Ptr, &remoteDNS.Len);
+	dict->GetValue(qtssCliRTSPSessRemoteAddrStr, 0, remoteAddr.Ptr, &remoteAddr.Len);
+	dict->GetValue(qtssCliRTSPSessRemoteAddrStr, 0, playerID.Ptr, &playerID.Len);
 
 	uint32_t* rtpBytesSent = nullptr;
 	uint32_t* rtcpBytesRecv = nullptr;
@@ -465,16 +467,16 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	// (Including the stats for incoming RTCP packets.)
 	char urlBuf[eURLSize] = { 0 };
 	StrPtrLen url(urlBuf, eURLSize - 1);
-	(void)QTSS_GetValue(inClientSession, qtssCliSesPresentationURL, 0, url.Ptr, &url.Len);
-	(void)QTSS_GetValuePtr(inClientSession, qtssCliSesPacketLossPercent, 0, (void**)&packetLossPercent, &theLen);
-	(void)QTSS_GetValuePtr(inClientSession, qtssCliSesMovieDurationInSecs, 0, (void**)&movieDuration, &theLen);
-	(void)QTSS_GetValuePtr(inClientSession, qtssCliSesMovieSizeInBytes, 0, (void**)&movieSizeInBytes, &theLen);
-	(void)QTSS_GetValuePtr(inClientSession, qtssCliSesMovieAverageBitRate, 0, (void**)&movieAverageBitRatePtr, &theLen);
-	(void)QTSS_GetValuePtr(inClientSession, qtssCliSesCreateTimeInMsec, 0, (void**)&theCreateTime, &theLen);
-	(void)QTSS_GetValuePtr(inClientSession, qtssCliSesFirstPlayTimeInMsec, 0, (void**)&thePlayTime, &theLen);
-	(void)QTSS_GetValuePtr(inClientSession, qtssCliSesRTPBytesSent, 0, (void**)&rtpBytesSent, &theLen);
-	(void)QTSS_GetValuePtr(inClientSession, qtssCliSesRTPPacketsSent, 0, (void**)&rtpPacketsSent, &theLen);
-	(void)QTSS_GetValuePtr(inClientSession, qtssCliSesRTCPBytesRecv, 0, (void**)&rtcpBytesRecv, &theLen);
+	dict->GetValue(qtssCliSesPresentationURL, 0, url.Ptr, &url.Len);
+	dict->GetValuePtr(qtssCliSesPacketLossPercent, 0, (void**)&packetLossPercent, &theLen);
+	dict->GetValuePtr(qtssCliSesMovieDurationInSecs, 0, (void**)&movieDuration, &theLen);
+	dict->GetValuePtr(qtssCliSesMovieSizeInBytes, 0, (void**)&movieSizeInBytes, &theLen);
+	dict->GetValuePtr(qtssCliSesMovieAverageBitRate, 0, (void**)&movieAverageBitRatePtr, &theLen);
+	dict->GetValuePtr(qtssCliSesCreateTimeInMsec, 0, (void**)&theCreateTime, &theLen);
+	dict->GetValuePtr(qtssCliSesFirstPlayTimeInMsec, 0, (void**)&thePlayTime, &theLen);
+	dict->GetValuePtr(qtssCliSesRTPBytesSent, 0, (void**)&rtpBytesSent, &theLen);
+	dict->GetValuePtr(qtssCliSesRTPPacketsSent, 0, (void**)&rtpPacketsSent, &theLen);
+	dict->GetValuePtr(qtssCliSesRTCPBytesRecv, 0, (void**)&rtcpBytesRecv, &theLen);
 
 	if (theCreateTime != nullptr && thePlayTime != nullptr)
 		startPlayTimeInSecs = (uint32_t)(((*theCreateTime - *thePlayTime) / 1000) + 0.5);
@@ -494,7 +496,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	auto clientBytesRecv = (uint32_t)((*rtpBytesSent * (100.0 - *packetLossPercent)) / 100.0);
 
 	tempLogStr.Ptr[0] = 0; tempLogStr.Len = eUserAgentSize;
-	(void)QTSS_GetValue(inClientSession, qtssCliSesFirstUserAgent, 0, tempLogStr.Ptr, &tempLogStr.Len);
+	dict->GetValue( qtssCliSesFirstUserAgent, 0, tempLogStr.Ptr, &tempLogStr.Len);
 
 	char userAgentBuf[eUserAgentSize] = { 0 };
 	StrPtrLen userAgent(userAgentBuf, eUserAgentSize - 1);
@@ -553,14 +555,15 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	QTSS_RTPStreamObject theRTPStreamObject = nullptr;
 
 	for (uint32_t theStreamObjectLen = sizeof(theRTPStreamObject);
-		QTSS_GetValue(inClientSession, qtssCliSesStreamObjects, theStreamIndex, (void*)&theRTPStreamObject, &theStreamObjectLen) == QTSS_NoErr;
+		dict->GetValue(qtssCliSesStreamObjects, theStreamIndex, (void*)&theRTPStreamObject, &theStreamObjectLen) == QTSS_NoErr;
 		theStreamIndex++, theStreamObjectLen = sizeof(theRTPStreamObject))
 	{
 
 		uint32_t* streamPacketsReceived = nullptr;
 		uint32_t* streamPacketsLost = nullptr;
-		(void)QTSS_GetValuePtr(theRTPStreamObject, qtssRTPStrTotPacketsRecv, 0, (void**)&streamPacketsReceived, &theLen);
-		(void)QTSS_GetValuePtr(theRTPStreamObject, qtssRTPStrTotalLostPackets, 0, (void**)&streamPacketsLost, &theLen);
+		QTSSDictionary *dict = (QTSSDictionary *)theRTPStreamObject;
+		dict->GetValuePtr(qtssRTPStrTotPacketsRecv, 0, (void**)&streamPacketsReceived, &theLen);
+		dict->GetValuePtr(qtssRTPStrTotalLostPackets, 0, (void**)&streamPacketsLost, &theLen);
 
 		// Add up packets received and packets lost to come up with a session wide total
 		if (streamPacketsReceived != nullptr)
@@ -570,20 +573,20 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 
 		// Identify the video and audio codec types
 		QTSS_RTPPayloadType* thePayloadType = nullptr;
-		(void)QTSS_GetValuePtr(theRTPStreamObject, qtssRTPStrPayloadType, 0, (void**)&thePayloadType, &theLen);
+		dict->GetValuePtr(qtssRTPStrPayloadType, 0, (void**)&thePayloadType, &theLen);
 		if (thePayloadType != nullptr)
 		{
 			if (*thePayloadType == qtssVideoPayloadType)
-				(void)QTSS_GetValue(theRTPStreamObject, qtssRTPStrPayloadName, 0, videoPayloadName.Ptr, &videoPayloadName.Len);
+				dict->GetValue(qtssRTPStrPayloadName, 0, videoPayloadName.Ptr, &videoPayloadName.Len);
 			else if (*thePayloadType == qtssAudioPayloadType)
-				(void)QTSS_GetValue(theRTPStreamObject, qtssRTPStrPayloadName, 0, audioPayloadName.Ptr, &audioPayloadName.Len);
+				dict->GetValue(qtssRTPStrPayloadName, 0, audioPayloadName.Ptr, &audioPayloadName.Len);
 		}
 
 		// If any one of the streams is being delivered over UDP instead of TCP,
 		// report in the log that the transport type for this session was UDP.
 		if (isTCPPtr == nullptr)
 		{
-			(void)QTSS_GetValuePtr(theRTPStreamObject, qtssRTPStrIsTCP, 0, (void**)&isTCPPtr, &theLen);
+			dict->GetValuePtr(qtssRTPStrIsTCP, 0, (void**)&isTCPPtr, &theLen);
 			if (isTCPPtr != nullptr)
 			{
 				if (*isTCPPtr == false)
@@ -594,7 +597,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 		}
 
 		float* clientBufferTimePtr = nullptr;
-		(void)QTSS_GetValuePtr(theRTPStreamObject, qtssRTPStrBufferDelayInSecs, 0, (void**)&clientBufferTimePtr, &theLen);
+		dict->GetValuePtr(qtssRTPStrBufferDelayInSecs, 0, (void**)&clientBufferTimePtr, &theLen);
 		if ((clientBufferTimePtr != nullptr) && (*clientBufferTimePtr != 0))
 		{
 			if (*clientBufferTimePtr > clientBufferTime)
@@ -625,7 +628,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	static uint32_t sTimeoutCode = 504;
 	uint32_t* theStatusCode = &sTimeoutCode;
 	theLen = sizeof(uint32_t);
-	(void)QTSS_GetValuePtr(inClientSession, qtssCliRTSPReqRealStatusCode, 0, (void **)&theStatusCode, &theLen);
+	dict->GetValuePtr(qtssCliRTSPReqRealStatusCode, 0, (void **)&theStatusCode, &theLen);
 	//  printf("qtssCliRTSPReqRealStatusCode = %"   _U32BITARG_   " \n", *theStatusCode);
 
 
@@ -646,7 +649,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 				static QTSS_CliSesClosingReason sReason = qtssCliSesCloseClientTeardown;
 				QTSS_CliSesClosingReason* theReasonPtr = &sReason;
 				theLen = sizeof(QTSS_CliSesTeardownReason);
-				(void)QTSS_GetValuePtr(inClientSession, qtssCliTeardownReason, 0, (void **)&theReasonPtr, &theLen);
+				dict->GetValuePtr(qtssCliTeardownReason, 0, (void **)&theReasonPtr, &theLen);
 				//              printf("qtssCliTeardownReason = %"   _U32BITARG_   " \n", *theReasonPtr);
 
 				if (*theReasonPtr == qtssCliSesTearDownClientRequest) //  the client asked for a tear down
@@ -685,7 +688,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 
 	uint32_t numCurClients = 0;
 	theLen = sizeof(numCurClients);
-	(void)QTSS_GetValue(sServer, qtssRTPSvrCurConn, 0, &numCurClients, &theLen);
+	(void)((QTSSDictionary*)sServer)->GetValue(qtssRTPSvrCurConn, 0, &numCurClients, &theLen);
 
 	/*
 		IMPORTANT!!!!
@@ -705,7 +708,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	float fcpuUtilized = 0;
 
 	theLen = sizeof(fcpuUtilized);
-	(void)QTSS_GetValue(sServer, qtssSvrCPULoadPercent, 0, &fcpuUtilized, &theLen);
+	(void)((QTSSDictionary*)sServer)->GetValue(qtssSvrCPULoadPercent, 0, &fcpuUtilized, &theLen);
 	auto cpuUtilized = (uint32_t)fcpuUtilized;
 
 	char lastUserName[eTempLogItemSize] = { 0 };
@@ -717,18 +720,18 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	//printf("logging of saved params are in dictionary \n");
 
 	tempLogStr.Ptr[0] = 0; tempLogStr.Len = eTempLogItemSize;
-	(void)QTSS_GetValue(inClientSession, qtssCliRTSPSesUserName, 0, tempLogStr.Ptr, &tempLogStr.Len);
+	dict->GetValue(qtssCliRTSPSesUserName, 0, tempLogStr.Ptr, &tempLogStr.Len);
 	ReplaceSpaces(&tempLogStr, &lastUserNameStr, "%20");
 	//printf("qtssRTSPSesLastUserName dictionary item = %s len = %" _S32BITARG_ "\n",lastUserNameStr.Ptr,lastUserNameStr.Len);
 
 	tempLogStr.Ptr[0] = 0; tempLogStr.Len = eTempLogItemSize;
-	(void)QTSS_GetValue(inClientSession, qtssCliRTSPSesURLRealm, 0, tempLogStr.Ptr, &tempLogStr.Len);
+	dict->GetValue(qtssCliRTSPSesURLRealm, 0, tempLogStr.Ptr, &tempLogStr.Len);
 	ReplaceSpaces(&tempLogStr, &lastURLRealmStr, "%20");
 	//printf("qtssRTSPSesLastURLRealm dictionary  item = %s len = %" _S32BITARG_ "\n",lastURLRealmStr.Ptr,lastURLRealmStr.Len);  
 
 	char respMsgBuffer[1024] = { 0 };
 	StrPtrLen theRespMsg;
-	(void)QTSS_GetValuePtr(inClientSession, qtssCliRTSPReqRespMsg, 0, (void**)&theRespMsg.Ptr, &theRespMsg.Len);
+	dict->GetValuePtr(qtssCliRTSPReqRespMsg, 0, (void**)&theRespMsg.Ptr, &theRespMsg.Len);
 	StrPtrLen respMsgEncoded(respMsgBuffer, 1024 - 1);
 	int32_t theErr = StringTranslator::EncodeURL(theRespMsg.Ptr, theRespMsg.Len, respMsgEncoded.Ptr, respMsgEncoded.Len);
 	if (theErr <= 0)
@@ -742,7 +745,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	//cs-uri-query
 	char urlQryBuf[eURLSize] = { 0 };
 	StrPtrLen urlQry(urlQryBuf, eURLSize - 1);
-	(void)QTSS_GetValue(inClientSession, qtssCliSesReqQueryString, 0, urlQry.Ptr, &urlQry.Len);
+	dict->GetValue(qtssCliSesReqQueryString, 0, urlQry.Ptr, &urlQry.Len);
 
 	char tempLogBuffer[1024];
 	char logBuffer[2048];
@@ -908,9 +911,10 @@ time_t QTSSAccessLog::WriteLogHeader(FILE *inFile)
 	if (result)
 	{
 		StrPtrLen serverName;
-		(void)QTSS_GetValuePtr(sServer, qtssSvrServerName, 0, (void**)&serverName.Ptr, &serverName.Len);
+		QTSSDictionary *dict = (QTSSDictionary *)sServer;
+		dict->GetValuePtr(qtssSvrServerName, 0, (void**)&serverName.Ptr, &serverName.Len);
 		StrPtrLen serverVersion;
-		(void)QTSS_GetValuePtr(sServer, qtssSvrServerVersion, 0, (void**)&serverVersion.Ptr, &serverVersion.Len);
+		dict->GetValuePtr(qtssSvrServerVersion, 0, (void**)&serverVersion.Ptr, &serverVersion.Len);
 		sprintf(tempBuffer, sLogHeader, serverName.Ptr, serverVersion.Ptr, theDateBuffer, sLogTimeInGMT ? "GMT" : "local time");
 		this->WriteToLog(tempBuffer, !kAllowLogToRoll);
 	}

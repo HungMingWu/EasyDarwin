@@ -666,7 +666,7 @@ bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen
 	// Get the user profile object from the request object that was created in the authenticate callback
 	QTSS_UserProfileObject theUserProfile = nullptr;
 	uint32_t len = sizeof(QTSS_UserProfileObject);
-	err = QTSS_GetValue(request, qtssRTSPReqUserProfile, 0, (void*)&theUserProfile, &len);
+	err = ((QTSSDictionary*)request)->GetValue(qtssRTSPReqUserProfile, 0, (void*)&theUserProfile, &len);
 	Assert(len == sizeof(QTSS_UserProfileObject));
 	if (err != QTSS_NoErr)
 		authenticated = false;
@@ -771,7 +771,7 @@ bool AcceptSession(QTSS_RTSPSessionObject inRTSPSession)
 {
 	char remoteAddress[20] = { 0 };
 	StrPtrLen theClientIPAddressStr(remoteAddress, sizeof(remoteAddress));
-	QTSS_Error err = QTSS_GetValue(inRTSPSession, qtssRTSPSesRemoteAddrStr, 0, (void*)theClientIPAddressStr.Ptr, &theClientIPAddressStr.Len);
+	QTSS_Error err = ((QTSSDictionary*)inRTSPSession)->GetValue(qtssRTSPSesRemoteAddrStr, 0, (void*)theClientIPAddressStr.Ptr, &theClientIPAddressStr.Len);
 	if (err != QTSS_NoErr) return false;
 
 	return AcceptAddress(&theClientIPAddressStr);
@@ -822,7 +822,7 @@ bool IsAuthentic(QTSS_Filter_Params* inParams, StringParser *fullRequestPtr)
 	else // must authenticate
 	{
 		StrPtrLen theClientIPAddressStr;
-		(void)QTSS_GetValuePtr(inParams->inRTSPSession, qtssRTSPSesRemoteAddrStr, 0, (void**)&theClientIPAddressStr.Ptr, &theClientIPAddressStr.Len);
+		((QTSSDictionary*)inParams->inRTSPSession)->GetValuePtr(qtssRTSPSesRemoteAddrStr, 0, (void**)&theClientIPAddressStr.Ptr, &theClientIPAddressStr.Len);
 		bool isLocal = IPComponentStr(&theClientIPAddressStr).IsLocal();
 
 		StrPtrLen authenticateName;
@@ -904,7 +904,8 @@ inline bool GetRequestAuthenticatedState(QTSS_Filter_Params* inParams)
 {
 	bool result = false;
 	uint32_t paramLen = sizeof(result);
-	QTSS_Error err = QTSS_GetValue(inParams->inRTSPRequest, sAuthenticatedID, 0, (void*)&result, &paramLen);
+	QTSSDictionary *dict = (QTSSDictionary*)inParams->inRTSPRequest;
+	QTSS_Error err = dict->GetValue(sAuthenticatedID, 0, (void*)&result, &paramLen);
 	if (err != QTSS_NoErr)
 	{
 		paramLen = sizeof(result);
@@ -918,7 +919,8 @@ inline bool GetRequestFlushState(QTSS_Filter_Params* inParams)
 {
 	bool result = false;
 	uint32_t paramLen = sizeof(result);
-	QTSS_Error err = QTSS_GetValue(inParams->inRTSPRequest, sFlushingID, 0, (void*)&result, &paramLen);
+	QTSSDictionary *dict = (QTSSDictionary*)inParams->inRTSPRequest;
+	QTSS_Error err = dict->GetValue(sFlushingID, 0, (void*)&result, &paramLen);
 	if (err != QTSS_NoErr)
 	{
 		paramLen = sizeof(result);
@@ -945,12 +947,12 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 	QTSS_RTSPRequestObject theRequest = inParams->inRTSPRequest;
 
 	uint32_t paramLen = sizeof(sSessID);
-	QTSS_Error err = QTSS_GetValue(inParams->inRTSPSession, qtssRTSPSesID, 0, (void*)&sSessID, &paramLen);
+	QTSS_Error err = ((QTSSDictionary*)inParams->inRTSPSession)->GetValue(qtssRTSPSesID, 0, (void*)&sSessID, &paramLen);
 	if (err != QTSS_NoErr)
 		return QTSS_NoErr;
 
 	StrPtrLen theFullRequest;
-	err = QTSS_GetValuePtr(theRequest, qtssRTSPReqFullRequest, 0, (void**)&theFullRequest.Ptr, &theFullRequest.Len);
+	err = ((QTSSDictionary*)theRequest)->GetValuePtr(qtssRTSPReqFullRequest, 0, (void**)&theFullRequest.Ptr, &theFullRequest.Len);
 	if (err != QTSS_NoErr)
 		return QTSS_NoErr;
 

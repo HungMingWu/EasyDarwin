@@ -56,7 +56,7 @@ HTTPSession::~HTTPSession()
 {
 	char remoteAddress[20] = { 0 };
 	StrPtrLen theIPAddressStr(remoteAddress, sizeof(remoteAddress));
-	QTSS_GetValue(this, easyHTTPSesRemoteAddrStr, 0, static_cast<void*>(theIPAddressStr.Ptr), &theIPAddressStr.Len);
+	GetValue(easyHTTPSesRemoteAddrStr, 0, static_cast<void*>(theIPAddressStr.Ptr), &theIPAddressStr.Len);
 
 	char msgStr[2048] = { 0 };
 	snprintf(msgStr, sizeof(msgStr), "HTTPSession offline from ip[%s]", remoteAddress);
@@ -431,7 +431,7 @@ QTSS_Error HTTPSession::SetupRequest()
 		uint32_t theBufferOffset = 0;
 		char* theRequestBody = nullptr;
 		uint32_t theLen = sizeof(theRequestBody);
-		theErr = QTSS_GetValue(this, easyHTTPSesContentBody, 0, &theRequestBody, &theLen);
+		theErr = GetValue(easyHTTPSesContentBody, 0, &theRequestBody, &theLen);
 
 		if (theErr != QTSS_NoErr)
 		{
@@ -450,7 +450,7 @@ QTSS_Error HTTPSession::SetupRequest()
 		}
 
 		theLen = sizeof(theBufferOffset);
-		QTSS_GetValue(this, easyHTTPSesContentBodyOffset, 0, &theBufferOffset, &theLen);
+		GetValue(easyHTTPSesContentBodyOffset, 0, &theBufferOffset, &theLen);
 
 		// We have our buffer and offset. Read the data.
 		//theErr = QTSS_Read(this, theRequestBody + theBufferOffset, content_length - theBufferOffset, &theLen);
@@ -779,7 +779,7 @@ QTSS_Error HTTPSession::execNetMsgCSGetServerVersionReqRESTful(const char* query
 	int64_t timeNow = OS::Milliseconds();
 	int64_t startupTime = 0;
 	uint32_t startupTimeSize = sizeof(startupTime);
-	(void)QTSS_GetValue(QTSServerInterface::GetServer(), qtssSvrStartupTime, 0, &startupTime, &startupTimeSize);
+	((QTSSDictionary*)(QTSServerInterface::GetServer()))->GetValue(qtssSvrStartupTime, 0, &startupTime, &startupTimeSize);
 	int64_t longstTime = (timeNow - startupTime) / 1000;
 
 	unsigned int timeDays = longstTime / (24 * 60 * 60);
@@ -918,7 +918,7 @@ QTSS_Error HTTPSession::execNetMsgCSGetBaseConfigReqRESTful(const char* queryStr
 
 	uint16_t port;
 	uint32_t len = sizeof(uint16_t);
-	(void)QTSS_GetValue(QTSServerInterface::GetServer()->GetPrefs(), qtssPrefsRTSPPorts, 0, static_cast<void*>(&port), &len);
+	((QTSSDictionary*)QTSServerInterface::GetServer()->GetPrefs())->GetValue(qtssPrefsRTSPPorts, 0, static_cast<void*>(&port), &len);
 	body[EASY_TAG_CONFIG_RTSP_LAN_PORT] = EasyUtil::ToString(port);
 
 	char lanip[512] = { 0 };

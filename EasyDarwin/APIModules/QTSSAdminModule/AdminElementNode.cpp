@@ -46,6 +46,7 @@
 #include "OSRef.h"
 #include "AdminElementNode.h"
 #include "QTSSDictionary.h"
+#include "QTSSDataConverter.h"
  //#include "OSHeaders.h"
 
 static char* sParameterDelimeter = ";";
@@ -371,21 +372,22 @@ void ElementNode::SetFields(uint32_t i, QTSS_Object attrInfoObject)
 	if (fFieldIDs[i].fFieldName[0] != 0)
 		return;
 
+	QTSSDictionary *dict = (QTSSDictionary *)attrInfoObject;
 	if (fFieldIDs[i].fFieldName[0] == 0)
 	{
 		fFieldIDs[i].fFieldLen = eMaxAttributeNameSize;
-		err = QTSS_GetValue(attrInfoObject, qtssAttrName, 0, &fFieldIDs[i].fFieldName, (uint32_t *)&fFieldIDs[i].fFieldLen);
+		err = dict->GetValue(qtssAttrName, 0, &fFieldIDs[i].fFieldName, (uint32_t *)&fFieldIDs[i].fFieldLen);
 		Assert(err == QTSS_NoErr);
 		if (fFieldIDs[i].fFieldName != nullptr)
 			fFieldIDs[i].fFieldName[fFieldIDs[i].fFieldLen] = 0;
 	}
 
 	ioLen = sizeof(fFieldIDs[i].fAPI_ID);
-	err = QTSS_GetValue(attrInfoObject, qtssAttrID, 0, &fFieldIDs[i].fAPI_ID, &ioLen);
+	err = dict->GetValue(qtssAttrID, 0, &fFieldIDs[i].fAPI_ID, &ioLen);
 	Assert(err == QTSS_NoErr);
 
 	ioLen = sizeof(fFieldIDs[i].fAPI_Type);
-	err = QTSS_GetValue(attrInfoObject, qtssAttrDataType, 0, &fFieldIDs[i].fAPI_Type, &ioLen);
+	err = dict->GetValue(qtssAttrDataType, 0, &fFieldIDs[i].fAPI_Type, &ioLen);
 	Assert(err == QTSS_NoErr);
 	if (fFieldIDs[i].fAPI_Type == 0 || err != QTSS_NoErr)
 	{
@@ -396,7 +398,7 @@ void ElementNode::SetFields(uint32_t i, QTSS_Object attrInfoObject)
 		fFieldIDs[i].fFieldType = eNode;
 
 	ioLen = sizeof(fFieldIDs[i].fAccessPermissions);
-	err = QTSS_GetValue(attrInfoObject, qtssAttrPermissions, 0, &fFieldIDs[i].fAccessPermissions, &ioLen);
+	err = dict->GetValue(qtssAttrPermissions, 0, &fFieldIDs[i].fAccessPermissions, &ioLen);
 	Assert(err == QTSS_NoErr);
 
 	fFieldIDs[i].fAccessData[0] = 0;
@@ -483,7 +485,7 @@ ElementNode* ElementNode::CreateArrayAttributeNode(uint32_t index, QTSS_Object s
 			fieldPtr->fFieldType = eNode;
 			// this is an array of objects so record each object as the source for a new node
 			uint32_t sourceLen = sizeof(fieldPtr->fAPISource);
-			QTSS_Error err = QTSS_GetValue(source, fieldPtr->fAPI_ID, fieldPtr->fIndex, &fieldPtr->fAPISource, &sourceLen);
+			QTSS_Error err = ((QTSSDictionary*)source)->GetValue(fieldPtr->fAPI_ID, fieldPtr->fIndex, &fieldPtr->fAPISource, &sourceLen);
 			Warn(err == QTSS_NoErr);
 			if (err != QTSS_NoErr)
 			{   //printf("Error Getting Value for %s type = qtssAttrDataTypeQTSS_Object err = %"   _U32BITARG_   "\n", fieldPtr->fFieldName,err);
@@ -756,7 +758,7 @@ void ElementNode::SetUpSingleNode(QueryURI *queryPtr, StrPtrLen *currentSegmentP
 				if (fieldPtr != nullptr && fieldPtr->fAPI_Type == qtssAttrDataTypeQTSS_Object)
 				{
 					uint32_t sourceLen = sizeof(fieldPtr->fAPISource);
-					(void)QTSS_GetValue(GetSource(), fieldPtr->fAPI_ID, fieldPtr->fIndex, &fieldPtr->fAPISource, &sourceLen);
+					((QTSSDictionary*)GetSource())->GetValue(fieldPtr->fAPI_ID, fieldPtr->fIndex, &fieldPtr->fAPISource, &sourceLen);
 				}
 
 				QTSS_Object theSourceObject = GetAPISource(index);
@@ -876,7 +878,7 @@ void ElementNode::SetUpAllNodes(QueryURI *queryPtr, StrPtrLen *currentSegmentPtr
 
 QTSS_Error ElementNode::GetAttributeSize(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex, uint32_t* outLenPtr)
 {
-	return QTSS_GetValue(inObject, inID, inIndex, nullptr, outLenPtr);
+	return ((QTSSDictionary*)inObject)->GetValue(inID, inIndex, nullptr, outLenPtr);
 }
 
 char *ElementNode::NewIndexElement(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex)
@@ -1092,15 +1094,14 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 	QTSS_AttrDataType attrDataType = qtssAttrDataTypeUnknown;
 	if (typePtr && typePtr->Len > 0)
 	{
-		err = QTSS_TypeStringToType(dataType.get(), &attrDataType);
-		Assert(err == QTSS_NoErr);
+		attrDataType = QTSSDataConverter::TypeStringToType(dataType.get());
 		//printf("ElementNode::RespondWithSelfAdd theType=%s typeID=%"   _U32BITARG_   " \n",dataType.GetObject(), attrDataType);
 	}
 
 	//printf("ElementNode::RespondWithSelfAdd theValue= %s theType=%s typeID=%"   _U32BITARG_   " \n",value.GetObject(), typePtr->Ptr, attrDataType);
 	char valueBuff[2048] = "";
 	uint32_t len = 2048;
-	err = QTSS_StringToValue(value.get(), attrDataType, valueBuff, &len);
+	err = QTSSDataConverter::StringToValue(value.get(), attrDataType, valueBuff, &len);
 	if (err)
 	{
 		uint32_t result = 400;
@@ -1154,7 +1155,7 @@ void ElementNode::RespondWithSelfAdd(QTSS_StreamRef inStream, QueryURI *queryPtr
 	}
 	QTSS_AttributeID attributeID = 0;
 	uint32_t attributeLen = sizeof(attributeID);
-	err = QTSS_GetValue(attrInfoObject, qtssAttrID, 0, &attributeID, &attributeLen);
+	err = ((QTSSDictionary*)attrInfoObject)->GetValue(qtssAttrID, 0, &attributeID, &attributeLen);
 	if (err)
 	{
 		uint32_t result = 400;
@@ -1401,7 +1402,7 @@ void    ElementNode::RespondToAdd(QTSS_StreamRef inStream, int32_t index, QueryU
 	//printf("ElementNode::RespondToAdd theValue= %s theType=%s typeID=%"   _U32BITARG_   " \n",value.GetObject(), GetAPI_TypeStr(index), GetAPI_Type(index));
 	char valueBuff[2048] = "";
 	uint32_t len = 2048;
-	err = QTSS_StringToValue(value.get(), GetAPI_Type(index), valueBuff, &len);
+	err = QTSSDataConverter::StringToValue(value.get(), GetAPI_Type(index), valueBuff, &len);
 	if (err)
 	{
 		uint32_t result = 400;
@@ -1431,7 +1432,7 @@ void    ElementNode::RespondToAdd(QTSS_StreamRef inStream, int32_t index, QueryU
 
 		uint32_t tempBuff;
 		uint32_t attributeLen = sizeof(tempBuff);
-		(void)QTSS_GetValue(source, GetAPI_ID(index), 0, &tempBuff, &attributeLen);
+		(void)((QTSSDictionary*)source)->GetValue(GetAPI_ID(index), 0, &tempBuff, &attributeLen);
 		if (attributeLen != len)
 		{
 			uint32_t result = 400;
@@ -1542,7 +1543,7 @@ void    ElementNode::RespondToSet(QTSS_StreamRef inStream, int32_t index, QueryU
 
 		//printf("ElementNode::RespondToSet valuePtr->Ptr= %s\n",value.GetObject());
 
-		err = QTSS_StringToValue(value.get(), GetAPI_Type(index), valueBuff, &len);
+		err = QTSSDataConverter::StringToValue(value.get(), GetAPI_Type(index), valueBuff, &len);
 		if (err)
 		{   //sprintf(messageBuffer,  "QTSS_Error=%" _S32BITARG_ " from QTSS_ConvertStringToType",err);
 			break;

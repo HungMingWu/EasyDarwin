@@ -32,6 +32,7 @@
 
 #include "QTSSWebDebugModule.h"
 #include "StrPtrLen.h"
+#include "QTSSDictionary.h"
 
  // STATIC DATA
 
@@ -88,7 +89,7 @@ QTSS_Error Filter(QTSS_Filter_Params* inParams)
 {
 	uint32_t theLen = 0;
 	char* theFullRequest = nullptr;
-	(void)QTSS_GetValuePtr(inParams->inRTSPRequest, qtssRTSPReqFullRequest, 0, (void**)&theFullRequest, &theLen);
+	((QTSSDictionary*)inParams->inRTSPRequest)->GetValuePtr(qtssRTSPReqFullRequest, 0, (void**)&theFullRequest, &theLen);
 
 	if ((theFullRequest == nullptr) || (theLen < sRequestHeader.Len))
 		return QTSS_NoErr;

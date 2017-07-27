@@ -814,8 +814,7 @@ void    QTSServer::InitCallbacks()
 	sCallbacks.addr[kCreateObjectTypeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_CreateObjectType;
 	sCallbacks.addr[kAddAttributeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AddAttribute;
 	sCallbacks.addr[kIDForTagCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_IDForAttr;
-	sCallbacks.addr[kGetAttributePtrByIDCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetValuePtr;
-	sCallbacks.addr[kGetAttributeByIDCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetValue;
+
 	sCallbacks.addr[kSetAttributeByIDCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SetValue;
 	sCallbacks.addr[kCreateObjectValueCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_CreateObject;
 	sCallbacks.addr[kGetNumValuesCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetNumValues;
@@ -824,8 +823,6 @@ void    QTSServer::InitCallbacks()
 	sCallbacks.addr[kWriteVCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_WriteV;
 	sCallbacks.addr[kFlushCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Flush;
 	sCallbacks.addr[kReadCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Read;
-	sCallbacks.addr[kSeekCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Seek;
-	sCallbacks.addr[kAdviseCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Advise;
 
 	sCallbacks.addr[kAddServiceCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AddService;
 	sCallbacks.addr[kIDForServiceCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_IDForService;
@@ -833,13 +830,6 @@ void    QTSServer::InitCallbacks()
 
 	sCallbacks.addr[kSendRTSPHeadersCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SendRTSPHeaders;
 	sCallbacks.addr[kAppendRTSPHeadersCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AppendRTSPHeader;
-	sCallbacks.addr[kSendStandardRTSPCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SendStandardRTSPResponse;
-
-	sCallbacks.addr[kAddRTPStreamCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AddRTPStream;
-	sCallbacks.addr[kPlayCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Play;
-	sCallbacks.addr[kPauseCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Pause;
-	sCallbacks.addr[kTeardownCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Teardown;
-	sCallbacks.addr[kRefreshTimeOutCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_RefreshTimeOut;
 
 	sCallbacks.addr[kRequestEventCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_RequestEvent;
 	sCallbacks.addr[kSetIdleTimerCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SetIdleTimer;
@@ -859,11 +849,6 @@ void    QTSServer::InitCallbacks()
 	sCallbacks.addr[kGetAttrInfoByNameCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetAttrInfoByName;
 	sCallbacks.addr[kGetAttrInfoByIDCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetAttrInfoByID;
 	sCallbacks.addr[kGetNumAttributesCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetNumAttributes;
-
-	sCallbacks.addr[kTypeToTypeStringCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_TypeToTypeString;
-	sCallbacks.addr[kTypeStringToTypeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_TypeStringToType;
-	sCallbacks.addr[kStringToValueCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_StringToValue;
-	sCallbacks.addr[kValueToStringCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_ValueToString;
 
 	sCallbacks.addr[kRemoveValueCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_RemoveValue;
 

@@ -28,6 +28,7 @@
 	 Contains:   Implementation of object defined in ReflectorStream.h.
  */
 
+#include "RTPSession.h"
 #include "ReflectorStream.h"
 #include "QTSSModuleUtils.h"
 #include "SocketUtils.h"
@@ -399,7 +400,7 @@ QTSS_Error ReflectorStream::BindSockets(QTSS_StandardRTSP_Params* inParams, uint
 	if (inParams != nullptr)
 	{
 		uint32_t theLen = sizeof(fTransportType);
-		(void)QTSS_GetValue(inParams->inRTSPRequest, qtssRTSPReqTransportType, 0, (void*)&fTransportType, &theLen);
+		((QTSSDictionary*)inParams->inRTSPRequest)->GetValue(qtssRTSPReqTransportType, 0, (void*)&fTransportType, &theLen);
 	}
 
 	// get a pair of sockets. The socket must be bound on INADDR_ANY because we don't know
@@ -1768,7 +1769,7 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 		{
 			if ((inMilliseconds - fLastBroadcasterTimeOutRefresh) > kRefreshBroadcastSessionIntervalMilliSecs)
 			{
-				QTSS_RefreshTimeOut(fBroadcasterClientSession);
+				((RTPSession*)fBroadcasterClientSession)->RefreshTimeouts();
 				fLastBroadcasterTimeOutRefresh = inMilliseconds;
 			}
 		}

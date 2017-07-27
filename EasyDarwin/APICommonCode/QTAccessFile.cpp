@@ -553,7 +553,7 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     // Get the auth scheme
     QTSS_AuthScheme theAuthScheme = qtssAuthNone;
     uint32_t len = sizeof(theAuthScheme);
-    QTSS_Error theErr = QTSS_GetValue(theRTSPRequest, qtssRTSPReqAuthScheme, 0, (void*)&theAuthScheme, &len);
+    QTSS_Error theErr = ((QTSSDictionary*)theRTSPRequest)->GetValue(qtssRTSPReqAuthScheme, 0, (void*)&theAuthScheme, &len);
     Assert(len == sizeof(theAuthScheme));
     if(theErr != QTSS_NoErr)
         return theErr;
@@ -579,7 +579,8 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     char nameBuff[256];
     StrPtrLen reqNameStr(nameBuff, kBuffLen);
     StrPtrLen profileNameStr(username);
-    theErr = QTSS_GetValue (theRTSPRequest,qtssRTSPReqUserName,0, (void *) reqNameStr.Ptr, &reqNameStr.Len);
+	QTSSDictionary *dict = (QTSSDictionary *)theRTSPRequest;
+    theErr = dict->GetValue(qtssRTSPReqUserName,0, (void *) reqNameStr.Ptr, &reqNameStr.Len);
  
     
 if (DEBUG_QTACCESS)

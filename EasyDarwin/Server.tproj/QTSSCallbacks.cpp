@@ -187,54 +187,6 @@ QTSS_Error QTSSCallbacks::QTSS_GetAttrInfoByName(QTSS_Object inObject, const cha
 	return ((QTSSDictionary*)inObject)->GetAttrInfoByName(inAttrName, (QTSSAttrInfoDict**)outAttrInfoObject);
 }
 
-
-QTSS_Error  QTSSCallbacks::QTSS_GetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, void** outBuffer, uint32_t* outLen)
-{
-	if ((inDictionary == nullptr) || (outBuffer == nullptr) || (outLen == nullptr) || (inID == qtssIllegalAttrID))
-		return QTSS_BadArgument;
-	return ((QTSSDictionary*)inDictionary)->GetValuePtr(inID, inIndex, outBuffer, outLen);
-}
-
-
-QTSS_Error  QTSSCallbacks::QTSS_GetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, void* ioBuffer, uint32_t* ioLen)
-{
-	if (inDictionary == nullptr || (inID == qtssIllegalAttrID))
-		return QTSS_BadArgument;
-	return ((QTSSDictionary*)inDictionary)->GetValue(inID, inIndex, ioBuffer, ioLen);
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_TypeToTypeString(const QTSS_AttrDataType inType, char** outTypeString)
-{
-	if (outTypeString == nullptr)
-		return QTSS_BadArgument;
-
-	*outTypeString = QTSSDataConverter::TypeToTypeString(inType);
-	return QTSS_NoErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_TypeStringToType(char* inTypeString, QTSS_AttrDataType* outType)
-{
-	if ((inTypeString == nullptr) || (outType == nullptr))
-		return QTSS_BadArgument;
-
-	*outType = QTSSDataConverter::TypeStringToType(inTypeString);
-	return QTSS_NoErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_StringToValue(char* inValueAsString, const QTSS_AttrDataType inType, void* ioBuffer, uint32_t* ioBufSize)
-{
-	return  QTSSDataConverter::StringToValue(inValueAsString, inType, ioBuffer, ioBufSize);
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_ValueToString(void* inValue, const uint32_t inValueLen, const QTSS_AttrDataType inType, char** outString)
-{
-	if ((inValue == nullptr) || (outString == nullptr))
-		return QTSS_BadArgument;
-
-	*outString = QTSSDataConverter::ValueToString(inValue, inValueLen, inType);
-	return QTSS_NoErr;
-}
-
 QTSS_Error  QTSSCallbacks::QTSS_SetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, const void* inBuffer, uint32_t inLen)
 {
 	if ((inDictionary == nullptr) || ((inBuffer == nullptr) && (inLen > 0)) || (inID == qtssIllegalAttrID))
@@ -379,23 +331,6 @@ QTSS_Error  QTSSCallbacks::QTSS_Read(QTSS_StreamRef inStream, void* ioBuffer, ui
 		return theErr;
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_Seek(QTSS_StreamRef inStream, uint64_t inNewPosition)
-{
-	if (inStream == nullptr)
-		return QTSS_BadArgument;
-	return ((QTSSStream*)inStream)->Seek(inNewPosition);
-}
-
-
-QTSS_Error  QTSSCallbacks::QTSS_Advise(QTSS_StreamRef inStream, uint64_t inPosition, uint32_t inAdviseSize)
-{
-	if (inStream == nullptr)
-		return QTSS_BadArgument;
-	return ((QTSSStream*)inStream)->Advise(inPosition, inAdviseSize);
-}
-
-
-
 QTSS_Error  QTSSCallbacks::QTSS_OpenFileObject(char* inPath, QTSS_OpenFileFlags inFlags, QTSS_Object* outFileObject)
 {
 	if ((inPath == nullptr) || (outFileObject == nullptr))
@@ -519,100 +454,6 @@ QTSS_Error QTSSCallbacks::QTSS_AppendRTSPHeader(QTSS_RTSPRequestObject inRef,
 	((RTSPRequestInterface*)inRef)->AppendHeader(inHeader, &theValue);
 	return QTSS_NoErr;
 }
-
-QTSS_Error QTSSCallbacks::QTSS_SendStandardRTSPResponse(QTSS_RTSPRequestObject inRTSPRequest,
-	QTSS_Object inRTPInfo,
-	uint32_t inFlags)
-{
-	if ((inRTSPRequest == nullptr) || (inRTPInfo == nullptr))
-		return QTSS_BadArgument;
-
-	switch (((RTSPRequestInterface*)inRTSPRequest)->GetMethod())
-	{
-	case qtssDescribeMethod:
-		((RTPSession*)inRTPInfo)->SendDescribeResponse((RTSPRequestInterface*)inRTSPRequest);
-		return QTSS_NoErr;
-	case qtssSetupMethod:
-		{
-			// Because QTSS_SendStandardRTSPResponse supports sending a proper 304 Not Modified on a SETUP,
-			// but a caller typically won't be adding a stream for a 304 response, we have the policy of
-			// making the caller pass in the QTSS_ClientSessionObject instead. That means we need to do
-			// different things here depending...
-			if (((RTSPRequestInterface*)inRTSPRequest)->GetStatus() == qtssRedirectNotModified)
-				(void)((RTPSession*)inRTPInfo)->DoSessionSetupResponse((RTSPRequestInterface*)inRTSPRequest);
-			else
-			{
-				if (inFlags & qtssSetupRespDontWriteSSRC)
-					((RTPStream*)inRTPInfo)->DisableSSRC();
-				else
-					((RTPStream*)inRTPInfo)->EnableSSRC();
-
-				((RTPStream*)inRTPInfo)->SendSetupResponse((RTSPRequestInterface*)inRTSPRequest);
-			}
-
-			return QTSS_NoErr;
-		}
-	case qtssPlayMethod:
-	case qtssRecordMethod:
-		((RTPSession*)inRTPInfo)->SendPlayResponse((RTSPRequestInterface*)inRTSPRequest, inFlags);
-		return QTSS_NoErr;
-	case qtssPauseMethod:
-		((RTPSession*)inRTPInfo)->SendPauseResponse((RTSPRequestInterface*)inRTSPRequest);
-		return QTSS_NoErr;
-	case qtssTeardownMethod:
-		((RTPSession*)inRTPInfo)->SendTeardownResponse((RTSPRequestInterface*)inRTSPRequest);
-		return QTSS_NoErr;
-	case qtssAnnounceMethod:
-		((RTPSession*)inRTPInfo)->SendAnnounceResponse((RTSPRequestInterface*)inRTSPRequest);
-		return QTSS_NoErr;
-	}
-	return QTSS_BadArgument;
-}
-
-
-
-
-QTSS_Error  QTSSCallbacks::QTSS_AddRTPStream(QTSS_ClientSessionObject inClientSession, QTSS_RTSPRequestObject inRTSPRequest, QTSS_RTPStreamObject* outStream, QTSS_AddStreamFlags inFlags)
-{
-	if ((inClientSession == nullptr) || (inRTSPRequest == nullptr) || (outStream == nullptr))
-		return QTSS_BadArgument;
-	return ((RTPSession*)inClientSession)->AddStream((RTSPRequestInterface*)inRTSPRequest, (RTPStream**)outStream, inFlags);
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_Play(QTSS_ClientSessionObject inClientSession, QTSS_RTSPRequestObject inRTSPRequest, QTSS_PlayFlags inPlayFlags)
-{
-	if (inClientSession == nullptr)
-		return QTSS_BadArgument;
-	return ((RTPSession*)inClientSession)->Play((RTSPRequestInterface*)inRTSPRequest, inPlayFlags);
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_Pause(QTSS_ClientSessionObject inClientSession)
-{
-	if (inClientSession == nullptr)
-		return QTSS_BadArgument;
-	((RTPSession*)inClientSession)->Pause();
-	return QTSS_NoErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_Teardown(QTSS_ClientSessionObject inClientSession)
-{
-	if (inClientSession == nullptr)
-		return QTSS_BadArgument;
-
-	((RTPSession*)inClientSession)->Teardown();
-	return QTSS_NoErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_RefreshTimeOut(QTSS_ClientSessionObject inClientSession)
-{
-	if (inClientSession == nullptr)
-		return QTSS_BadArgument;
-
-	((RTPSession*)inClientSession)->RefreshTimeouts();
-	return QTSS_NoErr;
-}
-
-
 
 QTSS_Error  QTSSCallbacks::QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_EventType inEventMask)
 {

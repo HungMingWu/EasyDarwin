@@ -173,7 +173,7 @@ QTSS_Error  AdviseFile(QTSS_AdviseFile_Params* inParams)
 	OSFileSource** theFile = nullptr;
 	uint32_t theLen = 0;
 
-	(void)QTSS_GetValuePtr(inParams->inFileObject, sOSFileSourceAttr, 0, (void**)&theFile, &theLen);
+	((QTSSDictionary*)inParams->inFileObject)->GetValuePtr(sOSFileSourceAttr, 0, (void**)&theFile, &theLen);
 	Assert(theLen == sizeof(OSFileSource*));
 	(*theFile)->Advise(inParams->inPosition, inParams->inSize);
 
@@ -185,7 +185,7 @@ QTSS_Error  ReadFile(QTSS_ReadFile_Params* inParams)
 	OSFileSource** theFile = nullptr;
 	uint32_t theLen = 0;
 
-	(void)QTSS_GetValuePtr(inParams->inFileObject, sOSFileSourceAttr, 0, (void**)&theFile, &theLen);
+	((QTSSDictionary*)inParams->inFileObject)->GetValuePtr(sOSFileSourceAttr, 0, (void**)&theFile, &theLen);
 	Assert(theLen == sizeof(OSFileSource*));
 	OS_Error osErr = (*theFile)->Read(inParams->inFilePosition, inParams->ioBuffer, inParams->inBufLen, inParams->outLenRead);
 
@@ -203,9 +203,10 @@ QTSS_Error  CloseFile(QTSS_CloseFile_Params* inParams)
 	EventContext** theContext = nullptr;
 	uint32_t theLen = 0;
 
-	QTSS_Error theErr = QTSS_GetValuePtr(inParams->inFileObject, sOSFileSourceAttr, 0, (void**)&theFile, &theLen);
+	QTSSDictionary *dict = (QTSSDictionary *)inParams->inFileObject;
+	QTSS_Error theErr = dict->GetValuePtr(sOSFileSourceAttr, 0, (void**)&theFile, &theLen);
 	Assert(theErr == QTSS_NoErr);
-	theErr = QTSS_GetValuePtr(inParams->inFileObject, sEventContextAttr, 0, (void**)&theContext, &theLen);
+	theErr = dict->GetValuePtr(sEventContextAttr, 0, (void**)&theContext, &theLen);
 
 	if (theErr == QTSS_NoErr)
 	{
@@ -231,7 +232,7 @@ QTSS_Error  RequestEventFile(QTSS_RequestEventFile_Params* inParams)
 	EventContext** theContext = nullptr;
 	uint32_t theLen = 0;
 
-	QTSS_Error theErr = QTSS_GetValuePtr(inParams->inFileObject, sEventContextAttr, 0, (void**)&theContext, &theLen);
+	QTSS_Error theErr = ((QTSSDictionary*)inParams->inFileObject)->GetValuePtr(sEventContextAttr, 0, (void**)&theContext, &theLen);
 	if (theErr == QTSS_NoErr)
 	{
 		//

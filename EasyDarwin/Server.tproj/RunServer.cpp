@@ -416,7 +416,7 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 
 	uint32_t curBandwidth = 0;
 	theLen = sizeof(curBandwidth);
-	(void)QTSS_GetValue(sServer, qtssRTPSvrCurBandwidth, 0, &curBandwidth, &theLen);
+	(void)((QTSSDictionary*)sServer)->GetValue(qtssRTPSvrCurBandwidth, 0, &curBandwidth, &theLen);
 	snprintf(numStr, 11, "%"   _U32BITARG_   "", curBandwidth / 1024);
 	print_status(statusFile, stdOut, "%11s", numStr);
 
@@ -573,7 +573,7 @@ void PrintStatus(bool printHeader)
 
 	uint32_t curBandwidth = 0;
 	theLen = sizeof(curBandwidth);
-	(void)QTSS_GetValue(sServer, qtssRTPSvrCurBandwidth, 0, &curBandwidth, &theLen);
+	((QTSSDictionary*)sServer)->GetValue(qtssRTPSvrCurBandwidth, 0, &curBandwidth, &theLen);
 	printf("%11"   _U32BITARG_, curBandwidth / 1024);
 
 	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTPSvrCurPackets, 0, &thePrefStr);

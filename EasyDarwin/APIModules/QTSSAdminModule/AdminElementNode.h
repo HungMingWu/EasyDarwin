@@ -42,6 +42,7 @@
 #include "StrPtrLen.h"
 #include "OSRef.h"
 #include "AdminQuery.h"
+#include "QTSSDataConverter.h"
 
 void PRINT_STR(StrPtrLen *spl);
 void COPYBUFFER(char *dest, char *src, int8_t size);
@@ -120,7 +121,7 @@ public:
 	uint32_t  GetMyIndex() { Assert(fSelfPtr); return fSelfPtr->fIndex; };
 
 	uint32_t  GetMyAPI_Type() { Assert(fSelfPtr); return fSelfPtr->fAPI_Type; };
-	char*   GetMyAPI_TypeStr() { Assert(fSelfPtr); char* theTypeString = nullptr; (void)QTSS_TypeToTypeString(GetMyAPI_Type(), &theTypeString); return theTypeString; };
+	char*   GetMyAPI_TypeStr() { Assert(fSelfPtr); return QTSSDataConverter::TypeToTypeString(GetMyAPI_Type()); };
 	uint32_t  GetMyFieldType() { Assert(fSelfPtr); return fSelfPtr->fFieldType; };
 
 	char*   GetMyAccessData() { Assert(fSelfPtr); return fSelfPtr->fAccessData; };
@@ -145,7 +146,7 @@ public:
 	uint32_t  GetAPI_ID(int32_t index) { return fFieldIDs[index].fAPI_ID; };
 	uint32_t  GetAttributeIndex(int32_t index) { return fFieldIDs[index].fIndex; };
 	uint32_t  GetAPI_Type(int32_t index) { return fFieldIDs[index].fAPI_Type; };
-	char*   GetAPI_TypeStr(int32_t index) { char* theTypeStr = nullptr; (void)QTSS_TypeToTypeString(GetAPI_Type(index), &theTypeStr); return theTypeStr; };
+	char*   GetAPI_TypeStr(int32_t index) { return  QTSSDataConverter::TypeToTypeString(GetAPI_Type(index)); };
 	uint32_t  GetFieldType(int32_t index) { return fFieldIDs[index].fFieldType; };
 	char*   GetAccessData(int32_t index) { return fFieldIDs[index].fAccessData; };
 	uint32_t  GetAccessLen(int32_t index) { return fFieldIDs[index].fAccessLen; };

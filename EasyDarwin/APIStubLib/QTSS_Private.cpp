@@ -120,36 +120,6 @@ QTSS_Error QTSS_GetAttrInfoByName(QTSS_Object inObject, char* inAttrName, QTSS_O
     return (sCallbacks->addr [kGetAttrInfoByNameCallback]) (inObject, inAttrName, outAttrInfoObject);   
 }
 
-QTSS_Error  QTSS_GetValuePtr (QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, void** outBuffer, uint32_t* outLen)
-{
-    return (sCallbacks->addr [kGetAttributePtrByIDCallback]) (inDictionary, inID, inIndex, outBuffer, outLen);  
-}
-
-QTSS_Error  QTSS_GetValue (QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, void* ioBuffer, uint32_t* ioLen)
-{
-    return (sCallbacks->addr [kGetAttributeByIDCallback]) (inDictionary, inID, inIndex, ioBuffer, ioLen);   
-}
-
-QTSS_Error  QTSS_TypeStringToType(const char* inTypeString, QTSS_AttrDataType* outType)
-{
-    return (sCallbacks->addr [kTypeStringToTypeCallback]) (inTypeString, outType);  
-}
-
-QTSS_Error  QTSS_TypeToTypeString(const QTSS_AttrDataType inType, char** outTypeString)
-{
-    return (sCallbacks->addr [kTypeToTypeStringCallback]) (inType, outTypeString);  
-}
-
-QTSS_Error  QTSS_StringToValue(const char* inValueAsString, const QTSS_AttrDataType inType, void* ioBuffer, uint32_t* ioBufSize)
-{
-    return (sCallbacks->addr [kStringToValueCallback]) (inValueAsString, inType, ioBuffer, ioBufSize);  
-}
-
-QTSS_Error  QTSS_ValueToString(const void* inValue, const uint32_t inValueLen, const QTSS_AttrDataType inType, char** outString)
-{
-    return (sCallbacks->addr [kValueToStringCallback]) (inValue, inValueLen, inType, outString);    
-}
-
 QTSS_Error  QTSS_SetValue (QTSS_Object inDictionary, QTSS_AttributeID inID,uint32_t inIndex,  const void* inBuffer,  uint32_t inLen)
 {
     return (sCallbacks->addr [kSetAttributeByIDCallback]) (inDictionary, inID, inIndex, inBuffer, inLen);   
@@ -202,16 +172,6 @@ QTSS_Error  QTSS_Read(QTSS_StreamRef inRef, void* ioBuffer, uint32_t inBufLen, u
     return (sCallbacks->addr [kReadCallback]) (inRef, ioBuffer, inBufLen, outLengthRead);       
 }
 
-QTSS_Error  QTSS_Seek(QTSS_StreamRef inRef, uint64_t inNewPosition)
-{
-    return (sCallbacks->addr [kSeekCallback]) (inRef, inNewPosition);
-}
-
-QTSS_Error  QTSS_Advise(QTSS_StreamRef inRef, uint64_t inPosition, uint32_t inAdviseSize)
-{
-    return (sCallbacks->addr [kAdviseCallback]) (inRef, inPosition, inAdviseSize);      
-}
-
 // SERVICE ROUTINES
 
 QTSS_Error QTSS_AddService(const char* inServiceName, QTSS_ServiceFunctionPtr inFunctionPtr)
@@ -239,38 +199,6 @@ QTSS_Error QTSS_SendRTSPHeaders(QTSS_RTSPRequestObject inRef)
 QTSS_Error QTSS_AppendRTSPHeader(QTSS_RTSPRequestObject inRef, QTSS_RTSPHeader inHeader, const char* inValue, uint32_t inValueLen)
 {
     return (sCallbacks->addr [kAppendRTSPHeadersCallback]) (inRef, inHeader, inValue, inValueLen);      
-}
-
-QTSS_Error QTSS_SendStandardRTSPResponse(QTSS_RTSPRequestObject inRTSPRequest, QTSS_Object inRTPInfo, uint32_t inFlags)
-{
-    return (sCallbacks->addr [kSendStandardRTSPCallback]) (inRTSPRequest, inRTPInfo, inFlags);      
-}
-
-// RTP ROUTINES
-
-QTSS_Error QTSS_AddRTPStream(QTSS_ClientSessionObject inClientSession, QTSS_RTSPRequestObject inRTSPRequest, QTSS_RTPStreamObject* outStream, QTSS_AddStreamFlags inFlags)
-{
-    return (sCallbacks->addr [kAddRTPStreamCallback]) (inClientSession, inRTSPRequest, outStream, inFlags);     
-}
-
-QTSS_Error QTSS_Play(QTSS_ClientSessionObject inClientSession, QTSS_RTSPRequestObject inRTSPRequest, QTSS_PlayFlags inPlayFlags)
-{
-    return (sCallbacks->addr [kPlayCallback]) (inClientSession, inRTSPRequest, inPlayFlags);        
-}
-
-QTSS_Error QTSS_Pause(QTSS_ClientSessionObject inClientSession)
-{
-    return (sCallbacks->addr [kPauseCallback]) (inClientSession);       
-}
-
-QTSS_Error QTSS_Teardown(QTSS_ClientSessionObject inClientSession)
-{
-    return (sCallbacks->addr [kTeardownCallback]) (inClientSession);        
-}
-
-QTSS_Error QTSS_RefreshTimeOut(QTSS_ClientSessionObject inClientSession)
-{
-    return (sCallbacks->addr [kRefreshTimeOutCallback]) (inClientSession);
 }
 
 // FILE SYSTEM ROUTINES

@@ -312,7 +312,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	// Get the user profile object from the request object
 	QTSS_UserProfileObject theUserProfile = nullptr;
 	uint32_t len = sizeof(QTSS_UserProfileObject);
-	QTSS_Error theErr = QTSS_GetValue(theRTSPRequest, qtssRTSPReqUserProfile, 0, (void*)&theUserProfile, &len);
+	QTSS_Error theErr = ((QTSSDictionary*)theRTSPRequest)->GetValue(qtssRTSPReqUserProfile, 0, (void*)&theUserProfile, &len);
 	Assert(len == sizeof(QTSS_UserProfileObject));
 	if (theErr != QTSS_NoErr)
 		return theErr;
@@ -340,7 +340,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	// Get the request action from the request object
 	QTSS_ActionFlags action = qtssActionFlagsNoFlags;
 	len = sizeof(action);
-	theErr = QTSS_GetValue(theRTSPRequest, qtssRTSPReqAction, 0, (void*)&action, &len);
+	theErr = ((QTSSDictionary*)theRTSPRequest)->GetValue(qtssRTSPReqAction, 0, (void*)&action, &len);
 	Assert(len == sizeof(action));
 	if (theErr != QTSS_NoErr)
 		return theErr;
@@ -448,7 +448,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	{
 		// Get the authentication scheme from the request object
 		len = sizeof(authScheme);
-		theErr = QTSS_GetValue(theRTSPRequest, qtssRTSPReqAuthScheme, 0, (void*)&authScheme, &len);
+		theErr = ((QTSSDictionary*)theRTSPRequest)->GetValue(qtssRTSPReqAuthScheme, 0, (void*)&authScheme, &len);
 		Assert(len == sizeof(authScheme));
 		if (theErr != QTSS_NoErr)
 			return theErr;

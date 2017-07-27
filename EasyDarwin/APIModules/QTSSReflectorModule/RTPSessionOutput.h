@@ -101,7 +101,7 @@ bool RTPSessionOutput::PacketMatchesStream(void* inStreamCookie, QTSS_RTPStreamO
 {
 	void** theStreamCookie = nullptr;
 	uint32_t theLen = 0;
-	(void)QTSS_GetValuePtr(*theStreamPtr, fCookieAttrID, 0, (void**)&theStreamCookie, &theLen);
+	((QTSSDictionary*)*theStreamPtr)->GetValuePtr(fCookieAttrID, 0, (void**)&theStreamCookie, &theLen);
 
 	if ((theStreamCookie != nullptr) && (*theStreamCookie == inStreamCookie))
 		return true;

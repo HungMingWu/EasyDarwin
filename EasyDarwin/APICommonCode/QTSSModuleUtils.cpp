@@ -40,6 +40,8 @@
 #include "ResizeableStringFormatter.h"
 #include "QTAccessFile.h"
 #include "StringParser.h"
+#include "RTPSession.h"
+#include "QTSSDataConverter.h"
 #ifndef __Win32__
 #include <netinet/in.h>
 #endif
@@ -179,9 +181,9 @@ void    QTSSModuleUtils::LogError(  QTSS_ErrorVerbosity inVerbosity,
     // Retrieve the specified text message from the text messages dictionary.
     
     StrPtrLen theMessage;
-    (void)QTSS_GetValuePtr(sMessages, inTextMessage, 0, (void**)&theMessage.Ptr, &theMessage.Len);
+    ((QTSSDictionary*)sMessages)->GetValuePtr(inTextMessage, 0, (void**)&theMessage.Ptr, &theMessage.Len);
     if ((theMessage.Ptr == nullptr) || (theMessage.Len == 0))
-        (void)QTSS_GetValuePtr(sMessages, qtssMsgNoMessage, 0, (void**)&theMessage.Ptr, &theMessage.Len);
+		((QTSSDictionary*)sMessages)->GetValuePtr(qtssMsgNoMessage, 0, (void**)&theMessage.Ptr, &theMessage.Len);
 
     if ((theMessage.Ptr == nullptr) || (theMessage.Len == 0))
         return;
@@ -236,10 +238,10 @@ char* QTSSModuleUtils::GetFullPath( QTSS_RTSPRequestObject inRequest,
     // the file type is qtssFilePathTrunc attr, because there may be no path
     // once its truncated. That's ok. In that case, we just won't append a path.
     StrPtrLen theFilePath;
-    (void)QTSS_GetValuePtr(inRequest, whichFileType, 0, (void**)&theFilePath.Ptr, &theFilePath.Len);
+	((QTSSDictionary*)inRequest)->GetValuePtr(whichFileType, 0, (void**)&theFilePath.Ptr, &theFilePath.Len);
 		
     StrPtrLen theRootDir;
-    QTSS_Error theErr = QTSS_GetValuePtr(inRequest, qtssRTSPReqRootDir, 0, (void**)&theRootDir.Ptr, &theRootDir.Len);
+    QTSS_Error theErr = ((QTSSDictionary*)inRequest)->GetValuePtr(qtssRTSPReqRootDir, 0, (void**)&theRootDir.Ptr, &theRootDir.Len);
 	Assert(theErr == QTSS_NoErr);
 
 
@@ -382,14 +384,14 @@ QTSS_Error  QTSSModuleUtils::SendErrorResponse( QTSS_RTSPRequestObject inRequest
     {
         // Retrieve the specified message out of the text messages dictionary.
         StrPtrLen theMessage;
-        (void)QTSS_GetValuePtr(sMessages, inTextMessage, 0, (void**)&theMessage.Ptr, &theMessage.Len);
+		((QTSSDictionary*)sMessages)->GetValuePtr(inTextMessage, 0, (void**)&theMessage.Ptr, &theMessage.Len);
 
         if ((theMessage.Ptr == nullptr) || (theMessage.Len == 0))
         {
             // If we couldn't find the specified message, get the default
             // "No Message" message, and return that to the client instead.
             
-            (void)QTSS_GetValuePtr(sMessages, qtssMsgNoMessage, 0, (void**)&theMessage.Ptr, &theMessage.Len);
+			((QTSSDictionary*)sMessages)->GetValuePtr(qtssMsgNoMessage, 0, (void**)&theMessage.Ptr, &theMessage.Len);
         }
         Assert(theMessage.Ptr != nullptr);
         Assert(theMessage.Len > 0);
@@ -512,11 +514,12 @@ QTSS_Error	QTSSModuleUtils::SendHTTPErrorResponse( QTSS_RTSPRequestObject inRequ
 
     uint32_t realCode = 0;
     uint32_t len = sizeof(realCode);
-    (void) QTSS_GetValue(inRequest, qtssRTSPReqRealStatusCode, 0,  (void*)&realCode,&len);
+	QTSSDictionary *dict = (QTSSDictionary *)inRequest;
+    dict->GetValue(qtssRTSPReqRealStatusCode, 0,  (void*)&realCode,&len);
 
     char serverHeaderBuffer[64]; // the qtss Server: header field
     len = sizeof(serverHeaderBuffer) -1; // leave room for terminator
-    (void) QTSS_GetValue(sServer, qtssSvrRTSPServerHeader, 0,  (void*)serverHeaderBuffer,&len);
+    ((QTSSDictionary*)sServer)->GetValue(qtssSvrRTSPServerHeader, 0,  (void*)serverHeaderBuffer,&len);
     serverHeaderBuffer[len] = 0; // terminate.
  
     snprintf(messageLineBuffer,maxMessageBufferChars, "HTTP/1.1 %"   _U32BITARG_   " %s",realCode, errorMsg);
@@ -590,7 +593,7 @@ void    QTSSModuleUtils::SendDescribeResponse(QTSS_RTSPRequestObject inRequest,
     sprintf(buf, "%" _S32BITARG_ "", inTotalLength);
     (void)QTSS_AppendRTSPHeader(inRequest, qtssContentLengthHeader, &buf[0], ::strlen(&buf[0]));
 
-    (void)QTSS_SendStandardRTSPResponse(inRequest, inSession, 0);
+	((RTPSession*)inSession)->SendDescribeResponse((RTSPRequestInterface*)inRequest);
 
         // On solaris, the maximum # of vectors is very low (= 16) so to ensure that we are still able to
         // send the SDP if we have a number greater than the maximum allowed, we coalesce the vectors into
@@ -634,7 +637,7 @@ QTSS_ModulePrefsObject QTSSModuleUtils::GetModulePrefsObject(QTSS_ModuleObject i
 {
     QTSS_ModulePrefsObject thePrefsObject = nullptr;
     uint32_t theLen = sizeof(thePrefsObject);
-    QTSS_Error theErr = QTSS_GetValue(inModObject, qtssModPrefs, 0, &thePrefsObject, &theLen);
+    QTSS_Error theErr = ((QTSSDictionary*)inModObject)->GetValue(qtssModPrefs, 0, &thePrefsObject, &theLen);
     Assert(theErr == QTSS_NoErr);
     
     return thePrefsObject;
@@ -644,7 +647,7 @@ QTSS_Object QTSSModuleUtils::GetModuleAttributesObject(QTSS_ModuleObject inModOb
 {
     QTSS_Object theAttributesObject = nullptr;
     uint32_t theLen = sizeof(theAttributesObject);
-    QTSS_Error theErr = QTSS_GetValue(inModObject, qtssModAttributes, 0, &theAttributesObject, &theLen);
+    QTSS_Error theErr = ((QTSSDictionary*)inModObject)->GetValue(qtssModAttributes, 0, &theAttributesObject, &theLen);
     Assert(theErr == QTSS_NoErr);
     
     return theAttributesObject;
@@ -655,13 +658,14 @@ QTSS_ModulePrefsObject QTSSModuleUtils::GetModuleObjectByName(const StrPtrLen& i
     QTSS_ModuleObject theModule = nullptr;
     uint32_t theLen = sizeof(theModule);
     
-    for (int x = 0; QTSS_GetValue(sServer, qtssSvrModuleObjects, x, &theModule, &theLen) == QTSS_NoErr; x++)
+	QTSSDictionary *dict = (QTSSDictionary *)sServer;
+    for (int x = 0; dict->GetValue(qtssSvrModuleObjects, x, &theModule, &theLen) == QTSS_NoErr; x++)
     {
         Assert(theModule != nullptr);
         Assert(theLen == sizeof(theModule));
         
         StrPtrLen theName;
-        QTSS_Error theErr = QTSS_GetValuePtr(theModule, qtssModName, 0, (void**)&theName.Ptr, &theName.Len);
+        QTSS_Error theErr = ((QTSSDictionary*)theModule)->GetValuePtr(qtssModName, 0, (void**)&theName.Ptr, &theName.Len);
         Assert(theErr == QTSS_NoErr);
         
         if (inModuleName.Equal(theName))
@@ -685,7 +689,7 @@ void    QTSSModuleUtils::GetAttribute(QTSS_Object inObject, char* inAttributeNam
 
     //
     // Get the attribute value.
-    QTSS_Error theErr = QTSS_GetValue(inObject, theID, 0, ioBuffer, &inBufferLen);
+    QTSS_Error theErr = ((QTSSDictionary*)inObject)->GetValue(theID, 0, ioBuffer, &inBufferLen);
     
     //
     // Caller should KNOW how big this attribute is
@@ -702,9 +706,8 @@ void    QTSSModuleUtils::GetAttribute(QTSS_Object inObject, char* inAttributeNam
         {
             //
             // Log an error for this pref only if there was a default value provided.
-            char* theValueAsString = nullptr;
-            theErr = QTSS_ValueToString(inDefaultValue, inBufferLen, inType, &theValueAsString);
-            Assert(theErr == QTSS_NoErr);
+            char* theValueAsString = QTSSDataConverter::ValueToString(inDefaultValue, inBufferLen, inType);
+
             std::unique_ptr<char[]> theValueStr(theValueAsString);
             QTSSModuleUtils::LogError(  sMissingPrefVerbosity, 
                                         qtssServerPrefMissing,
@@ -788,7 +791,7 @@ QTSS_AttributeID QTSSModuleUtils::GetAttrID(QTSS_Object inObject, char* inAttrib
 
     QTSS_AttributeID theID = qtssIllegalAttrID; 
     uint32_t theLen = sizeof(theID);
-    theErr = QTSS_GetValue(theAttrInfo, qtssAttrID, 0, &theID, &theLen);
+    theErr = ((QTSSDictionary*)theAttrInfo)->GetValue(qtssAttrID, 0, &theID, &theLen);
     Assert(theErr == QTSS_NoErr);
 
     return theID;
@@ -805,19 +808,19 @@ QTSS_AttributeID QTSSModuleUtils::CheckAttributeDataType(QTSS_Object inObject, c
 
     QTSS_AttrDataType theAttributeType = qtssAttrDataTypeUnknown;
     uint32_t theLen = sizeof(theAttributeType);
-    theErr = QTSS_GetValue(theAttrInfo, qtssAttrDataType, 0, &theAttributeType, &theLen);
+	QTSSDictionary *dict = (QTSSDictionary *)theAttrInfo;
+    theErr = dict->GetValue(qtssAttrDataType, 0, &theAttributeType, &theLen);
     Assert(theErr == QTSS_NoErr);
     
     QTSS_AttributeID theID = qtssIllegalAttrID; 
     theLen = sizeof(theID);
-    theErr = QTSS_GetValue(theAttrInfo, qtssAttrID, 0, &theID, &theLen);
+    theErr = dict->GetValue(qtssAttrID, 0, &theID, &theLen);
     Assert(theErr == QTSS_NoErr);
 
     if (theAttributeType != inType)
     {
-        char* theValueAsString = nullptr;
-        theErr = QTSS_ValueToString(inDefaultValue, inBufferLen, inType, &theValueAsString);
-        Assert(theErr == QTSS_NoErr);
+        char* theValueAsString = QTSSDataConverter::ValueToString(inDefaultValue, inBufferLen, inType);
+
         std::unique_ptr<char[]> theValueStr(theValueAsString);
         QTSSModuleUtils::LogError(  qtssWarningVerbosity,
                                     qtssServerPrefWrongType,
@@ -855,7 +858,7 @@ QTSS_ActionFlags QTSSModuleUtils::GetRequestActions(QTSS_RTSPRequestObject theRT
     // Don't touch write requests
     QTSS_ActionFlags action = qtssActionFlagsNoFlags;
     uint32_t len = sizeof(QTSS_ActionFlags);
-    QTSS_Error theErr = QTSS_GetValue(theRTSPRequest, qtssRTSPReqAction, 0, (void*)&action, &len);
+    QTSS_Error theErr = ((QTSSDictionary*)theRTSPRequest)->GetValue(qtssRTSPReqAction, 0, (void*)&action, &len);
     Assert(theErr == QTSS_NoErr);
     Assert(len == sizeof(QTSS_ActionFlags));
     return action;
@@ -878,7 +881,7 @@ char* QTSSModuleUtils::GetMoviesRootDir_Copy(QTSS_RTSPRequestObject theRTSPReque
 QTSS_UserProfileObject QTSSModuleUtils::GetUserProfileObject(QTSS_RTSPRequestObject theRTSPRequest)
 {   QTSS_UserProfileObject theUserProfile = nullptr;
     uint32_t len = sizeof(QTSS_UserProfileObject);
-    QTSS_Error theErr = QTSS_GetValue(theRTSPRequest, qtssRTSPReqUserProfile, 0, (void*)&theUserProfile, &len);
+    QTSS_Error theErr = ((QTSSDictionary*)theRTSPRequest)->GetValue(qtssRTSPReqUserProfile, 0, (void*)&theUserProfile, &len);
     Assert(theErr == QTSS_NoErr);
     return theUserProfile;
 }
@@ -905,7 +908,7 @@ std::vector<std::string> QTSSModuleUtils::GetGroupsArray_Copy(QTSS_UserProfileOb
     {   
 		char *str = nullptr;
 		uint32_t len = 0;
-        QTSS_GetValuePtr(inUserProfile, qtssUserGroups, index,(void **) &str, &len);
+		((QTSSDictionary*)inUserProfile)->GetValuePtr(qtssUserGroups, index,(void **) &str, &len);
 		result[index] = std::string(str, len);
 		delete[] str;
     }   
@@ -920,7 +923,7 @@ bool QTSSModuleUtils::UserInGroup(QTSS_UserProfileObject inUserProfile, char* in
 		
 	char *userName = nullptr;
 	uint32_t len = 0;
-	QTSS_GetValuePtr(inUserProfile, qtssUserName, 0, (void **)&userName, &len);
+	((QTSSDictionary*)inUserProfile)->GetValuePtr(qtssUserName, 0, (void **)&userName, &len);
 	if (len == 0 || userName == nullptr || userName[0] == 0) // no user to check
 		return false;
 

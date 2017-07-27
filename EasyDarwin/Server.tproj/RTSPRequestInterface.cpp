@@ -723,7 +723,7 @@ void* RTSPRequestInterface::GetFileDigit(QTSSDictionary* inRequest, uint32_t* /*
 	StrPtrLen* theFileDigit = theRequest->GetValue(qtssRTSPReqFileDigit);
 
 	StrPtrLen theFilePath;
-	(void)QTSS_GetValuePtr(inRequest, qtssRTSPReqTruncAbsoluteURL, 0, (void**)&theFilePath.Ptr, &theFilePath.Len);
+	inRequest->GetValuePtr(qtssRTSPReqTruncAbsoluteURL, 0, (void**)&theFilePath.Ptr, &theFilePath.Len);
 
 	//uint32_t  theFilePathLen = theRequest->GetValue(qtssRTSPReqTruncAbsoluteURL)->Len;
 	theFileDigit->Ptr += theFileDigit->Len -1;

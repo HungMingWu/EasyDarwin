@@ -30,6 +30,7 @@
 
 #include <stdio.h>
 
+#include "QTSSDictionary.h"
 #include "QTSSFlowControlModule.h"
 #include "OSHeaders.h"
 #include "QTSSModuleUtils.h"
@@ -162,7 +163,7 @@ QTSS_Error RereadPrefs()
 		&sModuleEnabled, &sDefaultModuleEnabled, sizeof(sDefaultModuleEnabled));
 
 	uint32_t len = sizeof(sDisableThinning);
-	(void)QTSS_GetValue(sServerPrefs, qtssPrefsDisableThinning, 0, (void*)&sDisableThinning, &len);
+	(void)((QTSSDictionary*)sServerPrefs)->GetValue(qtssPrefsDisableThinning, 0, (void*)&sDisableThinning, &len);
 
 	return QTSS_NoErr;
 }
@@ -192,7 +193,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	// transport we should monitor
 	QTSS_RTPTransportType theTransportType = qtssRTPTransportTypeUDP;
 	uint32_t theLen = sizeof(theTransportType);
-	QTSS_Error theErr = QTSS_GetValue(inParams->inRTPStream, qtssRTPStrTransportType, 0, (void*)&theTransportType, &theLen);
+	QTSS_Error theErr = ((QTSSDictionary*)inParams->inRTPStream)->GetValue(qtssRTPStrTransportType, 0, (void*)&theTransportType, &theLen);
 	Assert(theErr == QTSS_NoErr);
 
 	if (theTransportType != qtssRTPTransportTypeUDP)
@@ -238,21 +239,22 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 
 	// Get our current counts for this stream. If any of these aren't present, something is seriously wrong
 	// with this dictionary, so we should probably just abort
-	(void)QTSS_GetValuePtr(theStream, sNumLossesAboveTolAttr, 0, (void**)&uint32_tPtr, &theLen);
+	QTSSDictionary *dict = (QTSSDictionary *)theStream;
+	dict->GetValuePtr(sNumLossesAboveTolAttr, 0, (void**)&uint32_tPtr, &theLen);
 	if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
 		theNumLossesAboveTol = *uint32_tPtr;
 
-	(void)QTSS_GetValuePtr(theStream, sNumLossesBelowTolAttr, 0, (void**)&uint32_tPtr, &theLen);
+	dict->GetValuePtr(sNumLossesBelowTolAttr, 0, (void**)&uint32_tPtr, &theLen);
 	if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
 		theNumLossesBelowTol = *uint32_tPtr;
 
-	(void)QTSS_GetValuePtr(theStream, sNumWorsesAttr, 0, (void**)&uint32_tPtr, &theLen);
+	dict->GetValuePtr(sNumWorsesAttr, 0, (void**)&uint32_tPtr, &theLen);
 	if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
 		theNumWorses = *uint32_tPtr;
 
 
 	//First take any action necessitated by the loss percent
-	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrPercentPacketsLost, 0, (void**)&uint16_tPtr, &theLen);
+	((QTSSDictionary*)inParams->inRTPStream)->GetValuePtr(qtssRTPStrPercentPacketsLost, 0, (void**)&uint16_tPtr, &theLen);
 	if ((uint16_tPtr != nullptr) && (theLen == sizeof(uint16_t)))
 	{
 		uint16_t thePercentLoss = *uint16_tPtr;
@@ -307,7 +309,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	}
 
 	//Now take a look at the getting worse heuristic
-	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrGettingWorse, 0, (void**)&uint16_tPtr, &theLen);
+	((QTSSDictionary*)inParams->inRTPStream)->GetValuePtr(qtssRTPStrGettingWorse, 0, (void**)&uint16_tPtr, &theLen);
 	if ((uint16_tPtr != nullptr) && (theLen == sizeof(uint16_t)))
 	{
 		uint16_t isGettingWorse = *uint16_tPtr;
@@ -335,7 +337,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	}
 
 	//Finally, if we get a getting better, automatically ratchet up
-	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrGettingBetter, 0, (void**)&uint16_tPtr, &theLen);
+	((QTSSDictionary*)inParams->inRTPStream)->GetValuePtr(qtssRTPStrGettingBetter, 0, (void**)&uint16_tPtr, &theLen);
 	if ((uint16_tPtr != nullptr) && (theLen == sizeof(uint16_t)) && (*uint16_tPtr > 0))
 		ratchetMore = true;
 
@@ -347,12 +349,13 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	{
 
 		uint32_t curQuality = 0;
-		(void)QTSS_GetValuePtr(theStream, qtssRTPStrQualityLevel, 0, (void**)&uint32_tPtr, &theLen);
+		QTSSDictionary *dict = (QTSSDictionary *)theStream;
+		dict->GetValuePtr(qtssRTPStrQualityLevel, 0, (void**)&uint32_tPtr, &theLen);
 		if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
 			curQuality = *uint32_tPtr;
 
 		uint32_t numQualityLevels = 0;
-		(void)QTSS_GetValuePtr(theStream, qtssRTPStrNumQualityLevels, 0, (void**)&uint32_tPtr, &theLen);
+		dict->GetValuePtr(qtssRTPStrNumQualityLevels, 0, (void**)&uint32_tPtr, &theLen);
 		if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
 			numQualityLevels = *uint32_tPtr;
 
@@ -374,13 +377,13 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 
 		bool *startedThinningPtr = nullptr;
 		int32_t numThinned = 0;
-		(void)QTSS_GetValuePtr(inParams->inClientSession, qtssCliSesStartedThinning, 0, (void**)&startedThinningPtr, &theLen);
+		((QTSSDictionary*)inParams->inClientSession)->GetValuePtr(qtssCliSesStartedThinning, 0, (void**)&startedThinningPtr, &theLen);
 		if (false == *startedThinningPtr)
 		{
 			(void)QTSS_LockObject(sServer);
 			*startedThinningPtr = true;
 
-			(void)QTSS_GetValue(sServer, qtssSvrNumThinned, 0, (void*)&numThinned, &theLen);
+			((QTSSDictionary*)sServer)->GetValue(qtssSvrNumThinned, 0, (void*)&numThinned, &theLen);
 			numThinned++;
 			(void)QTSS_SetValue(sServer, qtssSvrNumThinned, 0, &numThinned, sizeof(numThinned));
 			(void)QTSS_UnlockObject(sServer);
@@ -390,7 +393,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 			(void)QTSS_LockObject(sServer);
 			*startedThinningPtr = false;
 
-			(void)QTSS_GetValue(theStream, qtssSvrNumThinned, 0, (void*)&numThinned, &theLen);
+			((QTSSDictionary*)theStream)->GetValue(qtssSvrNumThinned, 0, (void*)&numThinned, &theLen);
 			numThinned--;
 			(void)QTSS_SetValue(sServer, qtssSvrNumThinned, 0, &numThinned, sizeof(numThinned));
 			(void)QTSS_UnlockObject(sServer);
@@ -429,7 +432,7 @@ void    InitializeDictionaryItems(QTSS_RTPStreamObject inStream)
 	uint32_t* theValue = nullptr;
 	uint32_t theValueLen = 0;
 
-	QTSS_Error theErr = QTSS_GetValuePtr(inStream, sNumLossesAboveTolAttr, 0, (void**)&theValue, &theValueLen);
+	QTSS_Error theErr = ((QTSSDictionary*)inStream)->GetValuePtr(sNumLossesAboveTolAttr, 0, (void**)&theValue, &theValueLen);
 
 	if (theErr != QTSS_NoErr)
 	{

@@ -1459,65 +1459,6 @@ QTSS_Error QTSS_GetAttrInfoByIndex(QTSS_Object inObject, uint32_t inIndex,
 QTSS_Error QTSS_GetNumAttributes (QTSS_Object inObject, uint32_t* outNumAttributes);
 
 /********************************************************************/
-//  QTSS_GetValuePtr
-//
-//  NOT TO BE USED WITH NON-PREEMPTIVE-SAFE attributes (or provide your own locking
-//  using QTSS_LockObject).
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-//              QTSS_NotPreemptiveSafe: Attempt to get a non-preemptive safe attribute
-//              QTSS_BadIndex: Attempt to get non-existent index.
-QTSS_Error QTSS_GetValuePtr (QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex,
-                                void** outBuffer, uint32_t* outLen);
-
-/********************************************************************/
-//  QTSS_GetValue
-//
-//  Copies the data into provided buffer. If QTSS_NotEnoughSpace is returned, outLen is still set.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-//              QTSS_NotEnoughSpace: Value is too big for buffer provided.
-//              QTSS_BadIndex: Attempt to get non-existent index.
-QTSS_Error QTSS_GetValue (QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex,
-                            void* ioBuffer, uint32_t* ioLen);
-
-/********************************************************************/
-//  QTSS_TypeStringToType
-//  QTSS_TypeToTypeString
-//
-//  Returns a text name for the specified QTSS_AttrDataType, or vice-versa
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument
-QTSS_Error  QTSS_TypeStringToType(const char* inTypeString, QTSS_AttrDataType* outType);
-QTSS_Error  QTSS_TypeToTypeString(const QTSS_AttrDataType inType, char** outTypeString);
-
-
-/********************************************************************/
-//  QTSS_StringToValue
-//
-//  Given a C-string and a QTSS_AttrDataType, this function converts the C-string
-//  to the specified type and puts the result in ioBuffer. ioBuffer must be allocated
-//  by the caller and must be big enough to contain the converted value.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-//              QTSS_NotEnoughSpace: Value is too big for buffer provided.
-//
-//  QTSS_ValueToString
-//
-//  Given a buffer containing a value of the specified type, this function converts
-//  the value to a C-string. This string is allocated internally and must be disposed of
-//  using QTSS_Delete
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-QTSS_Error  QTSS_StringToValue(const char* inValueAsString, const QTSS_AttrDataType inType, void* ioBuffer, uint32_t* ioBufSize);
-QTSS_Error  QTSS_ValueToString(const void* inValue, const uint32_t inValueLen, const QTSS_AttrDataType inType, char** outString);
-
-/********************************************************************/
 //  QTSS_SetValue
 //
 //  Returns:    QTSS_NoErr
@@ -1635,34 +1576,6 @@ QTSS_Error  QTSS_Flush(QTSS_StreamRef inRef);
 //              QTSS_BadArgument
 QTSS_Error  QTSS_Read(QTSS_StreamRef inRef, void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead);
 
-/********************************************************************/
-//  QTSS_Seek
-//
-//  Sets the current stream position to inNewPosition
-//
-//  Arguments   inRef:      The stream to read from.
-//              inNewPosition:  Offset from the start of the stream.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_RequestFailed
-//              QTSS_BadArgument
-QTSS_Error  QTSS_Seek(QTSS_StreamRef inRef, uint64_t inNewPosition);
-
-/********************************************************************/
-//  QTSS_Advise
-//
-//  Lets the stream know that the specified section of the stream will be read soon.
-//
-//  Arguments   inRef:          The stream to advise.
-//              inPosition:     Offset from the start of the stream of the advise region.
-//              inAdviseSize:   Size of the advise region.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_RequestFailed
-//              QTSS_BadArgument
-QTSS_Error  QTSS_Advise(QTSS_StreamRef inRef, uint64_t inPosition, uint32_t inAdviseSize);
-
-
 /*****************************************/
 //  SERVICES
 //
@@ -1744,92 +1657,6 @@ QTSS_Error QTSS_SendRTSPHeaders(QTSS_RTSPRequestObject inRef);
 //  Returns:    QTSS_NoErr
 //              QTSS_BadArgument: Bad argument
 QTSS_Error QTSS_AppendRTSPHeader(QTSS_RTSPRequestObject inRef, QTSS_RTSPHeader inHeader, const char* inValue, uint32_t inValueLen);
-
-
-/*****************************************/
-//  QTSS_SendStandardRTSPResponse
-//
-//  This function is also provided as an optional convienence to modules who are sending
-//  "typical" RTSP responses to clients. The function uses the QTSS_RTSPRequestObject and
-//  the QTSS_Object as inputs, where the object may either be a QTSS_ClientSessionObject
-//  or a QTSS_RTPStreamObject, depending on the method. The response is written to the
-//  stream provided.
-//
-//  Below is a description of what is returned for each method this function supports:
-//
-//  DESCRIBE:
-//
-//   Writes status line, CSeq, SessionID, Connection headers as determined by the request.
-//   Writes a Content-Base header with the Content-Base being the URL provided.
-//   Writes a Content-Type header of "application/sdp"
-//   QTSS_Object must be a QTSS_ClientSessionObject.
-//
-//  SETUP:
-//
-//   Writes status line, CSeq, SessionID, Connection headers as determined by the request.
-//   Writes a Transport header with the client & server ports (if connection is over UDP).
-//   QTSS_Object must be a QTSS_RTPStreamObject.
-//
-//  PLAY:
-//
-//   Writes status line, CSeq, SessionID, Connection headers as determined by the request.
-//   QTSS_Object must be a QTSS_ClientSessionObject.
-//
-//   Specify whether you want the server to append the seq#, timestamp, & ssrc info to
-//   the RTP-Info header via. the qtssPlayRespWriteTrackInfo flag.
-//
-//  PAUSE:
-//
-//   Writes status line, CSeq, SessionID, Connection headers as determined by the request.
-//   QTSS_Object must be a QTSS_ClientSessionObject.
-//
-//  TEARDOWN:
-//
-//   Writes status line, CSeq, SessionID, Connection headers as determined by the request.
-//   QTSS_Object must be a QTSS_ClientSessionObject.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-QTSS_Error  QTSS_SendStandardRTSPResponse(QTSS_RTSPRequestObject inRTSPRequest, QTSS_Object inRTPInfo, uint32_t inFlags);
-
-
-/*****************************************/
-//  CLIENT SESSION CALLBACKS
-//
-//  QTSS API Modules have the option of generating and sending RTP packets. Only
-//  one module currently can generate packets for a particular session. In order
-//  to do this, call QTSS_AddRTPStream. This must be done in response to a RTSP
-//  request, and typically is done in response to a SETUP request from the client.
-//
-//  After one or more streams have been added to the session, the module that "owns"
-//  the packet sending for that session can call QTSS_Play to start the streams playing.
-//  After calling QTSS_Play, the module will get invoked in the QTSS_SendPackets_Role.
-//  Calling QTSS_Pause stops playing.
-//
-//  The "owning" module may call QTSS_Teardown at any time. Doing this closes the
-//  session and will cause the QTSS_SessionClosing_Role to be invoked for this session. 
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-//              QTSS_RequestFailed: QTSS_RTPStreamObject couldn't be created.
-QTSS_Error  QTSS_AddRTPStream(QTSS_ClientSessionObject inClientSession, QTSS_RTSPRequestObject inRTSPRequest, QTSS_RTPStreamObject* outStream, QTSS_AddStreamFlags inFlags);
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-//              QTSS_RequestFailed: No streams added to this session.
-QTSS_Error  QTSS_Play(QTSS_ClientSessionObject inClientSession, QTSS_RTSPRequestObject inRTSPRequest, QTSS_PlayFlags inPlayFlags);
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-QTSS_Error  QTSS_Pause(QTSS_ClientSessionObject inClientSession);
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-QTSS_Error  QTSS_Teardown(QTSS_ClientSessionObject inClientSession);
-
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-QTSS_Error  QTSS_RefreshTimeOut(QTSS_ClientSessionObject inClientSession);
 
 /*****************************************/
 //  FILE SYSTEM CALLBACKS

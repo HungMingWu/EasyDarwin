@@ -75,17 +75,7 @@ public:
 
 	static QTSS_Error   QTSS_GetNumAttributes(QTSS_Object inObject, uint32_t* outNumValues);
 
-	// TYPE INFO & TYPE CONVERSIONS
-
-	static QTSS_Error   QTSS_TypeToTypeString(const QTSS_AttrDataType inType, char** outTypeString);
-	static QTSS_Error   QTSS_TypeStringToType(char* inTypeString, QTSS_AttrDataType* outType);
-	static QTSS_Error   QTSS_StringToValue(char* inValueAsString, const QTSS_AttrDataType inType, void* ioBuffer, uint32_t* ioBufSize);
-	static QTSS_Error   QTSS_ValueToString(void* inValue, const uint32_t inValueLen, const QTSS_AttrDataType inType, char** outString);
-
 	// ATTRIBUTE VALUES
-
-	static QTSS_Error   QTSS_GetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, void** outBuffer, uint32_t* outLen);
-	static QTSS_Error   QTSS_GetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, void* ioBuffer, uint32_t* ioLen);
 
 	static QTSS_Error   QTSS_SetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, const void* inBuffer, uint32_t inLen);
 	static QTSS_Error   QTSS_SetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, const void* inBuffer, uint32_t inLen);
@@ -99,8 +89,6 @@ public:
 	static QTSS_Error   QTSS_WriteV(QTSS_StreamRef inStream, iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten);
 	static QTSS_Error   QTSS_Flush(QTSS_StreamRef inStream);
 	static QTSS_Error   QTSS_Read(QTSS_StreamRef inRef, void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead);
-	static QTSS_Error   QTSS_Seek(QTSS_StreamRef inRef, uint64_t inNewPosition);
-	static QTSS_Error   QTSS_Advise(QTSS_StreamRef inRef, uint64_t inPosition, uint32_t inAdviseSize);
 
 	// FILE SYSTEM ROUTINES
 
@@ -122,15 +110,6 @@ public:
 
 	static QTSS_Error   QTSS_SendRTSPHeaders(QTSS_RTSPRequestObject inRef);
 	static QTSS_Error   QTSS_AppendRTSPHeader(QTSS_RTSPRequestObject inRef, QTSS_RTSPHeader inHeader, char* inValue, uint32_t inValueLen);
-	static QTSS_Error   QTSS_SendStandardRTSPResponse(QTSS_RTSPRequestObject inRTSPRequest, QTSS_Object inRTPInfo, uint32_t inFlags);
-
-	// RTP ROUTINES
-
-	static QTSS_Error   QTSS_AddRTPStream(QTSS_ClientSessionObject inClientSession, QTSS_RTSPRequestObject inRTSPRequest, QTSS_RTPStreamObject* outStream, QTSS_AddStreamFlags inFlags);
-	static QTSS_Error   QTSS_Play(QTSS_ClientSessionObject inClientSession, QTSS_RTSPRequestObject inRTSPRequest, QTSS_PlayFlags inPlayFlags);
-	static QTSS_Error   QTSS_Pause(QTSS_ClientSessionObject inClientSession);
-	static QTSS_Error   QTSS_Teardown(QTSS_ClientSessionObject inClientSession);
-	static QTSS_Error   QTSS_RefreshTimeOut(QTSS_ClientSessionObject inClientSession);
 
 	// ASYNC I/O ROUTINES
 	static QTSS_Error   QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_EventType inEventMask);

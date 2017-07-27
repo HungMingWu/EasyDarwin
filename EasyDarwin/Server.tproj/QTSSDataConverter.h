@@ -33,7 +33,7 @@
 	 Change History (most recent first):
 
  */
-
+#pragma once
 #include "QTSS.h"
 
 class QTSSDataConverter

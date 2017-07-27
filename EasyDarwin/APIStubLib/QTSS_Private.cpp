@@ -213,19 +213,6 @@ QTSS_Error  QTSS_CloseFileObject(QTSS_Object inFileObject)
     return (sCallbacks->addr [kCloseFileObjectCallback]) (inFileObject);        
 }
 
-// SOCKET ROUTINES
-
-QTSS_Error  QTSS_CreateStreamFromSocket(int inFileDesc, QTSS_StreamRef* outStream)
-{
-    return (sCallbacks->addr [kCreateSocketStreamCallback]) (inFileDesc, outStream);        
-}
-
-QTSS_Error  QTSS_DestroySocketStream(QTSS_StreamRef inStream)
-{
-    return (sCallbacks->addr [kDestroySocketStreamCallback]) (inStream);        
-
-}
-
 // ASYNC I/O STREAM ROUTINES
 
 QTSS_Error  QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_EventType inEventMask)

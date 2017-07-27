@@ -1735,7 +1735,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	if (theStreamInfo->fTimeScale == 0)
 		theStreamInfo->fTimeScale = 90000;
 
-	QTSS_RTPStreamObject newStream = nullptr;
+	RTPStream *newStream = nullptr;
 	{
 		// Ok, this is completely crazy but I can't think of a better way to do this that's
 		// safe so we'll do it this way for now. Because the ReflectorStreams use this session's
@@ -1747,7 +1747,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 			theSession->GetStreamByIndex(x)->GetMutex()->Lock();
 
 		theErr = ((RTPSession*)inParams->inClientSession)->AddStream(
-			(RTSPRequestInterface*)inParams->inRTSPRequest, (RTPStream**)&newStream, 0);
+			(RTSPRequestInterface*)inParams->inRTSPRequest, &newStream, 0);
 
 		for (uint32_t y = 0; y < theSession->GetNumStreams(); y++)
 			theSession->GetStreamByIndex(y)->GetMutex()->Unlock();
@@ -1757,13 +1757,13 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	}
 
 	// Set up dictionary items for this stream
-	theErr = QTSS_SetValue(newStream, qtssRTPStrPayloadName, 0, thePayloadName->Ptr, thePayloadName->Len);
+	theErr = newStream->SetValue(qtssRTPStrPayloadName, 0, thePayloadName->Ptr, thePayloadName->Len);
 	Assert(theErr == QTSS_NoErr);
-	theErr = QTSS_SetValue(newStream, qtssRTPStrPayloadType, 0, &thePayloadType, sizeof(thePayloadType));
+	theErr = newStream->SetValue(qtssRTPStrPayloadType, 0, &thePayloadType, sizeof(thePayloadType));
 	Assert(theErr == QTSS_NoErr);
-	theErr = QTSS_SetValue(newStream, qtssRTPStrTrackID, 0, &theTrackID, sizeof(theTrackID));
+	theErr = newStream->SetValue(qtssRTPStrTrackID, 0, &theTrackID, sizeof(theTrackID));
 	Assert(theErr == QTSS_NoErr);
-	theErr = QTSS_SetValue(newStream, qtssRTPStrTimescale, 0, &theStreamInfo->fTimeScale, sizeof(theStreamInfo->fTimeScale));
+	theErr = newStream->SetValue(qtssRTPStrTimescale, 0, &theStreamInfo->fTimeScale, sizeof(theStreamInfo->fTimeScale));
 	Assert(theErr == QTSS_NoErr);
 
 	// We only want to allow over buffering to dynamic rate clients   
@@ -1777,18 +1777,18 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	// Place the stream cookie in this stream for future reference
 	void* theStreamCookie = theSession->GetStreamCookie(theTrackID);
 	Assert(theStreamCookie != nullptr);
-	theErr = QTSS_SetValue(newStream, sStreamCookieAttr, 0, &theStreamCookie, sizeof(theStreamCookie));
+	theErr = newStream->SetValue(sStreamCookieAttr, 0, &theStreamCookie, sizeof(theStreamCookie));
 	Assert(theErr == QTSS_NoErr);
 
 	// Set the number of quality levels.
 	static uint32_t sNumQualityLevels = ReflectorSession::kNumQualityLevels;
-	theErr = QTSS_SetValue(newStream, qtssRTPStrNumQualityLevels, 0, &sNumQualityLevels, sizeof(sNumQualityLevels));
+	theErr = newStream->SetValue(qtssRTPStrNumQualityLevels, 0, &sNumQualityLevels, sizeof(sNumQualityLevels));
 	Assert(theErr == QTSS_NoErr);
 
 	//send the setup response
 	(void)QTSS_AppendRTSPHeader(inParams->inRTSPRequest, qtssCacheControlHeader,
 		kCacheControlHeader.Ptr, kCacheControlHeader.Len);
-	SendSetupRTSPResponse((RTPStream *)newStream, (RTSPRequestInterface *)(inParams->inRTSPRequest), qtssSetupRespDontWriteSSRC);
+	SendSetupRTSPResponse(newStream, (RTSPRequestInterface *)(inParams->inRTSPRequest), qtssSetupRespDontWriteSSRC);
 
 #ifdef REFLECTORSESSION_DEBUG
 	printf("QTSSReflectorModule.cpp:DoSetup Session =%p refcount=%"   _U32BITARG_   "\n", theSession->GetRef(), theSession->GetRef()->GetRefCount());

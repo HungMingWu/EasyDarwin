@@ -80,8 +80,7 @@ enum
     kGetNumValuesCallback           = 30,
     kGetNumAttributesCallback       = 31,
     kSignalStreamCallback           = 32,
-    kCreateSocketStreamCallback     = 33,
-    kDestroySocketStreamCallback    = 34,
+
     kAddStaticAttributeCallback     = 35,
     kAddInstanceAttributeCallback   = 36,
     kRemoveInstanceAttributeCallback= 37,

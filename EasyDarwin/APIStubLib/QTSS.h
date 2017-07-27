@@ -1696,44 +1696,6 @@ QTSS_Error  QTSS_OpenFileObject(char* inPath, QTSS_OpenFileFlags inFlags, QTSS_O
 //              QTSS_BadArgument
 QTSS_Error  QTSS_CloseFileObject(QTSS_Object inFileObject);
 
-
-/*****************************************/
-//  SOCKET CALLBACKS
-//
-//  It is not necessary for a module that internally uses network I/O to go through
-//  the QTSS API for their networking APIs. However, it is highly recommended
-//  to use nonblocking network I/O from a module. With nonblocking network I/O, it
-//  is very important to be able to receive socket events.
-//
-//  To facilitate this, QTSS API provides the following two callbacks to link external
-//  sockets into the QTSS API streams framework.
-//
-//  Once a module has created a QTSS stream out of its socket, it is possible to use the
-//  QTSS_RequestEvent callback to receive events on the socket. 
-
-
-/********************************************************************/
-//  QTSS_CreateStreamFromSocket
-//
-//  Creates a socket stream.
-//
-//  Arguments:  inFileDesc: the socket
-//
-//  Returns:    QTSS_NoErr
-QTSS_Error  QTSS_CreateStreamFromSocket(int inFileDesc, QTSS_SocketStream* outStream);
-
-
-/********************************************************************/
-//  QTSS_DestroySocketStream
-//
-//  Creates a socket stream.
-//
-//  Arguments:  inFileDesc: the socket
-//
-//  Returns:    QTSS_NoErr
-QTSS_Error  QTSS_DestroySocketStream(QTSS_SocketStream inStream);
-
-
 /*****************************************/
 //  ASYNC I/O CALLBACKS
 //

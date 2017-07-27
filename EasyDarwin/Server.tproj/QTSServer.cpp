@@ -838,9 +838,6 @@ void    QTSServer::InitCallbacks()
 	sCallbacks.addr[kOpenFileObjectCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_OpenFileObject;
 	sCallbacks.addr[kCloseFileObjectCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_CloseFileObject;
 
-	sCallbacks.addr[kCreateSocketStreamCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_CreateStreamFromSocket;
-	sCallbacks.addr[kDestroySocketStreamCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_DestroySocketStream;
-
 	sCallbacks.addr[kAddStaticAttributeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AddStaticAttribute;
 	sCallbacks.addr[kAddInstanceAttributeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AddInstanceAttribute;
 	sCallbacks.addr[kRemoveInstanceAttributeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_RemoveInstanceAttribute;

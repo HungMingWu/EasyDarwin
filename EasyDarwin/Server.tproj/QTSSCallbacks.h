@@ -95,11 +95,6 @@ public:
 	static QTSS_Error   QTSS_OpenFileObject(char* inPath, QTSS_OpenFileFlags inFlags, QTSS_Object* outFileObject);
 	static QTSS_Error   QTSS_CloseFileObject(QTSS_Object inFileObject);
 
-	// SOCKET ROUTINES
-
-	static QTSS_Error   QTSS_CreateStreamFromSocket(int inFileDesc, QTSS_StreamRef* outStream);
-	static QTSS_Error   QTSS_DestroySocketStream(QTSS_StreamRef inStream);
-
 	// SERVICE ROUTINES
 
 	static QTSS_Error   QTSS_AddService(const char* inServiceName, QTSS_ServiceFunctionPtr inFunctionPtr);

@@ -361,35 +361,6 @@ QTSS_Error  QTSSCallbacks::QTSS_CloseFileObject(QTSS_Object inFileObject)
 	return QTSS_NoErr;
 }
 
-
-QTSS_Error  QTSSCallbacks::QTSS_CreateStreamFromSocket(int inFileDesc, QTSS_StreamRef* outStream)
-{
-	if (outStream == nullptr)
-		return QTSS_BadArgument;
-
-	if (inFileDesc < 0)
-		return QTSS_BadArgument;
-
-	//
-	// Create a new socket object
-	*outStream = (QTSS_StreamRef)new QTSSSocket(inFileDesc);
-	return QTSS_NoErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_DestroySocketStream(QTSS_StreamRef inStream)
-{
-	if (inStream == nullptr)
-		return QTSS_BadArgument;
-
-	//
-	// Note that the QTSSSocket destructor will call close on its file descriptor.
-	// Calling module should not also close the file descriptor! (This is noted in the API)
-	auto* theSocket = (QTSSSocket*)inStream;
-	delete theSocket;
-	return QTSS_NoErr;
-}
-
-
 QTSS_Error  QTSSCallbacks::QTSS_AddService(const char* inServiceName, QTSS_ServiceFunctionPtr inFunctionPtr)
 {
 	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();

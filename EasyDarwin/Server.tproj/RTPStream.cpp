@@ -32,6 +32,7 @@
 
 #include <stdlib.h>
 #include <ctime>
+#include <memory>
 
 #ifndef __Win32__
 #include <arpa/inet.h>
@@ -175,7 +176,6 @@ RTPStream::RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession)
 	fFirstSeqNumber(0),
 	fFirstTimeStamp(0),
 	fTimescale(0),
-	fStreamURLPtr(fStreamURL, 0),
 	fQualityLevel(QTSServerInterface::GetServer()->GetPrefs()->GetDefaultStreamQuality()),
 	fNumQualityLevels(0),
 	fLastRTPTimestamp(0),
@@ -426,10 +426,12 @@ void  RTPStream::SetOverBufferState(RTSPRequestInterface* request)
 QTSS_Error RTPStream::Setup(RTSPRequestInterface* request, QTSS_AddStreamFlags inFlags)
 {
 	//Get the URL for this track
-	fStreamURLPtr.Len = kMaxStreamURLSizeInBytes;
-	if (request->GetValue(qtssRTSPReqFileName, 0, fStreamURLPtr.Ptr, &fStreamURLPtr.Len) != QTSS_NoErr)
+	std::unique_ptr<char[]> str(new char[128]);
+	StrPtrLen fStreamURLPtr1(str.get());
+	fStreamURLPtr1.Len = 128;
+	if (request->GetValue(qtssRTSPReqFileName, 0, fStreamURLPtr1.Ptr, &fStreamURLPtr1.Len) != QTSS_NoErr)
 		return QTSSModuleUtils::SendErrorResponse(request, qtssClientBadRequest, qtssMsgFileNameTooLong);
-	fStreamURL[fStreamURLPtr.Len] = '\0';//just in case someone wants to use string routines
+	fStreamURL = std::string(fStreamURLPtr1.Ptr, fStreamURLPtr1.Len);//just in case someone wants to use string routines
 
 	//
 	// Store the late-tolerance value that came out of hte x-RTP-Options header,
@@ -699,27 +701,11 @@ void RTPStream::AppendTransport(RTSPRequestInterface* request)
 void    RTPStream::AppendRTPInfo(QTSS_RTSPHeader inHeader, RTSPRequestInterface* request, uint32_t inFlags, bool lastInfo)
 {
 	//format strings for the various numbers we need to send back to the client
-	char rtpTimeBuf[20];
-	StrPtrLen rtpTimeBufPtr;
-	if (inFlags & qtssPlayRespWriteTrackInfo)
-	{
-		sprintf(rtpTimeBuf, "%"   _U32BITARG_   "", fFirstTimeStamp);
-		rtpTimeBufPtr.Set(rtpTimeBuf, ::strlen(rtpTimeBuf));
-		Assert(rtpTimeBufPtr.Len < 20);
-	}
+	std::string rtpTimeBuf = (inFlags & qtssPlayRespWriteTrackInfo) ? std::to_string(fFirstTimeStamp) : std::string{};
+	std::string seqNumberBuf = (inFlags & qtssPlayRespWriteTrackInfo) ? std::to_string(fFirstSeqNumber) : std::string{};
 
-	char seqNumberBuf[20];
-	StrPtrLen seqNumberBufPtr;
-	if (inFlags & qtssPlayRespWriteTrackInfo)
-	{
-		sprintf(seqNumberBuf, "%u", fFirstSeqNumber);
-		seqNumberBufPtr.Set(seqNumberBuf, ::strlen(seqNumberBuf));
-		Assert(seqNumberBufPtr.Len < 20);
-	}
-
-	StrPtrLen *nullSSRCPtr = nullptr; // There is no SSRC in RTP-Info header, it goes in the transport header.
-	request->AppendRTPInfoHeader(inHeader, &fStreamURLPtr, &seqNumberBufPtr, nullSSRCPtr, &rtpTimeBufPtr, lastInfo);
-
+	// There is no SSRC in RTP-Info header, it goes in the transport header.
+	request->AppendRTPInfoHeader(inHeader, fStreamURL, seqNumberBuf, {}, rtpTimeBuf, lastInfo);
 }
 
 

@@ -864,13 +864,6 @@ QTSS_ActionFlags QTSSModuleUtils::GetRequestActions(QTSS_RTSPRequestObject theRT
     return action;
 }
 
-char* QTSSModuleUtils::GetLocalPath_Copy(QTSS_RTSPRequestObject theRTSPRequest)
-{   char*   pathBuffStr = nullptr;
-    QTSS_Error theErr = ((QTSSDictionary*)theRTSPRequest)->GetValueAsString(qtssRTSPReqLocalPath, 0, &pathBuffStr);
-    Assert(theErr == QTSS_NoErr);
-    return pathBuffStr;
-}
-
 char* QTSSModuleUtils::GetMoviesRootDir_Copy(QTSS_RTSPRequestObject theRTSPRequest)
 {   char*   movieRootDirStr = nullptr;
     QTSS_Error theErr = ((QTSSDictionary*)theRTSPRequest)->GetValueAsString(qtssRTSPReqRootDir, 0, &movieRootDirStr);

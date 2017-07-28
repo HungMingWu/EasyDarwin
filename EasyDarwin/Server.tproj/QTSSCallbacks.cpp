@@ -39,6 +39,7 @@
 #include "QTSServerInterface.h"
 #include "QTSSDataConverter.h"
 #include "QTSSModule.h"
+#include "RTSPRequest.h"
 
 #include <errno.h>
 
@@ -571,9 +572,10 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 	// First create a RTSPRequestInterface object 
 	// There is no session attached to it, so just pass in NULL for the RTSPSession
 	auto *request = (RTSPRequestInterface *)ioAuthRequestObject;
+	RTSPRequest *pReq = (RTSPRequest *)ioAuthRequestObject;
 	// Set all the attributes required by the authentication module, using the input values
 	(void)request->SetValue(qtssRTSPReqUserName, 0, inAuthUserName, ::strlen(inAuthUserName), QTSSDictionary::kDontObeyReadOnly);
-	(void)request->SetValue(qtssRTSPReqLocalPath, 0, inAuthResourceLocalPath, ::strlen(inAuthResourceLocalPath), QTSSDictionary::kDontObeyReadOnly);
+	(void)pReq->SetLocalPath({ inAuthResourceLocalPath, ::strlen(inAuthResourceLocalPath) });
 	(void)request->SetValue(qtssRTSPReqRootDir, 0, inAuthMoviesDir, ::strlen(inAuthMoviesDir), QTSSDictionary::kNoFlags);
 	(void)request->SetValue(qtssRTSPReqAction, 0, (const void *)&inAuthRequestAction, sizeof(QTSS_ActionFlags), QTSSDictionary::kNoFlags);
 	(void)request->SetValue(qtssRTSPReqAuthScheme, 0, (const void *)&inAuthScheme, sizeof(QTSS_AuthScheme), QTSSDictionary::kDontObeyReadOnly);
@@ -747,14 +749,12 @@ void* QTSSCallbacks::Easy_GetRTSPPushSessions()
 
 		EasyDarwinRTSPSession session;
 		session.index = uIndex;
-		char* fullRequestURL = nullptr;
 
 		auto* clientSession = (RTPSession*)theSession->GetBroadcasterSession();
 
 		if (clientSession == nullptr) continue;
 
-		clientSession->GetValueAsString(qtssCliSesFullURL, 0, &fullRequestURL);
-		session.Url = fullRequestURL;
+		session.Url = std::string(clientSession->GetAbsoluteURL());
 		session.Name = theSession->GetStreamName()->Ptr;
 		session.numOutputs = theSession->GetNumOutputs();
 		session.channel = theSession->GetChannelNum();

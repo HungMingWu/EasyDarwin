@@ -206,7 +206,6 @@ class QTSSModuleUtils
         //
         static QTSS_ActionFlags GetRequestActions(QTSS_RTSPRequestObject theRTSPRequest);
  
-        static char* GetLocalPath_Copy(QTSS_RTSPRequestObject theRTSPRequest);
         static char* GetMoviesRootDir_Copy(QTSS_RTSPRequestObject theRTSPRequest);
         static QTSS_UserProfileObject GetUserProfileObject(QTSS_RTSPRequestObject theRTSPRequest);
         static QTSS_AttrRights GetRights(QTSS_UserProfileObject theUserProfileObject);

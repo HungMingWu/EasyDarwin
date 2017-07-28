@@ -38,6 +38,7 @@
 #define __RTSPREQUESTINTERFACE_H__
 
  //INCLUDES:
+#include <boost/utility/string_view.hpp>
 #include "QTSS.h"
 #include "QTSSDictionary.h"
 
@@ -49,6 +50,8 @@
 
 class RTSPRequestInterface : public QTSSDictionary
 {
+	//The full local path to the file. This Attribute is first set after the Routing Role has run and before any other role is called. 
+	std::string localPath;
 public:
 
 	//Initialize
@@ -82,8 +85,8 @@ public:
 		StrPtrLen* ssrc = nullptr);
 	void    AppendContentBaseHeader(StrPtrLen* theURL);
 	void    AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
-		StrPtrLen* url, StrPtrLen* seqNumber,
-		StrPtrLen* ssrc, StrPtrLen* rtpTime, bool lastRTPInfo);
+		boost::string_view url, boost::string_view seqNumber,
+		boost::string_view ssrc, boost::string_view rtpTime, bool lastRTPInfo);
 
 	void    AppendContentLength(uint32_t contentLength);
 	void    AppendDateAndExpires();
@@ -210,7 +213,8 @@ public:
 
 	StrPtrLen*                  GetRequestChallenge() { return &fAuthDigestChallenge; }
 
-
+	void SetLocalPath(boost::string_view localpath) { localPath = std::string(localpath); }
+	boost::string_view GetLocalPath();
 protected:
 
 	//ALL THIS STUFF HERE IS SETUP BY RTSPREQUEST object (derived)
@@ -240,7 +244,9 @@ protected:
 	QTSS_RTPTransportType       fTransportType;
 	QTSS_RTPNetworkMode         fNetworkMode;
 
+	// Content length of incoming RTSP request body
 	uint32_t                      fContentLength;
+
 	int64_t                      fIfModSinceDate;
 	float                     fSpeed;
 	float                     fLateTolerance;
@@ -268,7 +274,9 @@ protected:
 	bool                      fHasUser;
 	bool                      fAuthHandled;
 
+	// A setup request from the client.
 	QTSS_RTPTransportMode       fTransportMode;
+
 	uint16_t                      fSetUpServerPort;           //send this back as the server_port if is SETUP request
 
 	QTSS_ActionFlags            fAction;    // The action that will be performed for this request
@@ -316,7 +324,6 @@ private:
 	static void*        GetFileName(QTSSDictionary* inRequest, uint32_t* outLen);
 	static void*        GetFileDigit(QTSSDictionary* inRequest, uint32_t* outLen);
 	static void*        GetRealStatusCode(QTSSDictionary* inRequest, uint32_t* outLen);
-	static void*		GetLocalPath(QTSSDictionary* inRequest, uint32_t* outLen);
 	static void* 		GetAuthDigestResponse(QTSSDictionary* inRequest, uint32_t* outLen);
 
 	//optimized preformatted response header strings

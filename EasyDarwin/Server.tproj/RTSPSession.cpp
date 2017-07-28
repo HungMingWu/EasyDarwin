@@ -1923,13 +1923,13 @@ void RTSPSession::SetupClientSessionAttrs()
 {
 	// get and pass presentation url
 	StrPtrLen* theValue = fRequest->GetValue(qtssRTSPReqURI);
-	Assert(theValue != nullptr);
-	(void)fRTPSession->SetValue(qtssCliSesPresentationURL, 0, theValue->Ptr, theValue->Len, QTSSDictionary::kDontObeyReadOnly);
+	boost::string_view t(theValue->Ptr, theValue->Len);
+	fRTPSession->SetPresentationURL(t);
 
 	// get and pass full request url
 	theValue = fRequest->GetValue(qtssRTSPReqAbsoluteURL);
-	Assert(theValue != nullptr);
-	(void)fRTPSession->SetValue(qtssCliSesFullURL, 0, theValue->Ptr, theValue->Len, QTSSDictionary::kDontObeyReadOnly);
+	t = boost::string_view(theValue->Ptr, theValue->Len);
+	fRTPSession->SetAbsoluteURL(t);
 
 	// get and pass request host name
 	theValue = fRequest->GetHeaderDictionary()->GetValue(qtssHostHeader);
@@ -1943,11 +1943,7 @@ void RTSPSession::SetupClientSessionAttrs()
 
 	// get and pass CGI params
 	if (fRequest->GetMethod() == qtssDescribeMethod)
-	{
-		theValue = fRequest->GetValue(qtssRTSPReqQueryString);
-		Assert(theValue != nullptr);
-		(void)fRTPSession->SetValue(qtssCliSesReqQueryString, 0, theValue->Ptr, theValue->Len, QTSSDictionary::kDontObeyReadOnly);
-	}
+		fRTPSession->SeQueryString(fRequest->GetQueryString());
 
 	// store RTSP session info in the RTPSession.   
 	StrPtrLen tempStr;

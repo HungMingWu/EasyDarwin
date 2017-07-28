@@ -68,7 +68,7 @@ QTSSAttrInfoDict::AttrInfo  RTPSessionInterface::sAttributes[] =
 	/* 21 */ { "qtssCliRTSPSesURLRealm",            nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 22 */ { "qtssCliRTSPReqRealStatusCode",      nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 23 */ { "qtssCliTeardownReason",             nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 24 */ { "qtssCliSesReqQueryString",          nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 24 */ {},
 	/* 25 */ { "qtssCliRTSPReqRespMsg",             nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
 
 	/* 26 */ { "qtssCliSesCurrentBitRate",          CurrentBitRate,     qtssAttrDataTypeUInt32,  qtssAttrModeRead | qtssAttrModePreempSafe },
@@ -122,8 +122,6 @@ RTPSessionInterface::RTPSessionInterface()
 	// Make sure the dictionary knows about our preallocated memory for the RTP stream array
 	this->SetEmptyVal(qtssCliSesFirstUserAgent, &fUserAgentBuffer[0], kUserAgentBufSize);
 	this->SetEmptyVal(qtssCliSesStreamObjects, &fStreamBuffer[0], kStreamBufSize);
-	this->SetEmptyVal(qtssCliSesPresentationURL, &fPresentationURL[0], kPresentationURLSize);
-	this->SetEmptyVal(qtssCliSesFullURL, &fFullRequestURL[0], kRequestHostNameBufferSize);
 	this->SetEmptyVal(qtssCliSesHostName, &fRequestHostName[0], kFullRequestURLBufferSize);
 
 	this->SetVal(qtssCliSesCreateTimeInMsec, &fSessionCreateTime, sizeof(fSessionCreateTime));

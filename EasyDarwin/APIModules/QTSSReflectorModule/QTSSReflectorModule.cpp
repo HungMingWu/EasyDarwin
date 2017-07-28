@@ -42,6 +42,7 @@
 
 #include "SDPUtils.h"
 #include "sdpCache.h"
+#include "RTSPRequest.h"
 
 #include "QueryParamList.h"
 #include "EasyUtil.h"
@@ -202,7 +203,7 @@ static QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams);
 static QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSession);
 static QTSS_Error DestroySession(QTSS_ClientSessionClosing_Params* inParams);
 static void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* inSession, bool killClients);
-static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, QTSS_AttributeID inPathType, bool isPush = false, bool *foundSessionPtr = nullptr, char** resultFilePath = nullptr);
+static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool isPush = false, bool *foundSessionPtr = nullptr, char** resultFilePath = nullptr);
 static QTSS_Error RereadPrefs();
 static QTSS_Error ProcessRTPData(QTSS_IncomingData_Params* inParams);
 static QTSS_Error ReflectorAuthorizeRTSPRequest(QTSS_StandardRTSP_Params* inParams);
@@ -726,7 +727,7 @@ QTSS_Error ProcessRTSPRequest(QTSS_StandardRTSP_Params* inParams)
 	return QTSS_NoErr;
 }
 
-ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, QTSS_AttributeID inPathType, bool isPush, bool *foundSessionPtr, char** resultFilePath)
+static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool isPush, bool *foundSessionPtr, char** resultFilePath)
 {
 	char* theFileNameStr = nullptr;
 	QTSS_Error theErr = ((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqFileName, 0, &theFileNameStr);
@@ -735,14 +736,13 @@ ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, QTSS_Attrib
 	if (theErr != QTSS_NoErr)
 		return nullptr;
 
-	char* theQueryString = nullptr;
-	theErr = ((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqQueryString, 0, &theQueryString);
-	std::unique_ptr<char[]> theQueryStringDeleter(theQueryString);
+	RTSPRequest *pReq = (RTSPRequest *)(inParams->inRTSPRequest);
+	std::string theQueryString = std::string(pReq->GetQueryString());
 
 	std::string queryTemp;
-	if (theQueryString)
+	if (!theQueryString.empty())
 	{
-		queryTemp = EasyUtil::Urldecode(theQueryString);
+		queryTemp = EasyUtil::Urldecode(theQueryString.data());
 	}
 	QueryParamList parList(const_cast<char *>(queryTemp.c_str()));
 
@@ -769,7 +769,7 @@ ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, QTSS_Attrib
 		// Check and see if the full path to this file matches an existing ReflectorSession
 		StrPtrLen thePathPtr;
 		std::unique_ptr<char[]> sdpPath(QTSSModuleUtils::GetFullPath(inParams->inRTSPRequest,
-			inPathType,
+			qtssRTSPReqFileName,
 			&thePathPtr.Len, &sSDPSuffix));
 
 		thePathPtr.Ptr = sdpPath.get();
@@ -916,12 +916,11 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	std::unique_ptr<char[]> theFileNameStrDeleter(theFileNameStr);
 	StrPtrLen theFullPath(theFileNameStr);
 
-	char* theQueryString = nullptr;
-	((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqQueryString, 0, &theQueryString);
-	std::unique_ptr<char[]> theQueryStringDeleter(theQueryString);
+	RTSPRequest *pReq = (RTSPRequest *)(inParams->inRTSPRequest);
+	std::string theQueryString(pReq->GetQueryString());
 
 	std::string queryTemp;
-	if (theQueryString)
+	if (!theQueryString.empty())
 	{
 		queryTemp = EasyUtil::Urldecode(theQueryString);
 	}
@@ -968,18 +967,11 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	//
 	// We need to know the content length to manage memory
 	uint32_t theLen = 0;
-	uint32_t* theContentLenP = nullptr;
-	QTSS_Error theErr = ((QTSSDictionary*)inParams->inRTSPRequest)->GetValuePtr(qtssRTSPReqContentLen, 0, (void**)&theContentLenP, &theLen);
-	if ((theErr != QTSS_NoErr) || (theLen != sizeof(uint32_t)))
-	{
-		//
-		// RETURN ERROR RESPONSE: ANNOUNCE WITHOUT CONTENT LENGTH
-		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest, 0);
-	}
+	uint32_t theContentLen = pReq->GetContentLength();
 
 	// Check if the content-length is more than the imposed maximum
 	// if it is then return error response
-	if ((sMaxAnnouncedSDPLengthInKbytes != 0) && (*theContentLenP > (sMaxAnnouncedSDPLengthInKbytes * 1024)))
+	if ((sMaxAnnouncedSDPLengthInKbytes != 0) && theContentLen > (sMaxAnnouncedSDPLengthInKbytes * 1024))
 		return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssPreconditionFailed, &sSDPTooLongMessage);
 
 	//
@@ -990,7 +982,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	char* theRequestBody = nullptr;
 
 	theLen = sizeof(theRequestBody);
-	theErr = ((QTSSDictionary*)inParams->inRTSPRequest)->GetValue(sRequestBodyAttr, 0, &theRequestBody, &theLen);
+	QTSS_Error theErr = ((QTSSDictionary*)inParams->inRTSPRequest)->GetValue(sRequestBodyAttr, 0, &theRequestBody, &theLen);
 
 	//printf("QTSSReflectorModule:DoAnnounce theRequestBody =%s\n",theRequestBody);
 	if (theErr != QTSS_NoErr)
@@ -998,8 +990,8 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 		//
 		// First time we've been here for this request. Create a buffer for the content body and
 		// shove it in the request.
-		theRequestBody = new char[*theContentLenP + 1];
-		memset(theRequestBody, 0, *theContentLenP + 1);
+		theRequestBody = new char[theContentLen + 1];
+		memset(theRequestBody, 0, theContentLen + 1);
 		theLen = sizeof(theRequestBody);
 		theErr = QTSS_SetValue(inParams->inRTSPRequest, sRequestBodyAttr, 0, &theRequestBody, theLen);// SetValue creates an internal copy.
 		Assert(theErr == QTSS_NoErr);
@@ -1016,7 +1008,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 
 	//
 	// We have our buffer and offset. Read the data.
-	theErr = QTSS_Read(inParams->inRTSPRequest, theRequestBody + theBufferOffset, *theContentLenP - theBufferOffset, &theLen);
+	theErr = QTSS_Read(inParams->inRTSPRequest, theRequestBody + theBufferOffset, theContentLen - theBufferOffset, &theLen);
 	Assert(theErr != QTSS_BadArgument);
 
 	if (theErr == QTSS_RequestFailed)
@@ -1027,7 +1019,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest, 0);
 	}
 
-	if ((theErr == QTSS_WouldBlock) || (theLen < (*theContentLenP - theBufferOffset)))
+	if ((theErr == QTSS_WouldBlock) || (theLen < (theContentLen - theBufferOffset)))
 	{
 		//
 		// Update our offset in the buffer
@@ -1171,7 +1163,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 {
 	uint32_t theRefCount = 0;
 	char *theFileName = nullptr;
-	ReflectorSession* theSession = DoSessionSetup(inParams, qtssRTSPReqFileName, false, nullptr, &theFileName);
+	ReflectorSession* theSession = DoSessionSetup(inParams, false, nullptr, &theFileName);
 	std::unique_ptr<char[]> tempFilePath(theFileName);
 
 	if (theSession == nullptr)
@@ -1594,13 +1586,12 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	ReflectorSession* theSession = nullptr;
 
 	uint32_t theLen = 0;
-	uint32_t *transportModePtr = nullptr;
-	QTSS_Error theErr = ((QTSSDictionary*)inParams->inRTSPRequest)->GetValuePtr(qtssRTSPReqTransportMode, 0, (void**)&transportModePtr, &theLen);
-	bool isPush = (transportModePtr != nullptr && *transportModePtr == qtssRTPTransportModeRecord) ? true : false;
+	RTSPRequest *pReq = (RTSPRequest *)(inParams->inRTSPRequest);
+	bool isPush = pReq->IsPushRequest();
 	bool foundSession = false;
 
 	RTPSessionOutput** theOutput = nullptr;
-	theErr = ((QTSSDictionary*)inParams->inClientSession)->GetValuePtr(sOutputAttr, 0, (void**)&theOutput, &theLen);
+	QTSS_Error theErr = ((QTSSDictionary*)inParams->inClientSession)->GetValuePtr(sOutputAttr, 0, (void**)&theOutput, &theLen);
 	if (theLen != sizeof(RTPSessionOutput*))
 	{
 		//theLen = sizeof(theSession);
@@ -1608,7 +1599,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 
 		if (theErr != QTSS_NoErr && !isPush)
 		{
-			theSession = DoSessionSetup(inParams, qtssRTSPReqFileName);
+			theSession = DoSessionSetup(inParams);
 			if (theSession == nullptr)
 				return QTSS_RequestFailed;
 
@@ -1622,7 +1613,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 			QTSS_Error theErr = ((QTSSDictionary*)inParams->inClientSession)->GetValue(sClientBroadcastSessionAttr, 0, &theSession, &theLenTemp);
 			if (theSession == nullptr)
 			{
-				theSession = DoSessionSetup(inParams, qtssRTSPReqFileName, isPush, &foundSession);
+				theSession = DoSessionSetup(inParams, isPush, &foundSession);
 				if (theSession == nullptr)
 					return QTSS_RequestFailed;
 
@@ -2311,14 +2302,12 @@ bool InBroadcastDirList(QTSS_RTSPRequestObject inRTSPRequest)
 	return true;
 
 	bool allowed = false;
-
+	auto* theRequest = (RTSPRequest*)inRTSPRequest;
 	char* theURIPathStr;
 	(void)((QTSSDictionary*)inRTSPRequest)->GetValueAsString(qtssRTSPReqFilePath, 0, &theURIPathStr);
 	std::unique_ptr<char[]> requestPathStrDeleter(theURIPathStr);
 
-	char* theLocalPathStr;
-	(void)((QTSSDictionary*)inRTSPRequest)->GetValueAsString(qtssRTSPReqLocalPath, 0, &theLocalPathStr);
-	StrPtrLenDel requestPath(theLocalPathStr);
+	std::string theLocalPathStr(theRequest->GetLocalPath());
 
 	char* theRequestPathStr = nullptr;
 	char* theBroadcastDirStr = nullptr;
@@ -2342,7 +2331,7 @@ bool InBroadcastDirList(QTSS_RTSPRequestObject inRTSPRequest)
 
 		if (IsAbsolutePath(&theBroadcastDir))
 		{
-			theRequestPathStr = theLocalPathStr;
+			theRequestPathStr = (char *)theLocalPathStr.c_str();
 			isURI = false;
 		}
 		else
@@ -2406,13 +2395,12 @@ QTSS_Error GetDeviceStream(Easy_GetDeviceStream_Params* inParams)
 
 			if (clientSession)
 			{
-				char* theFullRequestURL = nullptr;
-				(void)((QTSSDictionary*)clientSession)->GetValueAsString(qtssCliSesFullURL, 0, &theFullRequestURL);
-				std::unique_ptr<char[]> theFileNameStrDeleter(theFullRequestURL);
+				RTPSession *pSession = (RTPSession *)clientSession;
+				std::string theFullRequestURL(pSession->GetAbsoluteURL());
 
-				if (theFullRequestURL && inParams->outUrl)
+				if (!theFullRequestURL.empty() && inParams->outUrl)
 				{
-					strcpy(inParams->outUrl, theFullRequestURL);
+					strcpy(inParams->outUrl, theFullRequestURL.c_str());
 					theErr = QTSS_NoErr;
 				}
 			}

@@ -58,6 +58,7 @@
 #include "base64.h"
 #include "md5digest.h"
 #include "OS.h"
+#include "RTSPRequest.h"
 
 #include "QTSServer.h"
 #if __MacOSX__
@@ -96,7 +97,7 @@ static char* sContentType = "Content-Type: text/plain";
 static char* sEOL = "\r\n";
 static char* sEOM = "\r\n\r\n";
 static char* sAuthRealm = "QTSS/modules/admin";
-static char* sAuthResourceLocalPath = "/modules/admin/";
+static std::string sAuthResourceLocalPath = "/modules/admin/";
 
 static QTSS_ServerObject        sServer = nullptr;
 static QTSS_ModuleObject        sModule = nullptr;
@@ -658,7 +659,8 @@ bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen
 	QTSS_ActionFlags authAction = qtssActionFlagsAdmin;
 
 	// authenticate callback to retrieve the password 
-	QTSS_Error err = QTSS_Authenticate(authName, sAuthResourceLocalPath, sAuthResourceLocalPath, authAction, qtssAuthBasic, request);
+	QTSS_Error err = QTSS_Authenticate(authName, sAuthResourceLocalPath.c_str(), 
+		sAuthResourceLocalPath.c_str(), authAction, qtssAuthBasic, request);
 	if (err != QTSS_NoErr) {
 		return false; // Couldn't even call QTSS_Authenticate...abandon!
 	}
@@ -724,10 +726,10 @@ QTSS_Error AuthorizeAdminRequest(QTSS_RTSPRequestObject request)
 
 	// get the resource path
 	// if the path does not match the admin path, don't handle the request
-	char* resourcePath = QTSSModuleUtils::GetLocalPath_Copy(request);
-	std::unique_ptr<char[]> resourcePathDeleter(resourcePath);
+	auto* pReq = (RTSPRequest*)request;
+	std::string resourcePath(pReq->GetLocalPath());
 
-	if (strcmp(sAuthResourceLocalPath, resourcePath) != 0)
+	if (sAuthResourceLocalPath != resourcePath)
 		return QTSS_NoErr;
 
 	// get the type of request

@@ -44,6 +44,7 @@
 #include "UserAgentParser.h"
 #include "Task.h"
 #include "OS.h"
+#include "RTPSession.h"
 #include <ctime>
 
 #define TESTUNIXTIME 0
@@ -466,8 +467,8 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	// Second, get networking info from the Client's session.
 	// (Including the stats for incoming RTCP packets.)
 	char urlBuf[eURLSize] = { 0 };
-	StrPtrLen url(urlBuf, eURLSize - 1);
-	dict->GetValue(qtssCliSesPresentationURL, 0, url.Ptr, &url.Len);
+	RTPSession *rtpSession = (RTPSession *)inClientSession;
+	std::string url(rtpSession->GetPresentationURL());
 	dict->GetValuePtr(qtssCliSesPacketLossPercent, 0, (void**)&packetLossPercent, &theLen);
 	dict->GetValuePtr(qtssCliSesMovieDurationInSecs, 0, (void**)&movieDuration, &theLen);
 	dict->GetValuePtr(qtssCliSesMovieSizeInBytes, 0, (void**)&movieSizeInBytes, &theLen);
@@ -743,9 +744,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	}
 
 	//cs-uri-query
-	char urlQryBuf[eURLSize] = { 0 };
-	StrPtrLen urlQry(urlQryBuf, eURLSize - 1);
-	dict->GetValue(qtssCliSesReqQueryString, 0, urlQry.Ptr, &urlQry.Len);
+	std::string urlQry(rtpSession->GetQueryString());
 
 	char tempLogBuffer[1024];
 	char logBuffer[2048];
@@ -757,7 +756,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%s ", (remoteDNS.Ptr[0] == '\0') ? sVoidField : remoteDNS.Ptr); //c-dns
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%s ", (url.Ptr[0] == '\0') ? sVoidField : url.Ptr);   //cs-uri-stem*
+	sprintf(tempLogBuffer, "%s ", (url.empty()) ? sVoidField : url.c_str());   //cs-uri-stem*
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", startPlayTimeInSecs);  //c-starttime 
 	::strcat(logBuffer, tempLogBuffer);
@@ -822,7 +821,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", cpuUtilized);  //s-cpu-util
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%s ", (urlQry.Ptr[0] == '\0') ? sVoidField : urlQry.Ptr); //cs-uri-query
+	sprintf(tempLogBuffer, "%s ", (urlQry.empty()) ? sVoidField : urlQry.c_str()); //cs-uri-query
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%s ", (lastUserName[0] == '\0') ? sVoidField : lastUserName); //c-username
 	::strcat(logBuffer, tempLogBuffer);

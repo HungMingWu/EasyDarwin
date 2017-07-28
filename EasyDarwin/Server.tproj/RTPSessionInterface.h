@@ -261,7 +261,6 @@ private:
 	{
 		kStreamBufSize = 4,
 		kUserAgentBufSize = 256,
-		kPresentationURLSize = 256,
 		kFullRequestURLBufferSize = 256,
 		kRequestHostNameBufferSize = 80,
 
@@ -279,8 +278,6 @@ private:
 	// theses are dictionary items picked up by the RTSPSession
 	// but we need to store copies of them for logging purposes.
 	char        fUserAgentBuffer[kUserAgentBufSize];
-	char        fPresentationURL[kPresentationURLSize];         // eg /foo/bar.mov
-	char        fFullRequestURL[kFullRequestURLBufferSize];     // eg rtsp://yourdomain.com/foo/bar.mov
 	char        fRequestHostName[kRequestHostNameBufferSize];   // eg yourdomain.com
 
 	char        fRTSPSessRemoteAddrStr[kIPAddrStrBufSize];

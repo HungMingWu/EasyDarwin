@@ -73,18 +73,13 @@ RTPSession::~RTPSession()
 			}
 		}
 
-		char* theURL = nullptr;
-		(void)this->GetValueAsString(qtssCliSesFullURL, 0, &theURL);
-		Assert(theURL != nullptr);
-
 		RTPBandwidthTracker* tracker = this->GetBandwidthTracker();
 
-		printf("Client complete. URL: %s.\n", theURL);
+		printf("Client complete. URL: %s.\n", absoluteURL.c_str());
 		printf("Max congestion window: %" _S32BITARG_ ". Min congestion window: %" _S32BITARG_ ". Avg congestion window: %" _S32BITARG_ "\n", tracker->GetMaxCongestionWindowSize(), tracker->GetMinCongestionWindowSize(), tracker->GetAvgCongestionWindowSize());
 		printf("Max RTT: %" _S32BITARG_ ". Min RTT: %" _S32BITARG_ ". Avg RTT: %" _S32BITARG_ "\n", tracker->GetMaxRTO(), tracker->GetMinRTO(), tracker->GetAvgRTO());
 		printf("Num resends: %" _S32BITARG_ ". Num skipped frames: %" _S32BITARG_ ". Num late packets dropped: %" _S32BITARG_ "\n", theNumResends, this->GetFramesSkipped(), theNumLatePacketsDropped);
 
-		delete[] theURL;
 	}
 
 	for (int x = 0; this->GetValuePtr(qtssCliSesStreamObjects, x, (void**)&theStream, &theLen) == QTSS_NoErr; x++)

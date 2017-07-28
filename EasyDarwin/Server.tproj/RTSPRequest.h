@@ -48,6 +48,7 @@
 #ifndef __RTSPREQUEST_H__
 #define __RTSPREQUEST_H__
 
+#include <boost/utility/string_view.hpp>
 #include "RTSPRequestInterface.h"
 #include "RTSPSessionInterface.h"
 #include "StringParser.h"
@@ -55,6 +56,8 @@
  //HTTPRequest class definition
 class RTSPRequest : public RTSPRequestInterface
 {
+	// query stting (CGI parameters) passed to the server in the request URL, does not include the '?' separator
+	boost::string_view queryString;
 public:
 
 	//CONSTRUCTOR / DESTRUCTOR
@@ -80,6 +83,8 @@ public:
 	QTSS_Error SendBasicChallenge(void);
 	QTSS_Error SendDigestChallenge(uint32_t qop, StrPtrLen *nonce, StrPtrLen* opaque);
 	QTSS_Error SendForbiddenResponse(void);
+	boost::string_view GetQueryString() const { return queryString; }
+	uint32_t GetContentLength() const { return fContentLength; }
 private:
 
 	//PARSING

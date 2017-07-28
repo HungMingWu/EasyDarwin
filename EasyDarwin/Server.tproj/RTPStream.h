@@ -179,7 +179,6 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         enum
         {
             kMaxSsrcSizeInBytes         = 12,
-            kMaxStreamURLSizeInBytes    = 128,
             kDefaultPayloadBufSize      = 32,
             kSenderReportIntervalInSecs = 7,
             kNumPrebuiltChNums          = 10,
@@ -244,8 +243,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         uint32_t      fTimescale;
         
         //what is the URL for this stream?
-        char        fStreamURL[kMaxStreamURLSizeInBytes];
-        StrPtrLen   fStreamURLPtr;
+        std::string   fStreamURL;
         
         int32_t      fQualityLevel;
         uint32_t      fNumQualityLevels;

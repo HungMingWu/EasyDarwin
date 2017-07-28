@@ -38,6 +38,7 @@
 #include "QTSSModuleUtils.h"
 #include "QTAccessFile.h"
 #include "QTSSDictionary.h"
+#include "RTSPRequest.h"
 
 #ifdef __MacOSX__
 #include <membership.h>
@@ -493,7 +494,7 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     *outAuthorizedPtr = false;
     
     QTSS_RTSPRequestObject  theRTSPRequest = inParams->inRTSPRequest;
-    
+	RTSPRequest *pReq = (RTSPRequest *)inParams->inRTSPRequest;
     // get the type of request
     // Don't touch write requests
     QTSS_ActionFlags action = QTSSModuleUtils::GetRequestActions(theRTSPRequest);
@@ -504,9 +505,8 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
         return QTSS_NoErr; // we don't handle
     
     //get the local file path
-    char*   pathBuffStr = QTSSModuleUtils::GetLocalPath_Copy(theRTSPRequest);
-    std::unique_ptr<char[]> pathBuffDeleter(pathBuffStr);
-    if (nullptr == pathBuffStr)
+    std::string  pathBuffStr(pReq->GetLocalPath());
+    if (pathBuffStr.empty())
         return QTSS_RequestFailed;
 
     //get the root movie directory
@@ -519,7 +519,7 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     if (nullptr == theUserProfile)
         return QTSS_RequestFailed;
 
-    char* accessFilePath = QTAccessFile::GetAccessFile_Copy(movieRootDirStr, pathBuffStr);
+    char* accessFilePath = QTAccessFile::GetAccessFile_Copy(movieRootDirStr, pathBuffStr.c_str());
     std::unique_ptr<char[]> accessFilePathDeleter(accessFilePath);
         
     char* username = QTSSModuleUtils::GetUserName_Copy(theUserProfile);

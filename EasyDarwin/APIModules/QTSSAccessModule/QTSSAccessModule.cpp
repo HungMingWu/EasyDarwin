@@ -43,6 +43,7 @@
 #include "AccessChecker.h"
 #include "QTAccessFile.h"
 #include "QTSSModuleUtils.h"
+#include "RTSPRequest.h"
 
 #ifndef __Win32__
 #include <unistd.h>
@@ -302,6 +303,7 @@ QTSS_Error RereadPrefs()
 QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 {
 	QTSS_RTSPRequestObject  theRTSPRequest = inParams->inRTSPRequest;
+	RTSPRequest *pReq = (RTSPRequest *)inParams->inRTSPRequest;
 	uint32_t fileErr;
 
 	OSMutexLocker locker(sUserMutex);
@@ -321,9 +323,9 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	// Check for a users and groups file in the access file
 	// For this, first get local file path and root movie directory
 	//get the local file path
-	char*   pathBuffStr = QTSSModuleUtils::GetLocalPath_Copy(theRTSPRequest);
-	std::unique_ptr<char[]> pathBuffDeleter(pathBuffStr);
-	if (nullptr == pathBuffStr)
+	std::string  pathBuffStr(pReq->GetLocalPath());
+
+	if (pathBuffStr.empty())
 		return QTSS_RequestFailed;
 	//get the root movie directory
 	char*   movieRootDirStr = QTSSModuleUtils::GetMoviesRootDir_Copy(theRTSPRequest);
@@ -331,7 +333,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	if (nullptr == movieRootDirStr)
 		return QTSS_RequestFailed;
 	// Now get the access file path
-	char* accessFilePath = QTAccessFile::GetAccessFile_Copy(movieRootDirStr, pathBuffStr);
+	char* accessFilePath = QTAccessFile::GetAccessFile_Copy(movieRootDirStr, pathBuffStr.c_str());
 	std::unique_ptr<char[]> accessFilePathDeleter(accessFilePath);
 	// Parse the access file for the AuthUserFile and AuthGroupFile keywords
 	char* usersFilePath = nullptr;

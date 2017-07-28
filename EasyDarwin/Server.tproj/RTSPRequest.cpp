@@ -187,8 +187,6 @@ QTSS_Error RTSPRequest::ParseFirstLine(StringParser &parser)
 	//first get the method
 	StrPtrLen theParsedData;
 	parser.ConsumeWord(&theParsedData);
-	this->SetVal(qtssRTSPReqMethodStr, theParsedData.Ptr, theParsedData.Len);
-
 
 	//THIS WORKS UNDER THE ASSUMPTION THAT:
 	//valid HTTP/1.1 headers are: GET, HEAD, POST, PUT, OPTIONS, DELETE, TRACE
@@ -289,21 +287,20 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 
 	// parse the query string from the url if present.
 	// init qtssRTSPReqQueryString dictionary to an empty string
-	StrPtrLen queryString;
 	// qtssRTSPReqQueryString = channel=1&token=888888
-	this->SetVal(qtssRTSPReqQueryString, queryString.Ptr, queryString.Len);
 
 	if (absParser.GetDataRemaining() > 0)
 	{
 		if (absParser.PeekFast() == '?')
 		{
 			// we've got some CGI param
-			absParser.ConsumeLength(&queryString, 1); // toss '?'
+			StrPtrLen queryString1;
+			absParser.ConsumeLength(&queryString1, 1); // toss '?'
 
 			// consume the rest of the line..
-			absParser.ConsumeUntilWhitespace(&queryString);
+			absParser.ConsumeUntilWhitespace(&queryString1);
 
-			this->SetVal(qtssRTSPReqQueryString, queryString.Ptr, queryString.Len);
+			queryString = boost::string_view(queryString1.Ptr, queryString1.Len);
 		}
 	}
 
@@ -571,10 +568,6 @@ void RTSPRequest::ParseTransportHeader()
 void  RTSPRequest::ParseRangeHeader()
 {
 	StringParser theRangeParser(fHeaderDictionary.GetValue(qtssRangeHeader));
-
-	// Setup the start and stop time dictionary attributes
-	this->SetVal(qtssRTSPReqStartTime, &fStartTime, sizeof(fStartTime));
-	this->SetVal(qtssRTSPReqStopTime, &fStopTime, sizeof(fStopTime));
 
 	theRangeParser.GetThru(nullptr, '=');//consume "npt="
 	theRangeParser.ConsumeWhitespace();
@@ -1009,7 +1002,7 @@ void RTSPRequest::SetupAuthLocalPath(void)
 
 	uint32_t theLen = 0;
 	char* theFullPath = QTSSModuleUtils::GetFullPath(this, theID, &theLen, nullptr);
-	this->SetValue(qtssRTSPReqLocalPath, 0, theFullPath, theLen, QTSSDictionary::kDontObeyReadOnly);
+	SetLocalPath({ theFullPath, theLen });
 	delete[] theFullPath;
 }
 

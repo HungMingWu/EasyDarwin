@@ -53,6 +53,14 @@
 
 class RTPSession : public RTPSessionInterface
 {
+	// full Presentation URL for this session. Same as presentationURL, 
+	// but includes rtsp://domain.com prefix
+	std::string absoluteURL;
+	// Presentation URL for this session. This URL is the "base" URL for the session. 
+	// RTSP requests to this URL are assumed to affect all streams on the session.
+	std::string presentationURL;
+	// Query string from the request that creates this  client session
+	std::string queryString;
 public:
 
 	RTPSession();
@@ -114,7 +122,18 @@ public:
 
 	int32_t          GetQualityLevel();
 	void            SetQualityLevel(int32_t level);
-
+	void            SeQueryString(boost::string_view query) {
+		queryString = std::string(queryString);
+	}
+	boost::string_view GetQueryString() const { return queryString; }
+	void            SetPresentationURL(boost::string_view url) {
+		presentationURL = std::string(url);
+	}
+	boost::string_view GetPresentationURL() const { return presentationURL; }
+	void            SetAbsoluteURL(boost::string_view url) {
+		absoluteURL = std::string(url);
+	}
+	boost::string_view GetAbsoluteURL() const { return absoluteURL; }
 private:
 
 	//where timeouts, deletion conditions get processed

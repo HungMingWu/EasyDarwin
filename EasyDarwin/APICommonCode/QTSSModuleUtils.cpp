@@ -42,6 +42,7 @@
 #include "StringParser.h"
 #include "RTPSession.h"
 #include "QTSSDataConverter.h"
+#include "RTSPRequest.h"
 #ifndef __Win32__
 #include <netinet/in.h>
 #endif
@@ -364,7 +365,9 @@ QTSS_Error  QTSSModuleUtils::AppendRTPMetaInfoHeader(   QTSS_RTSPRequestObject i
     //
     // When appending the header to the response, strip off the last ';'.
     // It's not needed.
-    return QTSS_AppendRTSPHeader(inRequest, qtssXRTPMetaInfoHeader, theFormatter.GetBufPtr(), theFormatter.GetCurrentOffset() - 1);
+    ((RTSPRequestInterface*)inRequest)->AppendHeader(qtssXRTPMetaInfoHeader, 
+		boost::string_view(theFormatter.GetBufPtr(), theFormatter.GetCurrentOffset() - 1));
+	return QTSS_NoErr;
 }
 
 QTSS_Error  QTSSModuleUtils::SendErrorResponse( QTSS_RTSPRequestObject inRequest,
@@ -429,14 +432,13 @@ QTSS_Error  QTSSModuleUtils::SendErrorResponse( QTSS_RTSPRequestObject inRequest
             theErrorMsgFormatter.Put(theMessage);
         
         
-        char buff[32];
-        sprintf(buff,"%"   _U32BITARG_   "",theErrorMsgFormatter.GetBytesWritten());
-        (void)QTSS_AppendRTSPHeader(inRequest, qtssContentLengthHeader, buff, ::strlen(buff));
+		std::string buff = std::to_string(theErrorMsgFormatter.GetBytesWritten());
+		((RTSPRequestInterface*)inRequest)->AppendHeader(qtssContentLengthHeader, buff);
     }
     
     //send the response header. In all situations where errors could happen, we
     //don't really care, cause there's nothing we can do anyway!
-    (void)QTSS_SendRTSPHeaders(inRequest);
+	((RTSPRequestInterface*)inRequest)->SendHeader();
 
     //
     // Now that we've formatted the message into the temporary buffer,
@@ -466,14 +468,13 @@ QTSS_Error	QTSSModuleUtils::SendErrorResponseWithMessage( QTSS_RTSPRequestObject
 		//Assert(inErrorMessagePtr->Len != 0);
 		theErrorMessage.Set(inErrorMessagePtr->Ptr, inErrorMessagePtr->Len);
 		
-        char buff[32];
-        sprintf(buff,"%"   _U32BITARG_   "",inErrorMessagePtr->Len);
-        (void)QTSS_AppendRTSPHeader(inRequest, qtssContentLengthHeader, buff, ::strlen(buff));
+        std::string buff = std::to_string(inErrorMessagePtr->Len);
+		((RTSPRequestInterface*)inRequest)->AppendHeader(qtssContentLengthHeader, buff);
     }
     
     //send the response header. In all situations where errors could happen, we
     //don't really care, cause there's nothing we can do anyway!
-    (void)QTSS_SendRTSPHeaders(inRequest);
+	((RTSPRequestInterface*)inRequest)->SendHeader();
 
     //
     // Now that we've formatted the message into the temporary buffer,
@@ -589,9 +590,7 @@ void    QTSSModuleUtils::SendDescribeResponse(QTSS_RTSPRequestObject inRequest,
                                                     uint32_t inTotalLength)
 {
     //write content size header
-    char buf[32];
-    sprintf(buf, "%" _S32BITARG_ "", inTotalLength);
-    (void)QTSS_AppendRTSPHeader(inRequest, qtssContentLengthHeader, &buf[0], ::strlen(&buf[0]));
+	((RTSPRequestInterface*)inRequest)->AppendHeader(qtssContentLengthHeader, std::to_string(inTotalLength));
 
 	((RTPSession*)inSession)->SendDescribeResponse((RTSPRequestInterface*)inRequest);
 

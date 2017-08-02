@@ -61,6 +61,8 @@ class RTPSession : public RTPSessionInterface
 	std::string presentationURL;
 	// Query string from the request that creates this  client session
 	std::string queryString;
+	//requestes host name for s session. Just the "domain.com" portion
+	std::string hostName;
 public:
 
 	RTPSession();
@@ -134,6 +136,10 @@ public:
 		absoluteURL = std::string(url);
 	}
 	boost::string_view GetAbsoluteURL() const { return absoluteURL; }
+	void            SetHost(boost::string_view url) {
+		hostName = std::string(url);
+	}
+	boost::string_view GetHost() const { return hostName; }
 private:
 
 	//where timeouts, deletion conditions get processed

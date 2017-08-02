@@ -31,7 +31,7 @@
 #include <map>
 #include <boost/utility/string_view.hpp>
 #include <boost/spirit/include/qi.hpp>
-#include <boost/spirit/include/phoenix.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 
 #include "RTSPRequest.h"
@@ -229,26 +229,32 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 	parser.ConsumeUntilWhitespace(&theURL);
 	//qtssRTSPReqAbsoluteURL = rtsp://www.easydarwin.org:554/live.sdp?channel=1&token=888888
 	this->SetVal(qtssRTSPReqAbsoluteURL, &theURL);
-
 	StringParser absParser(&theURL);
 	StrPtrLen theAbsURL;
 	//theAbsURL = rtsp://www.easydarwin.org:554/live.sdp
 	absParser.ConsumeUntil(&theAbsURL, sURLStopConditions);
 
-	StringParser urlParser(&theAbsURL);
-
 	//we always should have a slash before the uri.
 	//If not, that indicates this is a full URI. Also, this could be a '*' OPTIONS request
 	if ((*theAbsURL.Ptr != '/') && (*theAbsURL.Ptr != '*'))
 	{
-		//if it is a full URL, store the host name off in a separate parameter
-		StrPtrLen theRTSPString;
-		urlParser.ConsumeLength(&theRTSPString, 7); //consume "rtsp://"
-		//assign the host field here to the proper QTSS param
-		StrPtrLen theHost;
-		urlParser.ConsumeUntil(&theHost, '/');
-		// qtssHostHeader = www.easydarwin.org:554
-		fHeaderDictionary.SetVal(qtssHostHeader, &theHost);
+		std::string theAbsURLV(theAbsURL.Ptr, theAbsURL.Len), theHost, uriPath;
+		bool r = qi::phrase_parse(theAbsURLV.cbegin(), theAbsURLV.cend(),
+			qi::no_case["RTSP://"] >> *(qi::char_ - "/") >> (qi::eoi | *(qi::char_)),  
+			qi::ascii::blank, theHost, uriPath);
+
+		fHeaderDict.SetHost(theHost);
+		if (!uriPath.empty())
+			// qtssRTSPReqURI = /live.sdp
+			uri = uriPath;
+		else {
+			//
+			// This might happen if there is nothing after the host at all, not even
+			// a '/'. This is legal (RFC 2326, Sec 3.2). If so, just pretend that there
+			// is a '/'
+			static char* sSlashURI = "/";
+			uri = sSlashURI;
+		}
 	}
 
 	// don't allow non-aggregate operations indicated by a url/media track=id
@@ -268,23 +274,6 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 		if (theSession != nullptr && theSession->IsPlaying())
 			return QTSSModuleUtils::SendErrorResponse(this, qtssClientAggregateOptionAllowed, qtssMsgBadRTSPMethod, &theAbsURL);
 	}
-
-	//
-	// In case there is no URI at all... we have to fake it.
-	static char* sSlashURI = "/";
-
-	//whatever is in this position in the URL must be the URI. Store that
-	//in the qtssURLParam. Confused?
-	uint32_t uriLen = urlParser.GetDataReceivedLen() - urlParser.GetDataParsedLen();
-	if (uriLen > 0)
-		// qtssRTSPReqURI = /live.sdp
-		this->SetVal(qtssRTSPReqURI, urlParser.GetCurrentPosition(), urlParser.GetDataReceivedLen() - urlParser.GetDataParsedLen());
-	else
-		//
-		// This might happen if there is nothing after the host at all, not even
-		// a '/'. This is legal (RFC 2326, Sec 3.2). If so, just pretend that there
-		// is a '/'
-		this->SetVal(qtssRTSPReqURI, sSlashURI, 1);
 
 	// parse the query string from the url if present.
 	// init qtssRTSPReqQueryString dictionary to an empty string
@@ -318,19 +307,20 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 
 	//path strings are statically allocated. Therefore, if they are longer than
 	//this length we won't be able to handle the request.
-	StrPtrLen* theURLParam = this->GetValue(qtssRTSPReqURI);
-	if (theURLParam->Len > RTSPRequestInterface::kMaxFilePathSizeInBytes)
-		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgURLTooLong, theURLParam);
+	boost::string_view theURLParam = GetURI();
+	StrPtrLen theURLParamV((char *)theURLParam.data(), theURLParam.length());
+	if (theURLParam.length() > RTSPRequestInterface::kMaxFilePathSizeInBytes)
+		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgURLTooLong, &theURLParamV);
 
 	//decode the URL, put the result in the separate buffer for the file path,
 	//set the file path StrPtrLen to the proper value
-	int32_t theBytesWritten = StringTranslator::DecodeURL(theURLParam->Ptr, theURLParam->Len,
+	int32_t theBytesWritten = StringTranslator::DecodeURL((char *)theURLParam.data(), theURLParam.length(),
 		fFilePath, RTSPRequestInterface::kMaxFilePathSizeInBytes);
 	//if negative, an error occurred, reported as an QTSS_Error
 	//we also need to leave room for a terminator.
 	if ((theBytesWritten < 0) || (theBytesWritten == RTSPRequestInterface::kMaxFilePathSizeInBytes))
 	{
-		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgURLInBadFormat, theURLParam);
+		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgURLInBadFormat, &theURLParamV);
 	}
 
 	// Convert from a / delimited path to a local file system path
@@ -422,7 +412,7 @@ QTSS_Error RTSPRequest::ParseHeaders(StringParser& parser)
 		case qtssContentLengthHeader:       ParseContentLengthHeader(theHeaderValV); break;
 		case qtssSpeedHeader:               ParseSpeedHeader(theHeaderValV);     break;
 		case qtssXTransportOptionsHeader:   ParseTransportOptionsHeader(theHeaderVal); break;
-		case qtssXPreBufferHeader:          ParsePrebufferHeader(theHeaderVal); break;
+		case qtssXPreBufferHeader:          ParsePrebufferHeader(theHeaderValV); break;
 		case qtssXDynamicRateHeader:		ParseDynamicRateHeader(theHeaderValV); break;
 		case qtssXRandomDataSizeHeader:		ParseRandomDataSizeHeader(theHeaderValV); break;
 		case qtssBandwidthHeader:           ParseBandwidthHeader(theHeaderValV); break;
@@ -473,6 +463,16 @@ bool RTSPRequest::ParseNetworkModeSubHeader(StrPtrLen* inSubHeader)
 		result = true;
 	}
 
+	return result;
+}
+
+template <typename S>
+std::vector<std::string> spirit_direct(const S& input, char const* delimiter)
+{
+	std::vector<std::string> result;
+	if (!qi::parse(input.begin(), input.end(), 
+		qi::raw[*(qi::char_ - qi::char_(delimiter))] % qi::char_(delimiter), result))
+		result.push_back(std::string(input));
 	return result;
 }
 
@@ -640,24 +640,16 @@ void  RTSPRequest::ParseContentLengthHeader(boost::string_view header)
 	bool r = qi::phrase_parse(iter, end, qi::uint_, qi::ascii::blank, fContentLength);
 }
 
-void  RTSPRequest::ParsePrebufferHeader(StrPtrLen &header)
+void  RTSPRequest::ParsePrebufferHeader(boost::string_view header)
 {
-	StringParser thePrebufferParser(&header);
-
-	StrPtrLen thePrebufferArg;
-	while (thePrebufferParser.GetThru(&thePrebufferArg, '='))
-	{
-		thePrebufferArg.TrimWhitespace();
-
-		static const StrPtrLen kMaxTimeSubHeader("maxtime");
-		if (thePrebufferArg.EqualIgnoreCase(kMaxTimeSubHeader))
-		{
-			thePrebufferParser.ConsumeWhitespace();
-			fPrebufferAmt = thePrebufferParser.ConsumeFloat();
-		}
-
-		thePrebufferParser.GetThru(nullptr, ';'); //Skip past ';'
-
+	std::vector<std::string> splitTokens = spirit_direct(header, ";");
+	for (const auto &token : splitTokens) {
+		std::string name;
+		float temp;
+		bool r = qi::phrase_parse(token.cbegin(), token.cend(), *(qi::alpha - "=") >> "=" >> qi::float_, qi::ascii::blank,
+			name, temp);
+		if (r && boost::iequals(name, "maxtime"))
+			fPrebufferAmt = temp;
 	}
 }
 
@@ -1046,18 +1038,18 @@ QTSS_Error RTSPRequest::SendDigestChallenge(uint32_t qop, StrPtrLen *nonce, StrP
 	challengeFormatter.PutChar('"');                    // [Digest realm="somerealm", nonce="19723343a9fd75e019723343a9fd75e0"]
 	challengeFormatter.PutTerminator();                 // [Digest realm="somerealm", nonce="19723343a9fd75e019723343a9fd75e0"\0]
 
-	StrPtrLen challengePtr(challengeFormatter.GetBufPtr(), challengeFormatter.GetBytesWritten() - 1);
+	std::string challengePtr(challengeFormatter.GetBufPtr(), challengeFormatter.GetBytesWritten() - 1);
 
-	this->SetValue(qtssRTSPReqDigestChallenge, 0, challengePtr.Ptr, challengePtr.Len, QTSSDictionary::kDontObeyReadOnly);
+	this->SetValue(qtssRTSPReqDigestChallenge, 0, challengePtr.c_str(), challengePtr.length(), QTSSDictionary::kDontObeyReadOnly);
 	RTSPSessionInterface* thisRTSPSession = this->GetSession();
 	if (thisRTSPSession)
 	{
-		(void)thisRTSPSession->SetValue(qtssRTSPSesLastDigestChallenge, 0, challengePtr.Ptr, challengePtr.Len, QTSSDictionary::kDontObeyReadOnly);
+		(void)thisRTSPSession->SetValue(qtssRTSPSesLastDigestChallenge, 0, challengePtr.c_str(), challengePtr.length(), QTSSDictionary::kDontObeyReadOnly);
 	}
 
 	fStatus = qtssClientUnAuthorized;
 	this->SetResponseKeepAlive(true);
-	this->AppendHeader(qtssWWWAuthenticateHeader, &challengePtr);
+	this->AppendHeader(qtssWWWAuthenticateHeader, challengePtr);
 	this->SendHeader();
 
 	// deleting the memory that was allocated in GetPrefs call above
@@ -1076,8 +1068,7 @@ QTSS_Error RTSPRequest::SendBasicChallenge(void)
 
 	do
 	{
-		char realmBuff[kRealmBuffSize] = "Basic realm=\"";
-		StrPtrLen challenge(realmBuff);
+		std::string challenge("Basic realm=\"");
 		StrPtrLen whichRealm;
 
 		// Get the module's realm
@@ -1104,18 +1095,7 @@ QTSS_Error RTSPRequest::SendBasicChallenge(void)
 			}
 		}
 
-		int realmLen = whichRealm.Len + challenge.Len + 2; // add 2 based on double quote char + end of string 0x00
-		if (realmLen > kRealmBuffSize) // The realm is too big so use the default realm
-		{
-			Assert(0);
-			whichRealm = sDefaultRealm;
-		}
-		memcpy(&challenge.Ptr[challenge.Len], whichRealm.Ptr, whichRealm.Len);
-		int newLen = challenge.Len + whichRealm.Len;
-
-		challenge.Ptr[newLen] = '"'; // add the terminating "" this was accounted for with the size check above
-		challenge.Ptr[newLen + 1] = 0;// add the 0 terminator this was accounted for with the size check above
-		challenge.Len = newLen + 1; // set the real size of the string excluding the 0.
+		challenge += std::string(whichRealm.Ptr, whichRealm.Len) + "\"";
 
 #if (0)
 		{  // test code
@@ -1146,7 +1126,7 @@ QTSS_Error RTSPRequest::SendBasicChallenge(void)
 
 		fStatus = qtssClientUnAuthorized;
 		this->SetResponseKeepAlive(true);
-		this->AppendHeader(qtssWWWAuthenticateHeader, &challenge);
+		this->AppendHeader(qtssWWWAuthenticateHeader, challenge);
 		this->SendHeader();
 
 

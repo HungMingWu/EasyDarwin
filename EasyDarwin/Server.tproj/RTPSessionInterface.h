@@ -262,7 +262,6 @@ private:
 		kStreamBufSize = 4,
 		kUserAgentBufSize = 256,
 		kFullRequestURLBufferSize = 256,
-		kRequestHostNameBufferSize = 80,
 
 		kIPAddrStrBufSize = 20,
 		kLocalDNSBufSize = 80,
@@ -278,7 +277,6 @@ private:
 	// theses are dictionary items picked up by the RTSPSession
 	// but we need to store copies of them for logging purposes.
 	char        fUserAgentBuffer[kUserAgentBufSize];
-	char        fRequestHostName[kRequestHostNameBufferSize];   // eg yourdomain.com
 
 	char        fRTSPSessRemoteAddrStr[kIPAddrStrBufSize];
 	char        fRTSPSessLocalDNS[kLocalDNSBufSize];

@@ -609,28 +609,31 @@ void RTPStream::SendSetupResponse(RTSPRequestInterface* inRequest)
 
 	//
 	// Append the x-RTP-Options header if there was a late-tolerance field
-	if (inRequest->GetLateToleranceStr()->Len > 0)
-		inRequest->AppendHeader(qtssXTransportOptionsHeader, inRequest->GetLateToleranceStr());
+	StrPtrLen *ptr = inRequest->GetLateToleranceStr();
+	std::string ptrV(ptr->Ptr, ptr->Len);
+	if (ptr->Len > 0)
+		inRequest->AppendHeader(qtssXTransportOptionsHeader, ptrV);
 
 	//
 	// Append the retransmit header if the client sent it
 	StrPtrLen* theRetrHdr = inRequest->GetHeaderDictionary()->GetValue(qtssXRetransmitHeader);
+	std::string theRetrHdrV(theRetrHdr->Ptr, theRetrHdr->Len);
 	if ((theRetrHdr->Len > 0) && (fTransportType == qtssRTPTransportTypeReliableUDP))
-		inRequest->AppendHeader(qtssXRetransmitHeader, theRetrHdr);
+		inRequest->AppendHeader(qtssXRetransmitHeader, theRetrHdrV);
 
 	// Append the dynamic rate header if the client sent it
 	int32_t theRequestedRate = inRequest->GetDynamicRateState();
-	static StrPtrLen sHeaderOn("1", 1);
-	static StrPtrLen sHeaderOff("0", 1);
+	static boost::string_view sHeaderOn("1");
+	static boost::string_view sHeaderOff("0");
 	if (theRequestedRate > 0)	// the client sent the header and wants a dynamic rate
 	{
 		if (*(fSession->GetOverbufferWindow()->OverbufferingEnabledPtr()))
-			inRequest->AppendHeader(qtssXDynamicRateHeader, &sHeaderOn); // send 1 if overbuffering is turned on
+			inRequest->AppendHeader(qtssXDynamicRateHeader, sHeaderOn); // send 1 if overbuffering is turned on
 		else
-			inRequest->AppendHeader(qtssXDynamicRateHeader, &sHeaderOff); // send 0 if overbuffering is turned off
+			inRequest->AppendHeader(qtssXDynamicRateHeader, sHeaderOff); // send 0 if overbuffering is turned off
 	}
 	else if (theRequestedRate == 0) // the client sent the header but doesn't want a dynamic rate
-		inRequest->AppendHeader(qtssXDynamicRateHeader, &sHeaderOff);
+		inRequest->AppendHeader(qtssXDynamicRateHeader, sHeaderOff);
 	//else the client didn't send a header so do nothing 
 
 	inRequest->SendHeader();

@@ -174,18 +174,6 @@ QTSS_Error QTSS_DoService(QTSS_ServiceID inID, QTSS_ServiceFunctionArgsPtr inArg
     return (sCallbacks->addr [kDoServiceCallback]) (inID, inArgs);  
 }
 
-// RTSP ROUTINES
-
-QTSS_Error QTSS_SendRTSPHeaders(QTSS_RTSPRequestObject inRef)
-{
-    return (sCallbacks->addr [kSendRTSPHeadersCallback]) (inRef);       
-}
-
-QTSS_Error QTSS_AppendRTSPHeader(QTSS_RTSPRequestObject inRef, QTSS_RTSPHeader inHeader, const char* inValue, uint32_t inValueLen)
-{
-    return (sCallbacks->addr [kAppendRTSPHeadersCallback]) (inRef, inHeader, inValue, inValueLen);      
-}
-
 // FILE SYSTEM ROUTINES
 
 QTSS_Error  QTSS_OpenFileObject(char* inPath, QTSS_OpenFileFlags inFlags, QTSS_Object* outFileObject)

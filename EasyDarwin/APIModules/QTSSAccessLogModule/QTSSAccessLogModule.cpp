@@ -444,9 +444,6 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	char localDNSBuf[70] = { 0 };
 	StrPtrLen localDNS(localDNSBuf, 69);
 
-	char remoteDNSBuf[70] = { 0 };
-	StrPtrLen remoteDNS(remoteDNSBuf, 69);
-
 	char remoteAddrBuf[20] = { 0 };
 	StrPtrLen remoteAddr(remoteAddrBuf, 19);
 
@@ -456,7 +453,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	// First, get networking info from the RTSP session
 	dict->GetValue(qtssCliRTSPSessLocalAddrStr, 0, localIPAddr.Ptr, &localIPAddr.Len);
 	dict->GetValue(qtssCliRTSPSessLocalDNS, 0, localDNS.Ptr, &localDNS.Len);
-	dict->GetValue(qtssCliSesHostName, 0, remoteDNS.Ptr, &remoteDNS.Len);
+	std::string remoteDNS(((RTPSession *)inClientSession)->GetHost());
 	dict->GetValue(qtssCliRTSPSessRemoteAddrStr, 0, remoteAddr.Ptr, &remoteAddr.Len);
 	dict->GetValue(qtssCliRTSPSessRemoteAddrStr, 0, playerID.Ptr, &playerID.Len);
 
@@ -754,7 +751,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	::strcpy(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%s ", (theDateBuffer[0] == '\0') ? sVoidField : theDateBuffer);   //date* time*
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%s ", (remoteDNS.Ptr[0] == '\0') ? sVoidField : remoteDNS.Ptr); //c-dns
+	sprintf(tempLogBuffer, "%s ", (remoteDNS.empty()) ? sVoidField : remoteDNS.c_str()); //c-dns
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%s ", (url.empty()) ? sVoidField : url.c_str());   //cs-uri-stem*
 	::strcat(logBuffer, tempLogBuffer);

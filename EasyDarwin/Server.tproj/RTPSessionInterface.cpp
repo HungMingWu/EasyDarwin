@@ -122,7 +122,6 @@ RTPSessionInterface::RTPSessionInterface()
 	// Make sure the dictionary knows about our preallocated memory for the RTP stream array
 	this->SetEmptyVal(qtssCliSesFirstUserAgent, &fUserAgentBuffer[0], kUserAgentBufSize);
 	this->SetEmptyVal(qtssCliSesStreamObjects, &fStreamBuffer[0], kStreamBufSize);
-	this->SetEmptyVal(qtssCliSesHostName, &fRequestHostName[0], kFullRequestURLBufferSize);
 
 	this->SetVal(qtssCliSesCreateTimeInMsec, &fSessionCreateTime, sizeof(fSessionCreateTime));
 	this->SetVal(qtssCliSesFirstPlayTimeInMsec, &fFirstPlayTime, sizeof(fFirstPlayTime));

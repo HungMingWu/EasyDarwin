@@ -94,11 +94,6 @@ public:
 	static QTSS_Error   QTSS_IDForService(const char* inTag, QTSS_ServiceID* outID);
 	static QTSS_Error   QTSS_DoService(QTSS_ServiceID inID, QTSS_ServiceFunctionArgsPtr inArgs);
 
-	// RTSP ROUTINES
-
-	static QTSS_Error   QTSS_SendRTSPHeaders(QTSS_RTSPRequestObject inRef);
-	static QTSS_Error   QTSS_AppendRTSPHeader(QTSS_RTSPRequestObject inRef, QTSS_RTSPHeader inHeader, char* inValue, uint32_t inValueLen);
-
 	// ASYNC I/O ROUTINES
 	static QTSS_Error   QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_EventType inEventMask);
 	static QTSS_Error   QTSS_SignalStream(QTSS_StreamRef inStream);

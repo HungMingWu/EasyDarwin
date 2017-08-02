@@ -102,7 +102,7 @@ static StrPtrLen    sAudioStr("audio");
 static StrPtrLen    sRtpMapStr("rtpmap");
 static StrPtrLen    sControlStr("control");
 static StrPtrLen    sBufferDelayStr("x-bufferdelay");
-static StrPtrLen    sContentType("application/x-random-data");
+static boost::string_view    sContentType("application/x-random-data");
 
 static StrPtrLen    sAuthAlgorithm("md5");
 static StrPtrLen    sAuthQop("auth");
@@ -1691,7 +1691,9 @@ void RTSPSession::SetupRequest()
 			return;
 		}
 
-		fRequest->AppendHeader(qtssPublicHeader, QTSServerInterface::GetPublicHeader());
+		std::string temp(QTSServerInterface::GetPublicHeader()->Ptr,
+			QTSServerInterface::GetPublicHeader()->Len);
+		fRequest->AppendHeader(qtssPublicHeader, temp);
 
 		// DJM PROTOTYPE
 		StrPtrLen* requirePtr = fRequest->GetHeaderDictionary()->GetValue(qtssRequireHeader);
@@ -1700,7 +1702,7 @@ void RTSPSession::SetupRequest()
 			body = (char*)RTSPSessionInterface::sOptionsRequestBody;
 			bodySizeBytes = fRequest->GetRandomDataSize();
 			Assert(bodySizeBytes <= sizeof(RTSPSessionInterface::sOptionsRequestBody));
-			fRequest->AppendHeader(qtssContentTypeHeader, &sContentType);
+			fRequest->AppendHeader(qtssContentTypeHeader, sContentType);
 			fRequest->AppendContentLength(bodySizeBytes);
 		}
 
@@ -1923,19 +1925,15 @@ QTSS_Error  RTSPSession::CreateNewRTPSession(OSRefTable* inRefTable)
 void RTSPSession::SetupClientSessionAttrs()
 {
 	// get and pass presentation url
-	StrPtrLen* theValue = fRequest->GetValue(qtssRTSPReqURI);
-	boost::string_view t(theValue->Ptr, theValue->Len);
-	fRTPSession->SetPresentationURL(t);
+	fRTPSession->SetPresentationURL(fRequest->GetURI());
 
 	// get and pass full request url
-	theValue = fRequest->GetValue(qtssRTSPReqAbsoluteURL);
-	t = boost::string_view(theValue->Ptr, theValue->Len);
+	auto theValue = fRequest->GetValue(qtssRTSPReqAbsoluteURL);
+	auto t = boost::string_view(theValue->Ptr, theValue->Len);
 	fRTPSession->SetAbsoluteURL(t);
 
 	// get and pass request host name
-	theValue = fRequest->GetHeaderDictionary()->GetValue(qtssHostHeader);
-	Assert(theValue != nullptr);
-	(void)fRTPSession->SetValue(qtssCliSesHostName, 0, theValue->Ptr, theValue->Len, QTSSDictionary::kDontObeyReadOnly);
+	fRTPSession->SetHost(fRequest->GetHeaderDict().GetHost());
 
 	// get and pass user agent header
 	theValue = fRequest->GetHeaderDictionary()->GetValue(qtssUserAgentHeader);

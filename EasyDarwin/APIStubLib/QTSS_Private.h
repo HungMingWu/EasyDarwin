@@ -69,8 +69,6 @@ enum
     kAddServiceCallback             = 13,
     kIDForServiceCallback           = 14,
     kDoServiceCallback              = 15,
-    kSendRTSPHeadersCallback        = 16,
-    kAppendRTSPHeadersCallback      = 17,
 
     kRequestEventCallback           = 23,
     kSetIdleTimerCallback           = 24,

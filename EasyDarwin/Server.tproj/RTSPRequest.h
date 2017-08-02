@@ -58,6 +58,8 @@ class RTSPRequest : public RTSPRequestInterface
 {
 	// query stting (CGI parameters) passed to the server in the request URL, does not include the '?' separator
 	boost::string_view queryString;
+	//URI for this request
+	std::string uri;
 public:
 
 	//CONSTRUCTOR / DESTRUCTOR
@@ -85,10 +87,11 @@ public:
 	QTSS_Error SendForbiddenResponse(void);
 	boost::string_view GetQueryString() const { return queryString; }
 	uint32_t GetContentLength() const { return fContentLength; }
+	boost::string_view GetURI() const { return uri; }
 private:
 
 	//PARSING
-	enum { kRealmBuffSize = 512, kAuthNameAndPasswordBuffSize = 128, kAuthChallengeHeaderBufSize = 512 };
+	enum { kAuthNameAndPasswordBuffSize = 128, kAuthChallengeHeaderBufSize = 512 };
 
 	//Parsing the URI line (first line of request
 	QTSS_Error ParseFirstLine(StringParser &parser);
@@ -113,7 +116,7 @@ private:
 	void    ParseRetransmitHeader(StrPtrLen &header);
 	void    ParseContentLengthHeader(boost::string_view header);
 	void    ParseSpeedHeader(boost::string_view header);
-	void    ParsePrebufferHeader(StrPtrLen &header);
+	void    ParsePrebufferHeader(boost::string_view header);
 	void    ParseTransportOptionsHeader(StrPtrLen &header);
 	void    ParseSessionHeader(boost::string_view header);
 	void    ParseClientPortSubHeader(StrPtrLen* inClientPortSubHeader);

@@ -485,8 +485,6 @@ enum
     qtssCliSesMovieAverageBitRate   = 12,   //r/w       //uint32_t        //average bits per second based on total RTP bits/movie duration. This will default to 0 unless explictly set by a module.
     qtssCliSesLastRTSPSession       = 13,   //read      //QTSS_RTSPSessionObject //Private
 
-    qtssCliSesHostName              = 15,   //read      //char array    //requestes host name for s session. Just the "domain.com" portion from qtssCliSesFullURL above
-
     qtssCliRTSPSessRemoteAddrStr    = 16,   //read      //char array        //IP address addr of client, in dotted-decimal format.
     qtssCliRTSPSessLocalDNS         = 17,   //read      //char array        //DNS name of local IP address for this RTSP connection.
     qtssCliRTSPSessLocalAddrStr     = 18,   //read      //char array        //Ditto, in dotted-decimal format.
@@ -585,7 +583,6 @@ enum
     //Available in every method that receives the QTSS_RTSPRequestObject except for the QTSS_FilterMethod
     
     qtssRTSPReqFilePath             = 2,    //r/w        //char array        //Not pre-emptive safe!! //URI for this request, converted to a local file system path.
-    qtssRTSPReqURI                  = 3,    //read      //char array        //URI for this request
     qtssRTSPReqFilePathTrunc        = 4,    //read      //char array        //Not pre-emptive safe!! //Same as qtssRTSPReqFilePath, without the last element of the path
     qtssRTSPReqFileName             = 5,    //read      //char array        //Not pre-emptive safe!! //Everything after the last path separator in the file system path
     qtssRTSPReqFileDigit            = 6,    //read      //char array        //Not pre-emptive safe!! //If the URI ends with one or more digits, this points to those.
@@ -1609,28 +1606,6 @@ QTSS_Error QTSS_DoService(QTSS_ServiceID inID, QTSS_ServiceFunctionArgsPtr inArg
 
 // Rereads the preferences, also causes the QTSS_RereadPrefs_Role to be invoked
 #define QTSS_REREAD_PREFS_SERVICE   "RereadPreferences"
-
-
-
-/*****************************************/
-//  RTSP HEADER CALLBACKS
-//
-//  As a convience to modules that want to send RTSP responses, the server
-//  has internal utilities for formatting a proper RTSP response. When a module
-//  calls QTSS_SendRTSPHeaders, the server sends a proper RTSP status line, using
-//  the request's current status code, and also sends the proper CSeq header,
-//  session ID header, and connection header.
-//
-//  Any other headers can be appended by calling QTSS_AppendRTSPHeader. They will be
-//  sent along with everything else when QTSS_SendRTSPHeaders is called.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-QTSS_Error QTSS_SendRTSPHeaders(QTSS_RTSPRequestObject inRef);
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-QTSS_Error QTSS_AppendRTSPHeader(QTSS_RTSPRequestObject inRef, QTSS_RTSPHeader inHeader, const char* inValue, uint32_t inValueLen);
 
 /*****************************************/
 //  FILE SYSTEM CALLBACKS

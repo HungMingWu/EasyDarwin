@@ -60,6 +60,14 @@ public:
 		if (it == end(infos)) return {};
 		return it->second;
 	}
+	void SetHost(const std::string &session) {
+		infos[qtssHostHeader] = session;
+	}
+	boost::string_view GetHost() const {
+		auto it = infos.find(qtssHostHeader);
+		if (it == end(infos)) return {};
+		return it->second;
+	}
 };
 class RTSPRequestInterface : public QTSSDictionary
 {
@@ -85,7 +93,7 @@ public:
 	//Adds a new header to this object's list of headers to be sent out.
 	//Note that this is only needed for "special purpose" headers. The Server,
 	//CSeq, SessionID, and Connection headers are taken care of automatically
-	void    AppendHeader(QTSS_RTSPHeader inHeader, StrPtrLen* inValue);
+	void    AppendHeader(QTSS_RTSPHeader inHeader, boost::string_view inValue);
 
 
 	// The transport header constructed by this function mimics the one sent

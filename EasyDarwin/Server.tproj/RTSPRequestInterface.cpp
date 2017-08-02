@@ -247,14 +247,14 @@ RTSPRequestInterface::RTSPRequestInterface(RTSPSessionInterface *session)
 
 }
 
-void RTSPRequestInterface::AppendHeader(QTSS_RTSPHeader inHeader, StrPtrLen* inValue)
+void RTSPRequestInterface::AppendHeader(QTSS_RTSPHeader inHeader, boost::string_view inValue)
 {
 	if (!fStandardHeadersWritten)
 		this->WriteStandardHeaders();
 
 	fOutputStream->Put(RTSPProtocol::GetHeaderString(inHeader));
 	fOutputStream->Put(sColonSpace);
-	fOutputStream->Put(*inValue);
+	fOutputStream->Put((char *)inValue.data(), inValue.length());
 	fOutputStream->PutEOL();
 }
 
@@ -275,12 +275,7 @@ void RTSPRequestInterface::AppendContentLength(uint32_t contentLength)
 	if (!fStandardHeadersWritten)
 		this->WriteStandardHeaders();
 
-	char dataSize[10];
-	dataSize[sizeof(dataSize) - 1] = 0;
-	snprintf(dataSize, sizeof(dataSize) - 1, "%"   _U32BITARG_   "", contentLength);
-	StrPtrLen contentLengthStr(dataSize);
-	this->AppendHeader(qtssContentLengthHeader, &contentLengthStr);
-
+	this->AppendHeader(qtssContentLengthHeader, std::to_string(contentLength));
 }
 
 void RTSPRequestInterface::AppendDateAndExpires()
@@ -291,11 +286,11 @@ void RTSPRequestInterface::AppendDateAndExpires()
 	Assert(OSThread::GetCurrent() != nullptr);
 	DateBuffer* theDateBuffer = OSThread::GetCurrent()->GetDateBuffer();
 	theDateBuffer->InexactUpdate(); // Update the date buffer to the current date & time
-	StrPtrLen theDate(theDateBuffer->GetDateBuffer(), DateBuffer::kDateBufferLen);
+	std::string theDate(theDateBuffer->GetDateBuffer(), DateBuffer::kDateBufferLen);
 
 	// Append dates, and have this response expire immediately
-	this->AppendHeader(qtssDateHeader, &theDate);
-	this->AppendHeader(qtssExpiresHeader, &theDate);
+	this->AppendHeader(qtssDateHeader, theDate);
+	this->AppendHeader(qtssExpiresHeader, theDate);
 }
 
 
@@ -552,7 +547,7 @@ void RTSPRequestInterface::AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 
 void RTSPRequestInterface::WriteStandardHeaders()
 {
-	static StrPtrLen    sCloseString("Close", 5);
+	static boost::string_view    sCloseString("Close");
 
 	fStandardHeadersWritten = true; //must be done here to prevent recursive calls
 
@@ -594,20 +589,20 @@ void RTSPRequestInterface::WriteStandardHeaders()
 			fOutputStream->Put(QTSServerInterface::GetServerHeader());
 			fOutputStream->PutEOL();
 		}
-		AppendHeader(qtssCSeqHeader, fHeaderDictionary.GetValue(qtssCSeqHeader));
+		StrPtrLen *ptr = fHeaderDictionary.GetValue(qtssCSeqHeader);
+		std::string ptrV(ptr->Ptr, ptr->Len);
+		AppendHeader(qtssCSeqHeader, ptrV);
 	}
 
 	//append sessionID header
 	boost::string_view incomingID = fHeaderDict.GetSession();
-	if (!incomingID.empty()) {
-		StrPtrLen incomingIDV((char *)incomingID.data(), incomingID.length());
-		AppendHeader(qtssSessionHeader, &incomingIDV);
-	}
+	if (!incomingID.empty())
+		AppendHeader(qtssSessionHeader, incomingID);
 
 	//follows the HTTP/1.1 convention: if server wants to close the connection, it
 	//tags the response with the Connection: close header
 	if (!fResponseKeepAlive)
-		AppendHeader(qtssConnectionHeader, &sCloseString);
+		AppendHeader(qtssConnectionHeader, sCloseString);
 }
 
 void RTSPRequestInterface::SendHeader()

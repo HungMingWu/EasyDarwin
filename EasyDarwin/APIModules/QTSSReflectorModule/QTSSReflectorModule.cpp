@@ -86,7 +86,7 @@ static QTSS_AttributeID         sRTPInfoWaitTimeAttr = qtssIllegalAttrID;
 
 // ref to the prefs dictionary object
 static OSRefTable*      sSessionMap = nullptr;
-static const StrPtrLen  kCacheControlHeader("no-cache");
+static const boost::string_view kCacheControlHeader("no-cache");
 static QTSS_PrefsObject sServerPrefs = nullptr;
 static QTSS_ServerObject sServer = nullptr;
 static QTSS_ModulePrefsObject sPrefs = nullptr;
@@ -187,7 +187,7 @@ static StrPtrLen    sKILLNotValidMessage("Announced .kill is not a valid SDP");
 static StrPtrLen    sSDPTimeNotValidMessage("SDP time is not valid or movie not available at this time.");
 static StrPtrLen    sBroadcastNotAllowed("Broadcast is not allowed.");
 static StrPtrLen    sBroadcastNotActive("Broadcast is not active.");
-static StrPtrLen    sTheNowRangeHeader("npt=now-");
+static boost::string_view    sTheNowRangeHeader("npt=now-");
 
 // FUNCTION PROTOTYPES
 
@@ -1147,10 +1147,7 @@ std::string DoDescribeAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, Re
 			editedSDP += tempBuff;
 
 			editedSDP += " IN IP4 ";
-			uint32_t buffLen = sizeof(tempBuff) - 1;
-			(void)((QTSSDictionary*)inParams->inClientSession)->GetValue(qtssCliSesHostName, 0, &tempBuff, &buffLen);
-			editedSDP += std::string(tempBuff, buffLen);
-
+			editedSDP += std::string(((RTPSession*)inParams->inClientSession)->GetHost());
 			editedSDP += "\r\n";
 		}
 	}
@@ -1293,8 +1290,8 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	theDescribeVec[2].iov_base = const_cast<char *>(sortedSDP.GetMediaHeaders().data());
 	theDescribeVec[2].iov_len = sortedSDP.GetMediaHeaders().length();
 
-	(void)QTSS_AppendRTSPHeader(inParams->inRTSPRequest, qtssCacheControlHeader,
-		kCacheControlHeader.Ptr, kCacheControlHeader.Len);
+	((RTSPRequestInterface*)inParams->inRTSPRequest)->AppendHeader(qtssCacheControlHeader,
+		kCacheControlHeader);
 	QTSSModuleUtils::SendDescribeResponse(inParams->inRTSPRequest, inParams->inClientSession,
 		&theDescribeVec[0], 3, sessLen + mediaLen);
 
@@ -1687,9 +1684,8 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 
 		//send the setup response
 
-		(void)QTSS_AppendRTSPHeader(inParams->inRTSPRequest, qtssCacheControlHeader,
-			kCacheControlHeader.Ptr, kCacheControlHeader.Len);
-
+		((RTSPRequestInterface*)inParams->inRTSPRequest)->AppendHeader(qtssCacheControlHeader,
+			kCacheControlHeader);
 
 		SendSetupRTSPResponse((RTPStream *)newStream, (RTSPRequestInterface *)(inParams->inRTSPRequest), 0);
 
@@ -1777,8 +1773,8 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	Assert(theErr == QTSS_NoErr);
 
 	//send the setup response
-	(void)QTSS_AppendRTSPHeader(inParams->inRTSPRequest, qtssCacheControlHeader,
-		kCacheControlHeader.Ptr, kCacheControlHeader.Len);
+	((RTSPRequestInterface*)inParams->inRTSPRequest)->AppendHeader(qtssCacheControlHeader,
+		kCacheControlHeader);
 	SendSetupRTSPResponse(newStream, (RTSPRequestInterface *)(inParams->inRTSPRequest), qtssSetupRespDontWriteSSRC);
 
 #ifdef REFLECTORSESSION_DEBUG
@@ -1946,7 +1942,7 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 			StrPtrLen temp;
 			theErr = ((QTSSDictionary*)inParams->inClientSession)->GetValuePtr(sRTPInfoWaitTimeAttr, 0, (void**)&temp.Ptr, &temp.Len);
 			if (theErr != QTSS_NoErr)
-				QTSS_AppendRTSPHeader(inParams->inRTSPRequest, qtssRangeHeader, sTheNowRangeHeader.Ptr, sTheNowRangeHeader.Len);
+				((RTSPRequestInterface*)inParams->inRTSPRequest)->AppendHeader(qtssRangeHeader, sTheNowRangeHeader);
 		}
 
 		if (sPlayerCompatibility)

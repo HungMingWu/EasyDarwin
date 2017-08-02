@@ -434,16 +434,16 @@ void    RTPSession::SendDescribeResponse(RTSPRequestInterface* inRequest)
 	inRequest->AppendDateAndExpires();
 
 	//write content type header
-	static StrPtrLen sContentType("application/sdp");
-	inRequest->AppendHeader(qtssContentTypeHeader, &sContentType);
+	static boost::string_view sContentType("application/sdp");
+	inRequest->AppendHeader(qtssContentTypeHeader, sContentType);
 
 	// write x-Accept-Retransmit header
-	static StrPtrLen sRetransmitProtocolName("our-retransmit");
-	inRequest->AppendHeader(qtssXAcceptRetransmitHeader, &sRetransmitProtocolName);
+	static boost::string_view sRetransmitProtocolName("our-retransmit");
+	inRequest->AppendHeader(qtssXAcceptRetransmitHeader, sRetransmitProtocolName);
 
 	// write x-Accept-Dynamic-Rate header
-	static StrPtrLen dynamicRateEnabledStr("1");
-	inRequest->AppendHeader(qtssXAcceptDynamicRateHeader, &dynamicRateEnabledStr);
+	static boost::string_view dynamicRateEnabledStr("1");
+	inRequest->AppendHeader(qtssXAcceptDynamicRateHeader, dynamicRateEnabledStr);
 
 	//write content base header
 

@@ -825,9 +825,6 @@ void    QTSServer::InitCallbacks()
 	sCallbacks.addr[kIDForServiceCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_IDForService;
 	sCallbacks.addr[kDoServiceCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_DoService;
 
-	sCallbacks.addr[kSendRTSPHeadersCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SendRTSPHeaders;
-	sCallbacks.addr[kAppendRTSPHeadersCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AppendRTSPHeader;
-
 	sCallbacks.addr[kRequestEventCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_RequestEvent;
 	sCallbacks.addr[kSetIdleTimerCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SetIdleTimer;
 	sCallbacks.addr[kSignalStreamCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SignalStream;

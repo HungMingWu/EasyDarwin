@@ -811,12 +811,9 @@ void    QTSServer::InitCallbacks()
 	sCallbacks.addr[kConvertToUnixTimeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_ConvertToUnixTime;
 
 	sCallbacks.addr[kAddRoleCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AddRole;
-	sCallbacks.addr[kCreateObjectTypeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_CreateObjectType;
-	sCallbacks.addr[kAddAttributeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AddAttribute;
 	sCallbacks.addr[kIDForTagCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_IDForAttr;
 
 	sCallbacks.addr[kSetAttributeByIDCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SetValue;
-	sCallbacks.addr[kCreateObjectValueCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_CreateObject;
 	sCallbacks.addr[kGetNumValuesCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetNumValues;
 
 	sCallbacks.addr[kWriteCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Write;
@@ -851,7 +848,6 @@ void    QTSServer::InitCallbacks()
 
 	sCallbacks.addr[kRequestGlobalLockCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_RequestLockedCallback;
 	sCallbacks.addr[kIsGlobalLockedCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_IsGlobalLocked;
-	sCallbacks.addr[kUnlockGlobalLock] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_UnlockGlobalLock;
 
 	sCallbacks.addr[kAuthenticateCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Authenticate;
 	sCallbacks.addr[kAuthorizeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Authorize;

@@ -98,23 +98,6 @@ QTSS_Error QTSSCallbacks::QTSS_UnlockObject(QTSS_Object inDictionary)
 	return QTSS_NoErr;
 }
 
-QTSS_Error QTSSCallbacks::QTSS_CreateObjectType(QTSS_ObjectType* outType)
-{
-	QTSS_ObjectType type = QTSSDictionaryMap::CreateNewMap();
-	if (type == 0)
-		return QTSS_RequestFailed;
-
-	*outType = type;
-	return QTSS_NoErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_AddAttribute(QTSS_ObjectType inType, const char* inName, void* inUnused)
-{
-	//
-	// This call is deprecated, make the new call with sensible default arguments
-	return QTSSCallbacks::QTSS_AddStaticAttribute(inType, inName, inUnused, qtssAttrDataTypeUnknown);
-}
-
 QTSS_Error  QTSSCallbacks::QTSS_AddStaticAttribute(QTSS_ObjectType inObjectType, const char* inAttrName, void* inUnused, QTSS_AttrDataType inAttrDataType)
 {
 	Assert(inUnused == nullptr);
@@ -200,24 +183,6 @@ QTSS_Error  QTSSCallbacks::QTSS_SetValuePtr(QTSS_Object inDictionary, QTSS_Attri
 	if ((inDictionary == nullptr) || ((inBuffer == nullptr) && (inLen > 0)))
 		return QTSS_BadArgument;
 	return ((QTSSDictionary*)inDictionary)->SetValuePtr(inID, inBuffer, inLen);
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_CreateObject(QTSS_Object inDictionary, QTSS_AttributeID inID, QTSS_ObjectType inType, uint32_t* outIndex, QTSS_Object* outCreatedObject)
-{
-	if ((inDictionary == nullptr) || (outCreatedObject == nullptr) || (outIndex == nullptr) || (inID == qtssIllegalAttrID))
-		return QTSS_BadArgument;
-
-	QTSSDictionaryMap* theMap = nullptr;
-	if (inType != qtssDynamicObjectType)
-	{
-		uint32_t theDictionaryIndex = QTSSDictionaryMap::GetMapIndex(inType);
-		if (theDictionaryIndex == QTSSDictionaryMap::kIllegalDictionary)
-			return QTSS_BadArgument;
-
-		theMap = QTSSDictionaryMap::GetMap(theDictionaryIndex);
-	}
-
-	return ((QTSSDictionary*)inDictionary)->CreateObjectValue(inID, outIndex, (QTSSDictionary**)outCreatedObject, theMap);
 }
 
 QTSS_Error  QTSSCallbacks::QTSS_GetNumValues(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t* outNumValues)
@@ -536,29 +501,6 @@ bool      QTSSCallbacks::QTSS_IsGlobalLocked()
 
 	return theState->isGlobalLocked;
 }
-
-QTSS_Error  QTSSCallbacks::QTSS_UnlockGlobalLock()
-{
-	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
-	if (OSThread::GetCurrent() != nullptr)
-		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
-
-	// This may happen if this callback is occurring on module-created thread
-	if (theState == nullptr)
-		return QTSS_RequestFailed;
-
-	if (theState->curTask == nullptr)
-		return QTSS_OutOfState;
-
-	((Task *)OSThread::GetCurrent())->GlobalUnlock();
-
-	theState->globalLockRequested = false;
-	theState->isGlobalLocked = false;
-
-
-	return QTSS_NoErr;
-}
-
 
 QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const char* inAuthResourceLocalPath, const char* inAuthMoviesDir, QTSS_ActionFlags inAuthRequestAction, QTSS_AuthScheme inAuthScheme, QTSS_RTSPRequestObject ioAuthRequestObject)
 {

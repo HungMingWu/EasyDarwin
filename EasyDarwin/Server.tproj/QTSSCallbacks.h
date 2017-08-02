@@ -47,18 +47,12 @@ public:
 
 	static QTSS_Error   QTSS_AddRole(QTSS_Role inRole);
 
-	// DICTIONARY ROUTINES
-
 	// DICTIONARY LOCKING
 	static QTSS_Error   QTSS_LockObject(QTSS_Object inDictionary);
 	static QTSS_Error   QTSS_UnlockObject(QTSS_Object inDictionary);
 
-	// CREATE NEW OBJECT TYPE
-	static QTSS_Error   QTSS_CreateObjectType(QTSS_ObjectType* outType);
-
 	// ADD ATTRIBUTE
 
-	static QTSS_Error   QTSS_AddAttribute(QTSS_ObjectType inType, const char* inTag, void* inUnused);
 	static QTSS_Error   QTSS_AddStaticAttribute(QTSS_ObjectType inObjectType, const char* inAttrName, void* inUnused, QTSS_AttrDataType inAttrDataType);
 	static QTSS_Error   QTSS_AddInstanceAttribute(QTSS_Object inObject, const char* inAttrName, void* inUnused, QTSS_AttrDataType inAttrDataType);
 
@@ -79,7 +73,6 @@ public:
 
 	static QTSS_Error   QTSS_SetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, const void* inBuffer, uint32_t inLen);
 	static QTSS_Error   QTSS_SetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, const void* inBuffer, uint32_t inLen);
-	static QTSS_Error   QTSS_CreateObject(QTSS_Object inDictionary, QTSS_AttributeID inID, QTSS_ObjectType inType, uint32_t* outIndex, QTSS_Object* outCreatedObject);
 	static QTSS_Error   QTSS_GetNumValues(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t* outNumValues);
 	static QTSS_Error   QTSS_RemoveValue(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex);
 
@@ -115,7 +108,6 @@ public:
 
 	static QTSS_Error   QTSS_RequestLockedCallback();
 	static bool			QTSS_IsGlobalLocked();
-	static QTSS_Error   QTSS_UnlockGlobalLock();
 
 	// AUTHENTICATION AND AUTHORIZATION ROUTINE
 	static QTSS_Error   QTSS_Authenticate(const char* inAuthUserName, const char* inAuthResourceLocalPath, const char* inAuthMoviesDir, QTSS_ActionFlags inAuthRequestAction, QTSS_AuthScheme inAuthScheme, QTSS_RTSPRequestObject ioAuthRequestObject);

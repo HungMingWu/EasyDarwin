@@ -106,23 +106,23 @@ private:
 
 	//Functions to parse the contents of particuarly complicated headers (as a convienence
 	//for modules)
-	void    ParseRangeHeader();
-	void    ParseTransportHeader();
-	void    ParseIfModSinceHeader();
+	void    ParseRangeHeader(StrPtrLen &header);
+	void    ParseTransportHeader(StrPtrLen &header);
+	void    ParseIfModSinceHeader(StrPtrLen &header);
 	void    ParseAddrSubHeader(StrPtrLen* inSubHeader, StrPtrLen* inHeaderName, uint32_t* outAddr);
-	void    ParseRetransmitHeader();
-	void    ParseContentLengthHeader();
-	void    ParseSpeedHeader();
-	void    ParsePrebufferHeader();
-	void    ParseTransportOptionsHeader();
-	void    ParseSessionHeader();
+	void    ParseRetransmitHeader(StrPtrLen &header);
+	void    ParseContentLengthHeader(boost::string_view header);
+	void    ParseSpeedHeader(boost::string_view header);
+	void    ParsePrebufferHeader(StrPtrLen &header);
+	void    ParseTransportOptionsHeader(StrPtrLen &header);
+	void    ParseSessionHeader(boost::string_view header);
 	void    ParseClientPortSubHeader(StrPtrLen* inClientPortSubHeader);
 	void    ParseTimeToLiveSubHeader(StrPtrLen* inTimeToLiveSubHeader);
 	void    ParseModeSubHeader(StrPtrLen* inModeSubHeader);
 	bool  ParseNetworkModeSubHeader(StrPtrLen* inSubHeader);
-	void 	ParseDynamicRateHeader();
-	void	ParseRandomDataSizeHeader();
-	void    ParseBandwidthHeader();
+	void 	ParseDynamicRateHeader(boost::string_view header);
+	void	ParseRandomDataSizeHeader(boost::string_view header);
+	void    ParseBandwidthHeader(boost::string_view header);
 
 	static uint8_t    sURLStopConditions[];
 };

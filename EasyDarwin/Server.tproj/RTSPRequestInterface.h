@@ -38,6 +38,7 @@
 #define __RTSPREQUESTINTERFACE_H__
 
  //INCLUDES:
+#include <map>
 #include <boost/utility/string_view.hpp>
 #include "QTSS.h"
 #include "QTSSDictionary.h"
@@ -48,6 +49,18 @@
 #include "RTSPProtocol.h"
 #include "QTSSUserProfile.h"
 
+class HeaderDict {
+	std::map<int, std::string> infos;
+public:
+	void SetSession(const std::string &session) {
+		infos[qtssSessionHeader] = session;
+	}
+	boost::string_view GetSession() const { 
+		auto it = infos.find(qtssSessionHeader);
+		if (it == end(infos)) return {};
+		return it->second;
+	}
+};
 class RTSPRequestInterface : public QTSSDictionary
 {
 	//The full local path to the file. This Attribute is first set after the Routing Role has run and before any other role is called. 
@@ -170,6 +183,7 @@ public:
 
 	RTSPSessionInterface*       GetSession() { return fSession; }
 	QTSSDictionary*             GetHeaderDictionary() { return &fHeaderDictionary; }
+	const HeaderDict&           GetHeaderDict() const { return fHeaderDict; }
 
 	bool                      GetAllowed() { return fAllowed; }
 	void                        SetAllowed(bool allowed) { fAllowed = allowed; }
@@ -269,6 +283,7 @@ protected:
 	char*                       fMovieFolderPtr;
 
 	QTSSDictionary              fHeaderDictionary;
+	HeaderDict                  fHeaderDict;
 
 	bool                      fAllowed;
 	bool                      fHasUser;

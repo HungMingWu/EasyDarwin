@@ -1330,19 +1330,7 @@ QTSS_Error QTSS_LockObject(QTSS_Object inObject);
 //  Returns:    QTSS_NoErr
 //              QTSS_BadArgument:   bad object
 QTSS_Error QTSS_UnlockObject(QTSS_Object inObject);
-                                    
-/********************************************************************/
-//  QTSS_CreateObjectType
-//
-//  Creates a new object type.  Attributes can be added to this object type and then it can
-//  be passed into QTSS_CreateObjectValue.
-//
-//  This may only be called from the QTSS_Register role.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_RequestFailed: Too many object types already exist.
-QTSS_Error QTSS_CreateObjectType(QTSS_ObjectType* outType);
-                                    
+                                                                        
 /********************************************************************/
 //  QTSS_AddStaticAttribute
 //
@@ -1476,15 +1464,6 @@ QTSS_Error QTSS_SetValue (QTSS_Object inObject, QTSS_AttributeID inID, uint32_t 
 //              QTSS_ReadOnly: Attribute is read only.
 //
 QTSS_Error QTSS_SetValuePtr (QTSS_Object inObject, QTSS_AttributeID inID, const void* inBuffer,  uint32_t inLen);
-
-/********************************************************************/
-//  QTSS_CreateObjectValue
-//
-//  Returns:    QTSS_NoErr
-//                              QTSS_BadArgument: Bad argument
-//                              QTSS_ReadOnly: Attribute is read only.
-//
-QTSS_Error QTSS_CreateObjectValue (QTSS_Object inObject, QTSS_AttributeID inID, QTSS_ObjectType inType, uint32_t* outIndex, QTSS_Object* outCreatedObject);
 
 /********************************************************************/
 //  QTSS_GetNumValues
@@ -1739,7 +1718,6 @@ QTSS_Error  QTSS_SetIntervalRoleTimer(int64_t inIdleMsec);
 
 QTSS_Error  QTSS_RequestGlobalLock();
 bool      QTSS_IsGlobalLocked();
-QTSS_Error  QTSS_GlobalUnLock();
 
 
 /*****************************************/
@@ -1784,15 +1762,6 @@ QTSS_Error    QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObject, char** 
 
 // Get HLS Sessions(json)
 void*	Easy_GetRTSPPushSessions();
-
-#ifdef QTSS_OLDROUTINENAMES
-
-// Legacy routines
-// QTSS_AddAttribute has been replaced by QTSS_AddStaticAttribute
-QTSS_Error QTSS_AddAttribute(QTSS_ObjectType inObjectType, const char* inAttributeName,
-                                void* inUnused);
-
-#endif
 
 #ifdef __cplusplus
 }

@@ -59,7 +59,7 @@ enum
     
     kConvertToUnixTimeCallback      = 3,
     kAddRoleCallback                = 4,
-    kAddAttributeCallback           = 5,
+
     kIDForTagCallback               = 6,
 
 	kSetAttributeByIDCallback       = 9,
@@ -91,12 +91,10 @@ enum
     kRemoveValueCallback            = 46,
     kRequestGlobalLockCallback      = 47, 
     kIsGlobalLockedCallback         = 48, 
-    kUnlockGlobalLock               = 49, 
+
     kAuthenticateCallback           = 50,
     kAuthorizeCallback              = 51,   
 
-    kCreateObjectValueCallback      = 53,
-    kCreateObjectTypeCallback       = 54,
     kLockObjectCallback             = 55,
     kUnlockObjectCallback           = 56,
     kSetAttributePtrCallback        = 57,

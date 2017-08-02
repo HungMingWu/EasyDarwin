@@ -1754,7 +1754,7 @@ void RTSPSession::SetupRequest()
 	// and may screw up modules if we let them see this request.
 	if (fRequest->GetMethod() == qtssDescribeMethod)
 	{
-		if (fRequest->GetHeaderDictionary()->GetValue(qtssSessionHeader)->Len > 0)
+		if (!fRequest->GetHeaderDict().GetSession().empty())
 		{
 			(void)QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientHeaderFieldNotValid, qtssMsgNoSesIDOnDescribe);
 			return;
@@ -1847,10 +1847,11 @@ QTSS_Error  RTSPSession::FindRTPSession(OSRefTable* inRefTable)
 	// and it looks for this session ID in two places. First, the RTSP session ID header
 	// in the RTSP request, and if there isn't one there, in the RTSP session object itself.
 
-	StrPtrLen* theSessionID = fRequest->GetHeaderDictionary()->GetValue(qtssSessionHeader);
-	if (theSessionID != nullptr && theSessionID->Len > 0)
+	boost::string_view theSessionID = fRequest->GetHeaderDict().GetSession();
+	if (!theSessionID.empty())
 	{
-		OSRef* theRef = inRefTable->Resolve(theSessionID);
+		StrPtrLen theSessionIDV((char *)theSessionID.data(), theSessionID.length());
+		OSRef* theRef = inRefTable->Resolve(&theSessionIDV);
 
 		if (theRef != nullptr)
 			fRTPSession = (RTPSession*)theRef->GetObject();
@@ -1858,7 +1859,7 @@ QTSS_Error  RTSPSession::FindRTPSession(OSRefTable* inRefTable)
 	}
 
 	// If there wasn't a session ID in the headers, look for one in the RTSP session itself
-	if ((theSessionID == nullptr || theSessionID->Len == 0) && fLastRTPSessionIDPtr.Len > 0)
+	if (theSessionID.empty() && fLastRTPSessionIDPtr.Len > 0)
 	{
 		OSRef* theRef = inRefTable->Resolve(&fLastRTPSessionIDPtr);
 		if (theRef != nullptr)

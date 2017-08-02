@@ -75,16 +75,6 @@ QTSS_Error  QTSS_AddRole(QTSS_Role inRole)
 
 // DICTIONARY ROUTINES
 
-QTSS_Error  QTSS_CreateObjectType(QTSS_ObjectType* outType)
-{
-    return (sCallbacks->addr [kCreateObjectTypeCallback]) (outType);    
-}
-
-QTSS_Error  QTSS_AddAttribute(QTSS_ObjectType inType, const char* inTag, void* inUnused)
-{
-    return (sCallbacks->addr [kAddAttributeCallback]) (inType, inTag, inUnused);    
-}
-
 QTSS_Error  QTSS_AddStaticAttribute(QTSS_ObjectType inObjectType, char* inAttrName, void* inUnused, QTSS_AttrDataType inAttrDataType)
 {
     return (sCallbacks->addr [kAddStaticAttributeCallback]) (inObjectType, inAttrName, inUnused, inAttrDataType);   
@@ -128,11 +118,6 @@ QTSS_Error  QTSS_SetValue (QTSS_Object inDictionary, QTSS_AttributeID inID,uint3
 QTSS_Error  QTSS_SetValuePtr (QTSS_Object inDictionary, QTSS_AttributeID inID, const void* inBuffer,  uint32_t inLen)
 {
     return (sCallbacks->addr [kSetAttributePtrCallback]) (inDictionary, inID, inBuffer, inLen); 
-}
-
-QTSS_Error  QTSS_CreateObjectValue (QTSS_Object inDictionary, QTSS_AttributeID inID, QTSS_ObjectType inType, uint32_t* outIndex, QTSS_Object* outCreatedObject)
-{
-    return (sCallbacks->addr [kCreateObjectValueCallback]) (inDictionary, inID, inType, outIndex, outCreatedObject);    
 }
 
 QTSS_Error  QTSS_GetNumValues (QTSS_Object inObject, QTSS_AttributeID inID, uint32_t* outNumValues)
@@ -245,11 +230,6 @@ QTSS_Error  QTSS_RequestGlobalLock()
 bool  QTSS_IsGlobalLocked()
 {
     return (bool) (sCallbacks->addr [kIsGlobalLockedCallback])  ();
-}
-
-QTSS_Error  QTSS_GlobalUnLock()
-{
-    return (sCallbacks->addr [kUnlockGlobalLock])  ();
 }
 
 QTSS_Error  QTSS_LockObject(QTSS_Object inObject)

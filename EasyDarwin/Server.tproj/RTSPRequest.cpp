@@ -31,6 +31,7 @@
 #include <map>
 #include <boost/utility/string_view.hpp>
 #include <boost/spirit/include/qi.hpp>
+#include <boost/spirit/include/phoenix.hpp>
 #include <boost/fusion/include/std_pair.hpp>
 
 #include "RTSPRequest.h"
@@ -410,20 +411,21 @@ QTSS_Error RTSPRequest::ParseHeaders(StringParser& parser)
 
 		//some headers require some special processing. If this code begins
 		//to get out of control, we made need to come up with a function pointer table
+		boost::string_view theHeaderValV(theHeaderVal.Ptr, theHeaderVal.Len);
 		switch (theHeader)
 		{
-		case qtssSessionHeader:             ParseSessionHeader(); break;
-		case qtssTransportHeader:           ParseTransportHeader(); break;
-		case qtssRangeHeader:               ParseRangeHeader();     break;
-		case qtssIfModifiedSinceHeader:     ParseIfModSinceHeader(); break;
-		case qtssXRetransmitHeader:         ParseRetransmitHeader(); break;
-		case qtssContentLengthHeader:       ParseContentLengthHeader(); break;
-		case qtssSpeedHeader:               ParseSpeedHeader();     break;
-		case qtssXTransportOptionsHeader:   ParseTransportOptionsHeader(); break;
-		case qtssXPreBufferHeader:          ParsePrebufferHeader(); break;
-		case qtssXDynamicRateHeader:		ParseDynamicRateHeader(); break;
-		case qtssXRandomDataSizeHeader:		ParseRandomDataSizeHeader(); break;
-		case qtssBandwidthHeader:           ParseBandwidthHeader(); break;
+		case qtssSessionHeader:             ParseSessionHeader(theHeaderValV); break;
+		case qtssTransportHeader:           ParseTransportHeader(theHeaderVal); break;
+		case qtssRangeHeader:               ParseRangeHeader(theHeaderVal);     break;
+		case qtssIfModifiedSinceHeader:     ParseIfModSinceHeader(theHeaderVal); break;
+		case qtssXRetransmitHeader:         ParseRetransmitHeader(theHeaderVal); break;
+		case qtssContentLengthHeader:       ParseContentLengthHeader(theHeaderValV); break;
+		case qtssSpeedHeader:               ParseSpeedHeader(theHeaderValV);     break;
+		case qtssXTransportOptionsHeader:   ParseTransportOptionsHeader(theHeaderVal); break;
+		case qtssXPreBufferHeader:          ParsePrebufferHeader(theHeaderVal); break;
+		case qtssXDynamicRateHeader:		ParseDynamicRateHeader(theHeaderValV); break;
+		case qtssXRandomDataSizeHeader:		ParseRandomDataSizeHeader(theHeaderValV); break;
+		case qtssBandwidthHeader:           ParseBandwidthHeader(theHeaderValV); break;
 		default:    break;
 		}
 	}
@@ -443,12 +445,14 @@ QTSS_Error RTSPRequest::ParseHeaders(StringParser& parser)
 	return QTSS_NoErr;
 }
 
-void RTSPRequest::ParseSessionHeader()
+void RTSPRequest::ParseSessionHeader(boost::string_view header)
 {
-	StringParser theSessionParser(fHeaderDictionary.GetValue(qtssSessionHeader));
-	StrPtrLen theSessionID;
-	(void)theSessionParser.GetThru(&theSessionID, ';');
-	fHeaderDictionary.SetVal(qtssSessionHeader, &theSessionID);
+	std::string theSessionID;
+	auto iter = header.cbegin(), end = header.cend();
+	bool r = qi::phrase_parse(iter, end, *(qi::digit), qi::lit(";") | qi::ascii::blank, theSessionID);
+	if (r && iter == end) {
+		fHeaderDict.SetSession(theSessionID);
+	}
 }
 
 bool RTSPRequest::ParseNetworkModeSubHeader(StrPtrLen* inSubHeader)
@@ -472,11 +476,11 @@ bool RTSPRequest::ParseNetworkModeSubHeader(StrPtrLen* inSubHeader)
 	return result;
 }
 
-void RTSPRequest::ParseTransportHeader()
+void RTSPRequest::ParseTransportHeader(StrPtrLen &header)
 {
 	static char* sRTPAVPTransportStr = "RTP/AVP";
 
-	StringParser theTransParser(fHeaderDictionary.GetValue(qtssTransportHeader));
+	StringParser theTransParser(&header);
 
 	//transport header from client: Transport: RTP/AVP;unicast;client_port=5000-5001\r\n
 	//                              Transport: RTP/AVP;multicast;ttl=15;destination=229.41.244.93;client_port=5000-5002\r\n
@@ -565,9 +569,9 @@ void RTSPRequest::ParseTransportHeader()
 	}
 }
 
-void  RTSPRequest::ParseRangeHeader()
+void  RTSPRequest::ParseRangeHeader(StrPtrLen &header)
 {
-	StringParser theRangeParser(fHeaderDictionary.GetValue(qtssRangeHeader));
+	StringParser theRangeParser(&header);
 
 	theRangeParser.GetThru(nullptr, '=');//consume "npt="
 	theRangeParser.ConsumeWhitespace();
@@ -581,7 +585,7 @@ void  RTSPRequest::ParseRangeHeader()
 	}
 }
 
-void  RTSPRequest::ParseRetransmitHeader()
+void  RTSPRequest::ParseRetransmitHeader(StrPtrLen &header)
 {
 	StringParser theRetransmitParser(fHeaderDictionary.GetValue(qtssXRetransmitHeader));
 	StrPtrLen theProtName;
@@ -630,16 +634,15 @@ void  RTSPRequest::ParseRetransmitHeader()
 	}
 }
 
-void  RTSPRequest::ParseContentLengthHeader()
+void  RTSPRequest::ParseContentLengthHeader(boost::string_view header)
 {
-	StringParser theContentLenParser(fHeaderDictionary.GetValue(qtssContentLengthHeader));
-	theContentLenParser.ConsumeWhitespace();
-	fContentLength = theContentLenParser.ConsumeInteger(nullptr);
+	auto iter = header.cbegin(), end = header.cend();
+	bool r = qi::phrase_parse(iter, end, qi::uint_, qi::ascii::blank, fContentLength);
 }
 
-void  RTSPRequest::ParsePrebufferHeader()
+void  RTSPRequest::ParsePrebufferHeader(StrPtrLen &header)
 {
-	StringParser thePrebufferParser(fHeaderDictionary.GetValue(qtssXPreBufferHeader));
+	StringParser thePrebufferParser(&header);
 
 	StrPtrLen thePrebufferArg;
 	while (thePrebufferParser.GetThru(&thePrebufferArg, '='))
@@ -658,11 +661,11 @@ void  RTSPRequest::ParsePrebufferHeader()
 	}
 }
 
-void  RTSPRequest::ParseDynamicRateHeader()
+void  RTSPRequest::ParseDynamicRateHeader(boost::string_view header)
 {
-	StringParser theParser(fHeaderDictionary.GetValue(qtssXDynamicRateHeader));
-	theParser.ConsumeWhitespace();
-	int32_t value = theParser.ConsumeInteger(nullptr);
+	auto iter = header.cbegin(), end = header.cend();
+	int32_t value = 0;
+	bool r = qi::phrase_parse(iter, end, qi::int_, qi::ascii::blank, value);
 
 	// fEnableDynamicRate: < 0 undefined, 0 disable, > 0 enable
 	if (value > 0)
@@ -671,25 +674,24 @@ void  RTSPRequest::ParseDynamicRateHeader()
 		fEnableDynamicRateState = 0;
 }
 
-void  RTSPRequest::ParseIfModSinceHeader()
+void  RTSPRequest::ParseIfModSinceHeader(StrPtrLen &header)
 {
-	fIfModSinceDate = DateTranslator::ParseDate(fHeaderDictionary.GetValue(qtssIfModifiedSinceHeader));
+	fIfModSinceDate = DateTranslator::ParseDate(&header);
 
 	// Only set the param if this is a legal date
 	if (fIfModSinceDate != 0)
 		this->SetVal(qtssRTSPReqIfModSinceDate, &fIfModSinceDate, sizeof(fIfModSinceDate));
 }
 
-void RTSPRequest::ParseSpeedHeader()
+void RTSPRequest::ParseSpeedHeader(boost::string_view header)
 {
-	StringParser theSpeedParser(fHeaderDictionary.GetValue(qtssSpeedHeader));
-	theSpeedParser.ConsumeWhitespace();
-	fSpeed = theSpeedParser.ConsumeFloat();
+	auto iter = header.cbegin(), end = header.cend();
+	bool r = qi::phrase_parse(iter, end, qi::float_, qi::ascii::blank, fSpeed);
 }
 
-void RTSPRequest::ParseTransportOptionsHeader()
+void RTSPRequest::ParseTransportOptionsHeader(StrPtrLen &header)
 {
-	StringParser theRTPOptionsParser(fHeaderDictionary.GetValue(qtssXTransportOptionsHeader));
+	StringParser theRTPOptionsParser(&header);
 	StrPtrLen theRTPOptionsSubHeader;
 
 	do
@@ -833,23 +835,20 @@ void RTSPRequest::ParseTimeToLiveSubHeader(StrPtrLen* inTimeToLiveSubHeader)
 }
 
 // DJM PROTOTYPE
-void  RTSPRequest::ParseRandomDataSizeHeader()
+void  RTSPRequest::ParseRandomDataSizeHeader(boost::string_view header)
 {
-	StringParser theContentLenParser(fHeaderDictionary.GetValue(qtssXRandomDataSizeHeader));
-	theContentLenParser.ConsumeWhitespace();
-	fRandomDataSize = theContentLenParser.ConsumeInteger(nullptr);
+	auto iter = header.cbegin(), end = header.cend();
+	bool r = qi::phrase_parse(iter, end, qi::uint_, qi::ascii::blank, fRandomDataSize);
 
 	if (fRandomDataSize > RTSPSessionInterface::kMaxRandomDataSize) {
 		fRandomDataSize = RTSPSessionInterface::kMaxRandomDataSize;
 	}
 }
 
-void  RTSPRequest::ParseBandwidthHeader()
+void  RTSPRequest::ParseBandwidthHeader(boost::string_view header)
 {
-	StringParser theContentLenParser(fHeaderDictionary.GetValue(qtssBandwidthHeader));
-	theContentLenParser.ConsumeWhitespace();
-	fBandwidthBits = theContentLenParser.ConsumeInteger(nullptr);
-
+	auto iter = header.cbegin(), end = header.cend();
+	bool r = qi::phrase_parse(iter, end, qi::uint_, qi::ascii::blank, fBandwidthBits);
 }
 
 

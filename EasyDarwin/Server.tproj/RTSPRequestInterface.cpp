@@ -149,8 +149,7 @@ void RTSPRequestInterface::ReInit(RTSPSessionInterface *session)
 	this->SetVal(qtssRTSPReqFullRequest, input->GetRequestBuffer()->Ptr, input->GetRequestBuffer()->Len);
 
 	// klaus(20170223):fix ffplay cant pull stream from easydarwin
-	fHeaderDictionary.SetVal(qtssSessionHeader, nullptr, 0);
-	fHeaderDictionary.SetNumValues(qtssSessionHeader, 0);
+	fHeaderDict.SetSession("");
 }
 
 //CONSTRUCTOR / DESTRUCTOR: very simple stuff
@@ -304,7 +303,7 @@ void RTSPRequestInterface::AppendSessionHeaderWithTimeout(StrPtrLen* inSessionID
 {
 
 	// Append a session header if there wasn't one already
-	if (GetHeaderDictionary()->GetValue(qtssSessionHeader)->Len == 0)
+	if (GetHeaderDict().GetSession().empty())
 	{
 		if (!fStandardHeadersWritten)
 			this->WriteStandardHeaders();
@@ -599,9 +598,11 @@ void RTSPRequestInterface::WriteStandardHeaders()
 	}
 
 	//append sessionID header
-	StrPtrLen* incomingID = fHeaderDictionary.GetValue(qtssSessionHeader);
-	if ((incomingID != nullptr) && (incomingID->Len > 0))
-		AppendHeader(qtssSessionHeader, incomingID);
+	boost::string_view incomingID = fHeaderDict.GetSession();
+	if (!incomingID.empty()) {
+		StrPtrLen incomingIDV((char *)incomingID.data(), incomingID.length());
+		AppendHeader(qtssSessionHeader, &incomingIDV);
+	}
 
 	//follows the HTTP/1.1 convention: if server wants to close the connection, it
 	//tags the response with the Connection: close header

@@ -30,7 +30,6 @@ set (SRC
 			 TCPSocket.cpp TCPSocket.h
 			 TCPListenerSocket.cpp TCPListenerSocket.h
 			 GetWord.c GetWord.h
-			 OSCodeFragment.cpp OSCodeFragment.h
 			 OSHeap.cpp OSHeap.h
 			 OSBufferPool.cpp OSBufferPool.h
 			 base64.c base64.h

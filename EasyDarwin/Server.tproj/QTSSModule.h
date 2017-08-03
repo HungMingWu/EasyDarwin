@@ -42,7 +42,6 @@
 #include "Task.h"
 #include "QTSSPrefs.h"
 
-#include "OSCodeFragment.h"
 #include "OSQueue.h"
 #include "StrPtrLen.h"
 
@@ -178,11 +177,9 @@ public:
 
 private:
 
-	QTSS_Error LoadFromDisk(QTSS_MainEntryPointPtr* outEntrypoint);
-
 	OSQueueElem                 fQueueElem;
 	char*                       fPath;
-	OSCodeFragment*             fFragment;
+
 	QTSS_DispatchFuncPtr        fDispatchFunc;
 	bool                      fRoleArray[kNumRoles];
 	QTSSPrefs*                  fPrefs;

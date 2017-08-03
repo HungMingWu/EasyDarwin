@@ -89,7 +89,6 @@ QTSSModule::QTSSModule(char* inName, char* inPath)
 	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kModuleDictIndex)),
 	fQueueElem(nullptr),
 	fPath(nullptr),
-	fFragment(nullptr),
 	fDispatchFunc(nullptr),
 	fPrefs(nullptr),
 	fAttributes(nullptr)
@@ -97,14 +96,6 @@ QTSSModule::QTSSModule(char* inName, char* inPath)
 
 	fQueueElem.SetEnclosingObject(this);
 	this->SetTaskName("QTSSModule");
-	if ((inPath != nullptr) && (inPath[0] != '\0'))
-	{
-		// Create a code fragment if this module is being loaded from disk
-
-		fFragment = new OSCodeFragment(inPath);
-		fPath = new char[::strlen(inPath) + 2];
-		::strcpy(fPath, inPath);
-	}
 
 	fAttributes = new QTSSDictionary(nullptr, &fAttributesMutex);
 
@@ -126,8 +117,6 @@ QTSS_Error  QTSSModule::SetupModule(QTSS_CallbacksPtr inCallbacks, QTSS_MainEntr
 
 	// Load fragment from disk if necessary
 
-	if ((fFragment != nullptr) && (inEntrypoint == nullptr))
-		theErr = this->LoadFromDisk(&inEntrypoint);
 	if (theErr != QTSS_NoErr)
 		return theErr;
 
@@ -157,62 +146,12 @@ QTSS_Error  QTSSModule::SetupModule(QTSS_CallbacksPtr inCallbacks, QTSS_MainEntr
 	char msgStr[2048];
 	char* moduleName = nullptr;
 	(void)this->GetValueAsString(qtssModName, 0, &moduleName);
-	snprintf(msgStr, sizeof(msgStr), "Loading Module...%s [%s]", moduleName, (fFragment == nullptr) ? "static" : "dynamic");
+	snprintf(msgStr, sizeof(msgStr), "Loading Module...%s", moduleName);
 	delete moduleName;
 	QTSServerInterface::LogError(qtssMessageVerbosity, msgStr);
 
 	return QTSS_NoErr;
 }
-
-QTSS_Error QTSSModule::LoadFromDisk(QTSS_MainEntryPointPtr* outEntrypoint)
-{
-	static StrPtrLen sMainEntrypointName("_Main");
-
-	Assert(outEntrypoint != nullptr);
-
-	// Modules only need to be initialized if they reside on disk. 
-	if (fFragment == nullptr)
-		return QTSS_NoErr;
-
-	if (!fFragment->IsValid())
-		return QTSS_NotAModule;
-
-	// fPath is actually a path. Extract the file name.
-
-	StrPtrLen theFileName(fPath);
-	StringParser thePathParser(&theFileName);
-
-	while (thePathParser.GetThru(&theFileName, kPathDelimiterChar))
-		;
-	Assert(theFileName.Len > 0);
-	Assert(theFileName.Ptr != nullptr);
-
-#ifdef __Win32__
-	StringParser theDLLTruncator(&theFileName);
-	theDLLTruncator.ConsumeUntil(&theFileName, '.'); // strip off the ".DLL"
-#endif
-
-	/** 08/16/01 quellish **/
-
-#if __MacOSX__
-	StringParser theBundleTruncator(&theFileName);
-	theBundleTruncator.ConsumeUntil(&theFileName, '.'); // strip off the ".bundle"
-#endif
-
-	// At this point, theFileName points to the file name. Make this the module name.
-	this->SetValue(qtssModName, 0, theFileName.Ptr, theFileName.Len, QTSSDictionary::kDontObeyReadOnly);
-
-	// 
-	// The main entrypoint symbol name is the file name plus that _Main__ string up there.
-	std::unique_ptr<char[]> theSymbolName(new char[theFileName.Len + sMainEntrypointName.Len + 2]);
-	::memcpy(theSymbolName.get(), theFileName.Ptr, theFileName.Len);
-	theSymbolName[theFileName.Len] = '\0';
-
-	::strcat(theSymbolName.get(), sMainEntrypointName.Ptr);
-	*outEntrypoint = (QTSS_MainEntryPointPtr)fFragment->GetSymbol(theSymbolName.get());
-	return QTSS_NoErr;
-}
-
 
 int32_t QTSSModule::GetPrivateRoleIndex(QTSS_Role apiRole)
 {

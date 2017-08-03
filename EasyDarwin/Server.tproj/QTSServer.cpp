@@ -1137,16 +1137,12 @@ void QTSServer::SetupPublicHeader()
 	}
 	this->SetNumValues(qtssSvrHandledMethods, uniqueMethodCount);
 
-	// Format a text string for the Public: header
-	ResizeableStringFormatter theFormatter(nullptr, 0);
-
 	for (uint32_t a = 0; this->GetValuePtr(qtssSvrHandledMethods, a, (void**)&theMethod, &theLen) == QTSS_NoErr; a++)
 	{
-		sPublicHeaderFormatter.Put(RTSPProtocol::GetMethodString(*theMethod));
-		sPublicHeaderFormatter.Put(", ");
+		if (a) sPublicHeaderStr += ", ";
+		StrPtrLen temp = RTSPProtocol::GetMethodString(*theMethod);;
+		sPublicHeaderStr += std::string(temp.Ptr, temp.Len);
 	}
-	sPublicHeaderStr.Ptr = sPublicHeaderFormatter.GetBufPtr();
-	sPublicHeaderStr.Len = sPublicHeaderFormatter.GetBytesWritten() - 2; //trunc the last ", "
 }
 
 

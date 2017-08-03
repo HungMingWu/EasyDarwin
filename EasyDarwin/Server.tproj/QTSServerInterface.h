@@ -38,6 +38,7 @@
 #ifndef __QTSSERVERINTERFACE_H__
 #define __QTSSERVERINTERFACE_H__
 
+#include <boost/utility/string_view.hpp>
 #include "QTSS.h"
 #include "QTSSDictionary.h"
 #include "QTSServerPrefs.h"
@@ -255,7 +256,7 @@ public:
 
 	//
 	// PUBLIC HEADER
-	static StrPtrLen*   GetPublicHeader() { return &sPublicHeaderStr; }
+	static boost::string_view   GetPublicHeader() { return sPublicHeaderStr; }
 
 	//
 	// KILL ALL
@@ -347,8 +348,7 @@ protected:
 	int64_t						fStartupTime_UnixMilli{0};
 	int32_t						fGMTOffset{0};
 
-	static ResizeableStringFormatter    sPublicHeaderFormatter;
-	static StrPtrLen                    sPublicHeaderStr;
+	static std::string                  sPublicHeaderStr;
 
 	//
 	// MODULE DATA

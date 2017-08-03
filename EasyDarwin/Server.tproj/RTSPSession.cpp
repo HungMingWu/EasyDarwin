@@ -1690,9 +1690,7 @@ void RTSPSession::SetupRequest()
 			return;
 		}
 
-		std::string temp(QTSServerInterface::GetPublicHeader()->Ptr,
-			QTSServerInterface::GetPublicHeader()->Len);
-		fRequest->AppendHeader(qtssPublicHeader, temp);
+		fRequest->AppendHeader(qtssPublicHeader, QTSServerInterface::GetPublicHeader());
 
 		// DJM PROTOTYPE
 		boost::string_view require = fRequest->GetHeaderDict().Get(qtssRequireHeader);

@@ -62,8 +62,7 @@ StrPtrLen               QTSServerInterface::sServerBuildDateStr(__DATE__ ", " __
 char                    QTSServerInterface::sServerHeader[kMaxServerHeaderLen];
 StrPtrLen               QTSServerInterface::sServerHeaderPtr(sServerHeader, kMaxServerHeaderLen);
 
-ResizeableStringFormatter       QTSServerInterface::sPublicHeaderFormatter(nullptr, 0);
-StrPtrLen                       QTSServerInterface::sPublicHeaderStr;
+std::string             QTSServerInterface::sPublicHeaderStr;
 
 QTSSModule**            QTSServerInterface::sModuleArray[QTSSModule::kNumRoles];
 uint32_t                  QTSServerInterface::sNumModulesInRole[QTSSModule::kNumRoles];

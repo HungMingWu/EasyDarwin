@@ -149,7 +149,7 @@ void RTSPRequestInterface::ReInit(RTSPSessionInterface *session)
 	this->SetVal(qtssRTSPReqFullRequest, input->GetRequestBuffer()->Ptr, input->GetRequestBuffer()->Len);
 
 	// klaus(20170223):fix ffplay cant pull stream from easydarwin
-	fHeaderDict.SetSession("");
+	fHeaderDict.Set(qtssSessionHeader, "");
 }
 
 //CONSTRUCTOR / DESTRUCTOR: very simple stuff
@@ -177,7 +177,6 @@ RTSPRequestInterface::RTSPRequestInterface(RTSPSessionInterface *session)
 	fPrebufferAmt(-1),
 	fWindowSize(0),
 	fMovieFolderPtr(&fMovieFolderPath[0]),
-	fHeaderDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTSPHeaderDictIndex)),
 	fAllowed(true),
 	fHasUser(false),
 	fAuthHandled(false),
@@ -208,7 +207,6 @@ RTSPRequestInterface::RTSPRequestInterface(RTSPSessionInterface *session)
 	fStreamRef = this;
 	RTSPRequestStream* input = session->GetInputStream();
 	this->SetVal(qtssRTSPReqFullRequest, input->GetRequestBuffer()->Ptr, input->GetRequestBuffer()->Len);
-	this->SetVal(qtssRTSPReqMethod, &fMethod, sizeof(fMethod));
 	this->SetVal(qtssRTSPReqStatusCode, &fStatus, sizeof(fStatus));
 	this->SetVal(qtssRTSPReqRespKeepAlive, &fResponseKeepAlive, sizeof(fResponseKeepAlive));
 	this->SetVal(qtssRTSPReqStreamRef, &fStreamRef, sizeof(fStreamRef));
@@ -298,7 +296,7 @@ void RTSPRequestInterface::AppendSessionHeaderWithTimeout(StrPtrLen* inSessionID
 {
 
 	// Append a session header if there wasn't one already
-	if (GetHeaderDict().GetSession().empty())
+	if (GetHeaderDict().Get(qtssSessionHeader).empty())
 	{
 		if (!fStandardHeadersWritten)
 			this->WriteStandardHeaders();
@@ -565,12 +563,9 @@ void RTSPRequestInterface::WriteStandardHeaders()
 		{
 			fOutputStream->Put((char *)sPremadeNoHeader.c_str());
 		}
-		StrPtrLen* cSeq = fHeaderDictionary.GetValue(qtssCSeqHeader);
-		Assert(cSeq != nullptr);
-		if (cSeq->Len > 1)
-			fOutputStream->Put(*cSeq);
-		else if (cSeq->Len == 1)
-			fOutputStream->PutChar(*cSeq->Ptr);
+		boost::string_view cSeq = fHeaderDict.Get(qtssCSeqHeader);
+		if (!cSeq.empty())
+			fOutputStream->Put((char *)cSeq.data(), cSeq.length());
 		fOutputStream->PutEOL();
 	}
 	else
@@ -589,13 +584,11 @@ void RTSPRequestInterface::WriteStandardHeaders()
 			fOutputStream->Put(QTSServerInterface::GetServerHeader());
 			fOutputStream->PutEOL();
 		}
-		StrPtrLen *ptr = fHeaderDictionary.GetValue(qtssCSeqHeader);
-		std::string ptrV(ptr->Ptr, ptr->Len);
-		AppendHeader(qtssCSeqHeader, ptrV);
+		AppendHeader(qtssCSeqHeader, fHeaderDict.Get(qtssCSeqHeader));
 	}
 
 	//append sessionID header
-	boost::string_view incomingID = fHeaderDict.GetSession();
+	boost::string_view incomingID = fHeaderDict.Get(qtssSessionHeader);
 	if (!incomingID.empty())
 		AppendHeader(qtssSessionHeader, incomingID);
 

@@ -1004,9 +1004,8 @@ bool QTSSModuleUtils::FindStringInAttributeList(QTSS_Object inObject, QTSS_Attri
 
 bool QTSSModuleUtils::HavePlayerProfile(QTSS_PrefsObject inPrefObjectToCheck, QTSS_StandardRTSP_Params* inParams, uint32_t feature)
 {
-    StrPtrLenDel userAgentStr;    	
-    (void)((QTSSDictionary*)inParams->inClientSession)->GetValueAsString(qtssCliSesFirstUserAgent, 0, &userAgentStr.Ptr);
-    userAgentStr.Set(userAgentStr.Ptr);
+    std::string userAgentStrV(((RTPSession*)inParams->inClientSession)->GetUserAgent());
+    StrPtrLen userAgentStr((char *)userAgentStrV.c_str());
     
     switch (feature)
     {

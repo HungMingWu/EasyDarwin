@@ -139,7 +139,7 @@ QTSS_Error RTSPRequest::Parse()
 {
 	StringParser parser(this->GetValue(qtssRTSPReqFullRequest));
 	Assert(this->GetValue(qtssRTSPReqFullRequest)->Ptr != nullptr);
-
+	fHeaderDict.clear();
 	boost::string_view requestHeader(this->GetValue(qtssRTSPReqFullRequest)->Ptr, this->GetValue(qtssRTSPReqFullRequest)->Len);
 	typedef boost::string_view::const_iterator It;
 	RTSPHeaderGrammar<It> rtspGrammar;
@@ -243,7 +243,7 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 			qi::no_case["RTSP://"] >> *(qi::char_ - "/") >> (qi::eoi | *(qi::char_)),  
 			qi::ascii::blank, theHost, uriPath);
 
-		fHeaderDict.SetHost(theHost);
+		fHeaderDict.Set(qtssHostHeader, theHost);
 		if (!uriPath.empty())
 			// qtssRTSPReqURI = /live.sdp
 			uri = uriPath;
@@ -394,7 +394,7 @@ QTSS_Error RTSPRequest::ParseHeaders(StringParser& parser)
 		{
 			Assert(theHeader < qtssNumHeaders);
 			theHeaderVal.TrimWhitespace();
-			fHeaderDictionary.SetVal(theHeader, &theHeaderVal);
+			fHeaderDict.Set(theHeader, std::string(theHeaderVal.Ptr, theHeaderVal.Len));
 		}
 		if (!isStreamOK)
 			return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgNoEOLAfterHeader);
@@ -422,12 +422,10 @@ QTSS_Error RTSPRequest::ParseHeaders(StringParser& parser)
 
 	// Tell the session what the request body length is for this request
 	// so that it can prevent people from reading past the end of the request.
-	StrPtrLen* theContentLengthBody = fHeaderDictionary.GetValue(qtssContentLengthHeader);
-	if (theContentLengthBody->Len > 0)
+	std::string theContentLengthBody(fHeaderDict.Get(qtssContentLengthHeader));
+	if (!theContentLengthBody.empty())
 	{
-		StringParser theHeaderParser(fHeaderDictionary.GetValue(qtssContentLengthHeader));
-		theHeaderParser.ConsumeWhitespace();
-		this->GetSession()->SetRequestBodyLength(theHeaderParser.ConsumeInteger(nullptr));
+		this->GetSession()->SetRequestBodyLength(std::stoi(theContentLengthBody));
 	}
 
 	isStreamOK = parser.ExpectEOL();
@@ -441,7 +439,7 @@ void RTSPRequest::ParseSessionHeader(boost::string_view header)
 	auto iter = header.cbegin(), end = header.cend();
 	bool r = qi::phrase_parse(iter, end, *(qi::digit), qi::lit(";") | qi::ascii::blank, theSessionID);
 	if (r && iter == end) {
-		fHeaderDict.SetSession(theSessionID);
+		fHeaderDict.Set(qtssSessionHeader, theSessionID);
 	}
 }
 
@@ -587,7 +585,9 @@ void  RTSPRequest::ParseRangeHeader(StrPtrLen &header)
 
 void  RTSPRequest::ParseRetransmitHeader(StrPtrLen &header)
 {
-	StringParser theRetransmitParser(fHeaderDictionary.GetValue(qtssXRetransmitHeader));
+	boost::string_view t1(fHeaderDict.Get(qtssXRetransmitHeader));
+	StrPtrLen t2((char *)t1.data(), t1.length());
+	StringParser theRetransmitParser(&t2);
 	StrPtrLen theProtName;
 	bool foundRetransmitProt = false;
 
@@ -791,11 +791,11 @@ void RTSPRequest::ParseClientPortSubHeader(StrPtrLen* inClientPortSubHeader)
 	if (fClientPortB != fClientPortA + 1) // an error in the port values
 	{
 		// The following to setup and log the error as a message level 2.
-		StrPtrLen *userAgentPtr = fHeaderDictionary.GetValue(qtssUserAgentHeader);
+		boost::string_view userAgent = fHeaderDict.Get(qtssUserAgentHeader);
 		ResizeableStringFormatter errorPortMessage;
 		errorPortMessage.Put(sErrorMessage);
-		if (userAgentPtr != nullptr)
-			errorPortMessage.Put(*userAgentPtr);
+		if (!userAgent.empty())
+			errorPortMessage.Put((char *)userAgent.data(), userAgent.length());
 		errorPortMessage.PutSpace();
 		errorPortMessage.Put(*inClientPortSubHeader);
 		errorPortMessage.PutTerminator();
@@ -964,13 +964,13 @@ QTSS_Error RTSPRequest::ParseDigestHeader(StringParser *inParsedAuthLinePtr)
 QTSS_Error RTSPRequest::ParseAuthHeader(void)
 {
 	QTSS_Error  theErr = QTSS_NoErr;
-	QTSSDictionary *theRTSPHeaders = this->GetHeaderDictionary();
-	StrPtrLen   *authLine = theRTSPHeaders->GetValue(qtssAuthorizationHeader);
-	if ((authLine == nullptr) || (0 == authLine->Len))
+	boost::string_view authLine = GetHeaderDict().Get(qtssAuthorizationHeader);
+	if (authLine.empty())
 		return theErr;
 
 	StrPtrLen   authWord("");
-	StringParser parsedAuthLine(authLine);
+	StrPtrLen authLineV((char *)authLine.data(), authLine.length());
+	StringParser parsedAuthLine(&authLineV);
 	parsedAuthLine.ConsumeUntilWhitespace(&authWord);
 
 	if (authWord.EqualIgnoreCase(sAuthBasicStr.Ptr, sAuthBasicStr.Len))

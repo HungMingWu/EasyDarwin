@@ -260,7 +260,6 @@ private:
 	enum
 	{
 		kStreamBufSize = 4,
-		kUserAgentBufSize = 256,
 		kFullRequestURLBufferSize = 256,
 
 		kIPAddrStrBufSize = 20,
@@ -276,7 +275,6 @@ private:
 
 	// theses are dictionary items picked up by the RTSPSession
 	// but we need to store copies of them for logging purposes.
-	char        fUserAgentBuffer[kUserAgentBufSize];
 
 	char        fRTSPSessRemoteAddrStr[kIPAddrStrBufSize];
 	char        fRTSPSessLocalDNS[kLocalDNSBufSize];

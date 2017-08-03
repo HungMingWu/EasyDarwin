@@ -616,10 +616,9 @@ void RTPStream::SendSetupResponse(RTSPRequestInterface* inRequest)
 
 	//
 	// Append the retransmit header if the client sent it
-	StrPtrLen* theRetrHdr = inRequest->GetHeaderDictionary()->GetValue(qtssXRetransmitHeader);
-	std::string theRetrHdrV(theRetrHdr->Ptr, theRetrHdr->Len);
-	if ((theRetrHdr->Len > 0) && (fTransportType == qtssRTPTransportTypeReliableUDP))
-		inRequest->AppendHeader(qtssXRetransmitHeader, theRetrHdrV);
+	boost::string_view theRetrHdr = inRequest->GetHeaderDict().Get(qtssXRetransmitHeader);
+	if (!theRetrHdr.empty() && (fTransportType == qtssRTPTransportTypeReliableUDP))
+		inRequest->AppendHeader(qtssXRetransmitHeader, theRetrHdr);
 
 	// Append the dynamic rate header if the client sent it
 	int32_t theRequestedRate = inRequest->GetDynamicRateState();

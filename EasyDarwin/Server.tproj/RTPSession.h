@@ -63,6 +63,7 @@ class RTPSession : public RTPSessionInterface
 	std::string queryString;
 	//requestes host name for s session. Just the "domain.com" portion
 	std::string hostName;
+	std::string userAgent;
 public:
 
 	RTPSession();
@@ -124,7 +125,7 @@ public:
 
 	int32_t          GetQualityLevel();
 	void            SetQualityLevel(int32_t level);
-	void            SeQueryString(boost::string_view query) {
+	void            SetQueryString(boost::string_view query) {
 		queryString = std::string(queryString);
 	}
 	boost::string_view GetQueryString() const { return queryString; }
@@ -140,6 +141,10 @@ public:
 		hostName = std::string(url);
 	}
 	boost::string_view GetHost() const { return hostName; }
+	void            SetUserAgent(boost::string_view useragent) {
+		userAgent = std::string(useragent);
+	}
+	boost::string_view GetUserAgent() const { return userAgent; }
 private:
 
 	//where timeouts, deletion conditions get processed

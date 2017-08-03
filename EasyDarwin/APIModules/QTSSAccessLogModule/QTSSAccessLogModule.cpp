@@ -494,7 +494,8 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	auto clientBytesRecv = (uint32_t)((*rtpBytesSent * (100.0 - *packetLossPercent)) / 100.0);
 
 	tempLogStr.Ptr[0] = 0; tempLogStr.Len = eUserAgentSize;
-	dict->GetValue( qtssCliSesFirstUserAgent, 0, tempLogStr.Ptr, &tempLogStr.Len);
+	std::string userAgentV(((RTPSession *)inClientSession)->GetUserAgent());
+	tempLogStr.Set((char *)userAgentV.c_str());
 
 	char userAgentBuf[eUserAgentSize] = { 0 };
 	StrPtrLen userAgent(userAgentBuf, eUserAgentSize - 1);

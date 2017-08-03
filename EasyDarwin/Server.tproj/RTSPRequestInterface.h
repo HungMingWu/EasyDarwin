@@ -52,22 +52,15 @@
 class HeaderDict {
 	std::map<int, std::string> infos;
 public:
-	void SetSession(const std::string &session) {
-		infos[qtssSessionHeader] = session;
+	void Set(int type, const std::string &session) {
+		infos[type] = session;
 	}
-	boost::string_view GetSession() const { 
-		auto it = infos.find(qtssSessionHeader);
+	boost::string_view Get(int type) const { 
+		auto it = infos.find(type);
 		if (it == end(infos)) return {};
 		return it->second;
 	}
-	void SetHost(const std::string &session) {
-		infos[qtssHostHeader] = session;
-	}
-	boost::string_view GetHost() const {
-		auto it = infos.find(qtssHostHeader);
-		if (it == end(infos)) return {};
-		return it->second;
-	}
+	void clear() { infos.clear(); }
 };
 class RTSPRequestInterface : public QTSSDictionary
 {
@@ -190,7 +183,6 @@ public:
 	}
 
 	RTSPSessionInterface*       GetSession() { return fSession; }
-	QTSSDictionary*             GetHeaderDictionary() { return &fHeaderDictionary; }
 	const HeaderDict&           GetHeaderDict() const { return fHeaderDict; }
 
 	bool                      GetAllowed() { return fAllowed; }
@@ -290,7 +282,6 @@ protected:
 	char                        fMovieFolderPath[kMovieFolderBufSizeInBytes];
 	char*                       fMovieFolderPtr;
 
-	QTSSDictionary              fHeaderDictionary;
 	HeaderDict                  fHeaderDict;
 
 	bool                      fAllowed;

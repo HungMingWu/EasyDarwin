@@ -681,34 +681,28 @@ QTSS_Error ProcessRTSPRequest(QTSS_StandardRTSP_Params* inParams)
 {
 	OSMutexLocker locker(sSessionMap->GetMutex()); //operating on sOutputAttr
 
-	QTSS_RTSPMethod* theMethod = nullptr;
 	//printf("QTSSReflectorModule:ProcessRTSPRequest inClientSession=%"   _U32BITARG_   "\n", (uint32_t) inParams->inClientSession);
 	uint32_t theLen = 0;
-	if ((((QTSSDictionary*)inParams->inRTSPRequest)->GetValuePtr(qtssRTSPReqMethod, 0,
-		(void**)&theMethod, &theLen) != QTSS_NoErr) || (theLen != sizeof(QTSS_RTSPMethod)))
-	{
-		Assert(0);
-		return QTSS_RequestFailed;
-	}
+	QTSS_RTSPMethod theMethod = ((RTSPRequest*)inParams->inRTSPRequest)->GetMethod();
 
-	if (*theMethod == qtssAnnounceMethod)
+	if (theMethod == qtssAnnounceMethod)
 		return DoAnnounce(inParams);
-	if (*theMethod == qtssDescribeMethod)
+	if (theMethod == qtssDescribeMethod)
 		return DoDescribe(inParams);
-	if (*theMethod == qtssSetupMethod)
+	if (theMethod == qtssSetupMethod)
 		return DoSetup(inParams);
 
 	RTPSessionOutput** theOutput = nullptr;
 	QTSS_Error theErr = ((QTSSDictionary*)inParams->inClientSession)->GetValuePtr(sOutputAttr, 0, (void**)&theOutput, &theLen);
 	if ((theErr != QTSS_NoErr) || (theLen != sizeof(RTPSessionOutput*))) // a broadcaster push session
 	{
-		if (*theMethod == qtssPlayMethod || *theMethod == qtssRecordMethod)
+		if (theMethod == qtssPlayMethod || theMethod == qtssRecordMethod)
 			return DoPlay(inParams, nullptr);
 		else
 			return QTSS_RequestFailed;
 	}
 
-	switch (*theMethod)
+	switch (theMethod)
 	{
 	case qtssPlayMethod:
 		return DoPlay(inParams, (*theOutput)->GetReflectorSession());
@@ -855,8 +849,10 @@ std::string DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ch
 			char tempBuff[256] = ""; tempBuff[255] = 0;
 			char *nameStr = tempBuff;
 			uint32_t buffLen = sizeof(tempBuff) - 1;
-			QTSSDictionary *dict = (QTSSDictionary *)inParams->inClientSession;
-			dict->GetValue(qtssCliSesFirstUserAgent, 0, nameStr, &buffLen);
+			RTPSession *dict = (RTPSession *)inParams->inClientSession;
+			std::string userAgent(dict->GetUserAgent());
+			nameStr = (char *)userAgent.c_str();
+			buffLen = userAgent.length();
 			for (uint32_t c = 0; c < buffLen; c++)
 			{
 				if (StringParser::sEOLWhitespaceMask[(uint8_t)nameStr[c]])

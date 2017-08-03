@@ -120,7 +120,6 @@ RTPSessionInterface::RTPSessionInterface()
 	// Setup all dictionary attribute values
 
 	// Make sure the dictionary knows about our preallocated memory for the RTP stream array
-	this->SetEmptyVal(qtssCliSesFirstUserAgent, &fUserAgentBuffer[0], kUserAgentBufSize);
 	this->SetEmptyVal(qtssCliSesStreamObjects, &fStreamBuffer[0], kStreamBufSize);
 
 	this->SetVal(qtssCliSesCreateTimeInMsec, &fSessionCreateTime, sizeof(fSessionCreateTime));

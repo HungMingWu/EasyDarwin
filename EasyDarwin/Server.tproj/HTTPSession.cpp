@@ -519,7 +519,6 @@ void HTTPSession::CleanupRequest()
 		delete fRequest;
 		fRequest = nullptr;
 		fRoleParams.rtspRequestParams.inRTSPRequest = nullptr;
-		fRoleParams.rtspRequestParams.inRTSPHeaders = nullptr;
 	}
 
 	fSessionMutex.Unlock();

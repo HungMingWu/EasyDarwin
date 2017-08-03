@@ -378,7 +378,6 @@ int64_t RTSPSession::Run()
 				fRequest->ReInit(this);
 
 				fRoleParams.rtspRequestParams.inRTSPRequest = fRequest;
-				fRoleParams.rtspRequestParams.inRTSPHeaders = fRequest->GetHeaderDictionary();
 
 				// We have an RTSP request and are about to begin processing. We need to
 				// make sure that anyone sending interleaved data on this session won't
@@ -1682,8 +1681,8 @@ void RTSPSession::SetupRequest()
 	// send a standard OPTIONS response, and be done.
 	if (fRequest->GetMethod() == qtssOptionsMethod)// OPTIONSÇëÇó
 	{
-		StrPtrLen* cSeqPtr = fRequest->GetHeaderDictionary()->GetValue(qtssCSeqHeader);
-		if (cSeqPtr == nullptr || cSeqPtr->Len == 0)
+		boost::string_view cSeq = fRequest->GetHeaderDict().Get(qtssCSeqHeader);
+		if (cSeq.empty())
 		{
 			statusCode = qtssClientBadRequest;
 			fRequest->SetValue(qtssRTSPReqStatusCode, 0, &statusCode, sizeof(statusCode));
@@ -1696,8 +1695,9 @@ void RTSPSession::SetupRequest()
 		fRequest->AppendHeader(qtssPublicHeader, temp);
 
 		// DJM PROTOTYPE
-		StrPtrLen* requirePtr = fRequest->GetHeaderDictionary()->GetValue(qtssRequireHeader);
-		if (requirePtr && requirePtr->EqualIgnoreCase(RTSPProtocol::GetHeaderString(qtssXRandomDataSizeHeader)))
+		boost::string_view require = fRequest->GetHeaderDict().Get(qtssRequireHeader);
+		StrPtrLen temp1((char *)require.data(), require.length());
+		if (!require.empty() && temp1.EqualIgnoreCase(RTSPProtocol::GetHeaderString(qtssXRandomDataSizeHeader)))
 		{
 			body = (char*)RTSPSessionInterface::sOptionsRequestBody;
 			bodySizeBytes = fRequest->GetRandomDataSize();
@@ -1721,8 +1721,8 @@ void RTSPSession::SetupRequest()
 
 
 		// Check that it has the CSeq header
-		StrPtrLen* cSeqPtr = fRequest->GetHeaderDictionary()->GetValue(qtssCSeqHeader);
-		if (cSeqPtr == nullptr || cSeqPtr->Len == 0) // keep session
+		boost::string_view cSeq = fRequest->GetHeaderDict().Get(qtssCSeqHeader);
+		if (cSeq.empty()) // keep session
 		{
 			statusCode = qtssClientBadRequest;
 			fRequest->SetValue(qtssRTSPReqStatusCode, 0, &statusCode, sizeof(statusCode));
@@ -1756,7 +1756,7 @@ void RTSPSession::SetupRequest()
 	// and may screw up modules if we let them see this request.
 	if (fRequest->GetMethod() == qtssDescribeMethod)
 	{
-		if (!fRequest->GetHeaderDict().GetSession().empty())
+		if (!fRequest->GetHeaderDict().Get(qtssSessionHeader).empty())
 		{
 			(void)QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientHeaderFieldNotValid, qtssMsgNoSesIDOnDescribe);
 			return;
@@ -1832,7 +1832,6 @@ void RTSPSession::CleanupRequest()
 		//delete fRequest;
 		//fRequest = nullptr;
 		fRoleParams.rtspRequestParams.inRTSPRequest = nullptr;
-		fRoleParams.rtspRequestParams.inRTSPHeaders = nullptr;
 	}
 
 	fSessionMutex.Unlock();
@@ -1849,7 +1848,7 @@ QTSS_Error  RTSPSession::FindRTPSession(OSRefTable* inRefTable)
 	// and it looks for this session ID in two places. First, the RTSP session ID header
 	// in the RTSP request, and if there isn't one there, in the RTSP session object itself.
 
-	boost::string_view theSessionID = fRequest->GetHeaderDict().GetSession();
+	boost::string_view theSessionID = fRequest->GetHeaderDict().Get(qtssSessionHeader);
 	if (!theSessionID.empty())
 	{
 		StrPtrLen theSessionIDV((char *)theSessionID.data(), theSessionID.length());
@@ -1933,16 +1932,14 @@ void RTSPSession::SetupClientSessionAttrs()
 	fRTPSession->SetAbsoluteURL(t);
 
 	// get and pass request host name
-	fRTPSession->SetHost(fRequest->GetHeaderDict().GetHost());
+	fRTPSession->SetHost(fRequest->GetHeaderDict().Get(qtssHostHeader));
 
 	// get and pass user agent header
-	theValue = fRequest->GetHeaderDictionary()->GetValue(qtssUserAgentHeader);
-	Assert(theValue != nullptr);
-	(void)fRTPSession->SetValue(qtssCliSesFirstUserAgent, 0, theValue->Ptr, theValue->Len, QTSSDictionary::kDontObeyReadOnly);
+	fRTPSession->SetUserAgent(fRequest->GetHeaderDict().Get(qtssUserAgentHeader));
 
 	// get and pass CGI params
 	if (fRequest->GetMethod() == qtssDescribeMethod)
-		fRTPSession->SeQueryString(fRequest->GetQueryString());
+		fRTPSession->SetQueryString(fRequest->GetQueryString());
 
 	// store RTSP session info in the RTPSession.   
 	StrPtrLen tempStr;

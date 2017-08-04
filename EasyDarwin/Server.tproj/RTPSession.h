@@ -83,7 +83,7 @@ public:
 	//This puts this session into the session map (called by the server! not the module!)
 	//If this function fails (it can return QTSS_DupName), it means that there is already
 	//a session with this session ID in the map.
-	QTSS_Error  Activate(const StrPtrLen& inSessionID);
+	QTSS_Error  Activate(boost::string_view inSessionID);
 
 	// The way this object is implemented currently, only one module can send the
 	// packets for a session.

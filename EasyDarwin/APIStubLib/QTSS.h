@@ -470,7 +470,6 @@ enum
 {
     //QTSS_ClientSessionObject parameters. All of these are preemptive safe
     
-    qtssCliSesStreamObjects         = 0,    //read      //QTSS_RTPStreamObject//Iterated attribute. All the QTSS_RTPStreamRefs belonging to this session.
     qtssCliSesCreateTimeInMsec      = 1,    //read      //QTSS_TimeVal  //Time in milliseconds the session was created.
     qtssCliSesFirstPlayTimeInMsec   = 2,    //read      //QTSS_TimeVal  //Time in milliseconds the first QTSS_Play call was issued.
     qtssCliSesPlayTimeInMsec        = 3,    //read      //QTSS_TimeVal  //Time in milliseconds the most recent play was issued.
@@ -502,7 +501,7 @@ enum
     qtssCliSesPacketLossPercent     = 27,   //read      //Float32   //Current percent loss as a fraction. .5 = 50%. This is not an average.
     qtssCliSesTimeConnectedInMsec   = 28,   //read      //int64_t    //Time in milliseconds that this client has been connected.
     qtssCliSesCounterID             = 29,   //read      //uint32_t    //A unique, non-repeating ID for this session.
-    qtssCliSesRTSPSessionID         = 30,   //read      //char array//The RTSP session ID that refers to this client session
+    
     qtssCliSesFramesSkipped         = 31,   //r/w       //uint32_t    //Modules can set this to be the number of frames skipped for this client
     qtssCliSesTimeoutMsec            = 32,    //r/w        //uint32_t    // client session timeout in milliseconds refreshed by RefreshTimeout API call or any rtcp or rtp packet on the session.
     qtssCliSesOverBufferEnabled     = 33,   //read      //bool    // client overbuffers using dynamic rate streams
@@ -584,7 +583,7 @@ enum
     qtssRTSPReqFilePath             = 2,    //r/w        //char array        //Not pre-emptive safe!! //URI for this request, converted to a local file system path.
     qtssRTSPReqFilePathTrunc        = 4,    //read      //char array        //Not pre-emptive safe!! //Same as qtssRTSPReqFilePath, without the last element of the path
     qtssRTSPReqFileName             = 5,    //read      //char array        //Not pre-emptive safe!! //Everything after the last path separator in the file system path
-    qtssRTSPReqFileDigit            = 6,    //read      //char array        //Not pre-emptive safe!! //If the URI ends with one or more digits, this points to those.
+
     qtssRTSPReqAbsoluteURL          = 7,    //read      //char array        //The full URL, starting from "rtsp://"
     qtssRTSPReqTruncAbsoluteURL     = 8,    //read      //char array        //Absolute URL without last element of path
 
@@ -610,9 +609,7 @@ enum
     qtssRTSPReqLateTolerance        = 27,   //read      //Float32           // Value of the late-tolerance field of the x-RTP-Options header, or -1 if not present. 
 
     qtssRTSPReqTransportType        = 28,   //read      //QTSS_RTPTransportType // What kind of transport?  
-
-    qtssRTSPReqSetUpServerPort      = 30,   //r/w       //UInt16            // the ServerPort to respond to a client SETUP request with.
-    
+     
     qtssRTSPReqAction               = 31,   //r/w       //QTSS_ActionFlags  //Set by a module in the QTSS_RTSPSetAction_Role - for now, the server will set it as the role hasn't been added yet
     qtssRTSPReqUserProfile          = 32,   //r/w       //QTSS_UserProfileObject    //Object's username is filled in by the server and its password and group memberships filled in by the authentication module.       
     qtssRTSPReqPrebufferMaxTime     = 33,   //read      //Float32           //The maxtime field of the x-Prebuffer RTSP header

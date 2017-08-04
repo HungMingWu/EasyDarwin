@@ -1,4 +1,4 @@
-include_directories(../../CommonUtilitiesLib)
+include_directories(../../CommonUtilitiesLib ../../EasyProtocol/Include)
 add_library (RTCPUtilitiesLib 
              RTCPAckPacket.cpp RTCPAckPacket.h
 	     RTCPPacket.cpp RTCPPacket.h

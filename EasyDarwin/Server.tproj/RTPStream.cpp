@@ -118,18 +118,18 @@ QTSSAttrInfoDict::AttrInfo  RTPStream::sAttributes[] =
 
 };
 
-StrPtrLen RTPStream::sChannelNums[] =
+boost::string_view RTPStream::sChannelNums[] =
 {
-	StrPtrLen("0"),
-	StrPtrLen("1"),
-	StrPtrLen("2"),
-	StrPtrLen("3"),
-	StrPtrLen("4"),
-	StrPtrLen("5"),
-	StrPtrLen("6"),
-	StrPtrLen("7"),
-	StrPtrLen("8"),
-	StrPtrLen("9")
+	"0",
+	"1",
+	"2",
+	"3",
+	"4",
+	"5",
+	"6",
+	"7",
+	"8",
+	"9"
 };
 
 char *RTPStream::noType = "no-type";
@@ -471,7 +471,7 @@ QTSS_Error RTPStream::Setup(RTSPRequestInterface* request, QTSS_AddStreamFlags i
 		fSession->GetOverbufferWindow()->SetWindowSize(UINT32_MAX);
 
 		// If it is, get 2 channel numbers from the RTSP session.
-		fRTPChannel = request->GetSession()->GetTwoChannelNumbers(fSession->GetValue(qtssCliSesRTSPSessionID));
+		fRTPChannel = request->GetSession()->GetTwoChannelNumbers(fSession->GetSessionID());
 		fRTCPChannel = fRTPChannel + 1;
 
 		// If we are interleaving, this is all we need to do to setup.
@@ -609,10 +609,8 @@ void RTPStream::SendSetupResponse(RTSPRequestInterface* inRequest)
 
 	//
 	// Append the x-RTP-Options header if there was a late-tolerance field
-	StrPtrLen *ptr = inRequest->GetLateToleranceStr();
-	std::string ptrV(ptr->Ptr, ptr->Len);
-	if (ptr->Len > 0)
-		inRequest->AppendHeader(qtssXTransportOptionsHeader, ptrV);
+	if (!inRequest->GetLateToleranceStr().empty())
+		inRequest->AppendHeader(qtssXTransportOptionsHeader, inRequest->GetLateToleranceStr());
 
 	//
 	// Append the retransmit header if the client sent it
@@ -641,9 +639,9 @@ void RTPStream::SendSetupResponse(RTSPRequestInterface* inRequest)
 void RTPStream::AppendTransport(RTSPRequestInterface* request)
 {
 
-	StrPtrLen* ssrcPtr = nullptr;
+	boost::string_view ssrcPtr;
 	if (fEnableSSRC)
-		ssrcPtr = &fSsrcStringPtr;
+		ssrcPtr = boost::string_view(fSsrcStringPtr.Ptr, fSsrcStringPtr.Len);
 
 	// We are either going to append the RTP / RTCP port numbers (UDP),
 	// or the channel numbers (TCP, interleaved)
@@ -654,49 +652,40 @@ void RTPStream::AppendTransport(RTSPRequestInterface* request)
 		// to the right address right away. The sure-firest way to get the client
 		// to do this is to put the src address in the transport. So now we do that always.
 		//
-		char srcIPAddrBuf[20];
-		StrPtrLen theSrcIPAddress(srcIPAddrBuf, 20);
-		QTSServerInterface::GetServer()->GetPrefs()->GetTransportSrcAddr(&theSrcIPAddress);
-		if (theSrcIPAddress.Len == 0)
-			theSrcIPAddress = *fSockets->GetSocketA()->GetLocalAddrStr();
+		std::string theSrcIPAddress = QTSServerInterface::GetServer()->GetPrefs()->GetTransportSrcAddr();
+		if (theSrcIPAddress.empty()) {
+			StrPtrLen *p = fSockets->GetSocketA()->GetLocalAddrStr();
+			theSrcIPAddress = std::string(p->Ptr, p->Len);
+		}
 
 
 		if (request->IsPushRequest())
 		{
-			char rtpPortStr[10];
-			char rtcpPortStr[10];
-			sprintf(rtpPortStr, "%u", request->GetSetUpServerPort());
-			sprintf(rtcpPortStr, "%u", request->GetSetUpServerPort() + 1);
-			//printf(" RTPStream::AppendTransport rtpPort=%u rtcpPort=%u \n",request->GetSetUpServerPort(),request->GetSetUpServerPort()+1);
-			StrPtrLen rtpSPL(rtpPortStr);
-			StrPtrLen rtcpSPL(rtcpPortStr);
-			// Append UDP socket port numbers.
-			request->AppendTransportHeader(&rtpSPL, &rtcpSPL, nullptr, nullptr, &theSrcIPAddress, ssrcPtr);
+			std::string rtpPort = std::to_string(request->GetSetUpServerPort());
+			std::string rtcpPort = std::to_string(request->GetSetUpServerPort() + 1);
+			request->AppendTransportHeader(rtpPort, rtcpPort, {}, {}, theSrcIPAddress, ssrcPtr);
 		}
 		else
 		{
 			// Append UDP socket port numbers.
 			UDPSocket* theRTPSocket = fSockets->GetSocketA();
 			UDPSocket* theRTCPSocket = fSockets->GetSocketB();
-			request->AppendTransportHeader(theRTPSocket->GetLocalPortStr(), theRTCPSocket->GetLocalPortStr(), nullptr, nullptr, &theSrcIPAddress, ssrcPtr);
+			StrPtrLen *p = theRTPSocket->GetLocalPortStr();
+			StrPtrLen *p1 = theRTCPSocket->GetLocalPortStr();
+			request->AppendTransportHeader(std::string(p->Ptr, p->Len),
+				std::string(p1->Ptr, p1->Len), {}, {}, theSrcIPAddress, ssrcPtr);
 		}
 	}
 	else if (fRTCPChannel < kNumPrebuiltChNums)
 		// We keep a certain number of channel number strings prebuilt, so most of the time
 		// we won't have to call sprintf
-		request->AppendTransportHeader(nullptr, nullptr, &sChannelNums[fRTPChannel], &sChannelNums[fRTCPChannel], nullptr, ssrcPtr);
+		request->AppendTransportHeader({}, {}, sChannelNums[fRTPChannel], sChannelNums[fRTCPChannel], {}, ssrcPtr);
 	else
 	{
 		// If these channel numbers fall outside prebuilt range, we will have to call sprintf.
-		char rtpChannelBuf[10];
-		char rtcpChannelBuf[10];
-		sprintf(rtpChannelBuf, "%d", fRTPChannel);
-		sprintf(rtcpChannelBuf, "%d", fRTCPChannel);
-
-		StrPtrLen rtpChannel(rtpChannelBuf);
-		StrPtrLen rtcpChannel(rtcpChannelBuf);
-
-		request->AppendTransportHeader(nullptr, nullptr, &rtpChannel, &rtcpChannel, nullptr, ssrcPtr);
+		std::string rtpChannel = std::to_string(fRTPChannel);
+		std::string rtcpChannel = std::to_string(fRTCPChannel);
+		request->AppendTransportHeader({}, {}, rtpChannel, rtcpChannel, {}, ssrcPtr);
 	}
 }
 
@@ -821,17 +810,13 @@ QTSS_Error RTPStream::ReliableRTPWrite(void* inBuffer, uint32_t inLen, const int
 	// until this is a schedulable task
 
 	// Send retransmits for all streams on this session
-	RTPStream** retransStream = nullptr;
-	uint32_t retransStreamLen = 0;
-
 	//
 	// Send retransmits if we need to
-	for (int streamIter = 0; fSession->GetValuePtr(qtssCliSesStreamObjects, streamIter, (void**)&retransStream, &retransStreamLen) == QTSS_NoErr; streamIter++)
+	for (auto retransStream : fSession->GetStreams())
 	{
 		//printf("Resending packets for stream: %d\n",(*retransStream)->fTrackID);
 		//printf("RTPStream::ReliableRTPWrite. Calling ResendDueEntries\n");
-		if (retransStream != nullptr && *retransStream != nullptr)
-			(*retransStream)->fResender.ResendDueEntries();
+		retransStream->fResender.ResendDueEntries();
 	}
 
 	if (!fSawFirstPacket)
@@ -1668,6 +1653,11 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 		(void)QTSServerInterface::GetModule(QTSSModule::kRTCPProcessRole, x)->CallDispatch(QTSS_RTCPProcess_Role, &theParams);
 
 	fSession->GetSessionMutex()->Unlock();
+}
+
+float RTPStream::GetStreamStartTimeSecs()
+{
+	return (float)((OS::Milliseconds() - this->fSession->GetSessionCreateTime()) / 1000.0);
 }
 
 char* RTPStream::GetStreamTypeStr()

@@ -1,6 +1,8 @@
 include_directories(../CommonUtilitiesLib
                     ../RTSPUtilitiesLib
-                    ../EasyDarwin/APIStubLib .)
+                    ../EasyDarwin/APIStubLib 
+					../EasyProtocol/Include
+					.)
 add_library (HTTPUtilitiesLib 
              HTTPRequest.cpp HTTPRequest.h
 			 HTTPProtocol.cpp HTTPProtocol.h

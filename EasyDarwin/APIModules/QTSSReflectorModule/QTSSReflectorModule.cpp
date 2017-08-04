@@ -207,7 +207,7 @@ static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool
 static QTSS_Error RereadPrefs();
 static QTSS_Error ProcessRTPData(QTSS_IncomingData_Params* inParams);
 static QTSS_Error ReflectorAuthorizeRTSPRequest(QTSS_StandardRTSP_Params* inParams);
-static bool InfoPortsOK(QTSS_StandardRTSP_Params* inParams, SDPSourceInfo* theInfo, StrPtrLen* inPath);
+static bool InfoPortsOK(QTSS_StandardRTSP_Params* inParams, SDPSourceInfo* theInfo, boost::string_view inPath);
 void KillCommandPathInList();
 bool KillSession(StrPtrLen *sdpPath, bool killClients);
 QTSS_Error IntervalRole();
@@ -731,21 +731,22 @@ static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool
 		return nullptr;
 
 	RTSPRequest *pReq = (RTSPRequest *)(inParams->inRTSPRequest);
-	std::string theQueryString = std::string(pReq->GetQueryString());
 
-	std::string queryTemp;
-	if (!theQueryString.empty())
-	{
-		queryTemp = EasyUtil::Urldecode(theQueryString.data());
-	}
-	QueryParamList parList(const_cast<char *>(queryTemp.c_str()));
+	std::string queryTemp = [pReq]() {
+		std::string theQueryString = std::string(pReq->GetQueryString());
+		if (!theQueryString.empty())
+			theQueryString = EasyUtil::Urldecode(theQueryString.data());
+		return theQueryString;
+	}();
 
-	uint32_t theChannelNum = 1;
-	const char* chnNum = parList.DoFindCGIValueForParam(EASY_TAG_CHANNEL);
-	if (chnNum)
-	{
-		theChannelNum = stoi(chnNum);
-	}
+	uint32_t theChannelNum = [&queryTemp]() {
+		QueryParamList parList(const_cast<char *>(queryTemp.c_str()));
+		const char* chnNum = parList.DoFindCGIValueForParam(EASY_TAG_CHANNEL);
+		if (chnNum)
+			return std::stoi(chnNum);
+		return 1;
+	}();
+
 
 	StrPtrLen theFullPath(theFileNameStr);
 
@@ -871,8 +872,7 @@ std::string DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ch
 			editedSDP += " ";
 
 			buffLen = sizeof(tempBuff) - 1;
-			dict->GetValue(qtssCliSesRTSPSessionID, 0, &tempBuff, &buffLen);
-			editedSDP += std::string(tempBuff, buffLen);
+			editedSDP += std::string(dict->GetSessionID());
 
 			editedSDP += " ";
 			snprintf(tempBuff, sizeof(tempBuff) - 1, "%" _64BITARG_ "d", (int64_t)OS::UnixTime_Secs() + 2208988800LU);
@@ -1062,7 +1062,8 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	SDPSourceInfo theSDPSourceInfo(editedSDP.c_str(), editedSDP.length());
 	std::unique_ptr<char[]> charArrayPathDeleter(theRequestBody);
 
-	if (!InfoPortsOK(inParams, &theSDPSourceInfo, &theFullPath)) // All validity checks like this check should be done before touching the file.
+	boost::string_view theFullPathV(theFullPath.Ptr, theFullPath.Len);
+	if (!InfoPortsOK(inParams, &theSDPSourceInfo, theFullPathV)) // All validity checks like this check should be done before touching the file.
 	{
 		return QTSS_NoErr; // InfoPortsOK is sending back the error.
 	}
@@ -1301,7 +1302,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	return QTSS_NoErr;
 }
 
-bool InfoPortsOK(QTSS_StandardRTSP_Params* inParams, SDPSourceInfo* theInfo, StrPtrLen* inPath)
+bool InfoPortsOK(QTSS_StandardRTSP_Params* inParams, SDPSourceInfo* theInfo, boost::string_view inPath)
 {
 	// Check the ports based on the Pref whether to enforce a static SDP port range.
 	bool isOK = true;
@@ -1322,19 +1323,10 @@ bool InfoPortsOK(QTSS_StandardRTSP_Params* inParams, SDPSourceInfo* theInfo, Str
 
 			if (theErrorMessageID != qtssIllegalAttrID)
 			{
-				char thePort[32];
-				sprintf(thePort, "%u", theInfoPort);
+				std::string thePathPort = std::string(inPath) + ":" + std::to_string(theInfoPort);
+				(void)QTSSModuleUtils::LogError(qtssWarningVerbosity, theErrorMessageID, 0, (char *)thePathPort.c_str());
 
-				char *thePath = inPath->GetAsCString();
-				std::unique_ptr<char[]> charArrayPathDeleter(thePath);
-
-				auto *thePathPort = new char[inPath->Len + 32];
-				std::unique_ptr<char[]> charArrayPathPortDeleter(thePathPort);
-
-				sprintf(thePathPort, "%s:%s", thePath, thePort);
-				(void)QTSSModuleUtils::LogError(qtssWarningVerbosity, theErrorMessageID, 0, thePathPort);
-
-				StrPtrLen thePortStr(thePort);
+				StrPtrLen thePortStr((char *)thePathPort.c_str());
 				(void)QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssUnsupportedMediaType, theErrorMessageID, &thePortStr);
 
 				return false;
@@ -1389,7 +1381,8 @@ ReflectorSession* FindOrCreateSession(StrPtrLen* inName, QTSS_StandardRTSP_Param
 			return nullptr;
 		}
 
-		if (!InfoPortsOK(inParams, theInfo, &inPath))
+		boost::string_view inPathV(inPath.Ptr, inPath.Len);
+		if (!InfoPortsOK(inParams, theInfo, inPathV))
 		{
 			delete theInfo;
 			return nullptr;
@@ -1479,7 +1472,8 @@ ReflectorSession* FindOrCreateSession(StrPtrLen* inName, QTSS_StandardRTSP_Param
 			if (theInfo == nullptr)
 				break;
 
-			if (!InfoPortsOK(inParams, theInfo, &inPath))
+			boost::string_view inPathV(inPath.Ptr, inPath.Len);
+			if (!InfoPortsOK(inParams, theInfo, inPathV))
 			{
 				delete theInfo;
 				break;
@@ -1632,17 +1626,15 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 
 	//unless there is a digit at the end of this path (representing trackID), don't
 	//even bother with the request
-	char* theDigitStr = nullptr;
-	(void)((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqFileDigit, 0, &theDigitStr);
-	std::unique_ptr<char[]> theDigitStrDeleter(theDigitStr);
-	if (theDigitStr == nullptr)
+	std::string theDigitStr = pReq->GetFileDigit();
+	if (theDigitStr.empty())
 	{
 		if (isPush)
 			DeleteReflectorPushSession(inParams, theSession, foundSession);
 		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest, sExpectedDigitFilenameErr);
 	}
 
-	uint32_t theTrackID = ::strtol(theDigitStr, nullptr, 10);
+	uint32_t theTrackID = std::stoi(theDigitStr);
 
 	if (isPush)
 	{
@@ -1664,10 +1656,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssPreconditionFailed, sDuplicateBroadcastStreamErr);
 		}
 
-		uint16_t theReceiveBroadcastStreamPort = theStreamInfo->fPort;
-		theErr = QTSS_SetValue(inParams->inRTSPRequest, qtssRTSPReqSetUpServerPort, 0, &theReceiveBroadcastStreamPort, sizeof(theReceiveBroadcastStreamPort));
-		Assert(theErr == QTSS_NoErr);
-
+		pReq->SetUpServerPort(theStreamInfo->fPort);
 
 		QTSS_RTPStreamObject newStream = nullptr;
 		theErr = AddRTPStream(theSession, inParams, &newStream);
@@ -1796,14 +1785,13 @@ bool HaveStreamBuffers(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inS
 	for (y = 0; y < inSession->GetNumStreams(); y++)
 		inSession->GetStreamByIndex(y)->GetMutex()->Lock();
 
-	QTSS_RTPStreamObject* theRef = nullptr;
-	uint32_t theLen = 0;
-	uint32_t theStreamIndex = 0;
-	for (theStreamIndex = 0;
-		((QTSSDictionary*)inParams->inClientSession)->GetValuePtr(qtssCliSesStreamObjects, theStreamIndex, (void**)&theRef, &theLen) == QTSS_NoErr;
-		theStreamIndex++)
+
+
+	auto vecMap = ((RTPSession*)inParams->inClientSession)->GetStreams();
+	for (int i = 0; i < vecMap.size(); i++)
 	{
-		ReflectorStream* theReflectorStream = inSession->GetStreamByIndex(theStreamIndex);
+		RTPStream* theRef = vecMap[i];
+		ReflectorStream* theReflectorStream = inSession->GetStreamByIndex(i);
 
 		//  if (!theReflectorStream->HasFirstRTCP())
 		//      printf("theStreamIndex =%"   _U32BITARG_   " no rtcp\n", theStreamIndex);
@@ -1830,11 +1818,9 @@ bool HaveStreamBuffers(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inS
 			break;
 		}
 
-		QTSS_Error theErr = QTSS_SetValue(*theRef, qtssRTPStrFirstSeqNumber, 0, &firstSeqNum, sizeof(firstSeqNum));
-		Assert(theErr == QTSS_NoErr);
+		theRef->SetValue(qtssRTPStrFirstSeqNumber, 0, &firstSeqNum, sizeof(firstSeqNum));
 
-		theErr = QTSS_SetValue(*theRef, qtssRTPStrFirstTimestamp, 0, &firstTimeStamp, sizeof(firstTimeStamp));
-		Assert(theErr == QTSS_NoErr);
+		theRef->SetValue(qtssRTPStrFirstTimestamp, 0, &firstTimeStamp, sizeof(firstTimeStamp));
 
 
 	}

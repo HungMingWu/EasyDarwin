@@ -33,6 +33,7 @@
 #ifndef _MD5DIGEST_H_
 #define _MD5DIGEST_H_
 
+#include <boost/utility/string_view.hpp>
 #include "StrPtrLen.h"
 #include <stdint.h>
 
@@ -66,7 +67,7 @@ void CalcRequestDigest(StrPtrLen* hA1,
 	StrPtrLen* nonceCount,
 	StrPtrLen* cNonce,
 	StrPtrLen* qop,
-	StrPtrLen* method,
+	boost::string_view method,
 	StrPtrLen* digestUri,
 	StrPtrLen* hEntity,
 	StrPtrLen* requestDigest

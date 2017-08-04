@@ -33,6 +33,7 @@
 #ifndef _QTSS_MODULE_UTILS_H_
 #define _QTSS_MODULE_UTILS_H_
 
+#include <boost/utility/string_view.hpp>
 #include <stdlib.h>
 #include <string>
 #include <vector>
@@ -74,8 +75,8 @@ class QTSSModuleUtils
         static void     LogError(   QTSS_ErrorVerbosity inVerbosity,
                                     QTSS_AttributeID inTextMessage,
                                     uint32_t inErrNumber,
-                                    char* inArgument = nullptr,
-                                    char* inArg2 = nullptr);
+                                    boost::string_view inArgument = {},
+                                    boost::string_view inArg2 = {});
                                     
         static void   LogErrorStr( QTSS_ErrorVerbosity inVerbosity, char* inMessage);
         static void   LogPrefErrorStr( QTSS_ErrorVerbosity inVerbosity, char*  preference, char* inMessage);

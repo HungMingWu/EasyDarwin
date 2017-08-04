@@ -1140,8 +1140,7 @@ void QTSServer::SetupPublicHeader()
 	for (uint32_t a = 0; this->GetValuePtr(qtssSvrHandledMethods, a, (void**)&theMethod, &theLen) == QTSS_NoErr; a++)
 	{
 		if (a) sPublicHeaderStr += ", ";
-		StrPtrLen temp = RTSPProtocol::GetMethodString(*theMethod);;
-		sPublicHeaderStr += std::string(temp.Ptr, temp.Len);
+		sPublicHeaderStr += std::string(RTSPProtocol::GetMethodString(*theMethod));
 	}
 }
 

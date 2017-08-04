@@ -1557,7 +1557,7 @@ void RTSPSession::CheckAuthentication() {
 			//StrPtrLen* userName = profile->GetValue(qtssUserName);
 			//StrPtrLen* realm = fRequest->GetAuthRealm();
 			StrPtrLen* nonce = fRequest->GetAuthNonce();
-			StrPtrLen method = RTSPProtocol::GetMethodString(fRequest->GetMethod());
+			boost::string_view method = RTSPProtocol::GetMethodString(fRequest->GetMethod());
 			StrPtrLen* digestUri = fRequest->GetAuthUri();
 			StrPtrLen* responseDigest = fRequest->GetAuthResponse();
 			//StrPtrLen hA1;
@@ -1596,14 +1596,14 @@ void RTSPSession::CheckAuthentication() {
 				}
 
 				// allocates memory for requestDigest.Ptr
-				CalcRequestDigest(userPassword, nonce, nonceCount, cNonce, &sAuthQop, &method, digestUri, &emptyStr, &requestDigest);
+				CalcRequestDigest(userPassword, nonce, nonceCount, cNonce, &sAuthQop, method, digestUri, &emptyStr, &requestDigest);
 				// If they are equal, check if nonce used by client is same as the one sent by the server
 
 			}   // For No qop
 			else if (qop == RTSPSessionInterface::kNoQop)
 			{
 				// allocates memory for requestDigest->Ptr
-				CalcRequestDigest(userPassword, nonce, &emptyStr, &emptyStr, &emptyStr, &method, digestUri, &emptyStr, &requestDigest);
+				CalcRequestDigest(userPassword, nonce, &emptyStr, &emptyStr, &emptyStr, method, digestUri, &emptyStr, &requestDigest);
 			}
 
 			// hA1 is allocated memory 

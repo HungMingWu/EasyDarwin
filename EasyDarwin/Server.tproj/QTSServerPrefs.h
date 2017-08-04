@@ -63,7 +63,7 @@ public:
 	//This is the value we advertise to clients (lower than the real one)
 	uint32_t  GetRTSPTimeoutInSecs() { return fRTSPTimeoutInSecs; }
 	uint32_t  GetRTPSessionTimeoutInSecs() { return fRTPSessionTimeoutInSecs; }
-	StrPtrLen*  GetRTSPTimeoutAsString() { return &fRTSPTimeoutString; }
+	boost::string_view  GetRTSPTimeoutAsString() { return fRTSPTimeoutString; }
 
 	//This is the real timeout
 	uint32_t  GetRTSPSessionTimeoutInSecs() { return fRTSPSessionTimeoutInSecs; }
@@ -148,7 +148,7 @@ public:
 
 	//
 	// Transport addr pref. Caller must provide a buffer big enough for an IP addr
-	void    GetTransportSrcAddr(StrPtrLen* ioBuf);
+	std::string    GetTransportSrcAddr();
 
 	// String preferences. Note that the pointers returned here is allocated
 	// memory that you must delete!
@@ -232,8 +232,7 @@ public:
 private:
 
 	uint32_t      fRTSPTimeoutInSecs;
-	char        fRTSPTimeoutBuf[20];
-	StrPtrLen   fRTSPTimeoutString;
+	std::string   fRTSPTimeoutString;
 	uint32_t      fRTSPSessionTimeoutInSecs;
 	uint32_t      fRTPSessionTimeoutInSecs;
 

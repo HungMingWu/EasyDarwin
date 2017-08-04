@@ -29,30 +29,31 @@
  */
 
 #include "RTSPProtocol.h"
+#include <boost/algorithm/string/predicate.hpp>
 
 StrPtrLen RTSPProtocol::sRetrProtName("our-retransmit");
 
-StrPtrLen RTSPProtocol::sMethods[] =
+boost::string_view  RTSPProtocol::sMethods[] =
 {
-	StrPtrLen("DESCRIBE"),
-	StrPtrLen("SETUP"),
-	StrPtrLen("TEARDOWN"),
-	StrPtrLen("PLAY"),
-	StrPtrLen("PAUSE"),
-	StrPtrLen("OPTIONS"),
-	StrPtrLen("ANNOUNCE"),
-	StrPtrLen("GET_PARAMETER"),
-	StrPtrLen("SET_PARAMETER"),
-	StrPtrLen("REDIRECT"),
-	StrPtrLen("RECORD")
+	"DESCRIBE",
+	"SETUP",
+	"TEARDOWN",
+	"PLAY",
+	"PAUSE",
+	"OPTIONS",
+	"ANNOUNCE",
+	"GET_PARAMETER",
+	"SET_PARAMETER",
+	"REDIRECT",
+	"RECORD"
 };
 
-QTSS_RTSPMethod RTSPProtocol::GetMethod(const StrPtrLen &inMethodStr)
+QTSS_RTSPMethod RTSPProtocol::GetMethod(boost::string_view inMethodStr)
 {
 	//chances are this is one of our selected "VIP" methods. so check for this.
 	QTSS_RTSPMethod theMethod = qtssIllegalMethod;
 
-	switch (*inMethodStr.Ptr)
+	switch (inMethodStr[0])
 	{
 	case 'S':   case 's':   theMethod = qtssSetupMethod;    break;
 	case 'D':   case 'd':   theMethod = qtssDescribeMethod; break;
@@ -62,11 +63,11 @@ QTSS_RTSPMethod RTSPProtocol::GetMethod(const StrPtrLen &inMethodStr)
 	}
 
 	if ((theMethod != qtssIllegalMethod) &&
-		(inMethodStr.EqualIgnoreCase(sMethods[theMethod].Ptr, sMethods[theMethod].Len)))
+		boost::iequals(inMethodStr, sMethods[theMethod]))
 		return theMethod;
 
 	for (int32_t x = qtssNumVIPMethods; x < qtssIllegalMethod; x++)
-		if (inMethodStr.EqualIgnoreCase(sMethods[x].Ptr, sMethods[x].Len))
+		if (boost::iequals(inMethodStr, sMethods[x]))
 			return x;
 	return qtssIllegalMethod;
 }

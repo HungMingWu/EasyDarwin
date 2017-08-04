@@ -171,11 +171,9 @@ void    QTSSModuleUtils::SetupSupportedMethods(QTSS_Object inServer, QTSS_RTSPMe
 void    QTSSModuleUtils::LogError(  QTSS_ErrorVerbosity inVerbosity,
                                     QTSS_AttributeID inTextMessage,
                                     uint32_t /*inErrNumber*/,
-                                    char* inArgument,
-                                    char* inArg2)
-{
-    static char* sEmptyArg = "";
-    
+                                    boost::string_view inArgument,
+                                    boost::string_view inArg2)
+{  
     if (sMessages == nullptr)
         return;
         
@@ -189,20 +187,13 @@ void    QTSSModuleUtils::LogError(  QTSS_ErrorVerbosity inVerbosity,
     if ((theMessage.Ptr == nullptr) || (theMessage.Len == 0))
         return;
     
-    // sprintf and ::strlen will crash if inArgument is NULL
-    if (inArgument == nullptr)
-        inArgument = sEmptyArg;
-    if (inArg2 == nullptr)
-        inArg2 = sEmptyArg;
-    
     // Create a new string, and put the argument into the new string.
     
-    uint32_t theMessageLen = theMessage.Len + ::strlen(inArgument) + ::strlen(inArg2);
-
-    std::unique_ptr<char[]> theLogString(new char[theMessageLen + 1]);
-    sprintf(theLogString.get(), theMessage.Ptr, inArgument, inArg2);
+    std::string theLogString = std::string(theMessage.Ptr) +
+							   std::string(inArgument) +
+							   std::string(inArg2);
     
-    (void)QTSS_Write(sErrorLog, theLogString.get(), ::strlen(theLogString.get()),
+    (void)QTSS_Write(sErrorLog, theLogString.c_str(), theLogString.length(),
                         nullptr, inVerbosity);
 }
 

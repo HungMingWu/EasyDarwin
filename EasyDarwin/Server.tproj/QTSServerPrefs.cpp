@@ -281,7 +281,6 @@ QTSSAttrInfoDict::AttrInfo  QTSServerPrefs::sAttributes[] =
 QTSServerPrefs::QTSServerPrefs(XMLPrefsParser* inPrefsSource, bool inWriteMissingPrefs)
 	: QTSSPrefs(inPrefsSource, nullptr, QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kPrefsDictIndex), false),
 	fRTSPTimeoutInSecs(0),
-	fRTSPTimeoutString(fRTSPTimeoutBuf, 0),
 	fRTSPSessionTimeoutInSecs(0),
 	fRTPSessionTimeoutInSecs(0),
 	fMaximumConnections(0),
@@ -651,7 +650,7 @@ void QTSServerPrefs::UpdatePrintfOptions()
 
 }
 
-void QTSServerPrefs::GetTransportSrcAddr(StrPtrLen* ioBuf)
+std::string QTSServerPrefs::GetTransportSrcAddr()
 {
 	OSMutexLocker locker(&fPrefsMutex);
 
@@ -659,13 +658,10 @@ void QTSServerPrefs::GetTransportSrcAddr(StrPtrLen* ioBuf)
 	StrPtrLen* theTransportAddr = this->GetValue(qtssPrefsAltTransportIPAddr);
 
 	// If the movie folder path fits inside the provided buffer, copy it there
-	if ((theTransportAddr->Len > 0) && (theTransportAddr->Len < ioBuf->Len))
-	{
-		::memcpy(ioBuf->Ptr, theTransportAddr->Ptr, theTransportAddr->Len);
-		ioBuf->Len = theTransportAddr->Len;
-	}
+	if (theTransportAddr->Len > 0)
+		return std::string(theTransportAddr->Ptr, theTransportAddr->Len);
 	else
-		ioBuf->Len = 0;
+		return {};
 }
 
 char* QTSServerPrefs::GetStringPref(QTSS_AttributeID inAttrID)

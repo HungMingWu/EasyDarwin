@@ -43,7 +43,7 @@ unsigned int            RTPSessionInterface::sRTPSessionIDCounter = 0;
 
 QTSSAttrInfoDict::AttrInfo  RTPSessionInterface::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
-	/* 0  */ { "qtssCliSesStreamObjects",           nullptr,   qtssAttrDataTypeQTSS_Object,    qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 0  */ {},
 	/* 1  */ { "qtssCliSesCreateTimeInMsec",        nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 2  */ { "qtssCliSesFirstPlayTimeInMsec",     nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 3  */ { "qtssCliSesPlayTimeInMsec",          nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
@@ -75,7 +75,7 @@ QTSSAttrInfoDict::AttrInfo  RTPSessionInterface::sAttributes[] =
 	/* 27 */ { "qtssCliSesPacketLossPercent",       PacketLossPercent,  qtssAttrDataTypeFloat32, qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 28 */ { "qtssCliSesTimeConnectedinMsec",     TimeConnected,      qtssAttrDataTypeint64_t,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 29 */ { "qtssCliSesCounterID",               nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 30 */ { "qtssCliSesRTSPSessionID",           nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 30 */ {},
 	/* 31 */ { "qtssCliSesFramesSkipped",           nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
 	/* 32 */ { "qtssCliSesTimeoutMsec", 			nullptr, 	qtssAttrDataTypeUInt32,		qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
 	/* 33 */ { "qtssCliSesOverBufferEnabled",       nullptr, 	qtssAttrDataTypeBool16,		qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
@@ -120,7 +120,6 @@ RTPSessionInterface::RTPSessionInterface()
 	// Setup all dictionary attribute values
 
 	// Make sure the dictionary knows about our preallocated memory for the RTP stream array
-	this->SetEmptyVal(qtssCliSesStreamObjects, &fStreamBuffer[0], kStreamBufSize);
 
 	this->SetVal(qtssCliSesCreateTimeInMsec, &fSessionCreateTime, sizeof(fSessionCreateTime));
 	this->SetVal(qtssCliSesFirstPlayTimeInMsec, &fFirstPlayTime, sizeof(fFirstPlayTime));
@@ -146,7 +145,6 @@ RTPSessionInterface::RTPSessionInterface()
 	this->SetVal(qtssCliTeardownReason, &fTeardownReason, sizeof(fTeardownReason));
 	//   this->SetVal(qtssCliSesCurrentBitRate, &fMovieCurrentBitRate, sizeof(fMovieCurrentBitRate));
 	this->SetVal(qtssCliSesCounterID, &fUniqueID, sizeof(fUniqueID));
-	this->SetEmptyVal(qtssCliSesRTSPSessionID, &fRTSPSessionIDBuf[0], QTSS_MAX_SESSION_ID_LENGTH + 4);
 	this->SetVal(qtssCliSesFramesSkipped, &fFramesSkipped, sizeof(fFramesSkipped));
 	this->SetVal(qtssCliSesRTCPPacketsRecv, &fTotalRTCPPacketsRecv, sizeof(fTotalRTCPPacketsRecv));
 	this->SetVal(qtssCliSesRTCPBytesRecv, &fTotalRTCPBytesRecv, sizeof(fTotalRTCPBytesRecv));
@@ -200,9 +198,9 @@ QTSS_Error RTPSessionInterface::DoSessionSetupResponse(RTSPRequestInterface* inR
 	// checks to see if it is a 304 Not Modified. If it is, it sends the entire
 	// response and returns an error
 	if (QTSServerInterface::GetServer()->GetPrefs()->GetRTSPTimeoutInSecs() > 0)  // adv the timeout
-		inRequest->AppendSessionHeaderWithTimeout(this->GetValue(qtssCliSesRTSPSessionID), QTSServerInterface::GetServer()->GetPrefs()->GetRTSPTimeoutAsString());
+		inRequest->AppendSessionHeaderWithTimeout(GetSessionID(), QTSServerInterface::GetServer()->GetPrefs()->GetRTSPTimeoutAsString());
 	else
-		inRequest->AppendSessionHeaderWithTimeout(this->GetValue(qtssCliSesRTSPSessionID), nullptr); // no timeout in resp.
+		inRequest->AppendSessionHeaderWithTimeout(GetSessionID(), {}); // no timeout in resp.
 
 	if (inRequest->GetStatus() == qtssRedirectNotModified)
 	{
@@ -264,28 +262,22 @@ void* RTPSessionInterface::PacketLossPercent(QTSSDictionary* inSession, uint32_t
 	int64_t packetsLost = 0;
 	int64_t packetsSent = 0;
 
-	for (int x = 0; theSession->GetValue(qtssCliSesStreamObjects, x, (void*)&theStream, &theLen) == QTSS_NoErr; x++)
+	for (auto theStream : theSession->fStreamBuffer)
 	{
-		if (theStream != nullptr)
-		{
-			uint32_t streamCurPacketsLost = 0;
-			theLen = sizeof(uint32_t);
-			(void)theStream->GetValue(qtssRTPStrCurPacketsLostInRTCPInterval, 0, &streamCurPacketsLost, &theLen);
-			//printf("stream = %d streamCurPacketsLost = %"   _U32BITARG_   " \n",x, streamCurPacketsLost);
-
-			uint32_t streamCurPackets = 0;
-			theLen = sizeof(uint32_t);
-			(void)theStream->GetValue(qtssRTPStrPacketCountInRTCPInterval, 0, &streamCurPackets, &theLen);
-			//printf("stream = %d streamCurPackets = %"   _U32BITARG_   " \n",x, streamCurPackets);
-
-			packetsSent += (int64_t)streamCurPackets;
-			packetsLost += (int64_t)streamCurPacketsLost;
-			//printf("stream calculated loss = %f \n",x, (float) streamCurPacketsLost / (float) streamCurPackets);
-
-		}
-
-		theStream = nullptr;
+		uint32_t streamCurPacketsLost = 0;
 		theLen = sizeof(uint32_t);
+		theStream->GetValue(qtssRTPStrCurPacketsLostInRTCPInterval, 0, &streamCurPacketsLost, &theLen);
+		//printf("stream = %d streamCurPacketsLost = %"   _U32BITARG_   " \n",x, streamCurPacketsLost);
+
+		uint32_t streamCurPackets = 0;
+		theLen = sizeof(uint32_t);
+		theStream->GetValue(qtssRTPStrPacketCountInRTCPInterval, 0, &streamCurPackets, &theLen);
+		//printf("stream = %d streamCurPackets = %"   _U32BITARG_   " \n",x, streamCurPackets);
+
+		packetsSent += (int64_t)streamCurPackets;
+		packetsLost += (int64_t)streamCurPacketsLost;
+		//printf("stream calculated loss = %f \n",x, (float) streamCurPacketsLost / (float) streamCurPackets);
+
 	}
 
 	//Assert(packetsLost <= packetsSent);
@@ -319,8 +311,8 @@ void RTPSessionInterface::CreateDigestAuthenticationNonce() {
 	unsigned char nonceStr[16];
 	unsigned char colon[] = ":";
 	MD5_Init(&ctxt);
-	StrPtrLen* sesID = this->GetValue(qtssCliSesRTSPSessionID);
-	MD5_Update(&ctxt, (unsigned char *)sesID->Ptr, sesID->Len);
+	boost::string_view sesID = this->GetSessionID();
+	MD5_Update(&ctxt, (unsigned char *)sesID.data(), sesID.length());
 	MD5_Update(&ctxt, (unsigned char *)colon, 1);
 	MD5_Update(&ctxt, (unsigned char *)curTimeStr, ::strlen(curTimeStr));
 	MD5_Final(nonceStr, &ctxt);

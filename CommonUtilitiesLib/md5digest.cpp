@@ -170,7 +170,7 @@ void CalcRequestDigest(StrPtrLen* hA1,
 	StrPtrLen* nonceCount,
 	StrPtrLen* cNonce,
 	StrPtrLen* qop,
-	StrPtrLen* method,
+	boost::string_view method,
 	StrPtrLen* digestUri,
 	StrPtrLen* hEntity,
 	StrPtrLen* requestDigest
@@ -183,7 +183,6 @@ void CalcRequestDigest(StrPtrLen* hA1,
 	Assert(nonceCount);
 	Assert(cNonce);
 	Assert(qop);
-	Assert(method);
 	Assert(digestUri);
 	Assert(hEntity);
 	Assert(requestDigest);
@@ -203,7 +202,7 @@ void CalcRequestDigest(StrPtrLen* hA1,
 	// and for qop = "auth-int" is
 	//              A2 = method:digestUri:H(entity-body)
 	MD5_Init(&context);
-	MD5_Update(&context, (unsigned char *)method->Ptr, method->Len);
+	MD5_Update(&context, (unsigned char *)method.data(), method.length());
 	MD5_Update(&context, (unsigned char *)sColon.Ptr, sColon.Len);
 	MD5_Update(&context, (unsigned char *)digestUri->Ptr, digestUri->Len);
 	if (qop->Equal(sQopAuthInt)) {

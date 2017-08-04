@@ -553,9 +553,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	bool* isTCPPtr = nullptr;
 	QTSS_RTPStreamObject theRTPStreamObject = nullptr;
 
-	for (uint32_t theStreamObjectLen = sizeof(theRTPStreamObject);
-		dict->GetValue(qtssCliSesStreamObjects, theStreamIndex, (void*)&theRTPStreamObject, &theStreamObjectLen) == QTSS_NoErr;
-		theStreamIndex++, theStreamObjectLen = sizeof(theRTPStreamObject))
+	for (auto theRTPStreamObject : rtpSession->GetStreams())
 	{
 
 		uint32_t* streamPacketsReceived = nullptr;

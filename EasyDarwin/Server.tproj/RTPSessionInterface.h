@@ -36,6 +36,7 @@
 #ifndef _RTPSESSIONINTERFACE_H_
 #define _RTPSESSIONINTERFACE_H_
 
+#include <vector>
 #include "QTSSDictionary.h"
 
 #include "RTCPSRPacket.h"
@@ -46,8 +47,10 @@
 #include "RTPOverbufferWindow.h"
 #include "QTSServerInterface.h"
 #include "OSMutex.h"
+#include "RTPStream.h"
 
 class RTSPRequestInterface;
+
 
 class RTPSessionInterface : public QTSSDictionary, public Task
 {
@@ -198,7 +201,8 @@ public:
 	uint32_t          GetCurrentMovieBitRate() { return fMovieCurrentBitRate; }
 
 	uint32_t          GetMaxBandwidthBits() { uint32_t maxRTSP = GetLastRTSPBandwithBits();  return  maxRTSP; }
-
+	boost::string_view GetSessionID() const { return fRTSPSessionID; }
+	std::vector<RTPStream*> GetStreams()  { return fStreamBuffer; }
 protected:
 	// These variables are setup by the derived RTPSession object when
 	// Play and Pause get called
@@ -228,8 +232,9 @@ protected:
 
 	//Stores the session ID
 	OSRef               fRTPMapElem;
-	char                fRTSPSessionIDBuf[QTSS_MAX_SESSION_ID_LENGTH + 4];
-
+	//The RTSP session ID that refers to this client session
+	std::string         fRTSPSessionID;
+	StrPtrLen           fRTSPSessionIDV;
 	uint32_t      fLastBitRateBytes{0};
 	int64_t      fLastBitRateUpdateTime{0};
 	uint32_t      fMovieCurrentBitRate{0};
@@ -239,7 +244,7 @@ protected:
 	// the last RTSP request.
 	RTSPSessionInterface* fRTSPSession{nullptr};
 
-
+	std::vector<RTPStream*>       fStreamBuffer;
 
 private:
 
@@ -259,7 +264,6 @@ private:
 	// even though we don't know how many streams we need at first.
 	enum
 	{
-		kStreamBufSize = 4,
 		kFullRequestURLBufferSize = 256,
 
 		kIPAddrStrBufSize = 20,
@@ -270,7 +274,7 @@ private:
 
 	};
 
-	void*       fStreamBuffer[kStreamBufSize];
+
 
 
 	// theses are dictionary items picked up by the RTSPSession

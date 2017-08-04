@@ -75,7 +75,7 @@ public:
 	//
 	// Pass in the RTSP Session ID of the Client session to which these channel numbers will
 	// belong.
-	uint8_t               GetTwoChannelNumbers(StrPtrLen* inRTSPSessionID);
+	uint8_t               GetTwoChannelNumbers(boost::string_view inRTSPSessionID);
 
 	//
 	// Given a channel number, returns the RTSP Session ID to which this channel number refers

@@ -83,12 +83,12 @@ private:
 	uint16_t GetPacketSeqNumber(StrPtrLen* inPacket);
 	void SetPacketSeqNumber(StrPtrLen* inPacket, uint16_t inSeqNumber);
 	bool PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrPtrLen* inPacket);
-	bool  FilterPacket(QTSS_RTPStreamObject *theStreamPtr, StrPtrLen* inPacket);
+	bool  FilterPacket(RTPStream *theStreamPtr, StrPtrLen* inPacket);
 
 	uint32_t GetPacketRTPTime(StrPtrLen* packetStrPtr);
-	inline  bool PacketMatchesStream(void* inStreamCookie, QTSS_RTPStreamObject *theStreamPtr);
-	bool PacketReadyToSend(QTSS_RTPStreamObject *theStreamPtr, int64_t *currentTimePtr, uint32_t inFlags, uint64_t* packetIDPtr, int64_t* timeToSendThisPacketAgainPtr);
-	bool PacketAlreadySent(QTSS_RTPStreamObject *theStreamPtr, uint32_t inFlags, uint64_t* packetIDPtr);
+	inline  bool PacketMatchesStream(void* inStreamCookie, RTPStream *theStreamPtr);
+	bool PacketReadyToSend(RTPStream *theStreamPtr, int64_t *currentTimePtr, uint32_t inFlags, uint64_t* packetIDPtr, int64_t* timeToSendThisPacketAgainPtr);
+	bool PacketAlreadySent(RTPStream *theStreamPtr, uint32_t inFlags, uint64_t* packetIDPtr);
 	QTSS_Error TrackRTCPBaseTime(QTSS_RTPStreamObject *theStreamPtr, StrPtrLen* inPacketStrPtr, int64_t *currentTimePtr, uint32_t inFlags, int64_t *packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr);
 	QTSS_Error RewriteRTCP(QTSS_RTPStreamObject *theStreamPtr, StrPtrLen* inPacketStrPtr, int64_t *currentTimePtr, uint32_t inFlags, int64_t *packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr);
 	QTSS_Error TrackRTPPackets(QTSS_RTPStreamObject *theStreamPtr, StrPtrLen* inPacketStrPtr, int64_t *currentTimePtr, uint32_t inFlags, int64_t *packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr);
@@ -97,11 +97,11 @@ private:
 };
 
 
-bool RTPSessionOutput::PacketMatchesStream(void* inStreamCookie, QTSS_RTPStreamObject *theStreamPtr)
+bool RTPSessionOutput::PacketMatchesStream(void* inStreamCookie, RTPStream *theStreamPtr)
 {
 	void** theStreamCookie = nullptr;
 	uint32_t theLen = 0;
-	((QTSSDictionary*)*theStreamPtr)->GetValuePtr(fCookieAttrID, 0, (void**)&theStreamCookie, &theLen);
+	theStreamPtr->GetValuePtr(fCookieAttrID, 0, (void**)&theStreamCookie, &theLen);
 
 	if ((theStreamCookie != nullptr) && (*theStreamCookie == inStreamCookie))
 		return true;

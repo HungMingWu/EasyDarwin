@@ -35,6 +35,7 @@
 #ifndef __RTSPPROTOCOL_H__
 #define __RTSPPROTOCOL_H__
 
+#include <boost/utility/string_view.hpp>
 #include "QTSSRTSPProtocol.h"
 #include "StrPtrLen.h"
 
@@ -47,9 +48,9 @@ public:
 	//  Method enumerated type definition in QTSS_RTSPProtocol.h
 
 	//The lookup function. Very simple
-	static uint32_t   GetMethod(const StrPtrLen &inMethodStr);
+	static uint32_t   GetMethod(boost::string_view inMethodStr);
 
-	static StrPtrLen&   GetMethodString(QTSS_RTSPMethod inMethod)
+	static boost::string_view   GetMethodString(QTSS_RTSPMethod inMethod)
 	{
 		return sMethods[inMethod];
 	}
@@ -107,7 +108,7 @@ public:
 private:
 
 	//for other lookups
-	static StrPtrLen            sMethods[];
+	static  boost::string_view             sMethods[];
 	static StrPtrLen            sHeaders[];
 	static StrPtrLen            sStatusCodeStrings[];
 	static StrPtrLen            sStatusCodeAsStrings[];

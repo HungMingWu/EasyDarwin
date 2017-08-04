@@ -37,6 +37,7 @@
 #define __STRINGFORMATTER_H__
 
 #include <string.h>
+#include <boost/utility/string_view.hpp>
 #include "StrPtrLen.h"
 #include "MyAssert.h"
 
@@ -74,9 +75,10 @@ public:
 	//Object does no bounds checking on the buffer. That is your responsibility!
 	//Put truncates to the buffer size
 	void        Put(const int32_t num);
-	void        Put(char* buffer, uint32_t bufferSize);
-	void        Put(char* str) { Put(str, strlen(str)); }
+	void        Put(const char* buffer, uint32_t bufferSize);
+	void        Put(const char* str) { Put(str, strlen(str)); }
 	void        Put(const StrPtrLen& str) { Put(str.Ptr, str.Len); }
+	void        Put(const boost::string_view str) { Put(str.data(), str.length()); }
 	void        PutSpace() { PutChar(' '); }
 	void        PutEOL() { Put(sEOL, sEOLLen); }
 	void        PutChar(char c) { Put(&c, 1); }

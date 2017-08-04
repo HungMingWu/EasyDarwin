@@ -91,12 +91,12 @@ public:
 
 	// The transport header constructed by this function mimics the one sent
 	// by the client, with the addition of server port & interleaved sub headers
-	void    AppendTransportHeader(StrPtrLen* serverPortA,
-		StrPtrLen* serverPortB,
-		StrPtrLen* channelA,
-		StrPtrLen* channelB,
-		StrPtrLen* serverIPAddr = nullptr,
-		StrPtrLen* ssrc = nullptr);
+	void    AppendTransportHeader(boost::string_view serverPortA,
+		boost::string_view serverPortB,
+		boost::string_view channelA,
+		boost::string_view channelB,
+		boost::string_view serverIPAddr = {},
+		boost::string_view ssrc = {});
 	void    AppendContentBaseHeader(StrPtrLen* theURL);
 	void    AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 		boost::string_view url, boost::string_view seqNumber,
@@ -104,7 +104,7 @@ public:
 
 	void    AppendContentLength(uint32_t contentLength);
 	void    AppendDateAndExpires();
-	void    AppendSessionHeaderWithTimeout(StrPtrLen* inSessionID, StrPtrLen* inTimeout);
+	void    AppendSessionHeaderWithTimeout(boost::string_view inSessionID, boost::string_view inTimeout);
 	void    AppendRetransmitHeader(uint32_t inAckTimeout);
 
 	// MODIFIERS
@@ -164,7 +164,7 @@ public:
 	//
 	// Value of late-tolerance field of x-RTP-Options header
 	float                     GetLateToleranceInSec() { return fLateTolerance; }
-	StrPtrLen*                  GetLateToleranceStr() { return &fLateToleranceStr; }
+	boost::string_view        GetLateToleranceStr() { return fLateToleranceStr; }
 
 	// these get set if there is a transport header
 	uint16_t                      GetClientPortA() { return fClientPortA; }
@@ -229,6 +229,9 @@ public:
 
 	void SetLocalPath(boost::string_view localpath) { localPath = std::string(localpath); }
 	boost::string_view GetLocalPath();
+	//If the URI ends with one or more digits, this points to those.
+	std::string         GetFileDigit();
+	void SetUpServerPort(uint16_t port) { fSetUpServerPort = port; }
 protected:
 
 	//ALL THIS STUFF HERE IS SETUP BY RTSPREQUEST object (derived)
@@ -264,7 +267,7 @@ protected:
 	int64_t                      fIfModSinceDate;
 	float                     fSpeed;
 	float                     fLateTolerance;
-	StrPtrLen                   fLateToleranceStr;
+	std::string               fLateToleranceStr;
 	float                     fPrebufferAmt;
 
 	StrPtrLen                   fFirstTransport;
@@ -336,7 +339,7 @@ private:
 	static void*        GetAbsTruncatedPath(QTSSDictionary* inRequest, uint32_t* outLen);
 	static void*        GetTruncatedPath(QTSSDictionary* inRequest, uint32_t* outLen);
 	static void*        GetFileName(QTSSDictionary* inRequest, uint32_t* outLen);
-	static void*        GetFileDigit(QTSSDictionary* inRequest, uint32_t* outLen);
+
 	static void*        GetRealStatusCode(QTSSDictionary* inRequest, uint32_t* outLen);
 	static void* 		GetAuthDigestResponse(QTSSDictionary* inRequest, uint32_t* outLen);
 

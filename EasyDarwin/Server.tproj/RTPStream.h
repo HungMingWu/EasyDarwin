@@ -49,7 +49,6 @@
 #include "UDPSocketPool.h"
 
 #include "RTSPRequestInterface.h"
-#include "RTPSessionInterface.h"
 #include "RTPPacketResender.h"
 #include "QTSServerInterface.h"
 #include "RTCPPacket.h"
@@ -60,6 +59,8 @@
 #ifndef MAX
 #define	MAX(a,b) (((a)>(b))?(a):(b))
 #endif	/* MAX */
+
+class RTPSessionInterface;
 
 class RTPStream : public QTSSDictionary, public UDPDemuxerTask
 {
@@ -354,7 +355,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         QTSS_Error  TCPWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags);
 
         static QTSSAttrInfoDict::AttrInfo   sAttributes[];
-        static StrPtrLen                    sChannelNums[];
+        static boost::string_view           sChannelNums[];
         static QTSS_ModuleState             sRTCPProcessModuleState;
 
         static char *noType;
@@ -370,7 +371,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         
         char *GetStreamTypeStr();
         enum { rtp = 0, rtcpSR = 1, rtcpRR = 2, rtcpACK = 3, rtcpAPP = 4 };
-        float GetStreamStartTimeSecs() { return (float) ((OS::Milliseconds() - this->fSession->GetSessionCreateTime())/1000.0); }
+		float GetStreamStartTimeSecs();
         void PrintPacket(char *inBuffer, uint32_t inLen, int32_t inType); 
         void PrintRTP(char* packetBuff, uint32_t inLen);
         void PrintRTCPSenderReport(char* packetBuff, uint32_t inLen);

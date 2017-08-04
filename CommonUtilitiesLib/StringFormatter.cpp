@@ -47,7 +47,7 @@ void StringFormatter::Put(const int32_t num)
 	Put(buff);
 }
 
-void StringFormatter::Put(char* buffer, uint32_t bufferSize)
+void StringFormatter::Put(const char* buffer, uint32_t bufferSize)
 {
 	//optimization for writing 1 character
 	if ((bufferSize == 1) && (fCurrentPut != fEndPut)) {

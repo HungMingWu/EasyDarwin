@@ -191,7 +191,8 @@ QTSS_Error RTSPRequest::ParseFirstLine(StringParser &parser)
 
 	//THIS WORKS UNDER THE ASSUMPTION THAT:
 	//valid HTTP/1.1 headers are: GET, HEAD, POST, PUT, OPTIONS, DELETE, TRACE
-	fMethod = RTSPProtocol::GetMethod(theParsedData);
+	boost::string_view theParsedDataV(theParsedData.Ptr, theParsedData.Len);
+	fMethod = RTSPProtocol::GetMethod(theParsedDataV);
 	if (fMethod == qtssIllegalMethod)
 		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgBadRTSPMethod, &theParsedData);
 
@@ -696,7 +697,7 @@ void RTSPRequest::ParseTransportOptionsHeader(StrPtrLen &header)
 			theLateTolParser.GetThru(nullptr, '=');
 			theLateTolParser.ConsumeWhitespace();
 			fLateTolerance = theLateTolParser.ConsumeFloat();
-			fLateToleranceStr = theRTPOptionsSubHeader;
+			fLateToleranceStr = std::string(theRTPOptionsSubHeader.Ptr, theRTPOptionsSubHeader.Len);
 		}
 
 		(void)theRTPOptionsParser.GetThru(&theRTPOptionsSubHeader, ';');
@@ -795,7 +796,7 @@ void RTSPRequest::ParseClientPortSubHeader(StrPtrLen* inClientPortSubHeader)
 		ResizeableStringFormatter errorPortMessage;
 		errorPortMessage.Put(sErrorMessage);
 		if (!userAgent.empty())
-			errorPortMessage.Put((char *)userAgent.data(), userAgent.length());
+			errorPortMessage.Put(userAgent);
 		errorPortMessage.PutSpace();
 		errorPortMessage.Put(*inClientPortSubHeader);
 		errorPortMessage.PutTerminator();

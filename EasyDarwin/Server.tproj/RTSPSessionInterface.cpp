@@ -199,7 +199,7 @@ QTSS_Error RTSPSessionInterface::RequestEvent(QTSS_EventType inEventMask)
 	return QTSS_NoErr;
 }
 
-uint8_t RTSPSessionInterface::GetTwoChannelNumbers(StrPtrLen* inRTSPSessionID)
+uint8_t RTSPSessionInterface::GetTwoChannelNumbers(boost::string_view inRTSPSessionID)
 {
 	//
 	// Allocate a TCP coalesce buffer if still needed
@@ -225,7 +225,7 @@ uint8_t RTSPSessionInterface::GetTwoChannelNumbers(StrPtrLen* inRTSPSessionID)
 
 	//
 	// Put this sessionID to the proper place in the map
-	fChNumToSessIDMap[numChannelEntries - 1].Set(inRTSPSessionID->GetAsCString(), inRTSPSessionID->Len);
+	fChNumToSessIDMap[numChannelEntries - 1].Set((char *)inRTSPSessionID.data(), inRTSPSessionID.length());
 
 	return theChannelNum;
 }

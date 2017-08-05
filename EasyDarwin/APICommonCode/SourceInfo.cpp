@@ -276,11 +276,9 @@ void SourceInfo::StreamInfo::Copy(const StreamInfo& copy)
     fPort = copy.fPort;
     fTimeToLive = copy.fTimeToLive;
     fPayloadType = copy.fPayloadType;
-    if ((copy.fPayloadName).Ptr != nullptr)
-        fPayloadName.Set((copy.fPayloadName).GetAsCString(), (copy.fPayloadName).Len);
+    fPayloadName = copy.fPayloadName;
     fTrackID = copy.fTrackID;
-	if ((copy.fTrackName).Ptr != nullptr)
-		fTrackName.Set((copy.fTrackName).GetAsCString(), (copy.fTrackName).Len);
+	fTrackName = copy.fTrackName;
     fBufferDelay = copy.fBufferDelay;
     fIsTCP = copy.fIsTCP;
     fSetupToReceive = copy.fSetupToReceive;
@@ -289,13 +287,6 @@ void SourceInfo::StreamInfo::Copy(const StreamInfo& copy)
 
 SourceInfo::StreamInfo::~StreamInfo()
 {
-    if (fPayloadName.Ptr != nullptr)
-        delete fPayloadName.Ptr;
-    fPayloadName.Len = 0;
-
-	if (fTrackName.Ptr != nullptr)
-        delete fTrackName.Ptr;
-	fTrackName.Len = 0;
 }
 
 void SourceInfo::OutputInfo::Copy(const OutputInfo& copy)

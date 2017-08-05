@@ -1697,10 +1697,11 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest,
 			sReflectorBadTrackIDErr);
 
-	StrPtrLen* thePayloadName = &theStreamInfo->fPayloadName;
+	boost::string_view thePayloadName = theStreamInfo->fPayloadName;
+	StrPtrLen thePayloadNameV((char *)thePayloadName.data(), thePayloadName.length());
 	QTSS_RTPPayloadType thePayloadType = theStreamInfo->fPayloadType;
 
-	StringParser parser(thePayloadName);
+	StringParser parser(&thePayloadNameV);
 
 	parser.GetThru(nullptr, '/');
 	theStreamInfo->fTimeScale = parser.ConsumeInteger(nullptr);
@@ -1729,7 +1730,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	}
 
 	// Set up dictionary items for this stream
-	theErr = newStream->SetValue(qtssRTPStrPayloadName, 0, thePayloadName->Ptr, thePayloadName->Len);
+	theErr = newStream->SetValue(qtssRTPStrPayloadName, 0, thePayloadName.data(), thePayloadName.length());
 	Assert(theErr == QTSS_NoErr);
 	theErr = newStream->SetValue(qtssRTPStrPayloadType, 0, &thePayloadType, sizeof(thePayloadType));
 	Assert(theErr == QTSS_NoErr);

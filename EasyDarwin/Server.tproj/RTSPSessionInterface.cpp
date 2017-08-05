@@ -124,10 +124,6 @@ RTSPSessionInterface::~RTSPSessionInterface()
 		delete fInputSocketP;
 
 	delete[] fTCPCoalesceBuffer;
-
-	for (uint8_t x = 0; x < (fCurChannelNum >> 1); x++)
-		delete[] fChNumToSessIDMap[x].Ptr;
-	delete[] fChNumToSessIDMap;
 }
 
 void RTSPSessionInterface::DecrementObjectHolderCount()
@@ -212,30 +208,18 @@ uint8_t RTSPSessionInterface::GetTwoChannelNumbers(boost::string_view inRTSPSess
 	fCurChannelNum += 2;
 
 	//
-	// Reallocate the Ch# to Session ID Map
-	uint32_t numChannelEntries = fCurChannelNum >> 1;
-	auto* newMap = new StrPtrLen[numChannelEntries];
-	if (fChNumToSessIDMap != nullptr)
-	{
-		Assert(numChannelEntries > 1);
-		::memcpy(newMap, fChNumToSessIDMap, sizeof(StrPtrLen) * (numChannelEntries - 1));
-		delete[] fChNumToSessIDMap;
-	}
-	fChNumToSessIDMap = newMap;
-
-	//
 	// Put this sessionID to the proper place in the map
-	fChNumToSessIDMap[numChannelEntries - 1].Set((char *)inRTSPSessionID.data(), inRTSPSessionID.length());
+	fChNumToSessIDMap.emplace_back(inRTSPSessionID.data(), inRTSPSessionID.length());
 
 	return theChannelNum;
 }
 
-StrPtrLen*  RTSPSessionInterface::GetSessionIDForChannelNum(uint8_t inChannelNum)
+boost::string_view  RTSPSessionInterface::GetSessionIDForChannelNum(uint8_t inChannelNum)
 {
 	if (inChannelNum < fCurChannelNum)
-		return &fChNumToSessIDMap[inChannelNum >> 1];
+		return fChNumToSessIDMap[inChannelNum >> 1];
 	else
-		return nullptr;
+		return {};
 }
 
 /*********************************

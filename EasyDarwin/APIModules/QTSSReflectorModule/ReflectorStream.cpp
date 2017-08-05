@@ -1865,7 +1865,7 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 		// TODO:A、对H264视频RTP包进行关键帧过滤，保存最新关键帧首个RTP包指针
 		// 1、判断是否为视频H.264 RTP
 		SourceInfo::StreamInfo* streamInfo = theSender->fStream->GetStreamInfo();
-		if (!(thePacket->IsRTCP()) && (streamInfo->fPayloadType == qtssVideoPayloadType) && (streamInfo->fPayloadName.Equal("H264/90000")))
+		if (!(thePacket->IsRTCP()) && (streamInfo->fPayloadType == qtssVideoPayloadType) && (streamInfo->fPayloadName =="H264/90000"))
 		{
 			// 2、在这里判断上面插入的thePacket是否为关键帧起始RTP包，如果是，这记录thePacket->fQueueElem
 			if (theSender->IsKeyFrameFirstPacket(thePacket))

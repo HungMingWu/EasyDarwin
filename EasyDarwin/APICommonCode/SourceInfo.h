@@ -64,7 +64,7 @@ class SourceInfo
         // the following metadata.
         struct StreamInfo
         {
-            StreamInfo() : fPayloadName(nullptr), fTrackName(nullptr), fBufferDelay((float) eDefaultBufferDelay) {}
+            StreamInfo() : fBufferDelay((float) eDefaultBufferDelay) {}
             ~StreamInfo(); // Deletes the memory allocated for the fPayloadName string 
             
             void Copy(const StreamInfo& copy);// Does copy dynamically allocated data
@@ -74,9 +74,9 @@ class SourceInfo
             uint16_t fPort{0};       // Dest (RTP) port of source content
             uint16_t fTimeToLive{0}; // Ttl for this stream
             QTSS_RTPPayloadType fPayloadType{0};   // Payload type of this stream
-            StrPtrLen fPayloadName; // Payload name of this stream
+            std::string fPayloadName; // Payload name of this stream
             uint32_t fTrackID{0};    // ID of this stream
-			StrPtrLen fTrackName;//Track Name of this stream
+			std::string fTrackName;//Track Name of this stream
             float fBufferDelay; // buffer delay (default is 3 seconds)
             bool  fIsTCP{false};     // Is this a TCP broadcast? If this is the case, the port and ttl are not valid
             bool  fSetupToReceive{false};    // If true then a push to the server is setup on this stream.

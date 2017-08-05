@@ -30,24 +30,35 @@
 
 */
 
+#include <boost/spirit/include/qi.hpp>
+
 #include "SDPSourceInfo.h"
 
-#include "StringParser.h"
-#include "StringFormatter.h"
 #include "SocketUtils.h"
-#include "StrPtrLen.h"
 #include "SDPUtils.h"
 
-static StrPtrLen    sCLine("c=IN IP4 0.0.0.0");
-static StrPtrLen    sControlLine("a=control:*");
-static StrPtrLen    sVideoStr("video");
-static StrPtrLen    sAudioStr("audio");
-static StrPtrLen    sRtpMapStr("rtpmap");
-static StrPtrLen    sControlStr("control");
-static StrPtrLen    sBufferDelayStr("x-bufferdelay");
-static StrPtrLen    sBroadcastControlStr("x-broadcastcontrol");
-static StrPtrLen    sAutoDisconnect("RTSP");
-static StrPtrLen    sAutoDisconnectTime("TIME");
+namespace qi = boost::spirit::qi;
+
+static std::string    sCLine("c=IN IP4 0.0.0.0");
+static std::string    sControlLine("a=control:*");
+static std::string    sVideoStr("video");
+static std::string    sAudioStr("audio");
+static std::string    sRtpMapStr("rtpmap");
+static std::string    sControlStr("control");
+static std::string    sBufferDelayStr("x-bufferdelay");
+static std::string    sBroadcastControlStr("x-broadcastcontrol");
+static std::string    sAutoDisconnect("RTSP");
+static std::string    sAutoDisconnectTime("TIME");
+
+template <typename S>
+static std::vector<std::string> spirit_direct(const S& input, char const* delimiter)
+{
+	std::vector<std::string> result;
+	if (!qi::parse(input.begin(), input.end(),
+		qi::raw[*(qi::char_ - qi::char_(delimiter))] % qi::char_(delimiter), result))
+		result.push_back(std::string(input));
+	return result;
+}
 
 SDPSourceInfo::~SDPSourceInfo()
 {
@@ -61,36 +72,31 @@ SDPSourceInfo::~SDPSourceInfo()
         delete [] theCharArray;
     }
     */
-    
-    fSDPData.Delete();
 }
 
 std::string SDPSourceInfo::GetLocalSDP()
 {
-    Assert(fSDPData.Ptr != nullptr);
+    Assert(!fSDPData.empty());
 
     bool appendCLine = true;
     uint32_t trackIndex = 0;
     
     std::string localSDP;
 
-    StrPtrLen sdpLine;
-    StringParser sdpParser(&fSDPData);
     char trackIndexBuffer[50];
     
+	std::vector<std::string> sdpLines = spirit_direct(fSDPData, "\r\n");
     // Only generate our own trackIDs if this file doesn't have 'em.
     // Our assumption here is that either the file has them, or it doesn't.
     // A file with some trackIDs, and some not, won't work.
     bool hasControlLine = false;
 
-    while (sdpParser.GetDataRemaining() > 0)
+    for (const auto sdpLine : sdpLines)
     {
         //stop when we reach an empty line.
-        sdpParser.GetThruEOL(&sdpLine);
-        if (sdpLine.Len == 0)
-            continue;
+		if (sdpLine.empty()) continue;
             
-        switch (*sdpLine.Ptr)
+        switch (sdpLine[0])
         {
             case 'c':
                 break;//ignore connection information
@@ -99,14 +105,9 @@ std::string SDPSourceInfo::GetLocalSDP()
                 //append new connection information right before the first 'm'
                 if (appendCLine)
                 {
-					localSDP += std::string(sCLine.Ptr, sCLine.Len) + "\r\n";
-                   
+					localSDP += sCLine + "\r\n";
                     if (!hasControlLine)
-                    { 
-						localSDP += std::string(sControlLine.Ptr, sControlLine.Len);
-						localSDP += "\r\n";
-                    }
-                    
+						localSDP += sControlLine + "\r\n";                    
                     appendCLine = false;
                 }
                 //the last "a=" for each m should be the control a=
@@ -116,48 +117,42 @@ std::string SDPSourceInfo::GetLocalSDP()
 					localSDP += std::string(trackIndexBuffer);
                 }
                 //now write the 'm' line, but strip off the port information
-                StringParser mParser(&sdpLine);
-                StrPtrLen mPrefix;
-                mParser.ConsumeUntil(&mPrefix, StringParser::sDigitMask);
-                localSDP += std::string(mPrefix.Ptr, mPrefix.Len);
-                localSDP += '0';
-                (void)mParser.ConsumeInteger(nullptr);
-				localSDP += std::string(mParser.GetCurrentPosition(), mParser.GetDataRemaining());
-                localSDP += "\r\n";
+				std::string mPrefix, mSuffix;
+				bool r = qi::phrase_parse(sdpLine.cbegin(), sdpLine.cend(),
+					+(qi::char_ - qi::digit) >> qi::omit[qi::ushort_] >> +(qi::char_),
+					qi::eoi, mPrefix, mSuffix);
+                localSDP += mPrefix + "0" + mSuffix + "\r\n";
                 trackIndex++;
                 break;
             }
             case 'a':
             {
-                StringParser aParser(&sdpLine);
-                aParser.ConsumeLength(nullptr, 2);//go past 'a='
-                StrPtrLen aLineType;
-                aParser.ConsumeWord(&aLineType);
-                if (aLineType.Equal(sControlStr))
+				std::string aLineType, rest;
+				bool r = qi::phrase_parse(sdpLine.cbegin(), sdpLine.cend(),
+					qi::no_case["a="] >> +(qi::alpha) >> ":" >> +(qi::char_),
+					qi::eoi, aLineType, rest);
+                if (aLineType == sControlStr)
                 {
-                    aParser.ConsumeUntil(nullptr, '=');
-                    aParser.ConsumeUntil(nullptr, StringParser::sDigitMask);
-                    
-                   StrPtrLen aDigitType;                
-                   (void)aParser.ConsumeInteger(&aDigitType);
-                    if (aDigitType.Len > 0)
+					uint32_t trackID;
+					r = qi::phrase_parse(rest.cbegin(), rest.cend(),
+						qi::omit[+(qi::alpha)] >> "=" >> qi::uint_,
+						qi::ascii::blank, trackID);
+
+					if (r)
                     {
-                      localSDP += std::string("a=control:trackID=", 18);
-                      localSDP += std::string(aDigitType.Ptr, aDigitType.Len);
-					  localSDP += "\r\n";
-                      hasControlLine = true;
-                      break;
+						localSDP += std::string("a=control:trackID=")
+							      + std::to_string(trackID) + "\r\n";
+						hasControlLine = true;
+						break;
                     }
                 }
                
-				localSDP += std::string(sdpLine.Ptr, sdpLine.Len);
-				localSDP += "\r\n";
+				localSDP += sdpLine + "\r\n";
                 break;
             }
             default:
             {
-				localSDP += std::string(sdpLine.Ptr, sdpLine.Len);
-				localSDP += "\r\n";
+				localSDP += sdpLine + "\r\n";
             }
         }
     }
@@ -175,22 +170,17 @@ std::string SDPSourceInfo::GetLocalSDP()
     return sortedSDP.GetSortedSDPStr(); // return a new copy of the sorted SDP
 }
 
-
 void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
 {
     //
     // There are some situations in which Parse can be called twice.
     // If that happens, just return and don't do anything the second time.
-    if (fSDPData.Ptr != nullptr)
+    if (!fSDPData.empty())
         return;
         
     Assert(fStreamArray == nullptr);
     
-    auto *sdpDataCopy = new char[sdpLen];
-    Assert(sdpDataCopy != nullptr);
-    
-    memcpy(sdpDataCopy,sdpData, sdpLen);
-    fSDPData.Set(sdpDataCopy, sdpLen);
+    fSDPData = std::string(sdpData, sdpLen);
 
     // If there is no trackID information in this SDP, we make the track IDs start
     // at 1 -> N
@@ -200,20 +190,14 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
     StreamInfo theGlobalStreamInfo; //needed if there is one c= header independent of
                                     //individual streams
 
-    StrPtrLen sdpLine;
-    StringParser trackCounter(&fSDPData);
-    StringParser sdpParser(&fSDPData);
     uint32_t theStreamIndex = 0;
 
-    //walk through the SDP, counting up the number of tracks
+	std::vector<std::string> sdpLines = spirit_direct(fSDPData, "\r\n");
+    // walk through the SDP, counting up the number of tracks
     // Repeat until there's no more data in the SDP
-    while (trackCounter.GetDataRemaining() > 0)
-    {
-        //each 'm' line in the SDP file corresponds to another track.
-        trackCounter.GetThruEOL(&sdpLine);
-        if ((sdpLine.Len > 0) && (sdpLine.Ptr[0] == 'm'))
-            fNumStreams++;  
-    }
+	for (const auto &sdpLine : sdpLines)
+		if (!sdpLine.empty() && sdpLine[0] == 'm')
+			fNumStreams++;
 
     //We should scale the # of StreamInfos to the # of trax, but we can't because
     //of an annoying compiler bug...
@@ -229,23 +213,19 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
     theGlobalStreamInfo.fBufferDelay = (float) eDefaultBufferDelay;
     
     //Now actually get all the data on all the streams
-    while (sdpParser.GetDataRemaining() > 0)
+	for (const auto &sdpLine : sdpLines)
     {
-        sdpParser.GetThruEOL(&sdpLine);
-        if (sdpLine.Len == 0)
+        if (sdpLine.empty())
             continue;//skip over any blank lines
 
-        switch (*sdpLine.Ptr)
+        switch (sdpLine[0])
         {
             case 't':
             {
-                StringParser mParser(&sdpLine);
-                                
-                mParser.ConsumeUntil(nullptr, StringParser::sDigitMask);
-                uint32_t ntpStart = mParser.ConsumeInteger(nullptr);
-                
-                mParser.ConsumeUntil(nullptr, StringParser::sDigitMask);               
-                uint32_t ntpEnd = mParser.ConsumeInteger(nullptr);
+				uint32_t ntpStart, ntpEnd;
+				bool r = qi::phrase_parse(sdpLine.cbegin(), sdpLine.cend(),
+					qi::no_case["t="] >> qi::uint_ >> qi::uint_,
+					qi::ascii::blank, ntpStart, ntpEnd);
                 
                 SetActiveNTPTimes(ntpStart,ntpEnd);
             }
@@ -261,30 +241,22 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
                 fStreamArray[theStreamIndex].fTrackID = currentTrack;
                 currentTrack++;
                 
-                StringParser mParser(&sdpLine);
+				std::string theStreamType, transportID;
+				uint16_t tempPort;
+				bool r = qi::phrase_parse(sdpLine.cbegin(), sdpLine.cend(),
+					qi::no_case["m="] >> +(qi::alpha) >> qi::ushort_ >> +(qi::char_),
+					qi::ascii::blank, theStreamType, tempPort, transportID);
                 
-                //find out what type of track this is
-                mParser.ConsumeLength(nullptr, 2);//go past 'm='
-                StrPtrLen theStreamType;
-                mParser.ConsumeWord(&theStreamType);
-                if (theStreamType.Equal(sVideoStr))
+                if (theStreamType == sVideoStr)
                     fStreamArray[theStreamIndex].fPayloadType = qtssVideoPayloadType;
-                else if (theStreamType.Equal(sAudioStr))
+                else if (theStreamType == sAudioStr)
                     fStreamArray[theStreamIndex].fPayloadType = qtssAudioPayloadType;
-                    
-                //find the port for this stream
-                mParser.ConsumeUntil(nullptr, StringParser::sDigitMask);
-                int32_t tempPort = mParser.ConsumeInteger(nullptr);
+
                 if ((tempPort > 0) && (tempPort < 65536))
-                    fStreamArray[theStreamIndex].fPort = (uint16_t) tempPort;
-                    
-                // find out whether this is TCP or UDP
-                mParser.ConsumeWhitespace();
-                StrPtrLen transportID;
-                mParser.ConsumeWord(&transportID);
-                
-                static const StrPtrLen kTCPTransportStr("RTP/AVP/TCP");
-                if (transportID.Equal(kTCPTransportStr))
+                    fStreamArray[theStreamIndex].fPort = tempPort;
+
+                static const std::string kTCPTransportStr("RTP/AVP/TCP");
+                if (transportID == kTCPTransportStr)
                     fStreamArray[theStreamIndex].fIsTCP = true;
                     
                 theStreamIndex++;
@@ -292,105 +264,71 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
             break;
             case 'a':
             {
-                StringParser aParser(&sdpLine);
+				std::string aLineType, rest;
+				bool r = qi::phrase_parse(sdpLine.cbegin(), sdpLine.cend(),
+					qi::no_case["a="] >> +(qi::alpha) >> ":" >> +(qi::char_),
+					qi::eoi, aLineType, rest);
 
-                aParser.ConsumeLength(nullptr, 2);//go past 'a='
-
-                StrPtrLen aLineType;
-
-                aParser.ConsumeWord(&aLineType);
-
-
-
-                if (aLineType.Equal(sBroadcastControlStr))
-
-                {   // found a control line for the broadcast (delete at time or delete at end of broadcast/server startup) 
-
+                if (aLineType == sBroadcastControlStr)
+                {   
+					// found a control line for the broadcast (delete at time or delete at end of broadcast/server startup) 
                     // printf("found =%s\n",sBroadcastControlStr);
-
-                    aParser.ConsumeUntil(nullptr,StringParser::sWordMask);
-
-                    StrPtrLen sessionControlType;
-
-                    aParser.ConsumeWord(&sessionControlType);
-
-                    if (sessionControlType.Equal(sAutoDisconnect))
+                    if (rest == sAutoDisconnect)
                     {
                        fSessionControlType = kRTSPSessionControl; 
-                    }       
-                    else if (sessionControlType.Equal(sAutoDisconnectTime))
+                    }  
+                    else if (rest == sAutoDisconnectTime)
                     {
                        fSessionControlType = kSDPTimeControl; 
-                    }       
-                    
-
+                    }
                 }
 
                 //if we haven't even hit an 'm' line yet, just ignore all 'a' lines
                 if (theStreamIndex == 0)
                     break;
                     
-                if (aLineType.Equal(sRtpMapStr))
+                if (aLineType == sRtpMapStr)
                 {
+					std::string codecName;
+					r = qi::phrase_parse(rest.cbegin(), rest.cend(),
+						qi::omit[qi::uint_] >> +(qi::char_),
+						qi::ascii::blank, codecName);
                     //mark the codec type if this line has a codec name on it. If we already
                     //have a codec type for this track, just ignore this line
-                    if ((fStreamArray[theStreamIndex - 1].fPayloadName.Len == 0) &&
-                        (aParser.GetThru(nullptr, ' ')))
-                    {
-                        StrPtrLen payloadNameFromParser;
-                        (void)aParser.GetThruEOL(&payloadNameFromParser);
-						char* temp = payloadNameFromParser.GetAsCString();
-//                                                printf("payloadNameFromParser (%x) = %s\n", temp, temp);
-                        (fStreamArray[theStreamIndex - 1].fPayloadName).Set(temp, payloadNameFromParser.Len);
-//                                                printf("%s\n", fStreamArray[theStreamIndex - 1].fPayloadName.Ptr);
-                    }
+					if (fStreamArray[theStreamIndex - 1].fPayloadName.empty())
+						fStreamArray[theStreamIndex - 1].fPayloadName = std::move(codecName);
                 }
-                else if (aLineType.Equal(sControlStr))
-                {           
-					// Modify By EasyDarwin
-					//if ((fStreamArray[theStreamIndex - 1].fTrackName.Len == 0) &&
-     //                   (aParser.GetThru(NULL, ' ')))
-					{
-						StrPtrLen trackNameFromParser;
-						aParser.ConsumeUntil(nullptr,':');
-						aParser.ConsumeLength(nullptr,1);
-						aParser.GetThruEOL(&trackNameFromParser);
+                else if (aLineType == sControlStr)
+                {
+					uint32_t trackID;
+					r = qi::phrase_parse(rest.cbegin(), rest.cend(),
+						qi::omit[+(qi::alpha)] >> "=" >> qi::uint_,
+						qi::ascii::blank, trackID);
 
-						char* temp = trackNameFromParser.GetAsCString();
-//                                                printf("trackNameFromParser (%x) = %s\n", temp, temp);
-						(fStreamArray[theStreamIndex - 1].fTrackName).Set(temp, trackNameFromParser.Len);
-//                                                printf("%s\n", fStreamArray[theStreamIndex - 1].fTrackName.Ptr);
-					
-						StringParser tParser(&trackNameFromParser);
-						tParser.ConsumeUntil(nullptr, '=');
-						tParser.ConsumeUntil(nullptr, StringParser::sDigitMask);
-						fStreamArray[theStreamIndex - 1].fTrackID = tParser.ConsumeInteger(nullptr);
-					}
+					fStreamArray[theStreamIndex - 1].fTrackName = rest;
+					fStreamArray[theStreamIndex - 1].fTrackID = trackID;
                 }
-                else if (aLineType.Equal(sBufferDelayStr))
-                {   // if a BufferDelay is found then set all of the streams to the same buffer delay (it's global)
-                    aParser.ConsumeUntil(nullptr, StringParser::sDigitMask);
-                    theGlobalStreamInfo.fBufferDelay = aParser.ConsumeFloat();
+                else if (aLineType == sBufferDelayStr)
+                {
+					// if a BufferDelay is found then set all of the streams to the same buffer delay (it's global)
+					float delay;
+					r = qi::phrase_parse(rest.cbegin(), rest.cend(),
+						qi::omit[+(qi::alpha)] >> "=" >> qi::float_,
+						qi::ascii::blank, delay);
+					theGlobalStreamInfo.fBufferDelay = delay;
                 }
-
             }
             break;
             case 'c':
             {
-                //get the IP address off this header
-                StringParser cParser(&sdpLine);
-                cParser.ConsumeLength(nullptr, 9);//strip off "c=in ip4 "
-                uint32_t tempIPAddr = SDPSourceInfo::GetIPAddr(&cParser, '/');
-                                
-                //grab the ttl
-                int32_t tempTtl = kDefaultTTL;
-                if (cParser.GetThru(nullptr, '/'))
-                {
-                    tempTtl = cParser.ConsumeInteger(nullptr);
-                    Assert(tempTtl >= 0);
-                    Assert(tempTtl < 65536);
-                }
+				std::string IP;
+				uint16_t tempTtl = kDefaultTTL;
+				bool r = qi::phrase_parse(sdpLine.cbegin(), sdpLine.cend(),
+					qi::no_case["c=in ip4"] >> *(qi::char_ - "/") >> -("/" >> qi::ushort_),
+					qi::ascii::blank, IP, tempTtl);
 
+                uint32_t tempIPAddr = SocketUtils::ConvertStringToAddr(IP.c_str());
+ 
                 if (theStreamIndex > 0)
                 {
                     //if this c= line is part of a stream, it overrides the
@@ -418,28 +356,3 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
     }
         
 }
-
-uint32_t SDPSourceInfo::GetIPAddr(StringParser* inParser, char inStopChar)
-{
-    StrPtrLen ipAddrStr;
-
-    // Get the IP addr str
-    inParser->ConsumeUntil(&ipAddrStr, inStopChar);
-    
-    if (ipAddrStr.Len == 0)
-        return 0;
-    
-    // NULL terminate it
-    char endChar = ipAddrStr.Ptr[ipAddrStr.Len];
-    ipAddrStr.Ptr[ipAddrStr.Len] = '\0';
-    
-    //inet_addr returns numeric IP addr in network byte order, make
-    //sure to convert to host order.
-    uint32_t ipAddr = SocketUtils::ConvertStringToAddr(ipAddrStr.Ptr);
-    
-    // Make sure to put the old char back!
-    ipAddrStr.Ptr[ipAddrStr.Len] = endChar;
-
-    return ipAddr;
-}
-

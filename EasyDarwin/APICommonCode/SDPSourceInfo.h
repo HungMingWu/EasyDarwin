@@ -35,9 +35,8 @@
 #ifndef __SDP_SOURCE_INFO_H__
 #define __SDP_SOURCE_INFO_H__
 
-#include "StrPtrLen.h"
 #include "SourceInfo.h"
-#include "StringParser.h"
+#include <boost/utility/string_view.hpp>
 
 class SDPSourceInfo : public SourceInfo
 {
@@ -56,22 +55,15 @@ class SDPSourceInfo : public SourceInfo
         std::string  GetLocalSDP() override;
 
         // Returns the SDP data
-        StrPtrLen*  GetSDPData()    { return &fSDPData; }
-        
-        // Utility routines
-        
-        // Assuming the parser is currently pointing at the beginning of an dotted-
-        // decimal IP address, this consumes it (stopping at inStopChar), and returns
-        // the IP address (host ordered) as a uint32_t
-        static uint32_t GetIPAddr(StringParser* inParser, char inStopChar);
-      
+        boost::string_view  GetSDPData()    { return fSDPData; }
+
     private:
 
         enum
         {
             kDefaultTTL = 15    //UInt16
         };
-        StrPtrLen   fSDPData;
+        std::string   fSDPData;
 };
 #endif // __SDP_SOURCE_INFO_H__
 

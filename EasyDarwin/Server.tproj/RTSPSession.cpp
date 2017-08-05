@@ -2124,17 +2124,14 @@ void RTSPSession::HandleIncomingDataPacket()
 
 	// Attempt to find the RTP session for this request.
 	auto   packetChannel = (uint8_t)fInputStream.GetRequestBuffer()->Ptr[1];
-	StrPtrLen* theSessionID = this->GetSessionIDForChannelNum(packetChannel);
+	boost::string_view theSessionID = GetSessionIDForChannelNum(packetChannel);
 
-	if (theSessionID == nullptr)
-	{
-		Assert(0);
+	if (theSessionID.empty())
 		return;
-		theSessionID = &fLastRTPSessionIDPtr;
-	}
 
+	StrPtrLen theSessionIDV((char *)theSessionID.data(), theSessionID.length());
 	OSRefTable* theMap = QTSServerInterface::GetServer()->GetRTPSessionMap();
-	OSRef* theRef = theMap->Resolve(theSessionID);
+	OSRef* theRef = theMap->Resolve(&theSessionIDV);
 
 	if (theRef != nullptr)
 		fRTPSession = (RTPSession*)theRef->GetObject();

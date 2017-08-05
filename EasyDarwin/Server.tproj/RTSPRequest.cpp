@@ -466,7 +466,7 @@ bool RTSPRequest::ParseNetworkModeSubHeader(StrPtrLen* inSubHeader)
 }
 
 template <typename S>
-std::vector<std::string> spirit_direct(const S& input, char const* delimiter)
+static std::vector<std::string> spirit_direct(const S& input, char const* delimiter)
 {
 	std::vector<std::string> result;
 	if (!qi::parse(input.begin(), input.end(), 

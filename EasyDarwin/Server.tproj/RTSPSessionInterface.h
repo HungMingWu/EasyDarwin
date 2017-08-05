@@ -34,6 +34,8 @@
 #ifndef __RTSPSESSIONINTERFACE_H__
 #define __RTSPSESSIONINTERFACE_H__
 
+#include <vector>
+#include <string>
 #include "RTSPRequestStream.h"
 #include "RTSPResponseStream.h"
 #include "Task.h"
@@ -79,7 +81,7 @@ public:
 
 	//
 	// Given a channel number, returns the RTSP Session ID to which this channel number refers
-	StrPtrLen*  GetSessionIDForChannelNum(uint8_t inChannelNum);
+	boost::string_view  GetSessionIDForChannelNum(uint8_t inChannelNum);
 
 	//Two main things are persistent through the course of a session, not
 	//associated with any one request. The RequestStream (which can be used for
@@ -185,7 +187,7 @@ protected:
 	unsigned int        fObjectHolders{0};
 
 	uint8_t               fCurChannelNum{0};
-	StrPtrLen*          fChNumToSessIDMap{nullptr};
+	std::vector<std::string> fChNumToSessIDMap;
 
 	QTSS_StreamRef      fStreamRef;
 

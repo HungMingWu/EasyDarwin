@@ -86,7 +86,7 @@ class QTSSModuleUtils
         // for disposing this memory
 
         static char* GetFullPath(   QTSS_RTSPRequestObject inRequest,
-                                    QTSS_AttributeID whichFileType,
+                                    boost::string_view whichFileStr,
                                     uint32_t* outLen,
                                     StrPtrLen* suffix = nullptr);
 
@@ -229,7 +229,7 @@ class QTSSModuleUtils
 
         static bool HavePlayerProfile(QTSS_PrefsObject inPrefObjectToCheck, QTSS_StandardRTSP_Params* inParams, uint32_t feature);
         
-        static QTSS_Error AuthorizeRequest(QTSS_RTSPRequestObject theRTSPRequest, bool* allowed, bool*haveUser,bool *authContinue);
+        static QTSS_Error AuthorizeRequest(QTSS_RTSPRequestObject theRTSPRequest, bool allowed, bool haveUser,bool authContinue);
         
          
     private:

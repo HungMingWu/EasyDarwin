@@ -203,6 +203,14 @@ public:
 	uint32_t          GetMaxBandwidthBits() { uint32_t maxRTSP = GetLastRTSPBandwithBits();  return  maxRTSP; }
 	boost::string_view GetSessionID() const { return fRTSPSessionID; }
 	std::vector<RTPStream*> GetStreams()  { return fStreamBuffer; }
+	void SetUserName(boost::string_view name) { fUserName = std::string(name); }
+	boost::string_view GetUserName() const { return fUserName; }
+	void SetLocalDNS(boost::string_view local) { fRTSPSessLocalDNS = std::string(local); }
+	boost::string_view GetLocalDNS() const { return fRTSPSessLocalDNS; }
+	void SetLocalAddr(boost::string_view local) { fRTSPSessLocalAddrStr = std::string(local); }
+	boost::string_view GetLocalAddr() const { return fRTSPSessLocalAddrStr; }
+	void SetRemoteAddr(boost::string_view remote) {	fRTSPSessRemoteAddrStr = std::string(fRTSPSessRemoteAddrStr); }
+	boost::string_view GetRemoteAddr() const { return fRTSPSessRemoteAddrStr; }
 protected:
 	// These variables are setup by the derived RTPSession object when
 	// Play and Pause get called
@@ -245,6 +253,7 @@ protected:
 	RTSPSessionInterface* fRTSPSession{nullptr};
 
 	std::vector<RTPStream*>       fStreamBuffer;
+	std::string fUserName;
 
 private:
 
@@ -267,7 +276,6 @@ private:
 		kFullRequestURLBufferSize = 256,
 
 		kIPAddrStrBufSize = 20,
-		kLocalDNSBufSize = 80,
 
 		kAuthNonceBufSize = 32,
 		kAuthOpaqueBufSize = 32,
@@ -280,11 +288,11 @@ private:
 	// theses are dictionary items picked up by the RTSPSession
 	// but we need to store copies of them for logging purposes.
 
-	char        fRTSPSessRemoteAddrStr[kIPAddrStrBufSize];
-	char        fRTSPSessLocalDNS[kLocalDNSBufSize];
-	char        fRTSPSessLocalAddrStr[kIPAddrStrBufSize];
+	std::string        fRTSPSessRemoteAddrStr;
+	std::string        fRTSPSessLocalDNS;
+	std::string        fRTSPSessLocalAddrStr;
 
-	char        fUserNameBuf[RTSPSessionInterface::kMaxUserNameLen];
+	
 	char        fUserPasswordBuf[RTSPSessionInterface::kMaxUserPasswordLen];
 	char        fUserRealmBuf[RTSPSessionInterface::kMaxUserRealmLen];
 	uint32_t      fLastRTSPReqRealStatusCode{200};

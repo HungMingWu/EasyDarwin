@@ -47,23 +47,23 @@ uint32_t					RTSPSessionInterface::sOptionsRequestBody[kMaxRandomDataSize / size
 QTSSAttrInfoDict::AttrInfo  RTSPSessionInterface::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
 	/* 0 */ { "qtssRTSPSesID",              nullptr,           qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 1 */ { "qtssRTSPSesLocalAddr",       SetupParams,    qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
-	/* 2 */ { "qtssRTSPSesLocalAddrStr",    SetupParams,    qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
-	/* 3 */ { "qtssRTSPSesLocalDNS",        SetupParams,    qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
-	/* 4 */ { "qtssRTSPSesRemoteAddr",      SetupParams,    qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
-	/* 5 */ { "qtssRTSPSesRemoteAddrStr",   SetupParams,    qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
-	/* 6 */ { "qtssRTSPSesEventCntxt",      nullptr,           qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 7 */ { "qtssRTSPSesType",            nullptr,           qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 8 */ { "qtssRTSPSesStreamRef",       nullptr,           qtssAttrDataTypeQTSS_StreamRef, qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 1 */ {},
+	/* 2 */ {},
+	/* 3 */ {},
+	/* 4 */ {},
+	/* 5 */ {},
+	/* 6 */ {},
+	/* 7 */ {},
+	/* 8 */ {},
 
-	/* 9 */ { "qtssRTSPSesLastUserName",    nullptr,           qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 10 */{ "qtssRTSPSesLastUserPassword",nullptr,           qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 11 */{ "qtssRTSPSesLastURLRealm",    nullptr,           qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 9 */ {},
+	/* 10 */{},
+	/* 11 */{},
 
-	/* 12 */{ "qtssRTSPSesLocalPort",       SetupParams,    qtssAttrDataTypeUInt16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
-	/* 13 */{ "qtssRTSPSesRemotePort",      SetupParams,    qtssAttrDataTypeUInt16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
+	/* 12 */{},
+	/* 13 */{},
 
-	/* 14 */{ "qtssRTSPSesLastDigestChallenge",nullptr,        qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe  }
+	/* 14 */{}
 
 
 };
@@ -97,20 +97,11 @@ RTSPSessionInterface::RTSPSessionInterface()
 {
 	fTimeoutTask.SetTask(this);
 	fSocket.SetTask(this);
-	fStreamRef = this;
 
 	//fSessionID = (uint32_t)atomic_add(&sSessionIDCounter, 1);
 	fSessionID = ++sSessionIDCounter;
 
 	this->SetVal(qtssRTSPSesID, &fSessionID, sizeof(fSessionID));
-	this->SetVal(qtssRTSPSesEventCntxt, &fOutputSocketP, sizeof(fOutputSocketP));
-	this->SetVal(qtssRTSPSesType, &fSessionType, sizeof(fSessionType));
-	this->SetVal(qtssRTSPSesStreamRef, &fStreamRef, sizeof(fStreamRef));
-
-	this->SetEmptyVal(qtssRTSPSesLastUserName, &fUserNameBuf[0], kMaxUserNameLen);
-	this->SetEmptyVal(qtssRTSPSesLastUserPassword, &fUserPasswordBuf[0], kMaxUserPasswordLen);
-	this->SetEmptyVal(qtssRTSPSesLastURLRealm, &fUserRealmBuf[0], kMaxUserRealmLen);
-
 
 	fInputStream.ShowRTSP(QTSServerInterface::GetServer()->GetPrefs()->GetRTSPDebugPrintfs());
 	fOutputStream.ShowRTSP(QTSServerInterface::GetServer()->GetPrefs()->GetRTSPDebugPrintfs());
@@ -384,34 +375,22 @@ void    RTSPSessionInterface::SnarfInputSocket(RTSPSessionInterface* fromRTSPSes
 	fInputStream.AttachToSocket(fInputSocketP);
 }
 
-void* RTSPSessionInterface::SetupParams(QTSSDictionary* inSession, uint32_t* /*outLen*/)
+std::string RTSPSessionInterface::GetLocalAddr()
 {
-	auto* theSession = (RTSPSessionInterface*)inSession;
+	StrPtrLen* theLocalAddrStr = fSocket.GetLocalAddrStr();
+	return std::string(theLocalAddrStr->Ptr, theLocalAddrStr->Len);
+}
 
-	theSession->fLocalAddr = theSession->fSocket.GetLocalAddr();
-	theSession->fRemoteAddr = theSession->fSocket.GetRemoteAddr();
+std::string RTSPSessionInterface::GetLocalDNS()
+{
+	StrPtrLen* theLocalDNSStr = fSocket.GetLocalDNSStr();
+	return std::string(theLocalDNSStr->Ptr, theLocalDNSStr->Len);
+}
 
-	theSession->fLocalPort = theSession->fSocket.GetLocalPort();
-	theSession->fRemotePort = theSession->fSocket.GetRemotePort();
-
-	StrPtrLen* theLocalAddrStr = theSession->fSocket.GetLocalAddrStr();
-	StrPtrLen* theLocalDNSStr = theSession->fSocket.GetLocalDNSStr();
-	StrPtrLen* theRemoteAddrStr = theSession->fSocket.GetRemoteAddrStr();
-	if (theLocalAddrStr == nullptr || theLocalDNSStr == nullptr || theRemoteAddrStr == nullptr)
-	{    //the socket is bad most likely values are all 0. If the socket had an error we shouldn't even be here.
-		 //theLocalDNSStr is set to localAddr if it is unavailable, so it should be present at this point as well.
-		Assert(0);   //for debugging
-		return nullptr; //nothing to set
-	}
-	theSession->SetVal(qtssRTSPSesLocalAddr, &theSession->fLocalAddr, sizeof(theSession->fLocalAddr));
-	theSession->SetVal(qtssRTSPSesLocalAddrStr, theLocalAddrStr->Ptr, theLocalAddrStr->Len);
-	theSession->SetVal(qtssRTSPSesLocalDNS, theLocalDNSStr->Ptr, theLocalDNSStr->Len);
-	theSession->SetVal(qtssRTSPSesRemoteAddr, &theSession->fRemoteAddr, sizeof(theSession->fRemoteAddr));
-	theSession->SetVal(qtssRTSPSesRemoteAddrStr, theRemoteAddrStr->Ptr, theRemoteAddrStr->Len);
-
-	theSession->SetVal(qtssRTSPSesLocalPort, &theSession->fLocalPort, sizeof(theSession->fLocalPort));
-	theSession->SetVal(qtssRTSPSesRemotePort, &theSession->fRemotePort, sizeof(theSession->fRemotePort));
-	return nullptr;
+std::string RTSPSessionInterface::GetRemoteAddr()
+{
+	StrPtrLen* theRemoteAddrStr = fSocket.GetRemoteAddrStr();
+	return std::string(theRemoteAddrStr->Ptr, theRemoteAddrStr->Len);
 }
 
 void RTSPSessionInterface::SaveOutputStream()

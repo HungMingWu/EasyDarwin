@@ -426,12 +426,7 @@ void  RTPStream::SetOverBufferState(RTSPRequestInterface* request)
 QTSS_Error RTPStream::Setup(RTSPRequestInterface* request, QTSS_AddStreamFlags inFlags)
 {
 	//Get the URL for this track
-	std::unique_ptr<char[]> str(new char[128]);
-	StrPtrLen fStreamURLPtr1(str.get());
-	fStreamURLPtr1.Len = 128;
-	if (request->GetValue(qtssRTSPReqFileName, 0, fStreamURLPtr1.Ptr, &fStreamURLPtr1.Len) != QTSS_NoErr)
-		return QTSSModuleUtils::SendErrorResponse(request, qtssClientBadRequest, qtssMsgFileNameTooLong);
-	fStreamURL = std::string(fStreamURLPtr1.Ptr, fStreamURLPtr1.Len);//just in case someone wants to use string routines
+	fStreamURL = request->GetFileName();//just in case someone wants to use string routines
 
 	//
 	// Store the late-tolerance value that came out of hte x-RTP-Options header,

@@ -141,18 +141,25 @@ public:
 	{
 		kMaxRandomDataSize = 256 * 1024,
 	};
-
+	void SetDigestChallenge(boost::string_view digest) { lastDigestChallenge = std::string(digest); }
+	boost::string_view GetDigestChallenge() const { return lastDigestChallenge;  }
+	std::string GetLocalAddr();
+	std::string GetLocalDNS();
+	std::string GetRemoteAddr();
+	void SetLastURLRealm(boost::string_view realm) { fUserRealm = std::string(realm); }
+	boost::string_view GetLastURLRealm() const { return fUserRealm; }
+	void SetPassword(boost::string_view password) { fUserPassword = std::string(password); }
 protected:
 	enum
 	{
 		kFirstRTSPSessionID = 1,    //uint32_t
 	};
-
+	std::string lastDigestChallenge;
 	//Each RTSP session has a unique number that identifies it.
 
-	char                fUserNameBuf[kMaxUserNameLen];
-	char                fUserPasswordBuf[kMaxUserPasswordLen];
-	char                fUserRealmBuf[kMaxUserRealmLen];
+	std::string         fUserName;
+	std::string         fUserPassword;
+	std::string         fUserRealm;
 
 	TimeoutTask         fTimeoutTask;//allows the session to be timed out
 
@@ -189,15 +196,8 @@ protected:
 	uint8_t               fCurChannelNum{0};
 	std::vector<std::string> fChNumToSessIDMap;
 
-	QTSS_StreamRef      fStreamRef;
-
 	uint32_t              fSessionID;
-	uint32_t              fLocalAddr;
-	uint32_t              fRemoteAddr;
 	int32_t              fRequestBodyLen{-1};
-
-	uint16_t              fLocalPort;
-	uint16_t              fRemotePort;
 
 	// For OPTIONS request
 	StrPtrLen				fOldOutputStreamBuffer;
@@ -213,9 +213,6 @@ protected:
 	static 	uint32_t			sOptionsRequestBody[kMaxRandomDataSize / sizeof(uint32_t)];
 
 	//Dictionary support
-
-	// Param retrieval function
-	static void*        SetupParams(QTSSDictionary* inSession, uint32_t* outLen);
 
 	static QTSSAttrInfoDict::AttrInfo   sAttributes[];
 };

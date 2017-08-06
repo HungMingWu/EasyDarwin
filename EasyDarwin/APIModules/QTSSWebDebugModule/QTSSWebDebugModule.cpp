@@ -96,51 +96,5 @@ QTSS_Error Filter(QTSS_Filter_Params* inParams)
 	if (::memcmp(theFullRequest, sRequestHeader.Ptr, sRequestHeader.Len) != 0)
 		return QTSS_NoErr;
 
-#if MEMORY_DEBUGGING
-	uint32_t* theStateVal = NULL;
-	(void)QTSS_GetValuePtr(inParams->inRTSPRequest, sStateAttr, 0, (void**)&theStateVal, &theLen);
-	//if ((theStateVal == NULL) || (theLen != sizeof(uint32_t)))
-	//{
-	bool theFalse = false;
-	(void)QTSS_SetValue(inParams->inRTSPRequest, qtssRTSPReqRespKeepAlive, 0, &theFalse, sizeof(theFalse));
-
-	// Begin writing the HTTP response. We don't need to worry about flow control
-	// because we're using the QTSS_RTSPRequestObject for the response, which does buffering
-	(void)QTSS_Write(inParams->inRTSPRequest, sResponseHeader, ::strlen(sResponseHeader), &theLen, 0);
-
-	//QTSS_EventContextRef* theContext = NULL;
-	//(void)QTSS_GetValuePtr(inParams->inRTSPSession, qtssRTSPSesEventCntxt, 0, (void**)&theContext, &theLen);
-	//Assert(theContext != NULL);
-	//Assert(theLen == sizeof(QTSS_EventContextRef));
-
-	//(void)QTSS_RequestEvent(*theContext, EV_WR);
-
-//  uint32_t theValue = 4;
-//  (void)QTSS_SetValue(inParams->inRTSPRequest, sStateAttr, 0, &theValue, sizeof(theValue));
-//  return QTSS_NoErr;
-//}
-
-//we must hold the tagQueue mutex for the duration of this exercise because
-//we don't want any of the values we are reporting to change
-	OSMutexLocker locker(OSMemory::GetTagQueueMutex());
-
-	//write out header and total allocated memory
-	char buffer[1024];
-	sprintf(buffer, "<HTML><TITLE>TimeShare Debug Page</TITLE><BODY>Total dynamic memory allocated: %" _S32BITARG_ "<P>List of objects:<BR>", OSMemory::GetAllocatedMemory());
-	(void)QTSS_Write(inParams->inRTSPRequest, buffer, ::strlen(buffer), &theLen, 0);
-
-	//now report the list of tags:
-	for (OSQueueIter iter(OSMemory::GetTagQueue()); !iter.IsDone(); iter.Next())
-	{
-		OSMemory::TagElem* elem = (OSMemory::TagElem*)iter.GetCurrent()->GetEnclosingObject();
-		Assert(elem != NULL);
-		if (elem->numObjects > 0)
-		{
-			sprintf(buffer, "Object allocated at: %s, %d. Number of currently allocated objects: %" _S32BITARG_ ", Total size: %" _S32BITARG_ "<BR>", elem->fileName, elem->line, elem->numObjects, elem->totMemory);
-			(void)QTSS_Write(inParams->inRTSPRequest, buffer, ::strlen(buffer), &theLen, 0);
-		}
-	}
-	(void)QTSS_Write(inParams->inRTSPRequest, sResponseEnd, ::strlen(sResponseEnd), &theLen, 0);
-#endif
 	return QTSS_NoErr;
 }

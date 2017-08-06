@@ -879,7 +879,7 @@ QTSS_Error RTSPRequest::ParseBasicHeader(StringParser *inParsedAuthLinePtr)
 
 
 	// Set the qtssRTSPReqUserName and qtssRTSPReqUserPassword attributes in the Request object
-	(void) this->SetValue(qtssRTSPReqUserName, 0, name.Ptr, name.Len, QTSSDictionary::kDontObeyReadOnly);
+	SetAuthUserName({ name.Ptr, name.Len });
 	(void) this->SetValue(qtssRTSPReqUserPassword, 0, password.Ptr, password.Len, QTSSDictionary::kDontObeyReadOnly);
 
 	// Also set the qtssUserName attribute in the qtssRTSPReqUserProfile object attribute of the Request Object
@@ -927,7 +927,7 @@ QTSS_Error RTSPRequest::ParseDigestHeader(StringParser *inParsedAuthLinePtr)
 		// fAuthRealm, fAuthNonce, fAuthUri, fAuthNonceCount, fAuthResponse, fAuthOpaque
 		if (fieldName.Equal(sUsernameStr)) {
 			// Set the qtssRTSPReqUserName attribute in the Request object
-			(void) this->SetValue(qtssRTSPReqUserName, 0, fieldValue.Ptr, fieldValue.Len, QTSSDictionary::kDontObeyReadOnly);
+			SetAuthUserName({ fieldValue.Ptr, fieldValue.Len });
 			// Also set the qtssUserName attribute in the qtssRTSPReqUserProfile object attribute of the Request Object
 			(void)fUserProfile.SetValue(qtssUserName, 0, fieldValue.Ptr, fieldValue.Len, QTSSDictionary::kDontObeyReadOnly);
 		}
@@ -991,9 +991,11 @@ void RTSPRequest::SetupAuthLocalPath(void)
 	// Get the truncated path on a setup, because setups have the trackID appended
 	if (qtssSetupMethod == fMethod)
 		theID = qtssRTSPReqFilePathTrunc;
-
+	StrPtrLen theFilePath;
+	GetValuePtr(theID, 0, (void**)&theFilePath.Ptr, &theFilePath.Len);
 	uint32_t theLen = 0;
-	char* theFullPath = QTSSModuleUtils::GetFullPath(this, theID, &theLen, nullptr);
+	boost::string_view theFilePathV(theFilePath.Ptr, theFilePath.Len);
+	char* theFullPath = QTSSModuleUtils::GetFullPath(this, theFilePathV, &theLen, nullptr);
 	SetLocalPath({ theFullPath, theLen });
 	delete[] theFullPath;
 }
@@ -1041,11 +1043,11 @@ QTSS_Error RTSPRequest::SendDigestChallenge(uint32_t qop, StrPtrLen *nonce, StrP
 
 	std::string challengePtr(challengeFormatter.GetBufPtr(), challengeFormatter.GetBytesWritten() - 1);
 
-	this->SetValue(qtssRTSPReqDigestChallenge, 0, challengePtr.c_str(), challengePtr.length(), QTSSDictionary::kDontObeyReadOnly);
+	SetDigestChallenge(challengePtr);
 	RTSPSessionInterface* thisRTSPSession = this->GetSession();
 	if (thisRTSPSession)
 	{
-		(void)thisRTSPSession->SetValue(qtssRTSPSesLastDigestChallenge, 0, challengePtr.c_str(), challengePtr.length(), QTSSDictionary::kDontObeyReadOnly);
+		thisRTSPSession->SetDigestChallenge(challengePtr);
 	}
 
 	fStatus = qtssClientUnAuthorized;

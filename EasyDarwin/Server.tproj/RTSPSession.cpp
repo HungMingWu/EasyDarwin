@@ -648,10 +648,7 @@ int64_t RTSPSession::Run()
 				fRequest->SetAllowed(allowed);
 				fRequest->SetHasUser(hasUser);
 				fRequest->SetAuthHandled(handled);
-
-				StrPtrLen* lastUsedDigestChallengePtr = this->GetValue(qtssRTSPSesLastDigestChallenge);
-				if (lastUsedDigestChallengePtr != nullptr)
-					(void) fRequest->SetValue(qtssRTSPReqDigestChallenge, (uint32_t)0, (void *)lastUsedDigestChallengePtr->Ptr, lastUsedDigestChallengePtr->Len, QTSSDictionary::kDontObeyReadOnly);
+				fRequest->SetDigestChallenge(lastDigestChallenge);
 
 
 				numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPAthnRole);
@@ -958,8 +955,7 @@ int64_t RTSPSession::Run()
 					// no modules took this one so send back a parameter error
 					if (fRequest->GetMethod() == qtssSetParameterMethod) // keep session
 					{
-						QTSS_RTSPStatusCode statusCode = qtssSuccessOK; //qtssClientParameterNotUnderstood;
-						fRequest->SetValue(qtssRTSPReqStatusCode, 0, &statusCode, sizeof(statusCode));
+						fRequest->SetStatus(qtssSuccessOK);
 						fRequest->SendHeader();
 					}
 					else
@@ -1358,26 +1354,19 @@ QTSS_Error RTSPSession::PreFilterForHTTPProxyTunnel()
 			// contruct a 200 OK header with an "x-server-ip-address" header
 
 			char        responseHeaderBuf[kMaxHTTPResponseLen];
-			char        localIPAddrBuf[20] = { 0 };
-			StrPtrLen   localIPAddr(localIPAddrBuf, 19);
-
-			// get a copy of the local IP address from the dictionary
-			// 从字典中得到本地ip地址
-
-			this->GetValue(qtssRTSPSesLocalAddrStr, 0, localIPAddr.Ptr, &localIPAddr.Len);
-			Assert(localIPAddr.Len < sizeof(localIPAddrBuf));
-			localIPAddrBuf[localIPAddr.Len] = 0;
+	
+			std::string localIPAddr = GetLocalAddr();;
 
 			// 使用"x-server-ip-address" 头部字段,构造响应报文
 			char *headerFieldPtr = "";
 			if (showServerInfo)
 			{
 				headerFieldPtr = QTSServerInterface::GetServerHeader().Ptr;
-				sprintf(responseHeaderBuf, sHTTPResponseFormatStr, "X-server-ip-address: ", localIPAddrBuf, "\r\n", headerFieldPtr);
+				sprintf(responseHeaderBuf, sHTTPResponseFormatStr, "X-server-ip-address: ", localIPAddr.c_str(), "\r\n", headerFieldPtr);
 			}
 			else
 			{
-				sprintf(responseHeaderBuf, sHTTPNoServerResponseFormatStr, "X-server-ip-address: ", localIPAddrBuf, "\r\n", headerFieldPtr);
+				sprintf(responseHeaderBuf, sHTTPNoServerResponseFormatStr, "X-server-ip-address: ", localIPAddr.c_str(), "\r\n", headerFieldPtr);
 			}
 			Assert(::strlen(responseHeaderBuf) < kMaxHTTPResponseLen);
 			fOutputStream.Put(responseHeaderBuf);
@@ -1684,8 +1673,7 @@ void RTSPSession::SetupRequest()
 		boost::string_view cSeq = fRequest->GetHeaderDict().Get(qtssCSeqHeader);
 		if (cSeq.empty())
 		{
-			statusCode = qtssClientBadRequest;
-			fRequest->SetValue(qtssRTSPReqStatusCode, 0, &statusCode, sizeof(statusCode));
+			fRequest->SetStatus(qtssClientBadRequest);
 			fRequest->SendHeader();
 			return;
 		}
@@ -1722,8 +1710,7 @@ void RTSPSession::SetupRequest()
 		boost::string_view cSeq = fRequest->GetHeaderDict().Get(qtssCSeqHeader);
 		if (cSeq.empty()) // keep session
 		{
-			statusCode = qtssClientBadRequest;
-			fRequest->SetValue(qtssRTSPReqStatusCode, 0, &statusCode, sizeof(statusCode));
+			fRequest->SetStatus(qtssClientBadRequest);
 			fRequest->SendHeader();
 			return;
 		}
@@ -1732,8 +1719,7 @@ void RTSPSession::SetupRequest()
 		// If the RTPSession doesn't exist, return error
 		if (fRTPSession == nullptr) // keep session
 		{
-			statusCode = qtssClientSessionNotFound;
-			fRequest->SetValue(qtssRTSPReqStatusCode, 0, &statusCode, sizeof(statusCode));
+			fRequest->SetStatus(qtssClientSessionNotFound);
 			fRequest->SendHeader();
 			return;
 		}
@@ -1940,21 +1926,9 @@ void RTSPSession::SetupClientSessionAttrs()
 		fRTPSession->SetQueryString(fRequest->GetQueryString());
 
 	// store RTSP session info in the RTPSession.   
-	StrPtrLen tempStr;
-	tempStr.Len = 0;
-	(void) this->GetValuePtr(qtssRTSPSesRemoteAddrStr, (uint32_t)0, (void **)&tempStr.Ptr, &tempStr.Len);
-	Assert(tempStr.Len != 0);
-	(void)fRTPSession->SetValue(qtssCliRTSPSessRemoteAddrStr, (uint32_t)0, tempStr.Ptr, tempStr.Len, QTSSDictionary::kDontObeyReadOnly);
-
-	tempStr.Len = 0;
-	(void) this->GetValuePtr(qtssRTSPSesLocalDNS, (uint32_t)0, (void **)&tempStr.Ptr, &tempStr.Len);
-	Assert(tempStr.Len != 0);
-	(void)fRTPSession->SetValue(qtssCliRTSPSessLocalDNS, (uint32_t)0, (void **)tempStr.Ptr, tempStr.Len, QTSSDictionary::kDontObeyReadOnly);
-
-	tempStr.Len = 0;
-	(void) this->GetValuePtr(qtssRTSPSesLocalAddrStr, (uint32_t)0, (void **)&tempStr.Ptr, &tempStr.Len);
-	Assert(tempStr.Len != 0);
-	(void)fRTPSession->SetValue(qtssCliRTSPSessLocalAddrStr, (uint32_t)0, tempStr.Ptr, tempStr.Len, QTSSDictionary::kDontObeyReadOnly);
+	fRTPSession->SetRemoteAddr(GetRemoteAddr());
+	fRTPSession->SetLocalDNS(GetLocalDNS());
+	fRTPSession->SetLocalAddr(GetLocalAddr());
 }
 
 uint32_t RTSPSession::GenerateNewSessionID(char* ioBuffer)
@@ -2071,20 +2045,19 @@ QTSS_Error RTSPSession::IsOkToAddNewRTPSession()
 void RTSPSession::SaveRequestAuthorizationParams(RTSPRequest *theRTSPRequest)
 {
 	// Set the RTSP session's copy of the user name
-	StrPtrLen* tempPtr = theRTSPRequest->GetValue(qtssRTSPReqUserName);
-	Assert(tempPtr != nullptr);
-	if (tempPtr)
+	boost::string_view userName = theRTSPRequest->GetAuthUserName();
+	if (!userName.empty())
 	{
-		(void)this->SetValue(qtssRTSPSesLastUserName, 0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
-		(void)fRTPSession->SetValue(qtssCliRTSPSesUserName, (uint32_t)0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
+		fUserName = std::string(userName);
+		fRTPSession->SetUserName(userName);
 	}
 
 	// Same thing... user password
-	tempPtr = theRTSPRequest->GetValue(qtssRTSPReqUserPassword);
+	StrPtrLen* tempPtr = theRTSPRequest->GetValue(qtssRTSPReqUserPassword);
 	Assert(tempPtr != nullptr);
 	if (tempPtr)
 	{
-		(void)this->SetValue(qtssRTSPSesLastUserPassword, 0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
+		SetPassword({ tempPtr->Ptr, tempPtr->Len });
 		(void)fRTPSession->SetValue(qtssCliRTSPSesUserPassword, (uint32_t)0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
 	}
 
@@ -2097,12 +2070,12 @@ void RTSPSession::SaveRequestAuthorizationParams(RTSPRequest *theRTSPRequest)
 			std::unique_ptr<char[]> theDefaultRealm(QTSServerInterface::GetServer()->GetPrefs()->GetAuthorizationRealm());
 			char *realm = theDefaultRealm.get();
 			uint32_t len = ::strlen(theDefaultRealm.get());
-			(void)this->SetValue(qtssRTSPSesLastURLRealm, 0, realm, len, QTSSDictionary::kDontObeyReadOnly);
+			SetLastURLRealm({ realm, len });
 			(void)fRTPSession->SetValue(qtssCliRTSPSesURLRealm, (uint32_t)0, realm, len, QTSSDictionary::kDontObeyReadOnly);
 		}
 		else
 		{
-			(void)this->SetValue(qtssRTSPSesLastURLRealm, 0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
+			SetLastURLRealm({ tempPtr->Ptr, tempPtr->Len });
 			(void)fRTPSession->SetValue(qtssCliRTSPSesURLRealm, (uint32_t)0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
 		}
 	}

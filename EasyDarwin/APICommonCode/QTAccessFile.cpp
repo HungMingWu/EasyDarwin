@@ -579,26 +579,12 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     char nameBuff[256];
     StrPtrLen reqNameStr(nameBuff, kBuffLen);
     StrPtrLen profileNameStr(username);
-	QTSSDictionary *dict = (QTSSDictionary *)theRTSPRequest;
-    theErr = dict->GetValue(qtssRTSPReqUserName,0, (void *) reqNameStr.Ptr, &reqNameStr.Len);
- 
-    
-if (DEBUG_QTACCESS)
-{   printf("QTAccessFile::AuthorizeRequest qtaccess profile user =%s ", username);
-    reqNameStr.PrintStr("request user=","\n");
-    printf("QTAccessFile::AuthorizeRequest allowRequest=%d founduser=%d authContinue=%d\n", allowRequest, founduser, authContinue);
-}   
+  
     if (allowRequest && founduser)
         theErr = QTSSModuleUtils::AuthorizeRequest(theRTSPRequest, &allowRequest, &founduser,&authContinue);
     if (!allowRequest && !founduser)
         theErr = QTSSModuleUtils::AuthorizeRequest(theRTSPRequest, &allowRequest, &founduser,&authContinue);
 
-if (DEBUG_QTACCESS)
-{   printf("QTAccessFile::AuthorizeRequest QTSSModuleUtils::AuthorizeRequest qtaccess profile user =%s ", username);
-    reqNameStr.PrintStr("request user=","\n");
-    printf("QTAccessFile::AuthorizeRequest allowRequest=%d founduser=%d authContinue=%d\n", allowRequest, founduser, authContinue);
-}   
- 
     return theErr;
 }
 

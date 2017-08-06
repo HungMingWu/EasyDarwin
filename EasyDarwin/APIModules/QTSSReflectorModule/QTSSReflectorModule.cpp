@@ -46,6 +46,7 @@
 
 #include "QueryParamList.h"
 #include "EasyUtil.h"
+#include "RTSPSession.h"
 
 using namespace std;
 
@@ -363,6 +364,10 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 	return QTSS_NoErr;
 }
 
+static std::string buildStreamName(boost::string_view theStreamName, uint32_t theChannelNum)
+{
+	return std::string(theStreamName) + EASY_KEY_SPLITER + std::to_string(theChannelNum);
+}
 
 QTSS_Error Initialize(QTSS_Initialize_Params* inParams)
 {
@@ -721,34 +726,31 @@ QTSS_Error ProcessRTSPRequest(QTSS_StandardRTSP_Params* inParams)
 	return QTSS_NoErr;
 }
 
+static std::string getQueryString(RTSPRequest *pReq) {
+	std::string theQueryString = std::string(pReq->GetQueryString());
+	if (!theQueryString.empty())
+		theQueryString = EasyUtil::Urldecode(theQueryString.data());
+	return theQueryString;
+};
+
+static uint32_t GetChannel(RTSPRequest *pReq) {
+	std::string queryTemp = getQueryString(pReq);
+	QueryParamList parList(const_cast<char *>(queryTemp.c_str()));
+	const char* chnNum = parList.DoFindCGIValueForParam(EASY_TAG_CHANNEL);
+	if (chnNum)
+		return std::stoi(chnNum);
+	return 1;
+}
+
 static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool isPush, bool *foundSessionPtr, char** resultFilePath)
 {
-	char* theFileNameStr = nullptr;
-	QTSS_Error theErr = ((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqFileName, 0, &theFileNameStr);
-	Assert(theErr == QTSS_NoErr);
-	std::unique_ptr<char[]> theFileNameStrDeleter(theFileNameStr);
-	if (theErr != QTSS_NoErr)
-		return nullptr;
+	std::string theFileNameStr = ((RTSPRequest*)inParams->inRTSPRequest)->GetFileName();
 
 	RTSPRequest *pReq = (RTSPRequest *)(inParams->inRTSPRequest);
 
-	std::string queryTemp = [pReq]() {
-		std::string theQueryString = std::string(pReq->GetQueryString());
-		if (!theQueryString.empty())
-			theQueryString = EasyUtil::Urldecode(theQueryString.data());
-		return theQueryString;
-	}();
+	uint32_t theChannelNum = GetChannel(pReq);
 
-	uint32_t theChannelNum = [&queryTemp]() {
-		QueryParamList parList(const_cast<char *>(queryTemp.c_str()));
-		const char* chnNum = parList.DoFindCGIValueForParam(EASY_TAG_CHANNEL);
-		if (chnNum)
-			return std::stoi(chnNum);
-		return 1;
-	}();
-
-
-	StrPtrLen theFullPath(theFileNameStr);
+	StrPtrLen theFullPath((char *)theFileNameStr.c_str());
 
 	if (theFullPath.Len > sMOVSuffix.Len)
 	{
@@ -763,8 +765,9 @@ static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool
 	{
 		// Check and see if the full path to this file matches an existing ReflectorSession
 		StrPtrLen thePathPtr;
+		std::string fileName = ((RTSPRequest *)inParams->inRTSPRequest)->GetFileName();
 		std::unique_ptr<char[]> sdpPath(QTSSModuleUtils::GetFullPath(inParams->inRTSPRequest,
-			qtssRTSPReqFileName,
+			fileName,
 			&thePathPtr.Len, &sSDPSuffix));
 
 		thePathPtr.Ptr = sdpPath.get();
@@ -879,9 +882,7 @@ std::string DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ch
 			editedSDP += tempBuff;
 
 			editedSDP += " IN IP4 ";
-			dict->GetValue(qtssCliRTSPSessRemoteAddrStr, 0, tempBuff, &buffLen);
-			editedSDP += std::string(tempBuff, buffLen);
-
+			editedSDP += std::string(dict->GetRemoteAddr());
 			editedSDP += "\r\n";
 		}
 	}
@@ -907,30 +908,14 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	//printf("QTSSReflectorModule:DoAnnounce\n");
 	//
 	// Get the full path to this file
-	char* theFileNameStr = nullptr;
-	(void)((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqFileName, 0, &theFileNameStr);
-	std::unique_ptr<char[]> theFileNameStrDeleter(theFileNameStr);
-	StrPtrLen theFullPath(theFileNameStr);
+	std::string theFileNameStr = ((RTSPRequest*)inParams->inRTSPRequest)->GetFileName();
+	StrPtrLen theFullPath((char *)theFileNameStr.c_str());
 
 	RTSPRequest *pReq = (RTSPRequest *)(inParams->inRTSPRequest);
-	std::string theQueryString(pReq->GetQueryString());
+	uint32_t theChannelNum = GetChannel(pReq);
 
-	std::string queryTemp;
-	if (!theQueryString.empty())
-	{
-		queryTemp = EasyUtil::Urldecode(theQueryString);
-	}
-	QueryParamList parList(const_cast<char *>(queryTemp.c_str()));
 
-	uint32_t theChannelNum = 1;
-	const char* chnNum = parList.DoFindCGIValueForParam(EASY_TAG_CHANNEL);
-	if (chnNum)
-	{
-		theChannelNum = stoi(chnNum);
-	}
-
-	char theStreamName[QTSS_MAX_NAME_LENGTH] = { 0 };
-	sprintf(theStreamName, "%s%s%d", theFileNameStr, EASY_KEY_SPLITER, theChannelNum);
+	std::string theStreamName = buildStreamName(theFileNameStr, theChannelNum);
 
 	// Check for a .kill at the end
 	bool pathOK = false;
@@ -1093,7 +1078,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	}
 #endif 
 	std::string sdpContext = sortedSDP.GetSortedSDPStr();
-	CSdpCache::GetInstance()->setSdpMap(theStreamName, const_cast<char *>(sdpContext.c_str()));
+	CSdpCache::GetInstance()->setSdpMap((char *)theStreamName.c_str(), const_cast<char *>(sdpContext.c_str()));
 
 
 	//printf("QTSSReflectorModule:DoAnnounce SendResponse OK=200\n");
@@ -1341,10 +1326,10 @@ ReflectorSession* FindOrCreateSession(StrPtrLen* inName, QTSS_StandardRTSP_Param
 {
 	OSMutexLocker locker(sSessionMap->GetMutex());
 
-	char theStreamName[QTSS_MAX_NAME_LENGTH] = { 0 };
-	sprintf(theStreamName, "%s%s%d", inName->Ptr, EASY_KEY_SPLITER, inChannel);
+	std::string theStreamName = 
+		buildStreamName(boost::string_view(inName->Ptr, inName->Len), inChannel);
 
-	StrPtrLen inPath(theStreamName);
+	StrPtrLen inPath((char *)theStreamName.c_str());
 
 	OSRef* theSessionRef = sSessionMap->Resolve(&inPath);
 	ReflectorSession* theSession = nullptr;
@@ -1740,10 +1725,8 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	Assert(theErr == QTSS_NoErr);
 
 	// We only want to allow over buffering to dynamic rate clients   
-	int32_t  canDynamicRate = -1;
-	theLen = sizeof(canDynamicRate);
-	QTSSDictionary *dict = (QTSSDictionary *)inParams->inRTSPRequest;
-	dict->GetValue(qtssRTSPReqDynamicRateState, 0, (void*)&canDynamicRate, &theLen);
+	RTSPRequest *dict = (RTSPRequest *)inParams->inRTSPRequest;
+	int32_t canDynamicRate = dict->GetDynamicRateState();
 	if (canDynamicRate < 1) // -1 no rate field, 0 off
 		(void)QTSS_SetValue(inParams->inClientSession, qtssCliSesOverBufferEnabled, 0, &sFalse, sizeof(sFalse));
 
@@ -1865,8 +1848,11 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 		// this code needs to be cleaned up
 		// Check and see if the full path to this file matches an existing ReflectorSession
 		StrPtrLen thePathPtr;
+		StrPtrLen theFilePath;
+		((QTSSDictionary*)inParams->inRTSPRequest)->GetValuePtr(qtssRTSPReqFilePath, 0, (void**)&theFilePath.Ptr, &theFilePath.Len);
+		boost::string_view theFilePathV(theFilePath.Ptr, theFilePath.Len);
 		std::unique_ptr<char[]> sdpPath(QTSSModuleUtils::GetFullPath(inParams->inRTSPRequest,
-			qtssRTSPReqFilePath,
+			theFilePathV,
 			&thePathPtr.Len, &sSDPSuffix));
 
 		thePathPtr.Ptr = sdpPath.get();
@@ -2180,11 +2166,8 @@ bool AcceptSession(QTSS_StandardRTSP_Params* inParams)
 	if (QTSSModuleUtils::UserInGroup(QTSSModuleUtils::GetUserProfileObject(theRTSPRequest), sBroadcasterGroup.Ptr, sBroadcasterGroup.Len))
 		return true; // ok we are allowing this broadcaster user
 
-	char remoteAddress[20] = { 0 };
-	StrPtrLen theClientIPAddressStr(remoteAddress, sizeof(remoteAddress));
-	QTSS_Error err = ((QTSSDictionary*)inRTSPSession)->GetValue(qtssRTSPSesRemoteAddrStr, 0, (void*)theClientIPAddressStr.Ptr, &theClientIPAddressStr.Len);
-	if (err != QTSS_NoErr)
-		return false;
+	boost::string_view remoteAddress = ((RTSPSession*)inRTSPSession)->GetRemoteAddr();
+	StrPtrLen theClientIPAddressStr((char *)remoteAddress.data(), remoteAddress.length());
 
 	if (IPComponentStr(&theClientIPAddressStr).IsLocal())
 	{
@@ -2358,10 +2341,10 @@ QTSS_Error GetDeviceStream(Easy_GetDeviceStream_Params* inParams)
 
 		OSMutexLocker locker(sSessionMap->GetMutex());
 
-		char theStreamName[QTSS_MAX_NAME_LENGTH] = { 0 };
-		sprintf(theStreamName, "%s%s%d", inParams->inDevice, EASY_KEY_SPLITER, inParams->inChannel);
+		std::string inDeviceName(inParams->inDevice);
+		std::string theStreamName = buildStreamName(inDeviceName, inParams->inChannel);
 
-		StrPtrLen inPath(theStreamName);
+		StrPtrLen inPath((char *)theStreamName.c_str());
 
 		OSRef* theSessionRef = sSessionMap->Resolve(&inPath);
 		ReflectorSession* theSession = nullptr;

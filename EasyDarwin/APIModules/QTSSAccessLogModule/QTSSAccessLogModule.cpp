@@ -45,6 +45,7 @@
 #include "Task.h"
 #include "OS.h"
 #include "RTPSession.h"
+#include "RTSPRequest.h"
 #include <ctime>
 
 #define TESTUNIXTIME 0
@@ -264,24 +265,20 @@ QTSS_Error PostProcess(QTSS_StandardRTSP_Params* inParams)
 {
 	static uint32_t sZero = 0;
 
-	uint32_t* theStatus = nullptr;
-	uint32_t theLen = 0;
-	QTSSDictionary *dict = (QTSSDictionary *)inParams->inRTSPRequest;
-	QTSS_Error theErr = dict->GetValuePtr(qtssRTSPReqRealStatusCode, 0, (void**)&theStatus, &theLen);
-	if (theErr != QTSS_NoErr)
-		return theErr;
+	RTSPRequest *dict = (RTSPRequest *)inParams->inRTSPRequest;
+	uint32_t theStatus = dict->GetRealStatusCode();
 
 	QTSS_CliSesClosingReason theReason = qtssCliSesCloseClientTeardown;
 
-	if ((*theStatus == 401) || (*theStatus == 403))
+	if ((theStatus == 401) || (theStatus == 403))
 	{
 		LogRequest(inParams->inClientSession, nullptr, &theReason);
-		(void)QTSS_SetValue(inParams->inClientSession, sLoggedAuthorizationAttrID, 0, theStatus, sizeof(*theStatus));
+		(void)QTSS_SetValue(inParams->inClientSession, sLoggedAuthorizationAttrID, 0, &theStatus, sizeof(theStatus));
 	}
 	else
 		(void)QTSS_SetValue(inParams->inClientSession, sLoggedAuthorizationAttrID, 0, &sZero, sizeof(sZero));
 
-	return theErr;
+	return QTSS_NoErr;
 }
 
 #if TESTUNIXTIME
@@ -393,7 +390,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 
 	uint32_t theLen = 0;
 	uint32_t* authorizationFailed = nullptr;
-	QTSSDictionary *dict = (QTSSDictionary *)inClientSession;
+	RTPSession *dict = (RTPSession *)inClientSession;
 	dict->GetValuePtr(sLoggedAuthorizationAttrID, 0, (void**)&authorizationFailed, &theLen);
 	if ((authorizationFailed != nullptr) && (*authorizationFailed > 0))
 		return QTSS_NoErr;
@@ -438,24 +435,12 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 
 	uint32_t startPlayTimeInSecs = 0;
 
-	char localIPAddrBuf[20] = { 0 };
-	StrPtrLen localIPAddr(localIPAddrBuf, 19);
-
-	char localDNSBuf[70] = { 0 };
-	StrPtrLen localDNS(localDNSBuf, 69);
-
-	char remoteAddrBuf[20] = { 0 };
-	StrPtrLen remoteAddr(remoteAddrBuf, 19);
-
-	char playerIDBuf[ePlayerIDSize] = { 0 };
-	StrPtrLen playerID(playerIDBuf, ePlayerIDSize - 1);
-
 	// First, get networking info from the RTSP session
-	dict->GetValue(qtssCliRTSPSessLocalAddrStr, 0, localIPAddr.Ptr, &localIPAddr.Len);
-	dict->GetValue(qtssCliRTSPSessLocalDNS, 0, localDNS.Ptr, &localDNS.Len);
-	std::string remoteDNS(((RTPSession *)inClientSession)->GetHost());
-	dict->GetValue(qtssCliRTSPSessRemoteAddrStr, 0, remoteAddr.Ptr, &remoteAddr.Len);
-	dict->GetValue(qtssCliRTSPSessRemoteAddrStr, 0, playerID.Ptr, &playerID.Len);
+	std::string localIPAddr(dict->GetLocalAddr());
+	std::string localDNS(dict->GetLocalDNS());
+	std::string remoteDNS(dict->GetHost());
+	std::string remoteAddr(dict->GetRemoteAddr());
+	std::string playerID(dict->GetRemoteAddr());
 
 	uint32_t* rtpBytesSent = nullptr;
 	uint32_t* rtcpBytesRecv = nullptr;
@@ -716,15 +701,13 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 
 	//printf("logging of saved params are in dictionary \n");
 
-	tempLogStr.Ptr[0] = 0; tempLogStr.Len = eTempLogItemSize;
-	dict->GetValue(qtssCliRTSPSesUserName, 0, tempLogStr.Ptr, &tempLogStr.Len);
+	boost::string_view t = dict->GetUserName();
+	tempLogStr.Set((char *)t.data(), t.length());
 	ReplaceSpaces(&tempLogStr, &lastUserNameStr, "%20");
-	//printf("qtssRTSPSesLastUserName dictionary item = %s len = %" _S32BITARG_ "\n",lastUserNameStr.Ptr,lastUserNameStr.Len);
 
 	tempLogStr.Ptr[0] = 0; tempLogStr.Len = eTempLogItemSize;
 	dict->GetValue(qtssCliRTSPSesURLRealm, 0, tempLogStr.Ptr, &tempLogStr.Len);
 	ReplaceSpaces(&tempLogStr, &lastURLRealmStr, "%20");
-	//printf("qtssRTSPSesLastURLRealm dictionary  item = %s len = %" _S32BITARG_ "\n",lastURLRealmStr.Ptr,lastURLRealmStr.Len);  
 
 	char respMsgBuffer[1024] = { 0 };
 	StrPtrLen theRespMsg;
@@ -746,7 +729,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	char logBuffer[2048];
 	// compatible fields (no respMsgEncoded field)
 	::memset(logBuffer, 0, 2048);
-	sprintf(tempLogBuffer, "%s ", (remoteAddr.Ptr[0] == '\0') ? sVoidField : remoteAddr.Ptr); //c-ip*
+	sprintf(tempLogBuffer, "%s ", (remoteAddr.empty() == '\0') ? sVoidField : remoteAddr.c_str()); //c-ip*
 	::strcpy(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%s ", (theDateBuffer[0] == '\0') ? sVoidField : theDateBuffer);   //date* time*
 	::strcat(logBuffer, tempLogBuffer);
@@ -763,7 +746,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%" _S32BITARG_ " ", *theStatusCode);   //c-status*
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%s ", (playerIDBuf[0] == '\0') ? sVoidField : playerIDBuf);   //c-playerid*
+	sprintf(tempLogBuffer, "%s ", (playerID.empty() == '\0') ? sVoidField : playerID.c_str());   //c-playerid*
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%s ", (playerVersionBuf[0] == '\0') ? sVoidField : playerVersionBuf); //c-playerversion
 	::strcat(logBuffer, tempLogBuffer);
@@ -809,9 +792,9 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", qualityLevel); //c-quality 
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%s ", (localIPAddr.Ptr[0] == '\0') ? sVoidField : localIPAddr.Ptr);   //s-ip 
+	sprintf(tempLogBuffer, "%s ", (localIPAddr.empty()) ? sVoidField : localIPAddr.c_str());   //s-ip 
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%s ", (localDNS.Ptr[0] == '\0') ? sVoidField : localDNS.Ptr); //s-dns
+	sprintf(tempLogBuffer, "%s ", (localDNS.empty()) ? sVoidField : localDNS.c_str()); //s-dns
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", numCurClients);    //s-totalclients
 	::strcat(logBuffer, tempLogBuffer);

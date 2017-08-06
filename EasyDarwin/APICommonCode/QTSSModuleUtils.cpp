@@ -219,24 +219,20 @@ void QTSSModuleUtils::LogPrefErrorStr( QTSS_ErrorVerbosity inVerbosity, char*  p
 
                         
 char* QTSSModuleUtils::GetFullPath( QTSS_RTSPRequestObject inRequest,
-                                    QTSS_AttributeID whichFileType,
+                                    boost::string_view whichFileStr,
                                     uint32_t* outLen,
                                     StrPtrLen* suffix)
 {
     Assert(outLen != nullptr);
     
 	(void)QTSS_LockObject(inRequest);
-    // Get the proper file path attribute. This may return an error if
-    // the file type is qtssFilePathTrunc attr, because there may be no path
-    // once its truncated. That's ok. In that case, we just won't append a path.
-    StrPtrLen theFilePath;
-	((QTSSDictionary*)inRequest)->GetValuePtr(whichFileType, 0, (void**)&theFilePath.Ptr, &theFilePath.Len);
+
 		
     StrPtrLen theRootDir;
     QTSS_Error theErr = ((QTSSDictionary*)inRequest)->GetValuePtr(qtssRTSPReqRootDir, 0, (void**)&theRootDir.Ptr, &theRootDir.Len);
 	Assert(theErr == QTSS_NoErr);
 
-
+	StrPtrLen theFilePath((char *)whichFileStr.data(), whichFileStr.length());
     //trim off extra / characters before concatenating
     // so root/ + /path instead of becoming root//path  is now root/path  as it should be.
     
@@ -368,8 +364,9 @@ QTSS_Error  QTSSModuleUtils::SendErrorResponse( QTSS_RTSPRequestObject inRequest
 {
     static bool sFalse = false;
     
+	RTSPRequest *pReq = (RTSPRequest *)inRequest;
     //set RTSP headers necessary for this error response message
-    (void)QTSS_SetValue(inRequest, qtssRTSPReqStatusCode, 0, &inStatusCode, sizeof(inStatusCode));
+	pReq->SetStatus(inStatusCode);
     (void)QTSS_SetValue(inRequest, qtssRTSPReqRespKeepAlive, 0, &sFalse, sizeof(sFalse));
     StringFormatter theErrorMsgFormatter(nullptr, 0);
     char *messageBuffPtr = nullptr;
@@ -447,8 +444,9 @@ QTSS_Error	QTSSModuleUtils::SendErrorResponseWithMessage( QTSS_RTSPRequestObject
 {
     static bool sFalse = false;
     
-    //set RTSP headers necessary for this error response message
-    (void)QTSS_SetValue(inRequest, qtssRTSPReqStatusCode, 0, &inStatusCode, sizeof(inStatusCode));
+	RTSPRequest *pReq = (RTSPRequest *)inRequest;
+	//set RTSP headers necessary for this error response message
+	pReq->SetStatus(inStatusCode);
     (void)QTSS_SetValue(inRequest, qtssRTSPReqRespKeepAlive, 0, &sFalse, sizeof(sFalse));
     StrPtrLen theErrorMessage(nullptr, 0);
     
@@ -485,7 +483,8 @@ QTSS_Error	QTSSModuleUtils::SendHTTPErrorResponse( QTSS_RTSPRequestObject inRequ
     static bool sFalse = false;
     
     //set status code for access log
-    (void)QTSS_SetValue(inRequest, qtssRTSPReqStatusCode, 0, &inStatusCode, sizeof(inStatusCode));
+	RTSPRequest *pReq = (RTSPRequest *)inRequest;
+	pReq->SetStatus(inStatusCode);
 
     if (inKillSession) // tell the server to end the session
         (void)QTSS_SetValue(inRequest, qtssRTSPReqRespKeepAlive, 0, &sFalse, sizeof(sFalse));
@@ -504,13 +503,11 @@ QTSS_Error	QTSSModuleUtils::SendHTTPErrorResponse( QTSS_RTSPRequestObject inRequ
     DateBuffer theDate;
     DateTranslator::UpdateDateBuffer(&theDate, 0); // get the current GMT date and time
 
-    uint32_t realCode = 0;
-    uint32_t len = sizeof(realCode);
-	QTSSDictionary *dict = (QTSSDictionary *)inRequest;
-    dict->GetValue(qtssRTSPReqRealStatusCode, 0,  (void*)&realCode,&len);
+	RTSPRequest *dict = (RTSPRequest *)inRequest;
+	uint32_t realCode = dict->GetRealStatusCode();
 
     char serverHeaderBuffer[64]; // the qtss Server: header field
-    len = sizeof(serverHeaderBuffer) -1; // leave room for terminator
+	uint32_t len = sizeof(serverHeaderBuffer) -1; // leave room for terminator
     ((QTSSDictionary*)sServer)->GetValue(qtssSvrRTSPServerHeader, 0,  (void*)serverHeaderBuffer,&len);
     serverHeaderBuffer[len] = 0; // terminate.
  
@@ -1029,25 +1026,16 @@ bool QTSSModuleUtils::HavePlayerProfile(QTSS_PrefsObject inPrefObjectToCheck, QT
 }
 
 
-QTSS_Error QTSSModuleUtils::AuthorizeRequest(QTSS_RTSPRequestObject theRTSPRequest, bool* allowed, bool*foundUser, bool *authContinue)
+QTSS_Error QTSSModuleUtils::AuthorizeRequest(QTSS_RTSPRequestObject theRTSPRequest, bool allowed, bool foundUser, bool authContinue)
 {
     QTSS_Error theErr = QTSS_NoErr;
     //printf("QTSSModuleUtils::AuthorizeRequest allowed=%d foundUser=%d authContinue=%d\n", *allowed, *foundUser, *authContinue);
-    
-    if (nullptr != allowed)
-        theErr = QTSS_SetValue(theRTSPRequest,qtssRTSPReqUserAllowed, 0, allowed, sizeof(bool));
-    if (QTSS_NoErr != theErr)
-        return theErr;
-    
-    if (nullptr != foundUser)
-        theErr = QTSS_SetValue(theRTSPRequest,qtssRTSPReqUserFound, 0, foundUser, sizeof(bool));
-    if (QTSS_NoErr != theErr)
-        return theErr;  
-    
-    if (nullptr != authContinue)
-        theErr = QTSS_SetValue(theRTSPRequest,qtssRTSPReqAuthHandled, 0, authContinue, sizeof(bool));
+	RTSPRequest *pReq = ((RTSPRequest *)theRTSPRequest);
+	pReq->SetUserAllow(allowed);
+	pReq->SetUserFound(foundUser);   
+	pReq->SetAuthHandle(authContinue);
         
-    return theErr;
+    return QTSS_NoErr;
 }
 
 

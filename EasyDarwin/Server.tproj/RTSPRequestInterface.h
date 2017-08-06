@@ -149,6 +149,7 @@ public:
 	// of this stuff is also available as QTSS API attributes.
 
 	QTSS_RTSPMethod             GetMethod() const { return fMethod; }
+	void                        SetStatus(QTSS_RTSPStatusCode status) { fStatus = status; }
 	QTSS_RTSPStatusCode         GetStatus() const { return fStatus; }
 	bool                      GetResponseKeepAlive() const { return fResponseKeepAlive; }
 	void                        SetResponseKeepAlive(bool keepAlive) { fResponseKeepAlive = keepAlive; }
@@ -232,6 +233,12 @@ public:
 	//If the URI ends with one or more digits, this points to those.
 	std::string         GetFileDigit();
 	void SetUpServerPort(uint16_t port) { fSetUpServerPort = port; }
+	//Everything after the last path separator in the file system path
+	std::string GetFileName();
+	uint32_t        GetRealStatusCode();
+	void SetUserAllow(bool allow) { fAllowed = allow; }
+	void SetUserFound(bool found) { fHasUser = found; }
+	void SetAuthHandle(bool handle) { fAuthHandled = handle; }
 protected:
 
 	//ALL THIS STUFF HERE IS SETUP BY RTSPREQUEST object (derived)
@@ -245,7 +252,7 @@ protected:
 
 	QTSS_RTSPMethod             fMethod;            //Method of this request
 	QTSS_RTSPStatusCode         fStatus;            //Current status of this request
-	uint32_t                      fRealStatusCode;    //Current RTSP status num of this request
+   
 	bool                      fRequestKeepAlive;  //Does the client want keep-alive?
 	bool                      fResponseKeepAlive; //Are we going to keep-alive?
 	RTSPProtocol::RTSPVersion   fVersion;
@@ -272,8 +279,6 @@ protected:
 
 	StrPtrLen                   fFirstTransport;
 
-	QTSS_StreamRef              fStreamRef;
-
 	//
 	// For reliable UDP
 	uint32_t                      fWindowSize;
@@ -287,8 +292,11 @@ protected:
 
 	HeaderDict                  fHeaderDict;
 
+	//Default is server pref based, set to false if request is denied. Missing or bad movie files should allow the server to handle the situation and return true.
 	bool                      fAllowed;
+	//Default is false, set to true if the user is found in the authenticate role and the module wants to take ownership of authenticating the user.
 	bool                      fHasUser;
+	//Default is false, set to true in the authorize role to take ownerhsip of authorizing the request. 
 	bool                      fAuthHandled;
 
 	// A setup request from the client.
@@ -314,6 +322,7 @@ protected:
 
 	bool                      fSkipAuthorization;
 
+	// -1 not in request, 0 off, 1 on
 	int32_t                      fEnableDynamicRateState;
 
 	// DJM PROTOTYPE
@@ -338,9 +347,7 @@ private:
 	//Individual param retrieval functions
 	static void*        GetAbsTruncatedPath(QTSSDictionary* inRequest, uint32_t* outLen);
 	static void*        GetTruncatedPath(QTSSDictionary* inRequest, uint32_t* outLen);
-	static void*        GetFileName(QTSSDictionary* inRequest, uint32_t* outLen);
 
-	static void*        GetRealStatusCode(QTSSDictionary* inRequest, uint32_t* outLen);
 	static void* 		GetAuthDigestResponse(QTSSDictionary* inRequest, uint32_t* outLen);
 
 	//optimized preformatted response header strings

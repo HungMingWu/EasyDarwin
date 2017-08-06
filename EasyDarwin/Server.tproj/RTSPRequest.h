@@ -60,6 +60,10 @@ class RTSPRequest : public RTSPRequestInterface
 	boost::string_view queryString;
 	//URI for this request
 	std::string uri;
+	//Challenge used by the server for Digest authentication
+	std::string digestChallenge;
+	//decoded Authentication information when provided by the RTSP request. See RTSPSessLastUserName.
+	std::string userName;
 public:
 
 	//CONSTRUCTOR / DESTRUCTOR
@@ -88,6 +92,9 @@ public:
 	boost::string_view GetQueryString() const { return queryString; }
 	uint32_t GetContentLength() const { return fContentLength; }
 	boost::string_view GetURI() const { return uri; }
+	void SetDigestChallenge(boost::string_view digest) { digestChallenge = std::string(digest); }
+	void SetAuthUserName(boost::string_view name) { userName = std::string(name); }
+	boost::string_view GetAuthUserName() const { return userName; }
 private:
 
 	//PARSING
@@ -122,7 +129,7 @@ private:
 	void    ParseClientPortSubHeader(StrPtrLen* inClientPortSubHeader);
 	void    ParseTimeToLiveSubHeader(StrPtrLen* inTimeToLiveSubHeader);
 	void    ParseModeSubHeader(StrPtrLen* inModeSubHeader);
-	bool  ParseNetworkModeSubHeader(StrPtrLen* inSubHeader);
+	bool    ParseNetworkModeSubHeader(StrPtrLen* inSubHeader);
 	void 	ParseDynamicRateHeader(boost::string_view header);
 	void	ParseRandomDataSizeHeader(boost::string_view header);
 	void    ParseBandwidthHeader(boost::string_view header);

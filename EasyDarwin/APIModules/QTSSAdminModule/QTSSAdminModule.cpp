@@ -59,7 +59,7 @@
 #include "md5digest.h"
 #include "OS.h"
 #include "RTSPRequest.h"
-
+#include "RTSPSession.h"
 #include "QTSServer.h"
 #if __MacOSX__
 #include <Security/Authorization.h>
@@ -760,10 +760,7 @@ QTSS_Error AuthorizeAdminRequest(QTSS_RTSPRequestObject request)
 	}
 
 	if (!allowed)
-	{
-		if (QTSS_NoErr != QTSS_SetValue(request, qtssRTSPReqUserAllowed, 0, &allowed, sizeof(allowed)))
-			return QTSS_RequestFailed; // Bail on the request. The Server will handle the error
-	}
+		pReq->SetUserAllow(allowed);
 
 	return QTSS_NoErr;
 }
@@ -771,10 +768,8 @@ QTSS_Error AuthorizeAdminRequest(QTSS_RTSPRequestObject request)
 
 bool AcceptSession(QTSS_RTSPSessionObject inRTSPSession)
 {
-	char remoteAddress[20] = { 0 };
-	StrPtrLen theClientIPAddressStr(remoteAddress, sizeof(remoteAddress));
-	QTSS_Error err = ((QTSSDictionary*)inRTSPSession)->GetValue(qtssRTSPSesRemoteAddrStr, 0, (void*)theClientIPAddressStr.Ptr, &theClientIPAddressStr.Len);
-	if (err != QTSS_NoErr) return false;
+	std::string remoteAddress = ((RTSPSession*)inRTSPSession)->GetRemoteAddr();
+	StrPtrLen theClientIPAddressStr((char *)remoteAddress.data(), remoteAddress.length());
 
 	return AcceptAddress(&theClientIPAddressStr);
 }
@@ -823,8 +818,8 @@ bool IsAuthentic(QTSS_Filter_Params* inParams, StringParser *fullRequestPtr)
 	}
 	else // must authenticate
 	{
-		StrPtrLen theClientIPAddressStr;
-		((QTSSDictionary*)inParams->inRTSPSession)->GetValuePtr(qtssRTSPSesRemoteAddrStr, 0, (void**)&theClientIPAddressStr.Ptr, &theClientIPAddressStr.Len);
+		std::string t1 = ((RTSPSession *)(inParams->inRTSPSession))->GetRemoteAddr();
+		StrPtrLen theClientIPAddressStr((char *)t1.data(), t1.length());
 		bool isLocal = IPComponentStr(&theClientIPAddressStr).IsLocal();
 
 		StrPtrLen authenticateName;

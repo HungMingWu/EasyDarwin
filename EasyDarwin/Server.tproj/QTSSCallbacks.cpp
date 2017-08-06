@@ -491,8 +491,8 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 	auto *request = (RTSPRequestInterface *)ioAuthRequestObject;
 	RTSPRequest *pReq = (RTSPRequest *)ioAuthRequestObject;
 	// Set all the attributes required by the authentication module, using the input values
-	(void)request->SetValue(qtssRTSPReqUserName, 0, inAuthUserName, ::strlen(inAuthUserName), QTSSDictionary::kDontObeyReadOnly);
-	(void)pReq->SetLocalPath({ inAuthResourceLocalPath, ::strlen(inAuthResourceLocalPath) });
+	pReq->SetAuthUserName({ inAuthUserName, ::strlen(inAuthUserName) });
+	pReq->SetLocalPath({ inAuthResourceLocalPath, ::strlen(inAuthResourceLocalPath) });
 	(void)request->SetValue(qtssRTSPReqRootDir, 0, inAuthMoviesDir, ::strlen(inAuthMoviesDir), QTSSDictionary::kNoFlags);
 	(void)request->SetValue(qtssRTSPReqAction, 0, (const void *)&inAuthRequestAction, sizeof(QTSS_ActionFlags), QTSSDictionary::kNoFlags);
 	(void)request->SetValue(qtssRTSPReqAuthScheme, 0, (const void *)&inAuthScheme, sizeof(QTSS_AuthScheme), QTSSDictionary::kDontObeyReadOnly);

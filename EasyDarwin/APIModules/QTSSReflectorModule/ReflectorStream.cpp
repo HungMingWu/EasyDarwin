@@ -34,7 +34,7 @@
 #include "SocketUtils.h"
 #include "RTCPPacket.h"
 #include "ReflectorSession.h"
-
+#include "RTSPRequest.h"
 
 #if DEBUG
 #define REFLECTOR_STREAM_DEBUGGING 0
@@ -398,10 +398,7 @@ QTSS_Error ReflectorStream::BindSockets(QTSS_StandardRTSP_Params* inParams, uint
 
 	// Set the transport Type a Broadcaster
 	if (inParams != nullptr)
-	{
-		uint32_t theLen = sizeof(fTransportType);
-		((QTSSDictionary*)inParams->inRTSPRequest)->GetValue(qtssRTSPReqTransportType, 0, (void*)&fTransportType, &theLen);
-	}
+		fTransportType = ((RTSPRequest*)inParams->inRTSPRequest)->GetTransportType();
 
 	// get a pair of sockets. The socket must be bound on INADDR_ANY because we don't know
 	// which interface has access to this broadcast. If there is a source IP address

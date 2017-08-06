@@ -60,31 +60,31 @@ QTSSAttrInfoDict::AttrInfo  RTSPRequestInterface::sAttributes[] =
 	/* 2 */ { "qtssRTSPReqFilePath",            nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModeWrite },
 	/* 3 */ { "qtssRTSPReqURI",                 nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 4 */ { "qtssRTSPReqFilePathTrunc",       GetTruncatedPath,       qtssAttrDataTypeCharArray,  qtssAttrModeRead },
-	/* 5 */ { "qtssRTSPReqFileName",            GetFileName,            qtssAttrDataTypeCharArray,  qtssAttrModeRead },
+	/* 5 */ {},
 	/* 6 */ {},
 	/* 7 */ { "qtssRTSPReqAbsoluteURL",         nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 8 */ { "qtssRTSPReqTruncAbsoluteURL",    GetAbsTruncatedPath,    qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeCacheable },
 	/* 9 */ { "qtssRTSPReqMethod",              nullptr,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 10 */ { "qtssRTSPReqStatusCode",         nullptr,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 10 */ {},
 	/* 11 */ {},
 	/* 12 */ {},
 	/* 13 */ { "qtssRTSPReqRespKeepAlive",      nullptr,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
 	/* 14 */ { "qtssRTSPReqRootDir",            nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModeWrite },
-	/* 15 */ { "qtssRTSPReqRealStatusCode",     GetRealStatusCode,      qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 16 */ { "qtssRTSPReqStreamRef",          nullptr,                   qtssAttrDataTypeQTSS_StreamRef, qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 15 */ {},
+	/* 16 */ {},
 
-	/* 17 */ { "qtssRTSPReqUserName",           nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 17 */ {},
 	/* 18 */ { "qtssRTSPReqUserPassword",       nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 19 */ { "qtssRTSPReqUserAllowed",        nullptr,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 19 */ {},
 	/* 20 */ { "qtssRTSPReqURLRealm",           nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
 	/* 21 */ {},
 	/* 22 */ { "qtssRTSPReqIfModSinceDate",     nullptr,                   qtssAttrDataTypeTimeVal,    qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 23 */ { "qtssRTSPReqQueryString",        nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 24 */ { "qtssRTSPReqRespMsg",            nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
 	/* 25 */ { "qtssRTSPReqContentLen",         nullptr,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 26 */ { "qtssRTSPReqSpeed",              nullptr,                   qtssAttrDataTypeFloat32,    qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 26 */ {},
 	/* 27 */ { "qtssRTSPReqLateTolerance",      nullptr,                   qtssAttrDataTypeFloat32,    qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 28 */ { "qtssRTSPReqTransportType",      nullptr,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 28 */ {},
 	/* 29 */ {},
 	/* 30 */ {},
 	/* 31 */ { "qtssRTSPReqAction",             nullptr,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
@@ -95,10 +95,10 @@ QTSSAttrInfoDict::AttrInfo  RTSPRequestInterface::sAttributes[] =
 	/* 36 */ { "qtssRTSPReqNetworkMode",		nullptr,					qtssAttrDataTypeUInt32,		qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 37 */ { "qtssRTSPReqDynamicRateValue",	nullptr,					qtssAttrDataTypeint32_t,		qtssAttrModeRead | qtssAttrModePreempSafe },
 
-	/* 39 */ { "qtssRTSPReqBandwidthBits",	    nullptr,					qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 39 */ { "qtssRTSPReqUserFound",          nullptr,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 40 */ { "qtssRTSPReqAuthHandled",        nullptr,                   qtssAttrDataTypeBool16,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 41 */ { "qtssRTSPReqDigestChallenge",    nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 39 */ {},
+	/* 39 */ {},
+	/* 40 */ {},
+	/* 41 */ {},
 	/* 42 */ { "qtssRTSPReqDigestResponse",     GetAuthDigestResponse,  qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe }
 };
 
@@ -157,7 +157,6 @@ RTSPRequestInterface::RTSPRequestInterface(RTSPSessionInterface *session)
 	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTSPRequestDictIndex)),
 	fMethod(qtssIllegalMethod),
 	fStatus(qtssSuccessOK),
-	fRealStatusCode(0),
 	fRequestKeepAlive(true),
 	//fResponseKeepAlive(true), //parameter need not be set
 	fVersion(RTSPProtocol::k10Version),
@@ -204,13 +203,9 @@ RTSPRequestInterface::RTSPRequestInterface(RTSPSessionInterface *session)
 	//pointers to binary variable values. Because these variables are just member variables of this object,
 	//we can properly initialize their pointers right off the bat.
 
-	fStreamRef = this;
 	RTSPRequestStream* input = session->GetInputStream();
 	this->SetVal(qtssRTSPReqFullRequest, input->GetRequestBuffer()->Ptr, input->GetRequestBuffer()->Len);
-	this->SetVal(qtssRTSPReqStatusCode, &fStatus, sizeof(fStatus));
 	this->SetVal(qtssRTSPReqRespKeepAlive, &fResponseKeepAlive, sizeof(fResponseKeepAlive));
-	this->SetVal(qtssRTSPReqStreamRef, &fStreamRef, sizeof(fStreamRef));
-	this->SetVal(qtssRTSPReqSpeed, &fSpeed, sizeof(fSpeed));
 	this->SetVal(qtssRTSPReqLateTolerance, &fLateTolerance, sizeof(fLateTolerance));
 	this->SetVal(qtssRTSPReqPrebufferMaxTime, &fPrebufferAmt, sizeof(fPrebufferAmt));
 
@@ -224,20 +219,10 @@ RTSPRequestInterface::RTSPRequestInterface(RTSPSessionInterface *session)
 	//There are actually other attributes that point to member variables that we COULD setup now, but they are attributes that
 	//typically aren't set for every request, so we lazy initialize those when we parse the request
 
-	this->SetVal(qtssRTSPReqUserAllowed, &fAllowed, sizeof(fAllowed));
-	this->SetVal(qtssRTSPReqUserFound, &fHasUser, sizeof(fHasUser));
-	this->SetVal(qtssRTSPReqAuthHandled, &fAuthHandled, sizeof(fAuthHandled));
-
-	this->SetVal(qtssRTSPReqTransportType, &fTransportType, sizeof(fTransportType));
-
 	this->SetVal(qtssRTSPReqAction, &fAction, sizeof(fAction));
 	this->SetVal(qtssRTSPReqUserProfile, &fUserProfilePtr, sizeof(fUserProfilePtr));
 	this->SetVal(qtssRTSPReqAuthScheme, &fAuthScheme, sizeof(fAuthScheme));
 	this->SetVal(qtssRTSPReqSkipAuthorization, &fSkipAuthorization, sizeof(fSkipAuthorization));
-
-	this->SetVal(qtssRTSPReqDynamicRateState, &fEnableDynamicRateState, sizeof(fEnableDynamicRateState));
-
-	this->SetVal(qtssRTSPReqBandwidthBits, &fBandwidthBits, sizeof(fBandwidthBits));
 
 	this->SetVal(qtssRTSPReqDigestResponse, &fAuthDigestResponse, sizeof(fAuthDigestResponse));
 
@@ -662,36 +647,17 @@ void* RTSPRequestInterface::GetTruncatedPath(QTSSDictionary* inRequest, uint32_t
 	return nullptr;
 }
 
-void* RTSPRequestInterface::GetFileName(QTSSDictionary* inRequest, uint32_t* /*outLen*/)
+std::string RTSPRequestInterface::GetFileName()
 {
 	// This function always gets called
-
-	auto* theRequest = (RTSPRequestInterface*)inRequest;
-	theRequest->SetVal(qtssRTSPReqFileName, theRequest->GetValue(qtssRTSPReqFilePath));
-
-	StrPtrLen* theFileNameParam = theRequest->GetValue(qtssRTSPReqFileName);
-
-	//paranoid check
-	if (theFileNameParam->Len == 0)
-		return theFileNameParam;
-
-	if (theFileNameParam->Ptr[0] == kPathDelimiterChar)
-	{
-		theFileNameParam->Ptr++;
-		theFileNameParam->Len--;
-	}
-
-	//walk back in the file name until we hit a /
-	int32_t x = 0;
-	int i = 0;
-	for (; x < theFileNameParam->Len; x++ )
-		if (theFileNameParam->Ptr[x] == kPathDelimiterChar)
-			break;
-	//once we do, make the tempPtr point to the next character after the slash,
-	//and adjust the length accordingly
-	theFileNameParam->Len = x;
-
-	return nullptr;
+	StrPtrLen *ptr = GetValue(qtssRTSPReqFilePath);
+	std::string str(ptr->Ptr, ptr->Len);
+	if (str[0] == '/') str = str.substr(1);
+	size_t nextDelimiter = str.find("/");
+	if (nextDelimiter == std::string::npos)
+		return str;
+	else
+		return str.substr(0, nextDelimiter);
 }
 
 
@@ -718,14 +684,12 @@ std::string RTSPRequestInterface::GetFileDigit()
 	return std::string(theFileDigit->Ptr, theFileDigit->Len);
 }
 
-void* RTSPRequestInterface::GetRealStatusCode(QTSSDictionary* inRequest, uint32_t* outLen)
+uint32_t RTSPRequestInterface::GetRealStatusCode()
 {
+	// Current RTSP status num of this request
 	// Set the fRealStatusCode variable based on the current fStatusCode.
 	// This function always gets called
-	auto* theReq = (RTSPRequestInterface*)inRequest;
-	theReq->fRealStatusCode = RTSPProtocol::GetStatusCode(theReq->fStatus);
-	*outLen = sizeof(uint32_t);
-	return &theReq->fRealStatusCode;
+	return RTSPProtocol::GetStatusCode(fStatus);
 }
 
 boost::string_view RTSPRequestInterface::GetLocalPath() {

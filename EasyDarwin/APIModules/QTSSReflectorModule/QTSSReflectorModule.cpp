@@ -62,6 +62,7 @@ using namespace std;
 #define REFLECTOR_MODULE_DEBUGGING 0
 #endif
 
+static char*        sBroadcasterSessionName = "QTSSReflectorModuleBroadcasterSession";
 // ATTRIBUTES
 static QTSS_AttributeID         sOutputAttr = qtssIllegalAttrID;
 static QTSS_AttributeID         sSessionAttr = qtssIllegalAttrID;
@@ -72,7 +73,6 @@ static QTSS_AttributeID         sExpectedDigitFilenameErr = qtssIllegalAttrID;
 static QTSS_AttributeID         sReflectorBadTrackIDErr = qtssIllegalAttrID;
 static QTSS_AttributeID         sDuplicateBroadcastStreamErr = qtssIllegalAttrID;
 static QTSS_AttributeID         sClientBroadcastSessionAttr = qtssIllegalAttrID;
-static QTSS_AttributeID         sRTSPBroadcastSessionAttr = qtssIllegalAttrID;
 static QTSS_AttributeID         sAnnounceRequiresSDPinNameErr = qtssIllegalAttrID;
 static QTSS_AttributeID         sAnnounceDisabledNameErr = qtssIllegalAttrID;
 static QTSS_AttributeID         sSDPcontainsInvalidMinimumPortErr = qtssIllegalAttrID;
@@ -221,7 +221,7 @@ static QTSS_Error GetDeviceStream(Easy_GetDeviceStream_Params* inParams);
 
 inline void KeepSession(QTSS_RTSPRequestObject theRequest, bool keep)
 {
-	(void)QTSS_SetValue(theRequest, qtssRTSPReqRespKeepAlive, 0, &keep, sizeof(keep));
+	((RTSPRequest *)theRequest)->SetResponseKeepAlive(keep);
 }
 
 // FUNCTION IMPLEMENTATIONS
@@ -320,7 +320,7 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 	static char*        sStreamCookieName = "QTSSReflectorModuleStreamCookie";
 	static char*        sRequestBufferName = "QTSSReflectorModuleRequestBuffer";
 	static char*        sRequestBufferLenName = "QTSSReflectorModuleRequestBufferLen";
-	static char*        sBroadcasterSessionName = "QTSSReflectorModuleBroadcasterSession";
+
 	static char*        sKillClientsEnabledName = "QTSSReflectorModuleTearDownClients";
 
 	static char*        sRTPInfoWaitTime = "QTSSReflectorModuleRTPInfoWaitTime";
@@ -347,10 +347,6 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 
 	(void)QTSS_AddStaticAttribute(qtssClientSessionObjectType, sKillClientsEnabledName, nullptr, qtssAttrDataTypeBool16);
 	(void)QTSS_IDForAttr(qtssClientSessionObjectType, sKillClientsEnabledName, &sKillClientsEnabledAttr);
-
-	// keep the same attribute name for the RTSPSessionObject as used int he ClientSessionObject
-	(void)QTSS_AddStaticAttribute(qtssRTSPSessionObjectType, sBroadcasterSessionName, nullptr, qtssAttrDataTypeVoidPointer);
-	(void)QTSS_IDForAttr(qtssRTSPSessionObjectType, sBroadcasterSessionName, &sRTSPBroadcastSessionAttr);
 
 	// Reflector session needs to setup some parameters too.
 	ReflectorStream::Register();
@@ -611,13 +607,12 @@ QTSS_Error ProcessRTPData(QTSS_IncomingData_Params* inParams)
 		return QTSS_NoErr;
 
 	//printf("QTSSReflectorModule:ProcessRTPData inRTSPSession=%"   _U32BITARG_   " inClientSession=%"   _U32BITARG_   "\n",inParams->inRTSPSession, inParams->inClientSession);
-	ReflectorSession* theSession = nullptr;
-	uint32_t theLen = sizeof(theSession);
-	QTSS_Error theErr = ((QTSSDictionary*)inParams->inRTSPSession)->GetValue(sRTSPBroadcastSessionAttr, 0, &theSession, &theLen);
 
+	uint32_t theLen;
+	boost::optional<boost::any> attr = ((RTSPSession*)inParams->inRTSPSession)->getAttribute(sBroadcasterSessionName);
+	if (!attr) return QTSS_NoErr;
+	ReflectorSession* theSession = boost::any_cast<ReflectorSession *>(attr.value());
 	//printf("QTSSReflectorModule.cpp:ProcessRTPData    sClientBroadcastSessionAttr=%"   _U32BITARG_   " theSession=%"   _U32BITARG_   " err=%" _S32BITARG_ " \n",sClientBroadcastSessionAttr, theSession,theErr);
-	if (theSession == nullptr || theErr != QTSS_NoErr)
-		return QTSS_NoErr;
 
 	// it is a broadcaster session
 	//printf("QTSSReflectorModule.cpp:is broadcaster session\n");
@@ -678,7 +673,7 @@ QTSS_Error ProcessRTPData(QTSS_IncomingData_Params* inParams)
 			}
 		}
 	}
-	return theErr;
+	return QTSS_NoErr;
 }
 
 
@@ -766,24 +761,13 @@ static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool
 		// Check and see if the full path to this file matches an existing ReflectorSession
 		StrPtrLen thePathPtr;
 		std::string fileName = ((RTSPRequest *)inParams->inRTSPRequest)->GetFileName();
-		std::unique_ptr<char[]> sdpPath(QTSSModuleUtils::GetFullPath(inParams->inRTSPRequest,
-			fileName,
-			&thePathPtr.Len, &sSDPSuffix));
+		boost::string_view theRootDir = ((RTSPRequest*)inParams->inRTSPRequest)->GetRootDir();
+		std::string t1(theRootDir);
+		std::string t2 = fileName;
+		std::string t3(sSDPSuffix.Ptr, sSDPSuffix.Len);
+		std::string sdpPath(t1 + t2 + t3);
 
-		thePathPtr.Ptr = sdpPath.get();
-
-		// If the actual file path has a .sdp in it, first look for the URL without the extra .sdp
-		if (thePathPtr.Len > (sSDPSuffix.Len * 2))
-		{
-			// Check and see if there is a .sdp in the file path.
-			// If there is, truncate off our extra ".sdp", cuz it isn't needed
-			StrPtrLen endOfPath(&sdpPath.get()[thePathPtr.Len - (sSDPSuffix.Len * 2)], sSDPSuffix.Len);
-			if (endOfPath.Equal(sSDPSuffix))
-			{
-				sdpPath.get()[thePathPtr.Len - sSDPSuffix.Len] = '\0';
-				thePathPtr.Len -= sSDPSuffix.Len;
-			}
-		}
+		thePathPtr.Set((char *)sdpPath.c_str());
 		if (resultFilePath != nullptr)
 			*resultFilePath = thePathPtr.GetAsCString();
 		return FindOrCreateSession(&thePathPtr, inParams, theChannelNum);
@@ -829,12 +813,10 @@ std::string DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ch
 		}
 
 		if (!checkedSDPContainer.HasLineType('s'))
-		{ // add s line
-			char* theSDPName = nullptr;
-
-			(void)((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqFilePath, 0, &theSDPName);
-			std::unique_ptr<char[]> thePathStrDeleter(theSDPName);
-			if (theSDPName == nullptr)
+		{
+			// add s line
+			boost::string_view theSDPName = ((RTSPRequest*)inParams->inRTSPRequest)->GetAbsolutePath();
+			if (theSDPName.empty())
 				editedSDP += "s=unknown\r\n";
 			else
 			{
@@ -1101,12 +1083,11 @@ std::string DoDescribeAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, Re
 		}
 
 		if (!checkedSDPContainer.HasLineType('s'))
-		{ // add s line
-			char* theSDPName = nullptr;
-			(void)((QTSSDictionary*)inParams->inRTSPRequest)->GetValueAsString(qtssRTSPReqFilePath, 0, &theSDPName);
-			std::unique_ptr<char[]> thePathStrDeleter(theSDPName);
+		{
+			// add s line
+			boost::string_view theSDPName = ((RTSPRequest*)inParams->inRTSPRequest)->GetAbsolutePath();
 			editedSDP += "s=";
-			editedSDP += theSDPName;
+			editedSDP += std::string(theSDPName);
 			editedSDP += "\r\n";
 		}
 
@@ -1839,54 +1820,7 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 
 		Assert(inSession != nullptr);
 
-		theErr = QTSS_SetValue(inParams->inRTSPSession, sRTSPBroadcastSessionAttr, 0, &inSession, sizeof(inSession));
-		if (theErr != QTSS_NoErr)
-			return QTSS_RequestFailed;
-
-		//printf("QTSSReflectorModule:SET for att err=%" _S32BITARG_ " id=%" _S32BITARG_ "\n",theErr,inParams->inRTSPSession);
-
-		// this code needs to be cleaned up
-		// Check and see if the full path to this file matches an existing ReflectorSession
-		StrPtrLen thePathPtr;
-		StrPtrLen theFilePath;
-		((QTSSDictionary*)inParams->inRTSPRequest)->GetValuePtr(qtssRTSPReqFilePath, 0, (void**)&theFilePath.Ptr, &theFilePath.Len);
-		boost::string_view theFilePathV(theFilePath.Ptr, theFilePath.Len);
-		std::unique_ptr<char[]> sdpPath(QTSSModuleUtils::GetFullPath(inParams->inRTSPRequest,
-			theFilePathV,
-			&thePathPtr.Len, &sSDPSuffix));
-
-		thePathPtr.Ptr = sdpPath.get();
-
-
-		// remove trackID designation from the path if it is there
-		char *trackStr = thePathPtr.FindString("/trackID=");
-		if (trackStr != nullptr && *trackStr != 0)
-		{
-			*trackStr = 0; // terminate the string.
-			thePathPtr.Len = ::strlen(thePathPtr.Ptr);
-		}
-
-		// If the actual file path has a .sdp in it, first look for the URL without the extra .sdp
-		if (thePathPtr.Len > (sSDPSuffix.Len * 2))
-		{
-			// Check and see if there is a .sdp in the file path.
-			// If there is, truncate off our extra ".sdp", cuz it isn't needed
-			StrPtrLen endOfPath(&sdpPath.get()[thePathPtr.Len - (sSDPSuffix.Len * 2)], sSDPSuffix.Len);
-			if (endOfPath.Equal(sSDPSuffix))
-			{
-				sdpPath.get()[thePathPtr.Len - sSDPSuffix.Len] = '\0';
-				thePathPtr.Len -= sSDPSuffix.Len;
-			}
-		}
-
-		//// do all above so we can add the session to the map with Resolve here.
-		//// we must only do this once.
-		//OSRef* debug = sSessionMap->Resolve(&thePathPtr);
-		//if (debug != inSession->GetRef())
-		//{   
-		//	 return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest, 0);
-		//}
-
+		((RTSPSession *)inParams->inRTSPSession)->addAttribute(sBroadcasterSessionName, inSession);
 		KeepSession(inParams->inRTSPRequest, true);
 		//printf("QTSSReflectorModule.cpp:DoPlay (PUSH) inRTSPSession=%"   _U32BITARG_   " inClientSession=%"   _U32BITARG_   "\n",(uint32_t)inParams->inRTSPSession,(uint32_t)inParams->inClientSession);
 	}
@@ -2159,11 +2093,11 @@ bool AcceptSession(QTSS_StandardRTSP_Params* inParams)
 	QTSS_RTSPSessionObject inRTSPSession = inParams->inRTSPSession;
 	QTSS_RTSPRequestObject theRTSPRequest = inParams->inRTSPRequest;
 
-	QTSS_ActionFlags action = QTSSModuleUtils::GetRequestActions(theRTSPRequest);
+	QTSS_ActionFlags action = ((RTSPRequest*)theRTSPRequest)->GetAction();
 	if (action != qtssActionFlagsWrite)
 		return false;
 
-	if (QTSSModuleUtils::UserInGroup(QTSSModuleUtils::GetUserProfileObject(theRTSPRequest), sBroadcasterGroup.Ptr, sBroadcasterGroup.Len))
+	if (QTSSModuleUtils::UserInGroup(((RTSPRequest*)theRTSPRequest)->GetUserProfile(), sBroadcasterGroup.Ptr, sBroadcasterGroup.Len))
 		return true; // ok we are allowing this broadcaster user
 
 	boost::string_view remoteAddress = ((RTSPSession*)inRTSPSession)->GetRemoteAddr();
@@ -2195,7 +2129,7 @@ QTSS_Error ReflectorAuthorizeRTSPRequest(QTSS_StandardRTSP_Params* inParams)
 
 	bool allowNoAccessFiles = false;
 	QTSS_ActionFlags noAction = ~qtssActionFlagsWrite; //no action anything but a write
-	QTSS_ActionFlags authorizeAction = QTSSModuleUtils::GetRequestActions(inParams->inRTSPRequest);
+	QTSS_ActionFlags authorizeAction = ((RTSPRequest*)inParams->inRTSPRequest)->GetAction();
 	//printf("ReflectorAuthorizeRTSPRequest authorizeAction=%d qtssActionFlagsWrite=%d\n", authorizeAction, qtssActionFlagsWrite);
 	bool outAllowAnyUser = false;
 	bool outAuthorized = false;
@@ -2215,10 +2149,8 @@ QTSS_Error RedirectBroadcast(QTSS_StandardRTSP_Params* inParams)
 {
 	QTSS_RTSPRequestObject theRequest = inParams->inRTSPRequest;
 
-	char* requestPathStr;
-	(void)((QTSSDictionary*)theRequest)->GetValueAsString(qtssRTSPReqFilePath, 0, &requestPathStr);
-	std::unique_ptr<char[]> requestPathStrDeleter(requestPathStr);
-	StrPtrLen theRequestPath(requestPathStr);
+	boost::string_view requestPathStr = ((RTSPRequest*)theRequest)->GetAbsolutePath();
+	StrPtrLen theRequestPath((char *)requestPathStr.data(), requestPathStr.length());
 	StringParser theRequestPathParser(&theRequestPath);
 
 	// request path begins with a '/' for ex. /mysample.mov or /redirect_broadcast_keyword/mysample.mov
@@ -2234,12 +2166,12 @@ QTSS_Error RedirectBroadcast(QTSS_StandardRTSP_Params* inParams)
 		&& theFirstPath.EqualIgnoreCase(sRedirectBroadcastsKeyword, ::strlen(sRedirectBroadcastsKeyword)))
 	{
 		// set qtssRTSPReqRootDir
-		(void)QTSS_SetValue(theRequest, qtssRTSPReqRootDir, 0, sBroadcastsRedirectDir, ::strlen(sBroadcastsRedirectDir));
+		((RTSPRequest *)theRequest)->SetRootDir({ sBroadcastsRedirectDir, ::strlen(sBroadcastsRedirectDir) });
 
 		// set the request file path to the new path with the keyword stripped
 		StrPtrLen theStrippedRequestPath;
 		theRequestPathParser.ConsumeLength(&theStrippedRequestPath, theRequestPathParser.GetDataRemaining());
-		(void)QTSS_SetValue(theRequest, qtssRTSPReqFilePath, 0, theStrippedRequestPath.Ptr, theStrippedRequestPath.Len);
+		((RTSPRequest *)theRequest)->SetAbsolutePath({ theStrippedRequestPath.Ptr, theStrippedRequestPath.Len });
 	}
 
 	return QTSS_NoErr;
@@ -2265,9 +2197,7 @@ bool InBroadcastDirList(QTSS_RTSPRequestObject inRTSPRequest)
 
 	bool allowed = false;
 	auto* theRequest = (RTSPRequest*)inRTSPRequest;
-	char* theURIPathStr;
-	(void)((QTSSDictionary*)inRTSPRequest)->GetValueAsString(qtssRTSPReqFilePath, 0, &theURIPathStr);
-	std::unique_ptr<char[]> requestPathStrDeleter(theURIPathStr);
+	std::string theURIPathStr(((RTSPRequest*)inRTSPRequest)->GetAbsolutePath());
 
 	std::string theLocalPathStr(theRequest->GetLocalPath());
 
@@ -2297,7 +2227,7 @@ bool InBroadcastDirList(QTSS_RTSPRequestObject inRTSPRequest)
 			isURI = false;
 		}
 		else
-			theRequestPathStr = theURIPathStr;
+			theRequestPathStr = (char *)theURIPathStr.c_str();
 
 		StrPtrLen requestPath(theRequestPathStr);
 		StringParser requestPathParser(&requestPath);

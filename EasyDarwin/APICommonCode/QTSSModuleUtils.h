@@ -81,15 +81,6 @@ class QTSSModuleUtils
         static void   LogErrorStr( QTSS_ErrorVerbosity inVerbosity, char* inMessage);
         static void   LogPrefErrorStr( QTSS_ErrorVerbosity inVerbosity, char*  preference, char* inMessage);
      
-        // This function constructs a C-string of the full path to the file being requested.
-        // You may opt to append an optional suffix, or pass in NULL. You are responsible
-        // for disposing this memory
-
-        static char* GetFullPath(   QTSS_RTSPRequestObject inRequest,
-                                    boost::string_view whichFileStr,
-                                    uint32_t* outLen,
-                                    StrPtrLen* suffix = nullptr);
-
         //
         // This function does 2 things:
         // 1.   Compares the enabled fields in the field ID array with the fields in the
@@ -205,10 +196,7 @@ class QTSSModuleUtils
         /// Get the type of request. Returns qtssActionFlagsNoFlags on failure.
         //  Result is a bitmap of flags
         //
-        static QTSS_ActionFlags GetRequestActions(QTSS_RTSPRequestObject theRTSPRequest);
  
-        static char* GetMoviesRootDir_Copy(QTSS_RTSPRequestObject theRTSPRequest);
-        static QTSS_UserProfileObject GetUserProfileObject(QTSS_RTSPRequestObject theRTSPRequest);
         static QTSS_AttrRights GetRights(QTSS_UserProfileObject theUserProfileObject);
         static char* GetExtendedRights(QTSS_UserProfileObject theUserProfileObject, uint32_t index);
        

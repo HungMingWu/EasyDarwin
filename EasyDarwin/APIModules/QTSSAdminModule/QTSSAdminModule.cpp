@@ -349,7 +349,7 @@ void APITests_DEBUG()
 
 inline void KeepSession(QTSS_RTSPRequestObject theRequest, bool keep)
 {
-	(void)QTSS_SetValue(theRequest, qtssRTSPReqRespKeepAlive, 0, &keep, sizeof(keep));
+	((RTSPRequest *)theRequest)->SetResponseKeepAlive(keep);
 }
 
 // FUNCTION IMPLEMENTATIONS
@@ -666,12 +666,7 @@ bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen
 	}
 
 	// Get the user profile object from the request object that was created in the authenticate callback
-	QTSS_UserProfileObject theUserProfile = nullptr;
-	uint32_t len = sizeof(QTSS_UserProfileObject);
-	err = ((QTSSDictionary*)request)->GetValue(qtssRTSPReqUserProfile, 0, (void*)&theUserProfile, &len);
-	Assert(len == sizeof(QTSS_UserProfileObject));
-	if (err != QTSS_NoErr)
-		authenticated = false;
+	QTSS_UserProfileObject theUserProfile = ((RTSPRequest*)request)->GetUserProfile();
 
 	if (err == QTSS_NoErr) {
 		char* reqPassword = passwordPtr->GetAsCString();
@@ -733,15 +728,15 @@ QTSS_Error AuthorizeAdminRequest(QTSS_RTSPRequestObject request)
 		return QTSS_NoErr;
 
 	// get the type of request
-	QTSS_ActionFlags action = QTSSModuleUtils::GetRequestActions(request);
+	QTSS_ActionFlags action = ((RTSPRequest*)request)->GetAction();
 	if (!(action & qtssActionFlagsAdmin))
 		return QTSS_RequestFailed;
 
-	QTSS_UserProfileObject theUserProfile = QTSSModuleUtils::GetUserProfileObject(request);
+	QTSS_UserProfileObject theUserProfile = ((RTSPRequest*)request)->GetUserProfile();
 	if (nullptr == theUserProfile)
 		return QTSS_RequestFailed;
 
-	(void)QTSS_SetValue(request, qtssRTSPReqURLRealm, 0, sAuthRealm, ::strlen(sAuthRealm));
+	((RTSPRequest*)request)->SetURLRealm({ sAuthRealm, ::strlen(sAuthRealm) });
 
 	// Authorize the user if the user belongs to the AdministratorGroup (this is an admin module pref)
 	std::vector<std::string> groupsArray = QTSSModuleUtils::GetGroupsArray_Copy(theUserProfile);
@@ -943,16 +938,13 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 
 	QTSS_RTSPRequestObject theRequest = inParams->inRTSPRequest;
 
-	uint32_t paramLen = sizeof(sSessID);
-	QTSS_Error err = ((QTSSDictionary*)inParams->inRTSPSession)->GetValue(qtssRTSPSesID, 0, (void*)&sSessID, &paramLen);
-	if (err != QTSS_NoErr)
-		return QTSS_NoErr;
+	uint32_t paramLen;
+	sSessID = ((RTSPSession *)inParams->inRTSPSession)->GetSessionID();
 
 	StrPtrLen theFullRequest;
-	err = ((QTSSDictionary*)theRequest)->GetValuePtr(qtssRTSPReqFullRequest, 0, (void**)&theFullRequest.Ptr, &theFullRequest.Len);
-	if (err != QTSS_NoErr)
-		return QTSS_NoErr;
-
+	QTSS_Error err = QTSS_NoErr;
+	boost::string_view	theFullRequestV = ((RTSPRequest*)theRequest)->GetFullRequest();
+	theFullRequest.Set((char *)theFullRequestV.data(), theFullRequestV.length());
 
 	StringParser fullRequest(&theFullRequest);
 

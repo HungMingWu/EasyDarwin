@@ -79,7 +79,7 @@ RTSPRequest::sURLStopConditions[] =
 	0, 0, 0, 0, 0, 0             //250-255
 };
 
-static StrPtrLen    sDefaultRealm("Streaming Server", 16);
+static boost::string_view    sDefaultRealm("Streaming Server");
 static StrPtrLen    sAuthBasicStr("Basic", 5);
 static StrPtrLen    sAuthDigestStr("Digest", 6);
 static StrPtrLen    sUsernameStr("username", 8);
@@ -137,10 +137,11 @@ private:
 //Parses the request
 QTSS_Error RTSPRequest::Parse()
 {
-	StringParser parser(this->GetValue(qtssRTSPReqFullRequest));
-	Assert(this->GetValue(qtssRTSPReqFullRequest)->Ptr != nullptr);
+	boost::string_view t(GetFullRequest());
+	StrPtrLen t1((char *)t.data(), t.length());
+	StringParser parser(&t1);
 	fHeaderDict.clear();
-	boost::string_view requestHeader(this->GetValue(qtssRTSPReqFullRequest)->Ptr, this->GetValue(qtssRTSPReqFullRequest)->Len);
+	boost::string_view requestHeader = GetFullRequest();
 	typedef boost::string_view::const_iterator It;
 	RTSPHeaderGrammar<It> rtspGrammar;
 	It iter = requestHeader.begin(), end = requestHeader.end();
@@ -176,8 +177,8 @@ QTSS_Error RTSPRequest::Parse()
 
 	//Make sure that there was some path that was extracted from this request. If not, there is no way
 	//we can process the request, so generate an error
-	if (this->GetValue(qtssRTSPReqFilePath)->Len == 0)
-		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgNoURLInRequest, this->GetValue(qtssRTSPReqFullRequest));
+	if (GetAbsolutePath().empty())
+		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgNoURLInRequest, nullptr);
 
 	return QTSS_NoErr;
 }
@@ -229,7 +230,7 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 	StrPtrLen theURL;
 	parser.ConsumeUntilWhitespace(&theURL);
 	//qtssRTSPReqAbsoluteURL = rtsp://www.easydarwin.org:554/live.sdp?channel=1&token=888888
-	this->SetVal(qtssRTSPReqAbsoluteURL, &theURL);
+	SetAbsoluteURL({ theURL.Ptr, theURL.Len });
 	StringParser absParser(&theURL);
 	StrPtrLen theAbsURL;
 	//theAbsURL = rtsp://www.easydarwin.org:554/live.sdp
@@ -246,7 +247,6 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 
 		fHeaderDict.Set(qtssHostHeader, theHost);
 		if (!uriPath.empty())
-			// qtssRTSPReqURI = /live.sdp
 			uri = uriPath;
 		else {
 			//
@@ -278,7 +278,6 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 
 	// parse the query string from the url if present.
 	// init qtssRTSPReqQueryString dictionary to an empty string
-	// qtssRTSPReqQueryString = channel=1&token=888888
 
 	if (absParser.GetDataRemaining() > 0)
 	{
@@ -301,7 +300,7 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 	// so the below functions don't make any sense.
 	if ((*theAbsURL.Ptr == '*') && (theAbsURL.Len == 1))
 	{
-		this->SetValue(qtssRTSPReqFilePath, 0, theAbsURL.Ptr, theAbsURL.Len, QTSSDictionary::kDontObeyReadOnly);
+		SetAbsolutePath({ theAbsURL.Ptr, theAbsURL.Len });
 
 		return QTSS_NoErr;
 	}
@@ -330,7 +329,7 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 	//setup the proper QTSS param
 	fFilePath[theBytesWritten] = '\0';
 	//this->SetVal(qtssRTSPReqFilePath, fFilePath, theBytesWritten);
-	this->SetValue(qtssRTSPReqFilePath, 0, fFilePath, theBytesWritten, QTSSDictionary::kDontObeyReadOnly);
+	SetAbsolutePath({ (char *)fFilePath, (size_t)theBytesWritten });
 
 
 
@@ -352,7 +351,7 @@ QTSS_Error RTSPRequest::ParseHeaders(StringParser& parser)
 
 		isStreamOK = parser.GetThru(&theKeyWord, ':');
 		if (!isStreamOK)
-			return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgNoColonAfterHeader, this->GetValue(qtssRTSPReqFullRequest));
+			return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgNoColonAfterHeader, nullptr);
 
 		theKeyWord.TrimWhitespace();
 
@@ -670,10 +669,6 @@ void  RTSPRequest::ParseDynamicRateHeader(boost::string_view header)
 void  RTSPRequest::ParseIfModSinceHeader(StrPtrLen &header)
 {
 	fIfModSinceDate = DateTranslator::ParseDate(&header);
-
-	// Only set the param if this is a legal date
-	if (fIfModSinceDate != 0)
-		this->SetVal(qtssRTSPReqIfModSinceDate, &fIfModSinceDate, sizeof(fIfModSinceDate));
 }
 
 void RTSPRequest::ParseSpeedHeader(boost::string_view header)
@@ -877,10 +872,8 @@ QTSS_Error RTSPRequest::ParseBasicHeader(StringParser *inParsedAuthLinePtr)
 	parsedNameAndPassword.ConsumeLength(nullptr, 1);
 	parsedNameAndPassword.GetThruEOL(&password);
 
-
-	// Set the qtssRTSPReqUserName and qtssRTSPReqUserPassword attributes in the Request object
 	SetAuthUserName({ name.Ptr, name.Len });
-	(void) this->SetValue(qtssRTSPReqUserPassword, 0, password.Ptr, password.Len, QTSSDictionary::kDontObeyReadOnly);
+	SetPassWord({ password.Ptr, password.Len });
 
 	// Also set the qtssUserName attribute in the qtssRTSPReqUserProfile object attribute of the Request Object
 	(void)fUserProfile.SetValue(qtssUserName, 0, name.Ptr, name.Len, QTSSDictionary::kDontObeyReadOnly);
@@ -901,7 +894,7 @@ QTSS_Error RTSPRequest::ParseDigestHeader(StringParser *inParsedAuthLinePtr)
 		digestAuthLine.GetThru(nullptr, '=');
 		digestAuthLine.ConsumeWhitespace();
 
-		fAuthDigestResponse.Set(authLine->Ptr, authLine->Len);
+		fAuthDigestResponse = std::string(authLine->Ptr, authLine->Len);
 	}
 
 	while (inParsedAuthLinePtr->GetDataRemaining() != 0)
@@ -985,19 +978,14 @@ QTSS_Error RTSPRequest::ParseAuthHeader(void)
 
 void RTSPRequest::SetupAuthLocalPath(void)
 {
-	QTSS_AttributeID theID = qtssRTSPReqFilePath;
+	std::string theFilePath(GetAbsolutePath());
 
 	//
 	// Get the truncated path on a setup, because setups have the trackID appended
 	if (qtssSetupMethod == fMethod)
-		theID = qtssRTSPReqFilePathTrunc;
-	StrPtrLen theFilePath;
-	GetValuePtr(theID, 0, (void**)&theFilePath.Ptr, &theFilePath.Len);
-	uint32_t theLen = 0;
-	boost::string_view theFilePathV(theFilePath.Ptr, theFilePath.Len);
-	char* theFullPath = QTSSModuleUtils::GetFullPath(this, theFilePathV, &theLen, nullptr);
-	SetLocalPath({ theFullPath, theLen });
-	delete[] theFullPath;
+		theFilePath = GetTruncatedPath();
+
+	SetLocalPath(std::string(GetRootDir()) + theFilePath);
 }
 
 QTSS_Error RTSPRequest::SendDigestChallenge(uint32_t qop, StrPtrLen *nonce, StrPtrLen* opaque)
@@ -1007,18 +995,18 @@ QTSS_Error RTSPRequest::SendDigestChallenge(uint32_t qop, StrPtrLen *nonce, StrP
 	char challengeBuf[kAuthChallengeHeaderBufSize];
 	ResizeableStringFormatter challengeFormatter(challengeBuf, kAuthChallengeHeaderBufSize);
 
-	StrPtrLen realm;
+	boost::string_view realm;
 	char *prefRealmPtr = nullptr;
-	StrPtrLen *realmPtr = this->GetValue(qtssRTSPReqURLRealm);              // Get auth realm set by the module
-	if (realmPtr->Len > 0) {
-		realm = *realmPtr;
+	boost::string_view realmPtr = GetURLRealm();              // Get auth realm set by the module
+	if (!realmPtr.empty()) {
+		realm = realmPtr;
 	}
 	else {                                                                  // If module hasn't set the realm
 		QTSServerInterface* theServer = QTSServerInterface::GetServer();    // get the realm from prefs
 		prefRealmPtr = theServer->GetPrefs()->GetAuthorizationRealm();      // allocates memory
 		Assert(prefRealmPtr != nullptr);
 		if (prefRealmPtr != nullptr) {
-			realm.Set(prefRealmPtr, strlen(prefRealmPtr));
+			realm = boost::string_view(prefRealmPtr, strlen(prefRealmPtr));
 		}
 		else {
 			realm = sDefaultRealm;
@@ -1072,12 +1060,11 @@ QTSS_Error RTSPRequest::SendBasicChallenge(void)
 	do
 	{
 		std::string challenge("Basic realm=\"");
-		StrPtrLen whichRealm;
+		boost::string_view whichRealm;
 
 		// Get the module's realm
-		StrPtrLen moduleRealm;
-		theErr = this->GetValuePtr(qtssRTSPReqURLRealm, 0, (void **)&moduleRealm.Ptr, &moduleRealm.Len);
-		if ((QTSS_NoErr == theErr) && (moduleRealm.Len > 0))
+		boost::string_view moduleRealm = GetURLRealm();
+		if (!moduleRealm.empty())
 		{
 			whichRealm = moduleRealm;
 		}
@@ -1090,7 +1077,7 @@ QTSS_Error RTSPRequest::SendBasicChallenge(void)
 			Assert(prefRealmPtr != nullptr);
 			if (prefRealmPtr != nullptr)
 			{
-				whichRealm.Set(prefRealmPtr, strlen(prefRealmPtr));
+				whichRealm = boost::string_view(prefRealmPtr, strlen(prefRealmPtr));
 			}
 			else
 			{
@@ -1098,7 +1085,7 @@ QTSS_Error RTSPRequest::SendBasicChallenge(void)
 			}
 		}
 
-		challenge += std::string(whichRealm.Ptr, whichRealm.Len) + "\"";
+		challenge += std::string(whichRealm) + "\"";
 
 #if (0)
 		{  // test code

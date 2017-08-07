@@ -489,9 +489,6 @@ enum
     qtssCliRTSPReqRealStatusCode    = 22,   //read      //uint32_t            //Same as qtssRTSPReqRTSPReqRealStatusCode, the status from the most recent (last) request.
     qtssCliTeardownReason           = 23,   //r/w       //QTSS_CliSesTeardownReason // Must be set by a module that calls QTSS_Teardown if it is not a client requested disconnect.
 
-
-    qtssCliRTSPReqRespMsg           = 25,   //read      //char array    // from the most recent (last) request. Error message sent back to client if response was an error.
-
     qtssCliSesCurrentBitRate        = 26,   //read      //uint32_t    //Current bit rate of all the streams on this session. This is not an average. In bits per second.
     qtssCliSesPacketLossPercent     = 27,   //read      //Float32   //Current percent loss as a fraction. .5 = 50%. This is not an average.
     qtssCliSesTimeConnectedInMsec   = 28,   //read      //int64_t    //Time in milliseconds that this client has been connected.
@@ -514,9 +511,7 @@ enum
 {
     //QTSS_RTSPSessionObject parameters
     
-    //Valid in any role that receives a QTSS_RTSPSessionObject
-    qtssRTSPSesID           = 0,        //read      //uint32_t        //This is a unique ID for each session since the server started up.
-    
+    //Valid in any role that receives a QTSS_RTSPSessionObject   
     qtssRTSPSesNumParams    = 15
 };
 typedef uint32_t QTSS_RTSPSessionAttributes;
@@ -554,43 +549,7 @@ enum
     //QTSS_RTSPRequestObject parameters. All of these are pre-emptive safe parameters
 
     //Available in every role that receives the QTSS_RTSPRequestObject
-    
-    qtssRTSPReqFullRequest          = 0,    //read      //char array        //The full request sent by the client
-    
     //Available in every method that receives the QTSS_RTSPRequestObject except for the QTSS_FilterMethod
-    
-    qtssRTSPReqFilePath             = 2,    //r/w        //char array        //Not pre-emptive safe!! //URI for this request, converted to a local file system path.
-    qtssRTSPReqFilePathTrunc        = 4,    //read      //char array        //Not pre-emptive safe!! //Same as qtssRTSPReqFilePath, without the last element of the path
-
-    qtssRTSPReqAbsoluteURL          = 7,    //read      //char array        //The full URL, starting from "rtsp://"
-    qtssRTSPReqTruncAbsoluteURL     = 8,    //read      //char array        //Absolute URL without last element of path
- 
-    qtssRTSPReqRespKeepAlive        = 13,   //r/w       //bool        //Will (should) the server keep the connection alive. Set this to false if the connection should be terminated after completion of this request.
-    qtssRTSPReqRootDir              = 14,   //r/w       //char array    //Not pre-emptive safe!! //Root directory to use for this request. The default value for this parameter is the server's media folder path. Modules may set this attribute from the QTSS_RTSPRoute_Role.
-
-    qtssRTSPReqUserPassword         = 18,   //read      //char array //decoded Authentication information when provided by the RTSP request. See RTSPSessLastUserPassword.
-   
-    qtssRTSPReqURLRealm             = 20,   //r/w       //char array //The authorization entity for the client to display "Please enter password for -realm- at server name. The default realm is "Streaming Server".
-    
-    qtssRTSPReqIfModSinceDate       = 22,   //read      //QTSS_TimeVal  // If the RTSP request contains an If-Modified-Since header, this is the if-modified date, converted to a QTSS_TimeVal
-
-
-
-
-    qtssRTSPReqRespMsg              = 24,   //r/w       //char array        // A module sending an RTSP error to the client should set this to be a text message describing why the error occurred. This description is useful to add to log files. Once the RTSP response has been sent, this attribute contains the response message.
-
-    qtssRTSPReqLateTolerance        = 27,   //read      //Float32           // Value of the late-tolerance field of the x-RTP-Options header, or -1 if not present. 
-     
-    qtssRTSPReqAction               = 31,   //r/w       //QTSS_ActionFlags  //Set by a module in the QTSS_RTSPSetAction_Role - for now, the server will set it as the role hasn't been added yet
-    qtssRTSPReqUserProfile          = 32,   //r/w       //QTSS_UserProfileObject    //Object's username is filled in by the server and its password and group memberships filled in by the authentication module.       
-    qtssRTSPReqPrebufferMaxTime     = 33,   //read      //Float32           //The maxtime field of the x-Prebuffer RTSP header
-    qtssRTSPReqAuthScheme           = 34,   //read      //QTSS_AuthScheme
-    
-    qtssRTSPReqSkipAuthorization    = 35,   //r/w       //bool            // Set by a module that wants the particular request to be
-                                                                            // allowed by all authorization modules
-    qtssRTSPReqNetworkMode          = 36,   //read      //QTSS_RTPNetworkMode // unicast or multicast        
-
-    qtssRTSPReqDigestResponse       = 42,   //read      //char array //Digest response used by the server for Digest authentication
     qtssRTSPReqNumParams            = 43
     
 };

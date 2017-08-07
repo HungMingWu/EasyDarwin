@@ -216,63 +216,7 @@ void QTSSModuleUtils::LogPrefErrorStr( QTSS_ErrorVerbosity inVerbosity, char*  p
    
 	(void)QTSS_Write(sErrorLog, buffer, ::strlen(buffer), nullptr, inVerbosity);
 }
-
-                        
-char* QTSSModuleUtils::GetFullPath( QTSS_RTSPRequestObject inRequest,
-                                    boost::string_view whichFileStr,
-                                    uint32_t* outLen,
-                                    StrPtrLen* suffix)
-{
-    Assert(outLen != nullptr);
-    
-	(void)QTSS_LockObject(inRequest);
-
-		
-    StrPtrLen theRootDir;
-    QTSS_Error theErr = ((QTSSDictionary*)inRequest)->GetValuePtr(qtssRTSPReqRootDir, 0, (void**)&theRootDir.Ptr, &theRootDir.Len);
-	Assert(theErr == QTSS_NoErr);
-
-	StrPtrLen theFilePath((char *)whichFileStr.data(), whichFileStr.length());
-    //trim off extra / characters before concatenating
-    // so root/ + /path instead of becoming root//path  is now root/path  as it should be.
-    
-	if (theRootDir.Len && theRootDir.Ptr[theRootDir.Len -1] == kPathDelimiterChar
-	    && theFilePath.Len  && theFilePath.Ptr[0] == kPathDelimiterChar)
-	{
-	    char *thePathEnd = &(theFilePath.Ptr[theFilePath.Len]);
-	    while (theFilePath.Ptr != thePathEnd)
-	    {
-	        if (*theFilePath.Ptr != kPathDelimiterChar)
-	            break;
-	            
-	        theFilePath.Ptr ++;
-	        theFilePath.Len --;
-	    }
-	}
-
-    //construct a full path out of the root dir path for this request,
-    //and the url path.
-    *outLen = theFilePath.Len + theRootDir.Len + 2;
-    if (suffix != nullptr)
-        *outLen += suffix->Len;
-    
-    auto* theFullPath = new char[*outLen];
-    
-    //write all the pieces of the path into this new buffer.
-    StringFormatter thePathFormatter(theFullPath, *outLen);
-    thePathFormatter.Put(theRootDir);
-    thePathFormatter.Put(theFilePath);
-    if (suffix != nullptr)
-        thePathFormatter.Put(*suffix);
-    thePathFormatter.PutTerminator();
-
-    *outLen = *outLen - 2;
-	
-	(void)QTSS_UnlockObject(inRequest);
-	
-    return theFullPath;
-}
-
+                   
 QTSS_Error  QTSSModuleUtils::AppendRTPMetaInfoHeader(   QTSS_RTSPRequestObject inRequest,
                                                         StrPtrLen* inRTPMetaInfoHeader,
                                                         RTPMetaInfoPacket::FieldID* inFieldIDArray)
@@ -367,7 +311,7 @@ QTSS_Error  QTSSModuleUtils::SendErrorResponse( QTSS_RTSPRequestObject inRequest
 	RTSPRequest *pReq = (RTSPRequest *)inRequest;
     //set RTSP headers necessary for this error response message
 	pReq->SetStatus(inStatusCode);
-    (void)QTSS_SetValue(inRequest, qtssRTSPReqRespKeepAlive, 0, &sFalse, sizeof(sFalse));
+	pReq->SetResponseKeepAlive(sFalse);
     StringFormatter theErrorMsgFormatter(nullptr, 0);
     char *messageBuffPtr = nullptr;
     
@@ -432,7 +376,7 @@ QTSS_Error  QTSSModuleUtils::SendErrorResponse( QTSS_RTSPRequestObject inRequest
     // Now that we've formatted the message into the temporary buffer,
     // write it out to the request stream and the Client Session object
     (void)QTSS_Write(inRequest, theErrorMsgFormatter.GetBufPtr(), theErrorMsgFormatter.GetBytesWritten(), nullptr, 0);
-    (void)QTSS_SetValue(inRequest, qtssRTSPReqRespMsg, 0, theErrorMsgFormatter.GetBufPtr(), theErrorMsgFormatter.GetBytesWritten());
+	pReq->SetRespMsg({ theErrorMsgFormatter.GetBufPtr(), theErrorMsgFormatter.GetBytesWritten() });
     
     delete [] messageBuffPtr;
     return QTSS_RequestFailed;
@@ -447,7 +391,7 @@ QTSS_Error	QTSSModuleUtils::SendErrorResponseWithMessage( QTSS_RTSPRequestObject
 	RTSPRequest *pReq = (RTSPRequest *)inRequest;
 	//set RTSP headers necessary for this error response message
 	pReq->SetStatus(inStatusCode);
-    (void)QTSS_SetValue(inRequest, qtssRTSPReqRespKeepAlive, 0, &sFalse, sizeof(sFalse));
+	pReq->SetResponseKeepAlive(sFalse);
     StrPtrLen theErrorMessage(nullptr, 0);
     
     if (sEnableRTSPErrorMsg)
@@ -469,7 +413,7 @@ QTSS_Error	QTSSModuleUtils::SendErrorResponseWithMessage( QTSS_RTSPRequestObject
     // Now that we've formatted the message into the temporary buffer,
     // write it out to the request stream and the Client Session object
     (void)QTSS_Write(inRequest, theErrorMessage.Ptr, theErrorMessage.Len, nullptr, 0);
-    (void)QTSS_SetValue(inRequest, qtssRTSPReqRespMsg, 0, theErrorMessage.Ptr, theErrorMessage.Len);
+	pReq->SetRespMsg({ theErrorMessage.Ptr, theErrorMessage.Len });
     
     return QTSS_RequestFailed;
 }
@@ -487,7 +431,7 @@ QTSS_Error	QTSSModuleUtils::SendHTTPErrorResponse( QTSS_RTSPRequestObject inRequ
 	pReq->SetStatus(inStatusCode);
 
     if (inKillSession) // tell the server to end the session
-        (void)QTSS_SetValue(inRequest, qtssRTSPReqRespKeepAlive, 0, &sFalse, sizeof(sFalse));
+        pReq->SetResponseKeepAlive(sFalse);
     
     ResizeableStringFormatter theErrorMessage(nullptr, 0); //allocates and deletes memory
     ResizeableStringFormatter bodyMessage(nullptr,0); //allocates and deletes memory
@@ -566,7 +510,7 @@ QTSS_Error	QTSSModuleUtils::SendHTTPErrorResponse( QTSS_RTSPRequestObject inRequ
     // Now that we've formatted the message into the temporary buffer,
     // write it out to the request stream and the Client Session object
     (void)QTSS_Write(inRequest, theErrorMessage.GetBufPtr(), theErrorMessage.GetBytesWritten(), nullptr, 0);
-    (void)QTSS_SetValue(inRequest, qtssRTSPReqRespMsg, 0, theErrorMessage.GetBufPtr(), theErrorMessage.GetBytesWritten());
+	pReq->SetRespMsg({ theErrorMessage.GetBufPtr(), theErrorMessage.GetBytesWritten() });
     
     return QTSS_RequestFailed;
 }
@@ -838,32 +782,6 @@ QTSS_AttributeID QTSSModuleUtils::CreateAttribute(QTSS_Object inObject, char* in
         Assert(theErr == QTSS_NoErr);
     }
     return theID;
-}
-
-QTSS_ActionFlags QTSSModuleUtils::GetRequestActions(QTSS_RTSPRequestObject theRTSPRequest)
-{
-    // Don't touch write requests
-    QTSS_ActionFlags action = qtssActionFlagsNoFlags;
-    uint32_t len = sizeof(QTSS_ActionFlags);
-    QTSS_Error theErr = ((QTSSDictionary*)theRTSPRequest)->GetValue(qtssRTSPReqAction, 0, (void*)&action, &len);
-    Assert(theErr == QTSS_NoErr);
-    Assert(len == sizeof(QTSS_ActionFlags));
-    return action;
-}
-
-char* QTSSModuleUtils::GetMoviesRootDir_Copy(QTSS_RTSPRequestObject theRTSPRequest)
-{   char*   movieRootDirStr = nullptr;
-    QTSS_Error theErr = ((QTSSDictionary*)theRTSPRequest)->GetValueAsString(qtssRTSPReqRootDir, 0, &movieRootDirStr);
-    Assert(theErr == QTSS_NoErr);
-    return movieRootDirStr;
-}
-
-QTSS_UserProfileObject QTSSModuleUtils::GetUserProfileObject(QTSS_RTSPRequestObject theRTSPRequest)
-{   QTSS_UserProfileObject theUserProfile = nullptr;
-    uint32_t len = sizeof(QTSS_UserProfileObject);
-    QTSS_Error theErr = ((QTSSDictionary*)theRTSPRequest)->GetValue(qtssRTSPReqUserProfile, 0, (void*)&theUserProfile, &len);
-    Assert(theErr == QTSS_NoErr);
-    return theUserProfile;
 }
 
 char *QTSSModuleUtils::GetUserName_Copy(QTSS_UserProfileObject inUserProfile)

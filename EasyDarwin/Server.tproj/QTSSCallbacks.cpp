@@ -493,9 +493,9 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 	// Set all the attributes required by the authentication module, using the input values
 	pReq->SetAuthUserName({ inAuthUserName, ::strlen(inAuthUserName) });
 	pReq->SetLocalPath({ inAuthResourceLocalPath, ::strlen(inAuthResourceLocalPath) });
-	(void)request->SetValue(qtssRTSPReqRootDir, 0, inAuthMoviesDir, ::strlen(inAuthMoviesDir), QTSSDictionary::kNoFlags);
-	(void)request->SetValue(qtssRTSPReqAction, 0, (const void *)&inAuthRequestAction, sizeof(QTSS_ActionFlags), QTSSDictionary::kNoFlags);
-	(void)request->SetValue(qtssRTSPReqAuthScheme, 0, (const void *)&inAuthScheme, sizeof(QTSS_AuthScheme), QTSSDictionary::kDontObeyReadOnly);
+	pReq->SetRootDir({ inAuthMoviesDir, ::strlen(inAuthMoviesDir) });
+	request->SetAction(inAuthRequestAction);
+	request->SetAuthScheme(inAuthScheme);
 	QTSSUserProfile *profile = request->GetUserProfile();
 	(void)profile->SetValue(qtssUserName, 0, inAuthUserName, ::strlen(inAuthUserName), QTSSDictionary::kDontObeyReadOnly);
 
@@ -566,9 +566,9 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 	return theErr;
 }
 
-QTSS_Error	QTSSCallbacks::QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObject, char** outAuthRealm, bool* outAuthUserAllowed)
+QTSS_Error	QTSSCallbacks::QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObject, std::string* outAuthRealm, bool* outAuthUserAllowed)
 {
-	auto* request = (RTSPRequestInterface *)inAuthRequestObject;
+	auto* request = (RTSPRequest *)inAuthRequestObject;
 	if (request == nullptr)
 		return QTSS_BadArgument;
 
@@ -642,8 +642,7 @@ QTSS_Error	QTSSCallbacks::QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObj
 	}
 
 	// outAuthRealm is set to the realm that is given by the module that has denied authentication
-	StrPtrLen* realm = request->GetValue(qtssRTSPReqURLRealm);
-	*outAuthRealm = realm->GetAsCString();
+	*outAuthRealm = std::string(request->GetURLRealm());
 
 	return theErr;
 }

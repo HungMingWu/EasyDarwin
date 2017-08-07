@@ -312,12 +312,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 		return QTSS_RequestFailed;
 
 	// Get the user profile object from the request object
-	QTSS_UserProfileObject theUserProfile = nullptr;
-	uint32_t len = sizeof(QTSS_UserProfileObject);
-	QTSS_Error theErr = ((QTSSDictionary*)theRTSPRequest)->GetValue(qtssRTSPReqUserProfile, 0, (void*)&theUserProfile, &len);
-	Assert(len == sizeof(QTSS_UserProfileObject));
-	if (theErr != QTSS_NoErr)
-		return theErr;
+	QTSS_UserProfileObject theUserProfile = ((RTSPRequest*)theRTSPRequest)->GetUserProfile();
 
 	bool defaultPaths = true;
 	// Check for a users and groups file in the access file
@@ -328,9 +323,8 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	if (pathBuffStr.empty())
 		return QTSS_RequestFailed;
 	//get the root movie directory
-	char*   movieRootDirStr = QTSSModuleUtils::GetMoviesRootDir_Copy(theRTSPRequest);
-	std::unique_ptr<char[]> movieRootDeleter(movieRootDirStr);
-	if (nullptr == movieRootDirStr)
+	boost::string_view   movieRootDirStr = ((RTSPRequest*)theRTSPRequest)->GetRootDir();
+	if (movieRootDirStr.empty())
 		return QTSS_RequestFailed;
 	// Now get the access file path
 	char* accessFilePath = QTAccessFile::GetAccessFile_Copy(movieRootDirStr, pathBuffStr.c_str());
@@ -340,12 +334,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	char* groupsFilePath = nullptr;
 
 	// Get the request action from the request object
-	QTSS_ActionFlags action = qtssActionFlagsNoFlags;
-	len = sizeof(action);
-	theErr = ((QTSSDictionary*)theRTSPRequest)->GetValue(qtssRTSPReqAction, 0, (void*)&action, &len);
-	Assert(len == sizeof(action));
-	if (theErr != QTSS_NoErr)
-		return theErr;
+	QTSS_ActionFlags action = ((RTSPRequest*)theRTSPRequest)->GetAction();
 
 	// Allocates memory for usersFilePath and groupsFilePath
 	QTSS_AuthScheme authScheme = QTAccessFile::FindUsersAndGroupsFilesAndAuthScheme(accessFilePath, action, &usersFilePath, &groupsFilePath);
@@ -449,17 +438,11 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	if (authScheme == qtssAuthNone)
 	{
 		// Get the authentication scheme from the request object
-		len = sizeof(authScheme);
-		theErr = ((QTSSDictionary*)theRTSPRequest)->GetValue(qtssRTSPReqAuthScheme, 0, (void*)&authScheme, &len);
-		Assert(len == sizeof(authScheme));
-		if (theErr != QTSS_NoErr)
-			return theErr;
+		authScheme = ((RTSPRequest *)theRTSPRequest)->GetAuthScheme();
 	}
 	else
 	{
-		theErr = QTSS_SetValue(theRTSPRequest, qtssRTSPReqAuthScheme, 0, (void*)&authScheme, sizeof(authScheme));
-		if (theErr != QTSS_NoErr)
-			return theErr;
+		((RTSPRequest *)theRTSPRequest)->SetAuthScheme(authScheme);
 	}
 
 	// Set the qtssUserRealm to the realm value retrieved from the users file
@@ -472,7 +455,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 
 	// Get the username from the user profile object
 	char*   usernameBuf = nullptr;
-	theErr = ((QTSSDictionary*)theUserProfile)->GetValueAsString(qtssUserName, 0, &usernameBuf);
+	QTSS_Error theErr = ((QTSSDictionary*)theUserProfile)->GetValueAsString(qtssUserName, 0, &usernameBuf);
 	std::unique_ptr<char[]> usernameBufDeleter(usernameBuf);
 	StrPtrLen username(usernameBuf);
 	if (theErr != QTSS_NoErr)
@@ -518,7 +501,7 @@ QTSS_Error AccessAuthorizeRTSPRequest(QTSS_StandardRTSP_Params* inParams)
 {
 	bool allowNoAccessFiles = sAllowGuestDefaultEnabled; //no access files allowed means allowing guest access (unknown users)
 	QTSS_ActionFlags noAction = ~qtssActionFlagsRead; // allow any action
-	QTSS_ActionFlags authorizeAction = QTSSModuleUtils::GetRequestActions(inParams->inRTSPRequest);
+	QTSS_ActionFlags authorizeAction = ((RTSPRequest*)inParams->inRTSPRequest)->GetAction();
 	bool authorized = false;
 	bool allowAnyUser = false;
 	QTAccessFile accessFile;

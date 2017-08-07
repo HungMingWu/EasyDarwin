@@ -710,10 +710,9 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	ReplaceSpaces(&tempLogStr, &lastURLRealmStr, "%20");
 
 	char respMsgBuffer[1024] = { 0 };
-	StrPtrLen theRespMsg;
-	dict->GetValuePtr(qtssCliRTSPReqRespMsg, 0, (void**)&theRespMsg.Ptr, &theRespMsg.Len);
+	boost::string_view theRespMsg = dict->GetRespMsg();
 	StrPtrLen respMsgEncoded(respMsgBuffer, 1024 - 1);
-	int32_t theErr = StringTranslator::EncodeURL(theRespMsg.Ptr, theRespMsg.Len, respMsgEncoded.Ptr, respMsgEncoded.Len);
+	int32_t theErr = StringTranslator::EncodeURL(theRespMsg.data(), theRespMsg.length(), respMsgEncoded.Ptr, respMsgEncoded.Len);
 	if (theErr <= 0)
 		respMsgEncoded.Ptr[0] = '\0';
 	else

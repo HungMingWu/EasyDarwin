@@ -319,13 +319,13 @@ bool QTAccessFile::AccessAllowed  (   char *userName, const std::vector<std::str
     return false; // user or group not found
 }
 
-char*  QTAccessFile::GetAccessFile_Copy( const char* movieRootDir, const char* dirPath)
+char*  QTAccessFile::GetAccessFile_Copy(boost::string_view movieRootDir, const char* dirPath)
 {   
     OSMutexLocker locker(sAccessFileMutex);
 
     char* currentDir= nullptr;
     char* lastSlash = nullptr;
-    int movieRootDirLen = ::strlen(movieRootDir);
+    int movieRootDirLen = movieRootDir.length();
     int maxLen = strlen(dirPath)+strlen(sQTAccessFileName) + strlen(kPathDelimiterString) + 1;
     currentDir = new char[maxLen];
 
@@ -497,7 +497,7 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
 	RTSPRequest *pReq = (RTSPRequest *)inParams->inRTSPRequest;
     // get the type of request
     // Don't touch write requests
-    QTSS_ActionFlags action = QTSSModuleUtils::GetRequestActions(theRTSPRequest);
+    QTSS_ActionFlags action = ((RTSPRequest*)theRTSPRequest)->GetAction();
     if(action == qtssActionFlagsNoFlags)
         return QTSS_RequestFailed;
     
@@ -510,12 +510,11 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
         return QTSS_RequestFailed;
 
     //get the root movie directory
-    char*   movieRootDirStr = QTSSModuleUtils::GetMoviesRootDir_Copy(theRTSPRequest);
-    std::unique_ptr<char[]> movieRootDeleter(movieRootDirStr);
-    if (nullptr == movieRootDirStr)
+	boost::string_view   movieRootDirStr = ((RTSPRequest*)theRTSPRequest)->GetRootDir();
+    if (movieRootDirStr.empty())
         return QTSS_RequestFailed;
     
-    QTSS_UserProfileObject theUserProfile = QTSSModuleUtils::GetUserProfileObject(theRTSPRequest);
+	QTSS_UserProfileObject theUserProfile = ((RTSPRequest*)theRTSPRequest)->GetUserProfile();
     if (nullptr == theUserProfile)
         return QTSS_RequestFailed;
 
@@ -551,24 +550,19 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     debug_printf("accessFile.AccessAllowed for user=%s returned %d\n", username, allowRequest);
     
     // Get the auth scheme
-    QTSS_AuthScheme theAuthScheme = qtssAuthNone;
-    uint32_t len = sizeof(theAuthScheme);
-    QTSS_Error theErr = ((QTSSDictionary*)theRTSPRequest)->GetValue(qtssRTSPReqAuthScheme, 0, (void*)&theAuthScheme, &len);
-    Assert(len == sizeof(theAuthScheme));
-    if(theErr != QTSS_NoErr)
-        return theErr;
+    QTSS_AuthScheme theAuthScheme = ((RTSPRequest*)theRTSPRequest)->GetAuthScheme();
     
     // If auth scheme is basic and the realm is present in the access file, use it
     if((theAuthScheme == qtssAuthBasic) && (realmNameStr.Ptr[0] != '\0'))   //set the realm if we have one
-        (void) QTSS_SetValue(theRTSPRequest,qtssRTSPReqURLRealm, 0, realmNameStr.Ptr, ::strlen(realmNameStr.Ptr));
+		((RTSPRequest*)theRTSPRequest)->SetURLRealm({ realmNameStr.Ptr, ::strlen(realmNameStr.Ptr) });
     else // if auth scheme is basic and no realm is present, or if the auth scheme is digest, use the realm from the users file
     {  
         char*   userRealm = nullptr;
 		(void)((QTSSDictionary*)theUserProfile)->GetValueAsString(qtssUserRealm, 0, &userRealm);
         if(userRealm != nullptr)
         {
-            std::unique_ptr<char[]> userRealmDeleter(userRealm);
-            (void) QTSS_SetValue(theRTSPRequest,qtssRTSPReqURLRealm, 0, userRealm, ::strlen(userRealm));
+            std::string userRealmDeleter(userRealm);
+			((RTSPRequest*)theRTSPRequest)->SetURLRealm(userRealmDeleter);
         }
     }
     
@@ -579,7 +573,8 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     char nameBuff[256];
     StrPtrLen reqNameStr(nameBuff, kBuffLen);
     StrPtrLen profileNameStr(username);
-  
+
+	QTSS_Error theErr;
     if (allowRequest && founduser)
         theErr = QTSSModuleUtils::AuthorizeRequest(theRTSPRequest, &allowRequest, &founduser,&authContinue);
     if (!allowRequest && !founduser)

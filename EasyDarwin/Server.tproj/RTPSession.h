@@ -64,6 +64,7 @@ class RTPSession : public RTPSessionInterface
 	//requestes host name for s session. Just the "domain.com" portion
 	std::string hostName;
 	std::string userAgent;
+	std::string respMsg;
 public:
 
 	RTPSession();
@@ -145,6 +146,8 @@ public:
 		userAgent = std::string(useragent);
 	}
 	boost::string_view GetUserAgent() const { return userAgent; }
+	void SetRespMsg(boost::string_view msg) { respMsg = std::string(msg); }
+	boost::string_view GetRespMsg() const { return respMsg; }
 private:
 
 	//where timeouts, deletion conditions get processed

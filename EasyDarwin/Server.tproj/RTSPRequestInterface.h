@@ -66,6 +66,10 @@ class RTSPRequestInterface : public QTSSDictionary
 {
 	//The full local path to the file. This Attribute is first set after the Routing Role has run and before any other role is called. 
 	std::string localPath;
+	std::string rootDir;
+	std::string fullRequest;
+	std::string absoluteURL;
+	std::string absolutePath;
 public:
 
 	//Initialize
@@ -97,7 +101,7 @@ public:
 		boost::string_view channelB,
 		boost::string_view serverIPAddr = {},
 		boost::string_view ssrc = {});
-	void    AppendContentBaseHeader(StrPtrLen* theURL);
+	void    AppendContentBaseHeader(boost::string_view theURL);
 	void    AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 		boost::string_view url, boost::string_view seqNumber,
 		boost::string_view ssrc, boost::string_view rtpTime, bool lastRTPInfo);
@@ -151,7 +155,7 @@ public:
 	QTSS_RTSPMethod             GetMethod() const { return fMethod; }
 	void                        SetStatus(QTSS_RTSPStatusCode status) { fStatus = status; }
 	QTSS_RTSPStatusCode         GetStatus() const { return fStatus; }
-	bool                      GetResponseKeepAlive() const { return fResponseKeepAlive; }
+	bool                        GetResponseKeepAlive() const { return fResponseKeepAlive; }
 	void                        SetResponseKeepAlive(bool keepAlive) { fResponseKeepAlive = keepAlive; }
 
 	//will be -1 unless there was a Range header. May have one or two values
@@ -239,6 +243,16 @@ public:
 	void SetUserAllow(bool allow) { fAllowed = allow; }
 	void SetUserFound(bool found) { fHasUser = found; }
 	void SetAuthHandle(bool handle) { fAuthHandled = handle; }
+	std::string GetAbsTruncatedPath();
+	void SetRootDir(boost::string_view root) { rootDir = std::string(root); }
+	boost::string_view GetRootDir() const { return rootDir; }
+	void SetFullRequest(boost::string_view req) { fullRequest = std::string(req); }
+	boost::string_view GetFullRequest() const { return fullRequest; }
+	void SetAbsoluteURL(boost::string_view url) { absoluteURL = std::string(url); }
+	boost::string_view GetAbsoluteURL() const { return absoluteURL; }
+	std::string GetTruncatedPath();
+	void SetAbsolutePath(boost::string_view path) { absolutePath = std::string(path); }
+	boost::string_view GetAbsolutePath() const { return absolutePath; }
 protected:
 
 	//ALL THIS STUFF HERE IS SETUP BY RTSPREQUEST object (derived)
@@ -330,7 +344,7 @@ protected:
 
 	uint32_t                      fBandwidthBits;
 	StrPtrLen                   fAuthDigestChallenge;
-	StrPtrLen                   fAuthDigestResponse;
+	std::string                 fAuthDigestResponse;
 private:
 
 	RTSPSessionInterface*   fSession;
@@ -344,11 +358,7 @@ private:
 		QTSS_RTSPStatusCode status,
 		RTSPProtocol::RTSPVersion version);
 
-	//Individual param retrieval functions
-	static void*        GetAbsTruncatedPath(QTSSDictionary* inRequest, uint32_t* outLen);
-	static void*        GetTruncatedPath(QTSSDictionary* inRequest, uint32_t* outLen);
-
-	static void* 		GetAuthDigestResponse(QTSSDictionary* inRequest, uint32_t* outLen);
+	boost::string_view	GetAuthDigestResponse();
 
 	//optimized preformatted response header strings
 	static std::string      sPremadeHeader;

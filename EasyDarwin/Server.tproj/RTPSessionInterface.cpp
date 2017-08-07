@@ -69,7 +69,7 @@ QTSSAttrInfoDict::AttrInfo  RTPSessionInterface::sAttributes[] =
 	/* 22 */ { "qtssCliRTSPReqRealStatusCode",      nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 23 */ { "qtssCliTeardownReason",             nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
 	/* 24 */ {},
-	/* 25 */ { "qtssCliRTSPReqRespMsg",             nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 25 */ {},
 
 	/* 26 */ { "qtssCliSesCurrentBitRate",          CurrentBitRate,     qtssAttrDataTypeUInt32,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 27 */ { "qtssCliSesPacketLossPercent",       PacketLossPercent,  qtssAttrDataTypeFloat32, qtssAttrModeRead | qtssAttrModePreempSafe },

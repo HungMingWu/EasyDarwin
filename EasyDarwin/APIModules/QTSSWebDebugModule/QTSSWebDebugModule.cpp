@@ -30,15 +30,17 @@
 
  */
 
+#include <boost/algorithm/string/predicate.hpp>
 #include "QTSSWebDebugModule.h"
 #include "StrPtrLen.h"
 #include "QTSSDictionary.h"
+#include "RTSPRequest.h"
 
  // STATIC DATA
 
 static QTSS_AttributeID sStateAttr = qtssIllegalAttrID;
 
-static StrPtrLen    sRequestHeader("GET /debug HTTP");
+static boost::string_view sRequestHeader("GET /debug HTTP");
 
 #if MEMORY_DEBUGGING
 static char*        sResponseHeader = "HTTP/1.0 200 OK\r\nServer: TimeShare/1.0\r\nConnection: Close\r\nContent-Type: text/html\r\n\r\n";
@@ -88,12 +90,9 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 QTSS_Error Filter(QTSS_Filter_Params* inParams)
 {
 	uint32_t theLen = 0;
-	char* theFullRequest = nullptr;
-	((QTSSDictionary*)inParams->inRTSPRequest)->GetValuePtr(qtssRTSPReqFullRequest, 0, (void**)&theFullRequest, &theLen);
+	boost::string_view theFullRequest = ((RTSPRequest*)inParams->inRTSPRequest)->GetFullRequest();
 
-	if ((theFullRequest == nullptr) || (theLen < sRequestHeader.Len))
-		return QTSS_NoErr;
-	if (::memcmp(theFullRequest, sRequestHeader.Ptr, sRequestHeader.Len) != 0)
+	if (!boost::starts_with(theFullRequest, sRequestHeader))
 		return QTSS_NoErr;
 
 	return QTSS_NoErr;

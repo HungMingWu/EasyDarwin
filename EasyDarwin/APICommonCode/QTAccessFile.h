@@ -35,6 +35,7 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <boost/utility/string_view.hpp>
 #include "QTSS.h"
 #include "StrPtrLen.h"
 #include "OSHeaders.h"
@@ -52,7 +53,7 @@ class QTAccessFile
         //GetGroupsArrayCopy 
         //
         // GetGroupsArrayCopy allocates outGroupCharPtrArray. Caller must "delete [] outGroupCharPtrArray" when done.
-        static char*  GetAccessFile_Copy( const char* movieRootDir, const char* dirPath);
+        static char*  GetAccessFile_Copy(boost::string_view movieRootDir, const char* dirPath);
 
         //over ride these in a sub class
         virtual bool HaveUser(char *userName, void* extraDataPtr);

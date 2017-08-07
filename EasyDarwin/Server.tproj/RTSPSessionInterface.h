@@ -43,7 +43,7 @@
 #include "QTSSDictionary.h"
 #include "atomic.h"
 
-class RTSPSessionInterface : public QTSSDictionary, public Task
+class RTSPSessionInterface : public Task
 {
 public:
 
@@ -106,10 +106,10 @@ public:
 	// Allows non-buffered writes to the client. These will flow control.
 
 	// THE FIRST ENTRY OF THE IOVEC MUST BE BLANK!!!
-	QTSS_Error WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten) override;
-	QTSS_Error Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t inFlags) override;
-	QTSS_Error Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead) override;
-	QTSS_Error RequestEvent(QTSS_EventType inEventMask) override;
+	QTSS_Error WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten);
+	QTSS_Error Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t inFlags);
+	QTSS_Error Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead);
+	QTSS_Error RequestEvent(QTSS_EventType inEventMask);
 
 	// performs RTP over RTSP
 	QTSS_Error  InterleavedWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, unsigned char channel);
@@ -211,10 +211,6 @@ protected:
 	static bool           sDoBase64Decoding;
 
 	static 	uint32_t			sOptionsRequestBody[kMaxRandomDataSize / sizeof(uint32_t)];
-
-	//Dictionary support
-
-	static QTSSAttrInfoDict::AttrInfo   sAttributes[];
 };
 #endif // __RTSPSESSIONINTERFACE_H__
 

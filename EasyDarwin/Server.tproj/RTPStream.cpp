@@ -447,7 +447,9 @@ QTSS_Error RTPStream::Setup(RTSPRequestInterface* request, QTSS_AddStreamFlags i
 
 	//
 	// Check to see if we are inside a valid reliable UDP directory
-	if ((fTransportType == qtssRTPTransportTypeReliableUDP) && (!QTSServerInterface::GetServer()->GetPrefs()->IsPathInsideReliableUDPDir(request->GetValue(qtssRTSPReqFilePath))))
+	boost::string_view t(request->GetAbsoluteURL());
+	StrPtrLen t1((char *)t.data(), t.length());
+	if ((fTransportType == qtssRTPTransportTypeReliableUDP) && (!QTSServerInterface::GetServer()->GetPrefs()->IsPathInsideReliableUDPDir(&t1)))
 		fTransportType = qtssRTPTransportTypeUDP;
 
 	//

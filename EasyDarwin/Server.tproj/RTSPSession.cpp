@@ -482,7 +482,7 @@ int64_t RTSPSession::Run()
 						if (oldReplacedRequest != nullptr)
 							delete[] oldReplacedRequest;
 
-						fRequest->SetVal(qtssRTSPReqFullRequest, theReplacedRequest, ::strlen(theReplacedRequest));
+						fRequest->SetFullRequest({ theReplacedRequest, ::strlen(theReplacedRequest) });
 						oldReplacedRequest = theReplacedRequest;
 						theReplacedRequest = nullptr;
 					}
@@ -597,7 +597,7 @@ int64_t RTSPSession::Run()
 				StrPtrLenDel prefRealm(QTSServerInterface::GetServer()->GetPrefs()->GetAuthorizationRealm());
 				if (prefRealm.Ptr != nullptr)
 				{
-					fRequest->SetValue(qtssRTSPReqURLRealm, 0, prefRealm.Ptr, prefRealm.Len, kDontObeyReadOnly);
+					fRequest->SetURLRealm({ prefRealm.Ptr, prefRealm.Len });
 				}
 
 
@@ -990,10 +990,7 @@ int64_t RTSPSession::Run()
 						uint32_t realStatusCode = RTSPProtocol::GetStatusCode(fRequest->GetStatus());
 						(void)fRTPSession->SetValue(qtssCliRTSPReqRealStatusCode, (uint32_t)0, (void *)&realStatusCode, sizeof(realStatusCode), QTSSDictionary::kDontObeyReadOnly);
 
-						// Make sure the RTPSession contains a copy of the qtssRTSPReqRespMsg in this request
-						StrPtrLen* theRespMsg = fRequest->GetValue(qtssRTSPReqRespMsg);
-						if (theRespMsg->Len > 0)
-							(void)fRTPSession->SetValue(qtssCliRTSPReqRespMsg, 0, theRespMsg->Ptr, theRespMsg->Len, QTSSDictionary::kDontObeyReadOnly);
+						fRTPSession->SetRespMsg(fRequest->GetRespMsg());
 
 						// Set the current RTSP session for this RTP session.
 						// We do this here because we need to make sure the SessionMutex
@@ -1491,10 +1488,8 @@ void RTSPSession::CheckAuthentication() {
 	}
 	else if (scheme == qtssAuthBasic) {
 		// For basic authentication, the authentication module returns the crypt of the password, 
-		// so compare crypt of qtssRTSPReqUserPassword and the text in qtssUserPassword
-		StrPtrLen* reqPassword = fRequest->GetValue(qtssRTSPReqUserPassword);
+		std::string reqPasswdStr(fRequest->GetPassWord());
 		char* userPasswdStr = userPassword->GetAsCString(); // memory allocated
-		char* reqPasswdStr = reqPassword->GetAsCString();   // memory allocated
 
 		if (userPassword->Len == 0)
 		{
@@ -1506,7 +1501,7 @@ void RTSPSession::CheckAuthentication() {
 			// The password is md5 encoded for win32
 			char md5EncodeResult[120];
 			// no memory is allocated in this function call
-			MD5Encode(reqPasswdStr, userPasswdStr, md5EncodeResult, sizeof(md5EncodeResult));
+			MD5Encode((char *)reqPasswdStr.c_str(), userPasswdStr, md5EncodeResult, sizeof(md5EncodeResult));
 			if (::strcmp(userPasswdStr, md5EncodeResult) != 0)
 				authenticated = false;
 #else
@@ -1517,8 +1512,6 @@ void RTSPSession::CheckAuthentication() {
 
 		delete[] userPasswdStr;    // deleting allocated memory
 		userPasswdStr = nullptr;
-		delete[] reqPasswdStr;
-		reqPasswdStr = nullptr;        // deleting allocated memory
 	}
 	else if (scheme == qtssAuthDigest) {
 		// For digest authentication, md5 digest comparison
@@ -1614,8 +1607,6 @@ void RTSPSession::CheckAuthentication() {
 		} while (false);
 	}
 
-	// If authenticaton failed, set qtssUserName in the qtssRTSPReqUserProfile attribute
-	// to nullptr and clear out the password and any groups that have been set.
 	if (!fRequest->GetAuthHandled())
 	{
 		if ((!authenticated) || (authenticated && (fRequest->GetStale()))) {
@@ -1629,8 +1620,9 @@ void RTSPSession::CheckAuthentication() {
 
 bool RTSPSession::ParseOptionsResponse()
 {
-	StringParser parser(fRequest->GetValue(qtssRTSPReqFullRequest));
-	Assert(fRequest->GetValue(qtssRTSPReqFullRequest)->Ptr != nullptr);
+	boost::string_view t1(fRequest->GetFullRequest());
+	StrPtrLen t1V((char *)t1.data(), t1.length());
+	StringParser parser(&t1V);
 	static StrPtrLen sRTSPStr("RTSP", 4);
 	StrPtrLen theProtocol;
 	parser.ConsumeLength(&theProtocol, 4);
@@ -1804,14 +1796,6 @@ void RTSPSession::CleanupRequest()
 
 	if (fRequest != nullptr)
 	{
-		// Check to see if a filter module has replaced the request. If so, delete
-		// their request now.
-		if (fRequest->GetValue(qtssRTSPReqFullRequest) && fInputStream.GetRequestBuffer())
-		{
-			if (fRequest->GetValue(qtssRTSPReqFullRequest)->Ptr != fInputStream.GetRequestBuffer()->Ptr)
-				delete[] fRequest->GetValue(qtssRTSPReqFullRequest)->Ptr;
-		}
-
 		// nullptr out any references to the current request
 		//delete fRequest;
 		//fRequest = nullptr;
@@ -1911,9 +1895,7 @@ void RTSPSession::SetupClientSessionAttrs()
 	fRTPSession->SetPresentationURL(fRequest->GetURI());
 
 	// get and pass full request url
-	auto theValue = fRequest->GetValue(qtssRTSPReqAbsoluteURL);
-	auto t = boost::string_view(theValue->Ptr, theValue->Len);
-	fRTPSession->SetAbsoluteURL(t);
+	fRTPSession->SetAbsoluteURL(fRequest->GetAbsoluteURL());
 
 	// get and pass request host name
 	fRTPSession->SetHost(fRequest->GetHeaderDict().Get(qtssHostHeader));
@@ -2046,39 +2028,30 @@ void RTSPSession::SaveRequestAuthorizationParams(RTSPRequest *theRTSPRequest)
 {
 	// Set the RTSP session's copy of the user name
 	boost::string_view userName = theRTSPRequest->GetAuthUserName();
-	if (!userName.empty())
-	{
-		fUserName = std::string(userName);
-		fRTPSession->SetUserName(userName);
-	}
+	fUserName = std::string(userName);
+	fRTPSession->SetUserName(userName);
 
 	// Same thing... user password
-	StrPtrLen* tempPtr = theRTSPRequest->GetValue(qtssRTSPReqUserPassword);
-	Assert(tempPtr != nullptr);
-	if (tempPtr)
+	boost::string_view password = theRTSPRequest->GetPassWord();
+	SetPassword(password);
+	(void)fRTPSession->SetValue(qtssCliRTSPSesUserPassword, (uint32_t)0, password.data(), password.length(), QTSSDictionary::kDontObeyReadOnly);
+
+	boost::string_view tempPtr = theRTSPRequest->GetURLRealm();
+	if (tempPtr.empty())
 	{
-		SetPassword({ tempPtr->Ptr, tempPtr->Len });
-		(void)fRTPSession->SetValue(qtssCliRTSPSesUserPassword, (uint32_t)0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
+		// If there is no realm explicitly specified in the request, then let's get the default out of the prefs
+		std::unique_ptr<char[]> theDefaultRealm(QTSServerInterface::GetServer()->GetPrefs()->GetAuthorizationRealm());
+		char *realm = theDefaultRealm.get();
+		uint32_t len = ::strlen(theDefaultRealm.get());
+		SetLastURLRealm({ realm, len });
+		(void)fRTPSession->SetValue(qtssCliRTSPSesURLRealm, (uint32_t)0, realm, len, QTSSDictionary::kDontObeyReadOnly);
+	}
+	else
+	{
+		SetLastURLRealm(tempPtr);
+		(void)fRTPSession->SetValue(qtssCliRTSPSesURLRealm, (uint32_t)0, tempPtr.data(), tempPtr.length(), QTSSDictionary::kDontObeyReadOnly);
 	}
 
-	tempPtr = theRTSPRequest->GetValue(qtssRTSPReqURLRealm);
-	if (tempPtr)
-	{
-		if (tempPtr->Len == 0)
-		{
-			// If there is no realm explicitly specified in the request, then let's get the default out of the prefs
-			std::unique_ptr<char[]> theDefaultRealm(QTSServerInterface::GetServer()->GetPrefs()->GetAuthorizationRealm());
-			char *realm = theDefaultRealm.get();
-			uint32_t len = ::strlen(theDefaultRealm.get());
-			SetLastURLRealm({ realm, len });
-			(void)fRTPSession->SetValue(qtssCliRTSPSesURLRealm, (uint32_t)0, realm, len, QTSSDictionary::kDontObeyReadOnly);
-		}
-		else
-		{
-			SetLastURLRealm({ tempPtr->Ptr, tempPtr->Len });
-			(void)fRTPSession->SetValue(qtssCliRTSPSesURLRealm, (uint32_t)0, tempPtr->Ptr, tempPtr->Len, QTSSDictionary::kDontObeyReadOnly);
-		}
-	}
 }
 
 QTSS_Error RTSPSession::DumpRequestData()

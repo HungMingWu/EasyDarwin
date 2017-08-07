@@ -387,7 +387,7 @@ void    RTPSession::SendDescribeResponse(RTSPRequestInterface* inRequest)
 
 	//write content base header
 
-	inRequest->AppendContentBaseHeader(inRequest->GetValue(qtssRTSPReqAbsoluteURL));
+	inRequest->AppendContentBaseHeader(inRequest->GetAbsoluteURL());
 
 	//I believe the only error that can happen is if the client has disconnected.
 	//if that's the case, just ignore it, hopefully the calling module will detect

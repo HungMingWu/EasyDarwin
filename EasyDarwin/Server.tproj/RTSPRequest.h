@@ -64,6 +64,9 @@ class RTSPRequest : public RTSPRequestInterface
 	std::string digestChallenge;
 	//decoded Authentication information when provided by the RTSP request. See RTSPSessLastUserName.
 	std::string userName;
+	std::string passWord;
+	std::string uRLRealm;
+	std::string respMsg;
 public:
 
 	//CONSTRUCTOR / DESTRUCTOR
@@ -95,6 +98,12 @@ public:
 	void SetDigestChallenge(boost::string_view digest) { digestChallenge = std::string(digest); }
 	void SetAuthUserName(boost::string_view name) { userName = std::string(name); }
 	boost::string_view GetAuthUserName() const { return userName; }
+	void SetPassWord(boost::string_view password) { passWord = std::string(password); }
+	boost::string_view GetPassWord() const { return passWord; }
+	void SetURLRealm(boost::string_view realm) { uRLRealm = std::string(realm); }
+	boost::string_view GetURLRealm() const { return uRLRealm; }
+	void SetRespMsg(boost::string_view msg) { respMsg = std::string(msg); }
+	boost::string_view GetRespMsg() const { return respMsg; }
 private:
 
 	//PARSING

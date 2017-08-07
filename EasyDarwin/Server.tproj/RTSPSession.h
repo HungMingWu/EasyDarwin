@@ -35,6 +35,9 @@
 #ifndef __RTSPSESSION_H__
 #define __RTSPSESSION_H__
 
+#include <map>
+#include <boost/any.hpp>
+#include <boost/optional.hpp>
 #include "RTSPSessionInterface.h"
 #include "RTSPRequestStream.h"
 #include "RTSPRequest.h"
@@ -97,7 +100,6 @@ class RTSPSession;
 //{
 //	return 0;
 //}
-
 class RTSPSession : public RTSPSessionInterface
 {
 public:
@@ -109,7 +111,14 @@ public:
 	static void Initialize();
 
 	bool IsPlaying() { if (fRTPSession == nullptr) return false; if (fRTPSession->GetSessionState() == qtssPlayingState) return true; return false; }
-
+	void addAttribute(boost::string_view key, boost::any value) {
+		attributes.emplace(std::make_pair(key, value));
+	}
+	boost::optional<boost::any> getAttribute(boost::string_view key) {
+		auto it = attributes.find(std::string(key));
+		if (it == end(attributes)) return {};
+		return it->second;
+	}
 private:
 
 	int64_t Run() override;
@@ -231,7 +240,7 @@ private:
 	QTSS_Error DumpRequestData();
 
     uint64_t fMsgCount;
-
+	std::map<std::string, boost::any> attributes;
     //friend class RTSPSessionHandler;
 
 };

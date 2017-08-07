@@ -44,37 +44,8 @@ unsigned int            RTSPSessionInterface::sSessionIDCounter = kFirstRTSPSess
 bool                  RTSPSessionInterface::sDoBase64Decoding = true;
 uint32_t					RTSPSessionInterface::sOptionsRequestBody[kMaxRandomDataSize / sizeof(uint32_t)];
 
-QTSSAttrInfoDict::AttrInfo  RTSPSessionInterface::sAttributes[] =
-{   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
-	/* 0 */ { "qtssRTSPSesID",              nullptr,           qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 1 */ {},
-	/* 2 */ {},
-	/* 3 */ {},
-	/* 4 */ {},
-	/* 5 */ {},
-	/* 6 */ {},
-	/* 7 */ {},
-	/* 8 */ {},
-
-	/* 9 */ {},
-	/* 10 */{},
-	/* 11 */{},
-
-	/* 12 */{},
-	/* 13 */{},
-
-	/* 14 */{}
-
-
-};
-
-
 void    RTSPSessionInterface::Initialize()
 {
-	for (uint32_t x = 0; x < qtssRTSPSesNumParams; x++)
-		QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTSPSessionDictIndex)->
-		SetAttribute(x, sAttributes[x].fAttrName, sAttributes[x].fFuncPtr, sAttributes[x].fAttrDataType, sAttributes[x].fAttrPermission);
-
 	// DJM PROTOTYPE
 	::srand((unsigned int)OS::Microseconds());
 	for (unsigned int i = 0; i < kMaxRandomDataSize / sizeof(uint32_t); i++)
@@ -85,8 +56,7 @@ void    RTSPSessionInterface::Initialize()
 
 
 RTSPSessionInterface::RTSPSessionInterface()
-	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTSPSessionDictIndex)),
-	Task(),
+	: Task(),
 	fTimeoutTask(nullptr, QTSServerInterface::GetServer()->GetPrefs()->GetRTSPSessionTimeoutInSecs() * 1000),
 	fInputStream(&fSocket),
 	fOutputStream(&fSocket, &fTimeoutTask),
@@ -100,8 +70,6 @@ RTSPSessionInterface::RTSPSessionInterface()
 
 	//fSessionID = (uint32_t)atomic_add(&sSessionIDCounter, 1);
 	fSessionID = ++sSessionIDCounter;
-
-	this->SetVal(qtssRTSPSesID, &fSessionID, sizeof(fSessionID));
 
 	fInputStream.ShowRTSP(QTSServerInterface::GetServer()->GetPrefs()->GetRTSPDebugPrintfs());
 	fOutputStream.ShowRTSP(QTSServerInterface::GetServer()->GetPrefs()->GetRTSPDebugPrintfs());

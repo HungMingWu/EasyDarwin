@@ -2234,13 +2234,6 @@ bool ElementNode::GetFilteredAttributeID(char *parentName, char *nodeName, QTSS_
 
 	if (0 == strcmp("server", parentName))
 	{
-		if (0 == strcmp("qtssSvrClientSessions", nodeName))
-		{
-			if (foundID)
-				*foundID = qtssCliSesCounterID;
-			found = true;
-		}
-
 		if (0 == strcmp("qtssSvrModuleObjects", nodeName))
 		{
 			if (foundID)
@@ -2256,12 +2249,6 @@ bool ElementNode::IsPreferenceContainer(char *nodeName, QTSS_AttributeID* foundI
 	bool found = false;
 	if (foundID) *foundID = 0;
 	//printf(" ElementNode::IsPreferenceContainer name = %s \n",nodeName);
-	if (0 == strcmp("qtssSvrPreferences", nodeName))
-	{
-		if (foundID) *foundID = qtssCliSesCounterID;
-		found = true;
-	}
-
 	if (0 == strcmp("qtssModPrefs", nodeName))
 	{
 		if (foundID) *foundID = qtssModName;

@@ -209,8 +209,8 @@ bool RTPSessionOutput::IsUDP()
 	QTSS_RTPTransportType *theTransportTypePtr = nullptr;
 	for (auto theStreamPtr : fClientSession->GetStreams())
 	{
-		theStreamPtr->GetValuePtr(qtssRTPStrTransportType, 0, (void**)&theTransportTypePtr, &theLen);
-		if (theTransportTypePtr && *theTransportTypePtr == qtssRTPTransportTypeUDP)
+		QTSS_RTPTransportType theTransportType = theStreamPtr->GetTransportType();
+		if (theTransportType == qtssRTPTransportTypeUDP)
 		{
 			fIsUDP = true;
 			break; // treat entire session UDP

@@ -179,10 +179,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	//
 	// Find out if this is a qtssRTPTransportTypeUDP. This is the only type of
 	// transport we should monitor
-	QTSS_RTPTransportType theTransportType = qtssRTPTransportTypeUDP;
-	uint32_t theLen = sizeof(theTransportType);
-	QTSS_Error theErr = ((QTSSDictionary*)inParams->inRTPStream)->GetValue(qtssRTPStrTransportType, 0, (void*)&theTransportType, &theLen);
-	Assert(theErr == QTSS_NoErr);
+	QTSS_RTPTransportType theTransportType = ((RTPStream*)inParams->inRTPStream)->GetTransportType();
 
 	if (theTransportType != qtssRTPTransportTypeUDP)
 		return QTSS_NoErr;
@@ -218,8 +215,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	bool clearPercentLossThickCount = true;
 
 	uint32_t* uint32_tPtr = nullptr;
-	uint16_t* uint16_tPtr = nullptr;
-	theLen = 0;
+	uint32_t theLen = 0;
 
 	uint32_t theNumLossesAboveTol = 0;
 	uint32_t theNumLossesBelowTol = 0;
@@ -242,91 +238,89 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 
 
 	//First take any action necessitated by the loss percent
-	((QTSSDictionary*)inParams->inRTPStream)->GetValuePtr(qtssRTPStrPercentPacketsLost, 0, (void**)&uint16_tPtr, &theLen);
-	if ((uint16_tPtr != nullptr) && (theLen == sizeof(uint16_t)))
+	uint16_t value = ((RTPStream*)inParams->inRTPStream)->GetPercentPacketsLost();
+
+	uint16_t thePercentLoss = value;
+	thePercentLoss /= 256; //Hmmm... looks like the client reports loss percent in multiples of 256
+#if FLOW_CONTROL_DEBUGGING
+	printf("Percent loss: %d\n", thePercentLoss);
+#endif
+
+	//check for a thinning condition
+	if (thePercentLoss > sLossThinTolerance)
 	{
-		uint16_t thePercentLoss = *uint16_tPtr;
-		thePercentLoss /= 256; //Hmmm... looks like the client reports loss percent in multiples of 256
-#if FLOW_CONTROL_DEBUGGING
-		printf("Percent loss: %d\n", thePercentLoss);
-#endif
+		theNumLossesAboveTol++;//we must count this loss
 
-		//check for a thinning condition
-		if (thePercentLoss > sLossThinTolerance)
+		//We only adjust after a certain number of these in a row. Check to see if we've
+		//satisfied the thinning condition, and adjust the count
+		if (theNumLossesAboveTol >= sNumLossesToThin)
 		{
-			theNumLossesAboveTol++;//we must count this loss
-
-			//We only adjust after a certain number of these in a row. Check to see if we've
-			//satisfied the thinning condition, and adjust the count
-			if (theNumLossesAboveTol >= sNumLossesToThin)
-			{
 #if FLOW_CONTROL_DEBUGGING
-				printf("Percent loss too high: ratcheting less\n");
+			printf("Percent loss too high: ratcheting less\n");
 #endif
-				ratchetLess = true;
-			}
-			else
-			{
-#if FLOW_CONTROL_DEBUGGING
-				printf("Percent loss too high: Incrementing percent loss count to %"   _U32BITARG_   "\n", theNumLossesAboveTol);
-#endif
-				(void)QTSS_SetValue(theStream, sNumLossesAboveTolAttr, 0, &theNumLossesAboveTol, sizeof(theNumLossesAboveTol));
-				clearPercentLossThinCount = false;
-			}
+			ratchetLess = true;
 		}
-		//check for a thickening condition
-		else if (thePercentLoss < sLossThickTolerance)
+		else
 		{
-			theNumLossesBelowTol++;//we must count this loss
-			if (theNumLossesBelowTol >= sLossesToThick)
-			{
 #if FLOW_CONTROL_DEBUGGING
-				printf("Percent is low: ratcheting more\n");
+			printf("Percent loss too high: Incrementing percent loss count to %"   _U32BITARG_   "\n", theNumLossesAboveTol);
 #endif
-				ratchetMore = true;
-			}
-			else
-			{
-#if FLOW_CONTROL_DEBUGGING
-				printf("Percent is low: Incrementing percent loss count to %"   _U32BITARG_   "\n", theNumLossesBelowTol);
-#endif
-				(void)QTSS_SetValue(theStream, sNumLossesBelowTolAttr, 0, &theNumLossesBelowTol, sizeof(theNumLossesBelowTol));
-				clearPercentLossThickCount = false;
-			}
+			(void)QTSS_SetValue(theStream, sNumLossesAboveTolAttr, 0, &theNumLossesAboveTol, sizeof(theNumLossesAboveTol));
+			clearPercentLossThinCount = false;
 		}
 	}
+	//check for a thickening condition
+	else if (thePercentLoss < sLossThickTolerance)
+	{
+		theNumLossesBelowTol++;//we must count this loss
+		if (theNumLossesBelowTol >= sLossesToThick)
+		{
+#if FLOW_CONTROL_DEBUGGING
+			printf("Percent is low: ratcheting more\n");
+#endif
+			ratchetMore = true;
+		}
+		else
+		{
+#if FLOW_CONTROL_DEBUGGING
+			printf("Percent is low: Incrementing percent loss count to %"   _U32BITARG_   "\n", theNumLossesBelowTol);
+#endif
+			(void)QTSS_SetValue(theStream, sNumLossesBelowTolAttr, 0, &theNumLossesBelowTol, sizeof(theNumLossesBelowTol));
+			clearPercentLossThickCount = false;
+		}
+	}
+
 
 	//Now take a look at the getting worse heuristic
-	((QTSSDictionary*)inParams->inRTPStream)->GetValuePtr(qtssRTPStrGettingWorse, 0, (void**)&uint16_tPtr, &theLen);
-	if ((uint16_tPtr != nullptr) && (theLen == sizeof(uint16_t)))
-	{
-		uint16_t isGettingWorse = *uint16_tPtr;
-		if (isGettingWorse != 0)
-		{
-			theNumWorses++;//we must count this getting worse
+	value = ((RTPStream*)inParams->inRTPStream)->GetWorse();
 
-			//If we've gotten N number of getting worses, then thin. Otherwise, just
-			//increment our count of getting worses
-			if (theNumWorses >= sWorsesToThin)
-			{
+	uint16_t isGettingWorse = value;
+	if (isGettingWorse != 0)
+	{
+		theNumWorses++;//we must count this getting worse
+
+		//If we've gotten N number of getting worses, then thin. Otherwise, just
+		//increment our count of getting worses
+		if (theNumWorses >= sWorsesToThin)
+		{
 #if FLOW_CONTROL_DEBUGGING
-				printf("Client reporting getting worse. Ratcheting less\n");
+			printf("Client reporting getting worse. Ratcheting less\n");
 #endif
-				ratchetLess = true;
-			}
-			else
-			{
+			ratchetLess = true;
+		}
+		else
+		{
 #if FLOW_CONTROL_DEBUGGING
-				printf("Client reporting getting worse. Incrementing num worses count to %"   _U32BITARG_   "\n", theNumWorses);
+			printf("Client reporting getting worse. Incrementing num worses count to %"   _U32BITARG_   "\n", theNumWorses);
 #endif
-				(void)QTSS_SetValue(theStream, sNumWorsesAttr, 0, &theNumWorses, sizeof(theNumWorses));
-			}
+			(void)QTSS_SetValue(theStream, sNumWorsesAttr, 0, &theNumWorses, sizeof(theNumWorses));
 		}
 	}
 
+
 	//Finally, if we get a getting better, automatically ratchet up
-	((QTSSDictionary*)inParams->inRTPStream)->GetValuePtr(qtssRTPStrGettingBetter, 0, (void**)&uint16_tPtr, &theLen);
-	if ((uint16_tPtr != nullptr) && (theLen == sizeof(uint16_t)) && (*uint16_tPtr > 0))
+	value = ((RTPStream*)inParams->inRTPStream)->GetBetter();
+	if (value > 0)
 		ratchetMore = true;
 
 	//For clearing out counts below

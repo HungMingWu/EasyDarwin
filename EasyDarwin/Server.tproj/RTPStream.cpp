@@ -77,7 +77,7 @@ QTSSAttrInfoDict::AttrInfo  RTPStream::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
 	/* 0  */ {},
 	/* 1  */ {},
-	/* 2  */ { "qtssRTPStrPayloadName",             nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
+	/* 2  */ {},
 	/* 3  */ {},
 	/* 4  */ { "qtssRTPStrFirstSeqNumber",          nullptr,   qtssAttrDataTypeSInt16, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
 	/* 5  */ { "qtssRTPStrFirstTimestamp",          nullptr,   qtssAttrDataTypeint32_t, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
@@ -86,33 +86,33 @@ QTSSAttrInfoDict::AttrInfo  RTPStream::sAttributes[] =
 	/* 8  */ { "qtssRTPStrNumQualityLevels",        nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
 	/* 9  */ {},
 
-	/* 10 */ { "qtssRTPStrFractionLostPackets",     nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 11 */ { "qtssRTPStrTotalLostPackets",        nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 10 */ {},
+	/* 11 */ {},
 	/* 12 */ {},
 	/* 13 */ {},
 	/* 14 */ {},
-	/* 15 */ { "qtssRTPStrPercentPacketsLost",      nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 16 */ { "qtssRTPStrAvgBufDelayInMsec",       nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 17 */ { "qtssRTPStrGettingBetter",           nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 18 */ { "qtssRTPStrGettingWorse",            nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 19 */ { "qtssRTPStrNumEyes",                 nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 15 */ {},
+	/* 16 */ {},
+	/* 17 */ {},
+	/* 18 */ {},
+	/* 19 */ {},
 	/* 20 */ {},
 	/* 21 */ {},
-	/* 22 */ { "qtssRTPStrTotPacketsRecv",          nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 22 */ {},
 	/* 23 */ {},
-	/* 24 */ { "qtssRTPStrTotPacketsLost",          nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 25 */ { "qtssRTPStrClientBufFill",           nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 26 */ { "qtssRTPStrFrameRate",               nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 24 */ {},
+	/* 25 */ {},
+	/* 26 */ {},
 	/* 27 */ {},
 	/* 28 */ {},
 	/* 29 */ { "qtssRTPStrIsTCP",                   nullptr,   qtssAttrDataTypeBool16, qtssAttrModeRead | qtssAttrModePreempSafe  },
 	/* 30 */ {},
-	/* 31 */ { "qtssRTPStrTransportType",           nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 32 */ { "qtssRTPStrStalePacketsDropped",     nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 33 */ { "qtssRTPStrCurrentAckTimeout",       nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 34 */ { "qtssRTPStrCurPacketsLostInRTCPInterval",    nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 31 */ {},
+	/* 32 */ {},
+	/* 33 */ {},
+	/* 34 */ {},
 	/* 35 */ { "qtssRTPStrPacketCountInRTCPInterval",       nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 36 */ { "qtssRTPStrSvrRTPPort",              nullptr,   qtssAttrDataTypeUInt16, qtssAttrModeRead | qtssAttrModePreempSafe  },
+	/* 36 */ {},
 	/* 37 */ {},
 	/* 38 */ {},
 	/* 39 */ {}
@@ -274,29 +274,13 @@ RTPStream::RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession)
 
 	// SETUP DICTIONARY ATTRIBUTES
 
-	this->SetEmptyVal(qtssRTPStrPayloadName, &fPayloadNameBuf, kDefaultPayloadBufSize);
 	this->SetVal(qtssRTPStrFirstSeqNumber, &fFirstSeqNumber, sizeof(fFirstSeqNumber));
 	this->SetVal(qtssRTPStrFirstTimestamp, &fFirstTimeStamp, sizeof(fFirstTimeStamp));
 	this->SetVal(qtssRTPStrTimescale, &fTimescale, sizeof(fTimescale));
 	this->SetVal(qtssRTPStrQualityLevel, &fQualityLevel, sizeof(fQualityLevel));
 	this->SetVal(qtssRTPStrNumQualityLevels, &fNumQualityLevels, sizeof(fNumQualityLevels));
-	this->SetVal(qtssRTPStrFractionLostPackets, &fFractionLostPackets, sizeof(fFractionLostPackets));
-	this->SetVal(qtssRTPStrTotalLostPackets, &fTotalLostPackets, sizeof(fTotalLostPackets));
 
-	this->SetVal(qtssRTPStrPercentPacketsLost, &fPercentPacketsLost, sizeof(fPercentPacketsLost));
-	this->SetVal(qtssRTPStrAvgBufDelayInMsec, &fAvgBufDelayMsec, sizeof(fAvgBufDelayMsec));
-	this->SetVal(qtssRTPStrGettingBetter, &fIsGettingBetter, sizeof(fIsGettingBetter));
-	this->SetVal(qtssRTPStrGettingWorse, &fIsGettingWorse, sizeof(fIsGettingWorse));
-	this->SetVal(qtssRTPStrNumEyes, &fNumEyes, sizeof(fNumEyes));
-	this->SetVal(qtssRTPStrTotPacketsRecv, &fTotalPacketsRecv, sizeof(fTotalPacketsRecv));
-	this->SetVal(qtssRTPStrTotPacketsLost, &fTotalPacketsLost, sizeof(fTotalPacketsLost));
-	this->SetVal(qtssRTPStrClientBufFill, &fClientBufferFill, sizeof(fClientBufferFill));
-	this->SetVal(qtssRTPStrFrameRate, &fFrameRate, sizeof(fFrameRate));
 	this->SetVal(qtssRTPStrIsTCP, &fIsTCP, sizeof(fIsTCP));
-	this->SetVal(qtssRTPStrTransportType, &fTransportType, sizeof(fTransportType));
-	this->SetVal(qtssRTPStrStalePacketsDropped, &fStalePacketsDropped, sizeof(fStalePacketsDropped));
-	this->SetVal(qtssRTPStrCurrentAckTimeout, &fCurrentAckTimeout, sizeof(fCurrentAckTimeout));
-	this->SetVal(qtssRTPStrCurPacketsLostInRTCPInterval, &fCurPacketsLostInRTCPInterval, sizeof(fPacketCountInRTCPInterval));
 }
 
 RTPStream::~RTPStream()
@@ -1676,10 +1660,8 @@ void RTPStream::PrintRTP(char* packetBuff, uint32_t inLen)
 	if (fTimescale > 0 && fFirstTimeStamp < timestamp)
 		rtpTimeInSecs = (float)(timestamp - fFirstTimeStamp) / (float)fTimescale;
 
-
-	StrPtrLen   *payloadStr = this->GetValue(qtssRTPStrPayloadName);
-	if (payloadStr && payloadStr->Len > 0)
-		payloadStr->PrintStr();
+	if (!fPayloadName.empty())
+		printf("%s\n", fPayloadName.c_str());
 	else
 		printf("?");
 
@@ -1719,9 +1701,8 @@ void RTPStream::PrintRTCPSenderReport(char* packetBuff, uint32_t inLen)
 	theReport++;
 	uint32_t bytecount = ntohl(*theReport);
 
-	StrPtrLen   *payloadStr = this->GetValue(qtssRTPStrPayloadName);
-	if (payloadStr && payloadStr->Len > 0)
-		payloadStr->PrintStr();
+	if (!fPayloadName.empty())
+		printf("%s\n", fPayloadName.c_str());
 	else
 		printf("?");
 

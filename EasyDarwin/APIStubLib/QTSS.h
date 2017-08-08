@@ -409,7 +409,6 @@ enum
 {
     //QTSS_RTPStreamObject parameters. All of these are preemptive safe.
     
-    qtssRTPStrPayloadName           = 2,    //r/w       //char array        //Payload name of the media on this stream. This will be empty unless set explicitly by a module.
     qtssRTPStrFirstSeqNumber        = 4,    //r/w       //SInt16            //Sequence number of the first RTP packet generated for this stream after the last PLAY request was issued. If known, this must be set by a module before calling QTSS_Play. It is used by the server to generate a proper RTSP PLAY response.
     qtssRTPStrFirstTimestamp        = 5,    //r/w       //int32_t            //RTP timestamp of the first RTP packet generated for this stream after the last PLAY request was issued. If known, this must be set by a module before calling QTSS_Play. It is used by the server to generate a proper RTSP PLAY response.
     qtssRTPStrTimescale             = 6,    //r/w       //int32_t            //Timescale for the track. If known, this must be set before calling QTSS_Play.
@@ -419,28 +418,9 @@ enum
     // All of these parameters come out of the last RTCP packet received on this stream.
     // If the corresponding field in the last RTCP packet was blank, the attribute value will be 0.
     
-    qtssRTPStrFractionLostPackets   = 10,   //read      //uint32_t            // Fraction lost packets so far on this stream.
-    qtssRTPStrTotalLostPackets      = 11,   //read      //uint32_t            // Total lost packets so far on this stream.
-
-    qtssRTPStrPercentPacketsLost    = 15,   //read      //UInt16            // Percent packets lost on this stream, as a fixed %.
-    qtssRTPStrAvgBufDelayInMsec     = 16,   //read      //UInt16            // Average buffer delay in milliseconds
-    qtssRTPStrGettingBetter         = 17,   //read      //UInt16            // Non-zero if the client is reporting that the stream is getting better.
-    qtssRTPStrGettingWorse          = 18,   //read      //UInt16            // Non-zero if the client is reporting that the stream is getting worse.
-    qtssRTPStrNumEyes               = 19,   //read      //uint32_t            // Number of clients connected to this stream.
-
-    qtssRTPStrTotPacketsRecv        = 22,   //read      //uint32_t            // Total packets received by the client
-
-    qtssRTPStrTotPacketsLost        = 24,   //read      //UInt16            // Total packets lost.
-    qtssRTPStrClientBufFill         = 25,   //read      //UInt16            // How much the client buffer is filled in 10ths of a second.
-    qtssRTPStrFrameRate             = 26,   //read      //UInt16            // Current frame rate, in frames per second.
-
     // Address & network related parameters
     qtssRTPStrIsTCP                 = 29,   //read      //bool            //Is this RTP stream being sent over TCP? If false, it is being sent over UDP.
-    qtssRTPStrTransportType         = 31,   //read      //QTSS_RTPTransportType // What kind of transport is being used?    
-    qtssRTPStrStalePacketsDropped   = 32,   //read      //uint32_t            // Number of packets dropped by QTSS_Write because they were too old. 
-    qtssRTPStrCurrentAckTimeout     = 33,   //read      //uint32_t            // Current ack timeout being advertised to the client in msec (part of reliable udp).
     
-    qtssRTPStrCurPacketsLostInRTCPInterval      = 34,   // read     //uint32_t            // An RTCP delta count of lost packets equal to qtssRTPStrPercentPacketsLost
     qtssRTPStrPacketCountInRTCPInterval = 35,           // read     //uint32_t            // An RTCP delta count of packets
 
     qtssRTPStrNumParams             = 40

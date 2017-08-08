@@ -192,9 +192,7 @@ float RTPSessionInterface::GetPacketLossPercent()
 
 	for (auto theStream : fStreamBuffer)
 	{
-		uint32_t streamCurPacketsLost = 0;
-		theLen = sizeof(uint32_t);
-		theStream->GetValue(qtssRTPStrCurPacketsLostInRTCPInterval, 0, &streamCurPacketsLost, &theLen);
+		uint32_t streamCurPacketsLost = theStream->GetPacketsLostInRTCPInterval();
 		//printf("stream = %d streamCurPacketsLost = %"   _U32BITARG_   " \n",x, streamCurPacketsLost);
 
 		uint32_t streamCurPackets = 0;

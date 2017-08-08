@@ -1652,8 +1652,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	}
 
 	// Set up dictionary items for this stream
-	theErr = newStream->SetValue(qtssRTPStrPayloadName, 0, thePayloadName.data(), thePayloadName.length());
-	Assert(theErr == QTSS_NoErr);
+	newStream->SetPayloadName(thePayloadName);
 	newStream->SetPayLoadType(thePayloadType);
 	newStream->SetSDPStreamID(theTrackID);
 	theErr = newStream->SetValue(qtssRTPStrTimescale, 0, &theStreamInfo->fTimeScale, sizeof(theStreamInfo->fTimeScale));

@@ -512,11 +512,8 @@ QTSS_Error LogRequest(RTPSession* inClientSession,
 	// are all stored on a per-stream basis, so let's iterate through all the streams,
 	// finding this information
 
-	char videoPayloadNameBuf[32] = { 0 };
-	StrPtrLen videoPayloadName(videoPayloadNameBuf, 31);
-
-	char audioPayloadNameBuf[32] = { 0 };
-	StrPtrLen audioPayloadName(audioPayloadNameBuf, 31);
+	boost::string_view videoPayloadName;
+	boost::string_view audioPayloadName;
 
 	uint32_t qualityLevel = 0;
 	uint32_t clientBufferTime = 0;
@@ -525,26 +522,21 @@ QTSS_Error LogRequest(RTPSession* inClientSession,
 	QTSS_RTPStreamObject theRTPStreamObject = nullptr;
 
 	for (auto theRTPStreamObject : rtpSession->GetStreams())
-	{
-
-		uint32_t* streamPacketsReceived = nullptr;
-		uint32_t* streamPacketsLost = nullptr;
+	{	
 		RTPStream *dict = (RTPStream *)theRTPStreamObject;
-		dict->GetValuePtr(qtssRTPStrTotPacketsRecv, 0, (void**)&streamPacketsReceived, &theLen);
-		dict->GetValuePtr(qtssRTPStrTotalLostPackets, 0, (void**)&streamPacketsLost, &theLen);
+		uint32_t streamPacketsReceived = dict->GetTotalPacketsRecv();
+		uint32_t streamPacketsLost = dict->GetTotalLostPackets();
 
 		// Add up packets received and packets lost to come up with a session wide total
-		if (streamPacketsReceived != nullptr)
-			clientPacketsReceived += *streamPacketsReceived;
-		if (streamPacketsLost != nullptr)
-			clientPacketsLost += *streamPacketsLost;
+		clientPacketsReceived += streamPacketsReceived;
+		clientPacketsLost += streamPacketsLost;
 
 		// Identify the video and audio codec types
 		QTSS_RTPPayloadType thePayloadType = dict->GetPayLoadType();
 		if (thePayloadType == qtssVideoPayloadType)
-			dict->GetValue(qtssRTPStrPayloadName, 0, videoPayloadName.Ptr, &videoPayloadName.Len);
+			videoPayloadName = dict->GetPayloadName();
 		else if (thePayloadType == qtssAudioPayloadType)
-			dict->GetValue(qtssRTPStrPayloadName, 0, audioPayloadName.Ptr, &audioPayloadName.Len);
+			audioPayloadName = dict->GetPayloadName();
 
 		// If any one of the streams is being delivered over UDP instead of TCP,
 		// report in the log that the transport type for this session was UDP.
@@ -743,9 +735,9 @@ QTSS_Error LogRequest(RTPSession* inClientSession,
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%s ", (theTransportType->Ptr[0] == '\0') ? sVoidField : theTransportType->Ptr);   //transport
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%s ", (audioPayloadName.Ptr[0] == '\0') ? sVoidField : audioPayloadName.Ptr); //audiocodec*
+	sprintf(tempLogBuffer, "%s ", (audioPayloadName.empty()) ? sVoidField : audioPayloadName.data()); //audiocodec*
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%s ", (videoPayloadName.Ptr[0] == '\0') ? sVoidField : videoPayloadName.Ptr); //videocodec*
+	sprintf(tempLogBuffer, "%s ", (videoPayloadName.empty()) ? sVoidField : videoPayloadName.data()); //videocodec*
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtpBytesSent);    //sc-bytes*
 	::strcat(logBuffer, tempLogBuffer);

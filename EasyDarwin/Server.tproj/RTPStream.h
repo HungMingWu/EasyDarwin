@@ -178,12 +178,18 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
 		uint32_t GetTimeScale() const {	return fTimescale; }
 		float GetBufferDelay() const { return fBufferDelay; }
 		bool isTCP() const { return fIsTCP; }
+		uint32_t GetTotalLostPackets() const { return fTotalLostPackets; }
+		uint16_t GetPercentPacketsLost() const { return fPercentPacketsLost; }
+		uint16_t GetWorse() const { return fIsGettingWorse; }
+		uint16_t GetBetter() const { return fIsGettingBetter; }
+		void SetPayloadName(boost::string_view name) { fPayloadName = std::string(name); }
+		boost::string_view GetPayloadName() const { return fPayloadName; }
+		uint32_t GetPacketsLostInRTCPInterval() { return fCurPacketsLostInRTCPInterval; }
     private:
         
         enum
         {
             kMaxSsrcSizeInBytes         = 12,
-            kDefaultPayloadBufSize      = 32,
             kSenderReportIntervalInSecs = 7,
             kNumPrebuiltChNums          = 10,
             kMaxQualityLevel            = 0,
@@ -238,7 +244,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         bool      fEnableSSRC;
         
         //Payload name and codec type.
-        char                fPayloadNameBuf[kDefaultPayloadBufSize];
+        std::string         fPayloadName;
         QTSS_RTPPayloadType fPayloadType;
 
         //Media information.

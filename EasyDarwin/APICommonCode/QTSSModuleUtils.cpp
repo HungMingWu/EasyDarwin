@@ -217,7 +217,7 @@ void QTSSModuleUtils::LogPrefErrorStr( QTSS_ErrorVerbosity inVerbosity, char*  p
 	(void)QTSS_Write(sErrorLog, buffer, ::strlen(buffer), nullptr, inVerbosity);
 }
                    
-QTSS_Error  QTSSModuleUtils::AppendRTPMetaInfoHeader(   QTSS_RTSPRequestObject inRequest,
+QTSS_Error  QTSSModuleUtils::AppendRTPMetaInfoHeader(   RTSPRequest* inRequest,
                                                         StrPtrLen* inRTPMetaInfoHeader,
                                                         RTPMetaInfoPacket::FieldID* inFieldIDArray)
 {
@@ -296,22 +296,21 @@ QTSS_Error  QTSSModuleUtils::AppendRTPMetaInfoHeader(   QTSS_RTSPRequestObject i
     //
     // When appending the header to the response, strip off the last ';'.
     // It's not needed.
-    ((RTSPRequestInterface*)inRequest)->AppendHeader(qtssXRTPMetaInfoHeader, 
+    inRequest->AppendHeader(qtssXRTPMetaInfoHeader, 
 		boost::string_view(theFormatter.GetBufPtr(), theFormatter.GetCurrentOffset() - 1));
 	return QTSS_NoErr;
 }
 
-QTSS_Error  QTSSModuleUtils::SendErrorResponse( QTSS_RTSPRequestObject inRequest,
+QTSS_Error  QTSSModuleUtils::SendErrorResponse( RTSPRequest* inRequest,
                                                         QTSS_RTSPStatusCode inStatusCode,
                                                         QTSS_AttributeID inTextMessage,
                                                         StrPtrLen* inStringArg)
 {
     static bool sFalse = false;
     
-	RTSPRequest *pReq = (RTSPRequest *)inRequest;
     //set RTSP headers necessary for this error response message
-	pReq->SetStatus(inStatusCode);
-	pReq->SetResponseKeepAlive(sFalse);
+	inRequest->SetStatus(inStatusCode);
+	inRequest->SetResponseKeepAlive(sFalse);
     StringFormatter theErrorMsgFormatter(nullptr, 0);
     char *messageBuffPtr = nullptr;
     
@@ -365,33 +364,32 @@ QTSS_Error  QTSSModuleUtils::SendErrorResponse( QTSS_RTSPRequestObject inRequest
         
         
 		std::string buff = std::to_string(theErrorMsgFormatter.GetBytesWritten());
-		((RTSPRequestInterface*)inRequest)->AppendHeader(qtssContentLengthHeader, buff);
+		inRequest->AppendHeader(qtssContentLengthHeader, buff);
     }
     
     //send the response header. In all situations where errors could happen, we
     //don't really care, cause there's nothing we can do anyway!
-	((RTSPRequestInterface*)inRequest)->SendHeader();
+	inRequest->SendHeader();
 
     //
     // Now that we've formatted the message into the temporary buffer,
     // write it out to the request stream and the Client Session object
-    (void)QTSS_Write(inRequest, theErrorMsgFormatter.GetBufPtr(), theErrorMsgFormatter.GetBytesWritten(), nullptr, 0);
-	pReq->SetRespMsg({ theErrorMsgFormatter.GetBufPtr(), theErrorMsgFormatter.GetBytesWritten() });
+	inRequest->Write(theErrorMsgFormatter.GetBufPtr(), theErrorMsgFormatter.GetBytesWritten(), nullptr, 0);
+	inRequest->SetRespMsg({ theErrorMsgFormatter.GetBufPtr(), theErrorMsgFormatter.GetBytesWritten() });
     
     delete [] messageBuffPtr;
     return QTSS_RequestFailed;
 }
 
-QTSS_Error	QTSSModuleUtils::SendErrorResponseWithMessage( QTSS_RTSPRequestObject inRequest,
+QTSS_Error	QTSSModuleUtils::SendErrorResponseWithMessage( RTSPRequest* inRequest,
 														QTSS_RTSPStatusCode inStatusCode,
 														StrPtrLen* inErrorMessagePtr)
 {
     static bool sFalse = false;
     
-	RTSPRequest *pReq = (RTSPRequest *)inRequest;
 	//set RTSP headers necessary for this error response message
-	pReq->SetStatus(inStatusCode);
-	pReq->SetResponseKeepAlive(sFalse);
+	inRequest->SetStatus(inStatusCode);
+	inRequest->SetResponseKeepAlive(sFalse);
     StrPtrLen theErrorMessage(nullptr, 0);
     
     if (sEnableRTSPErrorMsg)
@@ -402,24 +400,24 @@ QTSS_Error	QTSSModuleUtils::SendErrorResponseWithMessage( QTSS_RTSPRequestObject
 		theErrorMessage.Set(inErrorMessagePtr->Ptr, inErrorMessagePtr->Len);
 		
         std::string buff = std::to_string(inErrorMessagePtr->Len);
-		((RTSPRequestInterface*)inRequest)->AppendHeader(qtssContentLengthHeader, buff);
+		inRequest->AppendHeader(qtssContentLengthHeader, buff);
     }
     
     //send the response header. In all situations where errors could happen, we
     //don't really care, cause there's nothing we can do anyway!
-	((RTSPRequestInterface*)inRequest)->SendHeader();
+	inRequest->SendHeader();
 
     //
     // Now that we've formatted the message into the temporary buffer,
     // write it out to the request stream and the Client Session object
-    (void)QTSS_Write(inRequest, theErrorMessage.Ptr, theErrorMessage.Len, nullptr, 0);
-	pReq->SetRespMsg({ theErrorMessage.Ptr, theErrorMessage.Len });
+	inRequest->Write(theErrorMessage.Ptr, theErrorMessage.Len, nullptr, 0);
+	inRequest->SetRespMsg({ theErrorMessage.Ptr, theErrorMessage.Len });
     
     return QTSS_RequestFailed;
 }
 
 
-QTSS_Error	QTSSModuleUtils::SendHTTPErrorResponse( QTSS_RTSPRequestObject inRequest,
+QTSS_Error	QTSSModuleUtils::SendHTTPErrorResponse(RTSPRequest* inRequest,
 													QTSS_SessionStatusCode inStatusCode,
                                                     bool inKillSession,
                                                     char *errorMessage)
@@ -427,11 +425,10 @@ QTSS_Error	QTSSModuleUtils::SendHTTPErrorResponse( QTSS_RTSPRequestObject inRequ
     static bool sFalse = false;
     
     //set status code for access log
-	RTSPRequest *pReq = (RTSPRequest *)inRequest;
-	pReq->SetStatus(inStatusCode);
+	inRequest->SetStatus(inStatusCode);
 
     if (inKillSession) // tell the server to end the session
-        pReq->SetResponseKeepAlive(sFalse);
+		inRequest->SetResponseKeepAlive(sFalse);
     
     ResizeableStringFormatter theErrorMessage(nullptr, 0); //allocates and deletes memory
     ResizeableStringFormatter bodyMessage(nullptr,0); //allocates and deletes memory
@@ -447,8 +444,7 @@ QTSS_Error	QTSSModuleUtils::SendHTTPErrorResponse( QTSS_RTSPRequestObject inRequ
     DateBuffer theDate;
     DateTranslator::UpdateDateBuffer(&theDate, 0); // get the current GMT date and time
 
-	RTSPRequest *dict = (RTSPRequest *)inRequest;
-	uint32_t realCode = dict->GetRealStatusCode();
+	uint32_t realCode = inRequest->GetRealStatusCode();
 
     char serverHeaderBuffer[64]; // the qtss Server: header field
 	uint32_t len = sizeof(serverHeaderBuffer) -1; // leave room for terminator
@@ -509,14 +505,14 @@ QTSS_Error	QTSSModuleUtils::SendHTTPErrorResponse( QTSS_RTSPRequestObject inRequ
     //
     // Now that we've formatted the message into the temporary buffer,
     // write it out to the request stream and the Client Session object
-    (void)QTSS_Write(inRequest, theErrorMessage.GetBufPtr(), theErrorMessage.GetBytesWritten(), nullptr, 0);
-	pReq->SetRespMsg({ theErrorMessage.GetBufPtr(), theErrorMessage.GetBytesWritten() });
+	inRequest->Write(theErrorMessage.GetBufPtr(), theErrorMessage.GetBytesWritten(), nullptr, 0);
+	inRequest->SetRespMsg({ theErrorMessage.GetBufPtr(), theErrorMessage.GetBytesWritten() });
     
     return QTSS_RequestFailed;
 }
 														
-void    QTSSModuleUtils::SendDescribeResponse(QTSS_RTSPRequestObject inRequest,
-                                                    QTSS_ClientSessionObject inSession,
+void    QTSSModuleUtils::SendDescribeResponse(RTSPRequest* inRequest,
+                                                    RTPSession* inSession,
                                                     iovec* describeData,
                                                     uint32_t inNumVectors,
                                                     uint32_t inTotalLength)
@@ -524,7 +520,7 @@ void    QTSSModuleUtils::SendDescribeResponse(QTSS_RTSPRequestObject inRequest,
     //write content size header
 	((RTSPRequestInterface*)inRequest)->AppendHeader(qtssContentLengthHeader, std::to_string(inTotalLength));
 
-	((RTPSession*)inSession)->SendDescribeResponse((RTSPRequestInterface*)inRequest);
+	inSession->SendDescribeResponse(inRequest);
 
         // On solaris, the maximum # of vectors is very low (= 16) so to ensure that we are still able to
         // send the SDP if we have a number greater than the maximum allowed, we coalesce the vectors into
@@ -540,7 +536,7 @@ void    QTSSModuleUtils::SendDescribeResponse(QTSS_RTSPRequestObject inRequest,
     else
         (void)QTSS_WriteV(inRequest, describeData, inNumVectors, inTotalLength, NULL);
 #else
-    (void)QTSS_WriteV(inRequest, describeData, inNumVectors, inTotalLength, nullptr);
+	((RTSPRequest*)inRequest)->WriteV(describeData, inNumVectors, inTotalLength, nullptr);
 #endif
 
 }
@@ -910,7 +906,7 @@ bool QTSSModuleUtils::FindStringInAttributeList(QTSS_Object inObject, QTSS_Attri
 
 bool QTSSModuleUtils::HavePlayerProfile(QTSS_PrefsObject inPrefObjectToCheck, QTSS_StandardRTSP_Params* inParams, uint32_t feature)
 {
-    std::string userAgentStrV(((RTPSession*)inParams->inClientSession)->GetUserAgent());
+    std::string userAgentStrV(inParams->inClientSession->GetUserAgent());
     StrPtrLen userAgentStr((char *)userAgentStrV.c_str());
     
     switch (feature)
@@ -944,14 +940,11 @@ bool QTSSModuleUtils::HavePlayerProfile(QTSS_PrefsObject inPrefObjectToCheck, QT
 }
 
 
-QTSS_Error QTSSModuleUtils::AuthorizeRequest(QTSS_RTSPRequestObject theRTSPRequest, bool allowed, bool foundUser, bool authContinue)
+QTSS_Error QTSSModuleUtils::AuthorizeRequest(RTSPRequest* theRTSPRequest, bool allowed, bool foundUser, bool authContinue)
 {
-    QTSS_Error theErr = QTSS_NoErr;
-    //printf("QTSSModuleUtils::AuthorizeRequest allowed=%d foundUser=%d authContinue=%d\n", *allowed, *foundUser, *authContinue);
-	RTSPRequest *pReq = ((RTSPRequest *)theRTSPRequest);
-	pReq->SetUserAllow(allowed);
-	pReq->SetUserFound(foundUser);   
-	pReq->SetAuthHandle(authContinue);
+	theRTSPRequest->SetUserAllow(allowed);
+	theRTSPRequest->SetUserFound(foundUser);
+	theRTSPRequest->SetAuthHandle(authContinue);
         
     return QTSS_NoErr;
 }

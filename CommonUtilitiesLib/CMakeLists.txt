@@ -44,7 +44,8 @@ set (SRC
 			 UserAgentParser.cpp UserAgentParser.h
 			 ClientSocket.cpp ClientSocket.h
 			 keyframecache.cpp keyframecache.h
-			 Format.cpp Format.h)
+			 Format.cpp Format.h
+			 Attributes.h)
 IF (MSVC)
 set (SRC ${SRC} win32ev.cpp CreateDump.cpp)
 ELSE()

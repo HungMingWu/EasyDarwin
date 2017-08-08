@@ -105,8 +105,8 @@ public:
 	static bool			QTSS_IsGlobalLocked();
 
 	// AUTHENTICATION AND AUTHORIZATION ROUTINE
-	static QTSS_Error   QTSS_Authenticate(const char* inAuthUserName, const char* inAuthResourceLocalPath, const char* inAuthMoviesDir, QTSS_ActionFlags inAuthRequestAction, QTSS_AuthScheme inAuthScheme, QTSS_RTSPRequestObject ioAuthRequestObject);
-	static QTSS_Error	QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObject, std::string* outAuthRealm, bool* outAuthUserAllowed);
+	static QTSS_Error   QTSS_Authenticate(const char* inAuthUserName, const char* inAuthResourceLocalPath, const char* inAuthMoviesDir, QTSS_ActionFlags inAuthRequestAction, QTSS_AuthScheme inAuthScheme, RTSPRequest* ioAuthRequestObject);
+	static QTSS_Error	QTSS_Authorize(RTSPRequest* inAuthRequestObject, std::string* outAuthRealm, bool* outAuthUserAllowed);
 
 	static void* Easy_GetRTSPPushSessions();
 };

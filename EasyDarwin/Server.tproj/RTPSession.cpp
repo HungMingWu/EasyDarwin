@@ -35,6 +35,7 @@
 #include "QTSServerInterface.h"
 #include "QTSS.h"
 #include "OS.h"
+#include "RTSPRequest.h"
 
 #define RTPSESSION_DEBUGGING 0
 
@@ -160,7 +161,7 @@ RTPStream*  RTPSession::FindRTPStreamForChannelNum(uint8_t inChannelNum)
 	return nullptr; // Couldn't find a matching stream
 }
 
-QTSS_Error RTPSession::AddStream(RTSPRequestInterface* request, RTPStream** outStream,
+QTSS_Error RTPSession::AddStream(RTSPRequest* request, RTPStream** outStream,
 	QTSS_AddStreamFlags inFlags)
 {
 	Assert(outStream != nullptr);
@@ -345,6 +346,11 @@ void RTPSession::Teardown()
 	this->Signal(Task::kKillEvent);
 }
 
+void RTPSession::ResetTimeout(uint32_t timeout)
+{
+	fTimeoutTask.SetTimeout((int64_t)timeout);
+}
+
 void RTPSession::SendPlayResponse(RTSPRequestInterface* request, uint32_t inFlags)
 {
 	QTSS_RTSPHeader theHeader = qtssRTPInfoHeader;
@@ -362,7 +368,7 @@ void RTPSession::SendPlayResponse(RTSPRequestInterface* request, uint32_t inFlag
 	request->SendHeader();
 }
 
-void    RTPSession::SendDescribeResponse(RTSPRequestInterface* inRequest)
+void    RTPSession::SendDescribeResponse(RTSPRequest* inRequest)
 {
 	if (inRequest->GetStatus() == qtssRedirectNotModified)
 	{

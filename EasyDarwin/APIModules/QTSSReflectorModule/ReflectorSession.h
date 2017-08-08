@@ -105,7 +105,7 @@ public:
 	void    AddOutput(ReflectorOutput* inOutput, bool isClient);
 	void    RemoveOutput(ReflectorOutput* inOutput, bool isClient);
 	void    TearDownAllOutputs();
-	void    RemoveSessionFromOutput(QTSS_ClientSessionObject inSession);
+	void    RemoveSessionFromOutput(RTPSession* inSession);
 	void    ManuallyMarkSetup() { fIsSetup = true; }
 
 	//
@@ -127,7 +127,7 @@ public:
 
 	ReflectorStream*	GetStreamByIndex(uint32_t inIndex) { return fStreamArray[inIndex]; }
 	void AddBroadcasterClientSession(QTSS_StandardRTSP_Params* inParams);
-	QTSS_ClientSessionObject GetBroadcasterSession() { return fBroadcasterSession; }
+	RTPSession* GetBroadcasterSession() { return fBroadcasterSession; }
 
 	// For the QTSSSplitterModule, this object can cache a QTSS_StreamRef
 	void            SetSocketStream(QTSS_StreamRef inStream) { fSocketStream = inStream; }
@@ -190,7 +190,7 @@ private:
 
 	// For the QTSSSplitterModule, this object can cache a QTSS_StreamRef
 	QTSS_StreamRef fSocketStream;
-	QTSS_ClientSessionObject fBroadcasterSession;
+	RTPSession* fBroadcasterSession;
 	int64_t		fInitTimeMS;
 	int64_t		fNoneOutputStartTimeMS;
 

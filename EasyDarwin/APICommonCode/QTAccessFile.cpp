@@ -493,11 +493,10 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     *outAllowAnyUserPtr = false;
     *outAuthorizedPtr = false;
     
-    QTSS_RTSPRequestObject  theRTSPRequest = inParams->inRTSPRequest;
-	RTSPRequest *pReq = (RTSPRequest *)inParams->inRTSPRequest;
+	RTSPRequest*  theRTSPRequest = inParams->inRTSPRequest;
     // get the type of request
     // Don't touch write requests
-    QTSS_ActionFlags action = ((RTSPRequest*)theRTSPRequest)->GetAction();
+    QTSS_ActionFlags action = theRTSPRequest->GetAction();
     if(action == qtssActionFlagsNoFlags)
         return QTSS_RequestFailed;
     
@@ -505,16 +504,16 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
         return QTSS_NoErr; // we don't handle
     
     //get the local file path
-    std::string  pathBuffStr(pReq->GetLocalPath());
+    std::string  pathBuffStr(theRTSPRequest->GetLocalPath());
     if (pathBuffStr.empty())
         return QTSS_RequestFailed;
 
     //get the root movie directory
-	boost::string_view   movieRootDirStr = ((RTSPRequest*)theRTSPRequest)->GetRootDir();
+	boost::string_view   movieRootDirStr = theRTSPRequest->GetRootDir();
     if (movieRootDirStr.empty())
         return QTSS_RequestFailed;
     
-	QTSS_UserProfileObject theUserProfile = ((RTSPRequest*)theRTSPRequest)->GetUserProfile();
+	QTSS_UserProfileObject theUserProfile = theRTSPRequest->GetUserProfile();
     if (nullptr == theUserProfile)
         return QTSS_RequestFailed;
 
@@ -550,11 +549,11 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     debug_printf("accessFile.AccessAllowed for user=%s returned %d\n", username, allowRequest);
     
     // Get the auth scheme
-    QTSS_AuthScheme theAuthScheme = ((RTSPRequest*)theRTSPRequest)->GetAuthScheme();
+    QTSS_AuthScheme theAuthScheme = theRTSPRequest->GetAuthScheme();
     
     // If auth scheme is basic and the realm is present in the access file, use it
     if((theAuthScheme == qtssAuthBasic) && (realmNameStr.Ptr[0] != '\0'))   //set the realm if we have one
-		((RTSPRequest*)theRTSPRequest)->SetURLRealm({ realmNameStr.Ptr, ::strlen(realmNameStr.Ptr) });
+		theRTSPRequest->SetURLRealm({ realmNameStr.Ptr, ::strlen(realmNameStr.Ptr) });
     else // if auth scheme is basic and no realm is present, or if the auth scheme is digest, use the realm from the users file
     {  
         char*   userRealm = nullptr;
@@ -562,7 +561,7 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
         if(userRealm != nullptr)
         {
             std::string userRealmDeleter(userRealm);
-			((RTSPRequest*)theRTSPRequest)->SetURLRealm(userRealmDeleter);
+			theRTSPRequest->SetURLRealm(userRealmDeleter);
         }
     }
     

@@ -47,7 +47,7 @@ public:
 	// Adds some dictionary attributes
 	static void Register();
 
-	RTPSessionOutput(QTSS_ClientSessionObject inRTPSession, ReflectorSession* inReflectorSession,
+	RTPSessionOutput(RTPSession* inRTPSession, ReflectorSession* inReflectorSession,
 		QTSS_Object serverPrefs, QTSS_AttributeID inCookieAddrID);
 	~RTPSessionOutput() override = default;
 
@@ -70,7 +70,7 @@ public:
 
 private:
 
-	QTSS_ClientSessionObject fClientSession;
+	RTPSession*             fClientSession;
 	ReflectorSession*       fReflectorSession;
 	QTSS_AttributeID        fCookieAttrID;
 	uint32_t                  fBufferDelayMSecs;

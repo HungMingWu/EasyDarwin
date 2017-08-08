@@ -70,7 +70,7 @@ static QTSS_AttributeID     sLastRTPTimeStampAttr = qtssIllegalAttrID;
 
 static QTSS_AttributeID     sLastRTCPTransmitAttr = qtssIllegalAttrID;
 
-RTPSessionOutput::RTPSessionOutput(QTSS_ClientSessionObject inClientSession, ReflectorSession* inReflectorSession,
+RTPSessionOutput::RTPSessionOutput(RTPSession* inClientSession, ReflectorSession* inReflectorSession,
 	QTSS_Object serverPrefs, QTSS_AttributeID inCookieAddrID)
 	: fClientSession(inClientSession),
 	fReflectorSession(inReflectorSession),
@@ -180,25 +180,17 @@ void RTPSessionOutput::Register()
 
 bool RTPSessionOutput::IsPlaying()
 {
-	QTSS_RTPSessionState*   theState = nullptr;
-	uint32_t                  theLen = 0;
-
 	if (!fClientSession)
 		return false;
 
-	((QTSSDictionary*)fClientSession)->GetValuePtr(qtssCliSesState, 0, (void**)&theState, &theLen);
-	if (theLen == 0 || theState == nullptr || *theState != qtssPlayingState)
-		return false;
-
-
-	return true;
+	return fClientSession->GetSessionState() == qtssPlayingState;
 }
 
 void RTPSessionOutput::InitializeStreams()
 {
 	uint32_t                  packetCountInitValue = 0;
 
-	for (auto theStreamPtr : ((RTPSession*)fClientSession)->GetStreams())
+	for (auto theStreamPtr : fClientSession->GetStreams())
 		theStreamPtr->SetValue(sStreamPacketCountAttr, 0, &packetCountInitValue, sizeof(uint32_t));
 }
 
@@ -210,14 +202,12 @@ bool RTPSessionOutput::IsUDP()
 		return fIsUDP;
 
 
-	QTSS_RTPSessionState*   theState = nullptr;
 	uint32_t                  theLen = 0;
-	((QTSSDictionary*)fClientSession)->GetValuePtr(qtssCliSesState, 0, (void**)&theState, &theLen);
-	if (*theState != qtssPlayingState)
+	if (fClientSession->GetSessionState() != qtssPlayingState);
 		return true;
 
 	QTSS_RTPTransportType *theTransportTypePtr = nullptr;
-	for (auto theStreamPtr : ((RTPSession*)fClientSession)->GetStreams())
+	for (auto theStreamPtr : fClientSession->GetStreams())
 	{
 		theStreamPtr->GetValuePtr(qtssRTPStrTransportType, 0, (void**)&theTransportTypePtr, &theLen);
 		if (theTransportTypePtr && *theTransportTypePtr == qtssRTPTransportTypeUDP)
@@ -339,7 +329,7 @@ QTSS_Error  RTPSessionOutput::TrackRTCPBaseTime(QTSS_RTPStreamObject *theStreamP
 		if (fMustSynch || QTSS_NoErr != dict->GetValuePtr(sBaseArrivalTimeStampAttr, 0, (void**)&fBaseArrivalTime, &theLen))
 		{   // we don't have a base arrival time for the session see if we can set one now.
 
-			for (auto findStream : ((RTPSession*)fClientSession)->GetStreams())
+			for (auto findStream : fClientSession->GetStreams())
 			{
 				int64_t* firstArrivalTimePtr = nullptr;
 				if (QTSS_NoErr != findStream->GetValuePtr(sFirstRTPArrivalTimeAttr, 0, (void**)&firstArrivalTimePtr, &theLen))
@@ -559,7 +549,6 @@ QTSS_Error  RTPSessionOutput::TrackPackets(QTSS_RTPStreamObject *theStreamPtr, S
 
 QTSS_Error  RTPSessionOutput::WritePacket(StrPtrLen* inPacket, void* inStreamCookie, uint32_t inFlags, int64_t packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr, bool firstPacket)
 {
-	QTSS_RTPSessionState*   theState = nullptr;
 	uint32_t                  theLen = 0;
 	QTSS_Error              writeErr = QTSS_NoErr;
 	int64_t                  currentTime = OS::Milliseconds();
@@ -567,17 +556,13 @@ QTSS_Error  RTPSessionOutput::WritePacket(StrPtrLen* inPacket, void* inStreamCoo
 	if (inPacket == nullptr || inPacket->Len == 0)
 		return QTSS_NoErr;
 
-	RTPSessionInterface* pSession = (RTPSessionInterface *)fClientSession;
-	((QTSSDictionary*)fClientSession)->GetValuePtr(qtssCliSesState, 0, (void**)&theState, &theLen);
-	if (theLen == 0 || theState == nullptr || *theState != qtssPlayingState)
-	{   //printf("QTSS_WouldBlock *theState=%d qtssPlayingState=%d\n", *theState , qtssPlayingState);
+	if (fClientSession->GetSessionState() != qtssPlayingState)
 		return QTSS_WouldBlock;
-	}
 
 	//make sure all RTP streams with this ID see this packet
 	QTSS_RTPStreamObject *theStreamPtr = nullptr;
 
-	for (auto theStreamPtr : pSession->GetStreams())
+	for (auto theStreamPtr : fClientSession->GetStreams())
 	{
 		if (this->PacketMatchesStream(inStreamCookie, theStreamPtr))
 		{
@@ -771,9 +756,8 @@ bool RTPSessionOutput::PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrP
 
 void RTPSessionOutput::TearDown()
 {
-	QTSS_CliSesTeardownReason reason = qtssCliSesTearDownBroadcastEnded;
-	(void)QTSS_SetValue(fClientSession, qtssCliTeardownReason, 0, &reason, sizeof(reason));
-	((RTPSession*)fClientSession)->Teardown();
+	fClientSession->SetTeardownReason(qtssCliSesTearDownBroadcastEnded);
+	fClientSession->Teardown();
 }
 
 

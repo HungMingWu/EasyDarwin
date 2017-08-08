@@ -44,45 +44,45 @@ unsigned int            RTPSessionInterface::sRTPSessionIDCounter = 0;
 QTSSAttrInfoDict::AttrInfo  RTPSessionInterface::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
 	/* 0  */ {},
-	/* 1  */ { "qtssCliSesCreateTimeInMsec",        nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 2  */ { "qtssCliSesFirstPlayTimeInMsec",     nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 3  */ { "qtssCliSesPlayTimeInMsec",          nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 4  */ { "qtssCliSesAdjustedPlayTimeInMsec",  nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 5  */ { "qtssCliSesRTPBytesSent",            nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 6  */ { "qtssCliSesRTPPacketsSent",          nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 7  */ { "qtssCliSesState",                   nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 8  */ { "qtssCliSesPresentationURL",         nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 9  */ { "qtssCliSesFirstUserAgent",          nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 10 */ { "qtssCliStrMovieDurationInSecs",     nullptr,   qtssAttrDataTypeFloat64,        qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 11 */ { "qtssCliStrMovieSizeInBytes",        nullptr,   qtssAttrDataTypeuint64_t,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 12 */ { "qtssCliSesMovieAverageBitRate",     nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
-	/* 13 */ { "qtssCliSesLastRTSPSession",         nullptr,   qtssAttrDataTypeQTSS_Object,    qtssAttrModeRead | qtssAttrModePreempSafe } ,
-	/* 14 */ { "qtssCliSesFullURL",                 nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe } ,
-	/* 15 */ { "qtssCliSesHostName",                nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 1  */ {},
+	/* 2  */ {},
+	/* 3  */ {},
+	/* 4  */ {},
+	/* 5  */ {},
+	/* 6  */ {},
+	/* 7  */ {},
+	/* 8  */ {},
+	/* 9  */ {},
+	/* 10 */ {},
+	/* 11 */ {},
+	/* 12 */ {},
+	/* 13 */ {} ,
+	/* 14 */ {} ,
+	/* 15 */ {},
 
 	/* 16 */ {},
 	/* 17 */ {},
 	/* 18 */ {},
 	/* 19 */ {},
-	/* 20 */ { "qtssCliRTSPSesUserPassword",        nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 21 */ { "qtssCliRTSPSesURLRealm",            nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 22 */ { "qtssCliRTSPReqRealStatusCode",      nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 23 */ { "qtssCliTeardownReason",             nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 20 */ {},
+	/* 21 */ {},
+	/* 22 */ {},
+	/* 23 */ {},
 	/* 24 */ {},
 	/* 25 */ {},
 
-	/* 26 */ { "qtssCliSesCurrentBitRate",          CurrentBitRate,     qtssAttrDataTypeUInt32,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 27 */ { "qtssCliSesPacketLossPercent",       PacketLossPercent,  qtssAttrDataTypeFloat32, qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 28 */ { "qtssCliSesTimeConnectedinMsec",     TimeConnected,      qtssAttrDataTypeint64_t,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 29 */ { "qtssCliSesCounterID",               nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 26 */ {},
+	/* 27 */ {},
+	/* 28 */ {},
+	/* 29 */ {},
 	/* 30 */ {},
-	/* 31 */ { "qtssCliSesFramesSkipped",           nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 32 */ { "qtssCliSesTimeoutMsec", 			nullptr, 	qtssAttrDataTypeUInt32,		qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 33 */ { "qtssCliSesOverBufferEnabled",       nullptr, 	qtssAttrDataTypeBool16,		qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 34 */ { "qtssCliSesRTCPPacketsRecv",         nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 35 */ { "qtssCliSesRTCPBytesRecv",           nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 36 */ { "qtssCliSesStartedThinning",         nullptr, 	qtssAttrDataTypeBool16,		qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 37 */ { "qtssCliSessLastRTSPBandwidth",      nullptr, 	qtssAttrDataTypeUInt32,		qtssAttrModeRead | qtssAttrModePreempSafe }
+	/* 31 */ {},
+	/* 32 */ {},
+	/* 33 */ {},
+	/* 34 */ {},
+	/* 35 */ {},
+	/* 36 */ {},
+	/* 37 */ {}
 };
 
 void    RTPSessionInterface::Initialize()
@@ -116,52 +116,6 @@ RTPSessionInterface::RTPSessionInterface()
 
 	//mark the session create time
 	fSessionCreateTime = OS::Milliseconds();
-
-	// Setup all dictionary attribute values
-
-	// Make sure the dictionary knows about our preallocated memory for the RTP stream array
-
-	this->SetVal(qtssCliSesCreateTimeInMsec, &fSessionCreateTime, sizeof(fSessionCreateTime));
-	this->SetVal(qtssCliSesFirstPlayTimeInMsec, &fFirstPlayTime, sizeof(fFirstPlayTime));
-	this->SetVal(qtssCliSesPlayTimeInMsec, &fPlayTime, sizeof(fPlayTime));
-	this->SetVal(qtssCliSesAdjustedPlayTimeInMsec, &fAdjustedPlayTime, sizeof(fAdjustedPlayTime));
-	this->SetVal(qtssCliSesRTPBytesSent, &fBytesSent, sizeof(fBytesSent));
-	this->SetVal(qtssCliSesRTPPacketsSent, &fPacketsSent, sizeof(fPacketsSent));
-	this->SetVal(qtssCliSesState, &fState, sizeof(fState));
-	this->SetVal(qtssCliSesMovieDurationInSecs, &fMovieDuration, sizeof(fMovieDuration));
-	this->SetVal(qtssCliSesMovieSizeInBytes, &fMovieSizeInBytes, sizeof(fMovieSizeInBytes));
-	this->SetVal(qtssCliSesLastRTSPSession, &fRTSPSession, sizeof(fRTSPSession));
-	this->SetVal(qtssCliSesMovieAverageBitRate, &fMovieAverageBitRate, sizeof(fMovieAverageBitRate));
-
-	this->SetEmptyVal(qtssCliRTSPSesUserPassword, &fUserPasswordBuf[0], RTSPSessionInterface::kMaxUserPasswordLen);
-	this->SetEmptyVal(qtssCliRTSPSesURLRealm, &fUserRealmBuf[0], RTSPSessionInterface::kMaxUserRealmLen);
-
-	this->SetVal(qtssCliRTSPReqRealStatusCode, &fLastRTSPReqRealStatusCode, sizeof(fLastRTSPReqRealStatusCode));
-
-	this->SetVal(qtssCliTeardownReason, &fTeardownReason, sizeof(fTeardownReason));
-	//   this->SetVal(qtssCliSesCurrentBitRate, &fMovieCurrentBitRate, sizeof(fMovieCurrentBitRate));
-	this->SetVal(qtssCliSesCounterID, &fUniqueID, sizeof(fUniqueID));
-	this->SetVal(qtssCliSesFramesSkipped, &fFramesSkipped, sizeof(fFramesSkipped));
-	this->SetVal(qtssCliSesRTCPPacketsRecv, &fTotalRTCPPacketsRecv, sizeof(fTotalRTCPPacketsRecv));
-	this->SetVal(qtssCliSesRTCPBytesRecv, &fTotalRTCPBytesRecv, sizeof(fTotalRTCPBytesRecv));
-
-	this->SetVal(qtssCliSesTimeoutMsec, &fTimeout, sizeof(fTimeout));
-
-	this->SetVal(qtssCliSesOverBufferEnabled, this->GetOverbufferWindow()->OverbufferingEnabledPtr(), sizeof(bool));
-	this->SetVal(qtssCliSesStartedThinning, &fStartedThinning, sizeof(bool));
-
-	this->SetVal(qtssCliSessLastRTSPBandwidth, &fLastRTSPBandwidthHeaderBits, sizeof(fLastRTSPBandwidthHeaderBits));
-}
-
-void RTPSessionInterface::SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
-	uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen)
-{
-	if (inAttrIndex == qtssCliSesTimeoutMsec)
-	{
-		Assert(inNewValueLen == sizeof(uint32_t));
-		uint32_t newTimeOut = *((uint32_t *)inNewValue);
-		fTimeoutTask.SetTimeout((int64_t)newTimeOut);
-	}
 }
 
 void RTPSessionInterface::UpdateRTSPSession(RTSPSessionInterface* inNewRTSPSession)
@@ -228,37 +182,15 @@ void RTPSessionInterface::UpdateBitRateInternal(const int64_t& curTime)
 	//printf("Cur bandwidth: %d. Cur ack timeout: %d.\n",fTracker.GetCurrentBandwidthInBps(), fTracker.RecommendedClientAckTimeout());
 }
 
-void* RTPSessionInterface::TimeConnected(QTSSDictionary* inSession, uint32_t* outLen)
+float RTPSessionInterface::GetPacketLossPercent()
 {
-	auto* theSession = (RTPSessionInterface*)inSession;
-	theSession->fTimeConnected = (OS::Milliseconds() - theSession->GetSessionCreateTime());
-
-	// Return the result
-	*outLen = sizeof(theSession->fTimeConnected);
-	return &theSession->fTimeConnected;
-}
-
-void* RTPSessionInterface::CurrentBitRate(QTSSDictionary* inSession, uint32_t* outLen)
-{
-	auto* theSession = (RTPSessionInterface*)inSession;
-	theSession->UpdateBitRateInternal(OS::Milliseconds());
-
-	// Return the result
-	*outLen = sizeof(theSession->fMovieCurrentBitRate);
-	return &theSession->fMovieCurrentBitRate;
-}
-
-
-void* RTPSessionInterface::PacketLossPercent(QTSSDictionary* inSession, uint32_t* outLen)
-{
-	auto* theSession = (RTPSessionInterface*)inSession;
 	RTPStream* theStream = nullptr;
 	uint32_t theLen = sizeof(theStream);
 
 	int64_t packetsLost = 0;
 	int64_t packetsSent = 0;
 
-	for (auto theStream : theSession->fStreamBuffer)
+	for (auto theStream : fStreamBuffer)
 	{
 		uint32_t streamCurPacketsLost = 0;
 		theLen = sizeof(uint32_t);
@@ -280,16 +212,14 @@ void* RTPSessionInterface::PacketLossPercent(QTSSDictionary* inSession, uint32_t
 	if (packetsSent > 0)
 	{
 		if (packetsLost <= packetsSent)
-			theSession->fPacketLossPercent = (float)((((float)packetsLost / (float)packetsSent) * 100.0));
+			fPacketLossPercent = (float)((((float)packetsLost / (float)packetsSent) * 100.0));
 		else
-			theSession->fPacketLossPercent = 100.0;
+			fPacketLossPercent = 100.0;
 	}
 	else
-		theSession->fPacketLossPercent = 0.0;
-	//printf("Session loss percent packetsLost = %qd packetsSent= %qd theSession->fPacketLossPercent=%f\n",packetsLost,packetsSent,theSession->fPacketLossPercent);
-	// Return the result
-	*outLen = sizeof(theSession->fPacketLossPercent);
-	return &theSession->fPacketLossPercent;
+		fPacketLossPercent = 0.0;
+
+	return fPacketLossPercent;
 }
 
 void RTPSessionInterface::CreateDigestAuthenticationNonce() {

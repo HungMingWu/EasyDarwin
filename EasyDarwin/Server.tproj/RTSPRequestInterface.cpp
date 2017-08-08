@@ -53,55 +53,6 @@ std::string RTSPRequestInterface::sPremadeNoHeader;
 
 StrPtrLen   RTSPRequestInterface::sColonSpace(": ", 2);
 
-QTSSAttrInfoDict::AttrInfo  RTSPRequestInterface::sAttributes[] =
-{   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
-	/* 0 */ {},
-	/* 1 */ {},
-	/* 2 */ {},
-	/* 3 */ {},
-	/* 4 */ {},
-	/* 5 */ {},
-	/* 6 */ {},
-	/* 7 */ {},
-	/* 8 */ {},
-	/* 9 */ {},
-	/* 10 */ {},
-	/* 11 */ {},
-	/* 12 */ {},
-	/* 13 */ {},
-	/* 14 */ {},
-	/* 15 */ {},
-	/* 16 */ {},
-
-	/* 17 */ {},
-	/* 18 */ {},
-	/* 19 */ {},
-	/* 20 */ {},
-	/* 21 */ {},
-	/* 22 */ {},
-	/* 23 */ {},
-	/* 24 */ {},
-	/* 25 */ {},
-	/* 26 */ {},
-	/* 27 */ {},
-	/* 28 */ {},
-	/* 29 */ {},
-	/* 30 */ {},
-	/* 31 */ {},
-	/* 32 */ {},
-	/* 33 */ {},
-	/* 34 */ {},
-	/* 35 */ {},
-	/* 36 */ {},
-	/* 37 */ {},
-
-	/* 39 */ {},
-	/* 39 */ {},
-	/* 40 */ {},
-	/* 41 */ {},
-	/* 42 */ {}
-};
-
 std::string PutStatusLine(QTSS_RTSPStatusCode status, RTSPProtocol::RTSPVersion version)
 {
 	std::string result;
@@ -128,12 +79,6 @@ void  RTSPRequestInterface::Initialize(void)
 	temp = RTSPProtocol::GetHeaderString(qtssCSeqHeader);
 	sPremadeNoHeader += std::string(temp.Ptr, temp.Len) + ": ";
 
-	//Setup all the dictionary stuff
-	for (uint32_t x = 0; x < qtssRTSPReqNumParams; x++)
-		QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTSPRequestDictIndex)->
-		SetAttribute(x, sAttributes[x].fAttrName, sAttributes[x].fFuncPtr,
-			sAttributes[x].fAttrDataType, sAttributes[x].fAttrPermission);
-
 	QTSSDictionaryMap* theHeaderMap = QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTSPHeaderDictIndex);
 	for (uint32_t y = 0; y < qtssNumHeaders; y++)
 		theHeaderMap->SetAttribute(y, RTSPProtocol::GetHeaderString(y).Ptr, nullptr, qtssAttrDataTypeCharArray, qtssAttrModeRead | qtssAttrModePreempSafe);
@@ -154,8 +99,7 @@ void RTSPRequestInterface::ReInit(RTSPSessionInterface *session)
 
 //CONSTRUCTOR / DESTRUCTOR: very simple stuff
 RTSPRequestInterface::RTSPRequestInterface(RTSPSessionInterface *session)
-	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTSPRequestDictIndex)),
-	fMethod(qtssIllegalMethod),
+	: fMethod(qtssIllegalMethod),
 	fStatus(qtssSuccessOK),
 	fRequestKeepAlive(true),
 	//fResponseKeepAlive(true), //parameter need not be set

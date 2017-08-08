@@ -65,9 +65,8 @@ public:
 	//
 	// Without changing the window size, you can enable / disable all overbuffering
 	// using these calls. Defaults to enabled
-	void    TurnOffOverbuffering() { fOverbufferingEnabled = false; }
-	void    TurnOnOverbuffering() { fOverbufferingEnabled = true; }
-	bool*  OverbufferingEnabledPtr() { return &fOverbufferingEnabled; }
+	void    TurnOverbuffering(bool turned) { fOverbufferingEnabled = turned; }
+	bool    GetOverbufferEnabled() const { return fOverbufferingEnabled; }
 
 	//
 	// If the overbuffer window is full, this returns a time in the future when

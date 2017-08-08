@@ -988,7 +988,7 @@ int64_t RTSPSession::Run()
 
 						// Make sure the RTPSession contains a copy of the realStatusCode in this request
 						uint32_t realStatusCode = RTSPProtocol::GetStatusCode(fRequest->GetStatus());
-						(void)fRTPSession->SetValue(qtssCliRTSPReqRealStatusCode, (uint32_t)0, (void *)&realStatusCode, sizeof(realStatusCode), QTSSDictionary::kDontObeyReadOnly);
+						fRTPSession->SetStatusCode(realStatusCode);
 
 						fRTPSession->SetRespMsg(fRequest->GetRespMsg());
 
@@ -1650,9 +1650,7 @@ void RTSPSession::SetupRequest()
 		fRTPSession->RefreshTimeout();
 		uint32_t headerBits = fRequest->GetBandwidthHeaderBits();
 		if (headerBits != 0)
-			(void)fRTPSession->SetValue(qtssCliSessLastRTSPBandwidth, (uint32_t)0, &headerBits, sizeof(headerBits), QTSSDictionary::kDontObeyReadOnly);
-
-
+			fRTPSession->SetLastRTSPBandwithBits(headerBits);
 	}
 	QTSS_RTSPStatusCode statusCode = qtssSuccessOK;
 	char *body = nullptr;
@@ -1751,7 +1749,7 @@ void RTSPSession::SetupRequest()
 	OSMutexLocker locker(fRTPSession->GetMutex());
 	uint32_t headerBits = fRequest->GetBandwidthHeaderBits();
 	if (headerBits != 0)
-		(void)fRTPSession->SetValue(qtssCliSessLastRTSPBandwidth, 0, &headerBits, sizeof(headerBits), QTSSDictionary::kDontObeyReadOnly);
+		fRTPSession->SetLastRTSPBandwithBits(headerBits);
 
 	// If it's a play request and the late tolerance is sent in the request use this value
 	if ((fRequest->GetMethod() == qtssPlayMethod) && (fRequest->GetLateToleranceInSec() != -1))
@@ -2034,7 +2032,7 @@ void RTSPSession::SaveRequestAuthorizationParams(RTSPRequest *theRTSPRequest)
 	// Same thing... user password
 	boost::string_view password = theRTSPRequest->GetPassWord();
 	SetPassword(password);
-	(void)fRTPSession->SetValue(qtssCliRTSPSesUserPassword, (uint32_t)0, password.data(), password.length(), QTSSDictionary::kDontObeyReadOnly);
+	fRTPSession->SetPassword(password);
 
 	boost::string_view tempPtr = theRTSPRequest->GetURLRealm();
 	if (tempPtr.empty())
@@ -2044,12 +2042,12 @@ void RTSPSession::SaveRequestAuthorizationParams(RTSPRequest *theRTSPRequest)
 		char *realm = theDefaultRealm.get();
 		uint32_t len = ::strlen(theDefaultRealm.get());
 		SetLastURLRealm({ realm, len });
-		(void)fRTPSession->SetValue(qtssCliRTSPSesURLRealm, (uint32_t)0, realm, len, QTSSDictionary::kDontObeyReadOnly);
+		fRTPSession->SetRealm({ realm, len });
 	}
 	else
 	{
 		SetLastURLRealm(tempPtr);
-		(void)fRTPSession->SetValue(qtssCliRTSPSesURLRealm, (uint32_t)0, tempPtr.data(), tempPtr.length(), QTSSDictionary::kDontObeyReadOnly);
+		fRTPSession->SetRealm(tempPtr);
 	}
 
 }

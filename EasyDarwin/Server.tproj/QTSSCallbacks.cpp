@@ -477,7 +477,7 @@ bool      QTSSCallbacks::QTSS_IsGlobalLocked()
 	return theState->isGlobalLocked;
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const char* inAuthResourceLocalPath, const char* inAuthMoviesDir, QTSS_ActionFlags inAuthRequestAction, QTSS_AuthScheme inAuthScheme, QTSS_RTSPRequestObject ioAuthRequestObject)
+QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const char* inAuthResourceLocalPath, const char* inAuthMoviesDir, QTSS_ActionFlags inAuthRequestAction, QTSS_AuthScheme inAuthScheme, RTSPRequest* ioAuthRequestObject)
 {
 	if ((inAuthUserName == nullptr) || (inAuthResourceLocalPath == nullptr) || (inAuthMoviesDir == nullptr) || (ioAuthRequestObject == nullptr))
 		return QTSS_BadArgument;
@@ -488,15 +488,13 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 
 	// First create a RTSPRequestInterface object 
 	// There is no session attached to it, so just pass in NULL for the RTSPSession
-	auto *request = (RTSPRequestInterface *)ioAuthRequestObject;
-	RTSPRequest *pReq = (RTSPRequest *)ioAuthRequestObject;
 	// Set all the attributes required by the authentication module, using the input values
-	pReq->SetAuthUserName({ inAuthUserName, ::strlen(inAuthUserName) });
-	pReq->SetLocalPath({ inAuthResourceLocalPath, ::strlen(inAuthResourceLocalPath) });
-	pReq->SetRootDir({ inAuthMoviesDir, ::strlen(inAuthMoviesDir) });
-	request->SetAction(inAuthRequestAction);
-	request->SetAuthScheme(inAuthScheme);
-	QTSSUserProfile *profile = request->GetUserProfile();
+	ioAuthRequestObject->SetAuthUserName({ inAuthUserName, ::strlen(inAuthUserName) });
+	ioAuthRequestObject->SetLocalPath({ inAuthResourceLocalPath, ::strlen(inAuthResourceLocalPath) });
+	ioAuthRequestObject->SetRootDir({ inAuthMoviesDir, ::strlen(inAuthMoviesDir) });
+	ioAuthRequestObject->SetAction(inAuthRequestAction);
+	ioAuthRequestObject->SetAuthScheme(inAuthScheme);
+	QTSSUserProfile *profile = ioAuthRequestObject->GetUserProfile();
 	(void)profile->SetValue(qtssUserName, 0, inAuthUserName, ::strlen(inAuthUserName), QTSSDictionary::kDontObeyReadOnly);
 
 
@@ -512,7 +510,7 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 
 	// Setup the authentication param block
 	QTSS_RoleParams theAuthenticationParams;
-	theAuthenticationParams.rtspAthnParams.inRTSPRequest = request;
+	//theAuthenticationParams.rtspAthnParams.inRTSPRequest = request;
 
 	QTSS_Error theErr = QTSS_RequestFailed;
 
@@ -528,9 +526,9 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 	// Call all the modules that are registered for the RTSP Authorize Role 
 	for (; x < numModules; x++)
 	{
-		request->SetAllowed(allowedDefault);
-		request->SetHasUser(false);
-		request->SetAuthHandled(false);
+		ioAuthRequestObject->SetAllowed(allowedDefault);
+		ioAuthRequestObject->SetHasUser(false);
+		ioAuthRequestObject->SetAuthHandled(false);
 
 		debug_printf(" QTSSCallbacks::QTSS_Authenticate calling module module = %lu numModules=%lu\n", x, numModules);
 		theModulePtr = QTSServerInterface::GetModule(QTSSModule::kRTSPAthnRole, x);
@@ -545,9 +543,9 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 			debug_printf(" QTSSCallbacks::QTSS_Authorize calling module module = %lu is NULL! numModules=%lu\n", x, numModules);
 			continue;
 		}
-		allowed = request->GetAllowed();
-		hasUser = request->GetHasUser();
-		handled = request->GetAuthHandled();
+		allowed = ioAuthRequestObject->GetAllowed();
+		hasUser = ioAuthRequestObject->GetHasUser();
+		handled = ioAuthRequestObject->GetAuthHandled();
 		debug_printf("QTSSCallbacks::QTSS_Authenticate allowedDefault =%d allowed= %d hasUser = %d handled=%d \n", allowedDefault, allowed, hasUser, handled);
 
 
@@ -566,10 +564,9 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 	return theErr;
 }
 
-QTSS_Error	QTSSCallbacks::QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObject, std::string* outAuthRealm, bool* outAuthUserAllowed)
+QTSS_Error	QTSSCallbacks::QTSS_Authorize(RTSPRequest* inAuthRequestObject, std::string* outAuthRealm, bool* outAuthUserAllowed)
 {
-	auto* request = (RTSPRequest *)inAuthRequestObject;
-	if (request == nullptr)
+	if (inAuthRequestObject == nullptr)
 		return QTSS_BadArgument;
 
 	// Because this is a role being executed from inside a callback, we need to
@@ -584,7 +581,7 @@ QTSS_Error	QTSSCallbacks::QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObj
 
 	QTSS_RoleParams theParams;
 	theParams.rtspRequestParams.inRTSPSession = nullptr;
-	theParams.rtspRequestParams.inRTSPRequest = request;
+	theParams.rtspRequestParams.inRTSPRequest = inAuthRequestObject;
 	theParams.rtspRequestParams.inClientSession = nullptr;
 
 	QTSS_Error theErr = QTSS_RequestFailed;
@@ -602,9 +599,9 @@ QTSS_Error	QTSSCallbacks::QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObj
 
 	for (; x < numModules; x++)
 	{
-		request->SetAllowed(true);
-		request->SetHasUser(false);
-		request->SetAuthHandled(false);
+		inAuthRequestObject->SetAllowed(true);
+		inAuthRequestObject->SetHasUser(false);
+		inAuthRequestObject->SetAuthHandled(false);
 
 		debug_printf(" QTSSCallbacks::QTSS_Authorize calling module module = %lu numModules=%lu\n", x, numModules);
 		theModulePtr = QTSServerInterface::GetModule(QTSSModule::kRTSPAuthRole, x);
@@ -623,9 +620,9 @@ QTSS_Error	QTSSCallbacks::QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObj
 			continue;
 		}
 
-		allowed = request->GetAllowed();
-		hasUser = request->GetHasUser();
-		handled = request->GetAuthHandled();
+		allowed = inAuthRequestObject->GetAllowed();
+		hasUser = inAuthRequestObject->GetHasUser();
+		handled = inAuthRequestObject->GetAuthHandled();
 		debug_printf("QTSSCallbacks::QTSS_Authorize allowedDefault =%d allowed= %d hasUser = %d handled=%d \n", allowedDefault, allowed, hasUser, handled);
 
 		*outAuthUserAllowed = allowed;
@@ -642,7 +639,7 @@ QTSS_Error	QTSSCallbacks::QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObj
 	}
 
 	// outAuthRealm is set to the realm that is given by the module that has denied authentication
-	*outAuthRealm = std::string(request->GetURLRealm());
+	*outAuthRealm = std::string(inAuthRequestObject->GetURLRealm());
 
 	return theErr;
 }

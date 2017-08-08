@@ -74,9 +74,6 @@ public:
 		delete[] fAuthOpaque.Ptr;
 	}
 
-	void SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
-		uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen) override;
-
 	//Timeouts. This allows clients to refresh the timeout on this session
 	void    RefreshTimeout() { fTimeoutTask.RefreshTimeout(); }
 	void    RefreshRTSPTimeout() { if (fRTSPSession != nullptr) fRTSPSession->RefreshTimeout(); }
@@ -103,7 +100,9 @@ public:
 	OSRef*      GetRef() { return &fRTPMapElem; }
 	RTSPSessionInterface* GetRTSPSession() { return fRTSPSession; }
 	uint32_t      GetMovieAvgBitrate() { return fMovieAverageBitRate; }
+	void          SetMovieAvgBitrate(uint32_t rate) { fMovieAverageBitRate = rate; }
 	QTSS_CliSesTeardownReason GetTeardownReason() { return fTeardownReason; }
+	void SetTeardownReason(QTSS_CliSesTeardownReason reason) { fTeardownReason = reason; }
 	QTSS_RTPSessionState    GetSessionState() { return fState; }
 	void    SetUniqueID(uint32_t theID) { fUniqueID = theID; }
 	uint32_t  GetUniqueID() { return fUniqueID; }
@@ -176,8 +175,6 @@ public:
 	// the nounce count will be incremented.
 	void            UpdateDigestAuthChallengeParams(bool newNonce, bool createOpaque, uint32_t qop);
 
-	float* GetPacketLossPercent() { uint32_t outLen; return  (float*) this->PacketLossPercent(this, &outLen); }
-
 	int32_t          GetQualityLevel() { return fSessionQualityLevel; }
 	int32_t*         GetQualityLevelPtr() { return &fSessionQualityLevel; }
 	void            SetQualityLevel(int32_t level) {
@@ -198,6 +195,7 @@ public:
 	uint32_t          GetTotalRTCPBytesRecv() { return fTotalRTCPBytesRecv; }
 
 	uint32_t          GetLastRTSPBandwithBits() { return fLastRTSPBandwidthHeaderBits; }
+	void              SetLastRTSPBandwithBits(uint32_t bandwidth) { fLastRTSPBandwidthHeaderBits = bandwidth; }
 	uint32_t          GetCurrentMovieBitRate() { return fMovieCurrentBitRate; }
 
 	uint32_t          GetMaxBandwidthBits() { uint32_t maxRTSP = GetLastRTSPBandwithBits();  return  maxRTSP; }
@@ -211,6 +209,20 @@ public:
 	boost::string_view GetLocalAddr() const { return fRTSPSessLocalAddrStr; }
 	void SetRemoteAddr(boost::string_view remote) {	fRTSPSessRemoteAddrStr = std::string(fRTSPSessRemoteAddrStr); }
 	boost::string_view GetRemoteAddr() const { return fRTSPSessRemoteAddrStr; }
+	void SetPassword(boost::string_view password) { fUserPassword = std::string(password); }
+	void SetRealm(boost::string_view realm) { fUserRealm = std::string(realm); }
+	boost::string_view GetRealm() const { return fUserRealm; }
+	float GetPacketLossPercent();
+	uint64_t GetMovieSizeInBytes() const { return fMovieSizeInBytes; }
+	double GetMovieDuration() const { return fMovieDuration; }
+	void SetStatusCode(uint32_t code) { fLastRTSPReqRealStatusCode = code; }
+	uint32_t GetStatusCode() const { return fLastRTSPReqRealStatusCode; }
+	void SetOverBufferEnable(bool enabled) {
+		GetOverbufferWindow()->TurnOverbuffering(enabled);
+	}
+	bool GetOverBufferEnable() {
+		return GetOverbufferWindow()->GetOverbufferEnabled();
+	}
 protected:
 	// These variables are setup by the derived RTPSession object when
 	// Play and Pause get called
@@ -254,16 +266,14 @@ protected:
 
 	std::vector<RTPStream*>       fStreamBuffer;
 	std::string fUserName;
-
+	TimeoutTask fTimeoutTask;
 private:
 
 	//
 	// Utility function for calculating current bit rate
 	void UpdateBitRateInternal(const int64_t& curTime);
 
-	static void* PacketLossPercent(QTSSDictionary* inSession, uint32_t* outLen);
-	static void* TimeConnected(QTSSDictionary* inSession, uint32_t* outLen);
-	static void* CurrentBitRate(QTSSDictionary* inSession, uint32_t* outLen);
+	
 
 	// Create nonce
 	void CreateDigestAuthenticationNonce();
@@ -293,12 +303,12 @@ private:
 	std::string        fRTSPSessLocalAddrStr;
 
 	
-	char        fUserPasswordBuf[RTSPSessionInterface::kMaxUserPasswordLen];
-	char        fUserRealmBuf[RTSPSessionInterface::kMaxUserRealmLen];
+	std::string        fUserPassword;
+	std::string        fUserRealm;
 	uint32_t      fLastRTSPReqRealStatusCode{200};
 
 	//for timing out this session
-	TimeoutTask fTimeoutTask;
+
 	uint32_t      fTimeout;
 
 	// Time when this session got created

@@ -88,7 +88,7 @@ class QTSSModuleUtils
         //
         // 2.   Appends the x-RTP-Meta-Info header to the response, using the proper
         //      fields from the array, as well as the IDs provided in the array
-        static QTSS_Error   AppendRTPMetaInfoHeader( QTSS_RTSPRequestObject inRequest,
+        static QTSS_Error   AppendRTPMetaInfoHeader(RTSPRequest* inRequest,
                                                         StrPtrLen* inRTPMetaInfoHeader,
                                                         RTPMetaInfoPacket::FieldID* inFieldIDArray);
 
@@ -97,7 +97,7 @@ class QTSSModuleUtils
         //
         // It always returns QTSS_RequestFailed.
 
-        static QTSS_Error   SendErrorResponse(  QTSS_RTSPRequestObject inRequest,
+        static QTSS_Error   SendErrorResponse(RTSPRequest* inRequest,
                                                         QTSS_RTSPStatusCode inStatusCode,
                                                         QTSS_AttributeID inTextMessage,
                                                         StrPtrLen* inStringArg = nullptr);
@@ -107,7 +107,7 @@ class QTSSModuleUtils
 		// string
 		// 
 		// It always returns QTSS_RequestFailed
-		static QTSS_Error	SendErrorResponseWithMessage( QTSS_RTSPRequestObject inRequest,
+		static QTSS_Error	SendErrorResponseWithMessage(RTSPRequest* inRequest,
 														QTSS_RTSPStatusCode inStatusCode,
 														StrPtrLen* inErrorMessageStr);
 
@@ -116,7 +116,7 @@ class QTSSModuleUtils
         // Use the QTSS_RTSPStatusCodes for the inStatusCode, for now they are the same as HTTP.
         //
 		// It always returns QTSS_RequestFailed
-        static QTSS_Error	SendHTTPErrorResponse( QTSS_RTSPRequestObject inRequest,
+        static QTSS_Error	SendHTTPErrorResponse(RTSPRequest* inRequest,
 													QTSS_SessionStatusCode inStatusCode,
                                                     bool inKillSession,
                                                     char *errorMessage);
@@ -125,8 +125,8 @@ class QTSSModuleUtils
         //if they want to take advantage of it. Using the SDP data provided in the iovec,
         //this function sends a standard describe response.
         //NOTE: THE FIRST ENTRY OF THE IOVEC MUST BE EMPTY!!!!
-        static void SendDescribeResponse(QTSS_RTSPRequestObject inRequest,
-                                                    QTSS_ClientSessionObject inSession,
+        static void SendDescribeResponse(RTSPRequest* inRequest,
+                                                    RTPSession* inSession,
                                                     iovec* describeData,
                                                     uint32_t inNumVectors,
                                                     uint32_t inTotalLength);
@@ -217,7 +217,7 @@ class QTSSModuleUtils
 
         static bool HavePlayerProfile(QTSS_PrefsObject inPrefObjectToCheck, QTSS_StandardRTSP_Params* inParams, uint32_t feature);
         
-        static QTSS_Error AuthorizeRequest(QTSS_RTSPRequestObject theRTSPRequest, bool allowed, bool haveUser,bool authContinue);
+        static QTSS_Error AuthorizeRequest(RTSPRequest* theRTSPRequest, bool allowed, bool haveUser,bool authContinue);
         
          
     private:

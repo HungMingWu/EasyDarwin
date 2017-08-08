@@ -62,7 +62,7 @@ public:
 	}
 	void clear() { infos.clear(); }
 };
-class RTSPRequestInterface : public QTSSDictionary
+class RTSPRequestInterface
 {
 	//The full local path to the file. This Attribute is first set after the Routing Role has run and before any other role is called. 
 	std::string localPath;
@@ -80,7 +80,7 @@ public:
 
 	//CONSTRUCTOR:
 	RTSPRequestInterface(RTSPSessionInterface *session);
-	~RTSPRequestInterface() override
+	virtual ~RTSPRequestInterface()
 	{
 		if (fMovieFolderPtr != &fMovieFolderPath[0]) delete[] fMovieFolderPtr;
 	}
@@ -122,25 +122,25 @@ public:
 	// QTSS STREAM FUNCTIONS
 
 	// THE FIRST ENTRY OF THE IOVEC MUST BE BLANK!!!
-	QTSS_Error WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten) override;
+	QTSS_Error WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten);
 
 	//Write
 	//A "buffered send" that can be used for sending small chunks of data at a time.
-	QTSS_Error Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t inFlags) override;
+	QTSS_Error Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t inFlags);
 
 	// Flushes all currently buffered data to the network. This either returns
 	// QTSS_NoErr or EWOULDBLOCK. If it returns EWOULDBLOCK, you should wait for
 	// a EV_WR on the socket, and call flush again.
-	QTSS_Error  Flush() override { return fOutputStream->Flush(); }
+	QTSS_Error  Flush() { return fOutputStream->Flush(); }
 
 	// Reads data off the stream. Same behavior as calling RTSPSessionInterface::Read
-	QTSS_Error Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead) override
+	QTSS_Error Read(void* ioBuffer, uint32_t inLength, uint32_t* outLenRead)
 	{
 		return fSession->Read(ioBuffer, inLength, outLenRead);
 	}
 
 	// Requests an event. Same behavior as calling RTSPSessionInterface::RequestEvent
-	QTSS_Error RequestEvent(QTSS_EventType inEventMask) override
+	QTSS_Error RequestEvent(QTSS_EventType inEventMask)
 	{
 		return fSession->RequestEvent(inEventMask);
 	}
@@ -366,9 +366,6 @@ private:
 	static std::string      sPremadeNoHeader;
 
 	static StrPtrLen        sColonSpace;
-
-	//Dictionary support
-	static QTSSAttrInfoDict::AttrInfo   sAttributes[];
 };
 #endif // __RTSPREQUESTINTERFACE_H__
 

@@ -282,7 +282,7 @@ void ReflectorSession::TearDownAllOutputs()
 		fStreamArray[y]->TearDownAllOutputs();
 }
 
-void    ReflectorSession::RemoveSessionFromOutput(QTSS_ClientSessionObject inSession)
+void    ReflectorSession::RemoveSessionFromOutput(RTPSession* inSession)
 {
 	for (uint32_t x = 0; x < fSourceInfo->GetNumStreams(); x++)
 	{

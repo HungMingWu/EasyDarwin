@@ -302,8 +302,7 @@ QTSS_Error RereadPrefs()
 
 QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 {
-	QTSS_RTSPRequestObject  theRTSPRequest = inParams->inRTSPRequest;
-	RTSPRequest *pReq = (RTSPRequest *)inParams->inRTSPRequest;
+	RTSPRequest*  theRTSPRequest = inParams->inRTSPRequest;
 	uint32_t fileErr;
 
 	OSMutexLocker locker(sUserMutex);
@@ -312,18 +311,18 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 		return QTSS_RequestFailed;
 
 	// Get the user profile object from the request object
-	QTSS_UserProfileObject theUserProfile = ((RTSPRequest*)theRTSPRequest)->GetUserProfile();
+	QTSS_UserProfileObject theUserProfile = theRTSPRequest->GetUserProfile();
 
 	bool defaultPaths = true;
 	// Check for a users and groups file in the access file
 	// For this, first get local file path and root movie directory
 	//get the local file path
-	std::string  pathBuffStr(pReq->GetLocalPath());
+	std::string  pathBuffStr(theRTSPRequest->GetLocalPath());
 
 	if (pathBuffStr.empty())
 		return QTSS_RequestFailed;
 	//get the root movie directory
-	boost::string_view   movieRootDirStr = ((RTSPRequest*)theRTSPRequest)->GetRootDir();
+	boost::string_view   movieRootDirStr = theRTSPRequest->GetRootDir();
 	if (movieRootDirStr.empty())
 		return QTSS_RequestFailed;
 	// Now get the access file path
@@ -334,7 +333,7 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	char* groupsFilePath = nullptr;
 
 	// Get the request action from the request object
-	QTSS_ActionFlags action = ((RTSPRequest*)theRTSPRequest)->GetAction();
+	QTSS_ActionFlags action = theRTSPRequest->GetAction();
 
 	// Allocates memory for usersFilePath and groupsFilePath
 	QTSS_AuthScheme authScheme = QTAccessFile::FindUsersAndGroupsFilesAndAuthScheme(accessFilePath, action, &usersFilePath, &groupsFilePath);
@@ -438,11 +437,11 @@ QTSS_Error AuthenticateRTSPRequest(QTSS_RTSPAuth_Params* inParams)
 	if (authScheme == qtssAuthNone)
 	{
 		// Get the authentication scheme from the request object
-		authScheme = ((RTSPRequest *)theRTSPRequest)->GetAuthScheme();
+		authScheme = theRTSPRequest->GetAuthScheme();
 	}
 	else
 	{
-		((RTSPRequest *)theRTSPRequest)->SetAuthScheme(authScheme);
+		theRTSPRequest->SetAuthScheme(authScheme);
 	}
 
 	// Set the qtssUserRealm to the realm value retrieved from the users file

@@ -85,13 +85,13 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         QTSS_RTPTransportType GetTransportType() { return fTransportType; }
         uint32_t      GetStalePacketsDropped()    { return fStalePacketsDropped; }
         uint32_t      GetTotalPacketsRecv()       { return fTotalPacketsRecv; }
-        uint32_t      GetSDPStreamID()            { return fTrackID; } //streamID is trackID
+		void          SetSDPStreamID(uint32_t id) { fTrackID = id; }
 		RTPSessionInterface &GetSession()		{ return *fSession; }
         
         // Setup uses the info in the RTSPRequestInterface to associate
         // all the necessary resources, ports, sockets, etc, etc, with this
         // stream.
-        QTSS_Error Setup(RTSPRequestInterface* request, QTSS_AddStreamFlags inFlags);
+        QTSS_Error Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags);
         
         // Write sends RTP data to the client. Caller must specify
         // either qtssWriteFlagsIsRTP or qtssWriteFlagsIsRTCP
@@ -174,7 +174,10 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
 		
 		uint32_t          GetNumQualityLevels() { return fNumQualityLevels; } 
 		QTSS_RTPPayloadType GetPayLoadType() { return fPayloadType; }
-		
+		void SetPayLoadType(QTSS_RTPPayloadType type) { fPayloadType = type; }
+		uint32_t GetTimeScale() const {	return fTimescale; }
+		float GetBufferDelay() const { return fBufferDelay; }
+		bool isTCP() const { return fIsTCP; }
     private:
         
         enum

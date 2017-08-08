@@ -213,8 +213,8 @@ public:
 
 	ReflectorSocket();
 	~ReflectorSocket() override;
-	void    AddBroadcasterSession(QTSS_ClientSessionObject inSession) { OSMutexLocker locker(this->GetDemuxer()->GetMutex()); fBroadcasterClientSession = inSession; }
-	void    RemoveBroadcasterSession(QTSS_ClientSessionObject inSession) { OSMutexLocker locker(this->GetDemuxer()->GetMutex()); if (inSession == fBroadcasterClientSession) fBroadcasterClientSession = nullptr; }
+	void    AddBroadcasterSession(RTPSession* inSession) { OSMutexLocker locker(this->GetDemuxer()->GetMutex()); fBroadcasterClientSession = inSession; }
+	void    RemoveBroadcasterSession(RTPSession* inSession) { OSMutexLocker locker(this->GetDemuxer()->GetMutex()); if (inSession == fBroadcasterClientSession) fBroadcasterClientSession = nullptr; }
 	void    AddSender(ReflectorSender* inSender);
 	void    RemoveSender(ReflectorSender* inStreamElem);
 	bool  HasSender() { return (this->GetDemuxer()->GetHashTable()->GetNumEntries() > 0); }
@@ -235,7 +235,7 @@ private:
 		kRefreshBroadcastSessionIntervalMilliSecs = 10000,
 		kSSRCTimeOut = 30000 // milliseconds before clearing the SSRC if no new ssrcs have come in
 	};
-	QTSS_ClientSessionObject    fBroadcasterClientSession{nullptr};
+	RTPSession*                  fBroadcasterClientSession{nullptr};
 	int64_t                      fLastBroadcasterTimeOutRefresh{0};
 	// Queue of available ReflectorPackets
 	OSQueue fFreeQueue;

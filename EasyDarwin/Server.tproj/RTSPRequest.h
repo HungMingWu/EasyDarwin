@@ -75,7 +75,7 @@ public:
 	//Arguments:        session: the session this request is on (massive cyclical dependency)
 	RTSPRequest(RTSPSessionInterface* session)
 		: RTSPRequestInterface(session) {}
-	~RTSPRequest() override = default;
+	~RTSPRequest() = default;
 
 	//Parses the request. Returns an error handler if there was an error encountered
 	//in parsing.

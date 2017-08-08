@@ -236,12 +236,12 @@ QTSS_Error  QTSS_Authenticate(  const char* inAuthUserName,
                                 const char* inAuthMoviesDir, 
                                 QTSS_ActionFlags inAuthRequestAction, 
                                 QTSS_AuthScheme inAuthScheme, 
-                                QTSS_RTSPRequestObject ioAuthRequestObject)
+                                RTSPRequest* ioAuthRequestObject)
 {
     return (sCallbacks->addr [kAuthenticateCallback]) (inAuthUserName, inAuthResourceLocalPath, inAuthMoviesDir, inAuthRequestAction, inAuthScheme, ioAuthRequestObject);
 }
 
-QTSS_Error	QTSS_Authorize(QTSS_RTSPRequestObject inAuthRequestObject, char** outAuthRealm, bool* outAuthUserAllowed)
+QTSS_Error	QTSS_Authorize(RTSPRequest* inAuthRequestObject, char** outAuthRealm, bool* outAuthUserAllowed)
 {
     return (sCallbacks->addr [kAuthorizeCallback]) (inAuthRequestObject, outAuthRealm, outAuthUserAllowed);
 }

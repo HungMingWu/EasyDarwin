@@ -392,7 +392,7 @@ QTSS_Error ReflectorStream::BindSockets(QTSS_StandardRTSP_Params* inParams, uint
 	if (inReflectorSessionFlags & ReflectorSession::kIsPushSession)
 		fStreamInfo.fSetupToReceive = true;
 
-	QTSS_RTSPRequestObject inRequest = nullptr;
+	RTSPRequest* inRequest = nullptr;
 	if (inParams != nullptr)
 		inRequest = inParams->inRTSPRequest;
 
@@ -1766,7 +1766,7 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 		{
 			if ((inMilliseconds - fLastBroadcasterTimeOutRefresh) > kRefreshBroadcastSessionIntervalMilliSecs)
 			{
-				((RTPSession*)fBroadcasterClientSession)->RefreshTimeouts();
+				fBroadcasterClientSession->RefreshTimeouts();
 				fLastBroadcasterTimeOutRefresh = inMilliseconds;
 			}
 		}

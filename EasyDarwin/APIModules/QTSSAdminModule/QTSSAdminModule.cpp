@@ -164,7 +164,7 @@ static QTSS_Error Register(QTSS_Register_Params* inParams);
 static QTSS_Error Initialize(QTSS_Initialize_Params* inParams);
 static QTSS_Error FilterRequest(QTSS_Filter_Params* inParams);
 static QTSS_Error RereadPrefs();
-static QTSS_Error AuthorizeAdminRequest(QTSS_RTSPRequestObject request);
+static QTSS_Error AuthorizeAdminRequest(RTSPRequest* request);
 static bool AcceptSession(QTSS_RTSPSessionObject inRTSPSession);
 
 #if !DEBUG_ADMIN_MODULE
@@ -347,9 +347,9 @@ void APITests_DEBUG()
 
 #endif
 
-inline void KeepSession(QTSS_RTSPRequestObject theRequest, bool keep)
+inline void KeepSession(RTSPRequest* theRequest, bool keep)
 {
-	((RTSPRequest *)theRequest)->SetResponseKeepAlive(keep);
+	theRequest->SetResponseKeepAlive(keep);
 }
 
 // FUNCTION IMPLEMENTATIONS
@@ -649,7 +649,7 @@ inline bool HasAuthentication(StringParser *theFullRequestPtr, StrPtrLen* namePt
 	return hasAuthentication;
 }
 
-bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen* passwordPtr)
+bool  Authenticate(RTSPRequest* request, StrPtrLen* namePtr, StrPtrLen* passwordPtr)
 {
 	bool authenticated = true;
 
@@ -666,7 +666,7 @@ bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen
 	}
 
 	// Get the user profile object from the request object that was created in the authenticate callback
-	QTSS_UserProfileObject theUserProfile = ((RTSPRequest*)request)->GetUserProfile();
+	QTSS_UserProfileObject theUserProfile = request->GetUserProfile();
 
 	if (err == QTSS_NoErr) {
 		char* reqPassword = passwordPtr->GetAsCString();
@@ -715,28 +715,27 @@ bool  Authenticate(QTSS_RTSPRequestObject request, StrPtrLen* namePtr, StrPtrLen
 }
 
 
-QTSS_Error AuthorizeAdminRequest(QTSS_RTSPRequestObject request)
+QTSS_Error AuthorizeAdminRequest(RTSPRequest* request)
 {
 	bool allowed = false;
 
 	// get the resource path
 	// if the path does not match the admin path, don't handle the request
-	auto* pReq = (RTSPRequest*)request;
-	std::string resourcePath(pReq->GetLocalPath());
+	std::string resourcePath(request->GetLocalPath());
 
 	if (sAuthResourceLocalPath != resourcePath)
 		return QTSS_NoErr;
 
 	// get the type of request
-	QTSS_ActionFlags action = ((RTSPRequest*)request)->GetAction();
+	QTSS_ActionFlags action = request->GetAction();
 	if (!(action & qtssActionFlagsAdmin))
 		return QTSS_RequestFailed;
 
-	QTSS_UserProfileObject theUserProfile = ((RTSPRequest*)request)->GetUserProfile();
+	QTSS_UserProfileObject theUserProfile = request->GetUserProfile();
 	if (nullptr == theUserProfile)
 		return QTSS_RequestFailed;
 
-	((RTSPRequest*)request)->SetURLRealm({ sAuthRealm, ::strlen(sAuthRealm) });
+	request->SetURLRealm({ sAuthRealm, ::strlen(sAuthRealm) });
 
 	// Authorize the user if the user belongs to the AdministratorGroup (this is an admin module pref)
 	std::vector<std::string> groupsArray = QTSSModuleUtils::GetGroupsArray_Copy(theUserProfile);
@@ -755,7 +754,7 @@ QTSS_Error AuthorizeAdminRequest(QTSS_RTSPRequestObject request)
 	}
 
 	if (!allowed)
-		pReq->SetUserAllow(allowed);
+		request->SetUserAllow(allowed);
 
 	return QTSS_NoErr;
 }
@@ -858,7 +857,7 @@ inline bool InWaitInterval(QTSS_Filter_Params* inParams)
 	return false;
 }
 
-inline void GetQueryData(QTSS_RTSPRequestObject theRequest)
+inline void GetQueryData(RTSPRequest* theRequest)
 {
 	sAdminPtr = new AdminClass();
 	Assert(sAdminPtr != nullptr);
@@ -936,14 +935,14 @@ QTSS_Error FilterRequest(QTSS_Filter_Params* inParams)
 	//check to see if we should handle this request. Invokation is triggered
 	//by a "GET /" request
 
-	QTSS_RTSPRequestObject theRequest = inParams->inRTSPRequest;
+	RTSPRequest* theRequest = inParams->inRTSPRequest;
 
 	uint32_t paramLen;
 	sSessID = ((RTSPSession *)inParams->inRTSPSession)->GetSessionID();
 
 	StrPtrLen theFullRequest;
 	QTSS_Error err = QTSS_NoErr;
-	boost::string_view	theFullRequestV = ((RTSPRequest*)theRequest)->GetFullRequest();
+	boost::string_view	theFullRequestV = theRequest->GetFullRequest();
 	theFullRequest.Set((char *)theFullRequestV.data(), theFullRequestV.length());
 
 	StringParser fullRequest(&theFullRequest);

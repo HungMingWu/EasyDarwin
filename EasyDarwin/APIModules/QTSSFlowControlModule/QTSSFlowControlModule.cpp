@@ -35,6 +35,7 @@
 #include "OSHeaders.h"
 #include "QTSSModuleUtils.h"
 #include "MyAssert.h"
+#include "RTPSession.h"
 
  //Turns on printfs that are useful for debugging
 #define FLOW_CONTROL_DEBUGGING 0
@@ -174,19 +175,6 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	{
 		return QTSS_NoErr;
 	}
-
-#if FLOW_CONTROL_DEBUGGING
-	QTSS_RTPPayloadType* thePayloadType = 0;
-	uint32_t thePayloadLen = 0;
-	(void)QTSS_GetValuePtr(inParams->inRTPStream, qtssRTPStrPayloadType, 0, (void**)&thePayloadType, &thePayloadLen);
-
-	if ((*thePayloadType != 0) && (*thePayloadType == qtssVideoPayloadType))
-		printf("Video track reporting:\n");
-	else if ((*thePayloadType != 0) && (*thePayloadType == qtssAudioPayloadType))
-		printf("Audio track reporting:\n");
-	else
-		printf("Unknown track reporting\n");
-#endif
 
 	//
 	// Find out if this is a qtssRTPTransportTypeUDP. This is the only type of
@@ -377,11 +365,10 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 
 		bool *startedThinningPtr = nullptr;
 		int32_t numThinned = 0;
-		((QTSSDictionary*)inParams->inClientSession)->GetValuePtr(qtssCliSesStartedThinning, 0, (void**)&startedThinningPtr, &theLen);
-		if (false == *startedThinningPtr)
+		if (false == inParams->inClientSession->fStartedThinning)
 		{
 			(void)QTSS_LockObject(sServer);
-			*startedThinningPtr = true;
+			inParams->inClientSession->fStartedThinning = true;
 
 			((QTSSDictionary*)sServer)->GetValue(qtssSvrNumThinned, 0, (void*)&numThinned, &theLen);
 			numThinned++;
@@ -391,7 +378,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 		else if (curQuality == 0)
 		{
 			(void)QTSS_LockObject(sServer);
-			*startedThinningPtr = false;
+			inParams->inClientSession->fStartedThinning = false;
 
 			((QTSSDictionary*)theStream)->GetValue(qtssSvrNumThinned, 0, (void*)&numThinned, &theLen);
 			numThinned--;

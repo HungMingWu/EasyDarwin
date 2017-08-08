@@ -95,7 +95,7 @@ public:
 	//This call can only be made during an RTSP Setup request, and the
 	//RTSPRequestInterface must be provided.
 	//You may also opt to attach a codec name and type to this stream.
-	QTSS_Error  AddStream(RTSPRequestInterface* request, RTPStream** outStream,
+	QTSS_Error  AddStream(RTSPRequest* request, RTPStream** outStream,
 		QTSS_AddStreamFlags inFlags);
 
 	//Reset the thinning params for all streams using the late tolerance value
@@ -112,7 +112,7 @@ public:
 	void            Teardown();
 
 	//Utility functions. Modules aren't required to use these, but can be useful
-	void            SendDescribeResponse(RTSPRequestInterface* request);
+	void            SendDescribeResponse(RTSPRequest* request);
 	void            SendAnnounceResponse(RTSPRequestInterface* request);
 	void            SendPlayResponse(RTSPRequestInterface* request, uint32_t inFlags);
 	void            SendPauseResponse(RTSPRequestInterface* request)
@@ -148,6 +148,7 @@ public:
 	boost::string_view GetUserAgent() const { return userAgent; }
 	void SetRespMsg(boost::string_view msg) { respMsg = std::string(msg); }
 	boost::string_view GetRespMsg() const { return respMsg; }
+	void ResetTimeout(uint32_t timeout);
 private:
 
 	//where timeouts, deletion conditions get processed

@@ -420,7 +420,7 @@ void  RTPStream::SetOverBufferState(RTSPRequestInterface* request)
 	//if any stream turns it off then it is off for all streams
 	//a disable is from either the stream type default or a specific rtsp command to disable
 	if (!enableOverBuffer)
-		fSession->GetOverbufferWindow()->TurnOverbuffering(false);
+		fSession->GetOverbufferWindow()->TurnOffOverbuffering();
 }
 
 QTSS_Error RTPStream::Setup(RTSPRequestInterface* request, QTSS_AddStreamFlags inFlags)
@@ -621,7 +621,7 @@ void RTPStream::SendSetupResponse(RTSPRequestInterface* inRequest)
 	static boost::string_view sHeaderOff("0");
 	if (theRequestedRate > 0)	// the client sent the header and wants a dynamic rate
 	{
-		if (fSession->GetOverbufferWindow()->OverbufferingEnabled())
+		if (*(fSession->GetOverbufferWindow()->OverbufferingEnabledPtr()))
 			inRequest->AppendHeader(qtssXDynamicRateHeader, sHeaderOn); // send 1 if overbuffering is turned on
 		else
 			inRequest->AppendHeader(qtssXDynamicRateHeader, sHeaderOff); // send 0 if overbuffering is turned off
@@ -1055,7 +1055,7 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 	{
 		//
 		// Check to see if this packet is ready to send
-		if (false == fSession->GetOverbufferWindow()->OverbufferingEnabled()) // only force rtcps on time if overbuffering is off
+		if (false == *(fSession->GetOverbufferWindow()->OverbufferingEnabledPtr())) // only force rtcps on time if overbuffering is off
 		{
 			thePacket->suggestedWakeupTime = fSession->GetOverbufferWindow()->CheckTransmitTime(thePacket->packetTransmitTime, theTime, inLen);
 			if (thePacket->suggestedWakeupTime > theTime)

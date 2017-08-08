@@ -413,9 +413,9 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 		theDateBuffer[0] = '\0';
 
 	theLen = sizeof(QTSS_RTSPSessionObject);
-	RTSPSessionInterface *theRTSPSession = (RTSPSessionInterface *)inRTSPSession;
+	QTSS_RTSPSessionObject theRTSPSession = inRTSPSession;
 	if (theRTSPSession == nullptr)
-		theRTSPSession = dict->GetRTSPSession();
+		dict->GetValue(qtssCliSesLastRTSPSession, 0, (void*)&theRTSPSession, &theLen);
 
 	// Get lots of neat info to log from the various dictionaries
 
@@ -424,9 +424,16 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	// the last byte of each array is untouched.
 
 	float* packetLossPercent = nullptr;
+	double* movieDuration = nullptr;
+	uint64_t* movieSizeInBytes = nullptr;
+	uint32_t* movieAverageBitRatePtr = nullptr;
 	uint32_t clientPacketsReceived = 0;
 	uint32_t clientPacketsLost = 0;
 	StrPtrLen* theTransportType = &sUnknownStr;
+	int64_t* theCreateTime = nullptr;
+	int64_t* thePlayTime = nullptr;
+
+	uint32_t startPlayTimeInSecs = 0;
 
 	// First, get networking info from the RTSP session
 	std::string localIPAddr(dict->GetLocalAddr());
@@ -435,22 +442,27 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	std::string remoteAddr(dict->GetRemoteAddr());
 	std::string playerID(dict->GetRemoteAddr());
 
+	uint32_t* rtpBytesSent = nullptr;
+	uint32_t* rtcpBytesRecv = nullptr;
+	uint32_t* rtpPacketsSent = nullptr;
+
 	// Second, get networking info from the Client's session.
 	// (Including the stats for incoming RTCP packets.)
 	char urlBuf[eURLSize] = { 0 };
 	RTPSession *rtpSession = (RTPSession *)inClientSession;
 	std::string url(rtpSession->GetPresentationURL());
 	dict->GetValuePtr(qtssCliSesPacketLossPercent, 0, (void**)&packetLossPercent, &theLen);
-	double movieDuration = dict->GetMovieDuration();
-	uint64_t movieSizeInBytes = dict->GetMovieSizeInBytes();
-	uint32_t movieAverageBitRatePtr = dict->GetMovieAvgBitrate();
-	int64_t theCreateTime = dict->GetSessionCreateTime();
-	int64_t thePlayTime = dict->GetFirstPlayTime();
-	uint32_t rtpBytesSent = dict->GetBytesSent();
-	uint32_t rtpPacketsSent = dict->GetPacketsSent();
-	uint32_t rtcpBytesRecv = dict->GetTotalRTCPBytesRecv();
+	dict->GetValuePtr(qtssCliSesMovieDurationInSecs, 0, (void**)&movieDuration, &theLen);
+	dict->GetValuePtr(qtssCliSesMovieSizeInBytes, 0, (void**)&movieSizeInBytes, &theLen);
+	dict->GetValuePtr(qtssCliSesMovieAverageBitRate, 0, (void**)&movieAverageBitRatePtr, &theLen);
+	dict->GetValuePtr(qtssCliSesCreateTimeInMsec, 0, (void**)&theCreateTime, &theLen);
+	dict->GetValuePtr(qtssCliSesFirstPlayTimeInMsec, 0, (void**)&thePlayTime, &theLen);
+	dict->GetValuePtr(qtssCliSesRTPBytesSent, 0, (void**)&rtpBytesSent, &theLen);
+	dict->GetValuePtr(qtssCliSesRTPPacketsSent, 0, (void**)&rtpPacketsSent, &theLen);
+	dict->GetValuePtr(qtssCliSesRTCPBytesRecv, 0, (void**)&rtcpBytesRecv, &theLen);
 
-	uint32_t startPlayTimeInSecs = (uint32_t)(((theCreateTime - thePlayTime) / 1000) + 0.5);
+	if (theCreateTime != nullptr && thePlayTime != nullptr)
+		startPlayTimeInSecs = (uint32_t)(((*theCreateTime - *thePlayTime) / 1000) + 0.5);
 
 
 	// We need a value of 'c-bytes' to report as a log entry. This is supposed to be the total number
@@ -464,7 +476,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	// sent to the server from the client. If those values are accurate then the above formula will not 
 	// be exactly correct but it will be nearly correct.
 
-	auto clientBytesRecv = (uint32_t)((rtpBytesSent * (100.0 - *packetLossPercent)) / 100.0);
+	auto clientBytesRecv = (uint32_t)((*rtpBytesSent * (100.0 - *packetLossPercent)) / 100.0);
 
 	tempLogStr.Ptr[0] = 0; tempLogStr.Len = eUserAgentSize;
 	std::string userAgentV(((RTPSession *)inClientSession)->GetUserAgent());
@@ -579,7 +591,7 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	// Add the client buffer time to our client start latency (in whole seconds).
 	startPlayTimeInSecs += clientBufferTime;
 
-	if (rtpPacketsSent == 0) // no packets sent
+	if (*rtpPacketsSent == 0) // no packets sent
 		qualityLevel = 0; // no quality
 	else
 	{
@@ -596,17 +608,19 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	//we may not have an RTSP request. Assume that the status code is 504 timeout, if there is an RTSP
 	//request, though, we can find out what the real status code of the response is
 	static uint32_t sTimeoutCode = 504;
-	uint32_t theStatusCode = dict->GetStatusCode();
+	uint32_t* theStatusCode = &sTimeoutCode;
+	theLen = sizeof(uint32_t);
+	dict->GetValuePtr(qtssCliRTSPReqRealStatusCode, 0, (void **)&theStatusCode, &theLen);
 	//  printf("qtssCliRTSPReqRealStatusCode = %"   _U32BITARG_   " \n", *theStatusCode);
 
 
 	if (inCloseReasonPtr) do
 	{
-		if (theStatusCode < 300) // it was a succesful RTSP request but...
+		if (*theStatusCode < 300) // it was a succesful RTSP request but...
 		{
 			if (*inCloseReasonPtr == qtssCliSesCloseTimeout) // there was a timeout
 			{
-				theStatusCode = sTimeoutCode;
+				*theStatusCode = sTimeoutCode;
 				//                  printf(" log timeout ");
 				break;
 			}
@@ -615,29 +629,35 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 			{
 
 				static QTSS_CliSesClosingReason sReason = qtssCliSesCloseClientTeardown;
-				QTSS_CliSesClosingReason theReasonPtr = dict->GetTeardownReason();
+				QTSS_CliSesClosingReason* theReasonPtr = &sReason;
+				theLen = sizeof(QTSS_CliSesTeardownReason);
+				dict->GetValuePtr(qtssCliTeardownReason, 0, (void **)&theReasonPtr, &theLen);
+				//              printf("qtssCliTeardownReason = %"   _U32BITARG_   " \n", *theReasonPtr);
 
-				if (theReasonPtr == qtssCliSesTearDownClientRequest) //  the client asked for a tear down
+				if (*theReasonPtr == qtssCliSesTearDownClientRequest) //  the client asked for a tear down
 				{
 					//                  printf(" client requests teardown  ");
 					break;
 				}
 
-				if (theReasonPtr == qtssCliSesTearDownUnsupportedMedia) //  An error occured while streaming the file.
+				if (*theReasonPtr == qtssCliSesTearDownUnsupportedMedia) //  An error occured while streaming the file.
 				{
-					theStatusCode = 415;
+					*theStatusCode = 415;
 					//                      printf(" log UnsupportedMedia ");
 					break;
 				}
-				if (theReasonPtr == qtssCliSesTearDownBroadcastEnded) //  a broadcaster stopped broadcasting
+				if (*theReasonPtr == qtssCliSesTearDownBroadcastEnded) //  a broadcaster stopped broadcasting
 				{
-					theStatusCode = 452;
+					*theStatusCode = 452;
 					//                      printf(" log broadcast removed ");
 					break;
 				}
 
-				theStatusCode = 500; // some unknown reason for cancelling the connection
+				*theStatusCode = 500; // some unknown reason for cancelling the connection
 			}
+
+			//          printf("return status ");
+						// just use the qtssCliRTSPReqRealStatusCode for the reason
 		}
 
 	} while (false);
@@ -718,12 +738,12 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", startPlayTimeInSecs);  //c-starttime 
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", (uint32_t)(QTSS_MilliSecsTo1970Secs(curTime)
-		- QTSS_MilliSecsTo1970Secs(theCreateTime)));   //x-duration* 
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", theCreateTime == nullptr ? (uint32_t)0 : (uint32_t)(QTSS_MilliSecsTo1970Secs(curTime)
+		- QTSS_MilliSecsTo1970Secs(*theCreateTime)));   //x-duration* 
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%" _S32BITARG_ " ", (uint32_t)1);  //c-rate
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%" _S32BITARG_ " ", theStatusCode);   //c-status*
+	sprintf(tempLogBuffer, "%" _S32BITARG_ " ", *theStatusCode);   //c-status*
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%s ", (playerID.empty() == '\0') ? sVoidField : playerID.c_str());   //c-playerid*
 	::strcat(logBuffer, tempLogBuffer);
@@ -739,11 +759,11 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%s ", (playerCPUBuf[0] == '\0') ? sVoidField : playerCPUBuf); //c-cpu*
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%0.0f ", movieDuration); //filelength in secs*
+	sprintf(tempLogBuffer, "%0.0f ", movieDuration == nullptr ? zeroFloat : *movieDuration); //filelength in secs*
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%" _64BITARG_ "d ", movieSizeInBytes); //filesize in bytes*
+	sprintf(tempLogBuffer, "%" _64BITARG_ "d ", movieSizeInBytes == nullptr ? zerouint64_t : *movieSizeInBytes); //filesize in bytes*
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", movieAverageBitRatePtr);    //avgbandwidth in bits per second
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", movieAverageBitRatePtr == nullptr ? (uint32_t)0 : *movieAverageBitRatePtr);    //avgbandwidth in bits per second
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%s ", "RTP"); //protocol
 	::strcat(logBuffer, tempLogBuffer);
@@ -753,13 +773,13 @@ QTSS_Error LogRequest(QTSS_ClientSessionObject inClientSession,
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%s ", (videoPayloadName.Ptr[0] == '\0') ? sVoidField : videoPayloadName.Ptr); //videocodec*
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtpBytesSent);    //sc-bytes*
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtpBytesSent == nullptr ? (uint32_t)0 : *rtpBytesSent);    //sc-bytes*
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtcpBytesRecv);    //cs-bytes*
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtcpBytesRecv == nullptr ? (uint32_t)0 : *rtcpBytesRecv);    //cs-bytes*
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", clientBytesRecv);  //c-bytes
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtpPacketsSent);   //s-pkts-sent*
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", rtpPacketsSent == nullptr ? (uint32_t)0 : *rtpPacketsSent);   //s-pkts-sent*
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", clientPacketsReceived);    //c-pkts-recieved
 	::strcat(logBuffer, tempLogBuffer);

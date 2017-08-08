@@ -35,7 +35,7 @@
 #include "OSHeaders.h"
 #include "QTSSModuleUtils.h"
 #include "MyAssert.h"
-#include "RTPSession.h"
+
  //Turns on printfs that are useful for debugging
 #define FLOW_CONTROL_DEBUGGING 0
 
@@ -375,12 +375,13 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 		}
 
 
+		bool *startedThinningPtr = nullptr;
 		int32_t numThinned = 0;
-		bool startedThinningPtr = ((RTPSession*)inParams->inClientSession)->fStartedThinning;
-		if (false == startedThinningPtr)
+		((QTSSDictionary*)inParams->inClientSession)->GetValuePtr(qtssCliSesStartedThinning, 0, (void**)&startedThinningPtr, &theLen);
+		if (false == *startedThinningPtr)
 		{
 			(void)QTSS_LockObject(sServer);
-			((RTPSession*)inParams->inClientSession)->fStartedThinning = true;
+			*startedThinningPtr = true;
 
 			((QTSSDictionary*)sServer)->GetValue(qtssSvrNumThinned, 0, (void*)&numThinned, &theLen);
 			numThinned++;
@@ -390,7 +391,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 		else if (curQuality == 0)
 		{
 			(void)QTSS_LockObject(sServer);
-			((RTPSession*)inParams->inClientSession)->fStartedThinning = false;
+			*startedThinningPtr = false;
 
 			((QTSSDictionary*)theStream)->GetValue(qtssSvrNumThinned, 0, (void*)&numThinned, &theLen);
 			numThinned--;

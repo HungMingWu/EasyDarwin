@@ -470,15 +470,38 @@ enum
 {
     //QTSS_ClientSessionObject parameters. All of these are preemptive safe
     
+    qtssCliSesCreateTimeInMsec      = 1,    //read      //QTSS_TimeVal  //Time in milliseconds the session was created.
+    qtssCliSesFirstPlayTimeInMsec   = 2,    //read      //QTSS_TimeVal  //Time in milliseconds the first QTSS_Play call was issued.
+    qtssCliSesPlayTimeInMsec        = 3,    //read      //QTSS_TimeVal  //Time in milliseconds the most recent play was issued.
+    qtssCliSesAdjustedPlayTimeInMsec= 4,    //read      //QTSS_TimeVal  //Private - do not use
+    qtssCliSesRTPBytesSent          = 5,    //read      //uint32_t        //Number of RTP bytes sent so far on this session.
+    qtssCliSesRTPPacketsSent        = 6,    //read      //uint32_t        //Number of RTP packets sent so far on this session.
+    qtssCliSesState                 = 7,    //read      //QTSS_RTPSessionState // State of this session: is it paused or playing currently?
+  
+    qtssCliSesMovieDurationInSecs   = 10,   //r/w       //Float64       //Duration of the movie for this session in seconds. This will default to 0 unless set by a module.
+    qtssCliSesMovieSizeInBytes      = 11,   //r/w       //uint64_t        //Movie size in bytes. This will default to 0 unless explictly set by a module
+    qtssCliSesMovieAverageBitRate   = 12,   //r/w       //uint32_t        //average bits per second based on total RTP bits/movie duration. This will default to 0 unless explictly set by a module.
+    qtssCliSesLastRTSPSession       = 13,   //read      //QTSS_RTSPSessionObject //Private
+
     qtssCliRTSPSesUserPassword      = 20,   //read      //char array        // from the most recent (last) request.
     qtssCliRTSPSesURLRealm          = 21,   //read      //char array        // from the most recent (last) request.
     
+    qtssCliRTSPReqRealStatusCode    = 22,   //read      //uint32_t            //Same as qtssRTSPReqRTSPReqRealStatusCode, the status from the most recent (last) request.
+    qtssCliTeardownReason           = 23,   //r/w       //QTSS_CliSesTeardownReason // Must be set by a module that calls QTSS_Teardown if it is not a client requested disconnect.
+
     qtssCliSesCurrentBitRate        = 26,   //read      //uint32_t    //Current bit rate of all the streams on this session. This is not an average. In bits per second.
     qtssCliSesPacketLossPercent     = 27,   //read      //Float32   //Current percent loss as a fraction. .5 = 50%. This is not an average.
     qtssCliSesTimeConnectedInMsec   = 28,   //read      //int64_t    //Time in milliseconds that this client has been connected.
+    qtssCliSesCounterID             = 29,   //read      //uint32_t    //A unique, non-repeating ID for this session.
     
+    qtssCliSesFramesSkipped         = 31,   //r/w       //uint32_t    //Modules can set this to be the number of frames skipped for this client
     qtssCliSesTimeoutMsec            = 32,    //r/w        //uint32_t    // client session timeout in milliseconds refreshed by RefreshTimeout API call or any rtcp or rtp packet on the session.
+    qtssCliSesOverBufferEnabled     = 33,   //read      //bool    // client overbuffers using dynamic rate streams
+    qtssCliSesRTCPPacketsRecv       = 34,   //read      //uint32_t    //Number of RTCP packets received so far on this session.
+    qtssCliSesRTCPBytesRecv         = 35,   //read      //uint32_t    //Number of RTCP bytes received so far on this session.
+    qtssCliSesStartedThinning       = 36,   //read      //bool    // At least one of the streams in the session is thinned
 
+	qtssCliSessLastRTSPBandwidth    = 37,   //read      //uint32_t    // The last RTSP Bandwidth header value received from the client.
     qtssCliSesNumParams             = 38
     
 };

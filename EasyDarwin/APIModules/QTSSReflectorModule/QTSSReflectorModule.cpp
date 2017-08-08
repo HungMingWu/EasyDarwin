@@ -1468,7 +1468,7 @@ ReflectorSession* FindOrCreateSession(StrPtrLen* inName, QTSS_StandardRTSP_Param
 
 	// Turn off overbuffering if the "disable_overbuffering" pref says so
 	if (sDisableOverbuffering)
-		((RTPSession *)inParams->inClientSession)->SetOverBufferEnabled(sFalse);
+		(void)QTSS_SetValue(inParams->inClientSession, qtssCliSesOverBufferEnabled, 0, &sFalse, sizeof(sFalse));
 
 	return theSession;
 }
@@ -1709,7 +1709,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	RTSPRequest *dict = (RTSPRequest *)inParams->inRTSPRequest;
 	int32_t canDynamicRate = dict->GetDynamicRateState();
 	if (canDynamicRate < 1) // -1 no rate field, 0 off
-		((RTPSession*)inParams->inClientSession)->SetOverBufferEnabled(sFalse);
+		(void)QTSS_SetValue(inParams->inClientSession, qtssCliSesOverBufferEnabled, 0, &sFalse, sizeof(sFalse));
 
 	// Place the stream cookie in this stream for future reference
 	void* theStreamCookie = theSession->GetStreamCookie(theTrackID);
@@ -1838,7 +1838,7 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 		// interleaving the data over TCP. This must be set before calling QTSS_Play so the
 		// server can use it from within QTSS_Play
 		uint32_t bitsPerSecond = inSession->GetBitRate();
-		((RTPSession *)inParams->inClientSession)->SetMovieAvgBitrate(bitsPerSecond);
+		(void)QTSS_SetValue(inParams->inClientSession, qtssCliSesMovieAverageBitRate, 0, &bitsPerSecond, sizeof(bitsPerSecond));
 
 		if (sPlayResponseRangeHeader)
 		{

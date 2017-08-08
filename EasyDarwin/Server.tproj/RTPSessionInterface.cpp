@@ -44,21 +44,21 @@ unsigned int            RTPSessionInterface::sRTPSessionIDCounter = 0;
 QTSSAttrInfoDict::AttrInfo  RTPSessionInterface::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
 	/* 0  */ {},
-	/* 1  */ {},
-	/* 2  */ {},
-	/* 3  */ {},
-	/* 4  */ {},
-	/* 5  */ {},
-	/* 6  */ {},
-	/* 7  */ {},
-	/* 8  */ {},
-	/* 9  */ {},
-	/* 10 */ {},
-	/* 11 */ {},
-	/* 12 */ {},
-	/* 13 */ {} ,
-	/* 14 */ {} ,
-	/* 15 */ {},
+	/* 1  */ { "qtssCliSesCreateTimeInMsec",        nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 2  */ { "qtssCliSesFirstPlayTimeInMsec",     nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 3  */ { "qtssCliSesPlayTimeInMsec",          nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 4  */ { "qtssCliSesAdjustedPlayTimeInMsec",  nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 5  */ { "qtssCliSesRTPBytesSent",            nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 6  */ { "qtssCliSesRTPPacketsSent",          nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 7  */ { "qtssCliSesState",                   nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 8  */ { "qtssCliSesPresentationURL",         nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 9  */ { "qtssCliSesFirstUserAgent",          nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 10 */ { "qtssCliStrMovieDurationInSecs",     nullptr,   qtssAttrDataTypeFloat64,        qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 11 */ { "qtssCliStrMovieSizeInBytes",        nullptr,   qtssAttrDataTypeuint64_t,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 12 */ { "qtssCliSesMovieAverageBitRate",     nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
+	/* 13 */ { "qtssCliSesLastRTSPSession",         nullptr,   qtssAttrDataTypeQTSS_Object,    qtssAttrModeRead | qtssAttrModePreempSafe } ,
+	/* 14 */ { "qtssCliSesFullURL",                 nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe } ,
+	/* 15 */ { "qtssCliSesHostName",                nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
 
 	/* 16 */ {},
 	/* 17 */ {},
@@ -66,23 +66,23 @@ QTSSAttrInfoDict::AttrInfo  RTPSessionInterface::sAttributes[] =
 	/* 19 */ {},
 	/* 20 */ { "qtssCliRTSPSesUserPassword",        nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 21 */ { "qtssCliRTSPSesURLRealm",            nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 22 */ {},
-	/* 23 */ {},
+	/* 22 */ { "qtssCliRTSPReqRealStatusCode",      nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 23 */ { "qtssCliTeardownReason",             nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite },
 	/* 24 */ {},
 	/* 25 */ {},
 
 	/* 26 */ { "qtssCliSesCurrentBitRate",          CurrentBitRate,     qtssAttrDataTypeUInt32,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 27 */ { "qtssCliSesPacketLossPercent",       PacketLossPercent,  qtssAttrDataTypeFloat32, qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 28 */ { "qtssCliSesTimeConnectedinMsec",     TimeConnected,      qtssAttrDataTypeint64_t,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 29 */ {},
+	/* 29 */ { "qtssCliSesCounterID",               nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 30 */ {},
-	/* 31 */ {},
+	/* 31 */ { "qtssCliSesFramesSkipped",           nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
 	/* 32 */ { "qtssCliSesTimeoutMsec", 			nullptr, 	qtssAttrDataTypeUInt32,		qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 33 */ {},
-	/* 34 */ {},
-	/* 35 */ {},
-	/* 36 */ {},
-	/* 37 */ {}
+	/* 33 */ { "qtssCliSesOverBufferEnabled",       nullptr, 	qtssAttrDataTypeBool16,		qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
+	/* 34 */ { "qtssCliSesRTCPPacketsRecv",         nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 35 */ { "qtssCliSesRTCPBytesRecv",           nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 36 */ { "qtssCliSesStartedThinning",         nullptr, 	qtssAttrDataTypeBool16,		qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
+	/* 37 */ { "qtssCliSessLastRTSPBandwidth",      nullptr, 	qtssAttrDataTypeUInt32,		qtssAttrModeRead | qtssAttrModePreempSafe }
 };
 
 void    RTPSessionInterface::Initialize()
@@ -120,10 +120,37 @@ RTPSessionInterface::RTPSessionInterface()
 	// Setup all dictionary attribute values
 
 	// Make sure the dictionary knows about our preallocated memory for the RTP stream array
+
+	this->SetVal(qtssCliSesCreateTimeInMsec, &fSessionCreateTime, sizeof(fSessionCreateTime));
+	this->SetVal(qtssCliSesFirstPlayTimeInMsec, &fFirstPlayTime, sizeof(fFirstPlayTime));
+	this->SetVal(qtssCliSesPlayTimeInMsec, &fPlayTime, sizeof(fPlayTime));
+	this->SetVal(qtssCliSesAdjustedPlayTimeInMsec, &fAdjustedPlayTime, sizeof(fAdjustedPlayTime));
+	this->SetVal(qtssCliSesRTPBytesSent, &fBytesSent, sizeof(fBytesSent));
+	this->SetVal(qtssCliSesRTPPacketsSent, &fPacketsSent, sizeof(fPacketsSent));
+	this->SetVal(qtssCliSesState, &fState, sizeof(fState));
+	this->SetVal(qtssCliSesMovieDurationInSecs, &fMovieDuration, sizeof(fMovieDuration));
+	this->SetVal(qtssCliSesMovieSizeInBytes, &fMovieSizeInBytes, sizeof(fMovieSizeInBytes));
+	this->SetVal(qtssCliSesLastRTSPSession, &fRTSPSession, sizeof(fRTSPSession));
+	this->SetVal(qtssCliSesMovieAverageBitRate, &fMovieAverageBitRate, sizeof(fMovieAverageBitRate));
+
 	this->SetEmptyVal(qtssCliRTSPSesUserPassword, &fUserPasswordBuf[0], RTSPSessionInterface::kMaxUserPasswordLen);
 	this->SetEmptyVal(qtssCliRTSPSesURLRealm, &fUserRealmBuf[0], RTSPSessionInterface::kMaxUserRealmLen);
 
+	this->SetVal(qtssCliRTSPReqRealStatusCode, &fLastRTSPReqRealStatusCode, sizeof(fLastRTSPReqRealStatusCode));
+
+	this->SetVal(qtssCliTeardownReason, &fTeardownReason, sizeof(fTeardownReason));
+	//   this->SetVal(qtssCliSesCurrentBitRate, &fMovieCurrentBitRate, sizeof(fMovieCurrentBitRate));
+	this->SetVal(qtssCliSesCounterID, &fUniqueID, sizeof(fUniqueID));
+	this->SetVal(qtssCliSesFramesSkipped, &fFramesSkipped, sizeof(fFramesSkipped));
+	this->SetVal(qtssCliSesRTCPPacketsRecv, &fTotalRTCPPacketsRecv, sizeof(fTotalRTCPPacketsRecv));
+	this->SetVal(qtssCliSesRTCPBytesRecv, &fTotalRTCPBytesRecv, sizeof(fTotalRTCPBytesRecv));
+
 	this->SetVal(qtssCliSesTimeoutMsec, &fTimeout, sizeof(fTimeout));
+
+	this->SetVal(qtssCliSesOverBufferEnabled, this->GetOverbufferWindow()->OverbufferingEnabledPtr(), sizeof(bool));
+	this->SetVal(qtssCliSesStartedThinning, &fStartedThinning, sizeof(bool));
+
+	this->SetVal(qtssCliSessLastRTSPBandwidth, &fLastRTSPBandwidthHeaderBits, sizeof(fLastRTSPBandwidthHeaderBits));
 }
 
 void RTPSessionInterface::SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,

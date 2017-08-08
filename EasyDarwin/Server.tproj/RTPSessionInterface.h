@@ -103,9 +103,7 @@ public:
 	OSRef*      GetRef() { return &fRTPMapElem; }
 	RTSPSessionInterface* GetRTSPSession() { return fRTSPSession; }
 	uint32_t      GetMovieAvgBitrate() { return fMovieAverageBitRate; }
-	void SetMovieAvgBitrate(uint32_t average) { fMovieAverageBitRate = average; }
 	QTSS_CliSesTeardownReason GetTeardownReason() { return fTeardownReason; }
-	void SetTeardownReason(QTSS_CliSesTeardownReason reason) { fTeardownReason = reason; }
 	QTSS_RTPSessionState    GetSessionState() { return fState; }
 	void    SetUniqueID(uint32_t theID) { fUniqueID = theID; }
 	uint32_t  GetUniqueID() { return fUniqueID; }
@@ -198,11 +196,11 @@ public:
 	uint32_t          GetTotalRTCPPacketsRecv() { return fTotalRTCPPacketsRecv; }
 	void            IncrTotalRTCPBytesRecv(uint16_t cnt) { fTotalRTCPBytesRecv += cnt; }
 	uint32_t          GetTotalRTCPBytesRecv() { return fTotalRTCPBytesRecv; }
-	uint64_t      GetMovieSizeInBytes() const { return fMovieSizeInBytes; }
-	void          SetLastRTSPBandwithBits(uint32_t value) { fLastRTSPBandwidthHeaderBits = value; }
+
+	uint32_t          GetLastRTSPBandwithBits() { return fLastRTSPBandwidthHeaderBits; }
 	uint32_t          GetCurrentMovieBitRate() { return fMovieCurrentBitRate; }
 
-	uint32_t          GetMaxBandwidthBits() { uint32_t maxRTSP = fLastRTSPBandwidthHeaderBits;  return  maxRTSP; }
+	uint32_t          GetMaxBandwidthBits() { uint32_t maxRTSP = GetLastRTSPBandwithBits();  return  maxRTSP; }
 	boost::string_view GetSessionID() const { return fRTSPSessionID; }
 	std::vector<RTPStream*> GetStreams()  { return fStreamBuffer; }
 	void SetUserName(boost::string_view name) { fUserName = std::string(name); }
@@ -213,10 +211,6 @@ public:
 	boost::string_view GetLocalAddr() const { return fRTSPSessLocalAddrStr; }
 	void SetRemoteAddr(boost::string_view remote) {	fRTSPSessRemoteAddrStr = std::string(fRTSPSessRemoteAddrStr); }
 	boost::string_view GetRemoteAddr() const { return fRTSPSessRemoteAddrStr; }
-	void SetStatusCode(uint32_t code) { fLastRTSPReqRealStatusCode = code; }
-	uint32_t GetStatusCode() const { return fLastRTSPReqRealStatusCode; }
-	double GetMovieDuration() const { return fMovieDuration; }
-	void SetOverBufferEnabled(bool turned) { GetOverbufferWindow()->TurnOverbuffering(turned); }
 protected:
 	// These variables are setup by the derived RTPSession object when
 	// Play and Pause get called

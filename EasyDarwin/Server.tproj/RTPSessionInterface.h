@@ -52,12 +52,9 @@
 class RTSPRequestInterface;
 
 
-class RTPSessionInterface : public QTSSDictionary, public Task
+class RTPSessionInterface : public Task
 {
 public:
-
-	// Initializes dictionary resources
-	static void Initialize();
 
 	//
 	// CONSTRUCTOR / DESTRUCTOR
@@ -342,8 +339,6 @@ private:
 	RTPBandwidthTracker fTracker;
 	RTPOverbufferWindow fOverbufferWindow;
 
-	// Built in dictionary attributes
-	static QTSSAttrInfoDict::AttrInfo   sAttributes[];
 	static unsigned int sRTPSessionIDCounter;
 
 	// Authentication information that needs to be kept around

@@ -206,7 +206,6 @@ bool QTSServer::Initialize(XMLPrefsParser* inPrefsSource, PrefsSource* inMessage
 	HTTPSessionInterface::Initialize();
 
 	RTSPSessionInterface::Initialize();
-	RTPSessionInterface::Initialize();
 	RTSPSession::Initialize();
 	QTSSFile::Initialize();
 	QTSSUserProfile::Initialize();

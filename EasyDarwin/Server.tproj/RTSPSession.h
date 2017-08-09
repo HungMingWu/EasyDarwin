@@ -115,7 +115,7 @@ public:
 	inline boost::optional<boost::any> getAttribute(boost::string_view key) {
 		return attr.getAttribute(key);
 	}
-	inline void remoteAttribute(boost::string_view key) {
+	inline void removeAttribute(boost::string_view key) {
 		attr.removeAttribute(key);
 	}
 private:

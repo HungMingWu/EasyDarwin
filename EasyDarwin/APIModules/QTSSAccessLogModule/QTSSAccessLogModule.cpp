@@ -54,6 +54,7 @@ class QTSSAccessLog;
 class LogCheckTask;
 
 // STATIC DATA
+static boost::string_view        sLoggedAuthorizationName = "QTSSAccessLogModuleLoggedAuthorization";
 
 // Default values for preferences
 static bool   sDefaultLogEnabled = true;
@@ -66,8 +67,6 @@ static uint32_t   sDefaultRollInterval = 7;
 static char*    sVoidField = "-";
 static bool   sStartedUp = false;
 static bool   sDefaultLogTimeInGMT = true;
-
-static QTSS_AttributeID sLoggedAuthorizationAttrID = qtssIllegalAttrID;
 
 // Current values for preferences
 static bool   sLogEnabled = true;
@@ -193,11 +192,6 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 	static char* sModuleName = "QTSSAccessLogModule";
 	::strcpy(inParams->outModuleName, sModuleName);
 
-	static char*        sLoggedAuthorizationName = "QTSSAccessLogModuleLoggedAuthorization";
-
-	(void)QTSS_AddStaticAttribute(qtssClientSessionObjectType, sLoggedAuthorizationName, nullptr, qtssAttrDataTypeUInt32);
-	(void)QTSS_IDForAttr(qtssClientSessionObjectType, sLoggedAuthorizationName, &sLoggedAuthorizationAttrID);
-
 	return QTSS_NoErr;
 }
 
@@ -273,10 +267,10 @@ QTSS_Error PostProcess(QTSS_StandardRTSP_Params* inParams)
 	if ((theStatus == 401) || (theStatus == 403))
 	{
 		LogRequest(inParams->inClientSession, nullptr, &theReason);
-		(void)QTSS_SetValue(inParams->inClientSession, sLoggedAuthorizationAttrID, 0, &theStatus, sizeof(theStatus));
+		inParams->inClientSession->addAttribute(sLoggedAuthorizationName, theStatus);
 	}
 	else
-		(void)QTSS_SetValue(inParams->inClientSession, sLoggedAuthorizationAttrID, 0, &sZero, sizeof(sZero));
+		inParams->inClientSession->addAttribute(sLoggedAuthorizationName, sZero);
 
 	return QTSS_NoErr;
 }
@@ -389,9 +383,8 @@ QTSS_Error LogRequest(RTPSession* inClientSession,
 	// the case, we've logged that already, let's not log it twice
 
 	uint32_t theLen = 0;
-	uint32_t* authorizationFailed = nullptr;
-	inClientSession->GetValuePtr(sLoggedAuthorizationAttrID, 0, (void**)&authorizationFailed, &theLen);
-	if ((authorizationFailed != nullptr) && (*authorizationFailed > 0))
+	auto opt = inClientSession->getAttribute(sLoggedAuthorizationName);
+	if (opt && boost::any_cast<uint32_t>(opt.value()) > 0)
 		return QTSS_NoErr;
 
 	///inClientSession should never be NULL

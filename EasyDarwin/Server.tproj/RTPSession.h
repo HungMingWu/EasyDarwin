@@ -45,6 +45,7 @@
 #ifndef _RTPSESSION_H_
 #define _RTPSESSION_H_
 
+#include "Attributes.h"
 #include "RTPSessionInterface.h"
 #include "RTSPRequestInterface.h"
 #include "RTPStream.h"
@@ -149,8 +150,17 @@ public:
 	void SetRespMsg(boost::string_view msg) { respMsg = std::string(msg); }
 	boost::string_view GetRespMsg() const { return respMsg; }
 	void ResetTimeout(uint32_t timeout);
+	inline void addAttribute(boost::string_view key, boost::any value) {
+		attr.addAttribute(key, value);
+	}
+	inline boost::optional<boost::any> getAttribute(boost::string_view key) {
+		return attr.getAttribute(key);
+	}
+	inline void removeAttribute(boost::string_view key) {
+		attr.removeAttribute(key);
+	}
 private:
-
+	Attributes attr;
 	//where timeouts, deletion conditions get processed
 	int64_t  Run() override;
 

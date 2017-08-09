@@ -94,8 +94,7 @@ static void PrintfStrPtrLen(StrPtrLen *splRequest)
 #endif
 
 // hack stuff
-static char*                    sBroadcasterSessionName = "QTSSReflectorModuleBroadcasterSession";
-static QTSS_AttributeID         sClientBroadcastSessionAttr = qtssIllegalAttrID;
+static boost::string_view                    sBroadcasterSessionName = "QTSSReflectorModuleBroadcasterSession";
 
 static StrPtrLen    sVideoStr("video");
 static StrPtrLen    sAudioStr("audio");
@@ -173,7 +172,6 @@ RTSPSession::RTSPSession(bool doReportHTTPConnectionAddress)
 	fLastRTPSessionIDPtr.Set(fLastRTPSessionID, 0);
 	Assert(fLastRTPSessionIDPtr.Ptr == &fLastRTPSessionID[0]);
 
-	(void)QTSS_IDForAttr(qtssClientSessionObjectType, sBroadcasterSessionName, &sClientBroadcastSessionAttr);
 }
 
 RTSPSession::~RTSPSession()
@@ -611,9 +609,7 @@ int64_t RTSPSession::Run()
 						break;
 					}
 
-					void* theSession = nullptr;
-					uint32_t theLen = sizeof(theSession);
-					if (QTSS_NoErr == fRTPSession->GetValue(sClientBroadcastSessionAttr, 0, &theSession, &theLen))
+					if (fRTPSession->getAttribute(sBroadcasterSessionName))
 					{
 						fRequest->SetAction(qtssActionFlagsWrite); // an incoming broadcast session
 						break;
@@ -1645,8 +1641,6 @@ void RTSPSession::SetupRequest()
 
 	if (fRTPSession != nullptr)
 	{
-		OSMutexLocker locker(fRTPSession->GetMutex());
-
 		fRTPSession->RefreshTimeout();
 		uint32_t headerBits = fRequest->GetBandwidthHeaderBits();
 		if (headerBits != 0)
@@ -1717,7 +1711,6 @@ void RTSPSession::SetupRequest()
 		// refresh RTP session timeout so that it's kept alive in sync with the RTSP session.
 		if (fRequest->GetLateToleranceInSec() != -1)
 		{
-			OSMutexLocker locker(fRTPSession->GetMutex());
 			fRTPSession->SetStreamThinningParams(fRequest->GetLateToleranceInSec());
 			fRequest->SendHeader();
 			return;
@@ -1745,8 +1738,6 @@ void RTSPSession::SetupRequest()
 			return;
 	}
 
-
-	OSMutexLocker locker(fRTPSession->GetMutex());
 	uint32_t headerBits = fRequest->GetBandwidthHeaderBits();
 	if (headerBits != 0)
 		fRTPSession->SetLastRTSPBandwithBits(headerBits);
@@ -2085,7 +2076,6 @@ void RTSPSession::HandleIncomingDataPacket()
 
 	StrPtrLen packetWithoutHeaders(fInputStream.GetRequestBuffer()->Ptr + 4, fInputStream.GetRequestBuffer()->Len - 4);
 
-	OSMutexLocker locker(fRTPSession->GetMutex());
 	fRTPSession->RefreshTimeout();
 	RTPStream* theStream = fRTPSession->FindRTPStreamForChannelNum(packetChannel);
 	theStream->ProcessIncomingInterleavedData(packetChannel, this, &packetWithoutHeaders);

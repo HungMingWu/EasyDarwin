@@ -424,7 +424,6 @@ QTSS_Error LogRequest(RTPSession* inClientSession,
 
 	uint32_t clientPacketsReceived = 0;
 	uint32_t clientPacketsLost = 0;
-	StrPtrLen* theTransportType = &sUnknownStr;
 
 	// First, get networking info from the RTSP session
 	std::string localIPAddr(inClientSession->GetLocalAddr());
@@ -518,7 +517,6 @@ QTSS_Error LogRequest(RTPSession* inClientSession,
 	uint32_t qualityLevel = 0;
 	uint32_t clientBufferTime = 0;
 	uint32_t theStreamIndex = 0;
-	bool* isTCPPtr = nullptr;
 	QTSS_RTPStreamObject theRTPStreamObject = nullptr;
 
 	for (auto theRTPStreamObject : rtpSession->GetStreams())
@@ -537,20 +535,6 @@ QTSS_Error LogRequest(RTPSession* inClientSession,
 			videoPayloadName = dict->GetPayloadName();
 		else if (thePayloadType == qtssAudioPayloadType)
 			audioPayloadName = dict->GetPayloadName();
-
-		// If any one of the streams is being delivered over UDP instead of TCP,
-		// report in the log that the transport type for this session was UDP.
-		if (isTCPPtr == nullptr)
-		{
-			dict->GetValuePtr(qtssRTPStrIsTCP, 0, (void**)&isTCPPtr, &theLen);
-			if (isTCPPtr != nullptr)
-			{
-				if (*isTCPPtr == false)
-					theTransportType = &sUDPStr;
-				else
-					theTransportType = &sTCPStr;
-			}
-		}
 
 		float clientBufferTimePtr = dict->GetBufferDelay();
 		if (clientBufferTimePtr != 0)
@@ -732,8 +716,6 @@ QTSS_Error LogRequest(RTPSession* inClientSession,
 	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", movieAverageBitRatePtr);    //avgbandwidth in bits per second
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%s ", "RTP"); //protocol
-	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%s ", (theTransportType->Ptr[0] == '\0') ? sVoidField : theTransportType->Ptr);   //transport
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%s ", (audioPayloadName.empty()) ? sVoidField : audioPayloadName.data()); //audiocodec*
 	::strcat(logBuffer, tempLogBuffer);

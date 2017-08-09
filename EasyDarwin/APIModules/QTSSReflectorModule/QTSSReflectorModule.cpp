@@ -63,10 +63,10 @@ using namespace std;
 #endif
 
 static char*        sBroadcasterSessionName = "QTSSReflectorModuleBroadcasterSession";
+static boost::string_view       sStreamCookieName = "QTSSReflectorModuleStreamCookie";
 // ATTRIBUTES
 static QTSS_AttributeID         sOutputAttr = qtssIllegalAttrID;
 static QTSS_AttributeID         sSessionAttr = qtssIllegalAttrID;
-static QTSS_AttributeID         sStreamCookieAttr = qtssIllegalAttrID;
 static QTSS_AttributeID         sBufferOffsetAttr = qtssIllegalAttrID;
 static QTSS_AttributeID         sExpectedDigitFilenameErr = qtssIllegalAttrID;
 static QTSS_AttributeID         sReflectorBadTrackIDErr = qtssIllegalAttrID;
@@ -316,7 +316,6 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 	// Add an RTP session attribute for tracking ReflectorSession objects
 	static char*        sOutputName = "QTSSReflectorModuleOutput";
 	static char*        sSessionName = "QTSSReflectorModuleSession";
-	static char*        sStreamCookieName = "QTSSReflectorModuleStreamCookie";
 
 	static char*        sKillClientsEnabledName = "QTSSReflectorModuleTearDownClients";
 
@@ -330,9 +329,6 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 	(void)QTSS_AddStaticAttribute(qtssClientSessionObjectType, sSessionName, nullptr, qtssAttrDataTypeVoidPointer);
 	(void)QTSS_IDForAttr(qtssClientSessionObjectType, sSessionName, &sSessionAttr);
 
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sStreamCookieName, nullptr, qtssAttrDataTypeVoidPointer);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sStreamCookieName, &sStreamCookieAttr);
-
 	(void)QTSS_AddStaticAttribute(qtssClientSessionObjectType, sBroadcasterSessionName, nullptr, qtssAttrDataTypeVoidPointer);
 	(void)QTSS_IDForAttr(qtssClientSessionObjectType, sBroadcasterSessionName, &sClientBroadcastSessionAttr);
 
@@ -341,8 +337,6 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 
 	// Reflector session needs to setup some parameters too.
 	ReflectorStream::Register();
-	// RTPSessionOutput needs to do the same
-	RTPSessionOutput::Register();
 
 	// Tell the server our name!
 	static char* sModuleName = "QTSSReflectorModule";
@@ -1512,7 +1506,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 			if (theSession == nullptr)
 				return QTSS_RequestFailed;
 
-			auto* theNewOutput = new RTPSessionOutput((RTPSession *)inParams->inClientSession, theSession, sServerPrefs, sStreamCookieAttr);
+			auto* theNewOutput = new RTPSessionOutput((RTPSession *)inParams->inClientSession, theSession, sServerPrefs, sStreamCookieName);
 			theSession->AddOutput(theNewOutput, true);
 			(void)QTSS_SetValue(inParams->inClientSession, sOutputAttr, 0, &theNewOutput, sizeof(theNewOutput));
 		}
@@ -1651,12 +1645,11 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 			return theErr;
 	}
 
-	// Set up dictionary items for this stream
+	// Set up items for this stream
 	newStream->SetPayloadName(thePayloadName);
 	newStream->SetPayLoadType(thePayloadType);
 	newStream->SetSDPStreamID(theTrackID);
-	theErr = newStream->SetValue(qtssRTPStrTimescale, 0, &theStreamInfo->fTimeScale, sizeof(theStreamInfo->fTimeScale));
-	Assert(theErr == QTSS_NoErr);
+	newStream->SetTimeScale(theStreamInfo->fTimeScale);
 
 	// We only want to allow over buffering to dynamic rate clients   
 	RTSPRequest *dict = (RTSPRequest *)inParams->inRTSPRequest;
@@ -1667,13 +1660,10 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	// Place the stream cookie in this stream for future reference
 	void* theStreamCookie = theSession->GetStreamCookie(theTrackID);
 	Assert(theStreamCookie != nullptr);
-	theErr = newStream->SetValue(sStreamCookieAttr, 0, &theStreamCookie, sizeof(theStreamCookie));
-	Assert(theErr == QTSS_NoErr);
+	newStream->addAttribute(sStreamCookieName, theStreamCookie);
 
 	// Set the number of quality levels.
-	static uint32_t sNumQualityLevels = ReflectorSession::kNumQualityLevels;
-	theErr = newStream->SetValue(qtssRTPStrNumQualityLevels, 0, &sNumQualityLevels, sizeof(sNumQualityLevels));
-	Assert(theErr == QTSS_NoErr);
+	newStream->SetNumQualityLevels(ReflectorSession::kNumQualityLevels);
 
 	//send the setup response
 	((RTSPRequestInterface*)inParams->inRTSPRequest)->AppendHeader(qtssCacheControlHeader,
@@ -1736,11 +1726,8 @@ bool HaveStreamBuffers(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inS
 			break;
 		}
 
-		theRef->SetValue(qtssRTPStrFirstSeqNumber, 0, &firstSeqNum, sizeof(firstSeqNum));
-
-		theRef->SetValue(qtssRTPStrFirstTimestamp, 0, &firstTimeStamp, sizeof(firstTimeStamp));
-
-
+		theRef->SetSeqNumber(firstSeqNum);
+		theRef->SetTimeStamp(firstTimeStamp);
 	}
 	//unlock all streams
 	for (y = 0; y < inSession->GetNumStreams(); y++)

@@ -409,20 +409,11 @@ enum
 {
     //QTSS_RTPStreamObject parameters. All of these are preemptive safe.
     
-    qtssRTPStrFirstSeqNumber        = 4,    //r/w       //SInt16            //Sequence number of the first RTP packet generated for this stream after the last PLAY request was issued. If known, this must be set by a module before calling QTSS_Play. It is used by the server to generate a proper RTSP PLAY response.
-    qtssRTPStrFirstTimestamp        = 5,    //r/w       //int32_t            //RTP timestamp of the first RTP packet generated for this stream after the last PLAY request was issued. If known, this must be set by a module before calling QTSS_Play. It is used by the server to generate a proper RTSP PLAY response.
-    qtssRTPStrTimescale             = 6,    //r/w       //int32_t            //Timescale for the track. If known, this must be set before calling QTSS_Play.
-    qtssRTPStrQualityLevel          = 7,    //r/w       //uint32_t            //Private
-    qtssRTPStrNumQualityLevels      = 8,    //r/w       //uint32_t            //Private
-
     // All of these parameters come out of the last RTCP packet received on this stream.
     // If the corresponding field in the last RTCP packet was blank, the attribute value will be 0.
     
     // Address & network related parameters
-    qtssRTPStrIsTCP                 = 29,   //read      //bool            //Is this RTP stream being sent over TCP? If false, it is being sent over UDP.
     
-    qtssRTPStrPacketCountInRTCPInterval = 35,           // read     //uint32_t            // An RTCP delta count of packets
-
     qtssRTPStrNumParams             = 40
 
 };

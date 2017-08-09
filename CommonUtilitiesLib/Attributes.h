@@ -7,7 +7,7 @@ class Attributes {
 	std::map<std::string, boost::any> attributes;
 public:
 	void addAttribute(boost::string_view key, boost::any value) {
-		attributes.emplace(std::make_pair(key, value));
+		attributes[std::string(key)] = value;
 	}
 	boost::optional<boost::any> getAttribute(boost::string_view key) {
 		auto it = attributes.find(std::string(key));

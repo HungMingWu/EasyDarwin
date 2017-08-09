@@ -41,6 +41,7 @@
 #ifndef __RTPSTREAM_H__
 #define __RTPSTREAM_H__
 
+#include "Attributes.h"
 #include "QTSS.h"
 #include "QTSSDictionary.h"
 #include "QTSS_Private.h"
@@ -62,13 +63,10 @@
 
 class RTPSessionInterface;
 
-class RTPStream : public QTSSDictionary, public UDPDemuxerTask
+class RTPStream : public UDPDemuxerTask
 {
     public:
         
-        // Initializes dictionary resources
-        static void Initialize();
-
         //
         // CONSTRUCTOR / DESTRUCTOR
         
@@ -96,7 +94,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         // Write sends RTP data to the client. Caller must specify
         // either qtssWriteFlagsIsRTP or qtssWriteFlagsIsRTCP
         QTSS_Error  Write(void* inBuffer, uint32_t inLen,
-                                        uint32_t* outLenWritten, QTSS_WriteFlags inFlags) override;
+                                        uint32_t* outLenWritten, QTSS_WriteFlags inFlags);
         
         
         //UTILITY uint8_t_t:
@@ -173,9 +171,11 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
 		int32_t			GetMaxQualityLevelLimit() { return fMaxQualityLevel; }
 		
 		uint32_t          GetNumQualityLevels() { return fNumQualityLevels; } 
+		void              SetNumQualityLevels(uint32_t level) { fNumQualityLevels = level; }
 		QTSS_RTPPayloadType GetPayLoadType() { return fPayloadType; }
 		void SetPayLoadType(QTSS_RTPPayloadType type) { fPayloadType = type; }
 		uint32_t GetTimeScale() const {	return fTimescale; }
+		void SetTimeScale(uint32_t scale) { fTimescale = scale; }
 		float GetBufferDelay() const { return fBufferDelay; }
 		bool isTCP() const { return fIsTCP; }
 		uint32_t GetTotalLostPackets() const { return fTotalLostPackets; }
@@ -185,6 +185,19 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
 		void SetPayloadName(boost::string_view name) { fPayloadName = std::string(name); }
 		boost::string_view GetPayloadName() const { return fPayloadName; }
 		uint32_t GetPacketsLostInRTCPInterval() { return fCurPacketsLostInRTCPInterval; }
+		uint32_t GetPacketCountInRTCPInterval() { return 0; }
+		void SetTimeStamp(uint32_t timestamp) { fFirstTimeStamp = timestamp; }
+		void SetSeqNumber(uint16_t number) { fFirstSeqNumber = number; }
+		uint16_t GetSeqNumber() const { return fFirstSeqNumber; }
+		inline void addAttribute(boost::string_view key, boost::any value) {
+			attr.addAttribute(key, value);
+		}
+		inline boost::optional<boost::any> getAttribute(boost::string_view key) {
+			return attr.getAttribute(key);
+		}
+		inline void removeAttribute(boost::string_view key) {
+			attr.removeAttribute(key);
+		}
     private:
         
         enum
@@ -247,6 +260,7 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         std::string         fPayloadName;
         QTSS_RTPPayloadType fPayloadType;
 
+		Attributes attr;
         //Media information.
         uint16_t      fFirstSeqNumber;//used in sending the play response
         uint32_t      fFirstTimeStamp;//RTP time
@@ -363,7 +377,6 @@ class RTPStream : public QTSSDictionary, public UDPDemuxerTask
         void        SetTCPThinningParams();
         QTSS_Error  TCPWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags);
 
-        static QTSSAttrInfoDict::AttrInfo   sAttributes[];
         static boost::string_view           sChannelNums[];
         static QTSS_ModuleState             sRTCPProcessModuleState;
 

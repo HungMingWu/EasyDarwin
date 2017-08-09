@@ -43,12 +43,8 @@
 class RTPSessionOutput : public ReflectorOutput
 {
 public:
-
-	// Adds some dictionary attributes
-	static void Register();
-
 	RTPSessionOutput(RTPSession* inRTPSession, ReflectorSession* inReflectorSession,
-		QTSS_Object serverPrefs, QTSS_AttributeID inCookieAddrID);
+		QTSS_Object serverPrefs, boost::string_view inCookieAddrName);
 	~RTPSessionOutput() override = default;
 
 	ReflectorSession* GetReflectorSession() { return fReflectorSession; }
@@ -72,7 +68,7 @@ private:
 
 	RTPSession*             fClientSession;
 	ReflectorSession*       fReflectorSession;
-	QTSS_AttributeID        fCookieAttrID;
+	std::string             fCookieAttrName;
 	uint32_t                  fBufferDelayMSecs;
 	int64_t                  fBaseArrivalTime;
 	bool                  fIsUDP;
@@ -99,11 +95,9 @@ private:
 
 bool RTPSessionOutput::PacketMatchesStream(void* inStreamCookie, RTPStream *theStreamPtr)
 {
-	void** theStreamCookie = nullptr;
-	uint32_t theLen = 0;
-	theStreamPtr->GetValuePtr(fCookieAttrID, 0, (void**)&theStreamCookie, &theLen);
+	boost::optional<boost::any> opt = theStreamPtr->getAttribute(fCookieAttrName);
 
-	if ((theStreamCookie != nullptr) && (*theStreamCookie == inStreamCookie))
+	if (opt && boost::any_cast<void *>(opt.value()) == inStreamCookie)
 		return true;
 
 	return false;

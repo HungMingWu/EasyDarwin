@@ -41,40 +41,30 @@
 #define RTP_SESSION_DEBUGGING 0
 #endif
 
- // ATTRIBUTES
-static QTSS_AttributeID     sStreamPacketCountAttr = qtssIllegalAttrID;
-
-
-static QTSS_AttributeID     sNextSeqNumAttr = qtssIllegalAttrID;
-static QTSS_AttributeID     sSeqNumOffsetAttr = qtssIllegalAttrID;
-static QTSS_AttributeID     sLastQualityChangeAttr = qtssIllegalAttrID;
-static QTSS_AttributeID     sLastRTPPacketIDAttr = qtssIllegalAttrID;
-static QTSS_AttributeID     sLastRTCPPacketIDAttr = qtssIllegalAttrID;
-
-static QTSS_AttributeID     sFirstRTCPCurrentTimeAttr = qtssIllegalAttrID;
-static QTSS_AttributeID     sFirstRTCPArrivalTimeAttr = qtssIllegalAttrID;
-static QTSS_AttributeID     sFirstRTCPTimeStampAttr = qtssIllegalAttrID;
-
-static QTSS_AttributeID     sFirstRTPCurrentTimeAttr = qtssIllegalAttrID;
-static QTSS_AttributeID     sFirstRTPArrivalTimeAttr = qtssIllegalAttrID;
-static QTSS_AttributeID     sFirstRTPTimeStampAttr = qtssIllegalAttrID;
-
-static QTSS_AttributeID     sBaseRTPTimeStampAttr = qtssIllegalAttrID;
-
-static QTSS_AttributeID     sBaseArrivalTimeStampAttr = qtssIllegalAttrID;
-static QTSS_AttributeID     sStreamSSRCAttr = qtssIllegalAttrID;
-
-static QTSS_AttributeID     sStreamByteCountAttr = qtssIllegalAttrID;
-
-static QTSS_AttributeID     sLastRTPTimeStampAttr = qtssIllegalAttrID;
-
-static QTSS_AttributeID     sLastRTCPTransmitAttr = qtssIllegalAttrID;
+static boost::string_view        sLastRTCPTransmit = "qtssReflectorStreamLastRTCPTransmit";
+static boost::string_view        sNextSeqNum = "qtssNextSeqNum";
+static boost::string_view        sSeqNumOffset = "qtssSeqNumOffset";
+static boost::string_view        sLastQualityChange = "qtssLastQualityChange";
+static boost::string_view        sLastRTPPacketID = "qtssReflectorStreamLastRTPPacketID";
+static boost::string_view        sLastRTCPPacketID = "qtssReflectorStreamLastRTCPPacketID";
+static boost::string_view        sFirstRTPCurrentTime = "qtssReflectorStreamStartRTPCurrent";
+static boost::string_view        sFirstRTPArrivalTime = "qtssReflectorStreamStartRTPArrivalTime";
+static boost::string_view        sFirstRTPTimeStamp = "qtssReflectorStreamStartRTPTimeStamp";
+static boost::string_view        sBaseRTPTimeStamp = "qtssReflectorStreamBaseRTPTimeStamp";
+static boost::string_view        sBaseArrivalTimeStamp = "qtssReflectorStreamBaseArrivalTime";
+static boost::string_view        sStreamSSRC = "qtssReflectorStreamSSRC";
+static boost::string_view        sStreamPacketCount = "qtssReflectorStreamPacketCount";
+static boost::string_view        sStreamByteCount = "qtssReflectorStreamByteCount";
+//static boost::string_view        sFirstRTCPArrivalTime = "qtssReflectorStreamStartRTCPArrivalTime";
+//static boost::string_view        sLastRTPTimeStamp = "qtssReflectorStreamLastRTPTimeStamp";
+//static boost::string_view        sFirstRTCPTimeStamp = "qtssReflectorStreamStartRTCPTimeStamp";
+//static boost::string_view        sFirstRTCPCurrentTime = "qtssReflectorStreamStartRTCPCurrent";
 
 RTPSessionOutput::RTPSessionOutput(RTPSession* inClientSession, ReflectorSession* inReflectorSession,
-	QTSS_Object serverPrefs, QTSS_AttributeID inCookieAddrID)
+	QTSS_Object serverPrefs, boost::string_view inCookieAddrName)
 	: fClientSession(inClientSession),
 	fReflectorSession(inReflectorSession),
-	fCookieAttrID(inCookieAddrID),
+	fCookieAttrName(inCookieAddrName),
 	fBufferDelayMSecs(ReflectorStream::sOverBufferInMsec),
 	fBaseArrivalTime(0),
 	fIsUDP(false),
@@ -84,97 +74,6 @@ RTPSessionOutput::RTPSessionOutput(RTPSession* inClientSession, ReflectorSession
 {
 	// create a bookmark for each stream we'll reflect
 	this->InititializeBookmarks(inReflectorSession->GetNumStreams());
-
-}
-
-void RTPSessionOutput::Register()
-{
-	// Add some attributes to QTSS_RTPStream dictionary 
-	static char*        sNextSeqNum = "qtssNextSeqNum";
-	static char*        sSeqNumOffset = "qtssSeqNumOffset";
-	static char*        sLastQualityChange = "qtssLastQualityChange";
-
-	static char*        sLastRTPPacketID = "qtssReflectorStreamLastRTPPacketID";
-	static char*        sLastRTCPPacketID = "qtssReflectorStreamLastRTCPPacketID";
-
-
-	static char*        sFirstRTCPArrivalTime = "qtssReflectorStreamStartRTCPArrivalTime";
-	static char*        sFirstRTCPTimeStamp = "qtssReflectorStreamStartRTCPTimeStamp";
-	static char*        sFirstRTCPCurrentTime = "qtssReflectorStreamStartRTCPCurrent";
-
-	static char*        sFirstRTPArrivalTime = "qtssReflectorStreamStartRTPArrivalTime";
-	static char*        sFirstRTPTimeStamp = "qtssReflectorStreamStartRTPTimeStamp";
-	static char*        sFirstRTPCurrentTime = "qtssReflectorStreamStartRTPCurrent";
-
-	static char*        sBaseRTPTimeStamp = "qtssReflectorStreamBaseRTPTimeStamp";
-	static char*        sBaseArrivalTimeStamp = "qtssReflectorStreamBaseArrivalTime";
-
-	static char*        sLastRTPTimeStamp = "qtssReflectorStreamLastRTPTimeStamp";
-	static char*        sLastRTCPTransmit = "qtssReflectorStreamLastRTCPTransmit";
-
-	static char*        sStreamSSRC = "qtssReflectorStreamSSRC";
-	static char*        sStreamPacketCount = "qtssReflectorStreamPacketCount";
-	static char*        sStreamByteCount = "qtssReflectorStreamByteCount";
-
-
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sLastRTCPTransmit, nullptr, qtssAttrDataTypeUInt16);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sLastRTCPTransmit, &sLastRTCPTransmitAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sNextSeqNum, nullptr, qtssAttrDataTypeUInt16);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sNextSeqNum, &sNextSeqNumAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sSeqNumOffset, nullptr, qtssAttrDataTypeUInt16);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sSeqNumOffset, &sSeqNumOffsetAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sLastQualityChange, nullptr, qtssAttrDataTypeint64_t);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sLastQualityChange, &sLastQualityChangeAttr);
-
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sLastRTPPacketID, nullptr, qtssAttrDataTypeuint64_t);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sLastRTPPacketID, &sLastRTPPacketIDAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sLastRTCPPacketID, nullptr, qtssAttrDataTypeuint64_t);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sLastRTCPPacketID, &sLastRTCPPacketIDAttr);
-
-
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sLastRTPTimeStamp, nullptr, qtssAttrDataTypeUInt32);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sLastRTPTimeStamp, &sLastRTPTimeStampAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sFirstRTCPArrivalTime, nullptr, qtssAttrDataTypeint64_t);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sFirstRTCPArrivalTime, &sFirstRTCPArrivalTimeAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sFirstRTCPTimeStamp, nullptr, qtssAttrDataTypeUInt32);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sFirstRTCPTimeStamp, &sFirstRTCPTimeStampAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sFirstRTCPCurrentTime, nullptr, qtssAttrDataTypeUInt32);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sFirstRTCPCurrentTime, &sFirstRTCPCurrentTimeAttr);
-
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sFirstRTPCurrentTime, nullptr, qtssAttrDataTypeint64_t);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sFirstRTPCurrentTime, &sFirstRTPCurrentTimeAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sFirstRTPArrivalTime, nullptr, qtssAttrDataTypeint64_t);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sFirstRTPArrivalTime, &sFirstRTPArrivalTimeAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sFirstRTPTimeStamp, nullptr, qtssAttrDataTypeUInt32);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sFirstRTPTimeStamp, &sFirstRTPTimeStampAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sBaseRTPTimeStamp, nullptr, qtssAttrDataTypeUInt32);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sBaseRTPTimeStamp, &sBaseRTPTimeStampAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sBaseArrivalTimeStamp, nullptr, qtssAttrDataTypeVoidPointer);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sBaseArrivalTimeStamp, &sBaseArrivalTimeStampAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sStreamSSRC, nullptr, qtssAttrDataTypeVoidPointer);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sStreamSSRC, &sStreamSSRCAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sStreamPacketCount, nullptr, qtssAttrDataTypeUInt32);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sStreamPacketCount, &sStreamPacketCountAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sStreamByteCount, nullptr, qtssAttrDataTypeUInt32);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sStreamByteCount, &sStreamByteCountAttr);
 
 }
 
@@ -188,10 +87,8 @@ bool RTPSessionOutput::IsPlaying()
 
 void RTPSessionOutput::InitializeStreams()
 {
-	uint32_t                  packetCountInitValue = 0;
-
 	for (auto theStreamPtr : fClientSession->GetStreams())
-		theStreamPtr->SetValue(sStreamPacketCountAttr, 0, &packetCountInitValue, sizeof(uint32_t));
+		theStreamPtr->addAttribute(sStreamPacketCount, (uint32_t)0);
 }
 
 
@@ -231,24 +128,18 @@ bool RTPSessionOutput::IsUDP()
 
 bool  RTPSessionOutput::FilterPacket(RTPStream *theStreamPtr, StrPtrLen* inPacket)
 {
-
-	uint32_t* packetCountPtr = nullptr;
 	uint32_t theLen = 0;
 
 	//see if we started sending and if so then just keep sending (reset on a play)
-	QTSS_Error writeErr = theStreamPtr->GetValuePtr(sStreamPacketCountAttr, 0, (void**)&packetCountPtr, &theLen);
-	if (writeErr == QTSS_NoErr && theLen > 0 && *packetCountPtr > 0)
+	boost::optional<boost::any> opt = theStreamPtr->getAttribute(sStreamPacketCount);
+	if (opt && boost::any_cast<uint32_t>(opt.value()) > 0)
 		return false;
 
 	Assert(theStreamPtr);
 	Assert(inPacket);
 
 	uint16_t seqnum = this->GetPacketSeqNumber(inPacket);
-	uint16_t firstSeqNum = 0;
-	theLen = sizeof(firstSeqNum);
-
-	if (QTSS_NoErr != theStreamPtr->GetValue(qtssRTPStrFirstSeqNumber, 0, &firstSeqNum, &theLen))
-		return true;
+	uint16_t firstSeqNum = theStreamPtr->GetSeqNumber();
 
 	if (seqnum < firstSeqNum)
 	{
@@ -274,9 +165,8 @@ bool  RTPSessionOutput::PacketAlreadySent(RTPStream *theStreamPtr, uint32_t inFl
 
 	if (inFlags & qtssWriteFlagsIsRTP)
 	{
-		if ((QTSS_NoErr == theStreamPtr->GetValuePtr(sLastRTPPacketIDAttr, 0, (void**)&lastPacketIDPtr, &theLen))
-			&& (*packetIDPtr <= *lastPacketIDPtr)
-			)
+		boost::optional<boost::any> opt = theStreamPtr->getAttribute(sLastRTPPacketID);
+		if (opt && *packetIDPtr <= boost::any_cast<uint64_t>(opt.value()))
 		{
 			//printf("RTPSessionOutput::WritePacket Don't send RTP packet id =%qu\n", *packetIDPtr);
 			packetSent = true;
@@ -285,11 +175,10 @@ bool  RTPSessionOutput::PacketAlreadySent(RTPStream *theStreamPtr, uint32_t inFl
 	}
 	else if (inFlags & qtssWriteFlagsIsRTCP)
 	{
-		if (QTSS_NoErr == theStreamPtr->GetValuePtr(sLastRTCPPacketIDAttr, 0, (void**)&lastPacketIDPtr, &theLen)
-			&& (*packetIDPtr <= *lastPacketIDPtr)
-			)
+		boost::optional<boost::any> opt = theStreamPtr->getAttribute(sLastRTCPPacketID);
+		if (opt && *packetIDPtr <= boost::any_cast<uint64_t>(opt.value()))
 		{
-			//printf("RTPSessionOutput::WritePacket Don't send RTCP packet id =%qu last packet sent id =%qu\n", *packetIDPtr,*lastPacketIDPtr);
+			//printf("RTPSessionOutput::WritePacket Don't send RTP packet id =%qu\n", *packetIDPtr);
 			packetSent = true;
 		}
 	}
@@ -308,40 +197,39 @@ QTSS_Error  RTPSessionOutput::TrackRTCPBaseTime(QTSS_RTPStreamObject *theStreamP
 	bool haveBaseTime = false;
 	bool haveAllFirstRTPs = true;
 
-	uint32_t streamTimeScale = 0;
-	uint32_t  theLen = sizeof(streamTimeScale);
-	QTSSDictionary *dict = (QTSSDictionary *)*theStreamPtr;
-	QTSS_Error writeErr = dict->GetValue(qtssRTPStrTimescale, 0, (void *)&streamTimeScale, &theLen);
-	Assert(writeErr == QTSS_NoErr);
+	RTPStream *dict = (RTPStream *)*theStreamPtr;
+	uint32_t streamTimeScale = dict->GetTimeScale();
 
-	uint32_t baseTimeStamp = 0;
-	theLen = sizeof(baseTimeStamp);
-	if (!fMustSynch || QTSS_NoErr == dict->GetValue(sBaseRTPTimeStampAttr, 0, (void*)&baseTimeStamp, &theLen)) // we need a starting stream time that is synched 
+	boost::optional<boost::any> opt = dict->getAttribute(sBaseRTPTimeStamp);
+	if (!fMustSynch || !opt) // we need a starting stream time that is synched 
 	{
 		haveBaseTime = true;
 	}
 	else
 	{
 		uint64_t earliestArrivalTime = ~(uint64_t)0; //max value
-		uint32_t firstStreamTime = 0;
-		int64_t firstStreamArrivalTime = 0;
 
-		if (fMustSynch || QTSS_NoErr != dict->GetValuePtr(sBaseArrivalTimeStampAttr, 0, (void**)&fBaseArrivalTime, &theLen))
+		opt = dict->getAttribute(sBaseRTPTimeStamp);
+		if (fMustSynch || !opt)
 		{   // we don't have a base arrival time for the session see if we can set one now.
 
 			for (auto findStream : fClientSession->GetStreams())
 			{
-				int64_t* firstArrivalTimePtr = nullptr;
-				if (QTSS_NoErr != findStream->GetValuePtr(sFirstRTPArrivalTimeAttr, 0, (void**)&firstArrivalTimePtr, &theLen))
-				{// no packet on this stream yet 
+				opt = findStream->getAttribute(sFirstRTPArrivalTime);
+
+				if (!opt)
+				{
+					// no packet on this stream yet 
 					haveAllFirstRTPs = false; // not enough info to calc a base time
 					break;
 				}
 				else
-				{ // we have an arrival time see if it is the first for all streams
-					if ((uint64_t)*firstArrivalTimePtr < earliestArrivalTime)
+				{
+					int64_t firstArrivalTimePtr = boost::any_cast<int64_t>(opt.value());
+					// we have an arrival time see if it is the first for all streams
+					if ((uint64_t)firstArrivalTimePtr < earliestArrivalTime)
 					{
-						earliestArrivalTime = *firstArrivalTimePtr;
+						earliestArrivalTime = firstArrivalTimePtr;
 					}
 				}
 
@@ -349,38 +237,38 @@ QTSS_Error  RTPSessionOutput::TrackRTCPBaseTime(QTSS_RTPStreamObject *theStreamP
 
 			if (haveAllFirstRTPs) // we can now create a base arrival time and base stream time from that
 			{
-
-				writeErr = QTSS_SetValue(*theStreamPtr, sBaseArrivalTimeStampAttr, 0, &earliestArrivalTime, sizeof(int64_t));
-				Assert(writeErr == QTSS_NoErr);
+				dict->addAttribute(sBaseArrivalTimeStamp, earliestArrivalTime);
 				fBaseArrivalTime = (int64_t)earliestArrivalTime;
 			}
 		}
 
 		if (haveAllFirstRTPs)//sBaseRTPTimeStamp
-		{   // we don't have a base stream time but we have a base session time so calculate the base stream time.
-			theLen = sizeof(firstStreamTime);
-			QTSSDictionary *dict = (QTSSDictionary *)*theStreamPtr;
-			if (QTSS_NoErr != dict->GetValue(sFirstRTPTimeStampAttr, 0, (void*)&firstStreamTime, &theLen))
-				return QTSS_NoErr;
+		{   
+			// we don't have a base stream time but we have a base session time so calculate the base stream time.
+			RTPStream *dict = (RTPStream *)*theStreamPtr;
+			boost::optional<boost::any> opt;
+			opt = dict->getAttribute(sFirstRTPTimeStamp);
+			if (!opt) return QTSS_NoErr;
+			uint32_t firstStreamTime = boost::any_cast<uint32_t>(opt.value());
 
-			theLen = sizeof(firstStreamArrivalTime);
-			if (QTSS_NoErr != dict->GetValue(sFirstRTPArrivalTimeAttr, 0, (void*)&firstStreamArrivalTime, &theLen))
-				return QTSS_NoErr;
+			opt = dict->getAttribute(sFirstRTPArrivalTime);
+			if (!opt) return QTSS_NoErr;
+			int64_t firstStreamArrivalTime = boost::any_cast<int64_t>(opt.value());
 
 			int64_t arrivalTimeDiffMSecs = (firstStreamArrivalTime - fBaseArrivalTime);// + fBufferDelayMSecs;//add the buffer delay !! not sure about faster than real time arrival times....
 			auto timeDiffStreamTime = (uint32_t)(((double)arrivalTimeDiffMSecs / (double) 1000.0) * (double)streamTimeScale);
-			baseTimeStamp = firstStreamTime - timeDiffStreamTime;
-			if (QTSS_NoErr == QTSS_SetValue(*theStreamPtr, sBaseRTPTimeStampAttr, 0, (void*)&baseTimeStamp, sizeof(baseTimeStamp)))
-				haveBaseTime = true;
+			uint32_t baseTimeStamp = firstStreamTime - timeDiffStreamTime;
+			dict->addAttribute(sBaseRTPTimeStamp, baseTimeStamp);
+			haveBaseTime = true;
 
-			(void)QTSS_SetValue(*theStreamPtr, qtssRTPStrFirstTimestamp, 0, &baseTimeStamp, sizeof(baseTimeStamp));
+			((RTPStream *)*theStreamPtr)->SetTimeStamp(baseTimeStamp);
 
 			fMustSynch = false;
 			//printf("fBaseArrivalTime =%qd baseTimeStamp %"   _U32BITARG_   " streamStartTime=%qd diff =%qd\n", fBaseArrivalTime, baseTimeStamp, firstStreamArrivalTime, arrivalTimeDiffMSecs);
 		}
 	}
 
-	return writeErr;
+	return QTSS_NoErr;
 
 }
 
@@ -388,19 +276,17 @@ QTSS_Error  RTPSessionOutput::RewriteRTCP(QTSS_RTPStreamObject *theStreamPtr, St
 {
 	uint32_t  theLen;
 
-	int64_t firstRTPCurrentTime = 0;
-	theLen = sizeof(firstRTPCurrentTime);
-	QTSSDictionary *dict = (QTSSDictionary *)*theStreamPtr;
-	dict->GetValue(sFirstRTPCurrentTimeAttr, 0, (void*)&firstRTPCurrentTime, &theLen);
+	boost::optional<boost::any> opt;
 
-	int64_t firstRTPArrivalTime = 0;
-	theLen = sizeof(firstRTPArrivalTime);
-	dict->GetValue(sFirstRTPArrivalTimeAttr, 0, (void*)&firstRTPArrivalTime, &theLen);
+	RTPStream *dict = (RTPStream *)*theStreamPtr;
+	opt = dict->getAttribute(sFirstRTPCurrentTime);
+	int64_t firstRTPCurrentTime = boost::any_cast<int64_t>(opt.value());
 
+	opt = dict->getAttribute(sFirstRTPArrivalTime);
+	int64_t firstRTPArrivalTime = boost::any_cast<int64_t>(opt.value());
 
-	uint32_t rtpTime = 0;
-	theLen = sizeof(rtpTime);
-	dict->GetValue(sFirstRTPTimeStampAttr, 0, (void*)&rtpTime, &theLen);
+	opt = dict->getAttribute(sFirstRTPTimeStamp);
+	uint32_t rtpTime = boost::any_cast<uint32_t>(opt.value());
 
 
 	auto* theReport = (uint32_t*)inPacketStrPtr->Ptr;
@@ -408,13 +294,10 @@ QTSS_Error  RTPSessionOutput::RewriteRTCP(QTSS_RTPStreamObject *theStreamPtr, St
 	auto* theNTPTimestampP = (int64_t*)theReport;
 	*theNTPTimestampP = OS::HostToNetworkSInt64(OS::TimeMilli_To_1900Fixed64Secs(*currentTimePtr)); // time now
 
-	uint32_t baseTimeStamp = 0;
-	theLen = sizeof(baseTimeStamp);
-	dict->GetValue(sBaseRTPTimeStampAttr, 0, (void*)&baseTimeStamp, &theLen); // we need a starting stream time that is synched 
+	opt = dict->getAttribute(sBaseRTPTimeStamp);
+	uint32_t baseTimeStamp = boost::any_cast<uint32_t>(opt.value());
 
-	uint32_t streamTimeScale = 0;
-	theLen = sizeof(streamTimeScale);
-	dict->GetValue(qtssRTPStrTimescale, 0, (void *)&streamTimeScale, &theLen);
+	uint32_t streamTimeScale = dict->GetTimeScale();
 
 	int64_t packetOffset = *currentTimePtr - fBaseArrivalTime; // real time that has passed
 	packetOffset -= (firstRTPCurrentTime - firstRTPArrivalTime); // less the initial buffer delay for this stream
@@ -428,14 +311,9 @@ QTSS_Error  RTPSessionOutput::RewriteRTCP(QTSS_RTPStreamObject *theStreamPtr, St
 	theReport += 2; // point to the rtp time stamp of "now" synched and scaled in stream time
 	*theReport = htonl(baseTimeStamp + rtpTimeFromStartInScale);
 
-	theLen = sizeof(uint32_t);
-	uint32_t packetCount = 0;
-	dict->GetValue(sStreamPacketCountAttr, 0, &packetCount, &theLen);
 	theReport += 1; // point to the rtp packets sent
 	*theReport = htonl(ntohl(*theReport) * 2);
 
-	uint32_t byteCount = 0;
-	dict->GetValue(sStreamByteCountAttr, 0, &byteCount, &theLen);
 	theReport += 1; // point to the rtp payload bytes sent
 	*theReport = htonl(ntohl(*theReport) * 2);
 
@@ -474,51 +352,43 @@ QTSS_Error  RTPSessionOutput::TrackRTPPackets(QTSS_RTPStreamObject *theStreamPtr
 	int64_t *theTimePtr = nullptr;
 	uint32_t theLen = 0;
 
-	QTSSDictionary *dict = (QTSSDictionary *)*theStreamPtr;
-	if (QTSS_NoErr != dict->GetValuePtr(sFirstRTPArrivalTimeAttr, 0, (void**)&theTimePtr, &theLen))
+	RTPStream *dict = (RTPStream *)*theStreamPtr;
+	boost::optional<boost::any> opt = dict->getAttribute(sFirstRTPArrivalTime);
+	if (!opt)
 	{
 		uint32_t theSSRC = packetContainer.GetSSRC(packetContainer.fIsRTCP);
-		(void)QTSS_SetValue(*theStreamPtr, sStreamSSRCAttr, 0, &theSSRC, sizeof(theSSRC));
+		dict->addAttribute(sStreamSSRC, theSSRC);
 
 		uint32_t rtpTime = packetContainer.GetPacketRTPTime();
-		writeErr = QTSS_SetValue(*theStreamPtr, sFirstRTPTimeStampAttr, 0, &rtpTime, sizeof(rtpTime));
-		Assert(writeErr == QTSS_NoErr);
+		dict->addAttribute(sFirstRTPTimeStamp, rtpTime);
+		dict->addAttribute(sFirstRTPArrivalTime, *arrivalTimeMSecPtr);
+		dict->addAttribute(sFirstRTPCurrentTime, (int64_t)0);
 
-		writeErr = QTSS_SetValue(*theStreamPtr, sFirstRTPArrivalTimeAttr, 0, arrivalTimeMSecPtr, sizeof(int64_t));
-		Assert(writeErr == QTSS_NoErr);
-
-		writeErr = QTSS_SetValue(*theStreamPtr, sFirstRTPCurrentTimeAttr, 0, currentTimePtr, sizeof(int64_t));
-		Assert(writeErr == QTSS_NoErr);
-
-		uint32_t initValue = 0;
-		writeErr = QTSS_SetValue(*theStreamPtr, sStreamByteCountAttr, 0, &initValue, sizeof(uint32_t));
-		Assert(writeErr == QTSS_NoErr);
+		dict->addAttribute(sStreamByteCount, (uint32_t)0);
 
 		//printf("first rtp on stream stream=%"   _U32BITARG_   " ssrc=%"   _U32BITARG_   " rtpTime=%"   _U32BITARG_   " arrivalTimeMSecPtr=%qd currentTime=%qd\n",(uint32_t) theStreamPtr, theSSRC, rtpTime, *arrivalTimeMSecPtr, *currentTimePtr);
 
 	}
 	else
 	{
-		uint32_t* packetCountPtr = nullptr;
-		uint32_t* byteCountPtr = nullptr;
-		uint32_t theLen = 0;
-
-		writeErr = dict->GetValuePtr(sStreamByteCountAttr, 0, (void**)&byteCountPtr, &theLen);
-		if (writeErr == QTSS_NoErr && theLen > 0)
-			*byteCountPtr += inPacketStrPtr->Len - 12;// 12 header bytes
+		opt = dict->getAttribute(sStreamByteCount);
+		if (!opt) {
+			uint32_t byteCount = boost::any_cast<uint32_t>(opt.value());
+			dict->addAttribute(sStreamByteCount, byteCount + inPacketStrPtr->Len - 12); // 12 header bytes
+		}
 
 
-		uint32_t* theSSRCPtr = nullptr;
-		dict->GetValuePtr(sStreamSSRCAttr, 0, (void**)&theSSRCPtr, &theLen);
-		if (*theSSRCPtr != packetContainer.GetSSRC(packetContainer.fIsRTCP))
+		opt = dict->getAttribute(sStreamSSRC);
+		uint32_t theSSRCPtr = boost::any_cast<uint32_t>(opt.value());
+		if (theSSRCPtr != packetContainer.GetSSRC(packetContainer.fIsRTCP))
 		{
 
 
-			(void)QTSS_RemoveValue(*theStreamPtr, sFirstRTPArrivalTimeAttr, 0);
-			(void)QTSS_RemoveValue(*theStreamPtr, sFirstRTPTimeStampAttr, 0);
-			(void)QTSS_RemoveValue(*theStreamPtr, sFirstRTPCurrentTimeAttr, 0);
-			(void)QTSS_RemoveValue(*theStreamPtr, sStreamPacketCountAttr, 0);
-			(void)QTSS_RemoveValue(*theStreamPtr, sStreamByteCountAttr, 0);
+			dict->removeAttribute(sFirstRTPArrivalTime);
+			dict->removeAttribute(sFirstRTPTimeStamp);
+			dict->removeAttribute(sFirstRTPCurrentTime);
+			dict->removeAttribute(sStreamPacketCount);
+			dict->removeAttribute(sStreamByteCount);
 			fMustSynch = true;
 
 			//printf("found different ssrc =%"   _U32BITARG_   " packetssrc=%"   _U32BITARG_   "\n",*theSSRCPtr, packetContainer.GetSSRC(packetContainer.fIsRTCP));
@@ -611,26 +481,12 @@ QTSS_Error  RTPSessionOutput::WritePacket(StrPtrLen* inPacket, void* inStreamCoo
 
 				if (inFlags & qtssWriteFlagsIsRTP)
 				{
-					theStreamPtr->SetValue(sLastRTPPacketIDAttr, 0, packetIDPtr, sizeof(uint64_t));
+					theStreamPtr->addAttribute(sLastRTPPacketID, *packetIDPtr);
 				}
 				else if (inFlags & qtssWriteFlagsIsRTCP)
 				{
-					theStreamPtr->SetValue(sLastRTCPPacketIDAttr, 0, packetIDPtr, sizeof(uint64_t));
-					theStreamPtr->SetValue(sLastRTCPTransmitAttr, 0, &currentTime, sizeof(uint64_t));
-				}
-
-
-
-				{ // increment packet counts
-					uint32_t* packetCountPtr = nullptr;
-					uint32_t theLen = 0;
-
-					theStreamPtr->GetValuePtr(sStreamPacketCountAttr, 0, (void**)&packetCountPtr, &theLen);
-					if (theLen > 0)
-					{
-						*packetCountPtr += 1;
-						//printf("SET sStreamPacketCountAttr =%lu\n", *packetCountPtr);
-					}
+					theStreamPtr->addAttribute(sLastRTCPPacketID, *packetIDPtr);
+					theStreamPtr->addAttribute(sLastRTCPTransmit, currentTime);
 				}
 			}
 		}
@@ -668,6 +524,9 @@ bool RTPSessionOutput::PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrP
 	return false; // function is disabled.
 
 	static uint16_t sZero = 0;
+	boost::optional<uint16_t> nextSeqNum;
+	boost::optional<uint16_t> theSeqNumOffset;
+	boost::optional<int64_t> lastChangeTime;
 	//This function determines whether the packet should be dropped.
 	//It also adjusts the sequence number if necessary
 
@@ -675,75 +534,68 @@ bool RTPSessionOutput::PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrP
 		return false;
 
 	uint16_t curSeqNum = this->GetPacketSeqNumber(inPacket);
-	uint32_t* curQualityLevel = nullptr;
-	uint16_t* nextSeqNum = nullptr;
-	uint16_t* theSeqNumOffset = nullptr;
-	int64_t* lastChangeTime = nullptr;
-
+	
 	uint32_t theLen = 0;
-	QTSSDictionary *dict = (QTSSDictionary *)inStream;
-	dict->GetValuePtr(qtssRTPStrQualityLevel, 0, (void**)&curQualityLevel, &theLen);
-	if ((curQualityLevel == nullptr) || (theLen != sizeof(uint32_t)))
-		return false;
-	dict->GetValuePtr(sNextSeqNumAttr, 0, (void**)&nextSeqNum, &theLen);
-	if ((nextSeqNum == nullptr) || (theLen != sizeof(uint16_t)))
-	{
-		nextSeqNum = &sZero;
-		(void)QTSS_SetValue(inStream, sNextSeqNumAttr, 0, nextSeqNum, sizeof(uint16_t));
-	}
-	dict->GetValuePtr(sSeqNumOffsetAttr, 0, (void**)&theSeqNumOffset, &theLen);
-	if ((theSeqNumOffset == nullptr) || (theLen != sizeof(uint16_t)))
-	{
-		theSeqNumOffset = &sZero;
-		(void)QTSS_SetValue(inStream, sSeqNumOffsetAttr, 0, theSeqNumOffset, sizeof(uint16_t));
-	}
-	uint16_t newSeqNumOffset = *theSeqNumOffset;
+	RTPStream *dict = (RTPStream *)inStream;
+	uint32_t curQualityLevel = dict->GetQualityLevel();
 
-	dict->GetValuePtr(sLastQualityChangeAttr, 0, (void**)&lastChangeTime, &theLen);
-	if ((lastChangeTime == nullptr) || (theLen != sizeof(int64_t)))
-	{
+	boost::optional<boost::any> opt = dict->getAttribute(sNextSeqNum);
+	if (!opt) {
+		nextSeqNum = sZero;
+		dict->addAttribute(sNextSeqNum, sZero);
+	}
+	opt = dict->getAttribute(sSeqNumOffset);
+	if (!opt) {
+		theSeqNumOffset = sZero;
+		dict->addAttribute(sSeqNumOffset, sZero);
+	}
+
+	uint16_t newSeqNumOffset = theSeqNumOffset.value();
+
+	opt = dict->getAttribute(sLastQualityChange);
+	if (!opt) {
 		static int64_t startTime = 0;
-		lastChangeTime = &startTime;
-		(void)QTSS_SetValue(inStream, sLastQualityChangeAttr, 0, lastChangeTime, sizeof(int64_t));
+		lastChangeTime = startTime;
+		dict->addAttribute(sLastQualityChange, startTime);
 	}
 
 	int64_t timeNow = OS::Milliseconds();
-	if (*lastChangeTime == 0 || *curQualityLevel == 0)
-		*lastChangeTime = timeNow;
+	if (*lastChangeTime == 0 || curQualityLevel == 0)
+		lastChangeTime = timeNow;
 
-	if (*curQualityLevel > 0 && ((*lastChangeTime + 30000) < timeNow)) // 30 seconds between reductions
+	if (curQualityLevel > 0 && ((*lastChangeTime + 30000) < timeNow)) // 30 seconds between reductions
 	{
-		*curQualityLevel -= 1; // reduce quality value.  If we quality doesn't change then we may have hit some steady state which we can't get out of without thinning or increasing the quality
+		curQualityLevel -= 1; // reduce quality value.  If we quality doesn't change then we may have hit some steady state which we can't get out of without thinning or increasing the quality
 		*lastChangeTime = timeNow;
 		//printf("RTPSessionOutput set quality to %"   _U32BITARG_   "\n",*curQualityLevel);
 	}
 
 	//Check to see if we need to drop to audio only
-	if ((*curQualityLevel >= ReflectorSession::kAudioOnlyQuality) &&
+	if ((curQualityLevel >= ReflectorSession::kAudioOnlyQuality) &&
 		(*nextSeqNum == 0))
 	{
 #if REFLECTOR_THINNING_DEBUGGING || RTP_SESSION_DEBUGGING
 		printf(" *** Reflector Dropping to audio only *** \n");
 #endif
 		//All we need to do in this case is mark the sequence number of the first dropped packet
-		(void)QTSS_SetValue(inStream, sNextSeqNumAttr, 0, &curSeqNum, sizeof(uint16_t));
+		dict->addAttribute(sNextSeqNum, curSeqNum);
 		*lastChangeTime = timeNow;
 	}
 
 
 	//Check to see if we can reinstate video
-	if ((*curQualityLevel == ReflectorSession::kNormalQuality) && (*nextSeqNum != 0))
+	if ((curQualityLevel == ReflectorSession::kNormalQuality) && (*nextSeqNum != 0))
 	{
 		//Compute the offset amount for each subsequent sequence number. This offset will
 		//alter the sequence numbers so that they increment normally (providing the illusion to the
 		//client that there are no missing packets)
 		newSeqNumOffset = (*theSeqNumOffset) + (curSeqNum - (*nextSeqNum));
-		(void)QTSS_SetValue(inStream, sSeqNumOffsetAttr, 0, &newSeqNumOffset, sizeof(uint16_t));
-		(void)QTSS_SetValue(inStream, sNextSeqNumAttr, 0, &sZero, sizeof(uint16_t));
+		dict->addAttribute(sSeqNumOffset, newSeqNumOffset);
+		dict->addAttribute(sNextSeqNum, sZero);
 	}
 
 	//tell the caller whether to drop this packet or not.
-	if (*curQualityLevel >= ReflectorSession::kAudioOnlyQuality)
+	if (curQualityLevel >= ReflectorSession::kAudioOnlyQuality)
 		return true;
 	else
 	{
@@ -759,5 +611,3 @@ void RTPSessionOutput::TearDown()
 	fClientSession->SetTeardownReason(qtssCliSesTearDownBroadcastEnded);
 	fClientSession->Teardown();
 }
-
-

@@ -40,10 +40,11 @@
  //Turns on printfs that are useful for debugging
 #define FLOW_CONTROL_DEBUGGING 0
 
+static boost::string_view        sNumLossesAboveToleranceName = "QTSSFlowControlModuleLossAboveTol";
+static boost::string_view        sNumLossesBelowToleranceName = "QTSSFlowControlModuleLossBelowTol";
+static boost::string_view        sNumGettingWorsesName = "QTSSFlowControlModuleGettingWorses";
 // ATTRIBUTES IDs
 
-static QTSS_AttributeID sNumLossesAboveTolAttr = qtssIllegalAttrID;
-static QTSS_AttributeID sNumLossesBelowTolAttr = qtssIllegalAttrID;
 static QTSS_AttributeID sNumWorsesAttr = qtssIllegalAttrID;
 
 // STATIC VARIABLES
@@ -112,21 +113,6 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 	(void)QTSS_AddRole(QTSS_Initialize_Role);
 	(void)QTSS_AddRole(QTSS_RTCPProcess_Role);
 	(void)QTSS_AddRole(QTSS_RereadPrefs_Role);
-
-
-	// Add other attributes
-	static char*        sNumLossesAboveToleranceName = "QTSSFlowControlModuleLossAboveTol";
-	static char*        sNumLossesBelowToleranceName = "QTSSFlowControlModuleLossBelowTol";
-	static char*        sNumGettingWorsesName = "QTSSFlowControlModuleGettingWorses";
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sNumLossesAboveToleranceName, nullptr, qtssAttrDataTypeUInt32);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sNumLossesAboveToleranceName, &sNumLossesAboveTolAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sNumLossesBelowToleranceName, nullptr, qtssAttrDataTypeUInt32);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sNumLossesBelowToleranceName, &sNumLossesBelowTolAttr);
-
-	(void)QTSS_AddStaticAttribute(qtssRTPStreamObjectType, sNumGettingWorsesName, nullptr, qtssAttrDataTypeUInt32);
-	(void)QTSS_IDForAttr(qtssRTPStreamObjectType, sNumGettingWorsesName, &sNumWorsesAttr);
 
 	// Tell the server our name!
 	static char* sModuleName = "QTSSFlowControlModule";
@@ -206,7 +192,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	//If the initial values of our dictionary items aren't yet in, put them in.
 	InitializeDictionaryItems(inParams->inRTPStream);
 
-	QTSS_RTPStreamObject theStream = inParams->inRTPStream;
+	RTPStream* theStream = (RTPStream*)inParams->inRTPStream;
 
 	bool ratchetMore = false;
 	bool ratchetLess = false;
@@ -214,28 +200,20 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	bool clearPercentLossThinCount = true;
 	bool clearPercentLossThickCount = true;
 
-	uint32_t* uint32_tPtr = nullptr;
+	boost::optional<boost::any> opt;
 	uint32_t theLen = 0;
-
-	uint32_t theNumLossesAboveTol = 0;
-	uint32_t theNumLossesBelowTol = 0;
-	uint32_t theNumWorses = 0;
 
 	// Get our current counts for this stream. If any of these aren't present, something is seriously wrong
 	// with this dictionary, so we should probably just abort
-	QTSSDictionary *dict = (QTSSDictionary *)theStream;
-	dict->GetValuePtr(sNumLossesAboveTolAttr, 0, (void**)&uint32_tPtr, &theLen);
-	if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
-		theNumLossesAboveTol = *uint32_tPtr;
+	RTPStream *dict = (RTPStream *)theStream;
+	opt = dict->getAttribute(sNumLossesAboveToleranceName);
+	uint32_t theNumLossesAboveTol = (opt) ? boost::any_cast<uint32_t>(opt.value()) : 0;
 
-	dict->GetValuePtr(sNumLossesBelowTolAttr, 0, (void**)&uint32_tPtr, &theLen);
-	if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
-		theNumLossesBelowTol = *uint32_tPtr;
+	opt = dict->getAttribute(sNumLossesBelowToleranceName);
+	uint32_t theNumLossesBelowTol = (opt) ? boost::any_cast<uint32_t>(opt.value()) : 0;
 
-	dict->GetValuePtr(sNumWorsesAttr, 0, (void**)&uint32_tPtr, &theLen);
-	if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
-		theNumWorses = *uint32_tPtr;
-
+	opt = dict->getAttribute(sNumGettingWorsesName);
+	uint32_t theNumWorses = (opt) ? boost::any_cast<uint32_t>(opt.value()) : 0;
 
 	//First take any action necessitated by the loss percent
 	uint16_t value = ((RTPStream*)inParams->inRTPStream)->GetPercentPacketsLost();
@@ -265,7 +243,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 #if FLOW_CONTROL_DEBUGGING
 			printf("Percent loss too high: Incrementing percent loss count to %"   _U32BITARG_   "\n", theNumLossesAboveTol);
 #endif
-			(void)QTSS_SetValue(theStream, sNumLossesAboveTolAttr, 0, &theNumLossesAboveTol, sizeof(theNumLossesAboveTol));
+			theStream->addAttribute(sNumLossesAboveToleranceName, theNumLossesAboveTol);
 			clearPercentLossThinCount = false;
 		}
 	}
@@ -285,7 +263,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 #if FLOW_CONTROL_DEBUGGING
 			printf("Percent is low: Incrementing percent loss count to %"   _U32BITARG_   "\n", theNumLossesBelowTol);
 #endif
-			(void)QTSS_SetValue(theStream, sNumLossesBelowTolAttr, 0, &theNumLossesBelowTol, sizeof(theNumLossesBelowTol));
+			theStream->addAttribute(sNumLossesBelowToleranceName, theNumLossesBelowTol);
 			clearPercentLossThickCount = false;
 		}
 	}
@@ -330,30 +308,22 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 	if (ratchetMore || ratchetLess)
 	{
 
-		uint32_t curQuality = 0;
-		QTSSDictionary *dict = (QTSSDictionary *)theStream;
-		dict->GetValuePtr(qtssRTPStrQualityLevel, 0, (void**)&uint32_tPtr, &theLen);
-		if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
-			curQuality = *uint32_tPtr;
-
-		uint32_t numQualityLevels = 0;
-		dict->GetValuePtr(qtssRTPStrNumQualityLevels, 0, (void**)&uint32_tPtr, &theLen);
-		if ((uint32_tPtr != nullptr) && (theLen == sizeof(uint32_t)))
-			numQualityLevels = *uint32_tPtr;
+		uint32_t curQuality = dict->GetQualityLevel();
+		uint32_t numQualityLevels = dict->GetNumQualityLevels();
 
 		if ((ratchetLess) && (curQuality < numQualityLevels))
 		{
 			curQuality++;
 			if (curQuality > 1) // v3.0.1=v2.0.1 make level 2 means key frames in the file or max if reflected.
 				curQuality = numQualityLevels;
-			(void)QTSS_SetValue(theStream, qtssRTPStrQualityLevel, 0, &curQuality, sizeof(curQuality));
+			theStream->SetQualityLevel(curQuality);
 		}
 		else if ((ratchetMore) && (curQuality > 0))
 		{
 			curQuality--;
 			if (curQuality > 1)  // v3.0.1=v2.0.1 make level 2 means key frames in the file or max if reflected.
 				curQuality = 1;
-			(void)QTSS_SetValue(theStream, qtssRTPStrQualityLevel, 0, &curQuality, sizeof(curQuality));
+			theStream->SetQualityLevel(curQuality);
 		}
 
 
@@ -395,7 +365,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 #if FLOW_CONTROL_DEBUGGING
 		printf("Clearing num losses above tolerance count\n");
 #endif
-		(void)QTSS_SetValue(theStream, sNumLossesAboveTolAttr, 0, &zero, sizeof(zero));
+		theStream->addAttribute(sNumLossesAboveToleranceName, zero);
 	}
 	if (clearPercentLossThickCount)
 	{
@@ -403,7 +373,7 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 		printf("Clearing num losses below tolerance count\n");
 #endif
 
-		(void)QTSS_SetValue(theStream, sNumLossesBelowTolAttr, 0, &zero, sizeof(zero));
+		theStream->addAttribute(sNumLossesBelowToleranceName, zero);
 	}
 	return QTSS_NoErr;
 }
@@ -413,13 +383,14 @@ void    InitializeDictionaryItems(QTSS_RTPStreamObject inStream)
 	uint32_t* theValue = nullptr;
 	uint32_t theValueLen = 0;
 
-	QTSS_Error theErr = ((QTSSDictionary*)inStream)->GetValuePtr(sNumLossesAboveTolAttr, 0, (void**)&theValue, &theValueLen);
+	RTPStream *stream = (RTPStream *)inStream;
+	boost::optional<boost::any> opt = stream->getAttribute(sNumLossesAboveToleranceName);
 
-	if (theErr != QTSS_NoErr)
+	if (!opt)
 	{
 		// The dictionary parameters haven't been initialized yet. Just set them all to 0.
-		(void)QTSS_SetValue(inStream, sNumLossesAboveTolAttr, 0, &theValueLen, sizeof(theValueLen));
-		(void)QTSS_SetValue(inStream, sNumLossesBelowTolAttr, 0, &theValueLen, sizeof(theValueLen));
+		stream->addAttribute(sNumLossesAboveToleranceName, 0);
+		stream->addAttribute(sNumLossesBelowToleranceName, 0);
 		(void)QTSS_SetValue(inStream, sNumWorsesAttr, 0, &theValueLen, sizeof(theValueLen));
 	}
 }

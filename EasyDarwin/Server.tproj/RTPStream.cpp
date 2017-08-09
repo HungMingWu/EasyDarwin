@@ -72,53 +72,6 @@
 
 #define RTCP_TESTING 0
 
-
-QTSSAttrInfoDict::AttrInfo  RTPStream::sAttributes[] =
-{   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
-	/* 0  */ {},
-	/* 1  */ {},
-	/* 2  */ {},
-	/* 3  */ {},
-	/* 4  */ { "qtssRTPStrFirstSeqNumber",          nullptr,   qtssAttrDataTypeSInt16, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
-	/* 5  */ { "qtssRTPStrFirstTimestamp",          nullptr,   qtssAttrDataTypeint32_t, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
-	/* 6  */ { "qtssRTPStrTimescale",               nullptr,   qtssAttrDataTypeint32_t, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
-	/* 7  */ { "qtssRTPStrQualityLevel",            nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
-	/* 8  */ { "qtssRTPStrNumQualityLevels",        nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite   },
-	/* 9  */ {},
-
-	/* 10 */ {},
-	/* 11 */ {},
-	/* 12 */ {},
-	/* 13 */ {},
-	/* 14 */ {},
-	/* 15 */ {},
-	/* 16 */ {},
-	/* 17 */ {},
-	/* 18 */ {},
-	/* 19 */ {},
-	/* 20 */ {},
-	/* 21 */ {},
-	/* 22 */ {},
-	/* 23 */ {},
-	/* 24 */ {},
-	/* 25 */ {},
-	/* 26 */ {},
-	/* 27 */ {},
-	/* 28 */ {},
-	/* 29 */ { "qtssRTPStrIsTCP",                   nullptr,   qtssAttrDataTypeBool16, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 30 */ {},
-	/* 31 */ {},
-	/* 32 */ {},
-	/* 33 */ {},
-	/* 34 */ {},
-	/* 35 */ { "qtssRTPStrPacketCountInRTCPInterval",       nullptr,   qtssAttrDataTypeUInt32, qtssAttrModeRead | qtssAttrModePreempSafe  },
-	/* 36 */ {},
-	/* 37 */ {},
-	/* 38 */ {},
-	/* 39 */ {}
-
-};
-
 boost::string_view RTPStream::sChannelNums[] =
 {
 	"0",
@@ -140,17 +93,8 @@ char *RTPStream::TCP = "TCP";
 
 QTSS_ModuleState RTPStream::sRTCPProcessModuleState = { nullptr, 0, nullptr, false };
 
-void RTPStream::Initialize()
-{
-	for (int x = 0; x < qtssRTPStrNumParams; x++)
-		QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTPStreamDictIndex)->
-		SetAttribute(x, sAttributes[x].fAttrName, sAttributes[x].fFuncPtr,
-			sAttributes[x].fAttrDataType, sAttributes[x].fAttrPermission);
-}
-
 RTPStream::RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession)
-	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTPStreamDictIndex), nullptr),
-	fLastQualityChange(0),
+	: fLastQualityChange(0),
 	fSockets(nullptr),
 	fSession(inSession),
 	fBytesSentThisInterval(0),
@@ -271,16 +215,6 @@ RTPStream::RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession)
 	sprintf(fSsrcString, "%"   _U32BITARG_   "", fSsrc);
 	fSsrcStringPtr.Len = ::strlen(fSsrcString);
 	Assert(fSsrcStringPtr.Len < kMaxSsrcSizeInBytes);
-
-	// SETUP DICTIONARY ATTRIBUTES
-
-	this->SetVal(qtssRTPStrFirstSeqNumber, &fFirstSeqNumber, sizeof(fFirstSeqNumber));
-	this->SetVal(qtssRTPStrFirstTimestamp, &fFirstTimeStamp, sizeof(fFirstTimeStamp));
-	this->SetVal(qtssRTPStrTimescale, &fTimescale, sizeof(fTimescale));
-	this->SetVal(qtssRTPStrQualityLevel, &fQualityLevel, sizeof(fQualityLevel));
-	this->SetVal(qtssRTPStrNumQualityLevels, &fNumQualityLevels, sizeof(fNumQualityLevels));
-
-	this->SetVal(qtssRTPStrIsTCP, &fIsTCP, sizeof(fIsTCP));
 }
 
 RTPStream::~RTPStream()

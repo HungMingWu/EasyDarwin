@@ -36,6 +36,8 @@
 #endif
 
 #include <memory>
+#include <boost/spirit/include/qi.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include "RTSPRequestInterface.h"
 #include "RTSPSessionInterface.h"
@@ -51,7 +53,7 @@ std::string RTSPRequestInterface::sPremadeHeader;
 std::string RTSPRequestInterface::sPremadeNoHeader;
 
 
-StrPtrLen   RTSPRequestInterface::sColonSpace(": ", 2);
+static boost::string_view ColonSpace(": ");
 
 std::string PutStatusLine(QTSS_RTSPStatusCode status, RTSPProtocol::RTSPVersion version)
 {
@@ -72,16 +74,10 @@ void  RTSPRequestInterface::Initialize(void)
 
 	StrPtrLen temp = QTSServerInterface::GetServerHeader();
 	sPremadeHeader += std::string(temp.Ptr, temp.Len) + "\r\n";
-	temp = RTSPProtocol::GetHeaderString(qtssCSeqHeader);
-	sPremadeHeader += std::string(temp.Ptr, temp.Len) + ": ";
+	sPremadeHeader += std::string(RTSPProtocol::GetHeaderString(qtssCSeqHeader)) + ": ";
 
 	sPremadeNoHeader = ::PutStatusLine(qtssSuccessOK, RTSPProtocol::k10Version);
-	temp = RTSPProtocol::GetHeaderString(qtssCSeqHeader);
-	sPremadeNoHeader += std::string(temp.Ptr, temp.Len) + ": ";
-
-	QTSSDictionaryMap* theHeaderMap = QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kRTSPHeaderDictIndex);
-	for (uint32_t y = 0; y < qtssNumHeaders; y++)
-		theHeaderMap->SetAttribute(y, RTSPProtocol::GetHeaderString(y).Ptr, nullptr, qtssAttrDataTypeCharArray, qtssAttrModeRead | qtssAttrModePreempSafe);
+	sPremadeNoHeader += std::string(RTSPProtocol::GetHeaderString(qtssCSeqHeader)) + ": ";
 }
 
 void RTSPRequestInterface::ReInit(RTSPSessionInterface *session)
@@ -151,7 +147,7 @@ void RTSPRequestInterface::AppendHeader(QTSS_RTSPHeader inHeader, boost::string_
 		this->WriteStandardHeaders();
 
 	fOutputStream->Put(RTSPProtocol::GetHeaderString(inHeader));
-	fOutputStream->Put(sColonSpace);
+	fOutputStream->Put(ColonSpace);
 	fOutputStream->Put(inValue);
 	fOutputStream->PutEOL();
 }
@@ -206,7 +202,7 @@ void RTSPRequestInterface::AppendSessionHeaderWithTimeout(boost::string_view inS
 		if (!inSessionID.empty())
 		{
 			fOutputStream->Put(RTSPProtocol::GetHeaderString(qtssSessionHeader));
-			fOutputStream->Put(sColonSpace);
+			fOutputStream->Put(ColonSpace);
 			fOutputStream->Put(inSessionID);
 
 			if (!inTimeout.empty())
@@ -221,27 +217,16 @@ void RTSPRequestInterface::AppendSessionHeaderWithTimeout(boost::string_view inS
 
 }
 
-void RTSPRequestInterface::PutTransportStripped(StrPtrLen &fullTransportHeader, StrPtrLen &fieldToStrip)
+namespace qi = boost::spirit::qi;
+
+template <typename S>
+static std::vector<std::string> spirit_direct(const S& input, char const* delimiter)
 {
-
-	// skip the fieldToStrip and echo the rest back
-	auto offset = (uint32_t)(fieldToStrip.Ptr - fullTransportHeader.Ptr);
-	StrPtrLen transportStart(fullTransportHeader.Ptr, offset);
-	while (transportStart.Len > 0) // back up removing chars up to and including ;
-	{
-		transportStart.Len--;
-		if (transportStart[transportStart.Len] == ';')
-			break;
-	}
-
-	StrPtrLen transportRemainder(fieldToStrip.Ptr, fullTransportHeader.Len - offset);
-	StringParser transportParser(&transportRemainder);
-	transportParser.ConsumeUntil(&fieldToStrip, ';'); //remainder starts with ;       
-	transportRemainder.Set(transportParser.GetCurrentPosition(), transportParser.GetDataRemaining());
-
-	fOutputStream->Put(transportStart);
-	fOutputStream->Put(transportRemainder);
-
+	std::vector<std::string> result;
+	if (!qi::parse(input.begin(), input.end(),
+		qi::raw[*(qi::char_ - qi::char_(delimiter))] % qi::char_(delimiter), result))
+		result.push_back(std::string(input));
+	return result;
 }
 
 void RTSPRequestInterface::AppendTransportHeader(boost::string_view serverPortA,
@@ -255,8 +240,8 @@ void RTSPRequestInterface::AppendTransportHeader(boost::string_view serverPortA,
 	static StrPtrLen    sSourceString(";source=");
 	static StrPtrLen    sInterleavedString(";interleaved=");
 	static StrPtrLen    sSSRC(";ssrc=");
-	static StrPtrLen    sInterLeaved("interleaved");//match the interleaved tag
-	static StrPtrLen    sClientPort("client_port");
+	static boost::string_view    sInterLeaved("interleaved");//match the interleaved tag
+	static boost::string_view    sClientPort("client_port");
 	static StrPtrLen    sClientPortString(";client_port=");
 
 	if (!fStandardHeadersWritten)
@@ -264,28 +249,20 @@ void RTSPRequestInterface::AppendTransportHeader(boost::string_view serverPortA,
 
 	// Just write out the same transport header the client sent to us.
 	fOutputStream->Put(RTSPProtocol::GetHeaderString(qtssTransportHeader));
-	fOutputStream->Put(sColonSpace);
+	fOutputStream->Put(ColonSpace);
 
-	StrPtrLen outFirstTransport(fFirstTransport.GetAsCString());
-	std::unique_ptr<char[]> outFirstTransportDeleter(outFirstTransport.Ptr);
-	outFirstTransport.RemoveWhitespace();
-	while (outFirstTransport[outFirstTransport.Len - 1] == ';')
-		outFirstTransport.Len--;
-
-	// see if it contains an interleaved field or client port field
-	StrPtrLen stripClientPortStr;
-	StrPtrLen stripInterleavedStr;
-	(void)outFirstTransport.FindStringIgnoreCase(sClientPort, &stripClientPortStr);
-	(void)outFirstTransport.FindStringIgnoreCase(sInterLeaved, &stripInterleavedStr);
-
-	// echo back the transport without the interleaved or client ports fields we will add those in ourselves
-	if (stripClientPortStr.Len != 0)
-		PutTransportStripped(outFirstTransport, stripClientPortStr);
-	else if (stripInterleavedStr.Len != 0)
-		PutTransportStripped(outFirstTransport, stripInterleavedStr);
-	else
-		fOutputStream->Put(outFirstTransport);
-
+	std::vector<std::string> headers = spirit_direct(fFirstTransport, ";");
+	bool foundClientPort = false;
+	for (const auto & header : headers) {
+		if (header.empty()) continue;
+		if (boost::istarts_with(header, sClientPort)) {
+			foundClientPort = true;
+			continue;
+		}
+		if (boost::istarts_with(header, sInterLeaved)) continue;
+		fOutputStream->Put(header);
+		fOutputStream->Put(";");
+	}
 
 	//The source IP addr is optional, only append it if it is provided
 	if (!serverIPAddr.empty())
@@ -295,7 +272,7 @@ void RTSPRequestInterface::AppendTransportHeader(boost::string_view serverPortA,
 	}
 
 	// Append the client ports,
-	if (stripClientPortStr.Len != 0)
+	if (foundClientPort)
 	{
 		fOutputStream->Put(sClientPortString);
 		uint16_t portA = this->GetClientPortA();
@@ -350,7 +327,7 @@ void RTSPRequestInterface::AppendContentBaseHeader(boost::string_view theURL)
 		this->WriteStandardHeaders();
 
 	fOutputStream->Put(RTSPProtocol::GetHeaderString(qtssContentBaseHeader));
-	fOutputStream->Put(sColonSpace);
+	fOutputStream->Put(ColonSpace);
 	fOutputStream->Put(theURL);
 	fOutputStream->PutChar('/');
 	fOutputStream->PutEOL();
@@ -361,7 +338,7 @@ void RTSPRequestInterface::AppendRetransmitHeader(uint32_t inAckTimeout)
 	static const StrPtrLen kAckTimeout("ack-timeout=");
 
 	fOutputStream->Put(RTSPProtocol::GetHeaderString(qtssXRetransmitHeader));
-	fOutputStream->Put(sColonSpace);
+	fOutputStream->Put(ColonSpace);
 	fOutputStream->Put(RTSPProtocol::GetRetransmitProtocolName());
 	fOutputStream->PutChar(';');
 	fOutputStream->Put(kAckTimeout);
@@ -394,7 +371,7 @@ void RTSPRequestInterface::AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 
 	fOutputStream->Put(RTSPProtocol::GetHeaderString(inHeader));
 	if (inHeader != qtssSameAsLastHeader)
-		fOutputStream->Put(sColonSpace);
+		fOutputStream->Put(ColonSpace);
 
 	//Only append the various bits of RTP information if they actually have been
 	//providied

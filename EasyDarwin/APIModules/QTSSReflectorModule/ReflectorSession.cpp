@@ -55,14 +55,9 @@ FileDeleter::~FileDeleter()
 	fFilePath.Len = 0;
 }
 
-void ReflectorSession::Initialize()
-{
-	;
-}
-
-ReflectorSession::ReflectorSession(StrPtrLen* inSourceID, uint32_t inChannelNum, SourceInfo* inInfo) : Task(),
+ReflectorSession::ReflectorSession(boost::string_view inSourceID, uint32_t inChannelNum, SourceInfo* inInfo) : Task(),
 	fIsSetup(false),
-	fSessionName(inSourceID->GetAsCString()),
+	fSessionName(inSourceID),
 	fChannelNum(inChannelNum),
 	fQueueElem(),
 	fNumOutputs(0),
@@ -78,13 +73,11 @@ ReflectorSession::ReflectorSession(StrPtrLen* inSourceID, uint32_t inChannelNum,
 	this->SetTaskName("ReflectorSession");
 
 	fQueueElem.SetEnclosingObject(this);
-	if (inSourceID != nullptr)
+	if (!fSessionName.empty())
 	{
 		char streamID[QTSS_MAX_NAME_LENGTH + 10] = { 0 };
-		if (inSourceID->Len > QTSS_MAX_NAME_LENGTH)
-			inSourceID->Len = QTSS_MAX_NAME_LENGTH;
 
-		sprintf(streamID, "%s%s%d", inSourceID->Ptr, EASY_KEY_SPLITER, fChannelNum);
+		sprintf(streamID, "%s%s%d", fSessionName.c_str(), EASY_KEY_SPLITER, fChannelNum);
 		fSourceID.Ptr = new char[::strlen(streamID) + 1];
 		::strncpy(fSourceID.Ptr, streamID, strlen(streamID));
 		fSourceID.Ptr[strlen(streamID)] = '\0';
@@ -116,7 +109,6 @@ ReflectorSession::~ReflectorSession()
 	delete[] fStreamArray;
 	delete fSourceInfo;
 	fSourceID.Delete();
-	fSessionName.Delete();
 }
 
 QTSS_Error ReflectorSession::SetSessionName()
@@ -124,7 +116,7 @@ QTSS_Error ReflectorSession::SetSessionName()
 	if (fSourceID.Len > 0)
 	{
 		QTSS_RoleParams theParams;
-		theParams.easyStreamInfoParams.inStreamName = fSessionName.Ptr;
+		theParams.easyStreamInfoParams.inStreamName = (char *)fSessionName.data();
 		theParams.easyStreamInfoParams.inChannel = fChannelNum;
 		theParams.easyStreamInfoParams.inNumOutputs = fNumOutputs;
 		theParams.easyStreamInfoParams.inAction = easyRedisActionSet;
@@ -265,7 +257,7 @@ void    ReflectorSession::RemoveOutput(ReflectorOutput* inOutput, bool isClient)
 	{
 		this->SetNoneOutputStartTimeMS();
 		QTSS_RoleParams theParams;
-		theParams.easyStreamInfoParams.inStreamName = fSessionName.Ptr;
+		theParams.easyStreamInfoParams.inStreamName = (char *)fSessionName.data();
 		theParams.easyStreamInfoParams.inChannel = fChannelNum;
 		auto numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kEasyCMSFreeStreamRole);
 		for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
@@ -326,7 +318,7 @@ void*   ReflectorSession::GetStreamCookie(uint32_t inStreamID)
 void ReflectorSession::DelRedisLive()
 {
 	QTSS_RoleParams theParams;
-	theParams.easyStreamInfoParams.inStreamName = fSessionName.Ptr;
+	theParams.easyStreamInfoParams.inStreamName = (char *)fSessionName.data();
 	theParams.easyStreamInfoParams.inChannel = fChannelNum;
 	theParams.easyStreamInfoParams.inAction = easyRedisActionDelete;
 	uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRedisUpdateStreamInfoRole);
@@ -352,7 +344,7 @@ int64_t ReflectorSession::Run()
 	if ((GetNumOutputs() == 0) && (sNowTime - sNoneTime >= /*QTSServerInterface::GetServer()->GetPrefs()->GetRTPSessionTimeoutInSecs()*/35 * 1000))
 	{
 		QTSS_RoleParams theParams;
-		theParams.easyStreamInfoParams.inStreamName = fSessionName.Ptr;
+		theParams.easyStreamInfoParams.inStreamName = (char *)fSessionName.data();
 		theParams.easyStreamInfoParams.inChannel = fChannelNum;
 		auto numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kEasyCMSFreeStreamRole);
 		for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
@@ -364,7 +356,7 @@ int64_t ReflectorSession::Run()
 	else
 	{
 		QTSS_RoleParams theParams;
-		theParams.easyStreamInfoParams.inStreamName = fSessionName.Ptr;
+		theParams.easyStreamInfoParams.inStreamName = (char *)fSessionName.data();
 		theParams.easyStreamInfoParams.inChannel = fChannelNum;
 		theParams.easyStreamInfoParams.inNumOutputs = fNumOutputs;
 		theParams.easyStreamInfoParams.inBitrate = GetBitRate();

@@ -33,6 +33,7 @@
 #define debug_printf if (__RTSP_AUTH_DEBUG__) printf
 
 #include <memory>
+#include <boost/algorithm/string/predicate.hpp>
 
 #include "RTSPSession.h"
 #include "RTSPRequest.h"
@@ -104,7 +105,7 @@ static StrPtrLen    sBufferDelayStr("x-bufferdelay");
 static boost::string_view    sContentType("application/x-random-data");
 
 static StrPtrLen    sAuthAlgorithm("md5");
-static StrPtrLen    sAuthQop("auth");
+static boost::string_view    sAuthQop("auth");
 static StrPtrLen    sEmptyStr("");
 
 // static class member  initialized in RTSPSession ctor
@@ -1475,6 +1476,7 @@ void RTSPSession::CheckAuthentication() {
 
 	QTSSUserProfile* profile = fRequest->GetUserProfile();
 	StrPtrLen* userPassword = profile->GetValue(qtssUserPassword);
+	boost::string_view userPaddwordV(userPassword->Ptr, userPassword->Len);
 	QTSS_AuthScheme scheme = fRequest->GetAuthScheme();
 	bool authenticated = true;
 
@@ -1514,14 +1516,14 @@ void RTSPSession::CheckAuthentication() {
 		// The text returned by the authentication module in qtssUserPassword is MD5 hash of (username:realm:password)
 
 		uint32_t qop = fRequest->GetAuthQop();
-		StrPtrLen* opaque = fRequest->GetAuthOpaque();
-		StrPtrLen* sessionOpaque = fRTPSession->GetAuthOpaque();
+		boost::string_view opaque = fRequest->GetAuthOpaque();
+		boost::string_view sessionOpaque = fRTPSession->GetAuthOpaque();
 		uint32_t sessionQop = fRTPSession->GetAuthQop();
 
 		do {
 			// The Opaque string should be the same as that sent by the server
 			// The QoP should be the same as that sent by the server
-			if ((sessionOpaque->Len != 0) && !(sessionOpaque->Equal(*opaque))) {
+			if (!boost::iequals(sessionOpaque, opaque)) {
 				authenticated = false;
 				break;
 			}
@@ -1534,15 +1536,15 @@ void RTSPSession::CheckAuthentication() {
 			// All these are just pointers to existing memory... no new memory is allocated
 			//StrPtrLen* userName = profile->GetValue(qtssUserName);
 			//StrPtrLen* realm = fRequest->GetAuthRealm();
-			StrPtrLen* nonce = fRequest->GetAuthNonce();
+			boost::string_view nonce = fRequest->GetAuthNonce();
 			boost::string_view method = RTSPProtocol::GetMethodString(fRequest->GetMethod());
-			StrPtrLen* digestUri = fRequest->GetAuthUri();
-			StrPtrLen* responseDigest = fRequest->GetAuthResponse();
+			boost::string_view digestUri = fRequest->GetAuthUri();
+			boost::string_view responseDigest = fRequest->GetAuthResponse();
 			//StrPtrLen hA1;
-			StrPtrLen requestDigest;
-			StrPtrLen emptyStr;
+			std::string requestDigest;
+			boost::string_view emptyStr;
 
-			StrPtrLen* cNonce = fRequest->GetAuthCNonce();
+			boost::string_view cNonce = fRequest->GetAuthCNonce();
 			// Since qtssUserPassword = md5(username:realm:password)
 			// Just convert the 16 bit hash to a 32 bit char array to get HA1
 			//HashToString((unsigned char *)userPassword->Ptr, &hA1);
@@ -1551,17 +1553,17 @@ void RTSPSession::CheckAuthentication() {
 
 			// For qop="auth"
 			if (qop == RTSPSessionInterface::kAuthQop) {
-				StrPtrLen* nonceCount = fRequest->GetAuthNonceCount();
+				boost::string_view nonceCount = fRequest->GetAuthNonceCount();
 				uint32_t ncValue = 0;
 
 				// Convert nounce count (which is a string of 8 hex digits) into a uint32_t
-				if (nonceCount && nonceCount->Len)
+				if (!nonceCount.empty())
 				{
 					// Convert nounce count (which is a string of 8 hex digits) into a uint32_t                 
 					uint32_t bufSize = sizeof(ncValue);
-					StrPtrLenDel tempString(nonceCount->GetAsCString());
-					tempString.ToUpper();
-					QTSSDataConverter::ConvertCHexStringToBytes(tempString.Ptr,
+					std::string tempString(nonceCount);
+					//tempString.ToUpper();
+					QTSSDataConverter::ConvertCHexStringToBytes((char *)tempString.c_str(),
 						&ncValue,
 						&bufSize);
 					ncValue = ntohl(ncValue);
@@ -1574,31 +1576,27 @@ void RTSPSession::CheckAuthentication() {
 				}
 
 				// allocates memory for requestDigest.Ptr
-				CalcRequestDigest(userPassword, nonce, nonceCount, cNonce, &sAuthQop, method, digestUri, &emptyStr, &requestDigest);
+				requestDigest = CalcRequestDigest(userPaddwordV, nonce, nonceCount, cNonce, sAuthQop, method, digestUri, emptyStr);
 				// If they are equal, check if nonce used by client is same as the one sent by the server
 
 			}   // For No qop
 			else if (qop == RTSPSessionInterface::kNoQop)
 			{
 				// allocates memory for requestDigest->Ptr
-				CalcRequestDigest(userPassword, nonce, &emptyStr, &emptyStr, &emptyStr, method, digestUri, &emptyStr, &requestDigest);
+				requestDigest = CalcRequestDigest(userPaddwordV, nonce, emptyStr, emptyStr, emptyStr, method, digestUri, emptyStr);
 			}
 
 			// hA1 is allocated memory 
 			//delete [] hA1.Ptr;
 
-			if (responseDigest->Equal(requestDigest)) {
-				if (!(nonce->Equal(*(fRTPSession->GetAuthNonce()))))
+			if (boost::equals(responseDigest, requestDigest)) {
+				if (!boost::equals(nonce, fRTPSession->GetAuthNonce()))
 					fRequest->SetStale(true);
 				authenticated = true;
 			}
 			else {
 				authenticated = false;
 			}
-
-			// delete the memory allocated in CalcRequestDigest above 
-			delete[] requestDigest.Ptr;
-			requestDigest.Len = 0;
 
 		} while (false);
 	}
@@ -1666,8 +1664,7 @@ void RTSPSession::SetupRequest()
 
 		// DJM PROTOTYPE
 		boost::string_view require = fRequest->GetHeaderDict().Get(qtssRequireHeader);
-		StrPtrLen temp1((char *)require.data(), require.length());
-		if (!require.empty() && temp1.EqualIgnoreCase(RTSPProtocol::GetHeaderString(qtssXRandomDataSizeHeader)))
+		if (boost::iequals(require, RTSPProtocol::GetHeaderString(qtssXRandomDataSizeHeader)))
 		{
 			body = (char*)RTSPSessionInterface::sOptionsRequestBody;
 			bodySizeBytes = fRequest->GetRandomDataSize();

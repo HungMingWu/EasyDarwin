@@ -43,34 +43,30 @@ enum {
 };
 
 // HashToString allocates memory for hashStr->Ptr 
-void HashToString(unsigned char aHash[kHashLen], StrPtrLen* hashStr);
+std::string HashToString(unsigned char aHash[kHashLen]);
 
 // allocates memory for hashA1Hex16Bit->Ptr                   
 void CalcMD5HA1(StrPtrLen* userName, StrPtrLen* realm, StrPtrLen* userPassword, StrPtrLen* hashA1Hex16Bit);
 
-// allocates memory to hA1->Ptr
-void CalcHA1(StrPtrLen* algorithm,
+std::string CalcHA1(StrPtrLen* algorithm,
 	StrPtrLen* userName,
 	StrPtrLen* realm,
 	StrPtrLen* userPassword,
 	StrPtrLen* nonce,
-	StrPtrLen* cNonce,
-	StrPtrLen* hA1
+	StrPtrLen* cNonce
 );
 
 // allocates memory to hA1->Ptr
-void CalcHA1Md5Sess(StrPtrLen* hashA1Hex16Bit, StrPtrLen* nonce, StrPtrLen* cNonce, StrPtrLen* hA1);
-
-// allocates memory for requestDigest->Ptr               
-void CalcRequestDigest(StrPtrLen* hA1,
-	StrPtrLen* nonce,
-	StrPtrLen* nonceCount,
-	StrPtrLen* cNonce,
-	StrPtrLen* qop,
+void CalcHA1Md5Sess(StrPtrLen* hashA1Hex16Bit, StrPtrLen* nonce, StrPtrLen* cNonce, std::string* hA1);
+          
+std::string CalcRequestDigest(boost::string_view hA1,
+	boost::string_view nonce,
+	boost::string_view nonceCount,
+	boost::string_view cNonce,
+	boost::string_view qop,
 	boost::string_view method,
-	StrPtrLen* digestUri,
-	StrPtrLen* hEntity,
-	StrPtrLen* requestDigest
+	boost::string_view digestUri,
+	boost::string_view hEntity
 );
 
 void to64(register char* s, register int32_t v, register int n);

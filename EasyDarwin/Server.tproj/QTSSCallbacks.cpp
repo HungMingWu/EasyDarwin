@@ -668,7 +668,7 @@ void* QTSSCallbacks::Easy_GetRTSPPushSessions()
 		if (clientSession == nullptr) continue;
 
 		session.Url = std::string(clientSession->GetAbsoluteURL());
-		session.Name = theSession->GetStreamName()->Ptr;
+		session.Name = theSession->GetStreamName().data();
 		session.numOutputs = theSession->GetNumOutputs();
 		session.channel = theSession->GetChannelNum();
 		ack.AddSession(session);

@@ -67,8 +67,6 @@ public:
 		if (fRTSPSession != nullptr)
 			fRTSPSession->DecrementObjectHolderCount();
 		delete[] fSRBuffer.Ptr;
-		delete[] fAuthNonce.Ptr;
-		delete[] fAuthOpaque.Ptr;
 	}
 
 	//Timeouts. This allows clients to refresh the timeout on this session
@@ -158,10 +156,10 @@ public:
 	// Authentication information that needs to be kept around
 	// for the duration of the session      
 	QTSS_AuthScheme GetAuthScheme() { return fAuthScheme; }
-	StrPtrLen*      GetAuthNonce() { return &fAuthNonce; }
+	boost::string_view GetAuthNonce() { return fAuthNonce; }
 	uint32_t          GetAuthQop() { return fAuthQop; }
 	uint32_t          GetAuthNonceCount() { return fAuthNonceCount; }
-	StrPtrLen*      GetAuthOpaque() { return &fAuthOpaque; }
+	boost::string_view GetAuthOpaque() { return fAuthOpaque; }
 	void            SetAuthScheme(QTSS_AuthScheme scheme) { fAuthScheme = scheme; }
 	// Use this if the auth scheme or the qop has to be changed from the defaults 
 	// of scheme = Digest, and qop = auth
@@ -344,10 +342,10 @@ private:
 	// Authentication information that needs to be kept around
 	// for the duration of the session      
 	QTSS_AuthScheme             fAuthScheme;
-	StrPtrLen                   fAuthNonce;
+	std::string                 fAuthNonce;
 	uint32_t                      fAuthQop{RTSPSessionInterface::kNoQop};
 	uint32_t                      fAuthNonceCount{0};
-	StrPtrLen                   fAuthOpaque;
+	std::string                 fAuthOpaque;
 	uint32_t                      fQualityUpdate;
 
 	uint32_t                      fFramesSkipped{0};

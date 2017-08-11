@@ -72,75 +72,75 @@ QTSS_RTSPMethod RTSPProtocol::GetMethod(boost::string_view inMethodStr)
 	return qtssIllegalMethod;
 }
 
-StrPtrLen RTSPProtocol::sHeaders[] =
+boost::string_view RTSPProtocol::sHeaders[] =
 {
-	StrPtrLen("Accept"),
-	StrPtrLen("Cseq"),
-	StrPtrLen("User-Agent"),
-	StrPtrLen("Transport"),
-	StrPtrLen("Session"),
-	StrPtrLen("Range"),
+	"Accept",
+	"Cseq",
+	"User-Agent",
+	"Transport",
+	"Session",
+	"Range",
 
-	StrPtrLen("Accept-Encoding"),
-	StrPtrLen("Accept-Language"),
-	StrPtrLen("Authorization"),
-	StrPtrLen("Bandwidth"),
-	StrPtrLen("Blocksize"),
-	StrPtrLen("Cache-Control"),
-	StrPtrLen("Conference"),
-	StrPtrLen("Connection"),
-	StrPtrLen("Content-Base"),
-	StrPtrLen("Content-Encoding"),
-	StrPtrLen("Content-Language"),
-	StrPtrLen("Content-length"),
-	StrPtrLen("Content-Location"),
-	StrPtrLen("Content-Type"),
-	StrPtrLen("Date"),
-	StrPtrLen("Expires"),
-	StrPtrLen("From"),
-	StrPtrLen("Host"),
-	StrPtrLen("If-Match"),
-	StrPtrLen("If-Modified-Since"),
-	StrPtrLen("Last-Modified"),
-	StrPtrLen("Location"),
-	StrPtrLen("Proxy-Authenticate"),
-	StrPtrLen("Proxy-Require"),
-	StrPtrLen("Referer"),
-	StrPtrLen("Retry-After"),
-	StrPtrLen("Require"),
-	StrPtrLen("RTP-Info"),
-	StrPtrLen("Scale"),
-	StrPtrLen("Speed"),
-	StrPtrLen("Timestamp"),
-	StrPtrLen("Vary"),
-	StrPtrLen("Via"),
-	StrPtrLen("Allow"),
-	StrPtrLen("Public"),
-	StrPtrLen("Server"),
-	StrPtrLen("Unsupported"),
-	StrPtrLen("WWW-Authenticate"),
-	StrPtrLen(","),
-	StrPtrLen("x-Retransmit"),
-	StrPtrLen("x-Accept-Retransmit"),
-	StrPtrLen("x-RTP-Meta-Info"),
-	StrPtrLen("x-Transport-Options"),
-	StrPtrLen("x-Packet-Range"),
-	StrPtrLen("x-Prebuffer"),
-	StrPtrLen("x-Dynamic-Rate"),
-	StrPtrLen("x-Accept-Dynamic-Rate"),
+	"Accept-Encoding",
+	"Accept-Language",
+	"Authorization",
+	"Bandwidth",
+	"Blocksize",
+	"Cache-Control",
+	"Conference",
+	"Connection",
+	"Content-Base",
+	"Content-Encoding",
+	"Content-Language",
+	"Content-length",
+	"Content-Location",
+	"Content-Type",
+	"Date",
+	"Expires",
+	"From",
+	"Host",
+	"If-Match",
+	"If-Modified-Since",
+	"Last-Modified",
+	"Location",
+	"Proxy-Authenticate",
+	"Proxy-Require",
+	"Referer",
+	"Retry-After",
+	"Require",
+	"RTP-Info",
+	"Scale",
+	"Speed",
+	"Timestamp",
+	"Vary",
+	"Via",
+	"Allow",
+	"Public",
+	"Server",
+	"Unsupported",
+	"WWW-Authenticate",
+	",",
+	"x-Retransmit",
+	"x-Accept-Retransmit",
+	"x-RTP-Meta-Info",
+	"x-Transport-Options",
+	"x-Packet-Range",
+	"x-Prebuffer",
+	"x-Dynamic-Rate",
+	"x-Accept-Dynamic-Rate",
 	// DJM PROTOTYPE
-	StrPtrLen("x-Random-Data-Size"),
+	"x-Random-Data-Size",
 };
 
-QTSS_RTSPHeader RTSPProtocol::GetRequestHeader(const StrPtrLen &inHeaderStr)
+QTSS_RTSPHeader RTSPProtocol::GetRequestHeader(boost::string_view inHeaderStr)
 {
-	if (inHeaderStr.Len == 0)
+	if (inHeaderStr.empty())
 		return qtssIllegalHeader;
 
 	QTSS_RTSPHeader theHeader = qtssIllegalHeader;
 
 	//chances are this is one of our selected "VIP" headers. so check for this.
-	switch (*inHeaderStr.Ptr)
+	switch (inHeaderStr[0])
 	{
 	case 'C':   case 'c':   theHeader = qtssCSeqHeader;         break;
 	case 'S':   case 's':   theHeader = qtssSessionHeader;      break;
@@ -155,29 +155,22 @@ QTSS_RTSPHeader RTSPProtocol::GetRequestHeader(const StrPtrLen &inHeaderStr)
 	// Check to see whether this is one of our extension headers. These
 	// are very likely to appear in requests.
 	if (theHeader == qtssExtensionHeaders)
-	{
 		for (int32_t y = qtssExtensionHeaders; y < qtssNumHeaders; y++)
-		{
-			if (inHeaderStr.EqualIgnoreCase(sHeaders[y].Ptr, sHeaders[y].Len))
+			if (boost::iequals(inHeaderStr, sHeaders[y]))
 				return y;
-		}
-	}
 
 	//
 	// It's not one of our extension headers, check to see if this is one of
 	// our normal VIP headers
-	if ((theHeader != qtssIllegalHeader) &&
-		(inHeaderStr.EqualIgnoreCase(sHeaders[theHeader].Ptr, sHeaders[theHeader].Len)))
+	if (theHeader != qtssIllegalHeader && boost::iequals(inHeaderStr, sHeaders[theHeader]))
 		return theHeader;
 
 	//
 	//If this isn't one of our VIP headers, go through the remaining request headers, trying
 	//to find the right one.
 	for (int32_t x = qtssNumVIPHeaders; x < qtssNumHeaders; x++)
-	{
-		if (inHeaderStr.EqualIgnoreCase(sHeaders[x].Ptr, sHeaders[x].Len))
+		if (boost::iequals(inHeaderStr, sHeaders[x]))
 			return x;
-	}
 	return qtssIllegalHeader;
 }
 
@@ -344,9 +337,9 @@ StrPtrLen RTSPProtocol::sVersionString[] =
 	StrPtrLen("RTSP/1.0")
 };
 
-RTSPProtocol::RTSPVersion RTSPProtocol::GetVersion(StrPtrLen &versionStr)
+RTSPProtocol::RTSPVersion RTSPProtocol::GetVersion(boost::string_view versionStr)
 {
-	if (versionStr.Len != 8)
+	if (versionStr.length() != 8)
 		return kIllegalVersion;
 	else
 		return k10Version;

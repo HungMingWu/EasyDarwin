@@ -28,6 +28,7 @@
 	 Contains:   Implementation of object defined in .h
  */
 
+#include <memory>
 #include "RTPSessionInterface.h"
 #include "QTSServerInterface.h"
 #include "RTSPRequestInterface.h"
@@ -171,10 +172,6 @@ void RTPSessionInterface::CreateDigestAuthenticationNonce() {
 	auto* curTimeStr = new char[128];
 	sprintf(curTimeStr, "%" _64BITARG_ "d", curTime);
 
-	// Delete old nonce before creating a new one
-	if (fAuthNonce.Ptr != nullptr)
-		delete[] fAuthNonce.Ptr;
-
 	MD5_CTX ctxt;
 	unsigned char nonceStr[16];
 	unsigned char colon[] = ":";
@@ -184,7 +181,7 @@ void RTPSessionInterface::CreateDigestAuthenticationNonce() {
 	MD5_Update(&ctxt, (unsigned char *)colon, 1);
 	MD5_Update(&ctxt, (unsigned char *)curTimeStr, ::strlen(curTimeStr));
 	MD5_Final(nonceStr, &ctxt);
-	HashToString(nonceStr, &fAuthNonce);
+	fAuthNonce = HashToString(nonceStr);
 
 	delete[] curTimeStr; // No longer required once nonce is created
 
@@ -205,7 +202,7 @@ void RTPSessionInterface::SetChallengeParams(QTSS_AuthScheme scheme, uint32_t qo
 		// auth-int (Authentication with integrity) not supported yet
 		fAuthQop = qop;
 
-		if (newNonce || (fAuthNonce.Ptr == nullptr))
+		if (newNonce || fAuthNonce.empty())
 			this->CreateDigestAuthenticationNonce();
 
 		if (createOpaque) {
@@ -213,22 +210,14 @@ void RTPSessionInterface::SetChallengeParams(QTSS_AuthScheme scheme, uint32_t qo
 			// The base64 encoded form of the string is made the opaque value
 			int64_t theMicroseconds = OS::Microseconds();
 			::srand((unsigned int)theMicroseconds);
-			uint32_t randomNum = ::rand();
-			auto* randomNumStr = new char[128];
-			sprintf(randomNumStr, "%"   _U32BITARG_   "", randomNum);
-			int len = ::strlen(randomNumStr);
-			fAuthOpaque.Len = Base64encode_len(len);
-			auto *opaqueStr = new char[fAuthOpaque.Len];
-			(void)Base64encode(opaqueStr, randomNumStr, len);
-			delete[] randomNumStr;                 // Don't need this anymore
-			if (fAuthOpaque.Ptr != nullptr)             // Delete existing pointer before assigning new
-				delete[] fAuthOpaque.Ptr;              // one
-			fAuthOpaque.Ptr = opaqueStr;
+			std::string randomNumStr = std::to_string(::rand());
+			size_t AuthOpaque_Len = Base64encode_len(randomNumStr.length());
+			std::unique_ptr<char[]> opaqueStr(new char[AuthOpaque_Len]);
+			(void)Base64encode(opaqueStr.get(), randomNumStr.c_str(), (int)randomNumStr.length());
+			fAuthOpaque = std::string(opaqueStr.get(), AuthOpaque_Len);
 		}
 		else {
-			if (fAuthOpaque.Ptr != nullptr)
-				delete[] fAuthOpaque.Ptr;
-			fAuthOpaque.Len = 0;
+			fAuthOpaque.clear();
 		}
 		// Increase the Nonce Count by one
 		// This number is a count of the next request the server
@@ -240,7 +229,7 @@ void RTPSessionInterface::SetChallengeParams(QTSS_AuthScheme scheme, uint32_t qo
 }
 
 void RTPSessionInterface::UpdateDigestAuthChallengeParams(bool newNonce, bool createOpaque, uint32_t qop) {
-	if (newNonce || (fAuthNonce.Ptr == nullptr))
+	if (newNonce || fAuthNonce.empty())
 		this->CreateDigestAuthenticationNonce();
 
 
@@ -249,23 +238,14 @@ void RTPSessionInterface::UpdateDigestAuthChallengeParams(bool newNonce, bool cr
 		// The base64 encoded form of the string is made the opaque value
 		int64_t theMicroseconds = OS::Microseconds();
 		::srand((unsigned int)theMicroseconds);
-		uint32_t randomNum = ::rand();
-		auto* randomNumStr = new char[128];
-		sprintf(randomNumStr, "%"   _U32BITARG_   "", randomNum);
-		int len = ::strlen(randomNumStr);
-		fAuthOpaque.Len = Base64encode_len(len);
-		auto *opaqueStr = new char[fAuthOpaque.Len];
-		(void)Base64encode(opaqueStr, randomNumStr, len);
-		delete[] randomNumStr;                 // Don't need this anymore
-		if (fAuthOpaque.Ptr != nullptr)             // Delete existing pointer before assigning new
-			delete[] fAuthOpaque.Ptr;              // one
-		fAuthOpaque.Ptr = opaqueStr;
-		fAuthOpaque.Len = ::strlen(opaqueStr);
+		std::string randomNumStr = std::to_string(::rand());
+		size_t AuthOpaque_Len = Base64encode_len(randomNumStr.length());
+		std::unique_ptr<char[]> opaqueStr(new char[AuthOpaque_Len]);
+		(void)Base64encode(opaqueStr.get(), randomNumStr.c_str(), (int)randomNumStr.length());
+		fAuthOpaque = std::string(opaqueStr.get(), AuthOpaque_Len);
 	}
 	else {
-		if (fAuthOpaque.Ptr != nullptr)
-			delete[] fAuthOpaque.Ptr;
-		fAuthOpaque.Len = 0;
+		fAuthOpaque.clear();
 	}
 	fAuthNonceCount++;
 

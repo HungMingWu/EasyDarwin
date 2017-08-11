@@ -28,6 +28,7 @@
 	 Contains:   Implements the function declared in md5digest.h
  */
 
+#include <boost/algorithm/string/predicate.hpp>
 #include "md5.h"
 #include "md5digest.h"
 #include "StrPtrLen.h"
@@ -36,25 +37,20 @@
 static StrPtrLen sColon(":", 1);
 static StrPtrLen sMD5Sess("md5-sess", 8);
 static StrPtrLen sQopAuth("auth", 4);
-static StrPtrLen sQopAuthInt("auth-int", 8);
+static boost::string_view sQopAuthInt("auth-int", 8);
 
 // allocates memory for hashStr->Ptr
-void HashToString(unsigned char aHash[kHashLen], StrPtrLen* hashStr) {
-	uint16_t i;
+std::string HashToString(unsigned char aHash[kHashLen]) {
 	uint8_t hexDigit;
-	// Allocating memory
-	auto* str = new char[kHashHexLen + 1];
-	str[kHashHexLen] = 0;
-
-	for (i = 0; i < kHashLen; i++) {
+	std::string str;
+	for (uint16_t i = 0; i < kHashLen; i++) {
 		hexDigit = (aHash[i] >> 4) & 0xF;
-		str[i * 2] = (hexDigit <= 9) ? (hexDigit + '0') : (hexDigit + 'a' - 10);
+		str += (hexDigit <= 9) ? (hexDigit + '0') : (hexDigit + 'a' - 10);
 		hexDigit = aHash[i] & 0xF;
-		str[i * 2 + 1] = (hexDigit <= 9) ? (hexDigit + '0') : (hexDigit + 'a' - 10);
+		str += (hexDigit <= 9) ? (hexDigit + '0') : (hexDigit + 'a' - 10);
 	}
 
-	hashStr->Ptr = str;
-	hashStr->Len = kHashHexLen;
+	return str;
 }
 
 // allocates memory for hashA1Hex16Bit->Ptr
@@ -89,14 +85,12 @@ void CalcMD5HA1(StrPtrLen* userName,
 	hashA1Hex16Bit->Len = kHashLen;
 }
 
-// allocates memory to hA1->Ptr
-void CalcHA1(StrPtrLen* algorithm,
+std::string CalcHA1(StrPtrLen* algorithm,
 	StrPtrLen* userName,
 	StrPtrLen* realm,
 	StrPtrLen* userPassword,
 	StrPtrLen* nonce,
-	StrPtrLen* cNonce,
-	StrPtrLen* hA1
+	StrPtrLen* cNonce
 )
 {
 	// parameters must be valid pointers 
@@ -107,8 +101,6 @@ void CalcHA1(StrPtrLen* algorithm,
 	Assert(userPassword);
 	Assert(nonce);
 	Assert(cNonce);
-	Assert(hA1);
-	Assert(hA1->Ptr == nullptr); //This is the result. A Ptr here will be replaced. Value should be NULL.
 
 	MD5_CTX context;
 	unsigned char aHash[kHashLen];
@@ -134,11 +126,11 @@ void CalcHA1(StrPtrLen* algorithm,
 		MD5_Update(&context, (unsigned char *)cNonce->Ptr, cNonce->Len);
 		MD5_Final(aHash, &context);
 	}
-	HashToString(aHash, hA1);
+	return HashToString(aHash);
 }
 
 // allocates memory to hA1->Ptr
-void CalcHA1Md5Sess(StrPtrLen* hashA1Hex16Bit, StrPtrLen* nonce, StrPtrLen* cNonce, StrPtrLen* hA1)
+void CalcHA1Md5Sess(StrPtrLen* hashA1Hex16Bit, StrPtrLen* nonce, StrPtrLen* cNonce, std::string* hA1)
 {
 	// parameters must be valid pointers 
 	// It is ok if parameter->Ptr is NULL as long as parameter->Len is 0
@@ -147,7 +139,6 @@ void CalcHA1Md5Sess(StrPtrLen* hashA1Hex16Bit, StrPtrLen* nonce, StrPtrLen* cNon
 	Assert(nonce);
 	Assert(cNonce);
 	Assert(hA1);
-	Assert(hA1->Ptr == nullptr); //This is the result. A Ptr here will be replaced. Value should be NULL.
 
 	MD5_CTX context;
 	unsigned char aHash[kHashLen];
@@ -161,35 +152,21 @@ void CalcHA1Md5Sess(StrPtrLen* hashA1Hex16Bit, StrPtrLen* nonce, StrPtrLen* cNon
 	MD5_Final(aHash, &context);
 
 	// allocates memory to hA1->Ptr
-	HashToString(aHash, hA1);
+	*hA1 = HashToString(aHash);
 }
 
-// allocates memory for requestDigest->Ptr              
-void CalcRequestDigest(StrPtrLen* hA1,
-	StrPtrLen* nonce,
-	StrPtrLen* nonceCount,
-	StrPtrLen* cNonce,
-	StrPtrLen* qop,
+           
+std::string CalcRequestDigest(boost::string_view hA1,
+	boost::string_view nonce,
+	boost::string_view nonceCount,
+	boost::string_view cNonce,
+	boost::string_view qop,
 	boost::string_view method,
-	StrPtrLen* digestUri,
-	StrPtrLen* hEntity,
-	StrPtrLen* requestDigest
+	boost::string_view digestUri,
+	boost::string_view hEntity
 )
 {
-	// parameters must be valid pointers 
-	// It is ok if parameter->Ptr is NULL as long as parameter->Len is 0
-	Assert(hA1);
-	Assert(nonce);
-	Assert(nonceCount);
-	Assert(cNonce);
-	Assert(qop);
-	Assert(digestUri);
-	Assert(hEntity);
-	Assert(requestDigest);
-	Assert(requestDigest->Ptr == nullptr); //This is the result. A Ptr here will be replaced. Value should be NULL.
-
 	unsigned char aHash[kHashLen], requestHash[kHashLen];
-	StrPtrLen hA2;
 	MD5_CTX context;
 
 
@@ -204,39 +181,36 @@ void CalcRequestDigest(StrPtrLen* hA1,
 	MD5_Init(&context);
 	MD5_Update(&context, (unsigned char *)method.data(), method.length());
 	MD5_Update(&context, (unsigned char *)sColon.Ptr, sColon.Len);
-	MD5_Update(&context, (unsigned char *)digestUri->Ptr, digestUri->Len);
-	if (qop->Equal(sQopAuthInt)) {
+	MD5_Update(&context, (unsigned char *)digestUri.data(), digestUri.length());
+	if (boost::equals(qop, sQopAuthInt)) {
 		MD5_Update(&context, (unsigned char *)sColon.Ptr, sColon.Len);
-		MD5_Update(&context, (unsigned char *)hEntity->Ptr, hEntity->Len);
+		MD5_Update(&context, (unsigned char *)hEntity.data(), hEntity.length());
 	}
 	MD5_Final(aHash, &context);
 
 	// HashToString allocates memory for hA2...delete it after request-digest is created
-	HashToString(aHash, &hA2);
+	std::string hA2 = HashToString(aHash);
 	// Calculate request-digest
 	// where request-digest for qop="auth" or qop="auth-int" is
 	//          request-digest  = KD( H(A1), nonce:nonceCount:cNonce:qop:H(A2) )
 	// and if qop directive isn't present is
 	//          request-digest = KD( H(A1), nonce:H(A2) )
 	MD5_Init(&context);
-	MD5_Update(&context, (unsigned char *)hA1->Ptr, hA1->Len);
+	MD5_Update(&context, (unsigned char *)hA1.data(), hA1.length());
 	MD5_Update(&context, (unsigned char *)sColon.Ptr, sColon.Len);
-	MD5_Update(&context, (unsigned char *)nonce->Ptr, nonce->Len);
+	MD5_Update(&context, (unsigned char *)nonce.data(), nonce.length());
 	MD5_Update(&context, (unsigned char *)sColon.Ptr, sColon.Len);
-	if (qop->Ptr != nullptr) {
-		MD5_Update(&context, (unsigned char *)nonceCount->Ptr, nonceCount->Len);
+	if (!qop.empty()) {
+		MD5_Update(&context, (unsigned char *)nonceCount.data(), nonceCount.length());
 		MD5_Update(&context, (unsigned char *)sColon.Ptr, sColon.Len);
-		MD5_Update(&context, (unsigned char *)cNonce->Ptr, cNonce->Len);
+		MD5_Update(&context, (unsigned char *)cNonce.data(), cNonce.length());
 		MD5_Update(&context, (unsigned char *)sColon.Ptr, sColon.Len);
-		MD5_Update(&context, (unsigned char *)qop->Ptr, qop->Len);
+		MD5_Update(&context, (unsigned char *)qop.data(), qop.length());
 		MD5_Update(&context, (unsigned char *)sColon.Ptr, sColon.Len);
 	}
-	MD5_Update(&context, (unsigned char *)hA2.Ptr, hA2.Len);
+	MD5_Update(&context, (unsigned char *)hA2.c_str(), hA2.length());
 	MD5_Final(requestHash, &context);
-	HashToString(requestHash, requestDigest);
-
-	// Deleting memory allocated for hA2
-	delete[] hA2.Ptr;
+	return HashToString(requestHash);
 }
 
 

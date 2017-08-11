@@ -62,6 +62,7 @@ public:
 	}
 	void clear() { infos.clear(); }
 };
+
 class RTSPRequestInterface
 {
 	//The full local path to the file. This Attribute is first set after the Routing Role has run and before any other role is called. 
@@ -208,14 +209,14 @@ public:
 
 	QTSS_AuthScheme             GetAuthScheme() { return fAuthScheme; }
 	void                        SetAuthScheme(QTSS_AuthScheme scheme) { fAuthScheme = scheme; }
-	StrPtrLen*                  GetAuthRealm() { return &fAuthRealm; }
-	StrPtrLen*                  GetAuthNonce() { return &fAuthNonce; }
-	StrPtrLen*                  GetAuthUri() { return &fAuthUri; }
-	uint32_t                      GetAuthQop() { return fAuthQop; }
-	StrPtrLen*                  GetAuthNonceCount() { return &fAuthNonceCount; }
-	StrPtrLen*                  GetAuthCNonce() { return &fAuthCNonce; }
-	StrPtrLen*                  GetAuthResponse() { return &fAuthResponse; }
-	StrPtrLen*                  GetAuthOpaque() { return &fAuthOpaque; }
+	boost::string_view          GetAuthRealm() { return fAuthRealm; }
+	boost::string_view          GetAuthNonce() { return fAuthNonce; }
+	boost::string_view          GetAuthUri() { return fAuthUri; }
+	uint32_t                    GetAuthQop() { return fAuthQop; }
+	boost::string_view          GetAuthNonceCount() { return fAuthNonceCount; }
+	boost::string_view          GetAuthCNonce() { return fAuthCNonce; }
+	boost::string_view          GetAuthResponse() { return fAuthResponse; }
+	boost::string_view          GetAuthOpaque() { return fAuthOpaque; }
 	QTSSUserProfile*            GetUserProfile() { return fUserProfilePtr; }
 
 	bool                      GetStale() { return fStale; }
@@ -230,7 +231,7 @@ public:
 
 	uint32_t                      GetBandwidthHeaderBits() { return fBandwidthBits; }
 
-	StrPtrLen*                  GetRequestChallenge() { return &fAuthDigestChallenge; }
+	boost::string_view                  GetRequestChallenge() { return fAuthDigestChallenge; }
 
 	void SetLocalPath(boost::string_view localpath) { localPath = std::string(localpath); }
 	boost::string_view GetLocalPath();
@@ -291,7 +292,7 @@ protected:
 	std::string               fLateToleranceStr;
 	float                     fPrebufferAmt;
 
-	StrPtrLen                   fFirstTransport;
+	std::string               fFirstTransport;
 
 	//
 	// For reliable UDP
@@ -322,14 +323,14 @@ protected:
 											// Set to a combination of QTSS_ActionFlags 
 
 	QTSS_AuthScheme             fAuthScheme;
-	StrPtrLen                   fAuthRealm;
-	StrPtrLen                   fAuthNonce;
-	StrPtrLen                   fAuthUri;
-	uint32_t                      fAuthQop;
-	StrPtrLen                   fAuthNonceCount;
-	StrPtrLen                   fAuthCNonce;
-	StrPtrLen                   fAuthResponse;
-	StrPtrLen                   fAuthOpaque;
+	std::string                 fAuthRealm;
+	std::string                 fAuthNonce;
+	std::string                 fAuthUri;
+	uint32_t                    fAuthQop;
+	std::string                 fAuthNonceCount;
+	std::string                 fAuthCNonce;
+	std::string                 fAuthResponse;
+	std::string                 fAuthOpaque;
 	QTSSUserProfile             fUserProfile;
 	QTSSUserProfile*            fUserProfilePtr;
 	bool                      fStale;
@@ -343,8 +344,8 @@ protected:
 	uint32_t						fRandomDataSize;
 
 	uint32_t                      fBandwidthBits;
-	StrPtrLen                   fAuthDigestChallenge;
-	std::string                 fAuthDigestResponse;
+	std::string                   fAuthDigestChallenge;
+	std::string                   fAuthDigestResponse;
 private:
 
 	RTSPSessionInterface*   fSession;
@@ -352,7 +353,6 @@ private:
 
 	bool                  fStandardHeadersWritten;
 
-	void                    PutTransportStripped(StrPtrLen &outFirstTransport, StrPtrLen &outResultStr);
 	void                    WriteStandardHeaders();
 	static void             PutStatusLine(StringFormatter* putStream,
 		QTSS_RTSPStatusCode status,
@@ -364,8 +364,6 @@ private:
 	static std::string      sPremadeHeader;
 
 	static std::string      sPremadeNoHeader;
-
-	static StrPtrLen        sColonSpace;
 };
 #endif // __RTSPREQUESTINTERFACE_H__
 

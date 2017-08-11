@@ -65,18 +65,12 @@ public:
 
 	// Public interface to generic RTP packet forwarding engine
 
-	//
-	// Initialize
-	//
-	// Call initialize before calling any other function in this class
-	static void Initialize();
-
 	// Create one of these ReflectorSessions per source broadcast. For mapping purposes,
 	// the object can be constructred using an optional source ID.
 	//
 	// Caller may also provide a SourceInfo object, though it is not needed and
 	// will also need to be provided to SetupReflectorSession when that is called.
-	ReflectorSession(StrPtrLen* inSourceID, uint32_t inChannelNum = 0, SourceInfo* inInfo = nullptr);
+	ReflectorSession(boost::string_view inSourceID, uint32_t inChannelNum = 0, SourceInfo* inInfo = nullptr);
 	~ReflectorSession() override;
 
 	//
@@ -119,7 +113,7 @@ public:
 	boost::string_view GetLocalSDP()	{ return fLocalSDP; }
 
 	StrPtrLen*      GetSourceID()	{ return &fSourceID; }
-	StrPtrLen*      GetStreamName() { return &fSessionName; }
+	boost::string_view  GetStreamName() { return fSessionName; }
 	uint32_t			GetChannelNum() { return fChannelNum; }
 
 	bool			IsSetup() { return fIsSetup; }
@@ -174,7 +168,7 @@ private:
 	OSRef       fRef;
 	StrPtrLen   fSourceID;
 
-	StrPtrLen	fSessionName;
+	std::string	fSessionName;
 	uint32_t		fChannelNum;
 
 	OSQueueElem fQueueElem; // Relay uses this.

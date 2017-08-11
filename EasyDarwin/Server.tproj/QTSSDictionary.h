@@ -400,7 +400,7 @@ public:
 		kClientSessionDictIndex = 5,
 		kRTSPSessionDictIndex = 6,
 		kRTSPRequestDictIndex = 7,
-		kRTSPHeaderDictIndex = 8,
+
 		kFileDictIndex = 9,
 		kModuleDictIndex = 10,
 		kModulePrefsDictIndex = 11,

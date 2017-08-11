@@ -48,37 +48,6 @@
 #include "DateTranslator.h"
 #include "SocketUtils.h"
 
-uint8_t
-RTSPRequest::sURLStopConditions[] =
-{
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 1, //0-9      //'\t' is a stop condition
-	1, 0, 0, 1, 0, 0, 0, 0, 0, 0, //10-19    //'\r' & '\n' are stop conditions
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //20-29
-	0, 0, 1, 0, 0, 0, 0, 0, 0, 0, //30-39    //' '
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //40-49
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //50-59
-	0, 0, 0, 1, 0, 0, 0, 0, 0, 0, //60-69   //'?' 
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //70-79
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //80-89
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //90-99
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //100-109
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //110-119
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //120-129
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //130-139
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //140-149
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //150-159
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //160-169
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //170-179
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //180-189
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //190-199
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //200-209
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //210-219
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //220-229
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //230-239
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, //240-249
-	0, 0, 0, 0, 0, 0             //250-255
-};
-
 static boost::string_view    sDefaultRealm("Streaming Server");
 static StrPtrLen    sAuthBasicStr("Basic", 5);
 static StrPtrLen    sAuthDigestStr("Digest", 6);
@@ -137,9 +106,6 @@ private:
 //Parses the request
 QTSS_Error RTSPRequest::Parse()
 {
-	boost::string_view t(GetFullRequest());
-	StrPtrLen t1((char *)t.data(), t.length());
-	StringParser parser(&t1);
 	fHeaderDict.clear();
 	boost::string_view requestHeader = GetFullRequest();
 	typedef boost::string_view::const_iterator It;
@@ -162,13 +128,13 @@ QTSS_Error RTSPRequest::Parse()
 	}
 
 	//parse status line.
-	QTSS_Error error = ParseFirstLine(parser);
+	QTSS_Error error = ParseFirstLine(rtspHeader.method, rtspHeader.uri, rtspHeader.rtsp_version);
 
 	//handle any errors that come up    
 	if (error != QTSS_NoErr)
 		return error;
 
-	error = this->ParseHeaders(parser);
+	error = this->ParseHeaders(rtspHeader.header_fields);
 	if (error != QTSS_NoErr)
 		return error;
 
@@ -184,88 +150,56 @@ QTSS_Error RTSPRequest::Parse()
 }
 
 //returns: StatusLineTooLong, SyntaxError, BadMethod
-QTSS_Error RTSPRequest::ParseFirstLine(StringParser &parser)
+QTSS_Error RTSPRequest::ParseFirstLine(boost::string_view method, boost::string_view fulluri, boost::string_view ver)
 {
-	//first get the method
-	StrPtrLen theParsedData;
-	parser.ConsumeWord(&theParsedData);
-
-	//THIS WORKS UNDER THE ASSUMPTION THAT:
-	//valid HTTP/1.1 headers are: GET, HEAD, POST, PUT, OPTIONS, DELETE, TRACE
-	boost::string_view theParsedDataV(theParsedData.Ptr, theParsedData.Len);
-	fMethod = RTSPProtocol::GetMethod(theParsedDataV);
+	fMethod = RTSPProtocol::GetMethod(method);
 	if (fMethod == qtssIllegalMethod)
-		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgBadRTSPMethod, &theParsedData);
-
-	//no longer assume this is a space... instead, just consume whitespace
-	parser.ConsumeWhitespace();
+		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgBadRTSPMethod, nullptr);
 
 	//now parse the uri,for example rtsp://www.easydarwin.org:554/live.sdp?channel=1&token=888888
-	QTSS_Error err = ParseURI(parser);
+	QTSS_Error err = ParseURI(fulluri);
 	if (err != QTSS_NoErr)
 		return err;
 
-	//no longer assume this is a space... instead, just consume whitespace
-	parser.ConsumeWhitespace();
-
-	//if there is a version, consume the version string
-	StrPtrLen versionStr;
-	parser.ConsumeUntil(&versionStr, StringParser::sEOLMask);
-
 	//check the version
-	if (versionStr.Len > 0)
-		fVersion = RTSPProtocol::GetVersion(versionStr);
+	fVersion = RTSPProtocol::GetVersion(ver);
 
-	//go past the end of line
-	if (!parser.ExpectEOL())
-		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgNoRTSPVersion, &theParsedData);
 	return QTSS_NoErr;
 }
 
 //returns: SyntaxError if there was an error in the uri. Or InternalServerError
-QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
+QTSS_Error RTSPRequest::ParseURI(boost::string_view fulluri)
 {
 	//for example: rtsp://www.easydarwin.org:554/live.sdp?channel=1&token=888888
 	//read in the complete URL, set it to be the qtssAbsoluteURLParam
-	StrPtrLen theURL;
-	parser.ConsumeUntilWhitespace(&theURL);
 	//qtssRTSPReqAbsoluteURL = rtsp://www.easydarwin.org:554/live.sdp?channel=1&token=888888
-	SetAbsoluteURL({ theURL.Ptr, theURL.Len });
-	StringParser absParser(&theURL);
-	StrPtrLen theAbsURL;
+	SetAbsoluteURL(fulluri);
 	//theAbsURL = rtsp://www.easydarwin.org:554/live.sdp
-	absParser.ConsumeUntil(&theAbsURL, sURLStopConditions);
-
+	std::string theAbsURL;
+	bool r = qi::phrase_parse(fulluri.cbegin(), fulluri.cend(),
+		+(qi::char_ - "?") >> -("?" >> +(qi::char_)), qi::ascii::blank, theAbsURL, queryString);
 	//we always should have a slash before the uri.
 	//If not, that indicates this is a full URI. Also, this could be a '*' OPTIONS request
-	if ((*theAbsURL.Ptr != '/') && (*theAbsURL.Ptr != '*'))
+	if (theAbsURL[0] != '/' && theAbsURL[0] != '*')
 	{
-		std::string theAbsURLV(theAbsURL.Ptr, theAbsURL.Len), theHost, uriPath;
-		bool r = qi::phrase_parse(theAbsURLV.cbegin(), theAbsURLV.cend(),
+		std::string theHost;
+		bool r = qi::phrase_parse(theAbsURL.cbegin(), theAbsURL.cend(),
 			qi::no_case["RTSP://"] >> *(qi::char_ - "/") >> (qi::eoi | *(qi::char_)),  
 			qi::ascii::blank, theHost, uriPath);
 
 		fHeaderDict.Set(qtssHostHeader, theHost);
-		if (!uriPath.empty())
-			uri = uriPath;
-		else {
-			//
-			// This might happen if there is nothing after the host at all, not even
-			// a '/'. This is legal (RFC 2326, Sec 3.2). If so, just pretend that there
-			// is a '/'
+		if (uriPath.empty()) {
 			static char* sSlashURI = "/";
-			uri = sSlashURI;
+			uriPath = sSlashURI;
 		}
 	}
 
 	// don't allow non-aggregate operations indicated by a url/media track=id
-// might need this for rate adapt   if (qtssSetupMethod != fMethod && qtssOptionsMethod != fMethod && qtssSetParameterMethod != fMethod) // any method not a setup, options, or setparameter is not allowed to have a "/trackID=" in the url.
+	// might need this for rate adapt   if (qtssSetupMethod != fMethod && qtssOptionsMethod != fMethod && qtssSetParameterMethod != fMethod) // any method not a setup, options, or setparameter is not allowed to have a "/trackID=" in the url.
 	if (qtssSetupMethod != fMethod) // any method not a setup is not allowed to have a "/trackID=" in the url.
 	{
-		StrPtrLenDel tempCStr(theAbsURL.GetAsCString());
-		StrPtrLen nonaggregate(tempCStr.FindString("/trackID="));
-		if (nonaggregate.Len > 0) // check for non-aggregate method and return error
-			return QTSSModuleUtils::SendErrorResponse(this, qtssClientAggregateOptionAllowed, qtssMsgBadRTSPMethod, &theAbsURL);
+		if (theAbsURL.find("/trackID=") != std::string::npos) // check for non-aggregate method and return error
+			return QTSSModuleUtils::SendErrorResponse(this, qtssClientAggregateOptionAllowed, qtssMsgBadRTSPMethod, nullptr);
 	}
 
 	// don't allow non-aggregate operations like a setup on a playing session
@@ -273,34 +207,15 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 	{
 		auto*  theSession = (RTSPSession*)this->GetSession();
 		if (theSession != nullptr && theSession->IsPlaying())
-			return QTSSModuleUtils::SendErrorResponse(this, qtssClientAggregateOptionAllowed, qtssMsgBadRTSPMethod, &theAbsURL);
+			return QTSSModuleUtils::SendErrorResponse(this, qtssClientAggregateOptionAllowed, qtssMsgBadRTSPMethod, nullptr);
 	}
-
-	// parse the query string from the url if present.
-	// init qtssRTSPReqQueryString dictionary to an empty string
-
-	if (absParser.GetDataRemaining() > 0)
-	{
-		if (absParser.PeekFast() == '?')
-		{
-			// we've got some CGI param
-			StrPtrLen queryString1;
-			absParser.ConsumeLength(&queryString1, 1); // toss '?'
-
-			// consume the rest of the line..
-			absParser.ConsumeUntilWhitespace(&queryString1);
-
-			queryString = boost::string_view(queryString1.Ptr, queryString1.Len);
-		}
-	}
-
 
 	//
 	// If the is a '*', return right now because '*' is not a path
 	// so the below functions don't make any sense.
-	if ((*theAbsURL.Ptr == '*') && (theAbsURL.Len == 1))
+	if (theAbsURL == "*")
 	{
-		SetAbsolutePath({ theAbsURL.Ptr, theAbsURL.Len });
+		SetAbsolutePath(theAbsURL);
 
 		return QTSS_NoErr;
 	}
@@ -331,91 +246,46 @@ QTSS_Error RTSPRequest::ParseURI(StringParser &parser)
 	//this->SetVal(qtssRTSPReqFilePath, fFilePath, theBytesWritten);
 	SetAbsolutePath({ (char *)fFilePath, (size_t)theBytesWritten });
 
-
-
 	return QTSS_NoErr;
 }
 
 
 //throws eHTTPNoMoreData and eHTTPOutOfBuffer
-QTSS_Error RTSPRequest::ParseHeaders(StringParser& parser)
+QTSS_Error RTSPRequest::ParseHeaders(const std::map<std::string, std::string>& headers)
 {
-	StrPtrLen theKeyWord;
-	bool isStreamOK;
-
-	//Repeat until we get a \r\n\r\n, which signals the end of the headers
-
-	while ((parser.PeekFast() != '\r') && (parser.PeekFast() != '\n'))
+	for (const auto pairs : headers)
 	{
-		//First get the header identifier
-
-		isStreamOK = parser.GetThru(&theKeyWord, ':');
-		if (!isStreamOK)
-			return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgNoColonAfterHeader, nullptr);
-
-		theKeyWord.TrimWhitespace();
-
 		//Look up the proper header enumeration based on the header string.
 		//Use the enumeration to look up the dictionary ID of this header,
 		//and set that dictionary attribute to be whatever is in the body of the header
-
+		boost::string_view theKeyWord = pairs.first;
 		uint32_t theHeader = RTSPProtocol::GetRequestHeader(theKeyWord);
-		StrPtrLen theHeaderVal;
-		parser.ConsumeUntil(&theHeaderVal, StringParser::sEOLMask);
-
-		StrPtrLen theEOL;
-		if ((parser.PeekFast() == '\r') || (parser.PeekFast() == '\n'))
-		{
-			isStreamOK = true;
-			parser.ConsumeEOL(&theEOL);
-		}
-		else
-			isStreamOK = false;
-
-		while ((parser.PeekFast() == ' ') || (parser.PeekFast() == '\t'))
-		{
-			theHeaderVal.Len += theEOL.Len;
-			StrPtrLen temp;
-			parser.ConsumeUntil(&temp, StringParser::sEOLMask);
-			theHeaderVal.Len += temp.Len;
-
-			if ((parser.PeekFast() == '\r') || (parser.PeekFast() == '\n'))
-			{
-				isStreamOK = true;
-				parser.ConsumeEOL(&theEOL);
-			}
-			else
-				isStreamOK = false;
-		}
+		boost::string_view theHeaderVal = pairs.second;
 
 		// If this is an unknown header, ignore it. Otherwise, set the proper
 		// dictionary attribute
 		if (theHeader != qtssIllegalHeader)
 		{
 			Assert(theHeader < qtssNumHeaders);
-			theHeaderVal.TrimWhitespace();
-			fHeaderDict.Set(theHeader, std::string(theHeaderVal.Ptr, theHeaderVal.Len));
+			fHeaderDict.Set(theHeader, std::string(theHeaderVal));
 		}
-		if (!isStreamOK)
-			return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgNoEOLAfterHeader);
 
 		//some headers require some special processing. If this code begins
 		//to get out of control, we made need to come up with a function pointer table
-		boost::string_view theHeaderValV(theHeaderVal.Ptr, theHeaderVal.Len);
 		switch (theHeader)
 		{
-		case qtssSessionHeader:             ParseSessionHeader(theHeaderValV); break;
+		case qtssSessionHeader:             ParseSessionHeader(theHeaderVal); break;
 		case qtssTransportHeader:           ParseTransportHeader(theHeaderVal); break;
 		case qtssRangeHeader:               ParseRangeHeader(theHeaderVal);     break;
 		case qtssIfModifiedSinceHeader:     ParseIfModSinceHeader(theHeaderVal); break;
 		case qtssXRetransmitHeader:         ParseRetransmitHeader(theHeaderVal); break;
-		case qtssContentLengthHeader:       ParseContentLengthHeader(theHeaderValV); break;
-		case qtssSpeedHeader:               ParseSpeedHeader(theHeaderValV);     break;
+		case qtssContentLengthHeader:       ParseContentLengthHeader(theHeaderVal); break;
+		case qtssSpeedHeader:               ParseSpeedHeader(theHeaderVal);     break;
 		case qtssXTransportOptionsHeader:   ParseTransportOptionsHeader(theHeaderVal); break;
-		case qtssXPreBufferHeader:          ParsePrebufferHeader(theHeaderValV); break;
-		case qtssXDynamicRateHeader:		ParseDynamicRateHeader(theHeaderValV); break;
-		case qtssXRandomDataSizeHeader:		ParseRandomDataSizeHeader(theHeaderValV); break;
-		case qtssBandwidthHeader:           ParseBandwidthHeader(theHeaderValV); break;
+		case qtssXPreBufferHeader:          ParsePrebufferHeader(theHeaderVal); break;
+		case qtssXDynamicRateHeader:		ParseDynamicRateHeader(theHeaderVal); break;
+		case qtssXRandomDataSizeHeader:		ParseRandomDataSizeHeader(theHeaderVal); break;
+		case qtssBandwidthHeader:           ParseBandwidthHeader(theHeaderVal); break;
 		default:    break;
 		}
 	}
@@ -428,8 +298,6 @@ QTSS_Error RTSPRequest::ParseHeaders(StringParser& parser)
 		this->GetSession()->SetRequestBodyLength(std::stoi(theContentLengthBody));
 	}
 
-	isStreamOK = parser.ExpectEOL();
-	Assert(isStreamOK);
 	return QTSS_NoErr;
 }
 
@@ -443,25 +311,24 @@ void RTSPRequest::ParseSessionHeader(boost::string_view header)
 	}
 }
 
-bool RTSPRequest::ParseNetworkModeSubHeader(StrPtrLen* inSubHeader)
+bool RTSPRequest::ParseNetworkModeSubHeader(boost::string_view inSubHeader)
 {
-	static StrPtrLen sUnicast("unicast");
-	static StrPtrLen sMulticast("multiicast");
-	bool result = false; // true means header was found
+	static boost::string_view sUnicast("unicast");
+	static boost::string_view sMulticast("multiicast");
 
-	if (!result && inSubHeader->EqualIgnoreCase(sUnicast))
+	if (boost::iequals(inSubHeader, sUnicast))
 	{
 		fNetworkMode = qtssRTPNetworkModeUnicast;
-		result = true;
+		return true;
 	}
 
-	if (!result && inSubHeader->EqualIgnoreCase(sMulticast))
+	if (boost::iequals(inSubHeader, sMulticast))
 	{
 		fNetworkMode = qtssRTPNetworkModeMulticast;
-		result = true;
+		return true;
 	}
 
-	return result;
+	return false;
 }
 
 template <typename S>
@@ -474,11 +341,9 @@ static std::vector<std::string> spirit_direct(const S& input, char const* delimi
 	return result;
 }
 
-void RTSPRequest::ParseTransportHeader(StrPtrLen &header)
+void RTSPRequest::ParseTransportHeader(boost::string_view header)
 {
-	static char* sRTPAVPTransportStr = "RTP/AVP";
-
-	StringParser theTransParser(&header);
+	static boost::string_view sRTPAVPTransportStr = "RTP/AVP";
 
 	//transport header from client: Transport: RTP/AVP;unicast;client_port=5000-5001\r\n
 	//                              Transport: RTP/AVP;multicast;ttl=15;destination=229.41.244.93;client_port=5000-5002\r\n
@@ -487,89 +352,74 @@ void RTSPRequest::ParseTransportHeader(StrPtrLen &header)
 	//
 	// A client may send multiple transports to the server, comma separated.
 	// In this case, the server should just pick one and use that. 
-
-	while (theTransParser.GetDataRemaining() > 0)
-	{
-		(void)theTransParser.ConsumeWhitespace();
-		(void)theTransParser.ConsumeUntil(&fFirstTransport, ',');
-
-		if (fFirstTransport.NumEqualIgnoreCase(sRTPAVPTransportStr, ::strlen(sRTPAVPTransportStr)))
+	std::vector<std::string> transports = spirit_direct(header, ",");
+	for (const auto &transport : transports)
+		if (boost::istarts_with(transport, sRTPAVPTransportStr)) {
+			fFirstTransport = transport;
 			break;
+		}
 
-		if (theTransParser.PeekFast() == ',')
-			theTransParser.Expect(',');
-	}
-
-	StringParser theFirstTransportParser(&fFirstTransport);
-
-	StrPtrLen theTransportSubHeader;
-	(void)theFirstTransportParser.GetThru(&theTransportSubHeader, ';');
-
-	while (theTransportSubHeader.Len > 0)
+	std::vector<std::string> SubHeaders = spirit_direct(fFirstTransport, ";");
+	for (const auto &subHeader : SubHeaders)
 	{
-
 		// Extract the relevent information from the relevent subheader.
 		// So far we care about 3 sub-headers
 
-		if (!this->ParseNetworkModeSubHeader(&theTransportSubHeader))
+		if (!ParseNetworkModeSubHeader(subHeader))
 		{
-			theTransportSubHeader.TrimWhitespace();
-
-			switch (*theTransportSubHeader.Ptr)
+			switch (subHeader[0])
 			{
 			case 'r':	// rtp/avp/??? Is this tcp or udp?
 			case 'R':   // RTP/AVP/??? Is this TCP or UDP?
 				{
-					if (theTransportSubHeader.EqualIgnoreCase("RTP/AVP/TCP"))
+					if (boost::iequals(subHeader, "RTP/AVP/TCP"))
 						fTransportType = qtssRTPTransportTypeTCP;
 					break;
 				}
 			case 'c':   //client_port sub-header
 			case 'C':   //client_port sub-header
 				{
-					this->ParseClientPortSubHeader(&theTransportSubHeader);
+					ParseClientPortSubHeader(subHeader);
 					break;
 				}
 			case 'd':   //destination sub-header
 			case 'D':   //destination sub-header
 				{
-					static StrPtrLen sDestinationSubHeader("destination");
+					static boost::string_view sDestinationSubHeader("destination");
 
 					//Parse the header, extract the destination address
-					this->ParseAddrSubHeader(&theTransportSubHeader, &sDestinationSubHeader, &fDestinationAddr);
+					ParseAddrSubHeader(subHeader, sDestinationSubHeader, &fDestinationAddr);
 					break;
 				}
 			case 's':   //source sub-header
 			case 'S':   //source sub-header
 				{
 					//Same as above code
-					static StrPtrLen sSourceSubHeader("source");
-					this->ParseAddrSubHeader(&theTransportSubHeader, &sSourceSubHeader, &fSourceAddr);
+					static boost::string_view sSourceSubHeader("source");
+					ParseAddrSubHeader(subHeader, sSourceSubHeader, &fSourceAddr);
 					break;
 				}
 			case 't':   //time-to-live sub-header
 			case 'T':   //time-to-live sub-header
 				{
-					this->ParseTimeToLiveSubHeader(&theTransportSubHeader);
+					ParseTimeToLiveSubHeader(subHeader);
 					break;
 				}
 			case 'm':   //mode sub-header
 			case 'M':   //mode sub-header
 				{
-					this->ParseModeSubHeader(&theTransportSubHeader);
+					ParseModeSubHeader(subHeader);
 					break;
 				}
 			}
 		}
-
-		// Move onto the next parameter
-		(void)theFirstTransportParser.GetThru(&theTransportSubHeader, ';');
 	}
 }
 
-void  RTSPRequest::ParseRangeHeader(StrPtrLen &header)
+void  RTSPRequest::ParseRangeHeader(boost::string_view header)
 {
-	StringParser theRangeParser(&header);
+	StrPtrLen t((char *)header.data(), header.length());
+	StringParser theRangeParser(&t);
 
 	theRangeParser.GetThru(nullptr, '=');//consume "npt="
 	theRangeParser.ConsumeWhitespace();
@@ -583,10 +433,9 @@ void  RTSPRequest::ParseRangeHeader(StrPtrLen &header)
 	}
 }
 
-void  RTSPRequest::ParseRetransmitHeader(StrPtrLen &header)
+void  RTSPRequest::ParseRetransmitHeader(boost::string_view header)
 {
-	boost::string_view t1(fHeaderDict.Get(qtssXRetransmitHeader));
-	StrPtrLen t2((char *)t1.data(), t1.length());
+	StrPtrLen t2((char *)header.data(), header.length());
 	StringParser theRetransmitParser(&t2);
 	StrPtrLen theProtName;
 	bool foundRetransmitProt = false;
@@ -666,9 +515,10 @@ void  RTSPRequest::ParseDynamicRateHeader(boost::string_view header)
 		fEnableDynamicRateState = 0;
 }
 
-void  RTSPRequest::ParseIfModSinceHeader(StrPtrLen &header)
+void  RTSPRequest::ParseIfModSinceHeader(boost::string_view header)
 {
-	fIfModSinceDate = DateTranslator::ParseDate(&header);
+	StrPtrLen t((char *)header.data(), header.length());
+	fIfModSinceDate = DateTranslator::ParseDate(&t);
 }
 
 void RTSPRequest::ParseSpeedHeader(boost::string_view header)
@@ -677,9 +527,10 @@ void RTSPRequest::ParseSpeedHeader(boost::string_view header)
 	bool r = qi::phrase_parse(iter, end, qi::float_, qi::ascii::blank, fSpeed);
 }
 
-void RTSPRequest::ParseTransportOptionsHeader(StrPtrLen &header)
+void RTSPRequest::ParseTransportOptionsHeader(boost::string_view header)
 {
-	StringParser theRTPOptionsParser(&header);
+	StrPtrLen t((char *)header.data(), header.length());
+	StringParser theRTPOptionsParser(&t);
 	StrPtrLen theRTPOptionsSubHeader;
 
 	do
@@ -701,89 +552,52 @@ void RTSPRequest::ParseTransportOptionsHeader(StrPtrLen &header)
 }
 
 
-void RTSPRequest::ParseAddrSubHeader(StrPtrLen* inSubHeader, StrPtrLen* inHeaderName, uint32_t* outAddr)
+void RTSPRequest::ParseAddrSubHeader(boost::string_view inSubHeader, boost::string_view inHeaderName, uint32_t* outAddr)
 {
-	if (!inSubHeader || !inHeaderName || !outAddr)
+	if (inSubHeader.empty() || inHeaderName.empty() || !outAddr)
 		return;
 
-	StringParser theSubHeaderParser(inSubHeader);
-
-	// Skip over to the value
-	StrPtrLen theFirstBit;
-	theSubHeaderParser.GetThru(&theFirstBit, '=');
-	theFirstBit.TrimWhitespace();
+	std::string name, theAddr;
+	bool r = qi::phrase_parse(inSubHeader.cbegin(), inSubHeader.cend(),
+		*(qi::alpha - "=") >> "=" >> *(qi::char_), qi::ascii::blank,
+		name, theAddr);
 
 	// First make sure this is the proper subheader
-	if (!theFirstBit.EqualIgnoreCase(*inHeaderName))
+	if (!boost::iequals(name, inHeaderName))
 		return;
 
-	//Find the IP address
-	theSubHeaderParser.ConsumeUntilDigit();
-
-	//Set the addr string param.
-	StrPtrLen theAddr(theSubHeaderParser.GetCurrentPosition(), theSubHeaderParser.GetDataRemaining());
-
-	//Convert the string to a uint32_t IP address
-	char theTerminator = theAddr.Ptr[theAddr.Len];
-	theAddr.Ptr[theAddr.Len] = '\0';
-
-	*outAddr = SocketUtils::ConvertStringToAddr(theAddr.Ptr);
-
-	theAddr.Ptr[theAddr.Len] = theTerminator;
-
+	*outAddr = SocketUtils::ConvertStringToAddr(theAddr.c_str());
 }
 
-void RTSPRequest::ParseModeSubHeader(StrPtrLen* inModeSubHeader)
+void RTSPRequest::ParseModeSubHeader(boost::string_view inModeSubHeader)
 {
-	static StrPtrLen sModeSubHeader("mode");
-	static StrPtrLen sReceiveMode("receive");
-	static StrPtrLen sRecordMode("record");
-	StringParser theSubHeaderParser(inModeSubHeader);
+	static boost::string_view sModeSubHeader("mode");
+	static boost::string_view sReceiveMode("receive");
+	static boost::string_view sRecordMode("record");
 
-	// Skip over to the first port
-	StrPtrLen theFirstBit;
-	theSubHeaderParser.GetThru(&theFirstBit, '=');
-	theFirstBit.TrimWhitespace();
-
-	// Make sure this is the client port subheader
-	if (theFirstBit.EqualIgnoreCase(sModeSubHeader)) do
-	{
-		theSubHeaderParser.ConsumeWhitespace();
-
-		StrPtrLen theMode;
-		theSubHeaderParser.ConsumeWord(&theMode);
-
-		if (theMode.EqualIgnoreCase(sReceiveMode) || theMode.EqualIgnoreCase(sRecordMode))
-		{
+	std::string name, mode;
+	bool r = qi::phrase_parse(inModeSubHeader.cbegin(), inModeSubHeader.cend(),
+		*(qi::alpha - "=") >> "=" >> *(qi::char_), qi::ascii::blank,
+		name, mode);
+	if (r && boost::iequals(name, sModeSubHeader)) {
+		if (boost::iequals(mode, sReceiveMode) || boost::iequals(mode, sRecordMode))
 			fTransportMode = qtssRTPTransportModeRecord;
-			break;
-		}
-
-	} while (false);
-
+	}
 }
 
-void RTSPRequest::ParseClientPortSubHeader(StrPtrLen* inClientPortSubHeader)
+void RTSPRequest::ParseClientPortSubHeader(boost::string_view inClientPortSubHeader)
 {
-	static StrPtrLen sClientPortSubHeader("client_port");
-	static StrPtrLen sErrorMessage("Received invalid client_port field: ");
-	StringParser theSubHeaderParser(inClientPortSubHeader);
-
-	// Skip over to the first port
-	StrPtrLen theFirstBit;
-	theSubHeaderParser.GetThru(&theFirstBit, '=');
-	theFirstBit.TrimWhitespace();
-
-	// Make sure this is the client port subheader
-	if (!theFirstBit.EqualIgnoreCase(sClientPortSubHeader))
-		return;
-
-	// Store the two client ports as integers
-	theSubHeaderParser.ConsumeWhitespace();
-	fClientPortA = (uint16_t)theSubHeaderParser.ConsumeInteger(nullptr);
-	theSubHeaderParser.GetThru(nullptr, '-');
-	theSubHeaderParser.ConsumeWhitespace();
-	fClientPortB = (uint16_t)theSubHeaderParser.ConsumeInteger(nullptr);
+	static boost::string_view sClientPortSubHeader("client_port");
+	static boost::string_view sErrorMessage("Received invalid client_port field: ");
+	uint16_t portA, portB;
+	std::string name;
+	bool r = qi::phrase_parse(inClientPortSubHeader.cbegin(), inClientPortSubHeader.cend(),
+		*(qi::alpha - "=") >> "=" >> qi::ushort_ >> "-" >> qi::ushort_, qi::ascii::blank,
+		name, portA, portB);
+	if (r && boost::iequals(name, sClientPortSubHeader)) {
+		fClientPortA = portA;
+		fClientPortB = portB;
+	}
 	if (fClientPortB != fClientPortA + 1) // an error in the port values
 	{
 		// The following to setup and log the error as a message level 2.
@@ -793,7 +607,7 @@ void RTSPRequest::ParseClientPortSubHeader(StrPtrLen* inClientPortSubHeader)
 		if (!userAgent.empty())
 			errorPortMessage.Put(userAgent);
 		errorPortMessage.PutSpace();
-		errorPortMessage.Put(*inClientPortSubHeader);
+		errorPortMessage.Put(inClientPortSubHeader);
 		errorPortMessage.PutTerminator();
 		QTSSModuleUtils::LogError(qtssMessageVerbosity, qtssMsgNoMessage, 0, errorPortMessage.GetBufPtr(), nullptr);
 
@@ -803,23 +617,16 @@ void RTSPRequest::ParseClientPortSubHeader(StrPtrLen* inClientPortSubHeader)
 	}
 }
 
-void RTSPRequest::ParseTimeToLiveSubHeader(StrPtrLen* inTimeToLiveSubHeader)
+void RTSPRequest::ParseTimeToLiveSubHeader(boost::string_view inTimeToLiveSubHeader)
 {
-	static StrPtrLen sTimeToLiveSubHeader("ttl");
+	static boost::string_view sTimeToLiveSubHeader("ttl");
 
-	StringParser theSubHeaderParser(inTimeToLiveSubHeader);
-
-	// Skip over to the first part
-	StrPtrLen theFirstBit;
-	theSubHeaderParser.GetThru(&theFirstBit, '=');
-	theFirstBit.TrimWhitespace();
-	// Make sure this is the ttl subheader
-	if (!theFirstBit.EqualIgnoreCase(sTimeToLiveSubHeader))
-		return;
-
-	// Parse out the time to live...
-	theSubHeaderParser.ConsumeWhitespace();
-	fTtl = (uint16_t)theSubHeaderParser.ConsumeInteger(nullptr);
+	std::string name;
+	uint16_t temp;
+	bool r = qi::phrase_parse(inTimeToLiveSubHeader.cbegin(), inTimeToLiveSubHeader.cend(), *(qi::alpha - "=") >> "=" >> qi::ushort_, qi::ascii::blank,
+		name, temp);
+	if (r && boost::iequals(name, sTimeToLiveSubHeader))
+		fTtl = temp;
 }
 
 // DJM PROTOTYPE
@@ -861,22 +668,18 @@ QTSS_Error RTSPRequest::ParseBasicHeader(StringParser *inParsedAuthLinePtr)
 
 	(void)Base64decode(decodedAuthWord, encodedStr);
 
-	StrPtrLen   nameAndPassword;
-	nameAndPassword.Set(decodedAuthWord, ::strlen(decodedAuthWord));
+	boost::string_view nameAndPassword(decodedAuthWord, ::strlen(decodedAuthWord));
+	std::string  name, password;
 
-	StrPtrLen   name("");
-	StrPtrLen   password("");
-	StringParser parsedNameAndPassword(&nameAndPassword);
+	bool r = qi::phrase_parse(nameAndPassword.cbegin(), nameAndPassword.cend(),
+		*(qi::char_ - ":") >> ":" >> *(qi::char_), qi::ascii::blank,
+		name, password);
 
-	parsedNameAndPassword.ConsumeUntil(&name, ':');
-	parsedNameAndPassword.ConsumeLength(nullptr, 1);
-	parsedNameAndPassword.GetThruEOL(&password);
-
-	SetAuthUserName({ name.Ptr, name.Len });
-	SetPassWord({ password.Ptr, password.Len });
+	SetAuthUserName(name);
+	SetPassWord(password);
 
 	// Also set the qtssUserName attribute in the qtssRTSPReqUserProfile object attribute of the Request Object
-	(void)fUserProfile.SetValue(qtssUserName, 0, name.Ptr, name.Len, QTSSDictionary::kDontObeyReadOnly);
+	(void)fUserProfile.SetValue(qtssUserName, 0, name.c_str(), name.length(), QTSSDictionary::kDontObeyReadOnly);
 
 	return theErr;
 }
@@ -925,13 +728,13 @@ QTSS_Error RTSPRequest::ParseDigestHeader(StringParser *inParsedAuthLinePtr)
 			(void)fUserProfile.SetValue(qtssUserName, 0, fieldValue.Ptr, fieldValue.Len, QTSSDictionary::kDontObeyReadOnly);
 		}
 		else if (fieldName.Equal(sRealmStr)) {
-			fAuthRealm.Set(fieldValue.Ptr, fieldValue.Len);
+			fAuthRealm = std::string(fieldValue.Ptr, fieldValue.Len);
 		}
 		else if (fieldName.Equal(sNonceStr)) {
-			fAuthNonce.Set(fieldValue.Ptr, fieldValue.Len);
+			fAuthNonce = std::string(fieldValue.Ptr, fieldValue.Len);
 		}
 		else if (fieldName.Equal(sUriStr)) {
-			fAuthUri.Set(fieldValue.Ptr, fieldValue.Len);
+			fAuthUri = std::string(fieldValue.Ptr, fieldValue.Len);
 		}
 		else if (fieldName.Equal(sQopStr)) {
 			if (fieldValue.Equal(sQopAuthStr))
@@ -940,13 +743,13 @@ QTSS_Error RTSPRequest::ParseDigestHeader(StringParser *inParsedAuthLinePtr)
 				fAuthQop = RTSPSessionInterface::kAuthIntQop;
 		}
 		else if (fieldName.Equal(sNonceCountStr)) {
-			fAuthNonceCount.Set(fieldValue.Ptr, fieldValue.Len);
+			fAuthNonceCount = std::string(fieldValue.Ptr, fieldValue.Len);
 		}
 		else if (fieldName.Equal(sResponseStr)) {
-			fAuthResponse.Set(fieldValue.Ptr, fieldValue.Len);
+			fAuthResponse = std::string(fieldValue.Ptr, fieldValue.Len);
 		}
 		else if (fieldName.Equal(sOpaqueStr)) {
-			fAuthOpaque.Set(fieldValue.Ptr, fieldValue.Len);
+			fAuthOpaque = std::string(fieldValue.Ptr, fieldValue.Len);
 		}
 
 		inParsedAuthLinePtr->ConsumeWhitespace();
@@ -988,7 +791,7 @@ void RTSPRequest::SetupAuthLocalPath(void)
 	SetLocalPath(std::string(GetRootDir()) + theFilePath);
 }
 
-QTSS_Error RTSPRequest::SendDigestChallenge(uint32_t qop, StrPtrLen *nonce, StrPtrLen* opaque)
+QTSS_Error RTSPRequest::SendDigestChallenge(uint32_t qop, boost::string_view nonce, boost::string_view opaque)
 {
 	QTSS_Error theErr = QTSS_NoErr;
 
@@ -1025,7 +828,7 @@ QTSS_Error RTSPRequest::SendDigestChallenge(uint32_t qop, StrPtrLen *nonce, StrP
 	}
 	challengeFormatter.Put(sNonceStr);                  // [Digest realm="somerealm", nonce]
 	challengeFormatter.Put(sEqualQuote);                // [Digest realm="somerealm", nonce="]
-	challengeFormatter.Put(*nonce);                     // [Digest realm="somerealm", nonce="19723343a9fd75e019723343a9fd75e0]
+	challengeFormatter.Put(nonce);                     // [Digest realm="somerealm", nonce="19723343a9fd75e019723343a9fd75e0]
 	challengeFormatter.PutChar('"');                    // [Digest realm="somerealm", nonce="19723343a9fd75e019723343a9fd75e0"]
 	challengeFormatter.PutTerminator();                 // [Digest realm="somerealm", nonce="19723343a9fd75e019723343a9fd75e0"\0]
 

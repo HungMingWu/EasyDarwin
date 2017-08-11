@@ -60,10 +60,10 @@ public:
 	//  Header enumerated type definitions in QTSS_RTSPProtocol.h
 
 	//The lookup function. Very simple
-	static uint32_t GetRequestHeader(const StrPtrLen& inHeaderStr);
+	static uint32_t GetRequestHeader(boost::string_view inHeaderStr);
 
 	//The lookup function. Very simple.
-	static StrPtrLen& GetHeaderString(uint32_t inHeader)
+	static boost::string_view GetHeaderString(uint32_t inHeader)
 	{
 		return sHeaders[inHeader];
 	}
@@ -97,7 +97,7 @@ public:
 	static StrPtrLen&       GetRetransmitProtocolName() { return sRetrProtName; }
 
 	//accepts strings that look like "RTSP/1.0" etc...
-	static RTSPVersion      GetVersion(StrPtrLen &versionStr);
+	static RTSPVersion      GetVersion(boost::string_view versionStr);
 	static StrPtrLen&       GetVersionString(RTSPVersion version)
 	{
 		return sVersionString[version];
@@ -109,7 +109,7 @@ private:
 
 	//for other lookups
 	static  boost::string_view             sMethods[];
-	static StrPtrLen            sHeaders[];
+	static  boost::string_view             sHeaders[];
 	static StrPtrLen            sStatusCodeStrings[];
 	static StrPtrLen            sStatusCodeAsStrings[];
 	static int32_t               sStatusCodes[];

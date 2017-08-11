@@ -57,9 +57,9 @@
 class RTSPRequest : public RTSPRequestInterface
 {
 	// query stting (CGI parameters) passed to the server in the request URL, does not include the '?' separator
-	boost::string_view queryString;
+	std::string queryString;
 	//URI for this request
-	std::string uri;
+	std::string uriPath;
 	//Challenge used by the server for Digest authentication
 	std::string digestChallenge;
 	//decoded Authentication information when provided by the RTSP request. See RTSPSessLastUserName.
@@ -90,11 +90,11 @@ public:
 
 	void SetupAuthLocalPath(void);
 	QTSS_Error SendBasicChallenge(void);
-	QTSS_Error SendDigestChallenge(uint32_t qop, StrPtrLen *nonce, StrPtrLen* opaque);
+	QTSS_Error SendDigestChallenge(uint32_t qop, boost::string_view nonce, boost::string_view opaque);
 	QTSS_Error SendForbiddenResponse(void);
 	boost::string_view GetQueryString() const { return queryString; }
 	uint32_t GetContentLength() const { return fContentLength; }
-	boost::string_view GetURI() const { return uri; }
+	boost::string_view GetURI() const { return uriPath; }
 	void SetDigestChallenge(boost::string_view digest) { digestChallenge = std::string(digest); }
 	void SetAuthUserName(boost::string_view name) { userName = std::string(name); }
 	boost::string_view GetAuthUserName() const { return userName; }
@@ -107,43 +107,41 @@ public:
 private:
 
 	//PARSING
-	enum { kAuthNameAndPasswordBuffSize = 128, kAuthChallengeHeaderBufSize = 512 };
+	enum { kAuthChallengeHeaderBufSize = 512 };
 
 	//Parsing the URI line (first line of request
-	QTSS_Error ParseFirstLine(StringParser &parser);
+	QTSS_Error ParseFirstLine(boost::string_view method, boost::string_view fulluri, boost::string_view ver);
 
 	//Utility functions called by above
-	QTSS_Error ParseURI(StringParser &parser);
+	QTSS_Error ParseURI(boost::string_view fulluri);
 
 	//Parsing the rest of the headers
 	//This assumes that the parser is at the beginning of the headers. It will parse
 	//the headers, fill out the data & HTTPParameters object.
 	//
 	//Returns:      A handler object signifying that a fatal syntax error has occurred
-	QTSS_Error ParseHeaders(StringParser& parser);
+	QTSS_Error ParseHeaders(const std::map<std::string, std::string> &headers);
 
 
 	//Functions to parse the contents of particuarly complicated headers (as a convienence
 	//for modules)
-	void    ParseRangeHeader(StrPtrLen &header);
-	void    ParseTransportHeader(StrPtrLen &header);
-	void    ParseIfModSinceHeader(StrPtrLen &header);
-	void    ParseAddrSubHeader(StrPtrLen* inSubHeader, StrPtrLen* inHeaderName, uint32_t* outAddr);
-	void    ParseRetransmitHeader(StrPtrLen &header);
+	void    ParseRangeHeader(boost::string_view header);
+	void    ParseTransportHeader(boost::string_view header);
+	void    ParseIfModSinceHeader(boost::string_view header);
+	void    ParseAddrSubHeader(boost::string_view inSubHeader, boost::string_view inHeaderName, uint32_t* outAddr);
+	void    ParseRetransmitHeader(boost::string_view header);
 	void    ParseContentLengthHeader(boost::string_view header);
 	void    ParseSpeedHeader(boost::string_view header);
 	void    ParsePrebufferHeader(boost::string_view header);
-	void    ParseTransportOptionsHeader(StrPtrLen &header);
+	void    ParseTransportOptionsHeader(boost::string_view header);
 	void    ParseSessionHeader(boost::string_view header);
-	void    ParseClientPortSubHeader(StrPtrLen* inClientPortSubHeader);
-	void    ParseTimeToLiveSubHeader(StrPtrLen* inTimeToLiveSubHeader);
-	void    ParseModeSubHeader(StrPtrLen* inModeSubHeader);
-	bool    ParseNetworkModeSubHeader(StrPtrLen* inSubHeader);
+	void    ParseClientPortSubHeader(boost::string_view inClientPortSubHeader);
+	void    ParseTimeToLiveSubHeader(boost::string_view inTimeToLiveSubHeader);
+	void    ParseModeSubHeader(boost::string_view inModeSubHeader);
+	bool    ParseNetworkModeSubHeader(boost::string_view inSubHeader);
 	void 	ParseDynamicRateHeader(boost::string_view header);
 	void	ParseRandomDataSizeHeader(boost::string_view header);
 	void    ParseBandwidthHeader(boost::string_view header);
-
-	static uint8_t    sURLStopConditions[];
 };
 #endif // __RTSPREQUEST_H__
 

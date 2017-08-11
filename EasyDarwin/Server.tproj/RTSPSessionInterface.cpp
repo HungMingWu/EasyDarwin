@@ -28,6 +28,8 @@
 	 Contains:   Implementation of RTSPSessionInterface object.
  */
 
+#include <boost/algorithm/string/predicate.hpp>
+
 #include "RTSPSessionInterface.h"
 #include "QTSServerInterface.h"
 #include "RTSPProtocol.h"
@@ -394,7 +396,8 @@ void RTSPSessionInterface::RevertOutputStream()
 				theHeaderParser.ConsumeUntil(&theField, ':');
 				if (theHeaderParser.PeekFast() == ':')
 				{
-					if (theField.Equal(RTSPProtocol::GetHeaderString(qtssXDynamicRateHeader)))
+					boost::string_view theFieldV(theField.Ptr, theField.Len);
+					if (boost::iequals(theFieldV, RTSPProtocol::GetHeaderString(qtssXDynamicRateHeader)))
 					{
 						fOutputStream.Put(theRTTStr);
 						fOutputStream.Put(fRoundTripTime);

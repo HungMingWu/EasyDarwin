@@ -514,9 +514,6 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 
 	QTSS_Error theErr = QTSS_RequestFailed;
 
-	uint32_t x = 0;
-	uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPAthnRole);
-	QTSSModule* theModulePtr = nullptr;
 	bool allowedDefault = QTSServerInterface::GetServer()->GetPrefs()->GetAllowGuestDefault();
 	bool allowed = allowedDefault; //server pref?
 	bool hasUser = false;
@@ -524,23 +521,19 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 
 
 	// Call all the modules that are registered for the RTSP Authorize Role 
-	for (; x < numModules; x++)
+	for (const auto &theModulePtr : QTSServerInterface::GetModule(QTSSModule::kRTSPAthnRole))
 	{
 		ioAuthRequestObject->SetAllowed(allowedDefault);
 		ioAuthRequestObject->SetHasUser(false);
 		ioAuthRequestObject->SetAuthHandled(false);
 
-		debug_printf(" QTSSCallbacks::QTSS_Authenticate calling module module = %lu numModules=%lu\n", x, numModules);
-		theModulePtr = QTSServerInterface::GetModule(QTSSModule::kRTSPAthnRole, x);
 		theErr = QTSS_NoErr;
 		if (theModulePtr)
 		{
 			theErr = theModulePtr->CallDispatch(QTSS_RTSPAuthenticate_Role, &theAuthenticationParams);
-			debug_printf(" QTSSCallbacks::QTSS_Authorize calling module module = %lu numModules=%lu ModuleError=%ld\n", x, numModules, theErr);
 		}
 		else
 		{
-			debug_printf(" QTSSCallbacks::QTSS_Authorize calling module module = %lu is NULL! numModules=%lu\n", x, numModules);
 			continue;
 		}
 		allowed = ioAuthRequestObject->GetAllowed();
@@ -551,7 +544,6 @@ QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const c
 
 		if (hasUser || handled) //See RTSPSession.cpp::Run state=kAuthenticatingRequest
 		{
-			debug_printf(" QTSSCallbacks::QTSS_Authenticate skipping other modules fCurrentModule = %lu numModules=%lu\n", x, numModules);
 			break;
 		}
 	}
@@ -585,9 +577,6 @@ QTSS_Error	QTSSCallbacks::QTSS_Authorize(RTSPRequest* inAuthRequestObject, std::
 	theParams.rtspRequestParams.inClientSession = nullptr;
 
 	QTSS_Error theErr = QTSS_RequestFailed;
-	uint32_t x = 0;
-	uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPAuthRole);
-	QTSSModule* theModulePtr = nullptr;
 	bool 		allowedDefault = QTSServerInterface::GetServer()->GetPrefs()->GetAllowGuestDefault();
 	*outAuthUserAllowed = allowedDefault;
 	bool      allowed = allowedDefault; //server pref?
@@ -597,14 +586,12 @@ QTSS_Error	QTSSCallbacks::QTSS_Authorize(RTSPRequest* inAuthRequestObject, std::
 
 	// Call all the modules that are registered for the RTSP Authorize Role 
 
-	for (; x < numModules; x++)
+	for (const auto &theModulePtr : QTSServerInterface::GetModule(QTSSModule::kRTSPAuthRole))
 	{
 		inAuthRequestObject->SetAllowed(true);
 		inAuthRequestObject->SetHasUser(false);
 		inAuthRequestObject->SetAuthHandled(false);
 
-		debug_printf(" QTSSCallbacks::QTSS_Authorize calling module module = %lu numModules=%lu\n", x, numModules);
-		theModulePtr = QTSServerInterface::GetModule(QTSSModule::kRTSPAuthRole, x);
 		theErr = QTSS_NoErr;
 		if (theModulePtr)
 		{
@@ -612,11 +599,9 @@ QTSS_Error	QTSSCallbacks::QTSS_Authorize(RTSPRequest* inAuthRequestObject, std::
 				theModulePtr->GetValue(qtssModName)->PrintStr("QTSSModule::CallDispatch ENTER module=", "\n");
 
 			theErr = theModulePtr->CallDispatch(QTSS_RTSPAuthorize_Role, &theParams);
-			debug_printf(" QTSSCallbacks::QTSS_Authorize calling module module = %lu numModules=%lu ModuleError=%ld\n", x, numModules, theErr);
 		}
 		else
 		{
-			debug_printf(" QTSSCallbacks::QTSS_Authorize calling module module = %lu is NULL! numModules=%lu\n", x, numModules);
 			continue;
 		}
 
@@ -633,7 +618,6 @@ QTSS_Error	QTSSCallbacks::QTSS_Authorize(RTSPRequest* inAuthRequestObject, std::
 
 		if (!allowed && !handled)  //old module break on !allowed
 		{
-			debug_printf("RTSPSession.cpp::Run(kAuthorizingRequest)  skipping other modules fCurrentModule = %lu numModules=%lu\n", x, numModules);
 			break;
 		}
 	}

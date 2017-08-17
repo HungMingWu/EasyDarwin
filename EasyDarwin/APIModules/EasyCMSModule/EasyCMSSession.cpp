@@ -408,12 +408,8 @@ QTSS_Error EasyCMSSession::FreeStream(const char * streamName, uint32_t streamCh
 		theParams.GetAssociatedCMSParams.outCMSIP = chCMSIP;
 		theParams.GetAssociatedCMSParams.outCMSPort = chCMSPort;
 		theParams.GetAssociatedCMSParams.inSerial = fStreamName;
-		auto numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRedisGetAssociatedCMSRole);
-		for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
-		{
-			auto theModule = QTSServerInterface::GetModule(QTSSModule::kRedisGetAssociatedCMSRole, currentModule);
-			(void)theModule->CallDispatch(Easy_RedisGetAssociatedCMS_Role, &theParams);
-		}
+		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRedisGetAssociatedCMSRole))
+			theModule->CallDispatch(Easy_RedisGetAssociatedCMS_Role, &theParams);
 
 		if (chCMSIP[0] == 0)
 		{

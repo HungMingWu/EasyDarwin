@@ -244,39 +244,5 @@ private:
 
 };
 
-//class RTSPSessionHandler : public Task
-//{
-//public:
-//	RTSPSessionHandler(RTSPSession* session);
-//	virtual ~RTSPSessionHandler();
-//
-//private:
-//	virtual int64_t Run();
-//    
-//    void Release();
-//    RTSPSession* fRTSPSession;
-//
-//    //Number of packets to allocate when the socket is first created
-//	enum
-//	{
-//		kNumPreallocatedMsgs = 20,   //uint32_t
-//        sMsgHandleInterval = 1
-//	};
-//
-//	OSQueue fFreeMsgQueue;
-//	OSQueue fMsgQueue;
-//    OSMutex fQueueMutex;
-//    OSMutex fFreeQueueMutex;
-//
-//    bool  fLiveHandler;
-//
-//public:
-//    RTSPMsg* GetMsg();
-//	bool  ProcessMsg(const int64_t& inMilliseconds, RTSPMsg* theMsg);
-//    void HandleDataPacket(RTSPMsg* msg);
-//
-//    friend class RTSPSession;
-//};
-
 #endif // __RTSPSESSION_H__
 

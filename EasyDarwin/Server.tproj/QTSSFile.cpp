@@ -78,14 +78,13 @@ QTSS_Error  QTSSFile::Open(char* inPath, QTSS_OpenFileFlags inFlags)
 	theParams.openFileParams.inFileObject = this;
 
 	QTSS_Error theErr = QTSS_FileNotFound;
-	uint32_t x = 0;
 
-	for (; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kOpenFilePreProcessRole); x++)
+	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kOpenFilePreProcessRole))
 	{
-		theErr = QTSServerInterface::GetModule(QTSSModule::kOpenFilePreProcessRole, x)->CallDispatch(QTSS_OpenFilePreProcess_Role, &theParams);
+		theErr = theModule->CallDispatch(QTSS_OpenFilePreProcess_Role, &theParams);
 		if (theErr != QTSS_FileNotFound)
 		{
-			fModule = QTSServerInterface::GetModule(QTSSModule::kOpenFilePreProcessRole, x);
+			fModule = theModule;
 			break;
 		}
 	}
@@ -93,10 +92,11 @@ QTSS_Error  QTSSFile::Open(char* inPath, QTSS_OpenFileFlags inFlags)
 	if (theErr == QTSS_FileNotFound)
 	{
 		// None of the prepreprocessors claimed this file. Invoke the default file handler
-		if (QTSServerInterface::GetNumModulesInRole(QTSSModule::kOpenFileRole) > 0)
+		auto modules = QTSServerInterface::GetModule(QTSSModule::kOpenFileRole);
+		if (!modules.empty())
 		{
-			fModule = QTSServerInterface::GetModule(QTSSModule::kOpenFileRole, 0);
-			theErr = QTSServerInterface::GetModule(QTSSModule::kOpenFileRole, 0)->CallDispatch(QTSS_OpenFile_Role, &theParams);
+			fModule = modules[0];
+			theErr = fModule->CallDispatch(QTSS_OpenFile_Role, &theParams);
 
 		}
 	}

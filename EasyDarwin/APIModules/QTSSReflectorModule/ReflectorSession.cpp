@@ -27,10 +27,12 @@
 	Contains:   Implementation of object defined in ReflectorSession.h.
 */
 
+#include <chrono>
 #include "ReflectorSession.h"
 #include "SocketUtils.h"
 #include "OS.h"
 #include "QTSServerInterface.h"
+#include <boost/asio/io_service.hpp>
 
 #ifndef __Win32__
 #include <unistd.h>
@@ -55,7 +57,8 @@ FileDeleter::~FileDeleter()
 	fFilePath.Len = 0;
 }
 
-ReflectorSession::ReflectorSession(boost::string_view inSourceID, uint32_t inChannelNum, SourceInfo* inInfo) : Task(),
+extern boost::asio::io_service io_service;
+ReflectorSession::ReflectorSession(boost::string_view inSourceID, uint32_t inChannelNum, SourceInfo* inInfo) :
 	fIsSetup(false),
 	fSessionName(inSourceID),
 	fChannelNum(inChannelNum),
@@ -68,10 +71,9 @@ ReflectorSession::ReflectorSession(boost::string_view inSourceID, uint32_t inCha
 	fInitTimeMS(OS::Milliseconds()),
 	fNoneOutputStartTimeMS(OS::Milliseconds()),
 	fHasBufferedStreams(false),
-	fHasVideoKeyFrameUpdate(false)
+	fHasVideoKeyFrameUpdate(false),
+	timer(io_service)
 {
-	this->SetTaskName("ReflectorSession");
-
 	fQueueElem.SetEnclosingObject(this);
 	if (!fSessionName.empty())
 	{
@@ -86,8 +88,7 @@ ReflectorSession::ReflectorSession(boost::string_view inSourceID, uint32_t inCha
 
 		this->SetSessionName();
 	}
-
-	this->Signal(Task::kStartEvent);
+	timer.async_wait(std::bind(&ReflectorSession::Run, this, std::placeholders::_1));
 }
 
 
@@ -120,12 +121,8 @@ QTSS_Error ReflectorSession::SetSessionName()
 		theParams.easyStreamInfoParams.inChannel = fChannelNum;
 		theParams.easyStreamInfoParams.inNumOutputs = fNumOutputs;
 		theParams.easyStreamInfoParams.inAction = easyRedisActionSet;
-		auto numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRedisUpdateStreamInfoRole);
-		for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
-		{
-			QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRedisUpdateStreamInfoRole, currentModule);
-			(void)theModule->CallDispatch(Easy_RedisUpdateStreamInfo_Role, &theParams);
-		}
+		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRedisUpdateStreamInfoRole))
+			theModule->CallDispatch(Easy_RedisUpdateStreamInfo_Role, &theParams);
 	}
 	return QTSS_NoErr;
 }
@@ -259,12 +256,8 @@ void    ReflectorSession::RemoveOutput(ReflectorOutput* inOutput, bool isClient)
 		QTSS_RoleParams theParams;
 		theParams.easyStreamInfoParams.inStreamName = (char *)fSessionName.data();
 		theParams.easyStreamInfoParams.inChannel = fChannelNum;
-		auto numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kEasyCMSFreeStreamRole);
-		for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
-		{
-			auto theModule = QTSServerInterface::GetModule(QTSSModule::kEasyCMSFreeStreamRole, currentModule);
-			(void)theModule->CallDispatch(Easy_CMSFreeStream_Role, &theParams);
-		}
+		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kEasyCMSFreeStreamRole))
+			theModule->CallDispatch(Easy_CMSFreeStream_Role, &theParams);
 	}
 }
 
@@ -321,24 +314,19 @@ void ReflectorSession::DelRedisLive()
 	theParams.easyStreamInfoParams.inStreamName = (char *)fSessionName.data();
 	theParams.easyStreamInfoParams.inChannel = fChannelNum;
 	theParams.easyStreamInfoParams.inAction = easyRedisActionDelete;
-	uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRedisUpdateStreamInfoRole);
-	for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
+	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRedisUpdateStreamInfoRole))
 	{
 		printf("从redis中删除推流名称%s\n", fSourceID.Ptr);
-		QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRedisUpdateStreamInfoRole, currentModule);
-		(void)theModule->CallDispatch(Easy_RedisUpdateStreamInfo_Role, &theParams);
+		theModule->CallDispatch(Easy_RedisUpdateStreamInfo_Role, &theParams);
 	}
 }
 
-int64_t ReflectorSession::Run()
+void ReflectorSession::Run(const boost::system::error_code &ec)
 {
-	EventFlags events = this->GetEvents();
-
-	if (events & Task::kKillEvent)
-	{
-		return -1;
+	if (ec == boost::asio::error::operation_aborted) {
+		printf("ReflectorSession timer canceled\n");
+		return;
 	}
-
 	int64_t sNowTime = OS::Milliseconds();
 	int64_t sNoneTime = GetNoneOutputStartTimeMS();
 	if ((GetNumOutputs() == 0) && (sNowTime - sNoneTime >= /*QTSServerInterface::GetServer()->GetPrefs()->GetRTPSessionTimeoutInSecs()*/35 * 1000))
@@ -346,12 +334,8 @@ int64_t ReflectorSession::Run()
 		QTSS_RoleParams theParams;
 		theParams.easyStreamInfoParams.inStreamName = (char *)fSessionName.data();
 		theParams.easyStreamInfoParams.inChannel = fChannelNum;
-		auto numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kEasyCMSFreeStreamRole);
-		for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
-		{
-			auto theModule = QTSServerInterface::GetModule(QTSSModule::kEasyCMSFreeStreamRole, currentModule);
-			(void)theModule->CallDispatch(Easy_CMSFreeStream_Role, &theParams);
-		}
+		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kEasyCMSFreeStreamRole))
+			theModule->CallDispatch(Easy_CMSFreeStream_Role, &theParams);
 	}
 	else
 	{
@@ -361,13 +345,10 @@ int64_t ReflectorSession::Run()
 		theParams.easyStreamInfoParams.inNumOutputs = fNumOutputs;
 		theParams.easyStreamInfoParams.inBitrate = GetBitRate();
 		theParams.easyStreamInfoParams.inAction = easyRedisActionSet;
-		auto numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRedisUpdateStreamInfoRole);
-		for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
-		{
-			auto theModule = QTSServerInterface::GetModule(QTSSModule::kRedisUpdateStreamInfoRole, currentModule);
-			(void)theModule->CallDispatch(Easy_RedisUpdateStreamInfo_Role, &theParams);
-		}
-	}
 
-	return 20 *1000;
+		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRedisUpdateStreamInfoRole))
+			theModule->CallDispatch(Easy_RedisUpdateStreamInfo_Role, &theParams);
+	}
+	timer.expires_from_now(std::chrono::seconds(20));
+	timer.async_wait(std::bind(&ReflectorSession::Run, this, std::placeholders::_1));
 }

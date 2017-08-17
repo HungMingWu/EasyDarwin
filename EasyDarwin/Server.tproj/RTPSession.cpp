@@ -476,19 +476,15 @@ int64_t RTPSession::Run()
 		//invoking modules here, because the session is unregistered and
 		//therefore there's no way another thread could get involved anyway
 
-		uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kClientSessionClosingRole);
+		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kClientSessionClosingRole))
 		{
-			for (; fCurrentModule < numModules; fCurrentModule++)
-			{
-				fModuleState.eventRequested = false;
-				fModuleState.idleTime = 0;
-				QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kClientSessionClosingRole, fCurrentModule);
-				(void)theModule->CallDispatch(QTSS_ClientSessionClosing_Role, &theParams);
+			fModuleState.eventRequested = false;
+			fModuleState.idleTime = 0;
+			theModule->CallDispatch(QTSS_ClientSessionClosing_Role, &theParams);
 
-				// If this module has requested an event, return and wait for the event to transpire
-				if (fModuleState.eventRequested)
-					return fModuleState.idleTime; // If the module has requested idle time...
-			}
+			// If this module has requested an event, return and wait for the event to transpire
+			if (fModuleState.eventRequested)
+				return fModuleState.idleTime; // If the module has requested idle time...
 		}
 
 		return -1;//doing this will cause the destructor to get called.

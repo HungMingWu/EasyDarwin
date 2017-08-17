@@ -66,9 +66,9 @@ HTTPSession::~HTTPSession()
 	// Invoke the session closing modules
 	QTSS_RoleParams theParams;
 	theParams.rtspSessionClosingParams.inRTSPSession = this;
-
-	for (uint32_t x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPSessionClosingRole); x++)
-		(void)QTSServerInterface::GetModule(QTSSModule::kRTSPSessionClosingRole, x)->CallDispatch(QTSS_RTSPSessionClosing_Role, &theParams);
+	
+	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPSessionClosingRole))
+		theModule->CallDispatch(QTSS_RTSPSessionClosing_Role, &theParams);
 
 	fLiveSession = false; //used in Clean up request to remove the RTP session.
 	this->CleanupRequest();// Make sure that all our objects are deleted
@@ -1126,10 +1126,8 @@ QTSS_Error HTTPSession::execNetMsgCSGetDeviceStreamReqRESTful(const char* queryS
 		params.easyGetDeviceStreamParams.outUrl = outURL;
 		params.easyGetDeviceStreamParams.outIsReady = false;
 
-		uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kGetDeviceStreamRole);
-		for (uint32_t fCurrentModule = 0; fCurrentModule < numModules; fCurrentModule++)
+		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kGetDeviceStreamRole))
 		{
-			QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kGetDeviceStreamRole, fCurrentModule);
 			QTSS_Error exeErr = theModule->CallDispatch(Easy_GetDeviceStream_Role, &params);
 			if (exeErr == QTSS_NoErr)
 			{
@@ -1230,10 +1228,8 @@ QTSS_Error HTTPSession::execNetMsgCSLiveDeviceStreamReqRESTful(const char * quer
 		params.easyGetDeviceStreamParams.outUrl = nullptr;
 		params.easyGetDeviceStreamParams.outIsReady = false;
 
-		uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kLiveDeviceStreamRole);
-		for (uint32_t fCurrentModule = 0; fCurrentModule < numModules; fCurrentModule++)
+		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kLiveDeviceStreamRole))
 		{
-			QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kLiveDeviceStreamRole, fCurrentModule);
 			QTSS_Error exeErr = theModule->CallDispatch(Easy_LiveDeviceStream_Role, &params);
 			if (exeErr == QTSS_NoErr)
 			{

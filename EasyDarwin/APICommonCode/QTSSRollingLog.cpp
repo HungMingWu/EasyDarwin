@@ -38,15 +38,16 @@
 #include <errno.h> 
 #include <ctime>
 #include <memory>
+#include <boost/asio/io_service.hpp>
 #include "QTSSRollingLog.h"
 #include "OS.h"
 #include "ResizeableStringFormatter.h"
 
 static bool sCloseOnWrite = true;
+extern boost::asio::io_service io_service;
 
- QTSSRollingLog::QTSSRollingLog()
+QTSSRollingLog::QTSSRollingLog() : timer(io_service)
 {
-    this->SetTaskName("QTSSRollingLog");
 }
 
 QTSSRollingLog::~QTSSRollingLog()
@@ -135,9 +136,8 @@ char* QTSSRollingLog::GetLogPath(char *extension)
 
 void QTSSRollingLog::EnableLog( bool appendDotLog )
 {
-   //
     // Start this object running!
-    this->Signal(Task::kStartEvent);
+	timer.async_wait(std::bind(&QTSSRollingLog::Run, this, std::placeholders::_1));
 
     OSMutexLocker locker(&fMutex);
 
@@ -477,13 +477,12 @@ time_t QTSSRollingLog::ReadLogHeader(FILE* inFile)
     return theTime;
 }
 
-int64_t QTSSRollingLog::Run()
+void QTSSRollingLog::Run(const boost::system::error_code &ec)
 {
-    //
-    // If we are going away, just return
-    EventFlags events = this->GetEvents();
-    if (events & Task::kKillEvent)
-        return -1;
+	if (ec == boost::asio::error::operation_aborted) {
+		printf("QTSSRollingLog timer canceled\n");
+		return;
+	}
     
     OSMutexLocker locker(&fMutex);
     
@@ -507,7 +506,8 @@ int64_t QTSSRollingLog::Run()
             }
         }
     }
-    return 60 * 1000;
+	timer.expires_from_now(std::chrono::seconds(60));
+	timer.async_wait(std::bind(&QTSSRollingLog::Run, this, std::placeholders::_1));
 }
 
 void QTSSRollingLog::ResetToMidnight(time_t* inTimePtr, time_t* outTimePtr) 

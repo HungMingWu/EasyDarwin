@@ -1545,8 +1545,8 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 	OSThreadDataSetter theSetter(&sRTCPProcessModuleState, nullptr);
 
 	// Invoke RTCP processing modules
-	for (uint32_t x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTCPProcessRole); x++)
-		(void)QTSServerInterface::GetModule(QTSSModule::kRTCPProcessRole, x)->CallDispatch(QTSS_RTCPProcess_Role, &theParams);
+	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTCPProcessRole))
+		theModule->CallDispatch(QTSS_RTCPProcess_Role, &theParams);
 
 	fSession->GetSessionMutex()->Unlock();
 }

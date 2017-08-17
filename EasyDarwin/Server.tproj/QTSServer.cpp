@@ -170,8 +170,8 @@ QTSServer::~QTSServer()
 	theModuleState.curTask = nullptr;
 	OSThread::SetMainThreadData(&theModuleState);
 
-	for (uint32_t x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kShutdownRole); x++)
-		(void)QTSServerInterface::GetModule(QTSSModule::kShutdownRole, x)->CallDispatch(QTSS_Shutdown_Role, nullptr);
+	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kShutdownRole))
+		theModule->CallDispatch(QTSS_Shutdown_Role, nullptr);
 
 	OSThread::SetMainThreadData(nullptr);
 
@@ -1018,35 +1018,18 @@ void QTSServer::BuildModuleRoleArrays()
 	OSQueueIter theIter(&sModuleQueue);
 	QTSSModule* theModule = nullptr;
 
-	// Make sure these variables are cleaned out in case they've already been inited.
-
-	DestroyModuleRoleArrays();
-
 	// Loop through all the roles of all the modules, recording the number of
 	// modules in each role, and also recording which modules are doing what.
 
 	for (uint32_t x = 0; x < QTSSModule::kNumRoles; x++)
 	{
-		sNumModulesInRole[x] = 0;
+		sModuleArray[x].clear();
 		for (theIter.Reset(); !theIter.IsDone(); theIter.Next())
 		{
 			theModule = (QTSSModule*)theIter.GetCurrent()->GetEnclosingObject();
 			if (theModule->RunsInRole(x))
-				sNumModulesInRole[x] += 1;
-		}
-
-		if (sNumModulesInRole[x] > 0)
-		{
-			uint32_t moduleIndex = 0;
-			sModuleArray[x] = new QTSSModule*[sNumModulesInRole[x] + 1];
-			for (theIter.Reset(); !theIter.IsDone(); theIter.Next())
 			{
-				theModule = (QTSSModule*)theIter.GetCurrent()->GetEnclosingObject();
-				if (theModule->RunsInRole(x))
-				{
-					sModuleArray[x][moduleIndex] = theModule;
-					moduleIndex++;
-				}
+				sModuleArray[x].push_back(theModule);
 			}
 		}
 	}
@@ -1056,10 +1039,9 @@ void QTSServer::DestroyModuleRoleArrays()
 {
 	for (uint32_t x = 0; x < QTSSModule::kNumRoles; x++)
 	{
-		sNumModulesInRole[x] = 0;
-		if (sModuleArray[x] != nullptr)
-			delete[] sModuleArray[x];
-		sModuleArray[x] = nullptr;
+		for (auto &v : sModuleArray[x])
+			delete v;
+		sModuleArray[x].clear();
 	}
 }
 
@@ -1088,9 +1070,8 @@ void QTSServer::DoInitRole()
 	//   QTSS_RTSPMethod	theSetParameterMethod = qtssSetParameterMethod;
 	//    (void)this->SetValue(qtssSvrHandledMethods, 0, &theSetParameterMethod, sizeof(theSetParameterMethod));
 
-	for (uint32_t x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kInitializeRole); x++)
+	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kInitializeRole))
 	{
-		QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kInitializeRole, x);
 		theInitParams.initParams.inModule = theModule;
 		theModuleState.curModule = theModule;
 		QTSS_Error theErr = theModule->CallDispatch(QTSS_Initialize_Role, &theInitParams);
@@ -1346,11 +1327,8 @@ QTSS_Error QTSServer::RereadPrefsService(QTSS_ServiceFunctionArgsPtr /*inArgs*/)
 	//
 	// Now that we are done rereading the prefs, invoke all modules in the RereadPrefs
 	// role so they can update their internal prefs caches.
-	for (uint32_t x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kRereadPrefsRole); x++)
-	{
-		QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRereadPrefsRole, x);
-		(void)theModule->CallDispatch(QTSS_RereadPrefs_Role, nullptr);
-	}
+	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRereadPrefsRole))
+		theModule->CallDispatch(QTSS_RereadPrefs_Role, nullptr);
 	return QTSS_NoErr;
 }
 

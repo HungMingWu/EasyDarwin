@@ -1279,7 +1279,7 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 			//delete theSession;
 			CSdpCache::GetInstance()->eraseSdpMap(theSession->GetSourceID()->Ptr);
 			theSession->DelRedisLive();
-			theSession->Signal(Task::kKillEvent);
+			theSession->StopTimer();
 			return nullptr;
 		}
 
@@ -1383,7 +1383,7 @@ void DeleteReflectorPushSession(QTSS_StandardRTSP_Params* inParams, ReflectorSes
 		//delete theSession;
 		CSdpCache::GetInstance()->eraseSdpMap(theSession->GetSourceID()->Ptr);
 		theSession->DelRedisLive();
-		theSession->Signal(Task::kKillEvent);
+		theSession->StopTimer();
 	}
 }
 
@@ -1948,7 +1948,7 @@ void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* theSession, bool 
 				CSdpCache::GetInstance()->eraseSdpMap(theSession->GetSourceID()->Ptr);
 				theSession->DelRedisLive();
 
-				theSession->Signal(Task::kKillEvent);
+				theSession->StopTimer();
 			}
 		}
 	}

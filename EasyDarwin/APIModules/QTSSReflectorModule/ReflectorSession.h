@@ -32,6 +32,7 @@
  */
 
 #include <boost/utility/string_view.hpp>
+#include <boost/asio/steady_timer.hpp>
 
 #include "QTSS.h"
 #include "OSRef.h"
@@ -59,7 +60,7 @@ private:
 #ifndef __REFLECTOR_SESSION__
 #define __REFLECTOR_SESSION__
 
-class ReflectorSession : public Task
+class ReflectorSession
 {
 public:
 
@@ -71,7 +72,7 @@ public:
 	// Caller may also provide a SourceInfo object, though it is not needed and
 	// will also need to be provided to SetupReflectorSession when that is called.
 	ReflectorSession(boost::string_view inSourceID, uint32_t inChannelNum = 0, SourceInfo* inInfo = nullptr);
-	~ReflectorSession() override;
+	~ReflectorSession();
 
 	//
 	// MODIFIERS
@@ -158,7 +159,7 @@ public:
 	void	SetHasVideoKeyFrameUpdate(bool indexUpdate) { fHasVideoKeyFrameUpdate = indexUpdate; }
 
 	void	DelRedisLive();
-
+	void    StopTimer() { timer.cancel(); }
 private:
 
 	// Is this session setup?
@@ -192,7 +193,8 @@ private:
 	bool		fHasVideoKeyFrameUpdate;
 
 private:
-	int64_t Run() override;
+	boost::asio::steady_timer timer;
+	void Run(const boost::system::error_code &ec);
 };
 
 #endif

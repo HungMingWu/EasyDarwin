@@ -27,12 +27,16 @@
 	 Contains:   main function to drive streaming server on win32.
  */
 
+#include <thread>
+#include <boost/asio/io_service.hpp>
 #include "getopt.h"
 #include "FilePrefsSource.h"
 #include "RunServer.h"
 #include "QTSServer.h"
 #include "QTSSExpirationDate.h"
 #include "GenerateXMLPrefs.h"
+
+boost::asio::io_service io_service;
 
  // Data
 static FilePrefsSource sPrefsSource(true); // Allow dups
@@ -53,6 +57,11 @@ void WINAPI ServiceMain(DWORD argc, LPTSTR *argv);
 
 int main(int argc, char * argv[])
 {
+	std::thread t([&] {
+		boost::asio::io_service::work work(io_service);
+		io_service.run();
+	});
+	t.detach();
 	extern char* optarg;
 	char sAbsolutePath[MAX_PATH];
 	GetCurrentDirectory(MAX_PATH, sAbsolutePath);

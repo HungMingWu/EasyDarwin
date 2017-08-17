@@ -37,6 +37,7 @@
 
 #include <stdio.h>
 #include <time.h>
+#include <boost/asio/steady_timer.hpp>
 #ifndef __Win32__
 #include <sys/time.h>
 #endif
@@ -46,17 +47,14 @@
 
 const bool kAllowLogToRoll = true;
 
-class QTSSRollingLog : public Task
+class QTSSRollingLog
 {
     public:
-    
-        //pass in whether you'd like the log roller to log errors.
-        QTSSRollingLog();
-        
+		QTSSRollingLog();
         //
         // Call this to delete. Closes the log and sends a kill event
         void    Delete()
-            { CloseLog(false); this->Signal(Task::kKillEvent); }
+            { CloseLog(false); timer.cancel(); }
         
         //
         // Write a log message
@@ -105,7 +103,7 @@ class QTSSRollingLog : public Task
 
         //
         // Task object. Do not delete directly
-        ~QTSSRollingLog() override;
+        virtual ~QTSSRollingLog();
 
         //Derived class must provide a way to get the log & rolled log name
         virtual char* GetLogName() = 0;
@@ -118,10 +116,11 @@ class QTSSRollingLog : public Task
         time_t          ReadLogHeader(FILE* inFile);
 
     private:
-    
+ 
+		boost::asio::steady_timer timer;
         //
         // Run function to roll log right at midnight   
-        int64_t      Run() override;
+        void      Run(const boost::system::error_code &ec);
 
         FILE*           fLog{nullptr};
         time_t          fLogCreateTime{-1};

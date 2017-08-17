@@ -101,7 +101,7 @@ class QTSSErrorLog : public QTSSRollingLog
 {
 public:
 
-	QTSSErrorLog() : QTSSRollingLog() { this->SetTaskName("QTSSErrorLog"); }
+	QTSSErrorLog() = default;
 	~QTSSErrorLog() override = default;
 
 	char* GetLogName() override { return QTSServerInterface::GetServer()->GetPrefs()->GetErrorLogName(); }

@@ -32,6 +32,8 @@
 #ifndef kVersionString
 #include "revision.h"
 #endif
+#include <boost/asio/io_service.hpp>
+
 #include "QTSServerInterface.h"
 
 #include "RTPSessionInterface.h"
@@ -64,8 +66,7 @@ StrPtrLen               QTSServerInterface::sServerHeaderPtr(sServerHeader, kMax
 
 std::string             QTSServerInterface::sPublicHeaderStr;
 
-QTSSModule**            QTSServerInterface::sModuleArray[QTSSModule::kNumRoles];
-uint32_t                  QTSServerInterface::sNumModulesInRole[QTSSModule::kNumRoles];
+std::array<std::vector<QTSSModule*>, QTSSModule::kNumRoles> QTSServerInterface::sModuleArray{};
 OSQueue                 QTSServerInterface::sModuleQueue;
 QTSSErrorLogStream      QTSServerInterface::sErrorLogStream;
 
@@ -176,12 +177,6 @@ void    QTSServerInterface::Initialize()
 QTSServerInterface::QTSServerInterface()
 	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kServerDictIndex), &fMutex)
 {
-	for (uint32_t y = 0; y < QTSSModule::kNumRoles; y++)
-	{
-		sModuleArray[y] = nullptr;
-		sNumModulesInRole[y] = 0;
-	}
-
 	this->SetVal(qtssSvrState, &fServerState, sizeof(fServerState));
 	this->SetVal(qtssServerAPIVersion, &sServerAPIVersion, sizeof(sServerAPIVersion));
 	this->SetVal(qtssSvrDefaultIPAddr, &fDefaultIPAddr, sizeof(fDefaultIPAddr));
@@ -221,8 +216,8 @@ void QTSServerInterface::LogError(QTSS_ErrorVerbosity inVerbosity, char* inBuffe
 	theParams.errorParams.inVerbosity = inVerbosity;
 	theParams.errorParams.inBuffer = inBuffer;
 
-	for (uint32_t x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kErrorLogRole); x++)
-		(void)QTSServerInterface::GetModule(QTSSModule::kErrorLogRole, x)->CallDispatch(QTSS_ErrorLog_Role, &theParams);
+	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kErrorLogRole))
+		theModule->CallDispatch(QTSS_ErrorLog_Role, &theParams);
 
 	// If this is a fatal error, set the proper attribute in the RTSPServer dictionary
 	if ((inVerbosity == qtssFatalVerbosity) && (sServer != nullptr))
@@ -261,14 +256,8 @@ void QTSServerInterface::SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMa
 		else
 			OSThread::GetCurrent()->SetThreadData(&sStateChangeState);
 
-		uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kStateChangeRole);
-		{
-			for (uint32_t theCurrentModule = 0; theCurrentModule < numModules; theCurrentModule++)
-			{
-				QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kStateChangeRole, theCurrentModule);
-				(void)theModule->CallDispatch(QTSS_StateChange_Role, &theParams);
-			}
-		}
+		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kStateChangeRole))
+			theModule->CallDispatch(QTSS_StateChange_Role, &theParams);
 
 		//
 		// Make sure to clear out the thread data
@@ -279,12 +268,11 @@ void QTSServerInterface::SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMa
 	}
 }
 
-
+extern boost::asio::io_service io_service;
 RTPStatsUpdaterTask::RTPStatsUpdaterTask()
-	: Task()
+	: timer(io_service)
 {
-	this->SetTaskName("RTPStatsUpdaterTask");
-	this->Signal(Task::kStartEvent);
+	timer.async_wait(std::bind(&RTPStatsUpdaterTask::Run, this, std::placeholders::_1));
 }
 
 float RTPStatsUpdaterTask::GetCPUTimeInSeconds()
@@ -317,8 +305,12 @@ float RTPStatsUpdaterTask::GetCPUTimeInSeconds()
 	return cpuTimeInSec;
 }
 
-int64_t RTPStatsUpdaterTask::Run()
+void RTPStatsUpdaterTask::Run(const boost::system::error_code &ec)
 {
+	if (ec == boost::asio::error::operation_aborted) {
+		printf("RTPStatsUpdaterTask timer canceled\n");
+		return;
+	}
 
 	QTSServerInterface* theServer = QTSServerInterface::sServer;
 
@@ -361,8 +353,9 @@ int64_t RTPStatsUpdaterTask::Run()
 		// Prevent divide by zero errror
 		if (delta < 1000) {
 			WarnV(delta >= 1000, "delta < 1000");
-			(void)this->GetEvents();//we must clear the event mask!
-			return theServer->GetPrefs()->GetTotalBytesUpdateTimeInSecs() * 1000;
+			timer.expires_from_now(std::chrono::seconds(theServer->GetPrefs()->GetTotalBytesUpdateTimeInSecs()));
+			timer.async_wait(std::bind(&RTPStatsUpdaterTask::Run, this, std::placeholders::_1));
+			return;
 		}
 
 		uint32_t packetsPerSecond = periodicPackets;
@@ -434,8 +427,8 @@ int64_t RTPStatsUpdaterTask::Run()
 		fLastBytesSent = theServer->fTotalRTPBytes;
 	}
 
-	(void)this->GetEvents();//we must clear the event mask!
-	return theServer->GetPrefs()->GetTotalBytesUpdateTimeInSecs() * 1000;
+	timer.expires_from_now(std::chrono::seconds(theServer->GetPrefs()->GetTotalBytesUpdateTimeInSecs()));
+	timer.async_wait(std::bind(&RTPStatsUpdaterTask::Run, this, std::placeholders::_1));
 }
 
 RTPSessionInterface* RTPStatsUpdaterTask::GetNewestSession(OSRefTable* inRTPSessionMap)

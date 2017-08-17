@@ -636,12 +636,8 @@ void RunServer()
 		{
 			num = 0;
 
-			uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRedisTTLRole);
-			for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
-			{
-				QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRedisTTLRole, currentModule);
-				(void)theModule->CallDispatch(Easy_RedisTTL_Role, nullptr);
-			}
+			for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRedisTTLRole))
+				theModule->CallDispatch(Easy_RedisTTL_Role, nullptr);
 		}
 		//
 

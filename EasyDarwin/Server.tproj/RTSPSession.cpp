@@ -182,8 +182,8 @@ RTSPSession::~RTSPSession()
 	theParams.rtspSessionClosingParams.inRTSPSession = this;
 
 	// Invoke modules
-	for (uint32_t x = 0; x < QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPSessionClosingRole); x++)
-		(void)QTSServerInterface::GetModule(QTSSModule::kRTSPSessionClosingRole, x)->CallDispatch(QTSS_RTSPSessionClosing_Role, &theParams);
+	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPSessionClosingRole))
+		theModule->CallDispatch(QTSS_RTSPSessionClosing_Role, &theParams);
 
 	fLiveSession = false; //used in Clean up request to remove the RTP session.
 	this->CleanupRequest();// Make sure that all our objects are deleted
@@ -217,8 +217,6 @@ int64_t RTSPSession::Run()
 {
 	EventFlags events = this->GetEvents();
 	QTSS_Error err = QTSS_NoErr;
-	QTSSModule* theModule = nullptr;
-	uint32_t numModules = 0;
 	Assert(fLastRTPSessionIDPtr.Ptr == &fLastRTPSessionID[0]);
 
 	// Some callbacks look for this struct in the thread object
@@ -447,9 +445,9 @@ int64_t RTSPSession::Run()
 				theFilterParams.rtspFilterParams.outNewRequest = &theReplacedRequest;
 
 				// Invoke filter modules
-				numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPFilterRole);
-				for (; (fCurrentModule < numModules) && ((!fRequest->HasResponseBeenSent()) || fModuleState.eventRequested); fCurrentModule++)
+				for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPFilterRole))
 				{
+					if (fRequest->HasResponseBeenSent() && !fModuleState.eventRequested) break;
 					fModuleState.eventRequested = false;
 					fModuleState.idleTime = 0;
 					if (fModuleState.globalLockRequested)
@@ -458,8 +456,7 @@ int64_t RTSPSession::Run()
 						fModuleState.isGlobalLocked = true;
 					}
 
-					theModule = QTSServerInterface::GetModule(QTSSModule::kRTSPFilterRole, fCurrentModule);
-					(void)theModule->CallDispatch(QTSS_RTSPFilter_Role, &theFilterParams);
+					theModule->CallDispatch(QTSS_RTSPFilter_Role, &theFilterParams);
 					fModuleState.isGlobalLocked = false;
 
 					// If this module has requested an event, return and wait for the event to transpire
@@ -517,15 +514,15 @@ int64_t RTSPSession::Run()
 		case kRoutingRequest:
 			{
 				// Invoke router modules
-				numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPRouteRole);
 				{
 					// Manipulation of the RTPSession from the point of view of
 					// a module is guaranteed to be atomic by the API.
 					Assert(fRTPSession != nullptr);
 					OSMutexLocker   locker(fRTPSession->GetSessionMutex());
 
-					for (; (fCurrentModule < numModules) && ((!fRequest->HasResponseBeenSent()) || fModuleState.eventRequested); fCurrentModule++)
+					for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPRouteRole))
 					{
+						((!fRequest->HasResponseBeenSent()) || fModuleState.eventRequested);
 						fModuleState.eventRequested = false;
 						fModuleState.idleTime = 0;
 						if (fModuleState.globalLockRequested)
@@ -534,8 +531,7 @@ int64_t RTSPSession::Run()
 							fModuleState.isGlobalLocked = true;
 						}
 
-						theModule = QTSServerInterface::GetModule(QTSSModule::kRTSPRouteRole, fCurrentModule);
-						(void)theModule->CallDispatch(QTSS_RTSPRoute_Role, &fRoleParams);
+						theModule->CallDispatch(QTSS_RTSPRoute_Role, &fRoleParams);
 						fModuleState.isGlobalLocked = false;
 
 						if (fModuleState.globalLockRequested) // call this request back locked
@@ -648,14 +644,12 @@ int64_t RTSPSession::Run()
 				fRequest->SetDigestChallenge(lastDigestChallenge);
 
 
-				numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPAthnRole);
-				for (fCurrentModule = 0; (fCurrentModule < numModules) && ((!fRequest->HasResponseBeenSent()) || fModuleState.eventRequested); fCurrentModule++)
+				for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPAthnRole))
 				{
-
+					if (fRequest->HasResponseBeenSent() && !fModuleState.eventRequested) break;
 					fRequest->SetAllowed(allowedDefault);
 					fRequest->SetHasUser(false);
 					fRequest->SetAuthHandled(false);
-					debug_printf("RTSPSession.cpp:kAuthenticatingRequest  fCurrentModule = %lu numModules=%lu\n", fCurrentModule, numModules);
 
 
 					fModuleState.eventRequested = false;
@@ -666,8 +660,6 @@ int64_t RTSPSession::Run()
 						fModuleState.isGlobalLocked = true;
 					}
 
-
-					theModule = QTSServerInterface::GetModule(QTSSModule::kRTSPAthnRole, fCurrentModule);
 					if (nullptr == theModule)
 						continue;
 
@@ -699,7 +691,6 @@ int64_t RTSPSession::Run()
 
 					if (hasUser || handled)
 					{
-						debug_printf("RTSPSession.cpp::Run(kAuthenticatingRequest)  skipping other modules fCurrentModule = %lu numModules=%lu\n", fCurrentModule, numModules);
 						break;
 					}
 
@@ -719,7 +710,6 @@ int64_t RTSPSession::Run()
 		case kAuthorizingRequest:
 			{
 				// Invoke authorization modules
-				numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPAuthRole);
 				bool      allowedDefault = QTSServerInterface::GetServer()->GetPrefs()->GetAllowGuestDefault();
 				bool      allowed = true;
 				bool      hasUser = false;
@@ -737,11 +727,11 @@ int64_t RTSPSession::Run()
 				fRequest->SetHasUser(hasUser);
 				fRequest->SetAuthHandled(handled);
 
-				for (; (fCurrentModule < numModules) && ((!fRequest->HasResponseBeenSent()) || fModuleState.eventRequested); fCurrentModule++)
+				for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPAuthRole))
 				{
+					if (fRequest->HasResponseBeenSent() && !fModuleState.eventRequested) break;
 					fRequest->SetHasUser(false);
 					fRequest->SetAuthHandled(false);
-					debug_printf("RTSPSession.cpp:kAuthorizingRequest  BEFORE DISPATCH fCurrentModule = %lu numModules=%lu\n", fCurrentModule, numModules);
 
 					fModuleState.eventRequested = false;
 					fModuleState.idleTime = 0;
@@ -751,7 +741,6 @@ int64_t RTSPSession::Run()
 						fModuleState.isGlobalLocked = true;
 					}
 
-					theModule = QTSServerInterface::GetModule(QTSSModule::kRTSPAuthRole, fCurrentModule);
 					if (nullptr == theModule)
 						continue;
 
@@ -786,12 +775,10 @@ int64_t RTSPSession::Run()
 
 					if (!allowed && !handled)  //old module break on !allowed
 					{
-						debug_printf("RTSPSession.cpp::Run(kAuthorizingRequest)  skipping other modules fCurrentModule = %lu numModules=%lu\n", fCurrentModule, numModules);
 						break;
 					}
 					if (!allowed && hasUser && handled)  //new module break on !allowed
 					{
-						debug_printf("RTSPSession.cpp::Run(kAuthorizingRequest)  skipping other modules fCurrentModule = %lu numModules=%lu\n", fCurrentModule, numModules);
 						break;
 					}
 
@@ -860,15 +847,15 @@ int64_t RTSPSession::Run()
 		case kPreprocessingRequest:
 			{
 				// Invoke preprocessor modules
-				numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPPreProcessorRole);
 				{
 					// Manipulation of the RTPSession from the point of view of
 					// a module is guarenteed to be atomic by the API.
 					Assert(fRTPSession != nullptr);
 					OSMutexLocker   locker(fRTPSession->GetSessionMutex());
 
-					for (; (fCurrentModule < numModules) && ((!fRequest->HasResponseBeenSent()) || fModuleState.eventRequested); fCurrentModule++)
+					for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPPreProcessorRole))
 					{
+						if (fRequest->HasResponseBeenSent() && !fModuleState.eventRequested) break;
 						fModuleState.eventRequested = false;
 						fModuleState.idleTime = 0;
 						if (fModuleState.globalLockRequested)
@@ -877,8 +864,7 @@ int64_t RTSPSession::Run()
 							fModuleState.isGlobalLocked = true;
 						}
 
-						theModule = QTSServerInterface::GetModule(QTSSModule::kRTSPPreProcessorRole, fCurrentModule);
-						(void)theModule->CallDispatch(QTSS_RTSPPreProcessor_Role, &fRoleParams);
+						theModule->CallDispatch(QTSS_RTSPPreProcessor_Role, &fRoleParams);
 						fModuleState.isGlobalLocked = false;
 
 						// The way the API is set up currently, the first module that adds a stream
@@ -914,7 +900,8 @@ int64_t RTSPSession::Run()
 				// to send back.
 				fModuleState.eventRequested = false;
 				fModuleState.idleTime = 0;
-				if (QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPRequestRole) > 0)
+				auto modules = QTSServerInterface::GetModule(QTSSModule::kRTSPRequestRole);
+				if (!modules.empty())
 				{
 					// Manipulation of the RTPSession from the point of view of
 					// a module is guarenteed to be atomic by the API.
@@ -927,8 +914,8 @@ int64_t RTSPSession::Run()
 						fModuleState.isGlobalLocked = true;
 					}
 
-					theModule = QTSServerInterface::GetModule(QTSSModule::kRTSPRequestRole, 0);
-					(void)theModule->CallDispatch(QTSS_RTSPRequest_Role, &fRoleParams);
+					auto theModule = modules[0];
+					theModule->CallDispatch(QTSS_RTSPRequest_Role, &fRoleParams);
 					fModuleState.isGlobalLocked = false;
 
 					// Do the same check as above for the preprocessor
@@ -977,7 +964,6 @@ int64_t RTSPSession::Run()
 				{
 					// Invoke postprocessor modules only if there is an RTP session. We do NOT want
 					// postprocessors running when filters or syntax errors have occurred in the request!
-					numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPPostProcessorRole);
 					{
 						// Manipulation of the RTPSession from the point of view of
 						// a module is guarenteed to be atomic by the API.
@@ -996,8 +982,9 @@ int64_t RTSPSession::Run()
 						if (this->IsLiveSession())
 							fRTPSession->UpdateRTSPSession(this);
 
-						for (; (fCurrentModule < numModules) || (fModuleState.eventRequested); fCurrentModule++)
+						for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPPostProcessorRole))
 						{
+							if (!fModuleState.eventRequested) break;
 							fModuleState.eventRequested = false;
 							fModuleState.idleTime = 0;
 							if (fModuleState.globalLockRequested)
@@ -1006,8 +993,7 @@ int64_t RTSPSession::Run()
 								fModuleState.isGlobalLocked = true;
 							}
 
-							theModule = QTSServerInterface::GetModule(QTSSModule::kRTSPPostProcessorRole, fCurrentModule);
-							(void)theModule->CallDispatch(QTSS_RTSPPostProcessor_Role, &fRoleParams);
+							theModule->CallDispatch(QTSS_RTSPPostProcessor_Role, &fRoleParams);
 							fModuleState.isGlobalLocked = false;
 
 							if (fModuleState.globalLockRequested) // call this request back locked
@@ -2086,11 +2072,8 @@ void RTSPSession::HandleIncomingDataPacket()
 	packetParams.rtspIncomingDataParams.inPacketData = fInputStream.GetRequestBuffer()->Ptr;
 	packetParams.rtspIncomingDataParams.inPacketLen = fInputStream.GetRequestBuffer()->Len;
 
-	uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRTSPIncomingDataRole);
-	for (; fCurrentModule < numModules; fCurrentModule++)
-	{
-		QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRTSPIncomingDataRole, fCurrentModule);
-		(void)theModule->CallDispatch(QTSS_RTSPIncomingData_Role, &packetParams);
-	}
+	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPIncomingDataRole))
+		theModule->CallDispatch(QTSS_RTSPIncomingData_Role, &packetParams);
+
 	fCurrentModule = 0;
 }

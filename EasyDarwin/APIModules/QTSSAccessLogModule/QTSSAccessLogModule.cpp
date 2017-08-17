@@ -47,7 +47,8 @@
 #include "RTPSession.h"
 #include "RTSPRequest.h"
 #include <ctime>
-
+#include <boost/asio/steady_timer.hpp>
+#include <boost/asio/io_service.hpp>
 #define TESTUNIXTIME 0
 
 class QTSSAccessLog;
@@ -98,22 +99,25 @@ static char* sLogHeader = "#Software: %s\n"
 //**************************************************
 // CLASS DECLARATIONS
 //**************************************************
-
-class LogCheckTask : public Task
+extern boost::asio::io_service io_service;
+class LogCheckTask
 {
 public:
-	LogCheckTask() : Task() { this->SetTaskName("LogCheckTask"); this->Signal(Task::kStartEvent); }
-	~LogCheckTask() override = default;
-
+	LogCheckTask() : timer(io_service) {
+		timer.async_wait(std::bind(&LogCheckTask::Run, this, std::placeholders::_1));
+	}
+	~LogCheckTask() = default;
+	void StopTimer() { timer.cancel(); }
 private:
-	int64_t Run() override;
+	boost::asio::steady_timer timer;
+	void Run(const boost::system::error_code &ec);
 };
 
 class QTSSAccessLog : public QTSSRollingLog
 {
 public:
 
-	QTSSAccessLog() : QTSSRollingLog() { this->SetTaskName("QTSSAccessLog"); }
+	QTSSAccessLog() = default;
 	~QTSSAccessLog() override = default;
 
 	char* GetLogName() override { return QTSSModuleUtils::GetStringAttribute(sPrefs, "request_logfile_name", sDefaultLogName); }
@@ -237,7 +241,7 @@ QTSS_Error Shutdown()
 	{
 		//sLogCheckTask is a task object, so don't delete it directly
 		// instead we signal it to kill itself.
-		sLogCheckTask->Signal(Task::kKillEvent);
+		sLogCheckTask->StopTimer();
 		sLogCheckTask = nullptr;
 	}
 	return QTSS_NoErr;
@@ -796,8 +800,12 @@ QTSS_Error RollAccessLog(QTSS_ServiceFunctionArgsPtr /*inArgs*/)
 }
 
 // This task runs once an hour to check and see if the log needs to roll.
-int64_t LogCheckTask::Run()
+void LogCheckTask::Run(const boost::system::error_code &ec)
 {
+	if (ec == boost::asio::error::operation_aborted) {
+		printf("RTPStatsUpdaterTask timer canceled\n");
+		return;
+	}
 	static bool firstTime = true;
 
 	// don't check the log for rolling the first time we run.
@@ -813,8 +821,8 @@ int64_t LogCheckTask::Run()
 			success = sAccessLog->CheckRollLog();
 		Assert(success);
 	}
-	// execute this task again in one hour.
-	return (60 * 60 * 1000);
+	timer.expires_from_now(std::chrono::hours(1));
+	timer.async_wait(std::bind(&LogCheckTask::Run, this, std::placeholders::_1));
 }
 
 time_t QTSSAccessLog::WriteLogHeader(FILE *inFile)

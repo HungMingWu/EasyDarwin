@@ -38,7 +38,11 @@
 #ifndef __QTSSERVERINTERFACE_H__
 #define __QTSSERVERINTERFACE_H__
 
+#include <array>
+#include <vector>
 #include <boost/utility/string_view.hpp>
+#include <boost/asio/steady_timer.hpp>
+
 #include "QTSS.h"
 #include "QTSSDictionary.h"
 #include "QTSServerPrefs.h"
@@ -126,22 +130,14 @@ public:
 	void            IncrementTotalRTPSessions()
 	{
 		OSMutexLocker locker(&fMutex); fNumRTPSessions++; fTotalRTPSessions++;
-		uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRedisSetRTSPLoadRole);
-		for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
-		{
-			QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRedisSetRTSPLoadRole, currentModule);
-			(void)theModule->CallDispatch(Easy_RedisSetRTSPLoad_Role, nullptr);
-		}
+		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRedisSetRTSPLoadRole))
+			theModule->CallDispatch(Easy_RedisSetRTSPLoad_Role, nullptr);
 	}
 	void            AlterCurrentRTPSessionCount(int32_t inDifference)
 	{
 		OSMutexLocker locker(&fMutex); fNumRTPSessions += inDifference;
-		uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRedisSetRTSPLoadRole);
-		for (uint32_t currentModule = 0; currentModule < numModules; currentModule++)
-		{
-			QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRedisSetRTSPLoadRole, currentModule);
-			(void)theModule->CallDispatch(Easy_RedisSetRTSPLoad_Role, nullptr);
-		}
+		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRedisSetRTSPLoadRole))
+			theModule->CallDispatch(Easy_RedisSetRTSPLoad_Role, nullptr);
 	}
 
 
@@ -275,26 +271,10 @@ public:
 	// All module objects are stored here, and are accessable through
 	// these routines.
 
-	// Returns the number of modules that act in a given role
-	static uint32_t       GetNumModulesInRole(QTSSModule::RoleIndex inRole)
-	{
-		Assert(inRole < QTSSModule::kNumRoles); return sNumModulesInRole[inRole];
-	}
-
 	// Allows the caller to iterate over all modules that act in a given role           
-	static QTSSModule*  GetModule(QTSSModule::RoleIndex inRole, uint32_t inIndex)
+	static std::vector<QTSSModule*>  GetModule(QTSSModule::RoleIndex inRole)
 	{
-		Assert(inRole < QTSSModule::kNumRoles);
-		Assert(inIndex < sNumModulesInRole[inRole]);
-		if (inRole >= QTSSModule::kNumRoles) //index out of bounds, shouldn't happen
-		{
-			return nullptr;
-		}
-		if (inIndex >= sNumModulesInRole[inRole]) //index out of bounds, shouldn't happen
-		{
-			return nullptr;
-		}
-		return sModuleArray[inRole][inIndex];
+		return sModuleArray[inRole];
 	}
 
 	//
@@ -353,8 +333,7 @@ protected:
 	//
 	// MODULE DATA
 
-	static QTSSModule**             sModuleArray[QTSSModule::kNumRoles];
-	static uint32_t                   sNumModulesInRole[QTSSModule::kNumRoles];
+	static std::array<std::vector<QTSSModule*>, QTSSModule::kNumRoles> sModuleArray;
 	static OSQueue                  sModuleQueue;
 	static QTSSErrorLogStream       sErrorLogStream;
 
@@ -458,17 +437,17 @@ private:
 };
 
 
-class RTPStatsUpdaterTask : public Task
+class RTPStatsUpdaterTask
 {
 public:
 
 	// This class runs periodically to compute current totals & averages
 	RTPStatsUpdaterTask();
-	~RTPStatsUpdaterTask() override = default;
+	~RTPStatsUpdaterTask() = default;
 
 private:
-
-	int64_t Run() override;
+	boost::asio::steady_timer timer;
+	void Run(const boost::system::error_code &ec);
 	RTPSessionInterface* GetNewestSession(OSRefTable* inRTPSessionMap);
 	float GetCPUTimeInSeconds();
 

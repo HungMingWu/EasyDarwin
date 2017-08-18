@@ -368,46 +368,6 @@ void RTPSession::SendPlayResponse(RTSPRequestInterface* request, uint32_t inFlag
 	request->SendHeader();
 }
 
-void    RTPSession::SendDescribeResponse(RTSPRequest* inRequest)
-{
-	if (inRequest->GetStatus() == qtssRedirectNotModified)
-	{
-		(void)inRequest->SendHeader();
-		return;
-	}
-
-	// write date and expires
-	inRequest->AppendDateAndExpires();
-
-	//write content type header
-	static boost::string_view sContentType("application/sdp");
-	inRequest->AppendHeader(qtssContentTypeHeader, sContentType);
-
-	// write x-Accept-Retransmit header
-	static boost::string_view sRetransmitProtocolName("our-retransmit");
-	inRequest->AppendHeader(qtssXAcceptRetransmitHeader, sRetransmitProtocolName);
-
-	// write x-Accept-Dynamic-Rate header
-	static boost::string_view dynamicRateEnabledStr("1");
-	inRequest->AppendHeader(qtssXAcceptDynamicRateHeader, dynamicRateEnabledStr);
-
-	//write content base header
-
-	inRequest->AppendContentBaseHeader(inRequest->GetAbsoluteURL());
-
-	//I believe the only error that can happen is if the client has disconnected.
-	//if that's the case, just ignore it, hopefully the calling module will detect
-	//this and return control back to the server ASAP 
-	(void)inRequest->SendHeader();
-}
-
-void    RTPSession::SendAnnounceResponse(RTSPRequestInterface* inRequest)
-{
-	//
-	// Currently, no need to do anything special for an announce response
-	(void)inRequest->SendHeader();
-}
-
 int64_t RTPSession::Run()
 {
 #if DEBUG

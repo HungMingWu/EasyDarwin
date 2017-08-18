@@ -33,6 +33,7 @@
 #define debug_printf if (__RTSP_AUTH_DEBUG__) printf
 
 #include <memory>
+#include <fmt/format.h>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "RTSPSession.h"
@@ -111,43 +112,15 @@ static StrPtrLen    sEmptyStr("");
 // static class member  initialized in RTSPSession ctor
 OSRefTable* RTSPSession::sHTTPProxyTunnelMap = nullptr;
 
-char        RTSPSession::sHTTPResponseHeaderBuf[kMaxHTTPResponseLen];
-StrPtrLen   RTSPSession::sHTTPResponseHeaderPtr(sHTTPResponseHeaderBuf, kMaxHTTPResponseLen);
-
-char        RTSPSession::sHTTPResponseNoServerHeaderBuf[kMaxHTTPResponseLen];
-StrPtrLen   RTSPSession::sHTTPResponseNoServerHeaderPtr(sHTTPResponseNoServerHeaderBuf, kMaxHTTPResponseLen);
-
-// stock reponse with place holder for server header and optional "x-server-ip-address" header ( %s%s%s for  "x-server-ip-address" + ip address + \r\n )
-// the optional version must be generated at runtime to include a valid IP address for the actual interface
-char*       RTSPSession::sHTTPResponseFormatStr = "HTTP/1.0 200 OK\r\n%s%s%s%s\r\nConnection: close\r\nDate: Thu, 19 Aug 1982 18:30:00 GMT\r\nCache-Control: no-store\r\nPragma: no-cache\r\nContent-Type: application/x-rtsp-tunnelled\r\n\r\n";
-char*       RTSPSession::sHTTPNoServerResponseFormatStr = "HTTP/1.0 200 OK\r\n%s%s%s%sConnection: close\r\nDate: Thu, 19 Aug 1982 18:30:00 GMT\r\nCache-Control: no-store\r\nPragma: no-cache\r\nContent-Type: application/x-rtsp-tunnelled\r\n\r\n";
-
 void RTSPSession::Initialize()
 {
 	sHTTPProxyTunnelMap = new OSRefTable(OSRefTable::kDefaultTableSize);
-
-	// Construct premade HTTP response for HTTP proxy tunnel
-	sprintf(sHTTPResponseHeaderBuf, sHTTPResponseFormatStr, "", "", "", QTSServerInterface::GetServerHeader().Ptr);
-	sHTTPResponseHeaderPtr.Len = ::strlen(sHTTPResponseHeaderBuf);
-	Assert(sHTTPResponseHeaderPtr.Len < kMaxHTTPResponseLen);
-
-	sprintf(sHTTPResponseNoServerHeaderBuf, sHTTPNoServerResponseFormatStr, "", "", "", "");
-	sHTTPResponseNoServerHeaderPtr.Len = ::strlen(sHTTPResponseNoServerHeaderBuf);
-	Assert(sHTTPResponseNoServerHeaderPtr.Len < kMaxHTTPResponseLen);
 }
 
 RTSPSession::RTSPSession(bool doReportHTTPConnectionAddress)
 	: RTSPSessionInterface(),
-	fRequest(nullptr),
-	fRTPSession(nullptr),
 	fReadMutex(),
-	fHTTPMethod(kHTTPMethodInit),
-	fWasHTTPRequest(false),
-	fFoundValidAccept(false),
-	fDoReportHTTPConnectionAddress(doReportHTTPConnectionAddress),
-	fCurrentModule(0),
-	fState(kReadingFirstRequest),
-    fMsgCount(0)
+	fDoReportHTTPConnectionAddress(doReportHTTPConnectionAddress)
 {
 	this->SetTaskName("RTSPSession");
 
@@ -1323,6 +1296,10 @@ QTSS_Error RTSPSession::PreFilterForHTTPProxyTunnel()
 	}
 	else if (fHTTPMethod == kHTTPMethodGet)// HTTP GET请求
 	{
+		// stock reponse with place holder for server header and optional "x-server-ip-address" header ( %s%s%s for  "x-server-ip-address" + ip address + \r\n )
+		// the optional version must be generated at runtime to include a valid IP address for the actual interface
+		static std::string sHTTPResponseFormatStr = "HTTP/1.0 200 OK\r\n{}{}{}{}\r\nConnection: close\r\nDate: Thu, 19 Aug 1982 18:30:00 GMT\r\nCache-Control: no-store\r\nPragma: no-cache\r\nContent-Type: application/x-rtsp-tunnelled\r\n\r\n";
+		static std::string sHTTPNoServerResponseFormatStr = "HTTP/1.0 200 OK\r\n{}{}{}{}Connection: close\r\nDate: Thu, 19 Aug 1982 18:30:00 GMT\r\nCache-Control: no-store\r\nPragma: no-cache\r\nContent-Type: application/x-rtsp-tunnelled\r\n\r\n";
 		HTTP_TRACE("RTSPSession is a GET request.\n")
 			// we're session O (outptut)  the POST half is session 1 ( input )
 			fSessionType = qtssRTSPHTTPSession;
@@ -1332,31 +1309,23 @@ QTSS_Error RTSPSession::PreFilterForHTTPProxyTunnel()
 		if (fDoReportHTTPConnectionAddress)
 		{
 			// contruct a 200 OK header with an "x-server-ip-address" header
-
-			char        responseHeaderBuf[kMaxHTTPResponseLen];
-	
 			std::string localIPAddr = GetLocalAddr();;
 
 			// 使用"x-server-ip-address" 头部字段,构造响应报文
-			char *headerFieldPtr = "";
-			if (showServerInfo)
-			{
-				headerFieldPtr = QTSServerInterface::GetServerHeader().Ptr;
-				sprintf(responseHeaderBuf, sHTTPResponseFormatStr, "X-server-ip-address: ", localIPAddr.c_str(), "\r\n", headerFieldPtr);
-			}
-			else
-			{
-				sprintf(responseHeaderBuf, sHTTPNoServerResponseFormatStr, "X-server-ip-address: ", localIPAddr.c_str(), "\r\n", headerFieldPtr);
-			}
-			Assert(::strlen(responseHeaderBuf) < kMaxHTTPResponseLen);
-			fOutputStream.Put(responseHeaderBuf);
+			std::string responseHeader = (showServerInfo) ?
+				fmt::format(sHTTPResponseFormatStr, "X-server-ip-address: ", localIPAddr, "\r\n", QTSServerInterface::GetServerHeader().Ptr) : 
+				fmt::format(sHTTPNoServerResponseFormatStr, "X-server-ip-address: ", localIPAddr, "\r\n", "");
+	
+			fOutputStream.Put(responseHeader);
 		}
 		else // use the premade stopck version
 		{
+			static std::string responseHeader = fmt::format(sHTTPResponseFormatStr, "", "", "", QTSServerInterface::GetServerHeader().Ptr);
+			static std::string responseNoServerHeader = fmt::format(sHTTPNoServerResponseFormatStr, "", "", "", "");
 			if (showServerInfo)
-				fOutputStream.Put(sHTTPResponseHeaderPtr);  // 200 OK just means we connected...
+				fOutputStream.Put(responseHeader);  // 200 OK just means we connected...
 			else
-				fOutputStream.Put(sHTTPResponseNoServerHeaderPtr);  // 200 OK just means we connected...
+				fOutputStream.Put(responseNoServerHeader);  // 200 OK just means we connected...
 
 		}
 	}

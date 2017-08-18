@@ -510,17 +510,49 @@ QTSS_Error	QTSSModuleUtils::SendHTTPErrorResponse(RTSPRequest* inRequest,
     
     return QTSS_RequestFailed;
 }
-														
+
+static void ReqSendDescribeResponse(RTSPRequest *inRequest)
+{
+	if (inRequest->GetStatus() == qtssRedirectNotModified)
+	{
+		(void)inRequest->SendHeader();
+		return;
+	}
+
+	// write date and expires
+	inRequest->AppendDateAndExpires();
+
+	//write content type header
+	static boost::string_view sContentType("application/sdp");
+	inRequest->AppendHeader(qtssContentTypeHeader, sContentType);
+
+	// write x-Accept-Retransmit header
+	static boost::string_view sRetransmitProtocolName("our-retransmit");
+	inRequest->AppendHeader(qtssXAcceptRetransmitHeader, sRetransmitProtocolName);
+
+	// write x-Accept-Dynamic-Rate header
+	static boost::string_view dynamicRateEnabledStr("1");
+	inRequest->AppendHeader(qtssXAcceptDynamicRateHeader, dynamicRateEnabledStr);
+
+	//write content base header
+
+	inRequest->AppendContentBaseHeader(inRequest->GetAbsoluteURL());
+
+	//I believe the only error that can happen is if the client has disconnected.
+	//if that's the case, just ignore it, hopefully the calling module will detect
+	//this and return control back to the server ASAP 
+	inRequest->SendHeader();
+}
+
 void    QTSSModuleUtils::SendDescribeResponse(RTSPRequest* inRequest,
-                                                    RTPSession* inSession,
                                                     iovec* describeData,
                                                     uint32_t inNumVectors,
                                                     uint32_t inTotalLength)
 {
     //write content size header
-	((RTSPRequestInterface*)inRequest)->AppendHeader(qtssContentLengthHeader, std::to_string(inTotalLength));
+	inRequest->AppendHeader(qtssContentLengthHeader, std::to_string(inTotalLength));
 
-	inSession->SendDescribeResponse(inRequest);
+	ReqSendDescribeResponse(inRequest);
 
         // On solaris, the maximum # of vectors is very low (= 16) so to ensure that we are still able to
         // send the SDP if we have a number greater than the maximum allowed, we coalesce the vectors into
@@ -536,7 +568,7 @@ void    QTSSModuleUtils::SendDescribeResponse(RTSPRequest* inRequest,
     else
         (void)QTSS_WriteV(inRequest, describeData, inNumVectors, inTotalLength, NULL);
 #else
-	((RTSPRequest*)inRequest)->WriteV(describeData, inNumVectors, inTotalLength, nullptr);
+	inRequest->WriteV(describeData, inNumVectors, inTotalLength, nullptr);
 #endif
 
 }

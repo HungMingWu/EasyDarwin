@@ -66,7 +66,6 @@ public:
 			QTSServerInterface::GetServer()->IncrementNumThinned(-1);
 		if (fRTSPSession != nullptr)
 			fRTSPSession->DecrementObjectHolderCount();
-		delete[] fSRBuffer.Ptr;
 	}
 
 	//Timeouts. This allows clients to refresh the timeout on this session
@@ -111,10 +110,6 @@ public:
 	//
 	// Class for easily building a standard RTCP SR
 	RTCPSRPacket*   GetSRPacket() { return &fRTCPSRPacket; }
-
-	//
-	// Memory if you want to build your own
-	char*           GetSRBuffer(uint32_t inSRLen);
 
 	//
 	// STATISTICS UPDATING
@@ -332,7 +327,6 @@ private:
 	uint32_t      fUniqueID{0};
 
 	RTCPSRPacket        fRTCPSRPacket;
-	StrPtrLen           fSRBuffer;
 
 	RTPBandwidthTracker fTracker;
 	RTPOverbufferWindow fOverbufferWindow;

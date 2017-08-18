@@ -79,16 +79,6 @@ void RTPSessionInterface::UpdateRTSPSession(RTSPSessionInterface* inNewRTSPSessi
 	}
 }
 
-char* RTPSessionInterface::GetSRBuffer(uint32_t inSRLen)
-{
-	if (fSRBuffer.Len < inSRLen)
-	{
-		delete[] fSRBuffer.Ptr;
-		fSRBuffer.Set(new char[2 * inSRLen], 2 * inSRLen);
-	}
-	return fSRBuffer.Ptr;
-}
-
 QTSS_Error RTPSessionInterface::DoSessionSetupResponse(RTSPRequestInterface* inRequest)
 {
 	// This function appends a session header to the SETUP response, and

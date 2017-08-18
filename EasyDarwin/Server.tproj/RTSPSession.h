@@ -148,8 +148,8 @@ private:
 	char                fLastRTPSessionID[QTSS_MAX_SESSION_ID_LENGTH];
 	StrPtrLen           fLastRTPSessionIDPtr;
 
-	RTSPRequest*        fRequest;
-	RTPSession*         fRTPSession;
+	RTSPRequest*        fRequest{ nullptr };
+	RTPSession*         fRTPSession{ nullptr };
 
     //RTSPSessionHandler* fRTSPSessionHandler;
 
@@ -171,14 +171,7 @@ private:
 	{
 		kMaxHTTPResponseLen = 512
 	};
-	static              char        sHTTPResponseHeaderBuf[kMaxHTTPResponseLen];
-	static              StrPtrLen   sHTTPResponseHeaderPtr;
 
-	static              char        sHTTPResponseNoServerHeaderBuf[kMaxHTTPResponseLen];
-	static              StrPtrLen   sHTTPResponseNoServerHeaderPtr;
-
-	static              char        *sHTTPResponseFormatStr;
-	static              char        *sHTTPNoServerResponseFormatStr;
 	char                fProxySessionID[QTSS_MAX_SESSION_ID_LENGTH];    // our magic cookie to match proxy connections
 	StrPtrLen           fProxySessionIDPtr;
 	OSRef               fProxyRef;
@@ -192,9 +185,9 @@ private:
 		, kHTTPMethodPost
 	};
 
-	uint16_t      fHTTPMethod;
-	bool      fWasHTTPRequest;
-	bool      fFoundValidAccept;
+	uint16_t      fHTTPMethod{ kHTTPMethodInit };
+	bool      fWasHTTPRequest{ false };
+	bool      fFoundValidAccept{ false };
 	bool      fDoReportHTTPConnectionAddress; // true if we need to report our IP adress in reponse to the clients GET request (necessary for servers behind DNS round robin)
 	/* -- end adds for HTTP ProxyTunnel -- */
 
@@ -224,8 +217,8 @@ private:
 		kHaveNonTunnelMessage = 14                  // we've looked at the message, and its not an HTTP tunnle message
 	};
 
-	uint32_t fCurrentModule;
-	uint32_t fState;
+	uint32_t fCurrentModule{ 0 };
+	uint32_t fState{ kReadingFirstRequest };
 
 
 
@@ -238,7 +231,7 @@ private:
 	void SaveRequestAuthorizationParams(RTSPRequest *theRTSPRequest);
 	QTSS_Error DumpRequestData();
 
-    uint64_t fMsgCount;
+	uint64_t fMsgCount{ 0 };
 	Attributes attr;
     //friend class RTSPSessionHandler;
 

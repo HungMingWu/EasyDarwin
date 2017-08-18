@@ -445,7 +445,8 @@ void  RTSPRequest::ParseRetransmitHeader(boost::string_view header)
 		theRetransmitParser.ConsumeWhitespace();
 		theRetransmitParser.ConsumeWord(&theProtName);
 		theProtName.TrimTrailingWhitespace();
-		foundRetransmitProt = theProtName.EqualIgnoreCase(RTSPProtocol::GetRetransmitProtocolName());
+		boost::string_view theProtNameV(theProtName.Ptr, theProtName.Len);
+		foundRetransmitProt = boost::iequals(theProtNameV, RTSPProtocol::GetRetransmitProtocolName());
 	} while ((!foundRetransmitProt) &&
 		(theRetransmitParser.GetThru(nullptr, ',')));
 

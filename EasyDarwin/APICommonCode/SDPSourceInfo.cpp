@@ -31,6 +31,7 @@
 */
 
 #include <boost/spirit/include/qi.hpp>
+#include <fmt/format.h>
 
 #include "SDPSourceInfo.h"
 
@@ -82,8 +83,6 @@ std::string SDPSourceInfo::GetLocalSDP()
     uint32_t trackIndex = 0;
     
     std::string localSDP;
-
-    char trackIndexBuffer[50];
     
 	std::vector<std::string> sdpLines = spirit_direct(fSDPData, "\r\n");
     // Only generate our own trackIDs if this file doesn't have 'em.
@@ -112,10 +111,8 @@ std::string SDPSourceInfo::GetLocalSDP()
                 }
                 //the last "a=" for each m should be the control a=
                 if ((trackIndex > 0) && (!hasControlLine))
-                {
-                    sprintf(trackIndexBuffer, "a=control:trackID=%" _S32BITARG_ "\r\n",trackIndex);
-					localSDP += std::string(trackIndexBuffer);
-                }
+					localSDP += fmt::format("a=control:trackID={}\r\n", trackIndex);
+
                 //now write the 'm' line, but strip off the port information
 				std::string mPrefix, mSuffix;
 				bool r = qi::phrase_parse(sdpLine.cbegin(), sdpLine.cend(),
@@ -158,10 +155,7 @@ std::string SDPSourceInfo::GetLocalSDP()
     }
     
     if ((trackIndex > 0) && (!hasControlLine))
-    {
-        sprintf(trackIndexBuffer, "a=control:trackID=%" _S32BITARG_ "\r\n",trackIndex);
-        localSDP += std::string(trackIndexBuffer);
-    }
+		localSDP += fmt::format("a=control:trackID={}\r\n",trackIndex);
     
     SDPContainer rawSDPContainer; 
     (void) rawSDPContainer.SetSDPBuffer(localSDP);

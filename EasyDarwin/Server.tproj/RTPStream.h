@@ -202,7 +202,6 @@ class RTPStream : public UDPDemuxerTask
         
         enum
         {
-            kMaxSsrcSizeInBytes         = 12,
             kSenderReportIntervalInSecs = 7,
             kNumPrebuiltChNums          = 10,
             kMaxQualityLevel            = 0,
@@ -210,158 +209,153 @@ class RTPStream : public UDPDemuxerTask
             kIsRTPPacket                  = false
         };
     
-        int64_t fLastQualityChange;
+		int64_t fLastQualityChange{ 0 };
         int32_t fQualityInterval;
 
         //either pointers to the statically allocated sockets (maintained by the server)
         //or fresh ones (only fresh in extreme special cases)
-        UDPSocketPair*          fSockets;
+		UDPSocketPair*          fSockets{ nullptr };
         RTPSessionInterface*    fSession;
 
         // info for kinda reliable UDP
         //DssDurationTimer      fInfoDisplayTimer;
-        int32_t                  fBytesSentThisInterval;
-        int32_t                  fDisplayCount;
-        bool                  fSawFirstPacket;
+		int32_t                  fBytesSentThisInterval{ 0 };
+		int32_t                  fDisplayCount{ 0 };
+		bool                  fSawFirstPacket{ false };
         int64_t                  fStreamCumDuration;
         // manages UDP retransmits
         RTPPacketResender       fResender;
-        RTPBandwidthTracker*    fTracker;
+		RTPBandwidthTracker*    fTracker{ nullptr };
 
         
         //who am i sending to?
-        uint32_t      fRemoteAddr;
-        uint16_t      fRemoteRTPPort;
-        uint16_t      fRemoteRTCPPort;
-        uint16_t      fLocalRTPPort;
-		uint32_t	    fMonitorAddr;
-		int         fMonitorSocket;
-		uint32_t      fPlayerToMonitorAddr;
+		uint32_t      fRemoteAddr{ 0 };
+		uint16_t      fRemoteRTPPort{ 0 };
+		uint16_t      fRemoteRTCPPort{ 0 };
+		uint16_t      fLocalRTPPort{ 0 };
+		uint32_t	    fMonitorAddr{ 0 };
+		int         fMonitorSocket{ 0 };
+		uint32_t      fPlayerToMonitorAddr{ 0 };
 
         //RTCP stuff 
-        int64_t      fLastSenderReportTime;
-        uint32_t      fPacketCount;
-        uint32_t      fLastPacketCount;
-        uint32_t      fPacketCountInRTCPInterval;
-        uint32_t      fByteCount;
+		int64_t      fLastSenderReportTime{ 0 };
+		uint32_t      fPacketCount{ 0 };
+		uint32_t      fLastPacketCount{ 0 };
+		uint32_t      fPacketCountInRTCPInterval{ 0 };
+		uint32_t      fByteCount{ 0 };
         
         // DICTIONARY ATTRIBUTES
         
         //Module assigns a streamID to this object
-        uint32_t      fTrackID;
+		uint32_t      fTrackID{ 0 };
         
         //low-level RTP stuff 
         uint32_t      fSsrc;
-        char        fSsrcString[kMaxSsrcSizeInBytes];
-        StrPtrLen   fSsrcStringPtr;
-        bool      fEnableSSRC;
+		bool      fEnableSSRC{ false };
         
         //Payload name and codec type.
         std::string         fPayloadName;
-        QTSS_RTPPayloadType fPayloadType;
+		QTSS_RTPPayloadType fPayloadType{ qtssUnknownPayloadType };
 
 		Attributes attr;
         //Media information.
-        uint16_t      fFirstSeqNumber;//used in sending the play response
-        uint32_t      fFirstTimeStamp;//RTP time
-        uint32_t      fTimescale;
+		uint16_t      fFirstSeqNumber{ 0 };//used in sending the play response
+		uint32_t      fFirstTimeStamp{ 0 };//RTP time
+		uint32_t      fTimescale{ 0 };
         
         //what is the URL for this stream?
         std::string   fStreamURL;
         
         int32_t      fQualityLevel;
-        uint32_t      fNumQualityLevels;
+		uint32_t      fNumQualityLevels{ 0 };
         
-        uint32_t      fLastRTPTimestamp;
-		int64_t		fLastNTPTimeStamp;
-		uint32_t		fEstRTT;				//The estimated RTT calculated from RTCP's DLSR and LSR fields
+		uint32_t      fLastRTPTimestamp{ 0 };
+		int64_t		fLastNTPTimeStamp{ 0 };
+		uint32_t		fEstRTT{ 0 };				//The estimated RTT calculated from RTCP's DLSR and LSR fields
         
         // RTCP data
-        uint32_t      fFractionLostPackets;
-        uint32_t      fTotalLostPackets;
-        uint32_t      fJitter;
-        uint32_t      fReceiverBitRate;
-        uint16_t      fAvgLateMsec;
-        uint16_t      fPercentPacketsLost;
-        uint16_t      fAvgBufDelayMsec;
-        uint16_t      fIsGettingBetter;
-        uint16_t      fIsGettingWorse;
-        uint32_t      fNumEyes;
-        uint32_t      fNumEyesActive;
-        uint32_t      fNumEyesPaused;
-        uint32_t      fTotalPacketsRecv;
+		uint32_t      fFractionLostPackets{ 0 };
+		uint32_t      fTotalLostPackets{ 0 };
+		uint32_t      fJitter{ 0 };
+		uint32_t      fReceiverBitRate{ 0 };
+		uint16_t      fAvgLateMsec{ 0 };
+		uint16_t      fPercentPacketsLost{ 0 };
+		uint16_t      fAvgBufDelayMsec{ 0 };
+		uint16_t      fIsGettingBetter{ 0 };
+		uint16_t      fIsGettingWorse{ 0 };
+		uint32_t      fNumEyes{ 0 };
+		uint32_t      fNumEyesActive{ 0 };
+		uint32_t      fNumEyesPaused{ 0 };
+		uint32_t      fTotalPacketsRecv{ 0 };
         uint32_t      fPriorTotalPacketsRecv;
-        uint16_t      fTotalPacketsDropped;
-        uint16_t      fTotalPacketsLost;
-        uint32_t      fCurPacketsLostInRTCPInterval;
-        uint16_t      fClientBufferFill;
-        uint16_t      fFrameRate;
-        uint16_t      fExpectedFrameRate;
-        uint16_t      fAudioDryCount;
-        uint32_t      fClientSSRC;
+		uint16_t      fTotalPacketsDropped{ 0 };
+		uint16_t      fTotalPacketsLost{ 0 };
+		uint32_t      fCurPacketsLostInRTCPInterval{ 0 };
+		uint16_t      fClientBufferFill{ 0 };
+		uint16_t      fFrameRate{ 0 };
+		uint16_t      fExpectedFrameRate{ 0 };
+		uint16_t      fAudioDryCount{ 0 };
+		uint32_t      fClientSSRC{ 0 };
         
-        bool      fIsTCP;
-        QTSS_RTPTransportType   fTransportType;
+		bool      fIsTCP{ false };
+		QTSS_RTPTransportType   fTransportType{ qtssRTPTransportTypeTCP };
         
         // HTTP params
         // Each stream has a set of thinning related tolerances,
         // that are dependent on prefs and parameters in the SETUP.
         // These params, as well as the current packet delay determine
         // whether a packet gets dropped.
-        int32_t      fTurnThinningOffDelay_TCP;
-        int32_t      fIncreaseThinningDelay_TCP;
-        int32_t      fDropAllPacketsForThisStreamDelay_TCP;
-        uint32_t      fStalePacketsDropped_TCP;
-        int64_t      fTimeStreamCaughtUp_TCP;
-        int64_t      fLastQualityLevelIncreaseTime_TCP;
+		int32_t      fTurnThinningOffDelay_TCP{ 0 };
+		int32_t      fIncreaseThinningDelay_TCP{ 0 };
+		int32_t      fDropAllPacketsForThisStreamDelay_TCP{ 0 };
+		uint32_t      fStalePacketsDropped_TCP{ 0 };
+		int64_t      fTimeStreamCaughtUp_TCP{ 0 };
+		int64_t      fLastQualityLevelIncreaseTime_TCP{ 0 };
         //
         // Each stream has a set of thinning related tolerances,
         // that are dependent on prefs and parameters in the SETUP.
         // These params, as well as the current packet delay determine
         // whether a packet gets dropped.
-        int32_t      fThinAllTheWayDelay;
-        int32_t      fAlwaysThinDelay;
-        int32_t      fStartThinningDelay;
-        int32_t      fStartThickingDelay;
-        int32_t      fThickAllTheWayDelay;
-        int32_t      fQualityCheckInterval;
-        int32_t      fDropAllPacketsForThisStreamDelay;
-        uint32_t      fStalePacketsDropped;
-        int64_t      fLastCurrentPacketDelay;
-        bool      fWaitOnLevelAdjustment;
+		int32_t      fThinAllTheWayDelay{ 0 };
+		int32_t      fAlwaysThinDelay{ 0 };
+		int32_t      fStartThinningDelay{ 0 };
+		int32_t      fStartThickingDelay{ 0 };
+		int32_t      fThickAllTheWayDelay{ 0 };
+		int32_t      fQualityCheckInterval{ 0 };
+		int32_t      fDropAllPacketsForThisStreamDelay{ 0 };
+		uint32_t      fStalePacketsDropped{ 0 };
+		int64_t      fLastCurrentPacketDelay{ 0 };
+		bool      fWaitOnLevelAdjustment{ true };
         
-        float     fBufferDelay; // from the sdp
-        float     fLateToleranceInSec;
-                
-        // Pointer to the stream ref (this is just a this pointer)
-        QTSS_StreamRef  fStreamRef;
-        
-        uint32_t      fCurrentAckTimeout;
-        int32_t      fMaxSendAheadTimeMSec;
+		float     fBufferDelay{ 3.0 }; // from the sdp
+		float     fLateToleranceInSec{ 0 };
+                       
+		uint32_t      fCurrentAckTimeout{ 0 };
+		int32_t      fMaxSendAheadTimeMSec{ 0 };
         
 #if DEBUG
-        uint32_t      fNumPacketsDroppedOnTCPFlowControl;
-        int64_t      fFlowControlStartedMsec;
-        int64_t      fFlowControlDurationMsec;
+		uint32_t      fNumPacketsDroppedOnTCPFlowControl{ 0 };
+		int64_t      fFlowControlStartedMsec{ 0 };
+		int64_t      fFlowControlDurationMsec{ 0 };
 #endif
         
         // If we are interleaving RTP data over the TCP connection,
         // these are channel numbers to use for RTP & RTCP
-        uint8_t   fRTPChannel;
-        uint8_t   fRTCPChannel;
+		uint8_t   fRTPChannel{ 0 };
+		uint8_t   fRTCPChannel{ 0 };
         
-        QTSS_RTPNetworkMode     fNetworkMode;
+		QTSS_RTPNetworkMode     fNetworkMode{ qtssRTPNetworkModeDefault };
         
         int64_t  fStreamStartTimeOSms;
                 
-        int32_t fLastQualityLevel;
-        int32_t fLastRateLevel;
+		int32_t fLastQualityLevel{ 0 };
+		int32_t fLastRateLevel{ 0 };
        
         bool fDisableThinning;
-        int64_t fLastQualityUpdate;
+		int64_t fLastQualityUpdate{ 0 };
         uint32_t fDefaultQualityLevel;
         int32_t fMaxQualityLevel;
-		bool fInitialMaxQualityLevelIsSet;
+		bool fInitialMaxQualityLevelIsSet{ false };
 		bool fUDPMonitorEnabled;
 		uint16_t fMonitorVideoDestPort;
 		uint16_t fMonitorAudioDestPort;

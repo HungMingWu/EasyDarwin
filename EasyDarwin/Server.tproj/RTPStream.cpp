@@ -94,99 +94,18 @@ char *RTPStream::TCP = "TCP";
 QTSS_ModuleState RTPStream::sRTCPProcessModuleState = { nullptr, 0, nullptr, false };
 
 RTPStream::RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession)
-	: fLastQualityChange(0),
-	fSockets(nullptr),
-	fSession(inSession),
-	fBytesSentThisInterval(0),
-	fDisplayCount(0),
-	fSawFirstPacket(false),
-	fTracker(nullptr),
-	fRemoteAddr(0),
-	fRemoteRTPPort(0),
-	fRemoteRTCPPort(0),
-	fLocalRTPPort(0),
-	fMonitorAddr(0),
-	fMonitorSocket(0),
-	fPlayerToMonitorAddr(0),
-	fLastSenderReportTime(0),
-	fPacketCount(0),
-	fLastPacketCount(0),
-	fPacketCountInRTCPInterval(0),
-	fByteCount(0),
-	fTrackID(0),
+	: fSession(inSession),
 	fSsrc(inSSRC),
-	fSsrcStringPtr(fSsrcString, 0),
-	fEnableSSRC(false),
-	fPayloadType(qtssUnknownPayloadType),
-	fFirstSeqNumber(0),
-	fFirstTimeStamp(0),
-	fTimescale(0),
 	fQualityLevel(QTSServerInterface::GetServer()->GetPrefs()->GetDefaultStreamQuality()),
-	fNumQualityLevels(0),
-	fLastRTPTimestamp(0),
-	fLastNTPTimeStamp(0),
-	fEstRTT(0),
-	fFractionLostPackets(0),
-	fTotalLostPackets(0),
-	//fPriorTotalLostPackets(0),
-	fJitter(0),
-	fReceiverBitRate(0),
-	fAvgLateMsec(0),
-	fPercentPacketsLost(0),
-	fAvgBufDelayMsec(0),
-	fIsGettingBetter(0),
-	fIsGettingWorse(0),
-	fNumEyes(0),
-	fNumEyesActive(0),
-	fNumEyesPaused(0),
-	fTotalPacketsRecv(0),
-	fTotalPacketsDropped(0),
-	fTotalPacketsLost(0),
-	fCurPacketsLostInRTCPInterval(0),
-	fClientBufferFill(0),
-	fFrameRate(0),
-	fExpectedFrameRate(0),
-	fAudioDryCount(0),
-	fClientSSRC(0),
-	fIsTCP(false),
-	fTransportType(qtssRTPTransportTypeTCP),
-	fTurnThinningOffDelay_TCP(0),
-	fIncreaseThinningDelay_TCP(0),
-	fDropAllPacketsForThisStreamDelay_TCP(0),
-	fStalePacketsDropped_TCP(0),
-	fTimeStreamCaughtUp_TCP(0),
-	fLastQualityLevelIncreaseTime_TCP(0),
 
-	fThinAllTheWayDelay(0),
-	fAlwaysThinDelay(0),
-	fStartThinningDelay(0),
-	fStartThickingDelay(0),
-	fThickAllTheWayDelay(0),
-	fQualityCheckInterval(0),
-	fDropAllPacketsForThisStreamDelay(0),
-	fStalePacketsDropped(0),
-	fLastCurrentPacketDelay(0),
-	fWaitOnLevelAdjustment(true),
-	fBufferDelay(3.0),
-	fLateToleranceInSec(0),
-	fCurrentAckTimeout(0),
-	fMaxSendAheadTimeMSec(0),
-	fRTPChannel(0),
-	fRTCPChannel(0),
-	fNetworkMode(qtssRTPNetworkModeDefault),
 	fStreamStartTimeOSms(OS::Milliseconds()),
-	fLastQualityLevel(0),
-	fLastRateLevel(0),
 	fDisableThinning(QTSServerInterface::GetServer()->GetPrefs()->GetDisableThinning()),
-	fLastQualityUpdate(0),
 	fDefaultQualityLevel(QTSServerInterface::GetServer()->GetPrefs()->GetDefaultStreamQuality()),
 	fMaxQualityLevel(fDefaultQualityLevel),
-	fInitialMaxQualityLevelIsSet(false),
 	fUDPMonitorEnabled(QTSServerInterface::GetServer()->GetPrefs()->GetUDPMonitorEnabled()),
 	fMonitorVideoDestPort(QTSServerInterface::GetServer()->GetPrefs()->GetUDPMonitorVideoPort()),
 	fMonitorAudioDestPort(QTSServerInterface::GetServer()->GetPrefs()->GetUDPMonitorAudioPort())
 {
-	fStreamRef = this;
 	if (fUDPMonitorEnabled)
 	{
 		StrPtrLenDel destIP(QTSServerInterface::GetServer()->GetPrefs()->GetMonitorDestIP());
@@ -204,17 +123,6 @@ RTPStream::RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession)
 		(void) ::fcntl(fMonitorSocket, F_SETFL, flag | O_NONBLOCK);
 #endif
 	}
-
-
-#if DEBUG
-	fNumPacketsDroppedOnTCPFlowControl = 0;
-	fFlowControlStartedMsec = 0;
-	fFlowControlDurationMsec = 0;
-#endif
-	//format the ssrc as a string
-	sprintf(fSsrcString, "%"   _U32BITARG_   "", fSsrc);
-	fSsrcStringPtr.Len = ::strlen(fSsrcString);
-	Assert(fSsrcStringPtr.Len < kMaxSsrcSizeInBytes);
 }
 
 RTPStream::~RTPStream()
@@ -535,9 +443,7 @@ void RTPStream::SendSetupResponse(RTSPRequestInterface* inRequest)
 void RTPStream::AppendTransport(RTSPRequestInterface* request)
 {
 
-	boost::string_view ssrcPtr;
-	if (fEnableSSRC)
-		ssrcPtr = boost::string_view(fSsrcStringPtr.Ptr, fSsrcStringPtr.Len);
+	std::string ssrcStr = (fEnableSSRC) ? std::to_string(fSsrc) : std::string();
 
 	// We are either going to append the RTP / RTCP port numbers (UDP),
 	// or the channel numbers (TCP, interleaved)
@@ -559,7 +465,7 @@ void RTPStream::AppendTransport(RTSPRequestInterface* request)
 		{
 			std::string rtpPort = std::to_string(request->GetSetUpServerPort());
 			std::string rtcpPort = std::to_string(request->GetSetUpServerPort() + 1);
-			request->AppendTransportHeader(rtpPort, rtcpPort, {}, {}, theSrcIPAddress, ssrcPtr);
+			request->AppendTransportHeader(rtpPort, rtcpPort, {}, {}, theSrcIPAddress, ssrcStr);
 		}
 		else
 		{
@@ -569,19 +475,19 @@ void RTPStream::AppendTransport(RTSPRequestInterface* request)
 			StrPtrLen *p = theRTPSocket->GetLocalPortStr();
 			StrPtrLen *p1 = theRTCPSocket->GetLocalPortStr();
 			request->AppendTransportHeader(std::string(p->Ptr, p->Len),
-				std::string(p1->Ptr, p1->Len), {}, {}, theSrcIPAddress, ssrcPtr);
+				std::string(p1->Ptr, p1->Len), {}, {}, theSrcIPAddress, ssrcStr);
 		}
 	}
 	else if (fRTCPChannel < kNumPrebuiltChNums)
 		// We keep a certain number of channel number strings prebuilt, so most of the time
 		// we won't have to call sprintf
-		request->AppendTransportHeader({}, {}, sChannelNums[fRTPChannel], sChannelNums[fRTCPChannel], {}, ssrcPtr);
+		request->AppendTransportHeader({}, {}, sChannelNums[fRTPChannel], sChannelNums[fRTCPChannel], {}, ssrcStr);
 	else
 	{
 		// If these channel numbers fall outside prebuilt range, we will have to call sprintf.
 		std::string rtpChannel = std::to_string(fRTPChannel);
 		std::string rtcpChannel = std::to_string(fRTCPChannel);
-		request->AppendTransportHeader({}, {}, rtpChannel, rtcpChannel, {}, ssrcPtr);
+		request->AppendTransportHeader({}, {}, rtpChannel, rtcpChannel, {}, ssrcStr);
 	}
 }
 

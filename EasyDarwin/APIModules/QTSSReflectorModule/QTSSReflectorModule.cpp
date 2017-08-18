@@ -671,11 +671,12 @@ QTSS_Error ProcessRTSPRequest(QTSS_StandardRTSP_Params* inParams)
 	case qtssTeardownMethod:
 		// Tell the server that this session should be killed, and send a TEARDOWN response
 		inParams->inClientSession->Teardown();
-		inParams->inClientSession->SendTeardownResponse((RTSPRequestInterface*)inParams->inRTSPRequest);
+		inParams->inRTSPRequest->SetKeepAlive(false);
+		inParams->inRTSPRequest->SendHeader();
 		break;
 	case qtssPauseMethod:
 		inParams->inClientSession->Pause();
-		inParams->inClientSession->SendPauseResponse((RTSPRequestInterface*)inParams->inRTSPRequest);
+		inParams->inRTSPRequest->SendHeader();
 		break;
 	default:
 		break;
@@ -960,7 +961,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 
 	//printf("QTSSReflectorModule:DoAnnounce SendResponse OK=200\n");
 
-	((RTPSession*)inParams->inClientSession)->SendAnnounceResponse((RTSPRequestInterface*)inParams->inRTSPRequest);
+	inParams->inRTSPRequest->SendHeader();
 	return QTSS_NoErr;
 }
 
@@ -1145,9 +1146,9 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	theDescribeVec[2].iov_base = const_cast<char *>(sortedSDP.GetMediaHeaders().data());
 	theDescribeVec[2].iov_len = sortedSDP.GetMediaHeaders().length();
 
-	((RTSPRequestInterface*)inParams->inRTSPRequest)->AppendHeader(qtssCacheControlHeader,
+	inParams->inRTSPRequest->AppendHeader(qtssCacheControlHeader,
 		kCacheControlHeader);
-	QTSSModuleUtils::SendDescribeResponse(inParams->inRTSPRequest, inParams->inClientSession,
+	QTSSModuleUtils::SendDescribeResponse(inParams->inRTSPRequest, 
 		&theDescribeVec[0], 3, sessLen + mediaLen);
 
 	if (theRefCount)
@@ -1387,7 +1388,7 @@ void DeleteReflectorPushSession(QTSS_StandardRTSP_Params* inParams, ReflectorSes
 	}
 }
 
-QTSS_Error AddRTPStream(ReflectorSession* theSession, QTSS_StandardRTSP_Params* inParams, QTSS_RTPStreamObject *newStreamPtr)
+QTSS_Error AddRTPStream(ReflectorSession* theSession, QTSS_StandardRTSP_Params* inParams, RTPStream **newStreamPtr)
 {
 	// Ok, this is completely crazy but I can't think of a better way to do this that's
 	// safe so we'll do it this way for now. Because the ReflectorStreams use this session's
@@ -1404,7 +1405,7 @@ QTSS_Error AddRTPStream(ReflectorSession* theSession, QTSS_StandardRTSP_Params* 
 	// Turn off reliable UDP transport, because we are not yet equipped to
 	// do overbuffering.
 	QTSS_Error theErr = inParams->inClientSession->AddStream(
-		inParams->inRTSPRequest, (RTPStream**)newStreamPtr, qtssASFlagsForceUDPTransport);
+		inParams->inRTSPRequest, newStreamPtr, qtssASFlagsForceUDPTransport);
 
 	if (theSession != nullptr)
 		for (uint32_t y = 0; y < theSession->GetNumStreams(); y++)
@@ -1509,7 +1510,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 
 		inParams->inRTSPRequest->SetUpServerPort(theStreamInfo->fPort);
 
-		QTSS_RTPStreamObject newStream = nullptr;
+		RTPStream *newStream = nullptr;
 		QTSS_Error theErr = AddRTPStream(theSession, inParams, &newStream);
 		Assert(theErr == QTSS_NoErr);
 		if (theErr != QTSS_NoErr)
@@ -1520,10 +1521,10 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 
 		//send the setup response
 
-		((RTSPRequestInterface*)inParams->inRTSPRequest)->AppendHeader(qtssCacheControlHeader,
+		inParams->inRTSPRequest->AppendHeader(qtssCacheControlHeader,
 			kCacheControlHeader);
 
-		SendSetupRTSPResponse((RTPStream *)newStream, (RTSPRequestInterface *)(inParams->inRTSPRequest), 0);
+		SendSetupRTSPResponse(newStream, inParams->inRTSPRequest, 0);
 
 		theStreamInfo->fSetupToReceive = true;
 		// This is an incoming data session. Set the Reflector Session in the ClientSession
@@ -1586,10 +1587,9 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	newStream->SetTimeScale(theStreamInfo->fTimeScale);
 
 	// We only want to allow over buffering to dynamic rate clients   
-	RTSPRequest *dict = (RTSPRequest *)inParams->inRTSPRequest;
-	int32_t canDynamicRate = dict->GetDynamicRateState();
+	int32_t canDynamicRate = inParams->inRTSPRequest->GetDynamicRateState();
 	if (canDynamicRate < 1) // -1 no rate field, 0 off
-		((RTPSession*)inParams->inClientSession)->SetOverBufferEnable(sFalse);
+		inParams->inClientSession->SetOverBufferEnable(sFalse);
 
 	// Place the stream cookie in this stream for future reference
 	void* theStreamCookie = theSession->GetStreamCookie(theTrackID);
@@ -1600,9 +1600,9 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	newStream->SetNumQualityLevels(ReflectorSession::kNumQualityLevels);
 
 	//send the setup response
-	((RTSPRequestInterface*)inParams->inRTSPRequest)->AppendHeader(qtssCacheControlHeader,
+	inParams->inRTSPRequest->AppendHeader(qtssCacheControlHeader,
 		kCacheControlHeader);
-	SendSetupRTSPResponse(newStream, (RTSPRequestInterface *)(inParams->inRTSPRequest), qtssSetupRespDontWriteSSRC);
+	SendSetupRTSPResponse(newStream, inParams->inRTSPRequest, qtssSetupRespDontWriteSSRC);
 
 #ifdef REFLECTORSESSION_DEBUG
 	printf("QTSSReflectorModule.cpp:DoSetup Session =%p refcount=%"   _U32BITARG_   "\n", theSession->GetRef(), theSession->GetRef()->GetRefCount());

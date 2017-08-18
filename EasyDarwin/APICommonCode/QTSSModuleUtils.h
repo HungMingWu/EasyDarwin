@@ -126,7 +126,6 @@ class QTSSModuleUtils
         //this function sends a standard describe response.
         //NOTE: THE FIRST ENTRY OF THE IOVEC MUST BE EMPTY!!!!
         static void SendDescribeResponse(RTSPRequest* inRequest,
-                                                    RTPSession* inSession,
                                                     iovec* describeData,
                                                     uint32_t inNumVectors,
                                                     uint32_t inTotalLength);

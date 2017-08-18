@@ -113,17 +113,7 @@ public:
 	void            Teardown();
 
 	//Utility functions. Modules aren't required to use these, but can be useful
-	void            SendDescribeResponse(RTSPRequest* request);
-	void            SendAnnounceResponse(RTSPRequestInterface* request);
 	void            SendPlayResponse(RTSPRequestInterface* request, uint32_t inFlags);
-	void            SendPauseResponse(RTSPRequestInterface* request)
-	{
-		request->SendHeader();
-	}
-	void            SendTeardownResponse(RTSPRequestInterface* request)
-	{
-		request->SetKeepAlive(false); request->SendHeader();
-	}
 
 	int32_t          GetQualityLevel();
 	void            SetQualityLevel(int32_t level);

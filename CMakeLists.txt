@@ -2,6 +2,7 @@ cmake_minimum_required (VERSION 3.0)
 project (EasyDarwin C CXX)
 
 find_package(Boost 1.61 REQUIRED COMPONENTS system)
+find_package(fmt REQUIRED)
 
 if (Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS}) 

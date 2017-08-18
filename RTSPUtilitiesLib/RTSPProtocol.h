@@ -71,7 +71,7 @@ public:
 	//STATUS CODES
 
 	//returns name of this error
-	static StrPtrLen&       GetStatusCodeString(QTSS_RTSPStatusCode inStat)
+	static boost::string_view       GetStatusCodeString(QTSS_RTSPStatusCode inStat)
 	{
 		return sStatusCodeStrings[inStat];
 	}
@@ -81,7 +81,7 @@ public:
 		return sStatusCodes[inStat];
 	}
 	//returns error number as a string
-	static StrPtrLen&       GetStatusCodeAsString(QTSS_RTSPStatusCode inStat)
+	static boost::string_view       GetStatusCodeAsString(QTSS_RTSPStatusCode inStat)
 	{
 		return sStatusCodeAsStrings[inStat];
 	}
@@ -94,11 +94,11 @@ public:
 	};
 
 	// NAMES OF THINGS
-	static StrPtrLen&       GetRetransmitProtocolName() { return sRetrProtName; }
+	static boost::string_view       GetRetransmitProtocolName() { return sRetrProtName; }
 
 	//accepts strings that look like "RTSP/1.0" etc...
 	static RTSPVersion      GetVersion(boost::string_view versionStr);
-	static StrPtrLen&       GetVersionString(RTSPVersion version)
+	static boost::string_view GetVersionString(RTSPVersion version)
 	{
 		return sVersionString[version];
 	}
@@ -110,12 +110,12 @@ private:
 	//for other lookups
 	static  boost::string_view             sMethods[];
 	static  boost::string_view             sHeaders[];
-	static StrPtrLen            sStatusCodeStrings[];
-	static StrPtrLen            sStatusCodeAsStrings[];
+	static boost::string_view            sStatusCodeStrings[];
+	static boost::string_view            sStatusCodeAsStrings[];
 	static int32_t               sStatusCodes[];
-	static StrPtrLen            sVersionString[];
+	static boost::string_view    sVersionString[];
 
-	static StrPtrLen            sRetrProtName;
+	static boost::string_view            sRetrProtName;
 
 };
 #endif // __RTSPPROTOCOL_H__

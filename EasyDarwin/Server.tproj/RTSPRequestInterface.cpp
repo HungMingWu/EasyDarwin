@@ -36,6 +36,7 @@
 #endif
 
 #include <memory>
+#include <fmt/format.h>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -58,13 +59,9 @@ static boost::string_view ColonSpace(": ");
 std::string PutStatusLine(QTSS_RTSPStatusCode status, RTSPProtocol::RTSPVersion version)
 {
 	std::string result;
-	StrPtrLen temp;
-	temp = RTSPProtocol::GetVersionString(version);
-	result += std::string(temp.Ptr, temp.Len) + " ";
-	temp = RTSPProtocol::GetStatusCodeAsString(status);
-	result += std::string(temp.Ptr, temp.Len) + " ";
-	temp = RTSPProtocol::GetStatusCodeString(status);
-	result += std::string(temp.Ptr, temp.Len) + "\r\n";
+	result += std::string(RTSPProtocol::GetVersionString(version)) + " ";
+	result += std::string(RTSPProtocol::GetStatusCodeAsString(status)) + " ";
+	result += std::string(RTSPProtocol::GetStatusCodeString(status)) + "\r\n";
 	return result;
 }
 void  RTSPRequestInterface::Initialize(void)

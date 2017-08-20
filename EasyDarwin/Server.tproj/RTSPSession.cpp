@@ -1313,14 +1313,16 @@ QTSS_Error RTSPSession::PreFilterForHTTPProxyTunnel()
 
 			// 使用"x-server-ip-address" 头部字段,构造响应报文
 			std::string responseHeader = (showServerInfo) ?
-				fmt::format(sHTTPResponseFormatStr, "X-server-ip-address: ", localIPAddr, "\r\n", QTSServerInterface::GetServerHeader().Ptr) : 
+				fmt::format(sHTTPResponseFormatStr, "X-server-ip-address: ", localIPAddr, "\r\n", 
+					std::string(QTSServerInterface::GetServerHeader())) : 
 				fmt::format(sHTTPNoServerResponseFormatStr, "X-server-ip-address: ", localIPAddr, "\r\n", "");
 	
 			fOutputStream.Put(responseHeader);
 		}
 		else // use the premade stopck version
 		{
-			static std::string responseHeader = fmt::format(sHTTPResponseFormatStr, "", "", "", QTSServerInterface::GetServerHeader().Ptr);
+			static std::string responseHeader = fmt::format(sHTTPResponseFormatStr, "", "", "", 
+				std::string(QTSServerInterface::GetServerHeader()));
 			static std::string responseNoServerHeader = fmt::format(sHTTPNoServerResponseFormatStr, "", "", "", "");
 			if (showServerInfo)
 				fOutputStream.Put(responseHeader);  // 200 OK just means we connected...

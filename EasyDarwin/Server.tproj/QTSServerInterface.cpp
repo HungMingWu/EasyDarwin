@@ -61,8 +61,7 @@ StrPtrLen               QTSServerInterface::sServerCommentStr(kCommentString);
 
 StrPtrLen               QTSServerInterface::sServerPlatformStr(kPlatformNameString);
 StrPtrLen               QTSServerInterface::sServerBuildDateStr(__DATE__ ", " __TIME__);
-char                    QTSServerInterface::sServerHeader[kMaxServerHeaderLen];
-StrPtrLen               QTSServerInterface::sServerHeaderPtr(sServerHeader, kMaxServerHeaderLen);
+std::string             QTSServerInterface::sServerHeader;
 
 std::string             QTSServerInterface::sPublicHeaderStr;
 
@@ -146,32 +145,19 @@ void    QTSServerInterface::Initialize()
 			sConnectedUserAttributes[y].fAttrDataType, sConnectedUserAttributes[y].fAttrPermission);
 
 	//Write out a premade server header
-	StringFormatter serverFormatter(sServerHeaderPtr.Ptr, kMaxServerHeaderLen);
-	serverFormatter.Put(RTSPProtocol::GetHeaderString(qtssServerHeader));
-	serverFormatter.Put(": ");
-	serverFormatter.Put(sServerNameStr);
-	serverFormatter.PutChar('/');
-	serverFormatter.Put(sServerVersionStr);
-	serverFormatter.PutChar(' ');
-
-	serverFormatter.PutChar('(');
-	serverFormatter.Put("Build/");
-	serverFormatter.Put(sServerBuildStr);
-	serverFormatter.Put("; ");
-	serverFormatter.Put("Platform/");
-	serverFormatter.Put(sServerPlatformStr);
-	serverFormatter.PutChar(';');
+	sServerHeader = std::string(RTSPProtocol::GetHeaderString(qtssServerHeader))
+		          + ": " + std::string(sServerNameStr.Ptr, sServerNameStr.Len)
+				  + "/" + std::string(sServerVersionStr.Ptr, sServerVersionStr.Len)
+		          + " (Build/" + std::string(sServerBuildStr.Ptr, sServerBuildStr.Len)
+		          + "; Platform/" + std::string(sServerPlatformStr.Ptr, sServerPlatformStr.Len)
+		          + ";";
 
 	if (sServerCommentStr.Len > 0)
 	{
-		serverFormatter.PutChar(' ');
-		serverFormatter.Put(sServerCommentStr);
+		sServerHeader += " ";
+		sServerHeader += std::string(sServerCommentStr.Ptr, sServerCommentStr.Len);
 	}
-	serverFormatter.PutChar(')');
-
-
-	sServerHeaderPtr.Len = serverFormatter.GetCurrentOffset();
-	Assert(sServerHeaderPtr.Len < kMaxServerHeaderLen);
+	sServerHeader += ")";
 }
 
 QTSServerInterface::QTSServerInterface()
@@ -183,7 +169,6 @@ QTSServerInterface::QTSServerInterface()
 	this->SetVal(qtssSvrServerName, sServerNameStr.Ptr, sServerNameStr.Len);
 	this->SetVal(qtssSvrServerVersion, sServerVersionStr.Ptr, sServerVersionStr.Len);
 	this->SetVal(qtssSvrServerBuildDate, sServerBuildDateStr.Ptr, sServerBuildDateStr.Len);
-	this->SetVal(qtssSvrRTSPServerHeader, sServerHeaderPtr.Ptr, sServerHeaderPtr.Len);
 	this->SetVal(qtssRTSPCurrentSessionCount, &fNumRTSPSessions, sizeof(fNumRTSPSessions));
 	this->SetVal(qtssRTSPHTTPCurrentSessionCount, &fNumRTSPHTTPSessions, sizeof(fNumRTSPHTTPSessions));
 	this->SetVal(qtssRTPSvrCurConn, &fNumRTPSessions, sizeof(fNumRTPSessions));

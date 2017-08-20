@@ -246,7 +246,7 @@ public:
 	static StrPtrLen&   GetServerVersion() { return sServerVersionStr; }
 	static StrPtrLen&   GetServerPlatform() { return sServerPlatformStr; }
 	static StrPtrLen&   GetServerBuildDate() { return sServerBuildDateStr; }
-	static StrPtrLen&   GetServerHeader() { return sServerHeaderPtr; }
+	static boost::string_view GetServerHeader() { return sServerHeader; }
 	static StrPtrLen&   GetServerBuild() { return sServerBuildStr; }
 	static StrPtrLen&   GetServerComment() { return sServerCommentStr; }
 
@@ -355,8 +355,7 @@ private:
 	static StrPtrLen    sServerCommentStr;
 	static StrPtrLen    sServerPlatformStr;
 	static StrPtrLen    sServerBuildDateStr;
-	static char         sServerHeader[kMaxServerHeaderLen];
-	static StrPtrLen    sServerHeaderPtr;
+	static std::string  sServerHeader;
 
 	OSMutex             fMutex;
 

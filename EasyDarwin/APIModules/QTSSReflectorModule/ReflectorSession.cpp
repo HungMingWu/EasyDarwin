@@ -59,22 +59,13 @@ FileDeleter::~FileDeleter()
 
 extern boost::asio::io_service io_service;
 ReflectorSession::ReflectorSession(boost::string_view inSourceID, uint32_t inChannelNum, SourceInfo* inInfo) :
-	fIsSetup(false),
 	fSessionName(inSourceID),
 	fChannelNum(inChannelNum),
-	fQueueElem(),
-	fNumOutputs(0),
-	fStreamArray(nullptr),
 	fSourceInfo(inInfo),
-	fSocketStream(nullptr),
-	fBroadcasterSession(nullptr),
 	fInitTimeMS(OS::Milliseconds()),
 	fNoneOutputStartTimeMS(OS::Milliseconds()),
-	fHasBufferedStreams(false),
-	fHasVideoKeyFrameUpdate(false),
 	timer(io_service)
 {
-	fQueueElem.SetEnclosingObject(this);
 	if (!fSessionName.empty())
 	{
 		char streamID[QTSS_MAX_NAME_LENGTH + 10] = { 0 };

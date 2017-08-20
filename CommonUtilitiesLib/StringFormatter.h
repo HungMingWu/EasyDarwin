@@ -86,7 +86,7 @@ public:
 
 	//Writes a printf style formatted string
 	bool		PutFmtStr(const char *fmt, ...);
-
+	void        Consume(uint32_t theLengthSent) { fBytesWritten += theLengthSent; }
 
 	//the number of characters in the buffer
 	inline uint32_t       GetCurrentOffset();

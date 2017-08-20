@@ -446,16 +446,13 @@ QTSS_Error	QTSSModuleUtils::SendHTTPErrorResponse(RTSPRequest* inRequest,
 
 	uint32_t realCode = inRequest->GetRealStatusCode();
 
-    char serverHeaderBuffer[64]; // the qtss Server: header field
-	uint32_t len = sizeof(serverHeaderBuffer) -1; // leave room for terminator
-    ((QTSSDictionary*)sServer)->GetValue(qtssSvrRTSPServerHeader, 0,  (void*)serverHeaderBuffer,&len);
-    serverHeaderBuffer[len] = 0; // terminate.
+    boost::string_view serverHeader = ((QTSServerInterface*)sServer)->GetServerHeader();
  
     snprintf(messageLineBuffer,maxMessageBufferChars, "HTTP/1.1 %"   _U32BITARG_   " %s",realCode, errorMsg);
     theErrorMessage.Put(messageLineBuffer,::strlen(messageLineBuffer));
     theErrorMessage.PutEOL();
 
-    theErrorMessage.Put(serverHeaderBuffer,::strlen(serverHeaderBuffer));
+    theErrorMessage.Put(serverHeader);
     theErrorMessage.PutEOL();
  
     snprintf(messageLineBuffer,maxMessageBufferChars, "Date: %s",theDate.GetDateBuffer());

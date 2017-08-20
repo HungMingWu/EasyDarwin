@@ -38,7 +38,7 @@ QTSS_Error RTSPResponseStream::WriteV(iovec* inVec, uint32_t inNumVectors, uint3
 {
 	QTSS_Error theErr = QTSS_NoErr;
 	uint32_t theLengthSent = 0;
-	uint32_t amtInBuffer = this->GetCurrentOffset() - fBytesSentInBuffer;
+	uint32_t amtInBuffer = formater.GetCurrentOffset() - fBytesSentInBuffer;
 
 	if (amtInBuffer > 0)
 	{
@@ -46,7 +46,7 @@ QTSS_Error RTSPResponseStream::WriteV(iovec* inVec, uint32_t inNumVectors, uint3
 		// There is some data in the output buffer. Make sure to send that
 		// first, using the empty space in the ioVec.
 
-		inVec[0].iov_base = this->GetBufPtr() + fBytesSentInBuffer;
+		inVec[0].iov_base = formater.GetBufPtr() + fBytesSentInBuffer;
 		inVec[0].iov_len = amtInBuffer;
 		theErr = fSocket->WriteV(inVec, inNumVectors, &theLengthSent);
 
@@ -78,7 +78,7 @@ QTSS_Error RTSPResponseStream::WriteV(iovec* inVec, uint32_t inNumVectors, uint3
 			// fBytesSentInBuffer count, and set theLengthSent to 0.
 
 			fBytesSentInBuffer += theLengthSent;
-			Assert(fBytesSentInBuffer < this->GetCurrentOffset());
+			Assert(fBytesSentInBuffer < formater.GetCurrentOffset());
 			theLengthSent = 0;
 		}
 		// theLengthSent now represents how much data in the ioVec was sent
@@ -103,7 +103,7 @@ QTSS_Error RTSPResponseStream::WriteV(iovec* inVec, uint32_t inNumVectors, uint3
 	// Update the StringFormatter fBytesWritten variable... this data
 	// wasn't buffered in the output buffer at any time, so if we
 	// don't do this, this amount would get lost
-	fBytesWritten += theLengthSent;
+	formater.Consume(theLengthSent);
 
 	// All of the data was sent... whew!
 	if (theLengthSent == inTotalLength)
@@ -136,7 +136,7 @@ QTSS_Error RTSPResponseStream::WriteV(iovec* inVec, uint32_t inNumVectors, uint3
 	while (curVec < inNumVectors)
 	{
 		// Copy the remaining vectors into the buffer
-		this->Put(((char*)inVec[curVec].iov_base) + theLengthSent,
+		formater.Put(((char*)inVec[curVec].iov_base) + theLengthSent,
 			inVec[curVec].iov_len - theLengthSent);
 		theLengthSent = 0;
 		curVec++;
@@ -146,7 +146,7 @@ QTSS_Error RTSPResponseStream::WriteV(iovec* inVec, uint32_t inNumVectors, uint3
 
 QTSS_Error RTSPResponseStream::Flush()
 {
-	uint32_t amtInBuffer = this->GetCurrentOffset() - fBytesSentInBuffer;
+	uint32_t amtInBuffer = formater.GetCurrentOffset() - fBytesSentInBuffer;
 	if (amtInBuffer > 0)
 	{
 		if (fPrintRTSP)
@@ -155,12 +155,12 @@ QTSS_Error RTSPResponseStream::Flush()
 			DateTranslator::UpdateDateBuffer(&theDate, 0); // get the current GMT date and time
 
 			printf("\n#S->C:\n#time: ms=%"   _U32BITARG_   " date=%s\n", (uint32_t)OS::StartTimeMilli_Int(), theDate.GetDateBuffer());
-			StrPtrLen str(this->GetBufPtr() + fBytesSentInBuffer, amtInBuffer);
+			StrPtrLen str(formater.GetBufPtr() + fBytesSentInBuffer, amtInBuffer);
 			str.PrintStrEOL();
 		}
 
 		uint32_t theLengthSent = 0;
-		(void)fSocket->Send(this->GetBufPtr() + fBytesSentInBuffer, amtInBuffer, &theLengthSent);
+		(void)fSocket->Send(formater.GetBufPtr() + fBytesSentInBuffer, amtInBuffer, &theLengthSent);
 
 		// Refresh the timeout if we were able to send any data
 		if (theLengthSent > 0)
@@ -177,7 +177,7 @@ QTSS_Error RTSPResponseStream::Flush()
 			// Not all the data was sent, so report an EAGAIN
 
 			fBytesSentInBuffer += theLengthSent;
-			Assert(fBytesSentInBuffer < this->GetCurrentOffset());
+			Assert(fBytesSentInBuffer < formater.GetCurrentOffset());
 			return EAGAIN;
 		}
 	}

@@ -107,7 +107,6 @@ public:
 	// ACCESSORS
 
 	OSRef*          GetRef() { return &fRef; }
-	OSQueueElem*    GetQueueElem() { return &fQueueElem; }
 	uint32_t          GetNumOutputs() { return fNumOutputs; }
 	uint32_t          GetNumStreams() { return fSourceInfo->GetNumStreams(); }
 	SourceInfo*     GetSourceInfo() { return fSourceInfo; }
@@ -163,7 +162,7 @@ public:
 private:
 
 	// Is this session setup?
-	bool      fIsSetup;
+	bool      fIsSetup{ false };
 
 	// For storage in the session map       
 	OSRef       fRef;
@@ -172,11 +171,9 @@ private:
 	std::string	fSessionName;
 	uint32_t		fChannelNum;
 
-	OSQueueElem fQueueElem; // Relay uses this.
+	unsigned int        fNumOutputs{ 0 };
 
-	unsigned int        fNumOutputs;
-
-	ReflectorStream**   fStreamArray;
+	ReflectorStream**   fStreamArray{ nullptr };
 
 	// The reflector session needs to hang onto the source info object
 	// for it's entire lifetime. Right now, this is used for reflector-as-client.
@@ -184,13 +181,13 @@ private:
 	std::string fLocalSDP;
 
 	// For the QTSSSplitterModule, this object can cache a QTSS_StreamRef
-	QTSS_StreamRef fSocketStream;
-	RTPSession* fBroadcasterSession;
+	QTSS_StreamRef fSocketStream{ nullptr };
+	RTPSession* fBroadcasterSession{ nullptr };
 	int64_t		fInitTimeMS;
 	int64_t		fNoneOutputStartTimeMS;
 
-	bool		fHasBufferedStreams;
-	bool		fHasVideoKeyFrameUpdate;
+	bool		fHasBufferedStreams{ false };
+	bool		fHasVideoKeyFrameUpdate{ false };
 
 private:
 	boost::asio::steady_timer timer;

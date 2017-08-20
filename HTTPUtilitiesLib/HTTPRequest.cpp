@@ -22,6 +22,7 @@
  * @APPLE_LICENSE_HEADER_END@
  *
  */
+#include <boost/algorithm/string/predicate.hpp>
 #include "HTTPRequest.h"
 #include "HTTPProtocol.h"
 #include "StringParser.h"
@@ -33,10 +34,10 @@
 StrPtrLen HTTPRequest::sColonSpace(": ", 2);
 static bool sFalse = false;
 static bool sTrue = true;
-static StrPtrLen sCloseString("close", 5);
-static StrPtrLen sAllString("*", 1);
-static StrPtrLen sKeepAliveString("keep-alive", 10);
-static StrPtrLen sDefaultRealm("Streaming Server", 19);
+static boost::string_view sCloseString("close");
+static boost::string_view sAllString("*");
+static boost::string_view sKeepAliveString("keep-alive");
+static boost::string_view sDefaultRealm("Streaming Server");
 uint8_t HTTPRequest::sURLStopConditions[] =
 {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 1, //0-9      //'\t' is a stop condition
@@ -68,11 +69,9 @@ uint8_t HTTPRequest::sURLStopConditions[] =
 };
 
 // Constructor
-HTTPRequest::HTTPRequest(StrPtrLen* serverHeader, StrPtrLen* requestPtr)
+HTTPRequest::HTTPRequest(boost::string_view serverHeader, StrPtrLen* requestPtr)
+	: fSvrHeader(serverHeader)
 {
-	// Store the pointer to the server header field
-	fSvrHeader = *serverHeader;
-
 	// Set initial state
 	fRequestHeader = *requestPtr;
 	fHTTPHeader = nullptr;
@@ -93,11 +92,9 @@ HTTPRequest::HTTPRequest(StrPtrLen* serverHeader, StrPtrLen* requestPtr)
 }
 
 // Constructor for creating a response only
-HTTPRequest::HTTPRequest(StrPtrLen* serverHeader, HTTPType httpType)
+HTTPRequest::HTTPRequest(boost::string_view serverHeader, HTTPType httpType)
+	: fSvrHeader(serverHeader)
 {
-	// Store the pointer to the server header field
-	fSvrHeader = *serverHeader;
-
 	// We do not require any of these:
 	fRequestHeader = nullptr;
 
@@ -355,7 +352,8 @@ QTSS_Error HTTPRequest::parseHeaders(StringParser* parser)
 		// If this is the connection header
 		if (theHeader == httpConnectionHeader)
 		{ // Set the keep alive boolean based on the connection header value
-			setKeepAlive(&theHeaderVal);
+			boost::string_view theHeaderValV(theHeaderVal.Ptr, theHeaderVal.Len);
+			setKeepAlive(theHeaderValV);
 		}
 
 		// Have the header field and the value; Add value to the array
@@ -371,13 +369,13 @@ QTSS_Error HTTPRequest::parseHeaders(StringParser* parser)
 	return QTSS_NoErr;
 }
 
-void HTTPRequest::setKeepAlive(StrPtrLen *keepAliveValue)
+void HTTPRequest::setKeepAlive(boost::string_view keepAliveValue)
 {
-	if (sCloseString.EqualIgnoreCase(keepAliveValue->Ptr, keepAliveValue->Len))
+	if (boost::iequals(sCloseString, keepAliveValue))
 		fRequestKeepAlive = sFalse;
 	else
 	{
-		Assert(sKeepAliveString.EqualIgnoreCase(keepAliveValue->Ptr, keepAliveValue->Len));
+		Assert(boost::iequals(sKeepAliveString, keepAliveValue));
 		fRequestKeepAlive = sTrue;
 	}
 }
@@ -432,13 +430,12 @@ bool HTTPRequest::CreateResponseHeader(HTTPStatusCode statusCode, HTTPVersion ve
 
 	//make a partial header for the given version and status code
 	putStatusLine(fHTTPHeaderFormatter, statusCode, version);
-	Assert(fSvrHeader.Ptr != nullptr);
 
-	AppendResponseHeader(httpServerHeader, &fSvrHeader);
+	AppendResponseHeader(httpServerHeader, fSvrHeader);
 	fHTTPHeader->Len = fHTTPHeaderFormatter->GetCurrentOffset();
 
 	//Access-Control-Allow-Origin: *
-	AppendResponseHeader(httpAccessControlAllowOriginHeader, &sAllString);
+	AppendResponseHeader(httpAccessControlAllowOriginHeader, sAllString);
 
 	return true;
 }
@@ -464,9 +461,8 @@ bool HTTPRequest::CreateRequestHeader(HTTPMethod method, HTTPVersion version)
 
 	//make a partial header for the given version and status code
 	putMethedLine(fHTTPHeaderFormatter, method, version);
-	Assert(fSvrHeader.Ptr != nullptr);
 
-	AppendResponseHeader(httpUserAgentHeader, &fSvrHeader);
+	AppendResponseHeader(httpUserAgentHeader, fSvrHeader);
 	fHTTPHeader->Len = fHTTPHeaderFormatter->GetCurrentOffset();
 	return true;
 }
@@ -478,41 +474,33 @@ StrPtrLen* HTTPRequest::GetCompleteHTTPHeader() const
 	return fHTTPHeader;
 }
 
-void HTTPRequest::AppendResponseHeader(HTTPHeader inHeader, StrPtrLen* inValue) const
+void HTTPRequest::AppendResponseHeader(HTTPHeader inHeader, boost::string_view inValue) const
 {
 	fHTTPHeaderFormatter->Put(*(HTTPProtocol::GetHeaderString(inHeader)));
 	fHTTPHeaderFormatter->Put(sColonSpace);
-	fHTTPHeaderFormatter->Put(*inValue);
+	fHTTPHeaderFormatter->Put(inValue);
 	fHTTPHeaderFormatter->PutEOL();
 	fHTTPHeader->Len = fHTTPHeaderFormatter->GetCurrentOffset();
 }
 
 void HTTPRequest::AppendContentLengthHeader(uint64_t length_64bit) const
 {
-	//char* contentLength = new char[256];
-	char contentLength[256] = { 0 };
-	sprintf(contentLength, "%" _64BITARG_ "d", length_64bit);
-	StrPtrLen contentLengthPtr(contentLength);
-	AppendResponseHeader(httpContentLengthHeader, &contentLengthPtr);
+	AppendResponseHeader(httpContentLengthHeader, std::to_string(length_64bit));
 }
 
 void HTTPRequest::AppendContentLengthHeader(uint32_t length_32bit) const
 {
-	//char* contentLength = new char[256];
-	char contentLength[256] = { 0 };
-	sprintf(contentLength, "%"   _U32BITARG_   "", length_32bit);
-	StrPtrLen contentLengthPtr(contentLength);
-	AppendResponseHeader(httpContentLengthHeader, &contentLengthPtr);
+	AppendResponseHeader(httpContentLengthHeader, std::to_string(length_32bit));
 }
 
 void HTTPRequest::AppendConnectionCloseHeader() const
 {
-	AppendResponseHeader(httpConnectionHeader, &sCloseString);
+	AppendResponseHeader(httpConnectionHeader, sCloseString);
 }
 
 void HTTPRequest::AppendConnectionKeepAliveHeader() const
 {
-	AppendResponseHeader(httpConnectionHeader, &sKeepAliveString);
+	AppendResponseHeader(httpConnectionHeader, sKeepAliveString);
 }
 
 void HTTPRequest::AppendDateAndExpiresFields() const
@@ -520,11 +508,11 @@ void HTTPRequest::AppendDateAndExpiresFields() const
 	Assert(OSThread::GetCurrent() != nullptr);
 	DateBuffer* theDateBuffer = OSThread::GetCurrent()->GetDateBuffer();
 	theDateBuffer->InexactUpdate(); // Update the date buffer to the current date & time
-	StrPtrLen theDate(theDateBuffer->GetDateBuffer(), DateBuffer::kDateBufferLen);
+	boost::string_view theDate(theDateBuffer->GetDateBuffer(), DateBuffer::kDateBufferLen);
 
 	// Append dates, and have this response expire immediately
-	this->AppendResponseHeader(httpDateHeader, &theDate);
-	this->AppendResponseHeader(httpExpiresHeader, &theDate);
+	this->AppendResponseHeader(httpDateHeader, theDate);
+	this->AppendResponseHeader(httpExpiresHeader, theDate);
 }
 
 void HTTPRequest::AppendDateField() const
@@ -532,10 +520,10 @@ void HTTPRequest::AppendDateField() const
 	Assert(OSThread::GetCurrent() != nullptr);
 	DateBuffer* theDateBuffer = OSThread::GetCurrent()->GetDateBuffer();
 	theDateBuffer->InexactUpdate(); // Update the date buffer to the current date & time
-	StrPtrLen theDate(theDateBuffer->GetDateBuffer(), DateBuffer::kDateBufferLen);
+	boost::string_view theDate(theDateBuffer->GetDateBuffer(), DateBuffer::kDateBufferLen);
 
 	// Append date
-	this->AppendResponseHeader(httpDateHeader, &theDate);
+	this->AppendResponseHeader(httpDateHeader, theDate);
 }
 
 time_t HTTPRequest::ParseIfModSinceHeader()

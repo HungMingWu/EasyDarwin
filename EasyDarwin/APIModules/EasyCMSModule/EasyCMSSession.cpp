@@ -171,7 +171,7 @@ int64_t EasyCMSSession::Run()
 			Assert(fRequest == nullptr);
 
 			// 根据具体请求报文构造HTTPRequest请求类
-			fRequest = new HTTPRequest(&QTSServerInterface::GetServerHeader(), fInputStream.GetRequestBuffer());
+			fRequest = new HTTPRequest(QTSServerInterface::GetServerHeader(), fInputStream.GetRequestBuffer());
 
 			// 清空发送缓冲区
 			fOutputStream.ResetBytesWritten();
@@ -361,7 +361,7 @@ QTSS_Error EasyCMSSession::CSFreeStream()
 
 	StrPtrLen jsonContent(const_cast<char*>(msg.data()));
 
-	HTTPRequest httpReq(&QTSServerInterface::GetServerHeader(), httpRequestType);
+	HTTPRequest httpReq(QTSServerInterface::GetServerHeader(), httpRequestType);
 
 	if (!httpReq.CreateRequestHeader()) return QTSS_Unimplemented;
 

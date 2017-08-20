@@ -476,8 +476,7 @@ void  RTSPRequest::ParseRetransmitHeader(boost::string_view header)
 			// Save out the window size argument as a string so we
 			// can easily put it into the response
 			// (we never muck with this header)
-			fWindowSizeStr.Ptr = theProtArg.Ptr;
-			fWindowSizeStr.Len = theRetransmitParser.GetCurrentPosition() - theProtArg.Ptr;
+			fWindowSizeStr = boost::string_view(theProtArg.Ptr, theRetransmitParser.GetCurrentPosition() - theProtArg.Ptr);
 		}
 
 		theRetransmitParser.GetThru(nullptr, ';'); //Skip past ';'

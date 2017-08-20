@@ -398,7 +398,7 @@ QTSS_Error ReflectorStream::BindSockets(QTSS_StandardRTSP_Params* inParams, uint
 
 	// Set the transport Type a Broadcaster
 	if (inParams != nullptr)
-		fTransportType = ((RTSPRequest*)inParams->inRTSPRequest)->GetTransportType();
+		fTransportType = inParams->inRTSPRequest->GetTransportType();
 
 	// get a pair of sockets. The socket must be bound on INADDR_ANY because we don't know
 	// which interface has access to this broadcast. If there is a source IP address

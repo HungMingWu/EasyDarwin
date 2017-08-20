@@ -375,7 +375,7 @@ void RTSPSessionInterface::RevertOutputStream()
 {
 	Assert(fOldOutputStreamBuffer.Ptr != nullptr);
 	Assert(fOldOutputStreamBuffer.Len != 0);
-	static StrPtrLen theRTTStr(";rtt=", 5);
+	static boost::string_view theRTTStr(";rtt=");
 
 	if (fOldOutputStreamBuffer.Ptr != nullptr)
 	{
@@ -390,7 +390,8 @@ void RTSPSessionInterface::RevertOutputStream()
 			theStreamParser.ConsumeUntil(&theHeader, StringParser::sEOLMask);
 			if (theHeader.Len != 0)
 			{
-				fOutputStream.Put(theHeader);
+				boost::string_view theHeaderV(theHeader.Ptr, theHeader.Len);
+				fOutputStream.Put(theHeaderV);
 
 				StringParser theHeaderParser(&theHeader);
 				theHeaderParser.ConsumeUntil(&theField, ':');
@@ -400,12 +401,12 @@ void RTSPSessionInterface::RevertOutputStream()
 					if (boost::iequals(theFieldV, RTSPProtocol::GetHeaderString(qtssXDynamicRateHeader)))
 					{
 						fOutputStream.Put(theRTTStr);
-						fOutputStream.Put(fRoundTripTime);
+						fOutputStream.Put(std::to_string(fRoundTripTime));
 					}
 				}
 			}
 			theStreamParser.ConsumeEOL(&theEOL);
-			fOutputStream.Put(theEOL);
+			fOutputStream.PutEOL();
 		}
 
 		fOldOutputStreamBuffer.Delete();
@@ -414,10 +415,11 @@ void RTSPSessionInterface::RevertOutputStream()
 
 void RTSPSessionInterface::SendOptionsRequest()
 {
-	static StrPtrLen	sOptionsRequestHeader("OPTIONS * RTSP/1.0\r\nContent-Type: application/x-random-data\r\nContent-Length: 1400\r\n\r\n");
+	static boost::string_view	sOptionsRequestHeader("OPTIONS * RTSP/1.0\r\nContent-Type: application/x-random-data\r\nContent-Length: 1400\r\n\r\n");
 
 	fOutputStream.Put(sOptionsRequestHeader);
-	fOutputStream.Put((char*)(RTSPSessionInterface::sOptionsRequestBody), 1400);
+	fOutputStream.Put(
+		boost::string_view((char*)(RTSPSessionInterface::sOptionsRequestBody), 1400));
 
 	fOptionsRequestSendTime = OS::Milliseconds();
 	fSentOptionsRequest = true;

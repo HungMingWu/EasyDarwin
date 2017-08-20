@@ -69,8 +69,7 @@ void  RTSPRequestInterface::Initialize(void)
 	//make a partially complete header
 	sPremadeHeader = ::PutStatusLine(qtssSuccessOK, RTSPProtocol::k10Version);
 
-	StrPtrLen temp = QTSServerInterface::GetServerHeader();
-	sPremadeHeader += std::string(temp.Ptr, temp.Len) + "\r\n";
+	sPremadeHeader += std::string(QTSServerInterface::GetServerHeader()) + "\r\n";
 	sPremadeHeader += std::string(RTSPProtocol::GetHeaderString(qtssCSeqHeader)) + ": ";
 
 	sPremadeNoHeader = ::PutStatusLine(qtssSuccessOK, RTSPProtocol::k10Version);
@@ -149,13 +148,13 @@ void RTSPRequestInterface::AppendHeader(QTSS_RTSPHeader inHeader, boost::string_
 	fOutputStream->PutEOL();
 }
 
-void RTSPRequestInterface::PutStatusLine(StringFormatter* putStream, QTSS_RTSPStatusCode status,
+void RTSPRequestInterface::PutStatusLine(RTSPResponseStream* putStream, QTSS_RTSPStatusCode status,
 	RTSPProtocol::RTSPVersion version)
 {
 	putStream->Put(RTSPProtocol::GetVersionString(version));
-	putStream->PutSpace();
+	putStream->Put(" ");
 	putStream->Put(RTSPProtocol::GetStatusCodeAsString(status));
-	putStream->PutSpace();
+	putStream->Put(" ");
 	putStream->Put(RTSPProtocol::GetStatusCodeString(status));
 	putStream->PutEOL();
 }
@@ -233,13 +232,13 @@ void RTSPRequestInterface::AppendTransportHeader(boost::string_view serverPortA,
 	boost::string_view serverIPAddr,
 	boost::string_view ssrc)
 {
-	static StrPtrLen    sServerPortString(";server_port=");
-	static StrPtrLen    sSourceString(";source=");
-	static StrPtrLen    sInterleavedString(";interleaved=");
-	static StrPtrLen    sSSRC(";ssrc=");
+	static boost::string_view    sServerPortString(";server_port=");
+	static boost::string_view    sSourceString(";source=");
+	static boost::string_view    sInterleavedString(";interleaved=");
+	static boost::string_view    sSSRC(";ssrc=");
 	static boost::string_view    sInterLeaved("interleaved");//match the interleaved tag
 	static boost::string_view    sClientPort("client_port");
-	static StrPtrLen    sClientPortString(";client_port=");
+	static boost::string_view    sClientPortString(";client_port=");
 
 	if (!fStandardHeadersWritten)
 		this->WriteStandardHeaders();
@@ -272,14 +271,9 @@ void RTSPRequestInterface::AppendTransportHeader(boost::string_view serverPortA,
 	if (foundClientPort)
 	{
 		fOutputStream->Put(sClientPortString);
-		uint16_t portA = this->GetClientPortA();
-		uint16_t portB = this->GetClientPortB();
-		StrPtrLenDel clientPortA(QTSSDataConverter::ValueToString(&portA, sizeof(portA), qtssAttrDataTypeUInt16));
-		StrPtrLenDel clientPortB(QTSSDataConverter::ValueToString(&portB, sizeof(portB), qtssAttrDataTypeUInt16));
-
-		fOutputStream->Put(clientPortA);
-		fOutputStream->PutChar('-');
-		fOutputStream->Put(clientPortB);
+		fOutputStream->Put(std::to_string(GetClientPortA()));
+		fOutputStream->Put("-");
+		fOutputStream->Put(std::to_string(GetClientPortB()));
 	}
 
 	// Append the server ports, if provided.
@@ -287,7 +281,7 @@ void RTSPRequestInterface::AppendTransportHeader(boost::string_view serverPortA,
 	{
 		fOutputStream->Put(sServerPortString);
 		fOutputStream->Put(serverPortA);
-		fOutputStream->PutChar('-');
+		fOutputStream->Put("-");
 		fOutputStream->Put(serverPortB);
 	}
 
@@ -296,7 +290,7 @@ void RTSPRequestInterface::AppendTransportHeader(boost::string_view serverPortA,
 	{
 		fOutputStream->Put(sInterleavedString);
 		fOutputStream->Put(channelA);
-		fOutputStream->PutChar('-');
+		fOutputStream->Put("-");
 		fOutputStream->Put(channelB);
 	}
 
@@ -310,9 +304,9 @@ void RTSPRequestInterface::AppendTransportHeader(boost::string_view serverPortA,
 
 		StrPtrLen hexSSRC(QTSSDataConverter::ValueToString(&ssrcVal, sizeof(ssrcVal), qtssAttrDataTypeUnknown));
 		std::unique_ptr<char[]> hexStrDeleter(hexSSRC.Ptr);
-
+		std::string hexSSRCX(hexSSRC.Ptr);
 		fOutputStream->Put(sSSRC);
-		fOutputStream->Put(hexSSRC);
+		fOutputStream->Put(hexSSRCX);
 	}
 
 	fOutputStream->PutEOL();
@@ -326,26 +320,26 @@ void RTSPRequestInterface::AppendContentBaseHeader(boost::string_view theURL)
 	fOutputStream->Put(RTSPProtocol::GetHeaderString(qtssContentBaseHeader));
 	fOutputStream->Put(ColonSpace);
 	fOutputStream->Put(theURL);
-	fOutputStream->PutChar('/');
+	fOutputStream->Put("/");
 	fOutputStream->PutEOL();
 }
 
 void RTSPRequestInterface::AppendRetransmitHeader(uint32_t inAckTimeout)
 {
-	static const StrPtrLen kAckTimeout("ack-timeout=");
+	static boost::string_view kAckTimeout("ack-timeout=");
 
 	fOutputStream->Put(RTSPProtocol::GetHeaderString(qtssXRetransmitHeader));
 	fOutputStream->Put(ColonSpace);
 	fOutputStream->Put(RTSPProtocol::GetRetransmitProtocolName());
-	fOutputStream->PutChar(';');
+	fOutputStream->Put(";");
 	fOutputStream->Put(kAckTimeout);
-	fOutputStream->Put(inAckTimeout);
+	fOutputStream->Put(std::to_string(inAckTimeout));
 
-	if (fWindowSizeStr.Len > 0)
+	if (!fWindowSizeStr.empty())
 	{
 		//
 		// If the client provided a window size, append that as well.
-		fOutputStream->PutChar(';');
+		fOutputStream->Put(";");
 		fOutputStream->Put(fWindowSizeStr);
 	}
 
@@ -358,10 +352,10 @@ void RTSPRequestInterface::AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 	boost::string_view url, boost::string_view seqNumber,
 	boost::string_view ssrc, boost::string_view rtpTime, bool lastRTPInfo)
 {
-	static StrPtrLen sURL("url=", 4);
-	static StrPtrLen sSeq(";seq=", 5);
-	static StrPtrLen sSsrc(";ssrc=", 6);
-	static StrPtrLen sRTPTime(";rtptime=", 9);
+	static boost::string_view sURL("url=");
+	static boost::string_view sSeq(";seq=");
+	static boost::string_view sSsrc(";ssrc=");
+	static boost::string_view sRTPTime(";rtptime=");
 
 	if (!fStandardHeadersWritten)
 		this->WriteStandardHeaders();
@@ -385,7 +379,7 @@ void RTSPRequestInterface::AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 			{
 				fOutputStream->Put(path);
 				if (path.back() != '/')
-					fOutputStream->PutChar('/');
+					fOutputStream->Put("/");
 			}
 		}
 
@@ -479,7 +473,7 @@ QTSS_Error
 RTSPRequestInterface::Write(void* inBuffer, uint32_t inLength, uint32_t* outLenWritten, uint32_t /*inFlags*/)
 {
 	//now just write whatever remains into the output buffer
-	fOutputStream->Put((char*)inBuffer, inLength);
+	fOutputStream->Put(boost::string_view((char*)inBuffer, inLength));
 
 	if (outLenWritten != nullptr)
 		*outLenWritten = inLength;

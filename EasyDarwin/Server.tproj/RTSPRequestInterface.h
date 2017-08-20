@@ -297,7 +297,7 @@ protected:
 	//
 	// For reliable UDP
 	uint32_t                      fWindowSize;
-	StrPtrLen                   fWindowSizeStr;
+	boost::string_view            fWindowSizeStr;
 
 	//Because of URL decoding issues, we need to make a copy of the file path.
 	//Here is a buffer for it.
@@ -354,7 +354,7 @@ private:
 	bool                  fStandardHeadersWritten;
 
 	void                    WriteStandardHeaders();
-	static void             PutStatusLine(StringFormatter* putStream,
+	static void             PutStatusLine(RTSPResponseStream* putStream,
 		QTSS_RTSPStatusCode status,
 		RTSPProtocol::RTSPVersion version);
 

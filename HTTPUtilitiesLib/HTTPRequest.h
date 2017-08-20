@@ -37,10 +37,10 @@ class HTTPRequest
 public:
 
 	//HTTP请求构造函数
-	HTTPRequest(StrPtrLen* serverHeader, StrPtrLen* requestPtr);
+	HTTPRequest(boost::string_view serverHeader, StrPtrLen* requestPtr);
 
 	//HTTP响应构造函数
-	HTTPRequest(StrPtrLen* serverHeader, HTTPType httpType = httpRequestType);
+	HTTPRequest(boost::string_view serverHeader, HTTPType httpType = httpRequestType);
 
 	// Destructor
 	virtual ~HTTPRequest();
@@ -76,7 +76,7 @@ public:
 	bool					CreateRequestHeader(HTTPMethod method = httpPostMethod, HTTPVersion version = http11Version);
 
 	// To append response header fields as appropriate
-	void                    AppendResponseHeader(HTTPHeader inHeader, StrPtrLen* inValue) const;
+	void                    AppendResponseHeader(HTTPHeader inHeader, boost::string_view inValue) const;
 	void                    AppendDateAndExpiresFields() const;
 	void                    AppendDateField() const;
 	void                    AppendConnectionCloseHeader() const;
@@ -103,13 +103,13 @@ private:
 	QTSS_Error              parseHeaders(StringParser* parser);
 
 	// Sets fRequestKeepAlive
-	void                    setKeepAlive(StrPtrLen* keepAliveValue);
+	void                    setKeepAlive(boost::string_view keepAliveValue);
 	// Used in initialize and CreateResponseHeader
 	static void                    putStatusLine(StringFormatter* putStream, HTTPStatusCode status, HTTPVersion version);
 	// Used in initialize and CreateRequestHeader
 	static void					putMethedLine(StringFormatter* putStream, HTTPMethod method, HTTPVersion version);
 	//For writing into the premade headers
-	StrPtrLen*              getServerHeader() { return &fSvrHeader; }
+	boost::string_view          getServerHeader() { return fSvrHeader; }
 
 	// Complete request and response headers
 	StrPtrLen                       fRequestHeader;
@@ -139,7 +139,7 @@ private:
 	HTTPStatusCode      fStatusCode;
 	bool              fRequestKeepAlive;              // Keep-alive information in the client request
 	StrPtrLen           fFieldValues[httpNumHeaders];   // Array of header field values parsed from the request
-	StrPtrLen           fSvrHeader;                     // Server header set up at initialization
+	boost::string_view  fSvrHeader;                     // Server header set up at initialization
 	static StrPtrLen    sColonSpace;
 	static uint8_t        sURLStopConditions[];
 };

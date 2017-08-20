@@ -161,7 +161,7 @@ int64_t HTTPSession::Run()
 				Assert(fInputStream.GetRequestBuffer());
 
 				Assert(fRequest == nullptr);
-				fRequest = new HTTPRequest(&QTSServerInterface::GetServerHeader(), fInputStream.GetRequestBuffer());
+				fRequest = new HTTPRequest(QTSServerInterface::GetServerHeader(), fInputStream.GetRequestBuffer());
 
 				//在这里，我们已经读取了一个完整的Request，并准备进行请求的处理，直到响应报文发出
 				//在此过程中，此Session的Socket不进行任何网络数据的读/写；
@@ -306,7 +306,7 @@ int64_t HTTPSession::Run()
 
 QTSS_Error HTTPSession::SendHTTPPacket(StrPtrLen* contentXML, bool connectionClose, bool decrement)
 {
-	HTTPRequest httpAck(&QTSServerInterface::GetServerHeader(), httpResponseType);
+	HTTPRequest httpAck(QTSServerInterface::GetServerHeader(), httpResponseType);
 	httpAck.CreateResponseHeader(contentXML->Len ? httpOK : httpNotImplemented);
 	if (contentXML->Len)
 		httpAck.AppendContentLengthHeader(contentXML->Len);
@@ -320,8 +320,10 @@ QTSS_Error HTTPSession::SendHTTPPacket(StrPtrLen* contentXML, bool connectionClo
 
 	RTSPResponseStream *pOutputStream = GetOutputStream();
 	pOutputStream->Put(respHeader);
-	if (contentXML->Len > 0)
-		pOutputStream->Put(contentXML->Ptr, contentXML->Len);
+	if (contentXML->Len > 0) {
+		boost::string_view contentXMLV(contentXML->Ptr, contentXML->Len);
+		pOutputStream->Put(contentXMLV);
+	}
 
 	if (pOutputStream->GetBytesWritten() != 0)
 	{
@@ -578,7 +580,7 @@ QTSS_Error HTTPSession::execNetMsgCSGetRTSPLiveSessionsRESTful(const char* query
 		StrPtrLen msgJson(msgContent);
 
 		// 构造响应报文(HTTP头)
-		HTTPRequest httpAck(&QTSServerInterface::GetServerHeader(), httpResponseType);
+		HTTPRequest httpAck(QTSServerInterface::GetServerHeader(), httpResponseType);
 		httpAck.CreateResponseHeader(msgJson.Len ? httpOK : httpNotImplemented);
 		if (msgJson.Len)
 			httpAck.AppendContentLengthHeader(msgJson.Len);
@@ -592,8 +594,10 @@ QTSS_Error HTTPSession::execNetMsgCSGetRTSPLiveSessionsRESTful(const char* query
 		// HTTP响应Content
 		RTSPResponseStream *pOutputStream = GetOutputStream();
 		pOutputStream->Put(respHeader);
-		if (msgJson.Len > 0)
-			pOutputStream->Put(msgJson.Ptr, msgJson.Len);
+		if (msgJson.Len > 0) {
+			boost::string_view msgJsonV(msgJson.Ptr, msgJson.Len);
+			pOutputStream->Put(msgJsonV);
+		}
 
 		delete[] msgContent;
 	} while (false);
@@ -622,7 +626,7 @@ QTSS_Error HTTPSession::execNetMsgCSGetRTSPRecordSessionsRESTful(const char* que
 
 		StrPtrLen msgJson(msgContent);
 
-		HTTPRequest httpAck(&QTSServerInterface::GetServerHeader(), httpResponseType);
+		HTTPRequest httpAck(QTSServerInterface::GetServerHeader(), httpResponseType);
 		httpAck.CreateResponseHeader(msgJson.Len ? httpOK : httpNotImplemented);
 		if (msgJson.Len)
 			httpAck.AppendContentLengthHeader(msgJson.Len);
@@ -635,8 +639,10 @@ QTSS_Error HTTPSession::execNetMsgCSGetRTSPRecordSessionsRESTful(const char* que
 
 		RTSPResponseStream *pOutputStream = GetOutputStream();
 		pOutputStream->Put(respHeader);
-		if (msgJson.Len > 0)
-			pOutputStream->Put(msgJson.Ptr, msgJson.Len);
+		if (msgJson.Len > 0) {
+			boost::string_view msgJsonV(msgJson.Ptr, msgJson.Len);
+			pOutputStream->Put(msgJsonV);
+		}
 
 		delete[] msgContent;
 	} while (false);
@@ -770,10 +776,8 @@ QTSS_Error HTTPSession::execNetMsgCSGetServerVersionReqRESTful(const char* query
 	header[EASY_TAG_ERROR_NUM] = EASY_ERROR_SUCCESS_OK;
 	header[EASY_TAG_ERROR_STRING] = EasyProtocol::GetErrorString(EASY_ERROR_SUCCESS_OK);
 
-	char* serverHeader = nullptr;
-	(void)((QTSSDictionary*)QTSServerInterface::GetServer())->GetValueAsString(qtssSvrRTSPServerHeader, 0, &serverHeader);
-	std::unique_ptr<char[]> theFullPathStrDeleter(serverHeader);
-	body[EASY_TAG_SERVER_HEADER] = serverHeader;
+	std::string serverHeader(QTSServerInterface::GetServer()->GetServerHeader());
+	body[EASY_TAG_SERVER_HEADER] = serverHeader.c_str();
 
 	int64_t timeNow = OS::Milliseconds();
 	int64_t startupTime = 0;

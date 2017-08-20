@@ -41,7 +41,7 @@
 #include "TimeoutTask.h"
 #include "QTSS.h"
 
-class RTSPResponseStream : public ResizeableStringFormatter
+class RTSPResponseStream
 {
 public:
 
@@ -49,10 +49,10 @@ public:
 	// It also refreshes the timeout whenever there is a successful write
 	// on the socket.
 	RTSPResponseStream(TCPSocket* inSocket, TimeoutTask* inTimeoutTask)
-		: ResizeableStringFormatter(fOutputBuf, kOutputBufferSizeInBytes),
+		: formater(fOutputBuf, kOutputBufferSizeInBytes),
 		fSocket(inSocket), fBytesSentInBuffer(0), fTimeoutTask(inTimeoutTask), fPrintRTSP(false) {}
 
-	~RTSPResponseStream() override = default;
+	~RTSPResponseStream() = default;
 
 	// WriteV
 	//
@@ -86,7 +86,12 @@ public:
 
 	void        ShowRTSP(bool enable) { fPrintRTSP = enable; }
 
-
+	uint32_t    GetBytesWritten() { return formater.GetBytesWritten(); }
+	void        Reset(uint32_t inNumBytesToLeave = 0) { formater.Reset(inNumBytesToLeave);  }
+	void        PutEOL() { formater.PutEOL(); }
+	void        Put(const boost::string_view str) { formater.Put(str); }
+	void        ResetBytesWritten() { formater.ResetBytesWritten(); }
+	char*       GetBufPtr() { return formater.GetBufPtr(); }
 private:
 
 	enum
@@ -94,6 +99,7 @@ private:
 		kOutputBufferSizeInBytes = QTSS_MAX_REQUEST_BUFFER_SIZE  //uint32_t
 	};
 
+	StringFormatter formater;
 	//The default buffer size is allocated inline as part of the object. Because this size
 	//is good enough for 99.9% of all requests, we avoid the dynamic memory allocation in most
 	//cases. But if the response is too big for this buffer, the BufferIsFull function will

@@ -486,7 +486,6 @@ enum
     qtssSvrServerVersion            = 4,    //read		//char array        //Version of the server
     qtssSvrServerBuildDate          = 5,    //read		//char array        //When was the server built?
     qtssSvrRTSPPorts                = 6,    //read		// NOT PREEMPTIVE SAFE!//UInt16         //Indexed parameter: all the ports the server is listening on
-    qtssSvrRTSPServerHeader         = 7,    //read		//char array        //Server: header that the server uses to respond to RTSP clients
 
     // These parameters are NOT pre-emptive safe, they cannot be accessed
     // via. QTSS_GetValuePtr. Some exceptions noted below

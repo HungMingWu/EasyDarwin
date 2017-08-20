@@ -177,8 +177,7 @@ protected:
 		, kTCPCoalesceDirectWriteSize = 0 // if > this # bytes bypass coalescing and make a direct write
 		, kInteleaveHeaderSize = 4  // '$ '+ 1 byte ch ID + 2 bytes length
 	};
-	char*       fTCPCoalesceBuffer{nullptr};
-	int32_t      fNumInCoalesceBuffer{0};
+	std::vector<char>       fTCPCoalesceBuffer;
 
 
 	//+rt  socket we get from "accept()"

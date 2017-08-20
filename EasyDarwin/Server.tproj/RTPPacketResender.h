@@ -36,6 +36,7 @@
 #ifndef __RTP_PACKET_RESENDER_H__
 #define __RTP_PACKET_RESENDER_H__
 
+#include <vector>
 #include "PLDoubleLinkedList.h"
 
 #include "RTPBandwidthTracker.h"
@@ -142,9 +143,8 @@ private:
 	DssDurationTimer    fInfoDisplayTimer;
 #endif
 
-	RTPResenderEntry*   fPacketArray{nullptr};
+	std::vector<RTPResenderEntry>   fPacketArray;
 	uint16_t              fStartSeqNum;
-	uint32_t              fPacketArraySize;
 	uint32_t              fPacketArrayMask{0};
 	uint16_t              fHighestSeqNum{0};
 	uint32_t              fLastUsed{0};

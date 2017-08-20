@@ -80,32 +80,25 @@ OSBufferPool RTPPacketResender::sBufferPool(kMaxDataBufferSize);
 unsigned int    RTPPacketResender::sNumWastedBytes = 0;
 
 RTPPacketResender::RTPPacketResender()
-	: fPacketArraySize(kInitialPacketArraySize),
+	: fPacketArray(kInitialPacketArraySize),
 	fPacketQMutex()
 {
-	fPacketArray = (RTPResenderEntry*)new char[sizeof(RTPResenderEntry) * fPacketArraySize];
-	::memset(fPacketArray, 0, sizeof(RTPResenderEntry) * fPacketArraySize);
-
 }
 
 RTPPacketResender::~RTPPacketResender()
 {
-	for (uint32_t x = 0; x < fPacketArraySize; x++)
+	for (const auto & packet : fPacketArray)
 	{
-		if (fPacketArray[x].fPacketSize > 0)
-			atomic_sub(&sNumWastedBytes, kMaxDataBufferSize - fPacketArray[x].fPacketSize);
-		if (fPacketArray[x].fPacketData != nullptr)
+		if (packet.fPacketSize > 0)
+			atomic_sub(&sNumWastedBytes, kMaxDataBufferSize - packet.fPacketSize);
+		if (packet.fPacketData != nullptr)
 		{
-			if (fPacketArray[x].fIsSpecialBuffer)
-				delete[](char*)fPacketArray[x].fPacketData;
+			if (packet.fIsSpecialBuffer)
+				delete[](char*)packet.fPacketData;
 			else
-				sBufferPool.Put(fPacketArray[x].fPacketData);
+				sBufferPool.Put(packet.fPacketData);
 		}
 	}
-
-	delete[] fPacketArray;
-
-
 }
 
 #if RTP_PACKET_RESENDER_DEBUGGING
@@ -224,31 +217,23 @@ RTPResenderEntry*   RTPPacketResender::GetEmptyEntry(uint16_t inSeqNum, uint32_t
 		}
 	}
 
-	if (fPacketsInList == fPacketArraySize) // allocate a new array
-	{
-		fPacketArraySize += kPacketArrayIncreaseInterval;
-		auto* tempArray = (RTPResenderEntry*)new char[sizeof(RTPResenderEntry) * fPacketArraySize];
-		::memset(tempArray, 0, sizeof(RTPResenderEntry) * fPacketArraySize);
-		::memcpy(tempArray, fPacketArray, sizeof(RTPResenderEntry) * fPacketsInList);
-		delete[] fPacketArray;
-		fPacketArray = tempArray;
-		//printf("NewArray size=%" _S32BITARG_ " packetsInList=%" _S32BITARG_ "\n",fPacketArraySize, fPacketsInList);
-	}
+	if (fPacketsInList == fPacketArray.size()) // allocate a new array
+		fPacketArray.resize(fPacketArray.size() + kPacketArrayIncreaseInterval);
 
-	if (fPacketsInList < fPacketArraySize) // have an open spot
+	if (fPacketsInList < fPacketArray.size()) // have an open spot
 	{
 		theEntry = &fPacketArray[fPacketsInList];
 		fPacketsInList++;
 
-		if (fPacketsInList < fPacketArraySize)
+		if (fPacketsInList < fPacketArray.size())
 			fLastUsed = fPacketsInList;
 		else
-			fLastUsed = fPacketArraySize;
+			fLastUsed = fPacketArray.size();
 	}
 	else
 	{
 		// nothing open so re-use 
-		if (fLastUsed < fPacketArraySize - 1)
+		if (fLastUsed < fPacketArray.size() - 1)
 			fLastUsed++;
 		else
 			fLastUsed = 0;
@@ -428,8 +413,8 @@ void RTPPacketResender::RemovePacket(uint32_t packetIndex, bool reuseIndex)
 {
 	//OSMutexLocker packetQLocker(&fPacketQMutex);
 
-	Assert(packetIndex < fPacketArraySize);
-	if (packetIndex >= fPacketArraySize)
+	Assert(packetIndex < fPacketArray.size());
+	if (packetIndex >= fPacketArray.size())
 		return;
 
 	if (fPacketsInList == 0)

@@ -92,13 +92,10 @@ ReflectorSession::~ReflectorSession()
 			continue;
 
 		fStreamArray[x]->SetMyReflectorSession(nullptr);
-
-		delete fStreamArray[x];
-		fStreamArray[x] = nullptr;
 	}
 
 	// We own this object when it is given to us, so delete it now
-	delete[] fStreamArray;
+
 	delete fSourceInfo;
 	fSourceID.Delete();
 }
@@ -131,17 +128,11 @@ QTSS_Error ReflectorSession::SetupReflectorSession(SourceInfo* inInfo, QTSS_Stan
 	// this must be set to the new SDP.
 	fLocalSDP = inInfo->GetLocalSDP();
 
-	if (fStreamArray != nullptr)
-	{
-		delete fStreamArray; // keep the array list synchronized with the source info.
-	}
-
-	fStreamArray = new ReflectorStream*[fSourceInfo->GetNumStreams()];
-	::memset(fStreamArray, 0, fSourceInfo->GetNumStreams() * sizeof(ReflectorStream*));
+	fStreamArray.resize(fSourceInfo->GetNumStreams());
 
 	for (uint32_t x = 0; x < fSourceInfo->GetNumStreams(); x++)
 	{
-		fStreamArray[x] = new ReflectorStream(fSourceInfo->GetStreamInfo(x));
+		fStreamArray[x] = std::make_unique<ReflectorStream>(fSourceInfo->GetStreamInfo(x));
 		// Obviously, we may encounter an error binding the reflector sockets.
 		// If that happens, we'll just abort here, which will leave the ReflectorStream
 		// array in an inconsistent state, so we need to make sure in our cleanup
@@ -149,7 +140,6 @@ QTSS_Error ReflectorSession::SetupReflectorSession(SourceInfo* inInfo, QTSS_Stan
 		QTSS_Error theError = fStreamArray[x]->BindSockets(inParams, inFlags, filterState, filterTimeout);
 		if (theError != QTSS_NoErr)
 		{
-			delete fStreamArray[x];
 			fStreamArray[x] = nullptr;
 			return theError;
 		}
@@ -170,7 +160,7 @@ QTSS_Error ReflectorSession::SetupReflectorSession(SourceInfo* inInfo, QTSS_Stan
 
 void ReflectorSession::AddBroadcasterClientSession(QTSS_StandardRTSP_Params* inParams)
 {
-	if (nullptr == fStreamArray || nullptr == inParams)
+	if (fStreamArray.empty() || nullptr == inParams)
 		return;
 
 	for (uint32_t x = 0; x < fSourceInfo->GetNumStreams(); x++)
@@ -271,14 +261,11 @@ void    ReflectorSession::RemoveSessionFromOutput(RTPSession* inSession)
 uint32_t  ReflectorSession::GetBitRate()
 {
 	uint32_t retval = 0;
-	if (fStreamArray)
+	for (uint32_t x = 0; x < fSourceInfo->GetNumStreams(); x++)
 	{
-		for (uint32_t x = 0; x < fSourceInfo->GetNumStreams(); x++)
+		if (fStreamArray[x] != nullptr)
 		{
-			if (fStreamArray[x])
-			{
-				retval += fStreamArray[x]->GetBitRate();
-			}
+			retval += fStreamArray[x]->GetBitRate();
 		}
 	}
 	return retval;

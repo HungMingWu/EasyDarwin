@@ -119,7 +119,7 @@ public:
 	bool			IsSetup() { return fIsSetup; }
 	bool			HasVideoKeyFrameUpdate() { return fHasVideoKeyFrameUpdate; }
 
-	ReflectorStream*	GetStreamByIndex(uint32_t inIndex) { return fStreamArray[inIndex]; }
+	ReflectorStream*	GetStreamByIndex(uint32_t inIndex) { return fStreamArray[inIndex].get(); }
 	void AddBroadcasterClientSession(QTSS_StandardRTSP_Params* inParams);
 	RTPSession* GetBroadcasterSession() { return fBroadcasterSession; }
 
@@ -173,7 +173,7 @@ private:
 
 	unsigned int        fNumOutputs{ 0 };
 
-	ReflectorStream**   fStreamArray{ nullptr };
+	std::vector<std::unique_ptr<ReflectorStream>>   fStreamArray;
 
 	// The reflector session needs to hang onto the source info object
 	// for it's entire lifetime. Right now, this is used for reflector-as-client.

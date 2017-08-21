@@ -46,22 +46,22 @@ void TimeoutTask::Initialize()
 
 
 TimeoutTask::TimeoutTask(Task* inTask, int64_t inTimeoutInMilSecs)
-	: fTask(inTask), fQueueElem()
+	: fTask(inTask)
 {
-	fQueueElem.SetEnclosingObject(this);
 	this->SetTimeout(inTimeoutInMilSecs);
 	if (nullptr == inTask)
 		fTask = (Task *) this;
 	Assert(sThread != nullptr); // this can happen if RunServer intializes tasks in the wrong order
 
 	OSMutexLocker locker(&sThread->fMutex);
-	sThread->fQueue.EnQueue(&fQueueElem);
+	sThread->fQueue.emplace_back(this);
 }
 
 TimeoutTask::~TimeoutTask()
 {
 	OSMutexLocker locker(&sThread->fMutex);
-	sThread->fQueue.Remove(&fQueueElem);
+	auto it = std::find(begin(sThread->fQueue), end(sThread->fQueue), this);
+	sThread->fQueue.erase(it);
 }
 
 void TimeoutTask::SetTimeout(int64_t inTimeoutInMilSecs)
@@ -81,10 +81,8 @@ int64_t TimeoutTaskThread::Run()
 	int64_t intervalMilli = kIntervalSeconds * 1000;//always default to 60 seconds but adjust to smallest interval > 0
 	int64_t taskInterval = intervalMilli;
 
-	for (OSQueueIter iter(&fQueue); !iter.IsDone(); iter.Next())
+	for (const auto &theTimeoutTask : fQueue)
 	{
-		auto* theTimeoutTask = (TimeoutTask*)iter.GetCurrent()->GetEnclosingObject();
-
 		//if it's time to time this task out, signal it
 		if ((theTimeoutTask->fTimeoutAtThisTime > 0) && (curTime >= theTimeoutTask->fTimeoutAtThisTime))
 		{

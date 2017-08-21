@@ -205,17 +205,14 @@ uint8_t XMLTag::sNonNameMask[] =
 	1, 1, 1, 1, 1, 1             //250-255
 };
 
-XMLTag::XMLTag() : fElem(nullptr)
+XMLTag::XMLTag()
 {
-	fElem = this;
 }
 
 XMLTag::XMLTag(char* tagName) :
 	fTag(nullptr),
-	fValue(nullptr),
-	fElem(nullptr)
+	fValue(nullptr)
 {
-	fElem = this;
 	StrPtrLen temp(tagName);
 	fTag = temp.GetAsCString();
 }
@@ -226,22 +223,6 @@ XMLTag::~XMLTag()
 		delete[] fTag;
 	if (fValue)
 		delete[] fValue;
-
-	OSQueueElem* elem;
-	while ((elem = fAttributes.DeQueue()) != nullptr)
-	{
-		auto* attr = (XMLAttribute*)elem->GetEnclosingObject();
-		delete attr;
-	}
-
-	while ((elem = fEmbeddedTags.DeQueue()) != nullptr)
-	{
-		auto* tag = (XMLTag*)elem->GetEnclosingObject();
-		delete tag;
-	}
-
-	if (fElem.IsMemberOfAnyQueue())
-		fElem.InQueue()->Remove(&fElem);    // remove from parent tag
 }
 
 void XMLTag::ConsumeIfComment(StringParser* parser)
@@ -312,7 +293,7 @@ bool XMLTag::ParseTag(StringParser* parser, DTDVerifier* verifier, char* errorBu
 	{
 		// we must have an attribute value for this tag
 		auto* attr = new XMLAttribute;
-		fAttributes.EnQueue(&attr->fElem);
+		fAttributes.emplace_back(attr);
 		parser->ConsumeUntil(&temp, sNonNameMask);
 		if (temp.Len == 0)
 		{
@@ -400,7 +381,7 @@ bool XMLTag::ParseTag(StringParser* parser, DTDVerifier* verifier, char* errorBu
 		if ((*parser)[1] == '/')
 		{
 			// we'll only assign a value if there were no embedded tags
-			if (fEmbeddedTags.GetLength() == 0 && (!verifier || verifier->CanHaveValue(fTag)))
+			if (fEmbeddedTags.size() == 0 && (!verifier || verifier->CanHaveValue(fTag)))
 				fValue = temp.GetAsCString();
 			else
 			{
@@ -411,7 +392,7 @@ bool XMLTag::ParseTag(StringParser* parser, DTDVerifier* verifier, char* errorBu
 				{
 					if (errorBuffer)
 					{
-						if (fEmbeddedTags.GetLength() > 0)
+						if (fEmbeddedTags.size() > 0)
 							snprintf(errorBuffer, errorBufferSize, "Unexpected text outside of tag on line %d", tagStartLine);
 						else
 							snprintf(errorBuffer, errorBufferSize, "Tag <%s> on line %d not allowed to have data", fTag, tagStartLine);
@@ -425,7 +406,7 @@ bool XMLTag::ParseTag(StringParser* parser, DTDVerifier* verifier, char* errorBu
 		{
 			// this must be the beginning of an embedded tag
 			auto* tag = new XMLTag();
-			fEmbeddedTags.EnQueue(&tag->fElem);
+			fEmbeddedTags.emplace_back(tag);
 			if (!tag->ParseTag(parser, verifier, errorBuffer, errorBufferSize))
 				return false;
 
@@ -466,46 +447,37 @@ bool XMLTag::ParseTag(StringParser* parser, DTDVerifier* verifier, char* errorBu
 
 char* XMLTag::GetAttributeValue(const char* attrName)
 {
-	for (OSQueueIter iter(&fAttributes); !iter.IsDone(); iter.Next())
-	{
-		auto* attr = (XMLAttribute*)iter.GetCurrent()->GetEnclosingObject();
+	for (const auto &attr : fAttributes)
 		if (!strcmp(attr->fAttrName, attrName))
 			return attr->fAttrValue;
-	}
 
 	return nullptr;
 }
 
 XMLTag* XMLTag::GetEmbeddedTag(const uint32_t index)
 {
-	if (fEmbeddedTags.GetLength() <= index)
+	if (fEmbeddedTags.size() <= index)
 		return nullptr;
 
-	OSQueueIter iter(&fEmbeddedTags);
-	for (uint32_t i = 0; i < index; i++)
-	{
-		iter.Next();
-	}
-	OSQueueElem* result = iter.GetCurrent();
-
-	return (XMLTag*)result->GetEnclosingObject();
+	auto iter = fEmbeddedTags.begin();
+	std::advance(iter, index);
+	return (*iter).get();
 }
 
 XMLTag* XMLTag::GetEmbeddedTagByName(const char* tagName, const uint32_t index)
 {
-	if (fEmbeddedTags.GetLength() <= index)
+	if (fEmbeddedTags.size() <= index)
 		return nullptr;
 
 	XMLTag* result = nullptr;
 	uint32_t curIndex = 0;
-	for (OSQueueIter iter(&fEmbeddedTags); !iter.IsDone(); iter.Next())
+	for (const auto &temp : fEmbeddedTags)
 	{
-		auto* temp = (XMLTag*)iter.GetCurrent()->GetEnclosingObject();
 		if (!strcmp(temp->GetTagName(), tagName))
 		{
 			if (curIndex == index)
 			{
-				result = temp;
+				result = temp.get();
 				break;
 			}
 
@@ -518,19 +490,18 @@ XMLTag* XMLTag::GetEmbeddedTagByName(const char* tagName, const uint32_t index)
 
 XMLTag* XMLTag::GetEmbeddedTagByAttr(const char* attrName, const char* attrValue, const uint32_t index)
 {
-	if (fEmbeddedTags.GetLength() <= index)
+	if (fEmbeddedTags.size() <= index)
 		return nullptr;
 
 	XMLTag* result = nullptr;
 	uint32_t curIndex = 0;
-	for (OSQueueIter iter(&fEmbeddedTags); !iter.IsDone(); iter.Next())
+	for (const auto &temp : fEmbeddedTags)
 	{
-		auto* temp = (XMLTag*)iter.GetCurrent()->GetEnclosingObject();
 		if ((temp->GetAttributeValue(attrName) != nullptr) && (!strcmp(temp->GetAttributeValue(attrName), attrValue)))
 		{
 			if (curIndex == index)
 			{
-				result = temp;
+				result = temp.get();
 				break;
 			}
 
@@ -543,20 +514,19 @@ XMLTag* XMLTag::GetEmbeddedTagByAttr(const char* attrName, const char* attrValue
 
 XMLTag* XMLTag::GetEmbeddedTagByNameAndAttr(const char* tagName, const char* attrName, const char* attrValue, const uint32_t index)
 {
-	if (fEmbeddedTags.GetLength() <= index)
+	if (fEmbeddedTags.size() <= index)
 		return nullptr;
 
 	XMLTag* result = nullptr;
 	uint32_t curIndex = 0;
-	for (OSQueueIter iter(&fEmbeddedTags); !iter.IsDone(); iter.Next())
+	for (const auto &temp : fEmbeddedTags)
 	{
-		auto* temp = (XMLTag*)iter.GetCurrent()->GetEnclosingObject();
 		if (!strcmp(temp->GetTagName(), tagName) && (temp->GetAttributeValue(attrName) != nullptr) &&
 			(!strcmp(temp->GetAttributeValue(attrName), attrValue)))
 		{
 			if (curIndex == index)
 			{
-				result = temp;
+				result = temp.get();
 				break;
 			}
 
@@ -575,18 +545,17 @@ void XMLTag::AddAttribute(char* attrName, char* attrValue)
 	temp.Set(attrValue);
 	attr->fAttrValue = temp.GetAsCString();
 
-	fAttributes.EnQueue(&attr->fElem);
+	fAttributes.emplace_back(attr);
 }
 
 void XMLTag::RemoveAttribute(char* attrName)
 {
-	for (OSQueueIter iter(&fAttributes); !iter.IsDone(); iter.Next())
+	for (auto it = fAttributes.begin(); it != fAttributes.end(); ++it)
 	{
-		auto* attr = (XMLAttribute*)iter.GetCurrent()->GetEnclosingObject();
+		const auto &attr = *it;
 		if (!strcmp(attr->fAttrName, attrName))
 		{
-			fAttributes.Remove(&attr->fElem);
-			delete attr;
+			fAttributes.erase(it);
 			return;
 		}
 	}
@@ -594,12 +563,17 @@ void XMLTag::RemoveAttribute(char* attrName)
 
 void XMLTag::AddEmbeddedTag(XMLTag* tag)
 {
-	fEmbeddedTags.EnQueue(&tag->fElem);
+	fEmbeddedTags.emplace_back(tag);
 }
 
 void XMLTag::RemoveEmbeddedTag(XMLTag* tag)
 {
-	fEmbeddedTags.Remove(&tag->fElem);
+	auto it = std::find_if(begin(fEmbeddedTags), end(fEmbeddedTags),
+		[tag](const std::unique_ptr<XMLTag> &t) {
+		return t.get() == tag;
+	});
+	if (it != end(fEmbeddedTags))
+		fEmbeddedTags.erase(it);
 }
 
 void XMLTag::SetTagName(char* name)
@@ -615,7 +589,7 @@ void XMLTag::SetTagName(char* name)
 
 void XMLTag::SetValue(char* value)
 {
-	if (fEmbeddedTags.GetLength() > 0)
+	if (fEmbeddedTags.size() > 0)
 		return;     // can't have a value with embedded tags
 
 	if (fValue != nullptr)
@@ -636,12 +610,11 @@ void XMLTag::FormatData(ResizeableStringFormatter* formatter, uint32_t indent)
 
 	formatter->PutChar('<');
 	formatter->Put(fTag);
-	if (fAttributes.GetLength() > 0)
+	if (fAttributes.size() > 0)
 	{
 		formatter->PutChar(' ');
-		for (OSQueueIter iter(&fAttributes); !iter.IsDone(); iter.Next())
+		for (const auto &attr : fAttributes)
 		{
-			auto* attr = (XMLAttribute*)iter.GetCurrent()->GetEnclosingObject();
 			formatter->Put(attr->fAttrName);
 			formatter->Put("=\"");
 			formatter->Put(attr->fAttrValue);
@@ -650,7 +623,7 @@ void XMLTag::FormatData(ResizeableStringFormatter* formatter, uint32_t indent)
 	}
 	formatter->PutChar('>');
 
-	if (fEmbeddedTags.GetLength() == 0)
+	if (fEmbeddedTags.size() == 0)
 	{
 		if (fValue)
 			formatter->Put(fValue);
@@ -658,11 +631,8 @@ void XMLTag::FormatData(ResizeableStringFormatter* formatter, uint32_t indent)
 	else
 	{
 		formatter->Put(kEOLString);
-		for (OSQueueIter iter(&fEmbeddedTags); !iter.IsDone(); iter.Next())
-		{
-			auto* current = (XMLTag*)iter.GetCurrent()->GetEnclosingObject();
+		for (const auto &current : fEmbeddedTags)
 			current->FormatData(formatter, indent + 1);
-		}
 
 		for (uint32_t i = 0; i < indent; i++) formatter->PutChar('\t');
 	}
@@ -675,7 +645,6 @@ void XMLTag::FormatData(ResizeableStringFormatter* formatter, uint32_t indent)
 
 XMLAttribute::XMLAttribute()
 {
-	fElem = this;
 }
 
 XMLAttribute::~XMLAttribute()

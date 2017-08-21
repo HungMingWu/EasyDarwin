@@ -53,7 +53,7 @@ public:
 	// This writes the packet out to the proper QTSS_RTPStreamObject.
 	// If this function returns QTSS_WouldBlock, timeToSendThisPacketAgain will
 	// be set to # of msec in which the packet can be sent, or -1 if unknown
-	QTSS_Error  WritePacket(StrPtrLen* inPacketData, void* inStreamCookie, uint32_t inFlags, int64_t packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSec, bool firstPacket) override;
+	QTSS_Error  WritePacket(const std::vector<char> &inPacketData, void* inStreamCookie, uint32_t inFlags, int64_t packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSec, bool firstPacket) override;
 	void TearDown() override;
 
 	int64_t                  GetReflectorSessionInitTime() { return fReflectorSession->GetInitTimeMS(); }
@@ -76,10 +76,10 @@ private:
 	bool                  fMustSynch;
 	bool                  fPreFilter;
 
-	uint16_t GetPacketSeqNumber(StrPtrLen* inPacket);
-	void SetPacketSeqNumber(StrPtrLen* inPacket, uint16_t inSeqNumber);
-	bool PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrPtrLen* inPacket);
-	bool  FilterPacket(RTPStream *theStreamPtr, StrPtrLen* inPacket);
+	uint16_t GetPacketSeqNumber(const std::vector<char> &inPacket);
+	void SetPacketSeqNumber(const std::vector<char> &inPacket, uint16_t inSeqNumber);
+	bool PacketShouldBeThinned(QTSS_RTPStreamObject inStream, const std::vector<char> &inPacket);
+	bool  FilterPacket(RTPStream *theStreamPtr, const std::vector<char> &inPacket);
 
 	uint32_t GetPacketRTPTime(StrPtrLen* packetStrPtr);
 	inline  bool PacketMatchesStream(void* inStreamCookie, RTPStream *theStreamPtr);

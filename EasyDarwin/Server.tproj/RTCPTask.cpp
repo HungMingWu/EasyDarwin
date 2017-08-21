@@ -50,13 +50,11 @@ int64_t RTCPTask::Run()
 		//Must be done atomically wrt the socket pool.
 
 		OSMutexLocker locker(theServer->GetSocketPool()->GetMutex());
-		for (OSQueueIter iter(theServer->GetSocketPool()->GetSocketQueue());
-			!iter.IsDone(); iter.Next())
+		for (const auto &thePair : theServer->GetSocketPool()->GetSocketQueue())
 		{
 			uint32_t theRemoteAddr = 0;
 			uint16_t theRemotePort = 0;
 
-			auto* thePair = (UDPSocketPair*)iter.GetCurrent()->GetEnclosingObject();
 			Assert(thePair != nullptr);
 
 			for (uint32_t x = 0; x < 2; x++)

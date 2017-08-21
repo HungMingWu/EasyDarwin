@@ -41,7 +41,6 @@
 
 #include "QTSS.h"
 #include "StrPtrLen.h"
-#include "OSQueue.h"
 #include "OS.h"
 
 class SourceInfo

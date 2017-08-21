@@ -37,11 +37,9 @@
 #define __RTP_PACKET_RESENDER_H__
 
 #include <vector>
-#include "PLDoubleLinkedList.h"
 
 #include "RTPBandwidthTracker.h"
 #include "UDPSocket.h"
-#include "OSBufferPool.h"
 #include "OSMutex.h"
 
 #define RTP_PACKET_RESENDER_DEBUGGING 0
@@ -52,9 +50,7 @@ class RTPResenderEntry
 {
 public:
 
-	void*               fPacketData;
-	uint32_t              fPacketSize;
-	bool              fIsSpecialBuffer;
+	std::vector<char>     fPacket;
 	int64_t              fExpireTime;
 	int64_t              fAddedTime;
 	int64_t              fOrigRetransTimeout;
@@ -103,7 +99,6 @@ public:
 	int32_t              GetNumPacketsInList() { return fPacketsInList; }
 	int32_t              GetNumResends() { return fNumResends; }
 
-	static uint32_t       GetNumRetransmitBuffers() { return sBufferPool.GetTotalNumBuffers(); }
 	static uint32_t       GetWastedBufferBytes() { return sNumWastedBytes; }
 
 #if RTP_PACKET_RESENDER_DEBUGGING
@@ -158,7 +153,6 @@ private:
 	void RemovePacket(uint32_t packetIndex, bool reuse = true);
 	void RemovePacket(RTPResenderEntry* inEntry);
 
-	static OSBufferPool sBufferPool;
 	static unsigned int sNumWastedBytes;
 
 	void            UpdateCongestionWindow(int32_t bytesToOpenBy);

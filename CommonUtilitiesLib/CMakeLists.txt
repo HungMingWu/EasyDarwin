@@ -33,7 +33,6 @@ set (SRC
 			 TCPListenerSocket.cpp TCPListenerSocket.h
 			 GetWord.c GetWord.h
 			 OSHeap.cpp OSHeap.h
-			 OSBufferPool.cpp OSBufferPool.h
 			 base64.c base64.h
 			 sdpCache.cpp sdpCache.h
 			 md5.c md5.h

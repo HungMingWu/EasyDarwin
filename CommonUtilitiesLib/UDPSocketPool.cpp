@@ -38,11 +38,10 @@ UDPSocketPair* UDPSocketPool::GetUDPSocketPair(uint32_t inIPAddr, uint16_t inPor
 	OSMutexLocker locker(&fMutex);
 	if ((inSrcIPAddr != 0) || (inSrcPort != 0))
 	{
-		for (OSQueueIter qIter(&fUDPQueue); !qIter.IsDone(); qIter.Next())
+		for (const auto &theElem : fUDPQueue)
 		{
 			//If we find a pair that is a) on the right IP address, and b) doesn't
 			//have this source IP & port in the demuxer already, we can return this pair
-			auto* theElem = (UDPSocketPair*)qIter.GetCurrent()->GetEnclosingObject();
 			if ((theElem->fSocketA->GetLocalAddr() == inIPAddr) &&
 				((inPort == 0) || (theElem->fSocketA->GetLocalPort() == inPort)))
 			{
@@ -73,7 +72,9 @@ void UDPSocketPool::ReleaseUDPSocketPair(UDPSocketPair* inPair)
 	inPair->fRefCount--;
 	if (inPair->fRefCount == 0)
 	{
-		fUDPQueue.Remove(&inPair->fElem);
+		auto it = std::find(fUDPQueue.begin(), fUDPQueue.end(), inPair);
+		if (it != fUDPQueue.end())
+			fUDPQueue.erase(it);
 		this->DestructUDPSocketPair(inPair);
 	}
 }
@@ -123,7 +124,7 @@ UDPSocketPair*  UDPSocketPool::CreateUDPSocketPair(uint32_t inAddr, uint16_t inP
 			if (theErr == OS_NoErr)
 			{   //printf("fSocketB->Bind ok on port%u\n", socketBPort);
 				foundPair = true;
-				fUDPQueue.EnQueue(&theElem->fElem);
+				fUDPQueue.push_back(theElem);
 				theElem->fRefCount++;
 				return theElem;
 			}

@@ -87,30 +87,12 @@ class ReflectorSession;
 class ReflectorPacket
 {
 public:
-
-	ReflectorPacket() : fQueueElem() { fQueueElem.SetEnclosingObject(this); this->Reset(); }
-	void Reset() { // make packet ready to reuse fQueueElem is always in use
-		fBucketsSeenThisPacket = 0;
-		fTimeArrived = 0;
-		//fQueueElem -- should be set to this
-		fPacketPtr.Set(fPacketData, 0);
-		fIsRTCP = false;
-		fStreamCountID = 0;
-		fNeededByOutput = false;
-	}
-
+	ReflectorPacket() = default;
 	~ReflectorPacket() = default;
 
-	void    SetPacketData(char *data, uint32_t len)
+	void    SetPacketData(const char *data, size_t length)
 	{
-		Assert(kMaxReflectorPacketSize > len);
-
-		if (len > kMaxReflectorPacketSize)
-			len = kMaxReflectorPacketSize;
-
-		if (len > 0)
-			memcpy(this->fPacketPtr.Ptr, data, len);
-		this->fPacketPtr.Len = len;
+		fPacket = std::vector<char>(data, data + length);
 	}
 
 	bool  IsRTCP() { return fIsRTCP; }
@@ -120,20 +102,12 @@ public:
 	inline  int64_t  GetPacketNTPTime();
 
 private:
-
-	enum
-	{
-		kMaxReflectorPacketSize = 2060    //jm 5/02 increased from 2048 by 12 bytes for test bytes appended to packets
-	};
-
-	uint32_t      fBucketsSeenThisPacket;
-	int64_t      fTimeArrived;
-	OSQueueElem fQueueElem;
-	char        fPacketData[kMaxReflectorPacketSize];
-	StrPtrLen   fPacketPtr;
-	bool      fIsRTCP;
-	bool      fNeededByOutput; // is this packet still needed for output?
-	uint64_t      fStreamCountID;
+	uint32_t      fBucketsSeenThisPacket{ 0 };
+	int64_t      fTimeArrived{ 0 };
+	std::vector<char> fPacket;
+	bool      fIsRTCP{ false };
+	bool      fNeededByOutput{ false }; // is this packet still needed for output?
+	uint64_t      fStreamCountID{ 0 };
 
 	friend class ReflectorSender;
 	friend class ReflectorSocket;
@@ -144,14 +118,14 @@ private:
 
 uint32_t ReflectorPacket::GetSSRC(bool isRTCP)
 {
-	if (fPacketPtr.Ptr == nullptr || fPacketPtr.Len < 8)
+	if (fPacket.size() < 8)
 		return 0;
 
-	auto* theSsrcPtr = (uint32_t*)fPacketPtr.Ptr;
+	auto* theSsrcPtr = (uint32_t*)fPacket.data();
 	if (isRTCP)// RTCP 
 		return ntohl(theSsrcPtr[1]);
 
-	if (fPacketPtr.Len < 12)
+	if (fPacket.size() < 12)
 		return 0;
 
 	return ntohl(theSsrcPtr[2]);  // RTP SSRC
@@ -159,20 +133,19 @@ uint32_t ReflectorPacket::GetSSRC(bool isRTCP)
 
 uint32_t ReflectorPacket::GetPacketRTPTime()
 {
-
 	uint32_t timestamp = 0;
 	if (!fIsRTCP)
 	{
 		//The RTP timestamp number is the second long of the packet
-		if (fPacketPtr.Ptr == nullptr || fPacketPtr.Len < 8)
+		if (fPacket.size() < 8)
 			return 0;
-		timestamp = ntohl(((uint32_t*)fPacketPtr.Ptr)[1]);
+		timestamp = ntohl(((uint32_t*)fPacket.data())[1]);
 	}
 	else
 	{
-		if (fPacketPtr.Ptr == nullptr || fPacketPtr.Len < 20)
+		if (fPacket.size() < 20)
 			return 0;
-		timestamp = ntohl(((uint32_t*)fPacketPtr.Ptr)[4]);
+		timestamp = ntohl(((uint32_t*)fPacket.data())[4]);
 	}
 	return timestamp;
 }
@@ -181,10 +154,10 @@ uint16_t ReflectorPacket::GetPacketRTPSeqNum()
 {
 	Assert(!fIsRTCP); // not a supported type
 
-	if (fPacketPtr.Ptr == nullptr || fPacketPtr.Len < 4 || fIsRTCP)
+	if (fPacket.size() < 4 || fIsRTCP)
 		return 0;
 
-	uint16_t sequence = ntohs(((uint16_t*)fPacketPtr.Ptr)[1]); //The RTP sequenc number is the second short of the packet
+	uint16_t sequence = ntohs(((uint16_t*)fPacket.data())[1]); //The RTP sequenc number is the second short of the packet
 	return sequence;
 }
 
@@ -192,10 +165,10 @@ uint16_t ReflectorPacket::GetPacketRTPSeqNum()
 int64_t  ReflectorPacket::GetPacketNTPTime()
 {
 	Assert(fIsRTCP); // not a supported type
-	if (fPacketPtr.Ptr == nullptr || fPacketPtr.Len < 16 || !fIsRTCP)
+	if (fPacket.size() < 16 || !fIsRTCP)
 		return 0;
 
-	auto* theReport = (uint32_t*)fPacketPtr.Ptr;
+	auto* theReport = (uint32_t*)fPacket.data();
 	theReport += 2;
 	int64_t ntp = 0;
 	::memcpy(&ntp, theReport, sizeof(int64_t));
@@ -212,7 +185,7 @@ class ReflectorSocket : public IdleTask, public UDPSocket
 public:
 
 	ReflectorSocket();
-	~ReflectorSocket() override;
+	~ReflectorSocket() override = default;
 	void    AddBroadcasterSession(RTPSession* inSession) { OSMutexLocker locker(this->GetDemuxer()->GetMutex()); fBroadcasterClientSession = inSession; }
 	void    RemoveBroadcasterSession(RTPSession* inSession) { OSMutexLocker locker(this->GetDemuxer()->GetMutex()); if (inSession == fBroadcasterClientSession) fBroadcasterClientSession = nullptr; }
 	void    AddSender(ReflectorSender* inSender);
@@ -231,16 +204,13 @@ private:
 	//Number of packets to allocate when the socket is first created
 	enum
 	{
-		kNumPreallocatedPackets = 20,   //uint32_t
 		kRefreshBroadcastSessionIntervalMilliSecs = 10000,
 		kSSRCTimeOut = 30000 // milliseconds before clearing the SSRC if no new ssrcs have come in
 	};
 	RTPSession*                  fBroadcasterClientSession{nullptr};
 	int64_t                      fLastBroadcasterTimeOutRefresh{0};
-	// Queue of available ReflectorPackets
-	OSQueue fFreeQueue;
 	// Queue of senders
-	OSQueue fSenderQueue;
+	std::list<ReflectorSender*> fSenderQueue;
 	int64_t  fSleepTime{0};
 
 	uint32_t  fValidSSRC{0};
@@ -275,9 +245,8 @@ class ReflectorSender : public UDPDemuxerTask
 {
 public:
 	ReflectorSender(ReflectorStream* inStream, uint32_t inWriteFlag);
-	~ReflectorSender() override;
-	// Queue of senders
-	OSQueue fSenderQueue;
+	~ReflectorSender() override = default;
+
 	int64_t  fSleepTime;
 
 	//Used for adjusting sequence numbers in light of thinning
@@ -291,28 +260,28 @@ public:
 
 	//This function gets data from the multicast source and reflects.
 	//Returns the time at which it next needs to be invoked
-	void        ReflectPackets(int64_t* ioWakeupTime, OSQueue* inFreeQueue);
+	void        ReflectPackets(int64_t* ioWakeupTime);
 
 	//this is the old way of doing reflect packets. It is only here until the relay code can be cleaned up.
-	void        ReflectRelayPackets(int64_t* ioWakeupTime, OSQueue* inFreeQueue);
+	void        ReflectRelayPackets(int64_t* ioWakeupTime);
 
-	OSQueueElem*    SendPacketsToOutput(ReflectorOutput* theOutput, OSQueueElem* currentPacket, int64_t currentTime, int64_t  bucketDelay, bool firstPacket);
+	ReflectorPacket*    SendPacketsToOutput(ReflectorOutput* theOutput, ReflectorPacket* currentPacket, int64_t currentTime, int64_t  bucketDelay, bool firstPacket);
 
 	uint32_t      GetOldestPacketRTPTime(bool *foundPtr);
 	uint16_t      GetFirstPacketRTPSeqNum(bool *foundPtr);
 	bool      GetFirstPacketInfo(uint16_t* outSeqNumPtr, uint32_t* outRTPTimePtr, int64_t* outArrivalTimePtr);
 
-	OSQueueElem*GetClientBufferNextPacketTime(uint32_t inRTPTime);
+	ReflectorPacket* GetClientBufferNextPacketTime(uint32_t inRTPTime);
 	bool      GetFirstRTPTimePacket(uint16_t* outSeqNumPtr, uint32_t* outRTPTimePtr, int64_t* outArrivalTimePtr);
 
-	void        RemoveOldPackets(OSQueue* inFreeQueue);
-	OSQueueElem* GetClientBufferStartPacketOffset(int64_t offsetMsec, bool needKeyFrameFirstPacket = false);
-	OSQueueElem* GetClientBufferStartPacket() { return this->GetClientBufferStartPacketOffset(0); };
+	void        RemoveOldPackets();
+	ReflectorPacket* GetClientBufferStartPacketOffset(int64_t offsetMsec, bool needKeyFrameFirstPacket = false);
+	ReflectorPacket* GetClientBufferStartPacket() { return GetClientBufferStartPacketOffset(0); };
 
 	// ->geyijyn@20150427
 	// 关键帧索引及丢帧方案
-	OSQueueElem* NeedRelocateBookMark(OSQueueElem* currentElem);
-	OSQueueElem* GetNewestKeyFrameFirstPacket(OSQueueElem* currentElem, int64_t offsetMsec);
+	ReflectorPacket* NeedRelocateBookMark(ReflectorPacket* thePacket);
+	ReflectorPacket* GetNewestKeyFrameFirstPacket(ReflectorPacket* currentElem, int64_t offsetMsec);
 	bool IsKeyFrameFirstPacket(ReflectorPacket* thePacket);
 	bool IsFrameFirstPacket(ReflectorPacket* thePacket);
 	bool IsFrameLastPacket(ReflectorPacket* thePacket);
@@ -320,10 +289,10 @@ public:
 	ReflectorStream*    fStream;
 	uint32_t              fWriteFlag;
 
-	OSQueue         fPacketQueue;
-	OSQueueElem*    fFirstNewPacketInQueue;
-	OSQueueElem*    fFirstPacketInQueueForNewOutput;
-	OSQueueElem*	fKeyFrameStartPacketElementPointer;//最新关键帧指针
+	std::list<std::unique_ptr<ReflectorPacket>> fPacketQueue;
+	ReflectorPacket*    fFirstNewPacketInQueue{ nullptr };
+	ReflectorPacket*    fFirstPacketInQueueForNewOutput{ nullptr };
+	ReflectorPacket*	fKeyFrameStartPacketElementPointer{ nullptr };//最新关键帧指针
 
 	//these serve as an optimization, keeping track of when this
 	//sender needs to run so it doesn't run unnecessarily
@@ -334,8 +303,8 @@ public:
 		//printf("SetNextTimeToRun =%"_64BITARG_"d\n", fNextTimeToRun);
 	}
 
-	bool      fHasNewPackets;
-	int64_t      fNextTimeToRun;
+	bool      fHasNewPackets{ false };
+	int64_t      fNextTimeToRun{ 0 };
 
 	//how often to send RRs to the source
 	enum
@@ -343,8 +312,7 @@ public:
 		kRRInterval = 5000      //int64_t (every 5 seconds)
 	};
 
-	int64_t      fLastRRTime;
-	OSQueueElem fSocketQueueElem;
+	int64_t      fLastRRTime{ 0 };
 
 	friend class ReflectorSocket;
 	friend class ReflectorStream;
@@ -477,10 +445,8 @@ private:
 
 	// BUCKET ARRAY
 	//ReflectorOutputs are kept in a 2-dimensional array, "Buckets"
-	typedef ReflectorOutput** Bucket;
-	Bucket*     fOutputArray;
+	std::vector<std::vector<ReflectorOutput*>>     fOutputArray;
 
-	uint32_t      fNumBuckets;        //Number of buckets currently
 	uint32_t      fNumElements;       //Number of reflector outputs in the array
 
 	//Bucket array can't be modified while we are sending packets.

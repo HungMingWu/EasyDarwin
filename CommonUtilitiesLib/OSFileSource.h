@@ -35,10 +35,12 @@
 #define __OSFILE_H_
 
 #include <stdio.h>
+#include <list>
+#include <memory>
 
 #include "OSHeaders.h"
 #include "StrPtrLen.h"
-#include "OSQueue.h"
+#include "OSMutex.h"
 
 #define READ_LOG 0
 
@@ -55,12 +57,10 @@ public:
 	void SetFillSize(uint32_t fillSize) { fBufferFillSize = fillSize; }
 	uint32_t GetFillSize() const
 	{ return fBufferFillSize; }
-	OSQueueElem* GetQElem() { return &fQElem; }
 	int64_t              fArrayIndex{-1};
 	uint32_t              fBufferSize{0};
 	uint32_t              fBufferFillSize{0};
 	char*				fDataBuffer{nullptr};
-	OSQueueElem         fQElem;
 	uint32_t              fDummy{0};
 };
 
@@ -98,7 +98,7 @@ public:
 	void MarkUsed(FileBlockBuffer* inBuffPtr);
 
 private:
-	OSQueue fQueue;
+	std::list<std::unique_ptr<FileBlockBuffer>> fQueue;
 	uint32_t  fMaxBuffers{1};
 	uint32_t  fNumCurrentBuffers{0};
 	uint32_t  fBufferInc{0};

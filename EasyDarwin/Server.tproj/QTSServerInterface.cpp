@@ -66,7 +66,7 @@ std::string             QTSServerInterface::sServerHeader;
 std::string             QTSServerInterface::sPublicHeaderStr;
 
 std::array<std::vector<QTSSModule*>, QTSSModule::kNumRoles> QTSServerInterface::sModuleArray{};
-OSQueue                 QTSServerInterface::sModuleQueue;
+std::list<QTSSModule*>               QTSServerInterface::sModuleQueue;
 QTSSErrorLogStream      QTSServerInterface::sErrorLogStream;
 
 
@@ -122,7 +122,7 @@ QTSSAttrInfoDict::AttrInfo  QTSServerInterface::sAttributes[] =
 	/* 27 */ { "qtssSvrClientSessions",         nullptr,   qtssAttrDataTypeQTSS_Object,qtssAttrModeRead },
 	/* 28 */ { "qtssSvrCurrentTimeMilliseconds",CurrentUnixTimeMilli,   qtssAttrDataTypeTimeVal,qtssAttrModeRead},
 	/* 29 */ { "qtssSvrCPULoadPercent",         nullptr,   qtssAttrDataTypeFloat32,    qtssAttrModeRead},
-	/* 30 */ { "qtssSvrNumReliableUDPBuffers",  GetNumUDPBuffers,   qtssAttrDataTypeUInt32,     qtssAttrModeRead },
+	/* 30 */ {},
 	/* 31 */ { "qtssSvrReliableUDPWastageInBytes",GetNumWastedBytes, qtssAttrDataTypeUInt32,        qtssAttrModeRead },
 	/* 32 */ { "qtssSvrConnectedUsers",         nullptr, qtssAttrDataTypeQTSS_Object,      qtssAttrModeRead | qtssAttrModeWrite },
 	/* 33  */ { "qtssSvrServerBuild",           nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
@@ -454,7 +454,7 @@ void* QTSServerInterface::GetTotalUDPSockets(QTSSDictionary* inServer, uint32_t*
 {
 	auto* theServer = (QTSServerInterface*)inServer;
 	// Multiply by 2 because this is returning the number of socket *pairs*
-	theServer->fTotalUDPSockets = theServer->fSocketPool->GetSocketQueue()->GetLength() * 2;
+	theServer->fTotalUDPSockets = theServer->fSocketPool->GetSocketQueue().size() * 2;
 
 	// Return the result
 	*outLen = sizeof(theServer->fTotalUDPSockets);
@@ -477,19 +477,6 @@ void* QTSServerInterface::IsOutOfDescriptors(QTSSDictionary* inServer, uint32_t*
 	// Return the result
 	*outLen = sizeof(theServer->fIsOutOfDescriptors);
 	return &theServer->fIsOutOfDescriptors;
-}
-
-void* QTSServerInterface::GetNumUDPBuffers(QTSSDictionary* inServer, uint32_t* outLen)
-{
-	// This param retrieval function must be invoked each time it is called,
-	// because whether we are out of descriptors or not is continually changing
-	auto* theServer = (QTSServerInterface*)inServer;
-
-	theServer->fNumUDPBuffers = RTPPacketResender::GetNumRetransmitBuffers();
-
-	// Return the result
-	*outLen = sizeof(theServer->fNumUDPBuffers);
-	return &theServer->fNumUDPBuffers;
 }
 
 void* QTSServerInterface::GetNumWastedBytes(QTSSDictionary* inServer, uint32_t* outLen)

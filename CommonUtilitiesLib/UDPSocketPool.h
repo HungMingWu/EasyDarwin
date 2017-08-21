@@ -34,6 +34,7 @@
 #ifndef __UDPSOCKETPOOL_H__
 #define __UDPSOCKETPOOL_H__
 
+#include <list>
 #include "UDPDemuxer.h"
 #include "UDPSocket.h"
 #include "OSMutex.h"
@@ -50,7 +51,7 @@ public:
 
 	//Skanky access to member data
 	OSMutex*    GetMutex() { return &fMutex; }
-	OSQueue*    GetSocketQueue() { return &fUDPQueue; }
+	const std::list<UDPSocketPair*>&    GetSocketQueue() { return fUDPQueue; }
 
 	//Gets a UDP socket out of the pool. 
 	//inIPAddr = IP address you'd like this pair to be bound to.
@@ -86,7 +87,7 @@ private:
 		kHighestUDPPort = 65535 //uint16_t
 	};
 
-	OSQueue fUDPQueue;
+	std::list<UDPSocketPair*> fUDPQueue;
 	OSMutex fMutex;
 };
 
@@ -95,8 +96,7 @@ class UDPSocketPair
 public:
 
 	UDPSocketPair(UDPSocket* inSocketA, UDPSocket* inSocketB)
-		: fSocketA(inSocketA), fSocketB(inSocketB), fRefCount(0), fElem() {
-		fElem.SetEnclosingObject(this);
+		: fSocketA(inSocketA), fSocketB(inSocketB), fRefCount(0) {
 	}
 	~UDPSocketPair() = default;
 
@@ -108,7 +108,6 @@ private:
 	UDPSocket*  fSocketA;
 	UDPSocket*  fSocketB;
 	uint32_t      fRefCount;
-	OSQueueElem fElem;
 
 	friend class UDPSocketPool;
 };

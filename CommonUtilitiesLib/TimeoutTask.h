@@ -39,7 +39,7 @@
 #ifndef __TIMEOUTTASK_H__
 #define __TIMEOUTTASK_H__
 
-
+#include <list>
 #include "StrPtrLen.h"
 #include "IdleTask.h"
 
@@ -50,6 +50,7 @@
 
 #define TIMEOUT_DEBUGGING 0 //messages to help debugging timeouts
 
+class TimeoutTask;
 class TimeoutTaskThread : public IdleTask
 {
 public:
@@ -68,7 +69,7 @@ private:
 
 	int64_t          Run() override;
 	OSMutex                 fMutex;
-	OSQueue                 fQueue;
+	std::list<TimeoutTask*> fQueue;
 
 	friend class TimeoutTask;
 };
@@ -102,8 +103,6 @@ private:
 	Task*       fTask;
 	int64_t      fTimeoutAtThisTime;
 	int64_t      fTimeoutInMilSecs;
-	//for putting on our global queue of timeout tasks
-	OSQueueElem fQueueElem;
 
 	static TimeoutTaskThread*   sThread;
 

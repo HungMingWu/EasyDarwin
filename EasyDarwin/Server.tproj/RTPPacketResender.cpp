@@ -76,7 +76,6 @@ static const uint32_t kInitialPacketArraySize = 64;// must be multiple of kPacke
 //static const uint32_t kMaxPacketArraySize = 512;// must be multiple of kPacketArrayIncreaseInterval it would have to be a 3 mbit or more
 
 static const uint32_t kMaxDataBufferSize = 1600;
-OSBufferPool RTPPacketResender::sBufferPool(kMaxDataBufferSize);
 unsigned int    RTPPacketResender::sNumWastedBytes = 0;
 
 RTPPacketResender::RTPPacketResender()
@@ -89,15 +88,8 @@ RTPPacketResender::~RTPPacketResender()
 {
 	for (const auto & packet : fPacketArray)
 	{
-		if (packet.fPacketSize > 0)
-			atomic_sub(&sNumWastedBytes, kMaxDataBufferSize - packet.fPacketSize);
-		if (packet.fPacketData != nullptr)
-		{
-			if (packet.fIsSpecialBuffer)
-				delete[](char*)packet.fPacketData;
-			else
-				sBufferPool.Put(packet.fPacketData);
-		}
+		if (packet.fPacket.size() > 0)
+			atomic_sub(&sNumWastedBytes, kMaxDataBufferSize - packet.fPacket.size());
 	}
 }
 
@@ -246,19 +238,7 @@ RTPResenderEntry*   RTPPacketResender::GetEmptyEntry(uint16_t inSeqNum, uint32_t
 	//
 	// Check to see if this packet is too big for the buffer. If it is, then
 	// we need to specially allocate a special buffer
-	if (inPacketSize > kMaxDataBufferSize)
-	{
-		//sBufferPool.Put(theEntry->fPacketData);
-		theEntry->fIsSpecialBuffer = true;
-		theEntry->fPacketData = new char[inPacketSize];
-	}
-	else// It is not special, it's from the buffer pool
-	{
-		theEntry->fIsSpecialBuffer = false;
-		theEntry->fPacketData = sBufferPool.Get();
-	}
-
-
+	theEntry->fPacket.resize(inPacketSize);
 
 	return theEntry;
 }
@@ -271,7 +251,7 @@ void RTPPacketResender::ClearOutstandingPackets()
 	for (uint16_t packetIndex = 0; packetIndex < fPacketsInList; packetIndex++)
 	{
 		this->RemovePacket(packetIndex, false);// don't move packets delete in place
-		Assert(fPacketArray[packetIndex].fPacketSize == 0);
+		Assert(fPacketArray[packetIndex].fPacket.size() == 0);
 	}
 	if (fBandwidthTracker != nullptr)
 		fBandwidthTracker->EmptyWindow(fBandwidthTracker->BytesInList()); //clean it out
@@ -298,13 +278,12 @@ void RTPPacketResender::AddPacket(void * inRTPPacket, uint32_t packetSize, int32
 		//
 		// This may happen if this sequence number has already been added.
 		// That may happen if we have repeat packets in the stream.
-		if (theEntry == nullptr || theEntry->fPacketSize > 0)
+		if (theEntry == nullptr || theEntry->fPacket.size() > 0)
 			return;
 
 		//
 		// Reset all the information in the RTPResenderEntry
-		::memcpy(theEntry->fPacketData, inRTPPacket, packetSize);
-		theEntry->fPacketSize = packetSize;
+		theEntry->fPacket = std::vector<char>((char *)inRTPPacket, (char *)inRTPPacket + packetSize);
 		theEntry->fAddedTime = OS::Milliseconds();
 		theEntry->fOrigRetransTimeout = fBandwidthTracker->CurRetransmitTimeout();
 		theEntry->fExpireTime = theEntry->fAddedTime + ageLimit;
@@ -348,7 +327,7 @@ void RTPPacketResender::AckPacket(uint16_t inSeqNum, int64_t& inCurTimeInMsec)
 		theEntry = &fPacketArray[foundIndex];
 
 
-	if (theEntry == nullptr || theEntry->fPacketSize == 0)
+	if (theEntry == nullptr || theEntry->fPacket.size() == 0)
 	{   /*  we got an ack for a packet that has already expired or
 			for a packet whose re-transmit crossed with it's original ack
 
@@ -386,7 +365,7 @@ void RTPPacketResender::AckPacket(uint16_t inSeqNum, int64_t& inCurTimeInMsec)
 			, (int32_t)inSeqNum, fTrackID, OS::Milliseconds()
 		);
 #endif      
-		fBandwidthTracker->EmptyWindow(theEntry->fPacketSize);
+		fBandwidthTracker->EmptyWindow(theEntry->fPacket.size());
 		if (theEntry->fNumResends == 0)
 		{
 			// add RTT sample...        
@@ -421,26 +400,20 @@ void RTPPacketResender::RemovePacket(uint32_t packetIndex, bool reuseIndex)
 		return;
 
 	RTPResenderEntry* theEntry = &fPacketArray[packetIndex];
-	if (theEntry->fPacketSize == 0)
+	if (theEntry->fPacket.size() == 0)
 		return;
 
 	//
 	// Track the number of wasted bytes we have
-	atomic_sub(&sNumWastedBytes, kMaxDataBufferSize - theEntry->fPacketSize);
+	atomic_sub(&sNumWastedBytes, kMaxDataBufferSize - theEntry->fPacket.size());
 
-	Assert(theEntry->fPacketSize > 0);
+	Assert(theEntry->fPacket.size() > 0);
 
 	//
 	// Update our list information
 	Assert(fPacketsInList > 0);
 
-	if (theEntry->fIsSpecialBuffer)
-	{
-		delete[](char*)theEntry->fPacketData;
-	}
-	else if (theEntry->fPacketData != nullptr)
-		sBufferPool.Put(theEntry->fPacketData);
-
+	theEntry->fPacket.clear();
 
 	if (reuseIndex) // we are re-using the space so keep array contiguous
 	{
@@ -451,7 +424,7 @@ void RTPPacketResender::RemovePacket(uint32_t packetIndex, bool reuseIndex)
 	}
 	else    // the array is full
 	{
-		fBandwidthTracker->EmptyWindow(theEntry->fPacketSize, false); // keep window available
+		fBandwidthTracker->EmptyWindow(theEntry->fPacket.size(), false); // keep window available
 		::memset(theEntry, 0, sizeof(RTPResenderEntry));
 	}
 
@@ -471,7 +444,7 @@ void RTPPacketResender::ResendDueEntries()
 	{
 		theEntry = &fPacketArray[packetIndex];
 
-		if (theEntry->fPacketSize == 0)
+		if (theEntry->fPacket.empty())
 			continue;
 
 		if ((curTime - theEntry->fAddedTime) > fBandwidthTracker->CurRetransmitTimeout())
@@ -493,14 +466,14 @@ void RTPPacketResender::ResendDueEntries()
 				// This packet is expired
 				fNumExpired++;
 				//printf("Packet expired: %d\n", ((uint16_t*)thePacket)[1]);
-				fBandwidthTracker->EmptyWindow(theEntry->fPacketSize);
+				fBandwidthTracker->EmptyWindow(theEntry->fPacket.size());
 				this->RemovePacket(packetIndex);
 				//              printf("Expired packet %d\n", theEntry->fSeqNum);
 				continue;
 			}
 
 			// Resend this packet
-			fSocket->SendTo(fDestAddr, fDestPort, theEntry->fPacketData, theEntry->fPacketSize);
+			fSocket->SendTo(fDestAddr, fDestPort, theEntry->fPacket.data(), theEntry->fPacket.size());
 			//printf("Packet resent: %d\n", ((uint16_t*)theEntry->fPacketData)[1]);
 
 			theEntry->fNumResends++;

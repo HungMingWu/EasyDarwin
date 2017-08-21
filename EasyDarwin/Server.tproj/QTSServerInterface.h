@@ -39,6 +39,7 @@
 #define __QTSSERVERINTERFACE_H__
 
 #include <array>
+#include <list>
 #include <vector>
 #include <boost/utility/string_view.hpp>
 #include <boost/asio/steady_timer.hpp>
@@ -53,7 +54,6 @@
 #include "OSMutex.h"
 #include "Task.h"
 #include "TCPListenerSocket.h"
-#include "ResizeableStringFormatter.h"
 
 
 
@@ -334,7 +334,7 @@ protected:
 	// MODULE DATA
 
 	static std::array<std::vector<QTSSModule*>, QTSSModule::kNumRoles> sModuleArray;
-	static OSQueue                  sModuleQueue;
+	static std::list<QTSSModule*>                  sModuleQueue;
 	static QTSSErrorLogStream       sErrorLogStream;
 
 	char fCloudServiceNodeID[QTSS_MAX_SESSION_ID_LENGTH];
@@ -425,7 +425,6 @@ private:
 	static void* CurrentUnixTimeMilli(QTSSDictionary* inServer, uint32_t* outLen);
 	static void* GetTotalUDPSockets(QTSSDictionary* inServer, uint32_t* outLen);
 	static void* IsOutOfDescriptors(QTSSDictionary* inServer, uint32_t* outLen);
-	static void* GetNumUDPBuffers(QTSSDictionary* inServer, uint32_t* outLen);
 	static void* GetNumWastedBytes(QTSSDictionary* inServer, uint32_t* outLen);
 
 	static QTSServerInterface*  sServer;

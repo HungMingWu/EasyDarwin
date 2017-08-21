@@ -516,7 +516,6 @@ enum
     qtssSvrCurrentTimeMilliseconds  = 28,   //read      //QTSS_TimeVal  //Server's current time in milliseconds. Retrieving this attribute is equivalent to calling QTSS_Milliseconds
     qtssSvrCPULoadPercent           = 29,   //read      //Float32       //Current % CPU being used by the server
 
-    qtssSvrNumReliableUDPBuffers    = 30,   //read      //uint32_t    //Number of buffers currently allocated for UDP retransmits
     qtssSvrReliableUDPWastageInBytes= 31,   //read      //uint32_t    //Amount of data in the reliable UDP buffers being wasted
     qtssSvrConnectedUsers           = 32,   //r/w       //QTSS_Object   //List of connected user sessions (updated by modules for their sessions)
 

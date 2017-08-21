@@ -261,13 +261,10 @@ void    ReflectorSession::RemoveSessionFromOutput(RTPSession* inSession)
 uint32_t  ReflectorSession::GetBitRate()
 {
 	uint32_t retval = 0;
-	for (uint32_t x = 0; x < fSourceInfo->GetNumStreams(); x++)
-	{
-		if (fStreamArray[x] != nullptr)
-		{
-			retval += fStreamArray[x]->GetBitRate();
-		}
-	}
+	for (const auto &streamArray : fStreamArray)
+		if (streamArray != nullptr)
+			retval += streamArray->GetBitRate();
+
 	return retval;
 }
 

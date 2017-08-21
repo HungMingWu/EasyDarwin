@@ -126,7 +126,7 @@ bool RTPSessionOutput::IsUDP()
 }
 
 
-bool  RTPSessionOutput::FilterPacket(RTPStream *theStreamPtr, StrPtrLen* inPacket)
+bool  RTPSessionOutput::FilterPacket(RTPStream *theStreamPtr, const std::vector<char> &inPacket)
 {
 	uint32_t theLen = 0;
 
@@ -136,7 +136,6 @@ bool  RTPSessionOutput::FilterPacket(RTPStream *theStreamPtr, StrPtrLen* inPacke
 		return false;
 
 	Assert(theStreamPtr);
-	Assert(inPacket);
 
 	uint16_t seqnum = this->GetPacketSeqNumber(inPacket);
 	uint16_t firstSeqNum = theStreamPtr->GetSeqNumber();
@@ -417,13 +416,13 @@ QTSS_Error  RTPSessionOutput::TrackPackets(QTSS_RTPStreamObject *theStreamPtr, S
 }
 
 
-QTSS_Error  RTPSessionOutput::WritePacket(StrPtrLen* inPacket, void* inStreamCookie, uint32_t inFlags, int64_t packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr, bool firstPacket)
+QTSS_Error  RTPSessionOutput::WritePacket(const std::vector<char> &inPacket, void* inStreamCookie, uint32_t inFlags, int64_t packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr, bool firstPacket)
 {
 	uint32_t                  theLen = 0;
 	QTSS_Error              writeErr = QTSS_NoErr;
 	int64_t                  currentTime = OS::Milliseconds();
 
-	if (inPacket == nullptr || inPacket->Len == 0)
+	if (inPacket.empty())
 		return QTSS_NoErr;
 
 	if (fClientSession->GetSessionState() != qtssPlayingState)
@@ -452,13 +451,13 @@ QTSS_Error  RTPSessionOutput::WritePacket(StrPtrLen* inPacket, void* inStreamCoo
 			// (void) this->TrackPackets(theStreamPtr, inPacket, &currentTime,inFlags,  &packetLatenessInMSec, timeToSendThisPacketAgain, packetIDPtr,arrivalTimeMSecPtr);
 
 			QTSS_PacketStruct thePacket;
-			thePacket.packetData = inPacket->Ptr;
+			thePacket.packetData = (void *)&inPacket[0];
 			int64_t delayMSecs = fBufferDelayMSecs - (currentTime - *arrivalTimeMSecPtr);
 			thePacket.packetTransmitTime = (currentTime - packetLatenessInMSec);
 			if (fBufferDelayMSecs > 0)
 				thePacket.packetTransmitTime += delayMSecs; // add buffer time where oldest buffered packet as now == 0 and newest is entire buffer time in the future.
 
-			writeErr = theStreamPtr->Write(&thePacket, inPacket->Len, nullptr, inFlags | qtssWriteFlagsWriteBurstBegin);
+			writeErr = theStreamPtr->Write(&thePacket, inPacket.size(), nullptr, inFlags | qtssWriteFlagsWriteBurstBegin);
 			if (writeErr == QTSS_WouldBlock)
 			{
 				//printf("QTSS_Write == QTSS_WouldBlock\n");
@@ -498,28 +497,28 @@ QTSS_Error  RTPSessionOutput::WritePacket(StrPtrLen* inPacket, void* inStreamCoo
 	return writeErr;
 }
 
-uint16_t RTPSessionOutput::GetPacketSeqNumber(StrPtrLen* inPacket)
+uint16_t RTPSessionOutput::GetPacketSeqNumber(const std::vector<char> &inPacket)
 {
-	if (inPacket->Len < 4)
+	if (inPacket.size() < 4)
 		return 0;
 
 	//The RTP seq number is the second short of the packet
-	auto* seqNumPtr = (uint16_t*)inPacket->Ptr;
+	auto* seqNumPtr = (uint16_t*)&inPacket[0];
 	return ntohs(seqNumPtr[1]);
 }
 
-void RTPSessionOutput::SetPacketSeqNumber(StrPtrLen* inPacket, uint16_t inSeqNumber)
+void RTPSessionOutput::SetPacketSeqNumber(const std::vector<char> &inPacket, uint16_t inSeqNumber)
 {
-	if (inPacket->Len < 4)
+	if (inPacket.size() < 4)
 		return;
 
 	//The RTP seq number is the second short of the packet
-	auto* seqNumPtr = (uint16_t*)inPacket->Ptr;
+	auto* seqNumPtr = (uint16_t*)&inPacket[0];
 	seqNumPtr[1] = htons(inSeqNumber);
 }
 
 // this routine is not used
-bool RTPSessionOutput::PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrPtrLen* inPacket)
+bool RTPSessionOutput::PacketShouldBeThinned(QTSS_RTPStreamObject inStream, const std::vector<char> &inPacket)
 {
 	return false; // function is disabled.
 
@@ -530,10 +529,10 @@ bool RTPSessionOutput::PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrP
 	//This function determines whether the packet should be dropped.
 	//It also adjusts the sequence number if necessary
 
-	if (inPacket->Len < 4)
+	if (inPacket.size() < 4)
 		return false;
 
-	uint16_t curSeqNum = this->GetPacketSeqNumber(inPacket);
+	uint16_t curSeqNum = GetPacketSeqNumber(inPacket);
 	
 	uint32_t theLen = 0;
 	RTPStream *dict = (RTPStream *)inStream;
@@ -601,7 +600,7 @@ bool RTPSessionOutput::PacketShouldBeThinned(QTSS_RTPStreamObject inStream, StrP
 	{
 		//Adjust the sequence number of the current packet based on the offset, if any
 		curSeqNum -= newSeqNumOffset;
-		this->SetPacketSeqNumber(inPacket, curSeqNum);
+		SetPacketSeqNumber(inPacket, curSeqNum);
 		return false;
 	}
 }

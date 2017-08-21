@@ -82,7 +82,6 @@ public:
 	//
 	// ACCESSORS
 
-	OSQueueElem*    GetQueueElem() { return &fQueueElem; }
 	bool          IsInitialized() { return fDispatchFunc != nullptr; }
 	QTSSPrefs*      GetPrefsDict() { return fPrefs; }
 	QTSSDictionary* GetAttributesDict() { return fAttributes; }
@@ -177,7 +176,6 @@ public:
 
 private:
 
-	OSQueueElem                 fQueueElem;
 	char*                       fPath;
 
 	QTSS_DispatchFuncPtr        fDispatchFunc;

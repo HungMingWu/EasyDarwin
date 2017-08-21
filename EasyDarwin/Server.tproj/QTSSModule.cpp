@@ -87,14 +87,11 @@ void QTSSModule::Initialize()
 
 QTSSModule::QTSSModule(char* inName, char* inPath)
 	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kModuleDictIndex)),
-	fQueueElem(nullptr),
 	fPath(nullptr),
 	fDispatchFunc(nullptr),
 	fPrefs(nullptr),
 	fAttributes(nullptr)
 {
-
-	fQueueElem.SetEnclosingObject(this);
 	this->SetTaskName("QTSSModule");
 
 	fAttributes = new QTSSDictionary(nullptr, &fAttributesMutex);

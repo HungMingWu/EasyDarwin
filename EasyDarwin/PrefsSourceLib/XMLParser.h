@@ -26,6 +26,7 @@
 #ifndef __XMLParser_h__
 #define __XMLParser_h__
 
+#include <list>
 #include "StringParser.h"
 #include "OSQueue.h"
 #include "OSFileSource.h"
@@ -42,6 +43,16 @@ public:
 	virtual ~DTDVerifier() = default;;
 };
 
+class XMLAttribute
+{
+public:
+	XMLAttribute();
+	~XMLAttribute();
+
+	char* fAttrName{ nullptr };
+	char* fAttrValue{ nullptr };
+};
+
 class XMLTag
 {
 public:
@@ -55,7 +66,7 @@ public:
 	char* GetValue() { return fValue; }
 	char* GetTagName() { return fTag; }
 
-	uint32_t GetNumEmbeddedTags() { return fEmbeddedTags.GetLength(); }
+	uint32_t GetNumEmbeddedTags() { return fEmbeddedTags.size(); }
 
 	XMLTag* GetEmbeddedTag(const uint32_t index = 0);
 	XMLTag* GetEmbeddedTagByName(const char* tagName, const uint32_t index = 0);
@@ -77,24 +88,10 @@ private:
 
 	char* fTag{nullptr};
 	char* fValue{nullptr};
-	OSQueue fAttributes;
-	OSQueue fEmbeddedTags;
-
-	OSQueueElem fElem;
+	std::list<std::unique_ptr<XMLAttribute>> fAttributes;
+	std::list<std::unique_ptr<XMLTag>> fEmbeddedTags;
 
 	static uint8_t sNonNameMask[];        // stop when you hit a word
-};
-
-class XMLAttribute
-{
-public:
-	XMLAttribute();
-	~XMLAttribute();
-
-	char* fAttrName{nullptr};
-	char* fAttrValue{nullptr};
-
-	OSQueueElem fElem;
 };
 
 class XMLParser

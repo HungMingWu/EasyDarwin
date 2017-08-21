@@ -1008,30 +1008,22 @@ bool QTSServer::AddModule(QTSSModule* inModule)
 
 	//
 	// Add this module to the module queue
-	sModuleQueue.EnQueue(inModule->GetQueueElem());
+	sModuleQueue.push_back(inModule);
 
 	return true;
 }
 
 void QTSServer::BuildModuleRoleArrays()
 {
-	OSQueueIter theIter(&sModuleQueue);
-	QTSSModule* theModule = nullptr;
-
 	// Loop through all the roles of all the modules, recording the number of
 	// modules in each role, and also recording which modules are doing what.
 
 	for (uint32_t x = 0; x < QTSSModule::kNumRoles; x++)
 	{
 		sModuleArray[x].clear();
-		for (theIter.Reset(); !theIter.IsDone(); theIter.Next())
-		{
-			theModule = (QTSSModule*)theIter.GetCurrent()->GetEnclosingObject();
+		for (const auto &theModule : sModuleQueue)
 			if (theModule->RunsInRole(x))
-			{
 				sModuleArray[x].push_back(theModule);
-			}
-		}
 	}
 }
 
@@ -1083,7 +1075,9 @@ void QTSServer::DoInitRole()
 			QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssMsgInitFailed, theErr,
 				theModule->GetValue(qtssModName)->Ptr);
 
-			sModuleQueue.Remove(theModule->GetQueueElem());
+			auto it = std::find(sModuleQueue.begin(), sModuleQueue.end(), theModule);
+			if (it != sModuleQueue.end())
+				sModuleQueue.erase(it);
 			delete theModule;
 		}
 	}

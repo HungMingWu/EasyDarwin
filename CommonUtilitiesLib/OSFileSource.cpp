@@ -35,6 +35,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <cstdint>
+#include <algorithm>
 
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -144,10 +145,12 @@ void FileBlockPool::MarkUsed(FileBlockBuffer* inBuffPtr)
 	if (nullptr == inBuffPtr)
 		return;
 
-	if (fQueue.GetTail() != inBuffPtr->GetQElem()) // Least Recently Used tail is last accessed
+	if (fQueue.back().get() != inBuffPtr) // Least Recently Used tail is last accessed
 	{
-		fQueue.Remove(inBuffPtr->GetQElem());
-		fQueue.EnQueue(inBuffPtr->GetQElem()); // put on tail
+		auto it = std::find_if(fQueue.begin(), fQueue.end(), 
+			[inBuffPtr](const std::unique_ptr<FileBlockBuffer> &block) { return block.get() == inBuffPtr; });
+		if (it != fQueue.end()) fQueue.erase(it);
+		fQueue.emplace_back(inBuffPtr); // put on tail
 	}
 }
 
@@ -162,21 +165,15 @@ FileBlockBuffer* FileBlockPool::GetBufferElement(uint32_t bufferSizeBytes)
 		theNewBuf = new FileBlockBuffer();
 		theNewBuf->AllocateBuffer(bufferSizeBytes);
 		fNumCurrentBuffers++;
-		theNewBuf->fQElem.SetEnclosingObject(theNewBuf);
-		fQueue.EnQueue(theNewBuf->GetQElem()); // put on tail
+		fQueue.emplace_back(theNewBuf); // put on tail
 		Assert(theNewBuf != nullptr);
 		return theNewBuf;
 	}
 
-	OSQueueElem* theElem = fQueue.DeQueue(); // get head
 
-	Assert(theElem != nullptr);
-
-	if (theElem == nullptr)
-		return nullptr;
-
-	theNewBuf = (FileBlockBuffer*)theElem->GetEnclosingObject();
+	theNewBuf = fQueue.front().release();
 	Assert(theNewBuf != nullptr);
+	fQueue.pop_front();
 	//printf("FileBlockPool::GetBufferElement reuse buffer theNewBuf=%" _U32BITARG_ " fDataBuffer=%"   _U32BITARG_   " fArrayIndex=%" _S32BITARG_ "\n",theNewBuf,theNewBuf->fDataBuffer,theNewBuf->fArrayIndex);
 
 	return theNewBuf;
@@ -185,16 +182,7 @@ FileBlockBuffer* FileBlockPool::GetBufferElement(uint32_t bufferSizeBytes)
 
 void FileBlockPool::DeleteBlockPool()
 {
-
-	FileBlockBuffer* buffer = nullptr;
-	OSQueueElem* theElem = fQueue.DeQueue();
-	while (theElem != nullptr)
-	{
-		buffer = (FileBlockBuffer *)theElem->GetEnclosingObject();
-		delete buffer;
-		theElem = fQueue.DeQueue();
-	}
-
+	fQueue.clear();
 	fMaxBuffers = 1;
 	fNumCurrentBuffers = 0;
 	fBufferUnitSizeBytes = kBufferUnitSize;

@@ -47,10 +47,6 @@ public:
 
 	static QTSS_Error   QTSS_AddRole(QTSS_Role inRole);
 
-	// DICTIONARY LOCKING
-	static QTSS_Error   QTSS_LockObject(QTSS_Object inDictionary);
-	static QTSS_Error   QTSS_UnlockObject(QTSS_Object inDictionary);
-
 	// ADD ATTRIBUTE
 
 	static QTSS_Error   QTSS_AddStaticAttribute(QTSS_ObjectType inObjectType, const char* inAttrName, void* inUnused, QTSS_AttrDataType inAttrDataType);
@@ -74,13 +70,10 @@ public:
 	static QTSS_Error   QTSS_SetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, const void* inBuffer, uint32_t inLen);
 	static QTSS_Error   QTSS_SetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, const void* inBuffer, uint32_t inLen);
 	static QTSS_Error   QTSS_GetNumValues(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t* outNumValues);
-	static QTSS_Error   QTSS_RemoveValue(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex);
 
 	// STREAM ROUTINES
 
 	static QTSS_Error   QTSS_Write(QTSS_StreamRef inStream, void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, QTSS_WriteFlags inFlags);
-	static QTSS_Error   QTSS_WriteV(QTSS_StreamRef inStream, iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten);
-	static QTSS_Error   QTSS_Flush(QTSS_StreamRef inStream);
 	static QTSS_Error   QTSS_Read(QTSS_StreamRef inRef, void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead);
 
 	// FILE SYSTEM ROUTINES
@@ -96,7 +89,6 @@ public:
 
 	// ASYNC I/O ROUTINES
 	static QTSS_Error   QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_EventType inEventMask);
-	static QTSS_Error   QTSS_SignalStream(QTSS_StreamRef inStream);
 	static QTSS_Error   QTSS_SetIdleTimer(int64_t inMsecToWait);
 	static QTSS_Error   QTSS_SetIdleRoleTimer(int64_t inMsecToWait);
 

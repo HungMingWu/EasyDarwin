@@ -815,8 +815,6 @@ void    QTSServer::InitCallbacks()
 	sCallbacks.addr[kGetNumValuesCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetNumValues;
 
 	sCallbacks.addr[kWriteCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Write;
-	sCallbacks.addr[kWriteVCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_WriteV;
-	sCallbacks.addr[kFlushCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Flush;
 	sCallbacks.addr[kReadCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Read;
 
 	sCallbacks.addr[kAddServiceCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AddService;
@@ -825,7 +823,6 @@ void    QTSServer::InitCallbacks()
 
 	sCallbacks.addr[kRequestEventCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_RequestEvent;
 	sCallbacks.addr[kSetIdleTimerCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SetIdleTimer;
-	sCallbacks.addr[kSignalStreamCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SignalStream;
 
 	sCallbacks.addr[kOpenFileObjectCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_OpenFileObject;
 	sCallbacks.addr[kCloseFileObjectCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_CloseFileObject;
@@ -839,16 +836,12 @@ void    QTSServer::InitCallbacks()
 	sCallbacks.addr[kGetAttrInfoByIDCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetAttrInfoByID;
 	sCallbacks.addr[kGetNumAttributesCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetNumAttributes;
 
-	sCallbacks.addr[kRemoveValueCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_RemoveValue;
-
 	sCallbacks.addr[kRequestGlobalLockCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_RequestLockedCallback;
 	sCallbacks.addr[kIsGlobalLockedCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_IsGlobalLocked;
 
 	sCallbacks.addr[kAuthenticateCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Authenticate;
 	sCallbacks.addr[kAuthorizeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Authorize;
 
-	sCallbacks.addr[kLockObjectCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_LockObject;
-	sCallbacks.addr[kUnlockObjectCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_UnlockObject;
 	sCallbacks.addr[kSetAttributePtrCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SetValuePtr;
 
 	sCallbacks.addr[kSetIntervalRoleTimerCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SetIdleRoleTimer;

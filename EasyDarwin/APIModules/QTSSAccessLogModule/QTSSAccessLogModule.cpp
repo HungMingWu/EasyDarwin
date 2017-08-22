@@ -77,7 +77,7 @@ static bool   sLogTimeInGMT = true;
 
 static OSMutex*             sLogMutex = nullptr;//Log module isn't reentrant
 static QTSSAccessLog*       sAccessLog = nullptr;
-static QTSS_ServerObject    sServer = nullptr;
+static QTSServerInterface*  sServer = nullptr;
 static QTSS_ModulePrefsObject sPrefs = nullptr;
 static LogCheckTask* sLogCheckTask = nullptr;
 

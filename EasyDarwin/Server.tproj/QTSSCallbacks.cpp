@@ -75,29 +75,6 @@ QTSS_Error  QTSSCallbacks::QTSS_AddRole(QTSS_Role inRole)
 	return theState->curModule->AddRole(inRole);
 }
 
-
-
-QTSS_Error QTSSCallbacks::QTSS_LockObject(QTSS_Object inDictionary)
-{
-	if (inDictionary == nullptr)
-		return QTSS_BadArgument;
-
-	((QTSSDictionary*)inDictionary)->GetMutex()->Lock();
-	((QTSSDictionary*)inDictionary)->SetLocked(true);
-	return QTSS_NoErr;
-}
-
-QTSS_Error QTSSCallbacks::QTSS_UnlockObject(QTSS_Object inDictionary)
-{
-	if (inDictionary == nullptr)
-		return QTSS_BadArgument;
-
-	((QTSSDictionary*)inDictionary)->SetLocked(false);
-	((QTSSDictionary*)inDictionary)->GetMutex()->Unlock();
-
-	return QTSS_NoErr;
-}
-
 QTSS_Error  QTSSCallbacks::QTSS_AddStaticAttribute(QTSS_ObjectType inObjectType, const char* inAttrName, void* inUnused, QTSS_AttrDataType inAttrDataType)
 {
 	Assert(inUnused == nullptr);
@@ -219,55 +196,11 @@ QTSS_Error QTSSCallbacks::QTSS_GetNumAttributes(QTSS_Object inObject, uint32_t* 
 	return QTSS_NoErr;
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_RemoveValue(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex)
-{
-	if (inObject == nullptr)
-		return QTSS_BadArgument;
-
-	return ((QTSSDictionary*)inObject)->RemoveValue(inID, inIndex);
-}
-
-
-
 QTSS_Error  QTSSCallbacks::QTSS_Write(QTSS_StreamRef inStream, void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags)
 {
 	if (inStream == nullptr)
 		return QTSS_BadArgument;
 	QTSS_Error theErr = ((QTSSStream*)inStream)->Write(inBuffer, inLen, outLenWritten, inFlags);
-
-	// Server internally propogates POSIX errorcodes such as EAGAIN and ENOTCONN up to this
-	// level. The API guarentees that no POSIX errors get returned, so we have QTSS_Errors
-	// to replace them. So we have to replace them here.
-	if (theErr == EAGAIN)
-		return QTSS_WouldBlock;
-	else if (theErr > 0)
-		return QTSS_NotConnected;
-	else
-		return theErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_WriteV(QTSS_StreamRef inStream, iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten)
-{
-	if (inStream == nullptr)
-		return QTSS_BadArgument;
-	QTSS_Error theErr = ((QTSSStream*)inStream)->WriteV(inVec, inNumVectors, inTotalLength, outLenWritten);
-
-	// Server internally propogates POSIX errorcodes such as EAGAIN and ENOTCONN up to this
-	// level. The API guarentees that no POSIX errors get returned, so we have QTSS_Errors
-	// to replace them. So we have to replace them here.
-	if (theErr == EAGAIN)
-		return QTSS_WouldBlock;
-	else if (theErr > 0)
-		return QTSS_NotConnected;
-	else
-		return theErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_Flush(QTSS_StreamRef inStream)
-{
-	if (inStream == nullptr)
-		return QTSS_BadArgument;
-	QTSS_Error theErr = ((QTSSStream*)inStream)->Flush();
 
 	// Server internally propogates POSIX errorcodes such as EAGAIN and ENOTCONN up to this
 	// level. The API guarentees that no POSIX errors get returned, so we have QTSS_Errors
@@ -387,17 +320,6 @@ QTSS_Error  QTSSCallbacks::QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_Event
 	auto* theStream = (QTSSStream*)inStream;
 	theStream->SetTask(theState->curTask);
 	theStream->RequestEvent(inEventMask);
-	return QTSS_NoErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_SignalStream(QTSS_StreamRef inStream)
-{
-	if (inStream == nullptr)
-		return QTSS_BadArgument;
-
-	auto* theStream = (QTSSStream*)inStream;
-	if (theStream->GetTask() != nullptr)
-		theStream->GetTask()->Signal(Task::kReadEvent);
 	return QTSS_NoErr;
 }
 

@@ -51,7 +51,7 @@ static QTSS_AttributeID sNumWorsesAttr = qtssIllegalAttrID;
 
 static QTSS_ModulePrefsObject sPrefs = nullptr;
 static QTSS_PrefsObject     sServerPrefs = nullptr;
-static QTSS_ServerObject    sServer = nullptr;
+static QTSServerInterface*  sServer = nullptr;
 
 // Default values for preferences
 static uint32_t   sDefaultLossThinTolerance = 30;
@@ -329,26 +329,25 @@ QTSS_Error ProcessRTCPPacket(QTSS_RTCPProcess_Params* inParams)
 
 		bool *startedThinningPtr = nullptr;
 		int32_t numThinned = 0;
+		sServer->GetMutex()->Lock();
+		sServer->SetLocked(true);
 		if (false == inParams->inClientSession->fStartedThinning)
 		{
-			(void)QTSS_LockObject(sServer);
 			inParams->inClientSession->fStartedThinning = true;
-
 			((QTSSDictionary*)sServer)->GetValue(qtssSvrNumThinned, 0, (void*)&numThinned, &theLen);
 			numThinned++;
 			(void)QTSS_SetValue(sServer, qtssSvrNumThinned, 0, &numThinned, sizeof(numThinned));
-			(void)QTSS_UnlockObject(sServer);
 		}
 		else if (curQuality == 0)
 		{
-			(void)QTSS_LockObject(sServer);
 			inParams->inClientSession->fStartedThinning = false;
 
 			((QTSSDictionary*)theStream)->GetValue(qtssSvrNumThinned, 0, (void*)&numThinned, &theLen);
 			numThinned--;
 			(void)QTSS_SetValue(sServer, qtssSvrNumThinned, 0, &numThinned, sizeof(numThinned));
-			(void)QTSS_UnlockObject(sServer);
 		}
+		sServer->SetLocked(false);
+		sServer->GetMutex()->Unlock();
 		//When adjusting the quality, ALWAYS clear out ALL our counts of EVERYTHING. Note
 		//that this is the ONLY way that the fNumGettingWorses count gets cleared
 		(void)QTSS_SetValue(theStream, sNumWorsesAttr, 0, &zero, sizeof(zero));

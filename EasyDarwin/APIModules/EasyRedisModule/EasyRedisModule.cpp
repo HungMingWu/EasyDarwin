@@ -22,7 +22,7 @@
 // STATIC VARIABLES
 static QTSS_ModulePrefsObject	modulePrefs = nullptr;
 static QTSS_PrefsObject			sServerPrefs = nullptr;
-static QTSS_ServerObject		sServer = nullptr;
+static QTSServerInterface*  	sServer = nullptr;
 
 // Redis IP
 static char*            sRedis_IP = nullptr;

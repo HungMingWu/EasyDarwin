@@ -64,8 +64,7 @@ enum
 
 	kSetAttributeByIDCallback       = 9,
     kWriteCallback                  = 10,
-    kWriteVCallback                 = 11,
-    kFlushCallback                  = 12,
+
     kAddServiceCallback             = 13,
     kIDForServiceCallback           = 14,
     kDoServiceCallback              = 15,
@@ -77,7 +76,6 @@ enum
     kReadCallback                   = 27,
     kGetNumValuesCallback           = 30,
     kGetNumAttributesCallback       = 31,
-    kSignalStreamCallback           = 32,
 
     kAddStaticAttributeCallback     = 35,
     kAddInstanceAttributeCallback   = 36,
@@ -85,16 +83,13 @@ enum
     kGetAttrInfoByIndexCallback     = 38,
     kGetAttrInfoByNameCallback      = 39,
     kGetAttrInfoByIDCallback        = 40,
-        
-    kRemoveValueCallback            = 46,
+
     kRequestGlobalLockCallback      = 47, 
     kIsGlobalLockedCallback         = 48, 
 
     kAuthenticateCallback           = 50,
     kAuthorizeCallback              = 51,   
 
-    kLockObjectCallback             = 55,
-    kUnlockObjectCallback           = 56,
     kSetAttributePtrCallback        = 57,
     kSetIntervalRoleTimerCallback   = 58,
 

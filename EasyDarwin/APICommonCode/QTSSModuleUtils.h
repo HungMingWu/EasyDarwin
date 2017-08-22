@@ -55,7 +55,7 @@ class QTSSModuleUtils
     
       
         static void     Initialize( QTSS_TextMessagesObject inMessages,
-                                    QTSS_ServerObject inServer,
+                                    QTSServerInterface* inServer,
                                     QTSS_StreamRef inErrorLog);
     
         // Read the complete contents of the file at inPath into the StrPtrLen.
@@ -226,7 +226,7 @@ class QTSSModuleUtils
         static QTSS_AttributeID CheckAttributeDataType(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType, void* inDefaultValue, uint32_t inBufferLen);    
 
         static QTSS_TextMessagesObject  sMessages;
-        static QTSS_ServerObject        sServer;
+        static QTSServerInterface*      sServer;
         static QTSS_StreamRef           sErrorLog;
         static bool                   sEnableRTSPErrorMsg;
         static QTSS_ErrorVerbosity      sMissingPrefVerbosity;

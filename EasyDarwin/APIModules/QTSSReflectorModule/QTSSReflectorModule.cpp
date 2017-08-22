@@ -87,7 +87,7 @@ static QTSS_AttributeID         sInvalidPortRangeErr = qtssIllegalAttrID;
 static OSRefTable*      sSessionMap = nullptr;
 static const boost::string_view kCacheControlHeader("no-cache");
 static QTSS_PrefsObject sServerPrefs = nullptr;
-static QTSS_ServerObject sServer = nullptr;
+static QTSServerInterface* sServer = nullptr;
 static QTSS_ModulePrefsObject sPrefs = nullptr;
 
 //

@@ -871,7 +871,6 @@ typedef int64_t          QTSS_TimeVal;
 
 typedef QTSS_Object             QTSS_RTPStreamObject;
 typedef QTSS_Object             QTSS_RTSPSessionObject;
-typedef QTSS_Object             QTSS_ServerObject;
 typedef QTSS_Object             QTSS_PrefsObject;
 typedef QTSS_Object             QTSS_TextMessagesObject;
 typedef QTSS_Object             QTSS_FileObject;
@@ -892,6 +891,7 @@ typedef QTSS_RTSPStatusCode QTSS_SessionStatusCode;
 
 class RTSPRequest;
 class RTPSession;
+class QTSServerInterface;
 //***********************************************/
 // ROLE PARAMETER BLOCKS
 //
@@ -905,7 +905,7 @@ typedef struct
 
 typedef struct
 {
-    QTSS_ServerObject           inServer;           // Global dictionaries
+	QTSServerInterface*         inServer;           // Global dictionaries
     QTSS_PrefsObject            inPrefs;
     QTSS_TextMessagesObject     inMessages;
     QTSS_ErrorLogStream         inErrorLogStream;   // Writing to this stream causes modules to
@@ -1134,35 +1134,7 @@ time_t  QTSS_MilliSecsTo1970Secs(QTSS_TimeVal inQTSS_MilliSeconds);
 //                                      and there already is such a module.
 //              QTSS_BadArgument:   Registering for a nonexistent role.
 QTSS_Error QTSS_AddRole(QTSS_Role inRole);
-
-
-/*****************************************/
-//  ATTRIBUTE / OBJECT CALLBACKS
-//
-
-
-/********************************************************************/
-//  QTSS_LockObject
-//
-//  Grabs the mutex for this object so that accesses to the objects attributes
-//  from other threads will block.  Note that objects created through QTSS_CreateObjectValue
-//  will share a mutex with the parent object.
-//
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument:   bad object
-QTSS_Error QTSS_LockObject(QTSS_Object inObject);
-                                    
-/********************************************************************/
-//  QTSS_UnlockObject
-//
-//  Releases the mutex for this object.
-//
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument:   bad object
-QTSS_Error QTSS_UnlockObject(QTSS_Object inObject);
-                                                                        
+                                                                                                            
 /********************************************************************/
 //  QTSS_AddStaticAttribute
 //
@@ -1305,19 +1277,6 @@ QTSS_Error QTSS_SetValuePtr (QTSS_Object inObject, QTSS_AttributeID inID, const 
 //
 QTSS_Error QTSS_GetNumValues (QTSS_Object inObject, QTSS_AttributeID inID, uint32_t* outNumValues);
 
-/********************************************************************/
-//  QTSS_RemoveValue
-//
-//  This function removes the value with the specified index. If there
-//  are any values following this index, they will be reordered.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-//              QTSS_ReadOnly: Attribute is read only.
-//              QTSS_BadIndex: Attempt to set non-0 index of attribute with a param retrieval function.
-//
-QTSS_Error QTSS_RemoveValue (QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex);
-
 /*****************************************/
 //  STREAM CALLBACKS
 //
@@ -1341,29 +1300,6 @@ QTSS_Error QTSS_RemoveValue (QTSS_Object inObject, QTSS_AttributeID inID, uint32
 //              QTSS_BadArgument:   NULL argument.
 QTSS_Error  QTSS_Write(QTSS_StreamRef inRef, const void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, QTSS_WriteFlags inFlags);
 
-/********************************************************************/
-//  QTSS_WriteV
-//
-//  Works similar to the POSIX WriteV, and takes a POSIX iovec.
-//  THE FIRST ENTRY OF THE IOVEC MUST BE BLANK!!!
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_WouldBlock: The stream cannot accept any data at this time.
-//              QTSS_NotConnected: The stream receiver is no longer connected.
-//              QTSS_BadArgument:   NULL argument.
-QTSS_Error  QTSS_WriteV(QTSS_StreamRef inRef, iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten);
-
-/********************************************************************/
-//  QTSS_Flush
-//
-//  Some QTSS_StreamRefs (QTSS_RequestRef, for example) buffers data before sending it
-//  out. Calling this forces the stream to write the data immediately.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_WouldBlock: Stream cannot be completely flushed at this time.
-//              QTSS_NotConnected: The stream receiver is no longer connected.
-//              QTSS_BadArgument:   NULL argument.
-QTSS_Error  QTSS_Flush(QTSS_StreamRef inRef);
 
 /********************************************************************/
 //  QTSS_Read
@@ -1521,7 +1457,6 @@ QTSS_Error  QTSS_CloseFileObject(QTSS_Object inFileObject);
 //              QTSS_RequestFailed: Not currently possible to request an event. 
 
 QTSS_Error  QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_EventType inEventMask);
-QTSS_Error  QTSS_SignalStream(QTSS_StreamRef inStream, QTSS_EventType inEventMask);
 
 QTSS_Error  QTSS_SetIdleTimer(int64_t inIdleMsec);
 QTSS_Error  QTSS_SetIntervalRoleTimer(int64_t inIdleMsec);

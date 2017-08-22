@@ -54,13 +54,13 @@
 
 
 QTSS_TextMessagesObject     QTSSModuleUtils::sMessages = nullptr;
-QTSS_ServerObject           QTSSModuleUtils::sServer = nullptr;
+QTSServerInterface*         QTSSModuleUtils::sServer = nullptr;
 QTSS_StreamRef              QTSSModuleUtils::sErrorLog = nullptr;
 bool                      QTSSModuleUtils::sEnableRTSPErrorMsg = false;
 QTSS_ErrorVerbosity         QTSSModuleUtils::sMissingPrefVerbosity = qtssMessageVerbosity;
 
 void    QTSSModuleUtils::Initialize(QTSS_TextMessagesObject inMessages,
-                                    QTSS_ServerObject inServer,
+                                    QTSServerInterface* inServer,
                                     QTSS_StreamRef inErrorLog)
 {
     sMessages = inMessages;
@@ -554,19 +554,7 @@ void    QTSSModuleUtils::SendDescribeResponse(RTSPRequest* inRequest,
         // On solaris, the maximum # of vectors is very low (= 16) so to ensure that we are still able to
         // send the SDP if we have a number greater than the maximum allowed, we coalesce the vectors into
         // a single big buffer
-#ifdef __solaris__
-    if (inNumVectors > IOV_MAX )
-    {
-            char* describeDataBuffer = QTSSModuleUtils::CoalesceVectors(describeData, inNumVectors, inTotalLength);
-            (void)QTSS_Write(inRequest, (void *)describeDataBuffer, inTotalLength, NULL, qtssWriteFlagsNoFlags);
-            // deleting memory allocated by the CoalesceVectors call
-            delete [] describeDataBuffer;
-    }
-    else
-        (void)QTSS_WriteV(inRequest, describeData, inNumVectors, inTotalLength, NULL);
-#else
 	inRequest->WriteV(describeData, inNumVectors, inTotalLength, nullptr);
-#endif
 
 }
 
@@ -613,9 +601,8 @@ QTSS_ModulePrefsObject QTSSModuleUtils::GetModuleObjectByName(const StrPtrLen& i
 {
     QTSS_ModuleObject theModule = nullptr;
     uint32_t theLen = sizeof(theModule);
-    
-	QTSSDictionary *dict = (QTSSDictionary *)sServer;
-    for (int x = 0; dict->GetValue(qtssSvrModuleObjects, x, &theModule, &theLen) == QTSS_NoErr; x++)
+
+    for (int x = 0; sServer->GetValue(qtssSvrModuleObjects, x, &theModule, &theLen) == QTSS_NoErr; x++)
     {
         Assert(theModule != nullptr);
         Assert(theLen == sizeof(theModule));

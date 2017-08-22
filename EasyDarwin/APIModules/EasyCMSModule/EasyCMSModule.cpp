@@ -17,7 +17,7 @@
 
 // STATIC DATA
 static QTSS_PrefsObject				sServerPrefs = nullptr;
-static QTSS_ServerObject			sServer = nullptr;
+static QTSServerInterface*			sServer = nullptr;
 static QTSS_ModulePrefsObject		sEasyCMSModulePrefs = nullptr;
 
 // FUNCTION PROTOTYPES

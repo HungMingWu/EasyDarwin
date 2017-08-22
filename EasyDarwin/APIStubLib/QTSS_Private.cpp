@@ -130,26 +130,11 @@ QTSS_Error  QTSS_GetNumAttributes (QTSS_Object inObject, uint32_t* outNumValues)
     return (sCallbacks->addr [kGetNumAttributesCallback]) (inObject, outNumValues); 
 }
 
-QTSS_Error  QTSS_RemoveValue (QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex)
-{
-    return (sCallbacks->addr [kRemoveValueCallback]) (inObject, inID, inIndex); 
-}
-
 // STREAM ROUTINES
 
 QTSS_Error  QTSS_Write(QTSS_StreamRef inStream, const void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags)
 {
     return (sCallbacks->addr [kWriteCallback]) (inStream, inBuffer, inLen, outLenWritten, inFlags); 
-}
-
-QTSS_Error  QTSS_WriteV(QTSS_StreamRef inStream, iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength, uint32_t* outLenWritten)
-{
-    return (sCallbacks->addr [kWriteVCallback]) (inStream, inVec, inNumVectors, inTotalLength, outLenWritten);  
-}
-
-QTSS_Error  QTSS_Flush(QTSS_StreamRef inStream)
-{
-    return (sCallbacks->addr [kFlushCallback]) (inStream);  
 }
 
 QTSS_Error  QTSS_Read(QTSS_StreamRef inRef, void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead)
@@ -193,11 +178,6 @@ QTSS_Error  QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_EventType inEventMas
     return (sCallbacks->addr [kRequestEventCallback]) (inStream, inEventMask);      
 }
 
-QTSS_Error  QTSS_SignalStream(QTSS_StreamRef inStream)
-{
-    return (sCallbacks->addr [kSignalStreamCallback]) (inStream);       
-}
-
 QTSS_Error  QTSS_SetIdleTimer(int64_t inIdleMsec)
 {
     return (sCallbacks->addr [kSetIdleTimerCallback]) (inIdleMsec);     
@@ -218,16 +198,6 @@ QTSS_Error  QTSS_RequestGlobalLock()
 bool  QTSS_IsGlobalLocked()
 {
     return (bool) (sCallbacks->addr [kIsGlobalLockedCallback])  ();
-}
-
-QTSS_Error  QTSS_LockObject(QTSS_Object inObject)
-{
-    return (sCallbacks->addr [kLockObjectCallback])  (inObject);
-}
-
-QTSS_Error  QTSS_UnlockObject(QTSS_Object inObject)
-{
-    return (sCallbacks->addr [kUnlockObjectCallback])  (inObject);
 }
 
 // AUTHENTICATION AND AUTHORIZATION ROUTINE

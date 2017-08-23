@@ -40,7 +40,6 @@
 
 #include "RTSPSession.h"
 #include "RTSPSessionInterface.h"
-#include "StringParser.h"
 #include "StringTranslator.h"
 #include "QTSS.h"
 #include "QTSSModuleUtils.h"
@@ -49,21 +48,61 @@
 #include "SocketUtils.h"
 
 static boost::string_view    sDefaultRealm("Streaming Server");
-static StrPtrLen    sAuthBasicStr("Basic", 5);
-static StrPtrLen    sAuthDigestStr("Digest", 6);
-static StrPtrLen    sUsernameStr("username", 8);
-static StrPtrLen    sRealmStr("realm", 5);
-static StrPtrLen    sNonceStr("nonce", 5);
-static StrPtrLen    sUriStr("uri", 3);
-static StrPtrLen    sQopStr("qop", 3);
-static StrPtrLen    sQopAuthStr("auth", 4);
-static StrPtrLen    sQopAuthIntStr("auth-int", 8);
-static StrPtrLen    sNonceCountStr("nc", 2);
-static StrPtrLen    sResponseStr("response", 8);
-static StrPtrLen    sOpaqueStr("opaque", 6);
+static boost::string_view    sAuthBasicStr("Basic");
+static boost::string_view    sAuthDigestStr("Digest");
+static boost::string_view    sUsernameStr("username");
+static boost::string_view    sRealmStr("realm");
+static boost::string_view    sNonceStr("nonce");
+static boost::string_view    sUriStr("uri");
+static boost::string_view    sQopStr("qop");
+static boost::string_view    sQopAuthStr("auth");
+static boost::string_view    sQopAuthIntStr("auth-int");
+static boost::string_view    sNonceCountStr("nc");
+static boost::string_view    sResponseStr("response");
+static boost::string_view    sOpaqueStr("opaque");
 static StrPtrLen    sEqualQuote("=\"", 2);
 static StrPtrLen    sQuoteCommaSpace("\", ", 3);
 static StrPtrLen    sStaleTrue("stale=\"true\", ", 14);
+
+static float processNPT(boost::string_view nptStr)
+{
+	if (nptStr.empty())
+		return 0.0;
+
+	float valArray[4] = { 0, 0, 0, 0 };
+	float divArray[4] = { 1, 1, 1, 1 };
+	uint32_t valType = 0; // 0 == npt-sec, 1 == npt-hhmmss
+	uint32_t index;
+
+	auto it = nptStr.begin(), end = nptStr.end();
+	for (index = 0; index < 4; index++)
+	{
+		while ((it != end) && (*it >= '0') && (*it <= '9'))
+		{
+			valArray[index] = (valArray[index] * 10) + (*it - '0');
+			divArray[index] *= 10;
+			++it;
+		}
+
+		if (it == end || valType == 0 && index >= 1)
+			break;
+
+		if (*it == '.' && valType == 0 && index == 0)
+			;
+		else if (*it == ':' && index < 2)
+			valType = 1;
+		else if (*it == '.' && index == 2)
+			;
+		else
+			break;
+		++it;
+	}
+
+	if (valType == 0)
+		return valArray[0] + (valArray[1] / divArray[1]);
+	else
+		return (valArray[0] * 3600) + (valArray[1] * 60) + valArray[2] + (valArray[3] / divArray[3]);
+}
 
 typedef std::map<std::string, std::string> header_fields_t;
 
@@ -205,7 +244,7 @@ QTSS_Error RTSPRequest::ParseURI(boost::string_view fulluri)
 	// don't allow non-aggregate operations like a setup on a playing session
 	if (qtssSetupMethod == fMethod) // if it is a setup but we are playing don't allow it
 	{
-		auto*  theSession = (RTSPSession*)this->GetSession();
+		RTSPSession*  theSession = (RTSPSession *)GetSession();
 		if (theSession != nullptr && theSession->IsPlaying())
 			return QTSSModuleUtils::SendErrorResponse(this, qtssClientAggregateOptionAllowed, qtssMsgBadRTSPMethod, nullptr);
 	}
@@ -418,37 +457,28 @@ void RTSPRequest::ParseTransportHeader(boost::string_view header)
 
 void  RTSPRequest::ParseRangeHeader(boost::string_view header)
 {
-	StrPtrLen t((char *)header.data(), header.length());
-	StringParser theRangeParser(&t);
+	std::string startStr, endStr;
+	bool r = qi::phrase_parse(header.begin(), header.end(), 
+		qi::omit[+(qi::char_ - "=")] >> "=" >> +(qi::char_ - "-") >> -("-" >> +qi::char_)
+		, qi::ascii::blank, startStr, endStr);
 
-	theRangeParser.GetThru(nullptr, '=');//consume "npt="
-	theRangeParser.ConsumeWhitespace();
-	fStartTime = (double)theRangeParser.ConsumeNPT();
+	fStartTime = (double)processNPT(startStr);
 	//see if there is a stop time as well.
-	if (theRangeParser.GetDataRemaining() > 1)
-	{
-		theRangeParser.GetThru(nullptr, '-');
-		theRangeParser.ConsumeWhitespace();
-		fStopTime = (double)theRangeParser.ConsumeNPT();
-	}
+	if (!endStr.empty())
+		fStopTime = (double)processNPT(endStr);
 }
 
 void  RTSPRequest::ParseRetransmitHeader(boost::string_view header)
 {
-	StrPtrLen t2((char *)header.data(), header.length());
-	StringParser theRetransmitParser(&t2);
-	StrPtrLen theProtName;
 	bool foundRetransmitProt = false;
-
-	do
-	{
-		theRetransmitParser.ConsumeWhitespace();
-		theRetransmitParser.ConsumeWord(&theProtName);
-		theProtName.TrimTrailingWhitespace();
-		boost::string_view theProtNameV(theProtName.Ptr, theProtName.Len);
-		foundRetransmitProt = boost::iequals(theProtNameV, RTSPProtocol::GetRetransmitProtocolName());
-	} while ((!foundRetransmitProt) &&
-		(theRetransmitParser.GetThru(nullptr, ',')));
+	std::string processStr;
+	std::vector<std::string> tokens = spirit_direct(header, ",");
+	for (const auto &token : tokens)
+		if (boost::istarts_with(token, RTSPProtocol::GetRetransmitProtocolName())) {
+			foundRetransmitProt = true;
+			processStr = token.substr(RTSPProtocol::GetRetransmitProtocolName().length() + 1);
+			break;
+		}
 
 	if (!foundRetransmitProt)
 		return;
@@ -460,27 +490,13 @@ void  RTSPRequest::ParseRetransmitHeader(boost::string_view header)
 	if (fTransportType == qtssRTPTransportTypeUDP)
 		fTransportType = qtssRTPTransportTypeReliableUDP;
 
-	StrPtrLen theProtArg;
-	while (theRetransmitParser.GetThru(&theProtArg, '='))
-	{
-		//
-		// Parse out params
-		static const StrPtrLen kWindow("window");
-
-		theProtArg.TrimWhitespace();
-		if (theProtArg.EqualIgnoreCase(kWindow))
-		{
-			theRetransmitParser.ConsumeWhitespace();
-			fWindowSize = theRetransmitParser.ConsumeInteger(nullptr);
-
-			// Save out the window size argument as a string so we
-			// can easily put it into the response
-			// (we never muck with this header)
-			fWindowSizeStr = boost::string_view(theProtArg.Ptr, theRetransmitParser.GetCurrentPosition() - theProtArg.Ptr);
+	tokens = spirit_direct(processStr, ";");
+	static boost::string_view kWindow("window");
+	for (const auto &token : tokens)
+		if (boost::istarts_with(token, kWindow)) {
+			fWindowSize = std::stoi(token.substr(kWindow.length()));
+			fWindowSizeStr = token;
 		}
-
-		theRetransmitParser.GetThru(nullptr, ';'); //Skip past ';'
-	}
 }
 
 void  RTSPRequest::ParseContentLengthHeader(boost::string_view header)
@@ -529,26 +545,16 @@ void RTSPRequest::ParseSpeedHeader(boost::string_view header)
 
 void RTSPRequest::ParseTransportOptionsHeader(boost::string_view header)
 {
-	StrPtrLen t((char *)header.data(), header.length());
-	StringParser theRTPOptionsParser(&t);
-	StrPtrLen theRTPOptionsSubHeader;
-
-	do
-	{
-		static StrPtrLen sLateTolerance("late-tolerance");
-
-		if (theRTPOptionsSubHeader.NumEqualIgnoreCase(sLateTolerance.Ptr, sLateTolerance.Len))
-		{
-			StringParser theLateTolParser(&theRTPOptionsSubHeader);
-			theLateTolParser.GetThru(nullptr, '=');
-			theLateTolParser.ConsumeWhitespace();
-			fLateTolerance = theLateTolParser.ConsumeFloat();
-			fLateToleranceStr = std::string(theRTPOptionsSubHeader.Ptr, theRTPOptionsSubHeader.Len);
+	std::vector<std::string> tokens = spirit_direct(header, ";");
+	for (const auto &token : tokens)
+		if (boost::istarts_with(token, "late-tolerance")) {
+			bool r = qi::phrase_parse(token.cbegin(), token.cend(),
+				qi::omit[+(qi::char_ - "=")] >> "=" >> qi::double_, qi::ascii::blank, fLateTolerance);
+			if (r) {
+				fLateToleranceStr = token;
+				break;
+			}
 		}
-
-		(void)theRTPOptionsParser.GetThru(&theRTPOptionsSubHeader, ';');
-
-	} while (theRTPOptionsSubHeader.Len > 0);
 }
 
 
@@ -648,25 +654,22 @@ void  RTSPRequest::ParseBandwidthHeader(boost::string_view header)
 
 
 
-QTSS_Error RTSPRequest::ParseBasicHeader(StringParser *inParsedAuthLinePtr)
+QTSS_Error RTSPRequest::ParseBasicHeader(boost::string_view inParsedAuthLine)
 {
 	QTSS_Error  theErr = QTSS_NoErr;
 	fAuthScheme = qtssAuthBasic;
 
-	StrPtrLen authWord;
+	std::string authWord;
+	bool r1 = qi::phrase_parse(inParsedAuthLine.cbegin(), inParsedAuthLine.cend(),
+		qi::omit["Basic"] >> +(qi::char_), qi::ascii::blank, authWord);
 
-	inParsedAuthLinePtr->ConsumeWhitespace();
-	inParsedAuthLinePtr->ConsumeUntilWhitespace(&authWord);
-	if (0 == authWord.Len)
+	if (authWord.empty())
 		return theErr;
 
-	char* encodedStr = authWord.GetAsCString();
-	std::unique_ptr<char[]> encodedStrDeleter(encodedStr);
-
-	auto *decodedAuthWord = new char[Base64decode_len(encodedStr) + 1];
+	auto *decodedAuthWord = new char[Base64decode_len(authWord.c_str()) + 1];
 	std::unique_ptr<char[]> decodedAuthWordDeleter(decodedAuthWord);
 
-	(void)Base64decode(decodedAuthWord, encodedStr);
+	(void)Base64decode(decodedAuthWord, authWord.c_str());
 
 	boost::string_view nameAndPassword(decodedAuthWord, ::strlen(decodedAuthWord));
 	std::string  name, password;
@@ -684,35 +687,24 @@ QTSS_Error RTSPRequest::ParseBasicHeader(StringParser *inParsedAuthLinePtr)
 	return theErr;
 }
 
-QTSS_Error RTSPRequest::ParseDigestHeader(StringParser *inParsedAuthLinePtr)
+QTSS_Error RTSPRequest::ParseDigestHeader(boost::string_view inParsedAuthLine)
 {
 	QTSS_Error  theErr = QTSS_NoErr;
 	fAuthScheme = qtssAuthDigest;
 
-	inParsedAuthLinePtr->ConsumeWhitespace();
-	StrPtrLen   *authLine = inParsedAuthLinePtr->GetStream();
-	if (nullptr != authLine)
+	fAuthDigestResponse = std::string(inParsedAuthLine);
+
+	std::string parmeters;
+	bool r1 = qi::phrase_parse(inParsedAuthLine.cbegin(), inParsedAuthLine.cend(),
+		qi::omit["Digest"] >> +(qi::char_), qi::ascii::blank, parmeters);
+
+	std::vector<std::string> tokens = spirit_direct(parmeters, ",");
+	for (const auto &token : tokens)
 	{
-		StringParser digestAuthLine(authLine);
-		digestAuthLine.GetThru(nullptr, '=');
-		digestAuthLine.ConsumeWhitespace();
-
-		fAuthDigestResponse = std::string(authLine->Ptr, authLine->Len);
-	}
-
-	while (inParsedAuthLinePtr->GetDataRemaining() != 0)
-	{
-		StrPtrLen fieldNameAndValue("");
-		inParsedAuthLinePtr->GetThru(&fieldNameAndValue, ',');
-		StringParser parsedNameAndValue(&fieldNameAndValue);
-		StrPtrLen fieldName("");
-		StrPtrLen fieldValue("");
-
-		//Parse name="value" pair fields in the auth line
-		parsedNameAndValue.ConsumeUntil(&fieldName, '=');
-		parsedNameAndValue.ConsumeLength(nullptr, 1);
-		parsedNameAndValue.GetThruEOL(&fieldValue);
-		StringParser::UnQuote(&fieldValue);
+		std::string fieldName;
+		std::string fieldValue;
+		r1 = qi::phrase_parse(token.cbegin(), token.cend(),
+			+(qi::char_ - "=") >> "=" >> +qi::char_, qi::ascii::blank, fieldName, fieldValue);
 
 		// fieldValue.Ptr below is a pointer to a part of the qtssAuthorizationHeader 
 		// as GetValue returns a pointer
@@ -721,38 +713,36 @@ QTSS_Error RTSPRequest::ParseDigestHeader(StringParser *inParsedAuthLinePtr)
 		// object, and can just keep pointers to the values
 		// Thus, no need to delete memory for the following fields when the request is deleted:
 		// fAuthRealm, fAuthNonce, fAuthUri, fAuthNonceCount, fAuthResponse, fAuthOpaque
-		if (fieldName.Equal(sUsernameStr)) {
+		if (boost::equals(fieldName, sUsernameStr)) {
 			// Set the qtssRTSPReqUserName attribute in the Request object
-			SetAuthUserName({ fieldValue.Ptr, fieldValue.Len });
+			SetAuthUserName(fieldValue);
 			// Also set the qtssUserName attribute in the qtssRTSPReqUserProfile object attribute of the Request Object
-			(void)fUserProfile.SetValue(qtssUserName, 0, fieldValue.Ptr, fieldValue.Len, QTSSDictionary::kDontObeyReadOnly);
+			(void)fUserProfile.SetValue(qtssUserName, 0, fieldValue.c_str(), fieldValue.length(), QTSSDictionary::kDontObeyReadOnly);
 		}
-		else if (fieldName.Equal(sRealmStr)) {
-			fAuthRealm = std::string(fieldValue.Ptr, fieldValue.Len);
+		else if (boost::equals(fieldName, sRealmStr)) {
+			fAuthRealm = fieldValue;
 		}
-		else if (fieldName.Equal(sNonceStr)) {
-			fAuthNonce = std::string(fieldValue.Ptr, fieldValue.Len);
+		else if (boost::equals(fieldName, sNonceStr)) {
+			fAuthNonce = fieldValue;
 		}
-		else if (fieldName.Equal(sUriStr)) {
-			fAuthUri = std::string(fieldValue.Ptr, fieldValue.Len);
+		else if (boost::equals(fieldName, sUriStr)) {
+			fAuthUri = fieldValue;
 		}
-		else if (fieldName.Equal(sQopStr)) {
-			if (fieldValue.Equal(sQopAuthStr))
+		else if (boost::equals(fieldName, sQopStr)) {
+			if (boost::equals(fieldValue, sQopAuthStr))
 				fAuthQop = RTSPSessionInterface::kAuthQop;
-			else if (fieldValue.Equal(sQopAuthIntStr))
+			else if (boost::equals(fieldValue, sQopAuthIntStr))
 				fAuthQop = RTSPSessionInterface::kAuthIntQop;
 		}
-		else if (fieldName.Equal(sNonceCountStr)) {
-			fAuthNonceCount = std::string(fieldValue.Ptr, fieldValue.Len);
+		else if (boost::equals(fieldName, sNonceCountStr)) {
+			fAuthNonceCount = fieldValue;
 		}
-		else if (fieldName.Equal(sResponseStr)) {
-			fAuthResponse = std::string(fieldValue.Ptr, fieldValue.Len);
+		else if (boost::equals(fieldName, sResponseStr)) {
+			fAuthResponse = fieldValue;
 		}
-		else if (fieldName.Equal(sOpaqueStr)) {
-			fAuthOpaque = std::string(fieldValue.Ptr, fieldValue.Len);
+		else if (boost::equals(fieldName, sOpaqueStr)) {
+			fAuthOpaque = fieldValue;
 		}
-
-		inParsedAuthLinePtr->ConsumeWhitespace();
 	}
 
 	return theErr;
@@ -765,16 +755,11 @@ QTSS_Error RTSPRequest::ParseAuthHeader(void)
 	if (authLine.empty())
 		return theErr;
 
-	StrPtrLen   authWord("");
-	StrPtrLen authLineV((char *)authLine.data(), authLine.length());
-	StringParser parsedAuthLine(&authLineV);
-	parsedAuthLine.ConsumeUntilWhitespace(&authWord);
+	if (boost::istarts_with(authLine, sAuthBasicStr))
+		return ParseBasicHeader(authLine);
 
-	if (authWord.EqualIgnoreCase(sAuthBasicStr.Ptr, sAuthBasicStr.Len))
-		return ParseBasicHeader(&parsedAuthLine);
-
-	if (authWord.EqualIgnoreCase(sAuthDigestStr.Ptr, sAuthDigestStr.Len))
-		return ParseDigestHeader(&parsedAuthLine);
+	if (boost::istarts_with(authLine, sAuthDigestStr))
+		return ParseDigestHeader(authLine);
 
 	return theErr;
 }

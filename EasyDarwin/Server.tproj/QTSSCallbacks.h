@@ -40,9 +40,6 @@ class QTSSCallbacks
 {
 public:
 
-	// TIME ROUTINES
-	static void QTSS_ConvertToUnixTime(int64_t* inQTSS_MilliSecondsPtr, time_t* outSecondsPtr);
-
 	// STARTUP ROUTINES
 
 	static QTSS_Error   QTSS_AddRole(QTSS_Role inRole);
@@ -75,11 +72,6 @@ public:
 
 	static QTSS_Error   QTSS_Write(QTSS_StreamRef inStream, void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, QTSS_WriteFlags inFlags);
 	static QTSS_Error   QTSS_Read(QTSS_StreamRef inRef, void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead);
-
-	// FILE SYSTEM ROUTINES
-
-	static QTSS_Error   QTSS_OpenFileObject(char* inPath, QTSS_OpenFileFlags inFlags, QTSS_Object* outFileObject);
-	static QTSS_Error   QTSS_CloseFileObject(QTSS_Object inFileObject);
 
 	// SERVICE ROUTINES
 

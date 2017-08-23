@@ -138,7 +138,7 @@ static QTSS_Error   Shutdown();
 static QTSS_Error   PostProcess(QTSS_StandardRTSP_Params* inParams);
 static QTSS_Error   ClientSessionClosing(QTSS_ClientSessionClosing_Params* inParams);
 static QTSS_Error   LogRequest(RTPSession* inClientSession,
-	QTSS_RTSPSessionObject inRTSPSession, QTSS_CliSesClosingReason *inCloseReasonPtr);
+	RTSPSession* inRTSPSession, QTSS_CliSesClosingReason *inCloseReasonPtr);
 static void             CheckAccessLogState(bool forceEnabled);
 static QTSS_Error   RollAccessLog(QTSS_ServiceFunctionArgsPtr inArgs);
 static void         ReplaceSpaces(StrPtrLen *sourcePtr, StrPtrLen *destPtr, char *replaceStr);
@@ -360,7 +360,7 @@ void ReplaceSpaces(StrPtrLen *sourcePtr, StrPtrLen *destPtr, char *replaceStr)
 
 
 QTSS_Error LogRequest(RTPSession* inClientSession,
-	QTSS_RTSPSessionObject inRTSPSession, QTSS_CliSesClosingReason *inCloseReasonPtr)
+	RTSPSession* inRTSPSession, QTSS_CliSesClosingReason *inCloseReasonPtr)
 {
 	static StrPtrLen sUnknownStr(sVoidField);
 	static StrPtrLen sTCPStr("TCP");
@@ -408,7 +408,6 @@ QTSS_Error LogRequest(RTPSession* inClientSession,
 	if (!result)
 		theDateBuffer[0] = '\0';
 
-	theLen = sizeof(QTSS_RTSPSessionObject);
 	RTSPSessionInterface* theRTSPSession = (RTSPSessionInterface*)inRTSPSession;
 	if (theRTSPSession == nullptr)
 		theRTSPSession = inClientSession->GetRTSPSession();
@@ -432,8 +431,7 @@ QTSS_Error LogRequest(RTPSession* inClientSession,
 	// Second, get networking info from the Client's session.
 	// (Including the stats for incoming RTCP packets.)
 	char urlBuf[eURLSize] = { 0 };
-	RTPSession *rtpSession = (RTPSession *)inClientSession;
-	std::string url(rtpSession->GetPresentationURL());
+	std::string url(inClientSession->GetPresentationURL());
 	float packetLossPercent = inClientSession->GetPacketLossPercent();
 	double movieDuration = inClientSession->GetMovieDuration();
 	uint64_t movieSizeInBytes = inClientSession->GetMovieSizeInBytes();
@@ -516,7 +514,7 @@ QTSS_Error LogRequest(RTPSession* inClientSession,
 	uint32_t theStreamIndex = 0;
 	QTSS_RTPStreamObject theRTPStreamObject = nullptr;
 
-	for (auto theRTPStreamObject : rtpSession->GetStreams())
+	for (auto theRTPStreamObject : inClientSession->GetStreams())
 	{	
 		RTPStream *dict = (RTPStream *)theRTPStreamObject;
 		uint32_t streamPacketsReceived = dict->GetTotalPacketsRecv();
@@ -669,7 +667,7 @@ QTSS_Error LogRequest(RTPSession* inClientSession,
 	}
 
 	//cs-uri-query
-	std::string urlQry(rtpSession->GetQueryString());
+	std::string urlQry(inClientSession->GetQueryString());
 
 	char tempLogBuffer[1024];
 	char logBuffer[2048];
@@ -685,8 +683,8 @@ QTSS_Error LogRequest(RTPSession* inClientSession,
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", startPlayTimeInSecs);  //c-starttime 
 	::strcat(logBuffer, tempLogBuffer);
-	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", (QTSS_MilliSecsTo1970Secs(curTime)
-		- QTSS_MilliSecsTo1970Secs(theCreateTime)));   //x-duration* 
+	sprintf(tempLogBuffer, "%"   _U32BITARG_   " ", OS::TimeMilli_To_UnixTimeSecs(curTime)
+		- OS::TimeMilli_To_UnixTimeSecs(theCreateTime));   //x-duration* 
 	::strcat(logBuffer, tempLogBuffer);
 	sprintf(tempLogBuffer, "%" _S32BITARG_ " ", (uint32_t)1);  //c-rate
 	::strcat(logBuffer, tempLogBuffer);

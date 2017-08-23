@@ -57,7 +57,6 @@ enum
     //            kLastCallback value. Inserting or changing the index order will break dynamic modules
     //            built with another release.
     
-    kConvertToUnixTimeCallback      = 3,
     kAddRoleCallback                = 4,
 
     kIDForTagCallback               = 6,
@@ -71,8 +70,7 @@ enum
 
     kRequestEventCallback           = 23,
     kSetIdleTimerCallback           = 24,
-    kOpenFileObjectCallback         = 25,
-    kCloseFileObjectCallback        = 26,
+
     kReadCallback                   = 27,
     kGetNumValuesCallback           = 30,
     kGetNumAttributesCallback       = 31,

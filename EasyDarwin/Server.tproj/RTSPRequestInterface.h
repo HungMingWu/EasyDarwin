@@ -297,7 +297,7 @@ protected:
 	//
 	// For reliable UDP
 	uint32_t                      fWindowSize;
-	boost::string_view            fWindowSizeStr;
+	std::string                   fWindowSizeStr;
 
 	//Because of URL decoding issues, we need to make a copy of the file path.
 	//Here is a buffer for it.

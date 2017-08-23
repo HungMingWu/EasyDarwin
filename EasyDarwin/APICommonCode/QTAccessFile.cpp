@@ -39,6 +39,7 @@
 #include "QTAccessFile.h"
 #include "QTSSDictionary.h"
 #include "RTSPRequest.h"
+#include "QTSSFile.h"
 
 #ifdef __MacOSX__
 #include <membership.h>
@@ -348,10 +349,10 @@ char*  QTAccessFile::GetAccessFile_Copy(boost::string_view movieRootDir, const c
         ::strcat(currentDir, kPathDelimiterString);
         ::strcat(currentDir, sQTAccessFileName);
     
-        QTSS_Object fileObject = nullptr;
-        if( QTSS_OpenFileObject(currentDir, qtssOpenFileNoFlags, &fileObject) == QTSS_NoErr) 
+		std::unique_ptr<QTSSFile> fileObject(new QTSSFile);
+        if(fileObject->Open(currentDir, qtssOpenFileNoFlags) == QTSS_NoErr)
         {
-            (void)QTSS_CloseFileObject(fileObject);
+			fileObject->Close();
             return currentDir;
         }
                 

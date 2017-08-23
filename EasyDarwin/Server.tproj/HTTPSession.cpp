@@ -42,7 +42,7 @@ HTTPSession::HTTPSession()
 	QTSServerInterface::GetServer()->AlterCurrentRTSPHTTPSessionCount(1);
 
 	// Setup the QTSS param block, as none of these fields will change through the course of this session.
-	fRoleParams.rtspRequestParams.inRTSPSession = this;
+	fRoleParams.rtspRequestParams.inRTSPSession = nullptr;
 	fRoleParams.rtspRequestParams.inRTSPRequest = nullptr;
 	fRoleParams.rtspRequestParams.inClientSession = nullptr;
 
@@ -65,7 +65,7 @@ HTTPSession::~HTTPSession()
 
 	// Invoke the session closing modules
 	QTSS_RoleParams theParams;
-	theParams.rtspSessionClosingParams.inRTSPSession = this;
+	theParams.rtspSessionClosingParams.inRTSPSession = nullptr;
 	
 	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPSessionClosingRole))
 		theModule->CallDispatch(QTSS_RTSPSessionClosing_Role, &theParams);

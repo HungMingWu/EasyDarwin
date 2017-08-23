@@ -57,15 +57,6 @@ QTSS_Error _stublibrary_main(void* inPrivateArgs, QTSS_DispatchFuncPtr inDispatc
     return QTSS_NoErr;
 }
 
-// STUB FUNCTION DEFINITIONS
-
-time_t          QTSS_MilliSecsTo1970Secs(int64_t inQTSS_MilliSeconds)
-{
-    time_t outSeconds = 0;
-    (sCallbacks->addr [kConvertToUnixTimeCallback]) (&inQTSS_MilliSeconds, &outSeconds);
-    return outSeconds;
-}
-
 // STARTUP ROUTINES
     
 QTSS_Error  QTSS_AddRole(QTSS_Role inRole)
@@ -157,18 +148,6 @@ QTSS_Error QTSS_IDForService(const char* inTag, QTSS_ServiceID* outID)
 QTSS_Error QTSS_DoService(QTSS_ServiceID inID, QTSS_ServiceFunctionArgsPtr inArgs)
 {
     return (sCallbacks->addr [kDoServiceCallback]) (inID, inArgs);  
-}
-
-// FILE SYSTEM ROUTINES
-
-QTSS_Error  QTSS_OpenFileObject(char* inPath, QTSS_OpenFileFlags inFlags, QTSS_Object* outFileObject)
-{
-    return (sCallbacks->addr [kOpenFileObjectCallback]) (inPath, inFlags, outFileObject);       
-}
-
-QTSS_Error  QTSS_CloseFileObject(QTSS_Object inFileObject)
-{
-    return (sCallbacks->addr [kCloseFileObjectCallback]) (inFileObject);        
 }
 
 // ASYNC I/O STREAM ROUTINES

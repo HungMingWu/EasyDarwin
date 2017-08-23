@@ -54,14 +54,6 @@ using namespace std;
 #define __QTSSCALLBACKS_DEBUG__ 0
 #define debug_printf if (__QTSSCALLBACKS_DEBUG__) printf
 
-void    QTSSCallbacks::QTSS_ConvertToUnixTime(int64_t *inQTSS_MilliSecondsPtr, time_t* outSecondsPtr)
-{
-	if ((nullptr != outSecondsPtr) && (nullptr != inQTSS_MilliSecondsPtr))
-		*outSecondsPtr = OS::TimeMilli_To_UnixTimeSecs(*inQTSS_MilliSecondsPtr);
-}
-
-
-
 QTSS_Error  QTSSCallbacks::QTSS_AddRole(QTSS_Role inRole)
 {
 	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
@@ -228,36 +220,6 @@ QTSS_Error  QTSSCallbacks::QTSS_Read(QTSS_StreamRef inStream, void* ioBuffer, ui
 		return QTSS_NotConnected;
 	else
 		return theErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_OpenFileObject(char* inPath, QTSS_OpenFileFlags inFlags, QTSS_Object* outFileObject)
-{
-	if ((inPath == nullptr) || (outFileObject == nullptr))
-		return QTSS_BadArgument;
-
-	//
-	// Create a new file object
-	auto* theNewFile = new QTSSFile();
-	QTSS_Error theErr = theNewFile->Open(inPath, inFlags);
-
-	if (theErr != QTSS_NoErr)
-		delete theNewFile; // No module wanted to open the file.
-	else
-		*outFileObject = theNewFile;
-
-	return theErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_CloseFileObject(QTSS_Object inFileObject)
-{
-	if (inFileObject == nullptr)
-		return QTSS_BadArgument;
-
-	auto* theFile = (QTSSFile*)inFileObject;
-
-	theFile->Close();
-	delete theFile;
-	return QTSS_NoErr;
 }
 
 QTSS_Error  QTSSCallbacks::QTSS_AddService(const char* inServiceName, QTSS_ServiceFunctionPtr inFunctionPtr)
@@ -569,7 +531,7 @@ void* QTSSCallbacks::Easy_GetRTSPPushSessions()
 		EasyDarwinRTSPSession session;
 		session.index = uIndex;
 
-		auto* clientSession = (RTPSession*)theSession->GetBroadcasterSession();
+		RTPSession* clientSession = theSession->GetBroadcasterSession();
 
 		if (clientSession == nullptr) continue;
 

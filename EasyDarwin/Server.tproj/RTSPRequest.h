@@ -83,10 +83,10 @@ public:
 
 	QTSS_Error ParseAuthHeader(void);
 	// called by ParseAuthHeader
-	QTSS_Error ParseBasicHeader(StringParser *inParsedAuthLinePtr);
+	QTSS_Error ParseBasicHeader(boost::string_view inParsedAuthLinePtr);
 
 	// called by ParseAuthHeader
-	QTSS_Error ParseDigestHeader(StringParser *inParsedAuthLinePtr);
+	QTSS_Error ParseDigestHeader(boost::string_view inParsedAuthLine);
 
 	void SetupAuthLocalPath(void);
 	QTSS_Error SendBasicChallenge(void);

@@ -870,7 +870,6 @@ typedef int32_t          QTSS_ServiceID;
 typedef int64_t          QTSS_TimeVal;
 
 typedef QTSS_Object             QTSS_RTPStreamObject;
-typedef QTSS_Object             QTSS_RTSPSessionObject;
 typedef QTSS_Object             QTSS_PrefsObject;
 typedef QTSS_Object             QTSS_TextMessagesObject;
 typedef QTSS_Object             QTSS_FileObject;
@@ -891,6 +890,7 @@ typedef QTSS_RTSPStatusCode QTSS_SessionStatusCode;
 
 class RTSPRequest;
 class RTPSession;
+class RTSPSession;
 class QTSServerInterface;
 //***********************************************/
 // ROLE PARAMETER BLOCKS
@@ -927,7 +927,7 @@ typedef struct
 
 typedef struct 
 {
-    QTSS_RTSPSessionObject      inRTSPSession;
+	RTSPSession*                inRTSPSession;
     RTSPRequest*                inRTSPRequest;
 	RTPSession*                 inClientSession;
 
@@ -935,7 +935,7 @@ typedef struct
 
 typedef struct 
 {
-    QTSS_RTSPSessionObject      inRTSPSession;
+	RTSPSession*                inRTSPSession;
 	RTSPRequest*                inRTSPRequest;
     char**                      outNewRequest;
 
@@ -948,16 +948,16 @@ typedef struct
 
 typedef struct 
 {
-    QTSS_RTSPSessionObject      inRTSPSession;
+	RTSPSession*                inRTSPSession;
     RTPSession*                 inClientSession;
     char*                       inPacketData;
-    uint32_t                      inPacketLen;
+    uint32_t                    inPacketLen;
 
 } QTSS_IncomingData_Params;
 
 typedef struct
 {
-    QTSS_RTSPSessionObject      inRTSPSession;
+	RTSPSession*                inRTSPSession;
 } QTSS_RTSPSession_Params;
 
 typedef struct
@@ -1113,14 +1113,6 @@ typedef QTSS_Error (*QTSS_DispatchFuncPtr)(QTSS_Role inRole, QTSS_RoleParamPtr i
 
 // STUB LIBRARY MAIN
 QTSS_Error _stublibrary_main(void* inPrivateArgs, QTSS_DispatchFuncPtr inDispatchFunc);
-
-/********************************************************************/
-//  QTSS_MilliSecsTo1970Secs
-//
-//  Convert milliseconds from the QTSS_Milliseconds call to 
-//  second's since 1970
-//
-time_t  QTSS_MilliSecsTo1970Secs(QTSS_TimeVal inQTSS_MilliSeconds);
 
 /********************************************************************/
 //  QTSS_AddRole
@@ -1377,44 +1369,6 @@ QTSS_Error QTSS_DoService(QTSS_ServiceID inID, QTSS_ServiceFunctionArgsPtr inArg
 
 // Rereads the preferences, also causes the QTSS_RereadPrefs_Role to be invoked
 #define QTSS_REREAD_PREFS_SERVICE   "RereadPreferences"
-
-/*****************************************/
-//  FILE SYSTEM CALLBACKS
-//
-//  All modules that interact with the local file system should use these APIs instead
-//  of the direct operating system calls.
-//
-//  This is for two reasons: 1) to ensure portability of your module across different
-//  platforms such as Win32 and different versions of the UNIX operating system.
-//
-//  2)  To ensure your module will work properly if there is a 3rd party file system
-//      or database that contains media files.
-
-/********************************************************************/
-//  QTSS_OpenFileObject
-//
-//  Arguments   inPath: a NULL-terminated C-string containing a full path to the file to open.
-//                      inPath must be in the local (operating system) file system path style.
-//              inFlags: desired flags.
-//              outFileObject:  If function returns QTSS_NoErr, on output this will be a QTSS_Object
-//                              for the file.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_FileNotFound
-//              QTSS_RequestFailed
-//              QTSS_BadArgument
-QTSS_Error  QTSS_OpenFileObject(char* inPath, QTSS_OpenFileFlags inFlags, QTSS_Object* outFileObject);
-
-/********************************************************************/
-//  QTSS_CloseFileObject
-//
-//  Closes the file object.
-//
-//  Arguments:  inFileObject: the file to close
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument
-QTSS_Error  QTSS_CloseFileObject(QTSS_Object inFileObject);
 
 /*****************************************/
 //  ASYNC I/O CALLBACKS

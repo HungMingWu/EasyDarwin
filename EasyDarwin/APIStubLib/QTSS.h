@@ -28,13 +28,11 @@
 #include "OSHeaders.h"
 #include <string>
 #include "QTSSRTSPProtocol.h"
-#include "HTTPProtocol.h"
 
 #ifndef __Win32__
 #include <sys/uio.h>
 #endif
 
-#define QTSS_API_VERSION                0x00050000
 #define QTSS_MAX_MODULE_NAME_LENGTH     64
 #define QTSS_MAX_SESSION_ID_LENGTH      64
 #define QTSS_MAX_ATTRIBUTE_NAME_SIZE    64
@@ -479,7 +477,6 @@ enum
     
     // These parameters ARE pre-emptive safe.
     
-    qtssServerAPIVersion            = 0,    //read		//uint32_t            //The API version supported by this server (format 0xMMMMmmmm, where M=major version, m=minor version)
     qtssSvrDefaultDNSName           = 1,    //read		//char array        //The "default" DNS name of the server
     qtssSvrDefaultIPAddr            = 2,    //read		//uint32_t            //The "default" IP address of the server
     qtssSvrServerName               = 3,    //read		//char array        //Name of the server
@@ -571,8 +568,6 @@ enum
     qtssPrefsMaxTCPBufferSizeInBytes        = 25,   // "max_tcp_buffer_size" //uint32_t    // When streaming over TCP, this is the maximum size the TCP socket send buffer can be set to
     qtssPrefsTCPSecondsToBuffer             = 26,   // "tcp_seconds_to_buffer" //Float32 // When streaming over TCP, the size of the TCP send buffer is scaled based on the bitrate of the movie. It will fit all the data that gets sent in this amount of time.
     
-    qtssPrefsDoReportHTTPConnectionAddress  = 27,   // "do_report_http_connection_ip_address"    //bool    // when behind a round robin DNS, the client needs to be told the specific ip address of the maching handling its request. this pref tells the server to repot its IP address in the reply to the HTTP GET request when tunneling RTSP through HTTP
-
     qtssPrefsDefaultAuthorizationRealm      = 28,   // "default_authorization_realm" //char array   //
     
     qtssPrefsRunUserName                    = 29,   // "run_user_name"       //char array        //Run under this user's account
@@ -853,7 +848,6 @@ enum
 	Easy_RedisJudgeStreamID_Role =		FOUR_CHARS_TO_INT('j', 's', 'i', 'r'),	//jsir
 
 	//RESTful
-	Easy_GetDeviceStream_Role =			FOUR_CHARS_TO_INT('g', 'd', 's', 'r'),	//gdsr
 	Easy_LiveDeviceStream_Role =		FOUR_CHARS_TO_INT('l', 'd', 's', 'r'),	//ldsr
 };
 typedef uint32_t QTSS_Role;
@@ -1015,15 +1009,6 @@ typedef struct
     QTSS_EventType              inEventMask;
 } QTSS_RequestEventFile_Params;
 
-typedef struct
-{
-	char*						inDevice;
-	uint32_t						inChannel;
-	EasyStreamType				inStreamType;
-	char*						outUrl;
-	bool						outIsReady;
-}Easy_GetDeviceStream_Params;
-
 //redis module
 typedef struct
 {
@@ -1078,9 +1063,6 @@ typedef union
 	Easy_StreamInfo_Params              easyStreamInfoParams;
 	QTSS_GetAssociatedCMS_Params	    GetAssociatedCMSParams;
 	QTSS_JudgeStreamID_Params			JudgeStreamIDParams;
-
-	Easy_GetDeviceStream_Params			easyGetDeviceStreamParams;
-
 
 } QTSS_RoleParams, *QTSS_RoleParamPtr;
 
@@ -1458,10 +1440,5 @@ QTSS_Error  QTSS_Authenticate(  const char* inAuthUserName,
 //  Returns:            QTSS_NoErr
 //                      QTSS_BadArgument
 QTSS_Error    QTSS_Authorize(RTSPRequest* inAuthRequestObject, char** outAuthRealm, bool* outAuthUserAllowed);
-
-// Get HLS Sessions(json)
-void*	Easy_GetRTSPPushSessions();
-
-
 
 #endif

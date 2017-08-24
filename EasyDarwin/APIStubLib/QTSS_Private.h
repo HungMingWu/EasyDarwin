@@ -91,7 +91,6 @@ enum
     kSetAttributePtrCallback        = 57,
     kSetIntervalRoleTimerCallback   = 58,
 
-	kGetRTSPPushSessionsCallback	= 61,
 	kLastCallback                   = 62
 };
 
@@ -102,10 +101,8 @@ typedef struct {
 
 typedef struct
 {
-    uint32_t                  inServerAPIVersion;
     QTSS_CallbacksPtr       inCallbacks;
     QTSS_StreamRef          inErrorLogStream;
-    uint32_t                  outStubLibraryVersion;
     QTSS_DispatchFuncPtr    outDispatchFunction;
     
 } QTSS_PrivateArgs, *QTSS_PrivateArgsPtr;

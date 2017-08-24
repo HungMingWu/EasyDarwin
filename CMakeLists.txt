@@ -26,7 +26,4 @@ endif()
 
 add_subdirectory (CommonUtilitiesLib)
 add_subdirectory (RTSPUtilitiesLib)
-add_subdirectory (HTTPUtilitiesLib)
-add_subdirectory (EasyProtocol)
-add_subdirectory (EasyRedisClient)
 add_subdirectory (EasyDarwin)

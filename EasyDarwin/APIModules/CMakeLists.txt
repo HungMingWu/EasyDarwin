@@ -17,12 +17,5 @@ include_directories(../../CommonUtilitiesLib
 					)
 
 # Common module
-add_subdirectory(EasyCMSModule)
-add_subdirectory(EasyRedisModule)
-add_subdirectory(QTSSAccessLogModule)
-add_subdirectory(QTSSAccessModule)
-add_subdirectory(QTSSFlowControlModule)
-add_subdirectory(QTSSPOSIXFileSysModule)
 add_subdirectory(QTSSReflectorModule)
-add_subdirectory(QTSSWebDebugModule)
 add_library (APIModules ${SRC})

@@ -57,43 +57,14 @@
 #include <crypt.h>
 #endif
 
-#if __RTSP_HTTP_DEBUG__
-#define HTTP_TRACE(s) printf(s);
-#define HTTP_TRACE_SPL(s) PrintfStrPtrLen(s);
-#define HTTP_TRACE_ONE(s, one ) printf(s, one);
-#define HTTP_TRACE_TWO(s, one, two ) printf(s, one, two);
-#else
-#define HTTP_TRACE(s);
-#define HTTP_TRACE_SPL(s);
-#define HTTP_TRACE_ONE(s, one );
-#define HTTP_TRACE_TWO(s, one, two );
-#endif
-
-#if __RTSP_HTTP_VERBOSE__
-#define HTTP_VTRACE(s) printf(s);
-#define HTTP_VTRACE_SPL(s) PrintfStrPtrLen(s);
-#define HTTP_VTRACE_ONE(s, one ) printf(s, one);
-#define HTTP_VTRACE_TWO(s, one, two ) printf(s, one, two);
-#else
-#define HTTP_VTRACE(s);
-#define HTTP_VTRACE_SPL(s);
-#define HTTP_VTRACE_ONE(s, one );
-#define HTTP_VTRACE_TWO(s, one, two );
-#endif
-
-#if  __RTSP_HTTP_DEBUG__ || __RTSP_HTTP_VERBOSE__
-static void PrintfStrPtrLen(StrPtrLen *splRequest)
+static RTPSession* GetRTPSession(StrPtrLen *str)
 {
-	char    buff[1024];
-
-	memcpy(buff, splRequest->Ptr, splRequest->Len);
-
-	buff[splRequest->Len] = 0;
-
-	HTTP_TRACE_ONE("%s\n", buff)
-		//printf( "%s\n", buff );
+	OSRefTable* theMap = QTSServerInterface::GetServer()->GetRTPSessionMap();
+	OSRef* theRef = theMap->Resolve(str);
+	if (theRef != nullptr)
+		return (RTPSession*)theRef->GetObject();
+	return nullptr;
 }
-#endif
 
 // hack stuff
 static boost::string_view                    sBroadcasterSessionName = "QTSSReflectorModuleBroadcasterSession";
@@ -109,23 +80,11 @@ static StrPtrLen    sAuthAlgorithm("md5");
 static boost::string_view    sAuthQop("auth");
 static StrPtrLen    sEmptyStr("");
 
-// static class member  initialized in RTSPSession ctor
-OSRefTable* RTSPSession::sHTTPProxyTunnelMap = nullptr;
-
-void RTSPSession::Initialize()
-{
-	sHTTPProxyTunnelMap = new OSRefTable(OSRefTable::kDefaultTableSize);
-}
-
-RTSPSession::RTSPSession(bool doReportHTTPConnectionAddress)
+RTSPSession::RTSPSession()
 	: RTSPSessionInterface(),
-	fReadMutex(),
-	fDoReportHTTPConnectionAddress(doReportHTTPConnectionAddress)
+	fReadMutex()
 {
 	this->SetTaskName("RTSPSession");
-
-	// must guarantee this map is present
-	Assert(sHTTPProxyTunnelMap != nullptr);
 
 	QTSServerInterface::GetServer()->AlterCurrentRTSPSessionCount(1);
 
@@ -138,9 +97,6 @@ RTSPSession::RTSPSession(bool doReportHTTPConnectionAddress)
 	fModuleState.curTask = this;
 	fModuleState.curRole = 0;
 	fModuleState.globalLockRequested = false;
-
-	fProxySessionID[0] = 0;
-	fProxySessionIDPtr.Set(fProxySessionID, 0);
 
 	fLastRTPSessionID[0] = 0;
 	fLastRTPSessionIDPtr.Set(fLastRTPSessionID, 0);
@@ -165,20 +121,6 @@ RTSPSession::~RTSPSession()
 	else
 		QTSServerInterface::GetServer()->AlterCurrentRTSPHTTPSessionCount(-1);
 
-	if (*fProxySessionID != '\0')
-	{
-#if DEBUG
-		char * str = "???";
-
-		if (fSessionType == qtssRTSPHTTPInputSession)
-			str = "input session";
-		else if (fSessionType == qtssRTSPHTTPSession)
-			str = "input session";
-
-		HTTP_VTRACE_TWO("~RTSPSession, was a fProxySessionID (%s), %s\n", fProxySessionID, str)
-#endif      
-			sHTTPProxyTunnelMap->UnRegister(&fProxyRef);
-	}
 	if (fRequest)
 	{
 		delete fRequest;
@@ -231,7 +173,7 @@ int64_t RTSPSession::Run()
 				}
 
 				if (err == QTSS_RequestArrived)
-					fState = kHTTPFilteringRequest;
+					fState = kHaveNonTunnelMessage;
 				// If we get an E2BIG, it means our buffer was overfilled.
 				// In that case, we can just jump into the following state, and
 				// the code their does a check for this error and returns an error.
@@ -239,54 +181,6 @@ int64_t RTSPSession::Run()
 					fState = kHaveNonTunnelMessage;
 			}
 			continue;
-
-		case kHTTPFilteringRequest:
-			{
-
-				HTTP_TRACE("RTSPSession::Run kHTTPFilteringRequest\n")
-
-					fState = kHaveNonTunnelMessage; // assume it's not a tunnel setup message
-													// prefilter will set correct tunnel state if it is.
-
-				QTSS_Error  preFilterErr = this->PreFilterForHTTPProxyTunnel();
-
-				if (preFilterErr == QTSS_NoErr)
-				{
-					HTTP_TRACE("RTSPSession::Run kHTTPFilteringRequest\n")
-						continue;
-				}
-				else
-				{
-					// pre filter error indicates a tunnelling message that could 
-					// not join to a session.
-					HTTP_TRACE("RTSPSession::Run kHTTPFilteringRequest Tunnel protocol ERROR.\n")
-						return -1;
-
-				}
-			}
-
-		case kWaitingToBindHTTPTunnel:
-			// flush the GET response, if it's there
-			err = fOutputStream.Flush();
-			if (err == EAGAIN)
-			{
-				// If we get this error, we are currently flow-controlled and should
-				// wait for the socket to become writeable again
-				fSocket.RequestEvent(EV_WR);
-			}
-			return 0;
-			//continue;
-
-		case kSocketHasBeenBoundIntoHTTPTunnel:
-
-			// DMS - Can this execute either? I don't think so... this one
-			// we may not need...
-
-			// I've been joined, it's time to kill this session.
-			Assert(!this->IsLiveSession()); // at least the socket should not report connected any longer
-			HTTP_TRACE("RTSPSession has died of snarfage.\n")
-				break;
-
 
 		case kReadingRequest:
 			{
@@ -1087,348 +981,6 @@ int64_t RTSPSession::Run()
 	return 0;
 }
 
-bool RTSPSession::ParseProxyTunnelHTTP()
-{
-	/*
-		if it's an HTTP request
-		parse the interesing parts from the request
-
-		- check for GET or POST, set fHTTPMethod
-		- checck for HTTP protocol, set fWasHTTPRequest
-		- check for SessionID header, set fProxySessionID char array
-		- check for accept "application/x-rtsp-tunnelled.
-	*/
-
-	bool          isHTTPRequest = false;
-	StrPtrLen       *splRequest;
-
-	HTTP_VTRACE("ParseProxyTunnelHTTP\n")
-		// 获取请求缓冲区指针
-		splRequest = fInputStream.GetRequestBuffer();
-
-
-	fFoundValidAccept = true;
-
-	Assert(splRequest);
-
-	if (splRequest)
-	{
-		// 初始化fHTTPMethod
-		fHTTPMethod = kHTTPMethodUnknown;
-
-#if __RTSP_HTTP_DEBUG__ 
-		{
-			char    buff[1024];
-
-			memcpy(buff, splRequest->Ptr, splRequest->Len);
-
-			buff[splRequest->Len] = 0;
-
-			HTTP_VTRACE(buff)
-		}
-#endif
-
-		StrPtrLen       theParsedData;
-		StringParser    parser(splRequest);
-
-		parser.ConsumeWord(&theParsedData);
-
-		HTTP_VTRACE("request method: \n")
-			HTTP_VTRACE_SPL(&theParsedData)
-
-			// 识别是GET请求还是POST请求
-			if (theParsedData.EqualIgnoreCase("post", 4))
-			{
-				fHTTPMethod = kHTTPMethodPost;
-			}
-			else if (theParsedData.EqualIgnoreCase("get", 3))
-			{
-				fHTTPMethod = kHTTPMethodGet;
-			}
-
-		if (fHTTPMethod != kHTTPMethodUnknown)
-		{
-			HTTP_VTRACE("IsAHTTPProxyTunnelPostRequest found POST or GET\n")
-				parser.ConsumeWhitespace(); // skip over ws past method
-
-			parser.ConsumeUntilWhitespace(&theParsedData); // theParsedData now contains the URL and CGI params ( we don't need yet );
-
-			parser.ConsumeWhitespace(); // skip over ws past url
-
-			parser.ConsumeWord(&theParsedData); // now should contain "HTTP"
-
-			HTTP_VTRACE("should be HTTP/1.* next: \n")
-				HTTP_VTRACE_SPL(&theParsedData)
-
-				// DMS - why use NumEqualIgnoreCase? Wouldn't EqualIgnoreCase do the trick here?
-				// 识别是否有http字段
-				if (theParsedData.NumEqualIgnoreCase("http", 4))
-				{
-					HTTP_TRACE("ParseProxyTunnelHTTP found HTTP\n")
-						fWasHTTPRequest = true;
-				}
-
-		}
-
-		// fWasHTTPRequest为true
-		if (fWasHTTPRequest)
-		{
-			// it's HTTP and one of the methods we like....
-			// now, find the Session ID and Accept headers
-			const char* kSessionHeaderName = "X-SessionCookie:";// SessionCookie字段
-			const int   kSessionHeaderNameLen = ::strlen(kSessionHeaderName);
-			const char* kAcceptHeaderName = "Accept:";// Accept字段
-			const int   kAcceptHeaderNameLen = ::strlen(kAcceptHeaderName);
-			//const char* kAcceptData = "application/x-rtsp-tunnelled";
-			//const int kAcceptDataLen = ::strlen(kAcceptData);
-
-			while (parser.GetDataRemaining() > 0)
-			{
-				parser.GetThruEOL(&theParsedData); // we don't need this, but there is not a ComsumeThru...
-
-				parser.ConsumeUntilWhitespace(&theParsedData); // theParsedData now contains the URL and CGI params ( we don't need yet );
-
-				// 匹配SessionCookie字段
-				if (theParsedData.EqualIgnoreCase(kSessionHeaderName, kSessionHeaderNameLen))
-				{
-					// we got a weener!
-					if (parser.GetDataRemaining() > 0)
-						parser.ConsumeWhitespace();// 去掉空格
-
-					if (parser.GetDataRemaining() > 0)
-					{
-						StrPtrLen   sessionID;
-
-						parser.ConsumeUntil(&sessionID, StringParser::sEOLMask);
-
-						// cache the ID so we can use it to remove ourselves from the map
-						if (sessionID.Len < QTSS_MAX_SESSION_ID_LENGTH)
-						{
-							// 将sessionID内容拷贝到fProxySessionID
-							::memcpy(fProxySessionID, sessionID.Ptr, sessionID.Len);
-							fProxySessionID[sessionID.Len] = 0;
-							fProxySessionIDPtr.Set(fProxySessionID, ::strlen(fProxySessionID));
-							HTTP_VTRACE_ONE("found session id: %s\n", fProxySessionID)
-						}
-					}
-				}
-				// 匹配Accept字段
-				else if (theParsedData.EqualIgnoreCase(kAcceptHeaderName, kAcceptHeaderNameLen))
-				{
-					StrPtrLen   hTTPAcceptHeader;
-
-					// we got another weener!
-					if (parser.GetDataRemaining() > 0)
-						parser.ConsumeWhitespace();
-
-					if (parser.GetDataRemaining() > 0)
-					{
-						parser.ConsumeUntil(&hTTPAcceptHeader, StringParser::sEOLMask);
-
-#if __RTSP_HTTP_DEBUG__ 
-						{
-							char    buff[1024];
-
-							memcpy(buff, hTTPAcceptHeader.Ptr, hTTPAcceptHeader.Len);
-
-							buff[hTTPAcceptHeader.Len] = 0;
-
-							HTTP_VTRACE_ONE("client will accept: %s\n", buff)
-						}
-#endif
-
-						// we really don't need to check thisif ( theParsedData.EqualIgnoreCase( kAcceptData, kAcceptDataLen ) ) 
-						{
-							// 标识找到Accept字段
-							fFoundValidAccept = true;
-
-							HTTP_VTRACE("found valid accept\n")
-						}
-
-					}
-
-				}
-			}
-
-		}
-
-	}
-
-	// we found all that we were looking for
-	if (fFoundValidAccept && *fProxySessionID  && fWasHTTPRequest)
-		isHTTPRequest = true;
-
-	return isHTTPRequest;
-}
-
-
-/*
-	"pre" filter the request looking for the HTTP Proxy
-	tunnel HTTP requests, merge the 2 sessions
-	into one, let the donor Session die.
-*/
-QTSS_Error RTSPSession::PreFilterForHTTPProxyTunnel()
-{
-	// returns true if it's an HTTP request that can tunnel
-	if (!this->ParseProxyTunnelHTTP())
-		return QTSS_NoErr;
-
-	// This is an RTSP / HTTP session, so decrement the total RTSP sessions
-	// and increment the total HTTP sessions
-	// 这是一个RTSP / HTTP 会话，所以RTSP会话总数减1，HTTP会话总数+1
-	Assert(fSessionType == qtssRTSPSession);
-	QTSServerInterface::GetServer()->SwapFromRTSPToHTTP();
-
-	// Setup our ProxyTunnel OSRefTable Ref
-	Assert(fProxySessionIDPtr.Len > 0);
-	fProxyRef.Set(fProxySessionIDPtr, this);
-
-	// We have to set this here, because IF we are able to put ourselves in the map,
-	// the GET may arrive immediately after, and the GET checks this state.
-	fState = kWaitingToBindHTTPTunnel;
-	QTSS_RTSPSessionType theOtherSessionType = qtssRTSPSession;
-
-	if (fHTTPMethod == kHTTPMethodPost)// HTTP POST请求
-	{
-		HTTP_TRACE("RTSPSession is a POST request.\n")
-			fSessionType = qtssRTSPHTTPInputSession;
-		theOtherSessionType = qtssRTSPHTTPSession;
-	}
-	else if (fHTTPMethod == kHTTPMethodGet)// HTTP GET请求
-	{
-		// stock reponse with place holder for server header and optional "x-server-ip-address" header ( %s%s%s for  "x-server-ip-address" + ip address + \r\n )
-		// the optional version must be generated at runtime to include a valid IP address for the actual interface
-		static std::string sHTTPResponseFormatStr = "HTTP/1.0 200 OK\r\n{}{}{}{}\r\nConnection: close\r\nDate: Thu, 19 Aug 1982 18:30:00 GMT\r\nCache-Control: no-store\r\nPragma: no-cache\r\nContent-Type: application/x-rtsp-tunnelled\r\n\r\n";
-		static std::string sHTTPNoServerResponseFormatStr = "HTTP/1.0 200 OK\r\n{}{}{}{}Connection: close\r\nDate: Thu, 19 Aug 1982 18:30:00 GMT\r\nCache-Control: no-store\r\nPragma: no-cache\r\nContent-Type: application/x-rtsp-tunnelled\r\n\r\n";
-		HTTP_TRACE("RTSPSession is a GET request.\n")
-			// we're session O (outptut)  the POST half is session 1 ( input )
-			fSessionType = qtssRTSPHTTPSession;
-		theOtherSessionType = qtssRTSPHTTPInputSession;
-
-		bool showServerInfo = QTSServerInterface::GetServer()->GetPrefs()->GetRTSPServerInfoEnabled();
-		if (fDoReportHTTPConnectionAddress)
-		{
-			// contruct a 200 OK header with an "x-server-ip-address" header
-			std::string localIPAddr = GetLocalAddr();;
-
-			// 使用"x-server-ip-address" 头部字段,构造响应报文
-			std::string responseHeader = (showServerInfo) ?
-				fmt::format(sHTTPResponseFormatStr, "X-server-ip-address: ", localIPAddr, "\r\n", 
-					std::string(QTSServerInterface::GetServerHeader())) : 
-				fmt::format(sHTTPNoServerResponseFormatStr, "X-server-ip-address: ", localIPAddr, "\r\n", "");
-	
-			fOutputStream.Put(responseHeader);
-		}
-		else // use the premade stopck version
-		{
-			static std::string responseHeader = fmt::format(sHTTPResponseFormatStr, "", "", "", 
-				std::string(QTSServerInterface::GetServerHeader()));
-			static std::string responseNoServerHeader = fmt::format(sHTTPNoServerResponseFormatStr, "", "", "", "");
-			if (showServerInfo)
-				fOutputStream.Put(responseHeader);  // 200 OK just means we connected...
-			else
-				fOutputStream.Put(responseNoServerHeader);  // 200 OK just means we connected...
-
-		}
-	}
-	else
-		Assert(0);
-
-	// This function attempts to register our Ref into the map. If there is another
-	// session with a matching magic number, it resolves it and returns that Ref.
-	// If it returns nullptr, something bad has happened, and we should just kill the session.
-
-	OSRef* rtspSessionRef = this->RegisterRTSPSessionIntoHTTPProxyTunnelMap(theOtherSessionType);
-
-	// Something went wrong (usually we get here because there is a session with this magic
-	// number, and that session is currently doing something
-	if (rtspSessionRef == nullptr)
-	{
-		HTTP_TRACE("RegisterRTSPSessionIntoHTTPProxyTunnelMap returned nullptr. Abort.\n");
-		return QTSS_RequestFailed;
-	}
-
-	// We registered ourselves into the map (we are the first half), so wait for our other half
-	if (rtspSessionRef == &fProxyRef)
-	{
-		HTTP_TRACE("Registered this session into map. Waiting to bind\n");
-		return QTSS_NoErr;
-	}
-
-	OSRefReleaser theRefReleaser(sHTTPProxyTunnelMap, rtspSessionRef); // auto release this ref
-	auto* theOtherSession = (RTSPSession*)theRefReleaser.GetRef()->GetObject();
-
-	// We must lock down this session, for we (may) be manipulating its socket & input
-	// stream, and therefore it cannot be in the process of reading data or processing a request.
-	// If it is, well, safest thing to do is probably just deny this attempt to bind.
-
-	// Session加锁,因为在操作其socket和输入流,所以此时不能读取数据或处理请求
-	if (!theOtherSession->fReadMutex.TryLock())
-	{
-		HTTP_TRACE("Found another session in map, but couldn't grab fReadMutex. Abort.\n");
-		return QTSS_RequestFailed;
-	}
-
-	if (fHTTPMethod == kHTTPMethodPost)
-	{
-		// take the input session's socket. This also grabs the other session's input stream
-		theOtherSession->SnarfInputSocket(this);
-
-		// Attempt to bind to this GET connection
-		// this will reset our state on success.
-		HTTP_TRACE_ONE("RTSPSession POST snarfed a donor session successfuly (%s).\n", fProxySessionID)
-			fState = kSocketHasBeenBoundIntoHTTPTunnel;
-		theOtherSession->fState = kReadingRequest;
-		theOtherSession->Signal(Task::kReadEvent);
-	}
-	else if (fHTTPMethod == kHTTPMethodGet)
-	{
-		Assert(theOtherSession->fState == kWaitingToBindHTTPTunnel);
-		HTTP_TRACE_ONE("RTSPSession GET snarfed a donor session successfuly (%s).\n", fProxySessionID)
-
-			// take the input session's socket. This also grabs the other session's input stream
-			this->SnarfInputSocket(theOtherSession);
-
-		// we assume the donor's place in the map.
-		sHTTPProxyTunnelMap->Swap(&fProxyRef);
-
-		// the 1/2 connections are bound
-		// the output Session state goes back to reading a request, this time an RTSP request
-		// the socket donor Session(rtspSessionInput) state goes to kSocketHasBeenBoundIntoHTTPTunnel to die
-		fState = kReadingRequest;
-		theOtherSession->fState = kSocketHasBeenBoundIntoHTTPTunnel;
-		theOtherSession->Signal(Task::kKillEvent);
-	}
-
-	// Session 解锁
-	theOtherSession->fReadMutex.Unlock();
-	return QTSS_NoErr;
-}
-
-OSRef* RTSPSession::RegisterRTSPSessionIntoHTTPProxyTunnelMap(QTSS_RTSPSessionType inSessionType)
-{
-	// This function attempts to register the current session's fProxyRef into the map, and
-	// 1) returns the current session's fProxyRef if registration was successful
-	// 2) returns another session's fProxyRef if it has the same magic number and is the right sessionType
-	// 3) returns nullptr if there is a session with the same magic # but it couldn't be resolved.
-
-	OSMutexLocker locker(sHTTPProxyTunnelMap->GetMutex());
-	OSRef* theRef = sHTTPProxyTunnelMap->RegisterOrResolve(&fProxyRef);
-	if (theRef == nullptr)
-		return &fProxyRef;
-
-	auto* rtspSession = (RTSPSession*)theRef->GetObject();
-
-	// we can be the only user of the object right now
-	Assert(theRef->GetRefCount() > 0);
-	if (theRef->GetRefCount() > 1 || rtspSession->fSessionType != inSessionType)
-	{
-		sHTTPProxyTunnelMap->Release(theRef);
-		theRef = nullptr;
-	}
-	return theRef;
-}
-
 void RTSPSession::CheckAuthentication() {
 
 	QTSSUserProfile* profile = fRequest->GetUserProfile();
@@ -1591,8 +1143,7 @@ void RTSPSession::SetupRequest()
 	// let's also refresh RTP session timeout so that it's kept alive in sync with the RTSP session.
 	 //
 	 // Attempt to find the RTP session for this request.
-	OSRefTable* theMap = QTSServerInterface::GetServer()->GetRTPSessionMap();
-	theErr = this->FindRTPSession(theMap);
+	fRTPSession = FindRTPSession();
 
 	if (fRTPSession != nullptr)
 	{
@@ -1687,7 +1238,7 @@ void RTSPSession::SetupRequest()
 	// If we don't have an RTP session yet, create one...
 	if (fRTPSession == nullptr)
 	{
-		theErr = this->CreateNewRTPSession(theMap);
+		theErr = CreateNewRTPSession();
 		if (theErr != QTSS_NoErr)
 			return;
 	}
@@ -1752,7 +1303,7 @@ void RTSPSession::CleanupRequest()
 	this->SetRequestBodyLength(-1);
 }
 
-QTSS_Error  RTSPSession::FindRTPSession(OSRefTable* inRefTable)
+RTPSession*  RTSPSession::FindRTPSession()
 {
 	// This function attempts to locate the appropriate RTP session for this RTSP
 	// Request. It uses an RTSP session ID as a key to finding the correct RTP session,
@@ -1763,25 +1314,17 @@ QTSS_Error  RTSPSession::FindRTPSession(OSRefTable* inRefTable)
 	if (!theSessionID.empty())
 	{
 		StrPtrLen theSessionIDV((char *)theSessionID.data(), theSessionID.length());
-		OSRef* theRef = inRefTable->Resolve(&theSessionIDV);
-
-		if (theRef != nullptr)
-			fRTPSession = (RTPSession*)theRef->GetObject();
-
+		return GetRTPSession(&theSessionIDV);
 	}
 
 	// If there wasn't a session ID in the headers, look for one in the RTSP session itself
-	if (theSessionID.empty() && fLastRTPSessionIDPtr.Len > 0)
-	{
-		OSRef* theRef = inRefTable->Resolve(&fLastRTPSessionIDPtr);
-		if (theRef != nullptr)
-			fRTPSession = (RTPSession*)theRef->GetObject();
-	}
+	if (fLastRTPSessionIDPtr.Len > 0)
+		return GetRTPSession(&fLastRTPSessionIDPtr);
 
-	return QTSS_NoErr;
+	return nullptr;
 }
 
-QTSS_Error  RTSPSession::CreateNewRTPSession(OSRefTable* inRefTable)
+QTSS_Error  RTSPSession::CreateNewRTPSession()
 {
 	Assert(fLastRTPSessionIDPtr.Ptr == &fLastRTPSessionID[0]);
 
@@ -1826,7 +1369,7 @@ QTSS_Error  RTSPSession::CreateNewRTPSession(OSRefTable* inRefTable)
 	// Activate adds this session into the RTP session map. We need to therefore
 	// make sure to resolve the RTPSession object out of the map, even though
 	// we don't actually need to pointer.
-	OSRef* theRef = inRefTable->Resolve(&fLastRTPSessionIDPtr);
+	OSRef* theRef = QTSServerInterface::GetServer()->GetRTPSessionMap()->Resolve(&fLastRTPSessionIDPtr);
 	Assert(theRef != nullptr);
 
 	return QTSS_NoErr;
@@ -2019,11 +1562,7 @@ void RTSPSession::HandleIncomingDataPacket()
 		return;
 
 	StrPtrLen theSessionIDV((char *)theSessionID.data(), theSessionID.length());
-	OSRefTable* theMap = QTSServerInterface::GetServer()->GetRTPSessionMap();
-	OSRef* theRef = theMap->Resolve(&theSessionIDV);
-
-	if (theRef != nullptr)
-		fRTPSession = (RTPSession*)theRef->GetObject();
+	fRTPSession = GetRTPSession(&theSessionIDV);
 
 	if (fRTPSession == nullptr)
 		return;

@@ -306,7 +306,6 @@ QTSServerPrefs::QTSServerPrefs(XMLPrefsParser* inPrefsSource, bool inWriteMissin
 	fMinTCPBufferSizeInBytes(0),
 	fMaxTCPBufferSizeInBytes(0),
 	fTCPSecondsToBuffer(0),
-	fDoReportHTTPConnectionAddress(false),
 	fAppendSrcAddrInTransport(false),
 	fSmallWindowSizeInK(0),
 	fMediumWindowSizeInK(0),
@@ -387,7 +386,6 @@ void QTSServerPrefs::SetupAttributes()
 	this->SetVal(qtssPrefsMaxTCPBufferSizeInBytes, &fMaxTCPBufferSizeInBytes, sizeof(fMaxTCPBufferSizeInBytes));
 	this->SetVal(qtssPrefsTCPSecondsToBuffer, &fTCPSecondsToBuffer, sizeof(fTCPSecondsToBuffer));
 
-	this->SetVal(qtssPrefsDoReportHTTPConnectionAddress, &fDoReportHTTPConnectionAddress, sizeof(fDoReportHTTPConnectionAddress));
 	this->SetVal(qtssPrefsSrcAddrInTransport, &fAppendSrcAddrInTransport, sizeof(fAppendSrcAddrInTransport));
 
 	this->SetVal(qtssPrefsSmallWindowSizeInK, &fSmallWindowSizeInK, sizeof(fSmallWindowSizeInK));

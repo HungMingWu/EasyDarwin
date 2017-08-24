@@ -185,8 +185,6 @@ protected:
 	TCPSocket*          fOutputSocketP;
 	TCPSocket*          fInputSocketP;  // <-- usually same as fSocketP, unless we're HTTP Proxying
 
-	void        SnarfInputSocket(RTSPSessionInterface* fromRTSPSession);
-
 	// What session type are we?
 	QTSS_RTSPSessionType    fSessionType{qtssRTSPSession};
 	bool              fLiveSession{true};

@@ -85,7 +85,6 @@ public:
 	StrPtrLen*  GetRequestBuffer() { return fRequestPtr; }
 	bool      IsDataPacket() { return fIsDataPacket; }
 	void        ShowRTSP(bool enable) { fPrintRTSP = enable; }
-	void SnarfRetreat(RTSPRequestStream &fromRequest);
 
 private:
 

@@ -87,9 +87,6 @@ public:
 	uint32_t  GetMaxTCPBufferSizeInBytes() { return fMaxTCPBufferSizeInBytes; }
 	float GetTCPSecondsToBuffer() { return fTCPSecondsToBuffer; }
 
-	//for joining HTTP sessions from behind a round-robin DNS
-	bool  GetDoReportHTTPConnectionAddress() { return fDoReportHTTPConnectionAddress; }
-
 	//for debugging, mainly
 	bool      ShouldServerBreakOnAssert() { return fBreakOnAssert; }
 	bool      IsAutoRestartEnabled() { return fAutoRestart; }
@@ -264,7 +261,6 @@ private:
 	uint32_t  fMaxTCPBufferSizeInBytes;
 	float fTCPSecondsToBuffer;
 
-	bool  fDoReportHTTPConnectionAddress;
 	bool  fAppendSrcAddrInTransport;
 
 	uint32_t  fSmallWindowSizeInK;

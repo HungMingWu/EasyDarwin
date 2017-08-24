@@ -31,7 +31,6 @@ set (SRC
      QTSSFile.cpp QTSSFile.h
      RTPSessionInterface.cpp RTPSessionInterface.h
      QTSSMessages.cpp QTSSMessages.h
-     QTSSSocket.cpp QTSSSocket.h
      RTSPSession.cpp RTSPSession.h
      RTPPacketResender.cpp RTPPacketResender.h
      RTPBandwidthTracker.cpp RTPBandwidthTracker.h
@@ -40,15 +39,13 @@ set (SRC
      RTSPRequest.cpp RTSPRequest.h
 	 QTSSExpirationDate.cpp QTSSExpirationDate.h
 	 RTSPRequestStream.cpp RTSPRequestStream.h
-	 HTTPSessionInterface.cpp HTTPSessionInterface.h
-	 HTTPSession.cpp HTTPSession.h
 	 GenerateXMLPrefs.cpp GenerateXMLPrefs.h
 	 QTSSErrorLogModule.cpp QTSSErrorLogModule.h
 	 RTCPTask.cpp RTCPTask.h)
 
-link_libraries(APIModules HTTPUtilitiesLib RTCPUtilitiesLib RTSPUtilitiesLib PrefsSourceLib
-               APICommonCode APIStubLib EasyRedisClient
-               EasyProtocol CommonUtilitiesLib RTPMetaInfoLib jsoncpp)
+link_libraries(APIModules RTCPUtilitiesLib RTSPUtilitiesLib PrefsSourceLib
+               APICommonCode APIStubLib
+               CommonUtilitiesLib RTPMetaInfoLib)
 IF (MSVC)
 link_libraries(Ws2_32 Winmm)
 set (SRC ${SRC} win32main.cpp)

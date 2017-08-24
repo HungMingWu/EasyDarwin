@@ -597,31 +597,6 @@ QTSS_Object QTSSModuleUtils::GetModuleAttributesObject(QTSS_ModuleObject inModOb
     return theAttributesObject;
 }
 
-QTSS_ModulePrefsObject QTSSModuleUtils::GetModuleObjectByName(const StrPtrLen& inModuleName)
-{
-    QTSS_ModuleObject theModule = nullptr;
-    uint32_t theLen = sizeof(theModule);
-
-    for (int x = 0; sServer->GetValue(qtssSvrModuleObjects, x, &theModule, &theLen) == QTSS_NoErr; x++)
-    {
-        Assert(theModule != nullptr);
-        Assert(theLen == sizeof(theModule));
-        
-        StrPtrLen theName;
-        QTSS_Error theErr = ((QTSSDictionary*)theModule)->GetValuePtr(qtssModName, 0, (void**)&theName.Ptr, &theName.Len);
-        Assert(theErr == QTSS_NoErr);
-        
-        if (inModuleName.Equal(theName))
-            return theModule;
-            
-#if DEBUG
-        theModule = NULL;
-        theLen = sizeof(theModule);
-#endif
-    }
-    return nullptr;
-}
-
 void    QTSSModuleUtils::GetAttribute(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType, 
                                                 void* ioBuffer, void* inDefaultValue, uint32_t inBufferLen)
 {

@@ -28,6 +28,7 @@
 */
 
 #include <boost/spirit/include/qi.hpp>
+#include <boost/algorithm/string/predicate.hpp>
 #include "QTSServerInterface.h"
 #include "QTSSReflectorModule.h"
 #include "QTSSModuleUtils.h"
@@ -45,9 +46,9 @@
 #include "RTSPRequest.h"
 
 #include "QueryParamList.h"
-#include "EasyUtil.h"
 #include "RTSPSession.h"
 #include "QTSSFile.h"
+#include "uri/decode.h"
 
 using namespace std;
 namespace qi = boost::spirit::qi;
@@ -214,7 +215,6 @@ bool KillSession(boost::string_view sdpPath, bool killClients);
 QTSS_Error IntervalRole();
 static bool AcceptSession(QTSS_StandardRTSP_Params* inParams);
 static QTSS_Error RedirectBroadcast(QTSS_StandardRTSP_Params* inParams);
-static QTSS_Error GetDeviceStream(Easy_GetDeviceStream_Params* inParams);
 
 inline void KeepSession(RTSPRequest* theRequest, bool keep)
 {
@@ -251,8 +251,6 @@ QTSS_Error  QTSSReflectorModuleDispatch(QTSS_Role inRole, QTSS_RoleParamPtr inPa
 		return ReflectorAuthorizeRTSPRequest(&inParams->rtspRequestParams);
 	case QTSS_Interval_Role:
 		return IntervalRole();
-	case Easy_GetDeviceStream_Role:
-		return GetDeviceStream(&inParams->easyGetDeviceStreamParams);
 	default: break;
 	}
 	return QTSS_NoErr;
@@ -270,7 +268,6 @@ QTSS_Error Register(QTSS_Register_Params* inParams)
 	(void)QTSS_AddRole(QTSS_RTSPAuthorize_Role);
 	(void)QTSS_AddRole(QTSS_RereadPrefs_Role);
 	(void)QTSS_AddRole(QTSS_RTSPRoute_Role);
-	(void)QTSS_AddRole(Easy_GetDeviceStream_Role);
 
 	// Add text messages attributes
 	static char*        sExpectedDigitFilenameName = "QTSSReflectorModuleExpectedDigitFilename";
@@ -683,16 +680,18 @@ QTSS_Error ProcessRTSPRequest(QTSS_StandardRTSP_Params* inParams)
 static std::string getQueryString(RTSPRequest *pReq) {
 	std::string theQueryString = std::string(pReq->GetQueryString());
 	if (!theQueryString.empty())
-		theQueryString = EasyUtil::Urldecode(theQueryString.data());
+		theQueryString = boost::network::uri::decoded(theQueryString);
 	return theQueryString;
 };
 
 static uint32_t GetChannel(RTSPRequest *pReq) {
+#if 0
 	std::string queryTemp = getQueryString(pReq);
 	QueryParamList parList(const_cast<char *>(queryTemp.c_str()));
 	const char* chnNum = parList.DoFindCGIValueForParam(EASY_TAG_CHANNEL);
 	if (chnNum)
 		return std::stoi(chnNum);
+#endif
 	return 1;
 }
 
@@ -2023,44 +2022,4 @@ QTSS_Error RedirectBroadcast(QTSS_StandardRTSP_Params* inParams)
 	}
 
 	return QTSS_NoErr;
-}
-
-QTSS_Error GetDeviceStream(Easy_GetDeviceStream_Params* inParams)
-{
-	QTSS_Error theErr = QTSS_Unimplemented;
-
-	if (inParams->inDevice && inParams->inStreamType == easyRTSPType)
-	{
-
-		OSMutexLocker locker(sSessionMap->GetMutex());
-
-		std::string inDeviceName(inParams->inDevice);
-		std::string theStreamName = buildStreamName(inDeviceName, inParams->inChannel);
-
-		StrPtrLen inPath((char *)theStreamName.c_str());
-
-		OSRef* theSessionRef = sSessionMap->Resolve(&inPath);
-		ReflectorSession* theSession = nullptr;
-
-		if (theSessionRef)
-		{
-			theSession = (ReflectorSession*)theSessionRef->GetObject();
-			RTPSession* clientSession = theSession->GetBroadcasterSession();
-			Assert(theSession != nullptr);
-
-			if (clientSession)
-			{
-				std::string theFullRequestURL(clientSession->GetAbsoluteURL());
-
-				if (!theFullRequestURL.empty() && inParams->outUrl)
-				{
-					strcpy(inParams->outUrl, theFullRequestURL.c_str());
-					theErr = QTSS_NoErr;
-				}
-			}
-			sSessionMap->Release(theSessionRef);
-		}
-	}
-
-	return theErr;
 }

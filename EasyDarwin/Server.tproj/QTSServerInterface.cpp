@@ -42,11 +42,9 @@
 #include "RTSPProtocol.h"
 #include "RTPPacketResender.h"
 #include "revision.h"
-#include "EasyUtil.h"
 
 // STATIC DATA
 
-uint32_t                  QTSServerInterface::sServerAPIVersion = QTSS_API_VERSION;
 QTSServerInterface*     QTSServerInterface::sServer = nullptr;
 #if __MacOSX__
 StrPtrLen               QTSServerInterface::sServerNameStr("EasyDarwin");
@@ -92,7 +90,7 @@ QTSSAttrInfoDict::AttrInfo  QTSServerInterface::sConnectedUserAttributes[] =
 
 QTSSAttrInfoDict::AttrInfo  QTSServerInterface::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
-	/* 0  */ { "qtssServerAPIVersion",          nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 0  */ {},
 	/* 1  */ { "qtssSvrDefaultDNSName",         nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead },
 	/* 2  */ { "qtssSvrDefaultIPAddr",          nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead },
 	/* 3  */ { "qtssSvrServerName",             nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
@@ -164,7 +162,6 @@ QTSServerInterface::QTSServerInterface()
 	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kServerDictIndex), &fMutex)
 {
 	this->SetVal(qtssSvrState, &fServerState, sizeof(fServerState));
-	this->SetVal(qtssServerAPIVersion, &sServerAPIVersion, sizeof(sServerAPIVersion));
 	this->SetVal(qtssSvrDefaultIPAddr, &fDefaultIPAddr, sizeof(fDefaultIPAddr));
 	this->SetVal(qtssSvrServerName, sServerNameStr.Ptr, sServerNameStr.Len);
 	this->SetVal(qtssSvrServerVersion, sServerVersionStr.Ptr, sServerVersionStr.Len);
@@ -188,8 +185,6 @@ QTSServerInterface::QTSServerInterface()
 
 	this->SetVal(qtssSvrNumThinned, &fNumThinned, sizeof(fNumThinned));
 	this->SetVal(qtssSvrNumThreads, &fNumThreads, sizeof(fNumThreads));
-
-	sprintf(fCloudServiceNodeID, "%s", EasyUtil::GetUUID().c_str());
 
 	sServer = this;
 }

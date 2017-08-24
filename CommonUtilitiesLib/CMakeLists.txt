@@ -33,7 +33,7 @@ set (SRC
 			 TCPListenerSocket.cpp TCPListenerSocket.h
 			 GetWord.c GetWord.h
 			 OSHeap.cpp OSHeap.h
-			 base64.c base64.h
+			 base64.cpp base64.h
 			 sdpCache.cpp sdpCache.h
 			 md5.c md5.h
 			 md5digest.cpp md5digest.h
@@ -41,12 +41,9 @@ set (SRC
 			 DateTranslator.cpp DateTranslator.h
 			 StringTranslator.cpp StringTranslator.h
 			 SDPUtils.cpp SDPUtils.h
-			 Trim.c Trim.h
-			 UserAgentParser.cpp UserAgentParser.h
-			 ClientSocket.cpp ClientSocket.h
 			 keyframecache.cpp keyframecache.h
-			 Format.cpp Format.h
-			 Attributes.h)
+			 Attributes.h
+			 uri/decode.h uri/encode.h)
 IF (MSVC)
 set (SRC ${SRC} win32ev.cpp CreateDump.cpp)
 ELSE()

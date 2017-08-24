@@ -123,17 +123,12 @@ QTSS_Error  QTSSModule::SetupModule(QTSS_CallbacksPtr inCallbacks, QTSS_MainEntr
 
 	// Invoke the private initialization routine
 	QTSS_PrivateArgs thePrivateArgs;
-	thePrivateArgs.inServerAPIVersion = QTSS_API_VERSION;
 	thePrivateArgs.inCallbacks = inCallbacks;
-	thePrivateArgs.outStubLibraryVersion = 0;
 	thePrivateArgs.outDispatchFunction = nullptr;
 
 	theErr = (inEntrypoint)(&thePrivateArgs);
 	if (theErr != QTSS_NoErr)
 		return theErr;
-
-	if (thePrivateArgs.outStubLibraryVersion > thePrivateArgs.inServerAPIVersion)
-		return QTSS_WrongVersion;
 
 	// Set the dispatch function so we'll be able to invoke this module later on
 
@@ -190,7 +185,6 @@ int32_t QTSSModule::GetPrivateRoleIndex(QTSS_Role apiRole)
 	case Easy_RedisGetAssociatedCMS_Role:	return kRedisGetAssociatedCMSRole;
 	case Easy_RedisJudgeStreamID_Role:	return kRedisJudgeStreamIDRole;
 
-	case Easy_GetDeviceStream_Role:		return kGetDeviceStreamRole;
 	case Easy_LiveDeviceStream_Role:	return kLiveDeviceStreamRole;
 	default:
 		return -1;

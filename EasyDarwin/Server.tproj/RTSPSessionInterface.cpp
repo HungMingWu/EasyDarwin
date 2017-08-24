@@ -304,34 +304,6 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, uint32_t inLen
 
 }
 
-/*
-	take the TCP socket away from a RTSP session that's
-	waiting to be snarfed.
-
-*/
-
-void    RTSPSessionInterface::SnarfInputSocket(RTSPSessionInterface* fromRTSPSession)
-{
-	Assert(fromRTSPSession != nullptr);
-	Assert(fromRTSPSession->fOutputSocketP != nullptr);
-
-	// grab the unused, but already read fromsocket data
-	// this should be the first RTSP request
-	if (sDoBase64Decoding)
-		fInputStream.IsBase64Encoded(true); // client sends all data base64 encoded
-	fInputStream.SnarfRetreat(fromRTSPSession->fInputStream);
-
-	if (fInputSocketP == fOutputSocketP)
-		fInputSocketP = new TCPSocket(this, Socket::kNonBlockingSocketType);
-	else
-		fInputSocketP->Cleanup();   // if this is a socket replacing an old socket, we need
-									// to make sure the file descriptor gets closed
-	fInputSocketP->SnarfSocket(fromRTSPSession->fSocket);
-
-	// fInputStream, meet your new input socket
-	fInputStream.AttachToSocket(fInputSocketP);
-}
-
 std::string RTSPSessionInterface::GetLocalAddr()
 {
 	StrPtrLen* theLocalAddrStr = fSocket.GetLocalAddrStr();

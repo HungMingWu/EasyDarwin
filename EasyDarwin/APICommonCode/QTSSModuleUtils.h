@@ -134,11 +134,7 @@ class QTSSModuleUtils
                 // Called by SendDescribeResponse to coalesce iovec to a buffer
                 // Allocates memory - remember to delete it!
                 static char* CoalesceVectors(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength);
-                                                                                                                                                    
-        //
-        // SEARCH FOR A SPECIFIC MODULE OBJECT                          
-        static QTSS_ModulePrefsObject GetModuleObjectByName(const StrPtrLen& inModuleName);
-        
+                                                                                                                                                            
         //
         // GET MODULE PREFS OBJECT
         static QTSS_ModulePrefsObject GetModulePrefsObject(QTSS_ModuleObject inModObject);

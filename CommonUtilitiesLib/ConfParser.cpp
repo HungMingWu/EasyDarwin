@@ -30,7 +30,6 @@
 #include "OSHeaders.h"
 
 #include "GetWord.h"
-#include "Trim.h"
 
 #include <string.h> 
 #include <stdio.h>  
@@ -128,7 +127,7 @@ int ParseConfigFile(
 			error = 0; // allow empty lines at beginning of file.
 
 			// trim the leading whitespace
-			next = TrimLeft(lineBuff);
+			next = lineBuff;
 
 			if (*next)
 			{
@@ -171,7 +170,7 @@ int ParseConfigFile(
 						while (maxValues < kConfParserMaxParamValues && *next)
 						{
 							// ace
-							next = TrimLeft(next);
+							next = next;
 
 							if (*next)
 							{

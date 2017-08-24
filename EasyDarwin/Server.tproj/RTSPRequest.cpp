@@ -46,6 +46,7 @@
 #include "base64.h"
 #include "DateTranslator.h"
 #include "SocketUtils.h"
+#include "uri/decode.h"
 
 static boost::string_view    sDefaultRealm("Streaming Server");
 static boost::string_view    sAuthBasicStr("Basic");
@@ -261,29 +262,14 @@ QTSS_Error RTSPRequest::ParseURI(boost::string_view fulluri)
 
 	//path strings are statically allocated. Therefore, if they are longer than
 	//this length we won't be able to handle the request.
-	boost::string_view theURLParam = GetURI();
-	StrPtrLen theURLParamV((char *)theURLParam.data(), theURLParam.length());
-	if (theURLParam.length() > RTSPRequestInterface::kMaxFilePathSizeInBytes)
-		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgURLTooLong, &theURLParamV);
+	std::string theURLParam(GetURI());
 
 	//decode the URL, put the result in the separate buffer for the file path,
 	//set the file path StrPtrLen to the proper value
-	int32_t theBytesWritten = StringTranslator::DecodeURL((char *)theURLParam.data(), theURLParam.length(),
-		fFilePath, RTSPRequestInterface::kMaxFilePathSizeInBytes);
-	//if negative, an error occurred, reported as an QTSS_Error
-	//we also need to leave room for a terminator.
-	if ((theBytesWritten < 0) || (theBytesWritten == RTSPRequestInterface::kMaxFilePathSizeInBytes))
-	{
-		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgURLInBadFormat, &theURLParamV);
-	}
+	fFilePath = boost::network::uri::decoded(theURLParam);
 
-	// Convert from a / delimited path to a local file system path
-	StringTranslator::DecodePath(fFilePath, theBytesWritten);
-
-	//setup the proper QTSS param
-	fFilePath[theBytesWritten] = '\0';
 	//this->SetVal(qtssRTSPReqFilePath, fFilePath, theBytesWritten);
-	SetAbsolutePath({ (char *)fFilePath, (size_t)theBytesWritten });
+	SetAbsolutePath(fFilePath);
 
 	return QTSS_NoErr;
 }
@@ -666,12 +652,9 @@ QTSS_Error RTSPRequest::ParseBasicHeader(boost::string_view inParsedAuthLine)
 	if (authWord.empty())
 		return theErr;
 
-	auto *decodedAuthWord = new char[Base64decode_len(authWord.c_str()) + 1];
-	std::unique_ptr<char[]> decodedAuthWordDeleter(decodedAuthWord);
+	std::vector<char> decodedAuthWord = base64_decode(authWord);
 
-	(void)Base64decode(decodedAuthWord, authWord.c_str());
-
-	boost::string_view nameAndPassword(decodedAuthWord, ::strlen(decodedAuthWord));
+	boost::string_view nameAndPassword(decodedAuthWord.data(), decodedAuthWord.size());
 	std::string  name, password;
 
 	bool r = qi::phrase_parse(nameAndPassword.cbegin(), nameAndPassword.cend(),

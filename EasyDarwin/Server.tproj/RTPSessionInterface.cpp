@@ -201,10 +201,7 @@ void RTPSessionInterface::SetChallengeParams(QTSS_AuthScheme scheme, uint32_t qo
 			int64_t theMicroseconds = OS::Microseconds();
 			::srand((unsigned int)theMicroseconds);
 			std::string randomNumStr = std::to_string(::rand());
-			size_t AuthOpaque_Len = Base64encode_len(randomNumStr.length());
-			std::unique_ptr<char[]> opaqueStr(new char[AuthOpaque_Len]);
-			(void)Base64encode(opaqueStr.get(), randomNumStr.c_str(), (int)randomNumStr.length());
-			fAuthOpaque = std::string(opaqueStr.get(), AuthOpaque_Len);
+			fAuthOpaque = base64_encode(randomNumStr.c_str(), randomNumStr.length());
 		}
 		else {
 			fAuthOpaque.clear();
@@ -229,10 +226,7 @@ void RTPSessionInterface::UpdateDigestAuthChallengeParams(bool newNonce, bool cr
 		int64_t theMicroseconds = OS::Microseconds();
 		::srand((unsigned int)theMicroseconds);
 		std::string randomNumStr = std::to_string(::rand());
-		size_t AuthOpaque_Len = Base64encode_len(randomNumStr.length());
-		std::unique_ptr<char[]> opaqueStr(new char[AuthOpaque_Len]);
-		(void)Base64encode(opaqueStr.get(), randomNumStr.c_str(), (int)randomNumStr.length());
-		fAuthOpaque = std::string(opaqueStr.get(), AuthOpaque_Len);
+		fAuthOpaque = base64_encode(randomNumStr.c_str(), randomNumStr.length());
 	}
 	else {
 		fAuthOpaque.clear();

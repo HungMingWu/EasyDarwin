@@ -41,72 +41,12 @@
 #include "RTSPRequest.h"
 #include "RTPSession.h"
 
-//class RTSPMsg;
-//class RTSPSessionHandler;
-class RTSPSession;
-
-//class RTSPMsg
-//{
-//public:
-//	RTSPMsg() : fQueueElem() { fQueueElem.SetEnclosingObject(this); this->Reset(); }
-//	void Reset() { // make packet ready to reuse fQueueElem is always in use
-//		fTimeArrived = 0;
-//		fPacketPtr.Set(fPacketData, 0);
-//		fIsData = true;
-//		fMsgCountID = 0;
-//	}
-//
-//	~RTSPMsg() {}
-//
-//	void    SetMsgData(char *data, uint32_t len)
-//	{
-//		Assert(kMaxRTSPMsgLen > len);
-//
-//		if (len > kMaxRTSPMsgLen)
-//        {
-//            printf("len > kMaxRTSPMsgLen\n");
-//			len = kMaxRTSPMsgLen;
-//        }
-//
-//		if (len > 0)
-//			memcpy(this->fPacketPtr.Ptr, data, len);
-//		this->fPacketPtr.Len = len;
-//	}
-//
-//	bool  IsData() { return fIsData; }
-//	inline  uint16_t  GetPacketSeqNum();
-//
-//private:
-//
-//	enum
-//	{
-//		kMaxRTSPMsgLen = 2060
-//	};
-//
-//	int64_t      fTimeArrived;
-//	OSQueueElem fQueueElem;
-//	char        fPacketData[kMaxRTSPMsgLen];
-//	StrPtrLen   fPacketPtr;
-//	bool      fIsData;
-//	uint64_t      fMsgCountID;
-//
-//	friend class RTSPSession;
-//	friend class RTSPSessionHandler;
-//};
-//
-//uint16_t RTSPMsg::GetPacketSeqNum()
-//{
-//	return 0;
-//}
 class RTSPSession : public RTSPSessionInterface
 {
 public:
 
-	RTSPSession(bool doReportHTTPConnectionAddress);
+	RTSPSession();
 	~RTSPSession() override;
-
-	// Call this before using this object
-	static void Initialize();
 
 	bool IsPlaying() { if (fRTPSession == nullptr) return false; if (fRTPSession->GetSessionState() == qtssPlayingState) return true; return false; }
 	inline void addAttribute(boost::string_view key, boost::any value) {
@@ -123,8 +63,8 @@ private:
 	int64_t Run() override;
 
 	// Gets & creates RTP session for this request.
-	QTSS_Error  FindRTPSession(OSRefTable* inTable);
-	QTSS_Error  CreateNewRTPSession(OSRefTable* inTable);
+	RTPSession*  FindRTPSession();
+	QTSS_Error  CreateNewRTPSession();
 	void        SetupClientSessionAttrs();
 
 	// Does request prep & request cleanup, respectively
@@ -151,50 +91,12 @@ private:
 	RTSPRequest*        fRequest{ nullptr };
 	RTPSession*         fRTPSession{ nullptr };
 
-    //RTSPSessionHandler* fRTSPSessionHandler;
-
-
-	/* -- begin adds for HTTP ProxyTunnel -- */
-
-	// This gets grabbed whenever the input side of the session is being used.
-	// It is to protect POST snarfage while input stuff is in action
 	OSMutex             fReadMutex;
-
-	OSRef*              RegisterRTSPSessionIntoHTTPProxyTunnelMap(QTSS_RTSPSessionType inSessionType);
-	QTSS_Error          PreFilterForHTTPProxyTunnel();              // prefilter for HTTP proxies
-	bool              ParseProxyTunnelHTTP();                     // use by PreFilterForHTTPProxyTunnel
 	void                HandleIncomingDataPacket();
 
-	static              OSRefTable* sHTTPProxyTunnelMap;    // a map of available partners.
-
-	enum
-	{
-		kMaxHTTPResponseLen = 512
-	};
-
-	char                fProxySessionID[QTSS_MAX_SESSION_ID_LENGTH];    // our magic cookie to match proxy connections
-	StrPtrLen           fProxySessionIDPtr;
-	OSRef               fProxyRef;
-	enum
-	{
-		// the kinds of HTTP Methods we're interested in for
-		// RTSP tunneling
-		kHTTPMethodInit       // initialize to this
-		, kHTTPMethodUnknown    // tested, but unknown
-		, kHTTPMethodGet        // found one of these methods...
-		, kHTTPMethodPost
-	};
-
-	uint16_t      fHTTPMethod{ kHTTPMethodInit };
-	bool      fWasHTTPRequest{ false };
-	bool      fFoundValidAccept{ false };
-	bool      fDoReportHTTPConnectionAddress; // true if we need to report our IP adress in reponse to the clients GET request (necessary for servers behind DNS round robin)
-	/* -- end adds for HTTP ProxyTunnel -- */
-
-
-		// Module invocation and module state.
-		// This info keeps track of our current state so that
-		// the state machine works properly.
+	// Module invocation and module state.
+	// This info keeps track of our current state so that
+	// the state machine works properly.
 	enum
 	{
 		kReadingRequest = 0,
@@ -210,9 +112,6 @@ private:
 
 		// states that RTSP sessions that setup RTSP
 		// through HTTP tunnels pass through
-		kWaitingToBindHTTPTunnel = 10,                  // POST or GET side waiting to be joined with it's matching half
-		kSocketHasBeenBoundIntoHTTPTunnel = 11,         // POST side after attachment by GET side ( its dying )
-		kHTTPFilteringRequest = 12,                     // after kReadingRequest, enter this state
 		kReadingFirstRequest = 13,                      // initial state - the only time we look for an HTTP tunnel
 		kHaveNonTunnelMessage = 14                  // we've looked at the message, and its not an HTTP tunnle message
 	};

@@ -262,7 +262,6 @@ protected:
 	enum
 	{
 		kMovieFolderBufSizeInBytes = 256,   //uint32_t
-		kMaxFilePathSizeInBytes = 256       //uint32_t
 	};
 
 	QTSS_RTSPMethod             fMethod;            //Method of this request
@@ -301,7 +300,7 @@ protected:
 
 	//Because of URL decoding issues, we need to make a copy of the file path.
 	//Here is a buffer for it.
-	char                        fFilePath[kMaxFilePathSizeInBytes];
+	std::string                 fFilePath;
 	char                        fMovieFolderPath[kMovieFolderBufSizeInBytes];
 	char*                       fMovieFolderPtr;
 

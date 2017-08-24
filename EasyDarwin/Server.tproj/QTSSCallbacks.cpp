@@ -35,7 +35,6 @@
 #include "RTPSession.h"
 #include "OS.h"
 #include "QTSSFile.h"
-#include "QTSSSocket.h"
 #include "QTSServerInterface.h"
 #include "QTSSDataConverter.h"
 #include "QTSSModule.h"
@@ -43,12 +42,8 @@
 
 #include <errno.h>
 
-#include "EasyProtocolDef.h"
-#include "EasyProtocol.h"
-
 #include "ReflectorSession.h"
 
-using namespace EasyDarwin::Protocol;
 using namespace std;
 
 #define __QTSSCALLBACKS_DEBUG__ 0
@@ -510,48 +505,4 @@ QTSS_Error	QTSSCallbacks::QTSS_Authorize(RTSPRequest* inAuthRequestObject, std::
 	*outAuthRealm = std::string(inAuthRequestObject->GetURLRealm());
 
 	return theErr;
-}
-
-void* QTSSCallbacks::Easy_GetRTSPPushSessions()
-{
-	OSRefTable* reflectorSessionMap = QTSServerInterface::GetServer()->GetReflectorSessionMap();
-
-	EasyMsgSCRTSPLiveSessionsACK ack;
-	ack.SetHeaderValue(EASY_TAG_VERSION, "1.0");
-	ack.SetHeaderValue(EASY_TAG_CSEQ, "1");
-
-	uint32_t uIndex = 0;
-	OSMutexLocker locker(reflectorSessionMap->GetMutex());
-
-	for (OSRefHashTableIter theIter(reflectorSessionMap->GetHashTable()); !theIter.IsDone(); theIter.Next())
-	{
-		OSRef* theRef = theIter.GetCurrent();
-		auto* theSession = (ReflectorSession*)theRef->GetObject();
-
-		EasyDarwinRTSPSession session;
-		session.index = uIndex;
-
-		RTPSession* clientSession = theSession->GetBroadcasterSession();
-
-		if (clientSession == nullptr) continue;
-
-		session.Url = std::string(clientSession->GetAbsoluteURL());
-		session.Name = theSession->GetStreamName().data();
-		session.numOutputs = theSession->GetNumOutputs();
-		session.channel = theSession->GetChannelNum();
-		ack.AddSession(session);
-		uIndex++;
-	}
-
-	char count[16] = { 0 };
-	sprintf(count, "%d", uIndex);
-	ack.SetBodyValue(EASY_TAG_SESSION_COUNT, count);
-
-	string msg = ack.GetMsg();
-
-	uint32_t theMsgLen = strlen(msg.c_str());
-	auto* retMsg = new char[theMsgLen + 1];
-	retMsg[theMsgLen] = '\0';
-	strncpy(retMsg, msg.c_str(), strlen(msg.c_str()));
-	return (void*)retMsg;
 }

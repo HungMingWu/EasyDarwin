@@ -51,7 +51,6 @@ QTSS_Error _stublibrary_main(void* inPrivateArgs, QTSS_DispatchFuncPtr inDispatc
     
     // Send requested information back to the server
     
-    theArgs->outStubLibraryVersion = QTSS_API_VERSION;
     theArgs->outDispatchFunction = inDispatchFunc;
     
     return QTSS_NoErr;
@@ -193,9 +192,4 @@ QTSS_Error  QTSS_Authenticate(  const char* inAuthUserName,
 QTSS_Error	QTSS_Authorize(RTSPRequest* inAuthRequestObject, char** outAuthRealm, bool* outAuthUserAllowed)
 {
     return (sCallbacks->addr [kAuthorizeCallback]) (inAuthRequestObject, outAuthRealm, outAuthUserAllowed);
-}
-
-void* Easy_GetRTSPPushSessions()
-{
-	return (void *) ((QTSS_CallbackPtrProcPtr) sCallbacks->addr [kGetRTSPPushSessionsCallback]) ();
 }

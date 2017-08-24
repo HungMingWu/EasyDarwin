@@ -50,17 +50,6 @@ RTSPRequestStream::RTSPRequestStream(TCPSocket* sock)
 	fPrintRTSP(false)
 {}
 
-void RTSPRequestStream::SnarfRetreat(RTSPRequestStream &fromRequest)
-{
-	// Simplest thing to do is to just completely blow away everything in this current
-	// stream, and replace it with the retreat bytes from the other stream.
-	fRequestPtr = nullptr;
-	Assert(fRetreatBytes < kRequestBufferSizeInBytes);
-	fRetreatBytes = fromRequest.fRetreatBytes;
-	fEncodedBytesRemaining = fCurOffset = fRequest.Len = 0;
-	::memcpy(&fRequestBuffer[0], fromRequest.fRequest.Ptr + fromRequest.fRequest.Len, fromRequest.fRetreatBytes);
-}
-
 QTSS_Error RTSPRequestStream::ReadRequest()
 {
 	while (true)
@@ -342,7 +331,7 @@ QTSS_Error RTSPRequestStream::DecodeIncomingData(char* inSrcData, uint32_t inSrc
 		Assert((encodedBytesConsumed & 3) == 0);
 		Assert((bytesToDecode & 3) == 0);
 
-		uint32_t bytesDecoded = Base64decode(fRequest.Ptr + fRequest.Len, inSrcData + encodedBytesConsumed);
+		uint32_t bytesDecoded = 0;// Base64decode(fRequest.Ptr + fRequest.Len, inSrcData + encodedBytesConsumed);
 
 		// If bytesDecoded is 0, we will end up being in an endless loop. The
 		// base64 must be corrupt, so let's just return an error and abort

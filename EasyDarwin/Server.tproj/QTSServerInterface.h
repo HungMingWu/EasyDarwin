@@ -233,8 +233,6 @@ public:
 	//this function. This returns a pair pre-bound to the IPAddr specified.
 	UDPSocketPool*      GetSocketPool() { return fSocketPool; }
 
-	char* GetCloudServiceNodeID() { return fCloudServiceNodeID; }
-
 	QTSServerPrefs*     GetPrefs() { return fSrvrPrefs; }
 	QTSSMessages*       GetMessages() { return fSrvrMessages; }
 
@@ -337,8 +335,6 @@ protected:
 	static std::list<QTSSModule*>                  sModuleQueue;
 	static QTSSErrorLogStream       sErrorLogStream;
 
-	char fCloudServiceNodeID[QTSS_MAX_SESSION_ID_LENGTH];
-
 private:
 
 	enum
@@ -348,7 +344,6 @@ private:
 
 	static void* TimeConnected(QTSSDictionary* inConnection, uint32_t* outLen);
 
-	static uint32_t       sServerAPIVersion;
 	static StrPtrLen    sServerNameStr;
 	static StrPtrLen    sServerVersionStr;
 	static StrPtrLen    sServerBuildStr;

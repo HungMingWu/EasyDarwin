@@ -62,7 +62,7 @@ public:
 	// name of the module will be its file name. Otherwise, the
 	// inName parameter will set it.
 
-	QTSSModule(char* inName, char* inPath = nullptr);
+	QTSSModule(char* inPath = nullptr);
 
 	// This function does all the module setup. If the module is being
 	// loaded from disk, you need not pass in a main entrypoint (as
@@ -96,22 +96,7 @@ public:
 	{
 		int32_t theRoleIndex = -1;
 
-		if (MODULE_DEBUG)
-		{
-			this->GetValue(qtssModName)->PrintStr("QTSSModule::CallDispatch ENTER module=", " role=");
-			theRoleIndex = GetPrivateRoleIndex(inRole);
-			if (theRoleIndex != -1)
-				printf(" %s ENTR\n", sRoleNames[theRoleIndex]);
-
-		}
 		QTSS_Error theError = (fDispatchFunc)(inRole, inParams);
-
-		if (MODULE_DEBUG)
-		{
-			this->GetValue(qtssModName)->PrintStr("QTSSModule::CallDispatch EXIT  module=", " role=");
-			if (theRoleIndex != -1)
-				printf(" %s EXIT\n", sRoleNames[theRoleIndex]);
-		}
 
 		return theError;
 	}
@@ -121,7 +106,6 @@ public:
 	// add new RoleNames to sRoleNames in QTSSModule.cpp for debugging       
 	enum
 	{
-		kInitializeRole = 0,
 		kShutdownRole = 1,
 		kRTSPFilterRole = 2,
 		kRTSPRouteRole = 3,

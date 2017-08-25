@@ -110,7 +110,7 @@ QTSSAttrInfoDict::AttrInfo  QTSServerInterface::sAttributes[] =
 	/* 17 */ { "qtssRTPSvrAvgBandwidth",        nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead },
 	/* 18 */ { "qtssRTPSvrCurPackets",          nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead },
 	/* 19 */ { "qtssRTPSvrTotalPackets",        nullptr,   qtssAttrDataTypeuint64_t,     qtssAttrModeRead },
-	/* 20 */ { "qtssSvrHandledMethods",         nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe  },
+	/* 20 */ {},
 	/* 21 */ { "qtssSvrModuleObjects",          nullptr,   qtssAttrDataTypeQTSS_Object,qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 22 */ { "qtssSvrStartupTime",            nullptr,   qtssAttrDataTypeTimeVal,    qtssAttrModeRead },
 	/* 23 */ { "qtssSvrGMTOffsetInHrs",         nullptr,   qtssAttrDataTypeint32_t,     qtssAttrModeRead },

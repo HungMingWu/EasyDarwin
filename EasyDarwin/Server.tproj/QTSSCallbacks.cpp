@@ -49,19 +49,6 @@ using namespace std;
 #define __QTSSCALLBACKS_DEBUG__ 0
 #define debug_printf if (__QTSSCALLBACKS_DEBUG__) printf
 
-QTSS_Error  QTSSCallbacks::QTSS_AddRole(QTSS_Role inRole)
-{
-	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
-	if (OSThread::GetCurrent() != nullptr)
-		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
-
-	// Roles can only be added before modules have had their Initialize role invoked.
-	if ((theState == nullptr) || (theState->curRole != QTSS_Register_Role))
-		return QTSS_OutOfState;
-
-	return theState->curModule->AddRole(inRole);
-}
-
 QTSS_Error  QTSSCallbacks::QTSS_AddStaticAttribute(QTSS_ObjectType inObjectType, const char* inAttrName, void* inUnused, QTSS_AttrDataType inAttrDataType)
 {
 	Assert(inUnused == nullptr);
@@ -70,7 +57,7 @@ QTSS_Error  QTSSCallbacks::QTSS_AddStaticAttribute(QTSS_ObjectType inObjectType,
 		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
 
 	// Static attributes can only be added before modules have had their Initialize role invoked.
-	if ((theState == nullptr) || (theState->curRole != QTSS_Register_Role))
+	if (theState == nullptr)
 		return QTSS_OutOfState;
 
 	uint32_t theDictionaryIndex = QTSSDictionaryMap::GetMapIndex(inObjectType);
@@ -111,22 +98,6 @@ QTSS_Error  QTSSCallbacks::QTSS_IDForAttr(QTSS_ObjectType inType, const char* in
 	return QTSSDictionaryMap::GetMap(theDictionaryIndex)->GetAttrID(inName, outID);
 }
 
-QTSS_Error QTSSCallbacks::QTSS_GetAttrInfoByIndex(QTSS_Object inObject, uint32_t inIndex, QTSS_Object* outAttrInfoObject)
-{
-	if (inObject == nullptr)
-		return QTSS_BadArgument;
-
-	return ((QTSSDictionary*)inObject)->GetAttrInfoByIndex(inIndex, (QTSSAttrInfoDict**)outAttrInfoObject);
-}
-
-QTSS_Error QTSSCallbacks::QTSS_GetAttrInfoByID(QTSS_Object inObject, QTSS_AttributeID inAttrID, QTSS_Object* outAttrInfoObject)
-{
-	if (inObject == nullptr || (inAttrID == qtssIllegalAttrID))
-		return QTSS_BadArgument;
-
-	return ((QTSSDictionary*)inObject)->GetAttrInfoByID(inAttrID, (QTSSAttrInfoDict**)outAttrInfoObject);
-}
-
 QTSS_Error QTSSCallbacks::QTSS_GetAttrInfoByName(QTSS_Object inObject, const char* inAttrName, QTSS_Object* outAttrInfoObject)
 {
 	if (inObject == nullptr)
@@ -142,81 +113,6 @@ QTSS_Error  QTSSCallbacks::QTSS_SetValue(QTSS_Object inDictionary, QTSS_Attribut
 	return ((QTSSDictionary*)inDictionary)->SetValue(inID, inIndex, inBuffer, inLen);
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_SetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, const void* inBuffer, uint32_t inLen)
-{
-	if ((inDictionary == nullptr) || ((inBuffer == nullptr) && (inLen > 0)))
-		return QTSS_BadArgument;
-	return ((QTSSDictionary*)inDictionary)->SetValuePtr(inID, inBuffer, inLen);
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_GetNumValues(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t* outNumValues)
-{
-	if ((inObject == nullptr) || (outNumValues == nullptr) || (inID == qtssIllegalAttrID))
-		return QTSS_BadArgument;
-
-	*outNumValues = ((QTSSDictionary*)inObject)->GetNumValues(inID);
-	return QTSS_NoErr;
-}
-
-QTSS_Error QTSSCallbacks::QTSS_GetNumAttributes(QTSS_Object inObject, uint32_t* outNumValues)
-{
-
-	if (outNumValues == nullptr)
-		return QTSS_BadArgument;
-
-	if (inObject == nullptr)
-		return QTSS_BadArgument;
-
-	OSMutexLocker locker(((QTSSDictionary*)inObject)->GetMutex());
-
-	*outNumValues = 0;
-
-	// Get the Static Attribute count
-	QTSSDictionaryMap* theMap = ((QTSSDictionary*)inObject)->GetDictionaryMap();
-	if (theMap != nullptr)
-		*outNumValues += theMap->GetNumNonRemovedAttrs();
-	// Get the Instance Attribute count
-	theMap = ((QTSSDictionary*)inObject)->GetInstanceDictMap();
-	if (theMap != nullptr)
-		*outNumValues += theMap->GetNumNonRemovedAttrs();
-
-	return QTSS_NoErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_Write(QTSS_StreamRef inStream, void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags)
-{
-	if (inStream == nullptr)
-		return QTSS_BadArgument;
-	QTSS_Error theErr = ((QTSSStream*)inStream)->Write(inBuffer, inLen, outLenWritten, inFlags);
-
-	// Server internally propogates POSIX errorcodes such as EAGAIN and ENOTCONN up to this
-	// level. The API guarentees that no POSIX errors get returned, so we have QTSS_Errors
-	// to replace them. So we have to replace them here.
-	if (theErr == EAGAIN)
-		return QTSS_WouldBlock;
-	else if (theErr > 0)
-		return QTSS_NotConnected;
-	else
-		return theErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_Read(QTSS_StreamRef inStream, void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead)
-{
-	if ((inStream == nullptr) || (ioBuffer == nullptr))
-		return QTSS_BadArgument;
-	QTSS_Error theErr = ((QTSSStream*)inStream)->Read(ioBuffer, inBufLen, outLengthRead);
-
-	// Server internally propogates POSIX errorcodes such as EAGAIN and ENOTCONN up to this
-	// level. The API guarentees that no POSIX errors get returned, so we have QTSS_Errors
-	// to replace them. So we have to replace them here.
-	if (theErr == EAGAIN)
-		return QTSS_WouldBlock;
-	else if (theErr > 0)
-		return QTSS_NotConnected;
-	else
-		return theErr;
-}
-
 QTSS_Error  QTSSCallbacks::QTSS_AddService(const char* inServiceName, QTSS_ServiceFunctionPtr inFunctionPtr)
 {
 	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
@@ -225,10 +121,6 @@ QTSS_Error  QTSSCallbacks::QTSS_AddService(const char* inServiceName, QTSS_Servi
 
 	// This may happen if this callback is occurring on module-created thread
 	if (theState == nullptr)
-		return QTSS_OutOfState;
-
-	// Roles can only be added before modules have had their Initialize role invoked.
-	if (theState->curRole != QTSS_Register_Role)
 		return QTSS_OutOfState;
 
 	return QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kServiceDictIndex)->
@@ -257,29 +149,6 @@ QTSS_Error  QTSSCallbacks::QTSS_DoService(QTSS_ServiceID inID, QTSS_ServiceFunct
 	return (theFunction)(inArgs);
 }
 
-QTSS_Error  QTSSCallbacks::QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_EventType inEventMask)
-{
-	// First thing to do is to alter the thread's module state to reflect the fact
-	// that an event is outstanding.
-	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
-	if (OSThread::GetCurrent() != nullptr)
-		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
-
-	if (theState == nullptr)
-		return QTSS_RequestFailed;
-
-	if (theState->curTask == nullptr)
-		return QTSS_OutOfState;
-
-	theState->eventRequested = true;
-
-	// Now, tell this stream to be ready for the requested event
-	auto* theStream = (QTSSStream*)inStream;
-	theStream->SetTask(theState->curTask);
-	theStream->RequestEvent(inEventMask);
-	return QTSS_NoErr;
-}
-
 QTSS_Error  QTSSCallbacks::QTSS_SetIdleTimer(int64_t inMsecToWait)
 {
 	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
@@ -293,216 +162,6 @@ QTSS_Error  QTSSCallbacks::QTSS_SetIdleTimer(int64_t inMsecToWait)
 	if (theState->curTask == nullptr)
 		return QTSS_OutOfState;
 
-	theState->eventRequested = true;
 	theState->idleTime = inMsecToWait;
 	return QTSS_NoErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_SetIdleRoleTimer(int64_t inMsecToWait)
-{
-
-	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
-	if (OSThread::GetCurrent() != nullptr)
-		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
-
-	// This may happen if this callback is occurring on module-created thread
-	if (theState == nullptr)
-		return QTSS_RequestFailed;
-
-	if (theState->curModule == nullptr)
-		return QTSS_RequestFailed;
-
-
-	QTSSModule* theModule = theState->curModule;
-	QTSS_ModuleState* thePrivateModuleState = theModule->GetModuleState();
-	thePrivateModuleState->idleTime = inMsecToWait;
-	theModule->Signal(Task::kUpdateEvent);
-
-
-	return QTSS_NoErr;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_RequestLockedCallback()
-{
-	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
-	if (OSThread::GetCurrent() != nullptr)
-		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
-
-	// This may happen if this callback is occurring on module-created thread
-	if (theState == nullptr)
-		return QTSS_RequestFailed;
-
-	if (theState->curTask == nullptr)
-		return QTSS_OutOfState;
-
-	theState->globalLockRequested = true; //x
-
-	return QTSS_NoErr;
-}
-
-bool      QTSSCallbacks::QTSS_IsGlobalLocked()
-{
-	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
-	if (OSThread::GetCurrent() != nullptr)
-		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
-
-	// This may happen if this callback is occurring on module-created thread
-	if (theState == nullptr)
-		return false;
-
-	if (theState->curTask == nullptr)
-		return false;
-
-	return theState->isGlobalLocked;
-}
-
-QTSS_Error  QTSSCallbacks::QTSS_Authenticate(const char* inAuthUserName, const char* inAuthResourceLocalPath, const char* inAuthMoviesDir, QTSS_ActionFlags inAuthRequestAction, QTSS_AuthScheme inAuthScheme, RTSPRequest* ioAuthRequestObject)
-{
-	if ((inAuthUserName == nullptr) || (inAuthResourceLocalPath == nullptr) || (inAuthMoviesDir == nullptr) || (ioAuthRequestObject == nullptr))
-		return QTSS_BadArgument;
-	if (inAuthRequestAction == qtssActionFlagsNoFlags)
-		return QTSS_BadArgument;
-	if (inAuthScheme == qtssAuthNone)
-		return QTSS_BadArgument;
-
-	// First create a RTSPRequestInterface object 
-	// There is no session attached to it, so just pass in NULL for the RTSPSession
-	// Set all the attributes required by the authentication module, using the input values
-	ioAuthRequestObject->SetAuthUserName({ inAuthUserName, ::strlen(inAuthUserName) });
-	ioAuthRequestObject->SetLocalPath({ inAuthResourceLocalPath, ::strlen(inAuthResourceLocalPath) });
-	ioAuthRequestObject->SetRootDir({ inAuthMoviesDir, ::strlen(inAuthMoviesDir) });
-	ioAuthRequestObject->SetAction(inAuthRequestAction);
-	ioAuthRequestObject->SetAuthScheme(inAuthScheme);
-	QTSSUserProfile *profile = ioAuthRequestObject->GetUserProfile();
-	(void)profile->SetValue(qtssUserName, 0, inAuthUserName, ::strlen(inAuthUserName), QTSSDictionary::kDontObeyReadOnly);
-
-
-	// Because this is a role being executed from inside a callback, we need to
-	// make sure that QTSS_RequestEvent will not work.
-	Task* curTask = nullptr;
-	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
-	if (OSThread::GetCurrent() != nullptr)
-		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
-
-	if (theState != nullptr)
-		curTask = theState->curTask;
-
-	// Setup the authentication param block
-	QTSS_RoleParams theAuthenticationParams;
-	//theAuthenticationParams.rtspAthnParams.inRTSPRequest = request;
-
-	QTSS_Error theErr = QTSS_RequestFailed;
-
-	bool allowedDefault = QTSServerInterface::GetServer()->GetPrefs()->GetAllowGuestDefault();
-	bool allowed = allowedDefault; //server pref?
-	bool hasUser = false;
-	bool handled = false;
-
-
-	// Call all the modules that are registered for the RTSP Authorize Role 
-	for (const auto &theModulePtr : QTSServerInterface::GetModule(QTSSModule::kRTSPAthnRole))
-	{
-		ioAuthRequestObject->SetAllowed(allowedDefault);
-		ioAuthRequestObject->SetHasUser(false);
-		ioAuthRequestObject->SetAuthHandled(false);
-
-		theErr = QTSS_NoErr;
-		if (theModulePtr)
-		{
-			theErr = theModulePtr->CallDispatch(QTSS_RTSPAuthenticate_Role, &theAuthenticationParams);
-		}
-		else
-		{
-			continue;
-		}
-		allowed = ioAuthRequestObject->GetAllowed();
-		hasUser = ioAuthRequestObject->GetHasUser();
-		handled = ioAuthRequestObject->GetAuthHandled();
-		debug_printf("QTSSCallbacks::QTSS_Authenticate allowedDefault =%d allowed= %d hasUser = %d handled=%d \n", allowedDefault, allowed, hasUser, handled);
-
-
-		if (hasUser || handled) //See RTSPSession.cpp::Run state=kAuthenticatingRequest
-		{
-			break;
-		}
-	}
-
-
-	// Reset the curTask to what it was before this role started
-	if (theState != nullptr)
-		theState->curTask = curTask;
-
-	return theErr;
-}
-
-QTSS_Error	QTSSCallbacks::QTSS_Authorize(RTSPRequest* inAuthRequestObject, std::string* outAuthRealm, bool* outAuthUserAllowed)
-{
-	if (inAuthRequestObject == nullptr)
-		return QTSS_BadArgument;
-
-	// Because this is a role being executed from inside a callback, we need to
-	// make sure that QTSS_RequestEvent will not work.
-	Task* curTask = nullptr;
-	auto* theState = (QTSS_ModuleState*)OSThread::GetMainThreadData();
-	if (OSThread::GetCurrent() != nullptr)
-		theState = (QTSS_ModuleState*)OSThread::GetCurrent()->GetThreadData();
-
-	if (theState != nullptr)
-		curTask = theState->curTask;
-
-	QTSS_RoleParams theParams;
-	theParams.rtspRequestParams.inRTSPSession = nullptr;
-	theParams.rtspRequestParams.inRTSPRequest = inAuthRequestObject;
-	theParams.rtspRequestParams.inClientSession = nullptr;
-
-	QTSS_Error theErr = QTSS_RequestFailed;
-	bool 		allowedDefault = QTSServerInterface::GetServer()->GetPrefs()->GetAllowGuestDefault();
-	*outAuthUserAllowed = allowedDefault;
-	bool      allowed = allowedDefault; //server pref?
-	bool      hasUser = false;
-	bool      handled = false;
-
-
-	// Call all the modules that are registered for the RTSP Authorize Role 
-
-	for (const auto &theModulePtr : QTSServerInterface::GetModule(QTSSModule::kRTSPAuthRole))
-	{
-		inAuthRequestObject->SetAllowed(true);
-		inAuthRequestObject->SetHasUser(false);
-		inAuthRequestObject->SetAuthHandled(false);
-
-		theErr = QTSS_NoErr;
-		if (theModulePtr)
-		{
-			if (__QTSSCALLBACKS_DEBUG__)
-				theModulePtr->GetValue(qtssModName)->PrintStr("QTSSModule::CallDispatch ENTER module=", "\n");
-
-			theErr = theModulePtr->CallDispatch(QTSS_RTSPAuthorize_Role, &theParams);
-		}
-		else
-		{
-			continue;
-		}
-
-		allowed = inAuthRequestObject->GetAllowed();
-		hasUser = inAuthRequestObject->GetHasUser();
-		handled = inAuthRequestObject->GetAuthHandled();
-		debug_printf("QTSSCallbacks::QTSS_Authorize allowedDefault =%d allowed= %d hasUser = %d handled=%d \n", allowedDefault, allowed, hasUser, handled);
-
-		*outAuthUserAllowed = allowed;
-		//notes:
-		//if (allowed && !handled)  break; //old module               
-		//if (!allowed && handled) /new module handled the request but not authorized keep trying
-		//if (allowed && handled) //new module allowed but keep trying in case someone denies.
-
-		if (!allowed && !handled)  //old module break on !allowed
-		{
-			break;
-		}
-	}
-
-	// outAuthRealm is set to the realm that is given by the module that has denied authentication
-	*outAuthRealm = std::string(inAuthRequestObject->GetURLRealm());
-
-	return theErr;
 }

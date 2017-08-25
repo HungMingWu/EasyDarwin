@@ -56,13 +56,6 @@ QTSS_Error _stublibrary_main(void* inPrivateArgs, QTSS_DispatchFuncPtr inDispatc
     return QTSS_NoErr;
 }
 
-// STARTUP ROUTINES
-    
-QTSS_Error  QTSS_AddRole(QTSS_Role inRole)
-{
-    return (sCallbacks->addr [kAddRoleCallback]) (inRole);  
-}
-
 // DICTIONARY ROUTINES
 
 QTSS_Error  QTSS_AddStaticAttribute(QTSS_ObjectType inObjectType, char* inAttrName, void* inUnused, QTSS_AttrDataType inAttrDataType)
@@ -85,16 +78,6 @@ QTSS_Error  QTSS_IDForAttr(QTSS_ObjectType inType, const char* inTag, QTSS_Attri
     return (sCallbacks->addr [kIDForTagCallback]) (inType, inTag, outID);   
 }
 
-QTSS_Error QTSS_GetAttrInfoByIndex(QTSS_Object inObject, uint32_t inIndex, QTSS_Object* outAttrInfoObject)
-{
-    return (sCallbacks->addr [kGetAttrInfoByIndexCallback]) (inObject, inIndex, outAttrInfoObject); 
-}
-
-QTSS_Error QTSS_GetAttrInfoByID(QTSS_Object inObject, QTSS_AttributeID inAttrID, QTSS_Object* outAttrInfoObject)
-{
-    return (sCallbacks->addr [kGetAttrInfoByIDCallback]) (inObject, inAttrID, outAttrInfoObject);   
-}
-
 QTSS_Error QTSS_GetAttrInfoByName(QTSS_Object inObject, char* inAttrName, QTSS_Object* outAttrInfoObject)
 {
     return (sCallbacks->addr [kGetAttrInfoByNameCallback]) (inObject, inAttrName, outAttrInfoObject);   
@@ -103,33 +86,6 @@ QTSS_Error QTSS_GetAttrInfoByName(QTSS_Object inObject, char* inAttrName, QTSS_O
 QTSS_Error  QTSS_SetValue (QTSS_Object inDictionary, QTSS_AttributeID inID,uint32_t inIndex,  const void* inBuffer,  uint32_t inLen)
 {
     return (sCallbacks->addr [kSetAttributeByIDCallback]) (inDictionary, inID, inIndex, inBuffer, inLen);   
-}
-
-QTSS_Error  QTSS_SetValuePtr (QTSS_Object inDictionary, QTSS_AttributeID inID, const void* inBuffer,  uint32_t inLen)
-{
-    return (sCallbacks->addr [kSetAttributePtrCallback]) (inDictionary, inID, inBuffer, inLen); 
-}
-
-QTSS_Error  QTSS_GetNumValues (QTSS_Object inObject, QTSS_AttributeID inID, uint32_t* outNumValues)
-{
-    return (sCallbacks->addr [kGetNumValuesCallback]) (inObject, inID, outNumValues);   
-}
-
-QTSS_Error  QTSS_GetNumAttributes (QTSS_Object inObject, uint32_t* outNumValues)
-{
-    return (sCallbacks->addr [kGetNumAttributesCallback]) (inObject, outNumValues); 
-}
-
-// STREAM ROUTINES
-
-QTSS_Error  QTSS_Write(QTSS_StreamRef inStream, const void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags)
-{
-    return (sCallbacks->addr [kWriteCallback]) (inStream, inBuffer, inLen, outLenWritten, inFlags); 
-}
-
-QTSS_Error  QTSS_Read(QTSS_StreamRef inRef, void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead)
-{
-    return (sCallbacks->addr [kReadCallback]) (inRef, ioBuffer, inBufLen, outLengthRead);       
 }
 
 // SERVICE ROUTINES
@@ -151,45 +107,7 @@ QTSS_Error QTSS_DoService(QTSS_ServiceID inID, QTSS_ServiceFunctionArgsPtr inArg
 
 // ASYNC I/O STREAM ROUTINES
 
-QTSS_Error  QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_EventType inEventMask)
-{
-    return (sCallbacks->addr [kRequestEventCallback]) (inStream, inEventMask);      
-}
-
 QTSS_Error  QTSS_SetIdleTimer(int64_t inIdleMsec)
 {
     return (sCallbacks->addr [kSetIdleTimerCallback]) (inIdleMsec);     
-}
-
-QTSS_Error  QTSS_SetIntervalRoleTimer(int64_t inIdleMsec)
-{
-    return (sCallbacks->addr [kSetIntervalRoleTimerCallback]) (inIdleMsec);     
-}
-
-QTSS_Error  QTSS_RequestGlobalLock()
-{
-    return (sCallbacks->addr [kRequestGlobalLockCallback])  ();
-}
-
-// SYNCH GLOBAL MULTIPLE READERS/SINGLE WRITER ROUTINES
-
-bool  QTSS_IsGlobalLocked()
-{
-    return (bool) (sCallbacks->addr [kIsGlobalLockedCallback])  ();
-}
-
-// AUTHENTICATION AND AUTHORIZATION ROUTINE
-QTSS_Error  QTSS_Authenticate(  const char* inAuthUserName, 
-                                const char* inAuthResourceLocalPath, 
-                                const char* inAuthMoviesDir, 
-                                QTSS_ActionFlags inAuthRequestAction, 
-                                QTSS_AuthScheme inAuthScheme, 
-                                RTSPRequest* ioAuthRequestObject)
-{
-    return (sCallbacks->addr [kAuthenticateCallback]) (inAuthUserName, inAuthResourceLocalPath, inAuthMoviesDir, inAuthRequestAction, inAuthScheme, ioAuthRequestObject);
-}
-
-QTSS_Error	QTSS_Authorize(RTSPRequest* inAuthRequestObject, char** outAuthRealm, bool* outAuthUserAllowed)
-{
-    return (sCallbacks->addr [kAuthorizeCallback]) (inAuthRequestObject, outAuthRealm, outAuthUserAllowed);
 }

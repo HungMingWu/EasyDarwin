@@ -48,7 +48,7 @@ class QTAccessFile
         static uint8_t sWhitespaceAndGreaterThanMask[];
         static void Initialize();
         
-        static char * GetUserNameCopy(QTSS_UserProfileObject inUserProfile);
+        static char * GetUserNameCopy(QTSSUserProfile* inUserProfile);
 
         //GetGroupsArrayCopy 
         //

@@ -501,7 +501,6 @@ enum
     qtssRTPSvrCurPackets            = 18,   //read      //uint32_t    //Current packets per second being output by the server
     qtssRTPSvrTotalPackets          = 19,   //read      //uint64_t    //Total number of bytes served since startup
     
-    qtssSvrHandledMethods           = 20,   //r/w       //QTSS_RTSPMethod   //The methods that the server supports. Modules should append the methods they support to this attribute in their QTSS_Initialize_Role.
     qtssSvrModuleObjects            = 21,   //read		//this IS PREMPTIVE SAFE!  //QTSS_ModuleObject // A module object representing each module
     qtssSvrStartupTime              = 22,   //read      //QTSS_TimeVal  //Time the server started up
     qtssSvrGMTOffsetInHrs           = 23,   //read      //int32_t        //Server time zone (offset from GMT in hours)
@@ -717,7 +716,6 @@ enum
 {
     //QTSS_ModuleObject parameters
     
-    qtssModName                 = 0,    //read      //preemptive-safe       //char array        //Module name. 
     qtssModDesc                 = 1,    //r/w       //not preemptive-safe   //char array        //Text description of what the module does
     qtssModVersion              = 2,    //r/w       //not preemptive-safe   //uint32_t            //Version of the module. uint32_t format should be 0xMM.m.v.bbbb M=major version m=minor version v=very minor version b=build #
     qtssModRoles                = 3,    //read      //preemptive-safe       //QTSS_Role         //List of all the roles this module has registered for.
@@ -750,8 +748,7 @@ enum
     // All of these parameters are preemptive-safe.
     
     qtssUserName                = 0, //read  //char array
-    qtssUserPassword            = 1, //r/w   //char array
-    qtssUserGroups              = 2, //r/w   //char array -  multi-valued attribute, all values should be C strings padded with \0s to                                         //              make them all of the same length 
+    qtssUserPassword            = 1, //r/w   //char array                                      //              make them all of the same length 
     qtssUserRealm               = 3, //r/w   //char array -  the authentication realm for username
     qtssUserRights              = 4, //r/w   //QTSS_AttrRights - rights granted this user
     qtssUserExtendedRights      = 5, //r/w   //qtssAttrDataTypeCharArray - a list of strings with extended rights granted to the user.
@@ -795,32 +792,19 @@ typedef uint32_t QTSS_ConnectedUserObjectAttributes;
 enum
 {
     //Global
-    QTSS_Register_Role =             FOUR_CHARS_TO_INT('r', 'e', 'g', ' '), //reg  //All modules get this once at startup
-    QTSS_Initialize_Role =           FOUR_CHARS_TO_INT('i', 'n', 'i', 't'), //init //Gets called once, later on in the startup process
-    QTSS_Shutdown_Role =             FOUR_CHARS_TO_INT('s', 'h', 'u', 't'), //shut //Gets called once at shutdown
     
     QTSS_ErrorLog_Role =             FOUR_CHARS_TO_INT('e', 'l', 'o', 'g'), //elog //This gets called when the server wants to log an error.
-    QTSS_RereadPrefs_Role =          FOUR_CHARS_TO_INT('p', 'r', 'e', 'f'), //pref //This gets called when the server rereads preferences.
     QTSS_StateChange_Role =          FOUR_CHARS_TO_INT('s', 't', 'a', 't'), //stat //This gets called whenever the server changes state.
-    
-    QTSS_Interval_Role =             FOUR_CHARS_TO_INT('t', 'i', 'm', 'r'), //timr //This gets called whenever the module's interval timer times out calls.
     
     //RTSP-specific
     QTSS_RTSPFilter_Role =           FOUR_CHARS_TO_INT('f', 'i', 'l', 't'), //filt //Filter all RTSP requests before the server parses them
-    QTSS_RTSPRoute_Role =            FOUR_CHARS_TO_INT('r', 'o', 'u', 't'), //rout //Route all RTSP requests to the correct root folder.
     QTSS_RTSPAuthenticate_Role =     FOUR_CHARS_TO_INT('a', 't', 'h', 'n'), //athn //Authenticate the RTSP request username.
-    QTSS_RTSPAuthorize_Role =        FOUR_CHARS_TO_INT('a', 'u', 't', 'h'), //auth //Authorize RTSP requests to proceed
-    QTSS_RTSPPreProcessor_Role =     FOUR_CHARS_TO_INT('p', 'r', 'e', 'p'), //prep //Pre-process all RTSP requests before the server responds.
                                         //Modules may opt to "steal" the request and return a client response.
     QTSS_RTSPRequest_Role =          FOUR_CHARS_TO_INT('r', 'e', 'q', 'u'), //requ //Process an RTSP request & send client response
-    QTSS_RTSPPostProcessor_Role =    FOUR_CHARS_TO_INT('p', 'o', 's', 't'), //post //Post-process all RTSP requests
     QTSS_RTSPSessionClosing_Role =   FOUR_CHARS_TO_INT('s', 'e', 's', 'c'), //sesc //RTSP session is going away
-
-    QTSS_RTSPIncomingData_Role =     FOUR_CHARS_TO_INT('i', 'c', 'm', 'd'), //icmd //Incoming interleaved RTP data on this RTSP connection
 
     //RTP-specific
     QTSS_RTPSendPackets_Role =			FOUR_CHARS_TO_INT('s', 'e', 'n', 'd'), //send //Send RTP packets to the client
-    QTSS_ClientSessionClosing_Role =	FOUR_CHARS_TO_INT('d', 'e', 's', 's'), //dess //Client session is going away
     
     //RTCP-specific
     QTSS_RTCPProcess_Role =				FOUR_CHARS_TO_INT('r', 't', 'c', 'p'), //rtcp //Process all RTCP packets sent to the server
@@ -870,10 +854,8 @@ typedef QTSS_Object             QTSS_FileObject;
 typedef QTSS_Object             QTSS_ModuleObject;
 typedef QTSS_Object             QTSS_ModulePrefsObject;
 typedef QTSS_Object             QTSS_AttrInfoObject;
-typedef QTSS_Object             QTSS_UserProfileObject;
 typedef QTSS_Object             QTSS_ConnectedUserObject;
 
-typedef QTSS_StreamRef          QTSS_ErrorLogStream;
 typedef QTSS_StreamRef          QTSS_FileStream;
 typedef QTSS_StreamRef          QTSS_RTSPSessionStream;
 typedef QTSS_StreamRef          QTSS_RTSPRequestStream;
@@ -897,12 +879,14 @@ typedef struct
     char outModuleName[QTSS_MAX_MODULE_NAME_LENGTH];
 } QTSS_Register_Params;
 
+class QTSSStream;
+
 typedef struct
 {
 	QTSServerInterface*         inServer;           // Global dictionaries
     QTSS_PrefsObject            inPrefs;
     QTSS_TextMessagesObject     inMessages;
-    QTSS_ErrorLogStream         inErrorLogStream;   // Writing to this stream causes modules to
+	QTSSStream*                 inErrorLogStream;   // Writing to this stream causes modules to
                                                     // be invoked in the QTSS_ErrorLog_Role
     QTSS_ModuleObject           inModule;
 } QTSS_Initialize_Params;
@@ -1034,23 +1018,15 @@ typedef struct
 
 typedef union
 {
-    QTSS_Register_Params                regParams;
-    QTSS_Initialize_Params              initParams;
     QTSS_ErrorLog_Params                errorParams;
     QTSS_StateChange_Params             stateChangeParams;
 
     QTSS_Filter_Params                  rtspFilterParams;
-    QTSS_IncomingData_Params            rtspIncomingDataParams;
-    QTSS_StandardRTSP_Params            rtspRouteParams;
     QTSS_RTSPAuth_Params                rtspAthnParams;
-    QTSS_StandardRTSP_Params            rtspAuthParams;
-    QTSS_StandardRTSP_Params            rtspPreProcessorParams;
-    QTSS_StandardRTSP_Params            rtspRequestParams;
-    QTSS_StandardRTSP_Params            rtspPostProcessorParams;
+	QTSS_StandardRTSP_Params            rtspParams;
     QTSS_RTSPSession_Params             rtspSessionClosingParams;
 
     QTSS_RTPSendPackets_Params          rtpSendPacketsParams;
-    QTSS_ClientSessionClosing_Params    clientSessionClosingParams;
     QTSS_RTCPProcess_Params             rtcpProcessParams;
     
     QTSS_OpenFile_Params                openFilePreProcessParams;
@@ -1095,19 +1071,6 @@ typedef QTSS_Error (*QTSS_DispatchFuncPtr)(QTSS_Role inRole, QTSS_RoleParamPtr i
 
 // STUB LIBRARY MAIN
 QTSS_Error _stublibrary_main(void* inPrivateArgs, QTSS_DispatchFuncPtr inDispatchFunc);
-
-/********************************************************************/
-//  QTSS_AddRole
-//
-//  Only available from QTSS_Initialize role. Call this for all the roles you
-//  would like your module to operate on.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_OutOfState: If this function isn't being called from the Register role
-//              QTSS_RequestFailed:     If module is registering for the QTSS_RTSPRequest_Role
-//                                      and there already is such a module.
-//              QTSS_BadArgument:   Registering for a nonexistent role.
-QTSS_Error QTSS_AddRole(QTSS_Role inRole);
                                                                                                             
 /********************************************************************/
 //  QTSS_AddStaticAttribute
@@ -1174,18 +1137,6 @@ QTSS_Error QTSS_IDForAttr(QTSS_ObjectType inObjectType, const char* inAttributeN
                             QTSS_AttributeID* outID);
 
 /********************************************************************/
-//  QTSS_GetAttrInfoByID
-//
-//  Searches for an attribute with the specified ID in the specified object.
-//  If found, this function returns a QTSS_AttrInfoObject describing the attribute.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument
-//              QTSS_AttrDoesntExist
-QTSS_Error QTSS_GetAttrInfoByID(QTSS_Object inObject, QTSS_AttributeID inAttrID,
-                                    QTSS_AttrInfoObject* outAttrInfoObject);
-
-/********************************************************************/
 //  QTSS_GetAttrInfoByName
 //
 //  Searches for an attribute with the specified name in the specified object.
@@ -1198,28 +1149,6 @@ QTSS_Error QTSS_GetAttrInfoByName(QTSS_Object inObject, char* inAttrName,
                                     QTSS_AttrInfoObject* outAttrInfoObject);
 
 /********************************************************************/
-//  QTSS_GetAttrInfoByIndex
-//
-//  Allows caller to iterate over all the attributes in the specified object.
-//  Returns a QTSS_AttrInfoObject for the attribute with the given index (0.. num attributes).
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument
-//              QTSS_AttrDoesntExist
-QTSS_Error QTSS_GetAttrInfoByIndex(QTSS_Object inObject, uint32_t inIndex,
-                                    QTSS_AttrInfoObject* outAttrInfoObject);
-
-/********************************************************************/
-//  QTSS_GetNumAttributes
-//
-//  Returns the number of attributes in the specified object.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-//
-QTSS_Error QTSS_GetNumAttributes (QTSS_Object inObject, uint32_t* outNumAttributes);
-
-/********************************************************************/
 //  QTSS_SetValue
 //
 //  Returns:    QTSS_NoErr
@@ -1228,69 +1157,6 @@ QTSS_Error QTSS_GetNumAttributes (QTSS_Object inObject, uint32_t* outNumAttribut
 //              QTSS_BadIndex: Attempt to set non-0 index of attribute with a param retrieval function.
 //
 QTSS_Error QTSS_SetValue (QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex, const void* inBuffer,  uint32_t inLen);
-
-/********************************************************************/
-//  QTSS_SetValuePtr
-//
-//  This allows you to have an attribute that simply reflects the value of a variable in your module.
-//  If the update to this variable is not atomic, you should protect updates using QTSS_LockObject.
-//  This can't be used with indexed attributes.  Make sure the inBuffer provided exists as long as this
-//  attribute exists.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-//              QTSS_ReadOnly: Attribute is read only.
-//
-QTSS_Error QTSS_SetValuePtr (QTSS_Object inObject, QTSS_AttributeID inID, const void* inBuffer,  uint32_t inLen);
-
-/********************************************************************/
-//  QTSS_GetNumValues
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-//
-QTSS_Error QTSS_GetNumValues (QTSS_Object inObject, QTSS_AttributeID inID, uint32_t* outNumValues);
-
-/*****************************************/
-//  STREAM CALLBACKS
-//
-//  The QTSS API provides QTSS_StreamRefs as a generalized stream abstraction. Mostly,
-//  QTSS_StreamRefs are used for communicating with the client. For instance,
-//  in the QTSS_RTSPRequest_Role, modules receive a QTSS_StreamRef which can be
-//  used for reading RTSP data from the client, and sending RTSP response data to the client.
-//
-//  Additionally, QTSS_StreamRefs are generalized enough to be used in many other situations.
-//  For instance, modules receive a QTSS_StreamRef for the error log. When modules want
-//  to report errors, they can use these same routines, passing in the error log StreamRef.
-
-/********************************************************************/
-//  QTSS_Write
-//
-//  Writes data to a stream.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_WouldBlock: The stream cannot accept any data at this time.
-//              QTSS_NotConnected: The stream receiver is no longer connected.
-//              QTSS_BadArgument:   NULL argument.
-QTSS_Error  QTSS_Write(QTSS_StreamRef inRef, const void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, QTSS_WriteFlags inFlags);
-
-
-/********************************************************************/
-//  QTSS_Read
-//
-//  Reads data out of the stream
-//
-//  Arguments   inRef:      The stream to read from.
-//              ioBuffer:   A buffer to place the read data
-//              inBufLen:   The length of ioBuffer.
-//              outLengthRead:  If function returns QTSS_NoErr, on output this will be set to the
-//                              amount of data actually read.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_WouldBlock
-//              QTSS_RequestFailed
-//              QTSS_BadArgument
-QTSS_Error  QTSS_Read(QTSS_StreamRef inRef, void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead);
 
 /*****************************************/
 //  SERVICES
@@ -1392,53 +1258,6 @@ QTSS_Error QTSS_DoService(QTSS_ServiceID inID, QTSS_ServiceFunctionArgsPtr inArg
 //              QTSS_OutOfState: if this callback is made from a role that doesn't allow async I/O events
 //              QTSS_RequestFailed: Not currently possible to request an event. 
 
-QTSS_Error  QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_EventType inEventMask);
-
 QTSS_Error  QTSS_SetIdleTimer(int64_t inIdleMsec);
-QTSS_Error  QTSS_SetIntervalRoleTimer(int64_t inIdleMsec);
-
-QTSS_Error  QTSS_RequestGlobalLock();
-bool      QTSS_IsGlobalLocked();
-
-
-/*****************************************/
-//  AUTHENTICATE and AUTHORIZE CALLBACKS
-//
-//  All modules that want Authentication outside of the 
-//  QTSS_RTSPAuthenticate_Role must use the QTSS_Authenticate callback 
-//  and must pass in the request object
-//      All modules that want Authorization outside of the
-//      QTSS_RTSPAuthorize_Role should use the QTSS_Authorize callback
-//      and must pass in the request object
-/********************************************************************/
-
-//  QTSS_Authenticate
-//
-//  Arguments inputs:   inAuthUserName:         the username that is to be authenticated
-//                      inAuthResourceLocalPath:the resource that is to be authorized access
-//                      inAuthMoviesDir:        the movies directory (reqd. for finding the access file)
-//                      inAuthRequestAction:    the action that is performed for the resource
-//                      inAuthScheme:           the authentication scheme (the password retrieved will be based on it)
-//                      ioAuthRequestObject:    the request object 
-//                                              The object is filled with the attributes passed in  
-//  Returns:            QTSS_NoErr
-//                      QTSS_BadArgument        if any of the input arguments are null
-QTSS_Error  QTSS_Authenticate(  const char* inAuthUserName, 
-                                const char* inAuthResourceLocalPath, 
-                                const char* inAuthMoviesDir, 
-                                QTSS_ActionFlags inAuthRequestAction, 
-                                QTSS_AuthScheme inAuthScheme, 
-                                RTSPRequest* ioAuthRequestObject);
-
-//  QTSS_Authorize
-//
-//  Arguments inputs:   inAuthRequestObject:    the request object
-//
-//            outputs:  outAuthRealm:           the authentication realm 
-//                      outAuthUserAllowed:     true if user is allowed, and false otherwise
-//  
-//  Returns:            QTSS_NoErr
-//                      QTSS_BadArgument
-QTSS_Error    QTSS_Authorize(RTSPRequest* inAuthRequestObject, char** outAuthRealm, bool* outAuthUserAllowed);
 
 #endif

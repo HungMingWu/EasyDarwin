@@ -36,6 +36,7 @@
 #include "QTSS.h"
 #include "OS.h"
 #include "RTSPRequest.h"
+#include "QTSSReflectorModule.h"
 
 #define RTPSESSION_DEBUGGING 0
 
@@ -210,8 +211,6 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 {
 	//first setup the play associated session interface variables
 	Assert(request != nullptr);
-	if (fModule == nullptr)
-		return QTSS_RequestFailed;//Can't play if there are no associated streams
 
 	//what time is this play being issued at?
 	fLastBitRateUpdateTime = fNextSendPacketsTime = fPlayTime = OS::Milliseconds();
@@ -375,7 +374,8 @@ int64_t RTPSession::Run()
 #endif
 	EventFlags events = this->GetEvents();
 	QTSS_RoleParams theParams;
-	theParams.clientSessionClosingParams.inClientSession = this;    //every single role being invoked now has this
+	QTSS_ClientSessionClosing_Params clientSessionClosingParams;
+	clientSessionClosingParams.inClientSession = this;    //every single role being invoked now has this
 													//as the first parameter
 
 #if RTPSESSION_DEBUGGING
@@ -417,7 +417,7 @@ int64_t RTPSession::Run()
 			fCurrentModule = 0;             // right place in the code
 
 			// Set the reason parameter 
-			theParams.clientSessionClosingParams.inReason = fClosingReason;
+			clientSessionClosingParams.inReason = fClosingReason;
 
 			// If RTCP packets are being generated internally for this stream, 
 			// Send a BYE now.
@@ -436,23 +436,15 @@ int64_t RTPSession::Run()
 		//invoking modules here, because the session is unregistered and
 		//therefore there's no way another thread could get involved anyway
 
-		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kClientSessionClosingRole))
-		{
-			fModuleState.eventRequested = false;
-			fModuleState.idleTime = 0;
-			theModule->CallDispatch(QTSS_ClientSessionClosing_Role, &theParams);
+		ReflectionModule::DestroySession(&clientSessionClosingParams);
 
-			// If this module has requested an event, return and wait for the event to transpire
-			if (fModuleState.eventRequested)
-				return fModuleState.idleTime; // If the module has requested idle time...
-		}
 
 		return -1;//doing this will cause the destructor to get called.
 	}
 
 	//if the stream is currently paused, just return without doing anything.
 	//We'll get woken up again when a play is issued
-	if ((fState == qtssPausedState) || (fModule == nullptr))
+	if (fState == qtssPausedState)
 		return 0;
 
 	//Make sure to grab the session mutex here, to protect the module against
@@ -486,9 +478,6 @@ int64_t RTPSession::Run()
 
 			theParams.rtpSendPacketsParams.outNextPacketTime = 0;
 			// Async event registration is definitely allowed from this role.
-			fModuleState.eventRequested = false;
-			Assert(fModule != nullptr);
-			(void)fModule->CallDispatch(QTSS_RTPSendPackets_Role, &theParams);
 #if RTPSESSION_DEBUGGING
 			printf("RTPSession %" _S32BITARG_ ": back from sendPackets, nextPacketTime = %" _64BITARG_ "d\n", (int32_t)this, theParams.rtpSendPacketsParams.outNextPacketTime);
 #endif

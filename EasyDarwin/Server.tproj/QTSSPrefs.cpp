@@ -38,20 +38,18 @@
 #include <APICommonCode/QTSSModuleUtils.h>
 
 
-QTSSPrefs::QTSSPrefs(XMLPrefsParser* inPrefsSource, StrPtrLen* inModuleName, QTSSDictionaryMap* inMap,
+QTSSPrefs::QTSSPrefs(XMLPrefsParser* inPrefsSource, QTSSDictionaryMap* inMap,
 	bool areInstanceAttrsAllowed, QTSSPrefs* parentDictionary)
 	: QTSSDictionary(inMap, &fPrefsMutex),
 	fPrefsSource(inPrefsSource),
 	fPrefName(nullptr),
 	fParentDictionary(parentDictionary)
 {
-	if (inModuleName != nullptr)
-		fPrefName = inModuleName->GetAsCString();
 }
 
 QTSSDictionary* QTSSPrefs::CreateNewDictionary(QTSSDictionaryMap* inMap, OSMutex* /* inMutex */)
 {
-	return new QTSSPrefs(fPrefsSource, nullptr, inMap, true, this);
+	return new QTSSPrefs(fPrefsSource, inMap, true, this);
 }
 
 void QTSSPrefs::RereadPreferences()

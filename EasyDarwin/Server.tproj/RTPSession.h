@@ -74,7 +74,6 @@ public:
 	//
 	//ACCESS FUNCTIONS
 
-	QTSSModule* GetPacketSendingModule() { return fModule; }
 	bool      HasAnRTPStream() { return fHasAnRTPStream; }
 
 	RTPStream*  FindRTPStreamForChannelNum(uint8_t inChannelNum);
@@ -86,10 +85,6 @@ public:
 	//If this function fails (it can return QTSS_DupName), it means that there is already
 	//a session with this session ID in the map.
 	QTSS_Error  Activate(boost::string_view inSessionID);
-
-	// The way this object is implemented currently, only one module can send the
-	// packets for a session.
-	void        SetPacketSendingModule(QTSSModule* inModule) { fModule = inModule; }
 
 	//Once the session is bound, a module can add streams to it.
 	//It must pass in a trackID that uniquely identifies this stream.
@@ -166,7 +161,6 @@ private:
 		kCantGetMutexIdleTime = 10
 	};
 
-	QTSSModule*         fModule{nullptr};
 	bool              fHasAnRTPStream{false};
 	int32_t              fSessionQualityLevel;
 

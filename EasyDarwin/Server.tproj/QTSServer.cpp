@@ -43,6 +43,7 @@
 #include <pwd.h>
 #endif
 
+#include <algorithm>
 #include <memory>
 
 #include "QTSServer.h"
@@ -56,7 +57,6 @@
 #include "QTSSModuleUtils.h"
 
  //Compile time modules
-#include "QTSSErrorLogModule.h"
 #include "QTSSReflectorModule.h"
 
 #include "RTSPRequestInterface.h"
@@ -137,12 +137,10 @@ QTSServer::~QTSServer()
 	auto* locker = new OSMutexLocker(this->GetPrefs()->GetMutex());
 
 	QTSS_ModuleState theModuleState;
-	theModuleState.curRole = QTSS_Shutdown_Role;
 	theModuleState.curTask = nullptr;
 	OSThread::SetMainThreadData(&theModuleState);
 
-	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kShutdownRole))
-		theModule->CallDispatch(QTSS_Shutdown_Role, nullptr);
+	ReflectionModule::Shutdown();
 
 	OSThread::SetMainThreadData(nullptr);
 
@@ -204,14 +202,6 @@ bool QTSServer::Initialize(XMLPrefsParser* inPrefsSource, PrefsSource* inMessage
 	fSocketPool = new RTPSocketPool();
 	fRTPMap = new OSRefTable(kRTPSessionMapSize);
 	fReflectorSessionMap = new OSRefTable(kReflectorSessionMapSize);
-
-	//
-	// Load ERROR LOG module only. This is good in case there is a startup error.
-
-	auto* theLoggingModule = new QTSSModule("QTSSErrorLogModule");
-	(void)theLoggingModule->SetupModule(&sCallbacks, &QTSSErrorLogModule_Main);
-	(void)AddModule(theLoggingModule);
-	this->BuildModuleRoleArrays();
 
 	//
 	// DEFAULT IP ADDRESS & DNS NAME
@@ -663,40 +653,21 @@ void    QTSServer::LoadCompiledInModules()
 
 void    QTSServer::InitCallbacks()
 {
-	sCallbacks.addr[kAddRoleCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AddRole;
 	sCallbacks.addr[kIDForTagCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_IDForAttr;
 
 	sCallbacks.addr[kSetAttributeByIDCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SetValue;
-	sCallbacks.addr[kGetNumValuesCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetNumValues;
-
-	sCallbacks.addr[kWriteCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Write;
-	sCallbacks.addr[kReadCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Read;
 
 	sCallbacks.addr[kAddServiceCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AddService;
 	sCallbacks.addr[kIDForServiceCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_IDForService;
 	sCallbacks.addr[kDoServiceCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_DoService;
 
-	sCallbacks.addr[kRequestEventCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_RequestEvent;
 	sCallbacks.addr[kSetIdleTimerCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SetIdleTimer;
 
 	sCallbacks.addr[kAddStaticAttributeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AddStaticAttribute;
 	sCallbacks.addr[kAddInstanceAttributeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_AddInstanceAttribute;
 	sCallbacks.addr[kRemoveInstanceAttributeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_RemoveInstanceAttribute;
 
-	sCallbacks.addr[kGetAttrInfoByIndexCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetAttrInfoByIndex;
 	sCallbacks.addr[kGetAttrInfoByNameCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetAttrInfoByName;
-	sCallbacks.addr[kGetAttrInfoByIDCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetAttrInfoByID;
-	sCallbacks.addr[kGetNumAttributesCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_GetNumAttributes;
-
-	sCallbacks.addr[kRequestGlobalLockCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_RequestLockedCallback;
-	sCallbacks.addr[kIsGlobalLockedCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_IsGlobalLocked;
-
-	sCallbacks.addr[kAuthenticateCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Authenticate;
-	sCallbacks.addr[kAuthorizeCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_Authorize;
-
-	sCallbacks.addr[kSetAttributePtrCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SetValuePtr;
-
-	sCallbacks.addr[kSetIntervalRoleTimerCallback] = (QTSS_CallbackProcPtr)QTSSCallbacks::QTSS_SetIdleRoleTimer;
 }
 
 void QTSServer::LoadModules(QTSServerPrefs* inPrefs)
@@ -780,7 +751,7 @@ void    QTSServer::CreateModule(char* inModuleFolderPath, char* inModuleName)
 
 	//
 	// Construct a QTSSModule object, and attempt to initialize the module
-	auto* theNewModule = new QTSSModule(inModuleName, theModPath.get());
+	auto* theNewModule = new QTSSModule(theModPath.get());
 	QTSS_Error theErr = theNewModule->SetupModule(&sCallbacks);
 
 	if (theErr != QTSS_NoErr)
@@ -807,38 +778,23 @@ bool QTSServer::AddModule(QTSSModule* inModule)
 	QTSS_ModuleState theModuleState;
 
 	theModuleState.curModule = inModule;
-	theModuleState.curRole = QTSS_Register_Role;
 	theModuleState.curTask = nullptr;
 	OSThread::SetMainThreadData(&theModuleState);
 
 	// Currently we do nothing with the module name
-	QTSS_RoleParams theRegParams;
-	theRegParams.regParams.outModuleName[0] = 0;
+	QTSS_Register_Params regParams;
 
 	// If the module returns an error from the QTSS_Register role, don't put it anywhere
-	if (inModule->CallDispatch(QTSS_Register_Role, &theRegParams) != QTSS_NoErr)
+	if (ReflectionModule::Register(&regParams) != QTSS_NoErr)
 	{
-		//Log 
-		char msgStr[2048];
-		char* moduleName = nullptr;
-		(void)inModule->GetValueAsString(qtssModName, 0, &moduleName);
-		snprintf(msgStr, sizeof(msgStr), "Loading Module [%s] Failed!", moduleName);
-		delete moduleName;
-		QTSServerInterface::LogError(qtssMessageVerbosity, msgStr);
 		return false;
 	}
 
 	OSThread::SetMainThreadData(nullptr);
 
 	//
-	// Update the module name to reflect what was returned from the register role
-	theRegParams.regParams.outModuleName[QTSS_MAX_MODULE_NAME_LENGTH - 1] = 0;
-	if (theRegParams.regParams.outModuleName[0] != 0)
-		inModule->SetValue(qtssModName, 0, theRegParams.regParams.outModuleName, ::strlen(theRegParams.regParams.outModuleName), false);
-
-	//
 	// Give the module object a prefs dictionary. Instance attributes are allowed for these objects.
-	auto* thePrefs = new QTSSPrefs(sPrefsSource, inModule->GetValue(qtssModName), QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kModulePrefsDictIndex), true);
+	auto* thePrefs = new QTSSPrefs(sPrefsSource, QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kModulePrefsDictIndex), true);
 	thePrefs->RereadPreferences();
 	inModule->SetPrefsDict(thePrefs);
 
@@ -881,48 +837,23 @@ void QTSServer::DestroyModuleRoleArrays()
 
 void QTSServer::DoInitRole()
 {
-	QTSS_RoleParams theInitParams;
-	theInitParams.initParams.inServer = this;
-	theInitParams.initParams.inPrefs = fSrvrPrefs;
-	theInitParams.initParams.inMessages = fSrvrMessages;
-	theInitParams.initParams.inErrorLogStream = &sErrorLogStream;
+	QTSS_Initialize_Params initParams;
+	initParams.inServer = this;
+	initParams.inPrefs = fSrvrPrefs;
+	initParams.inMessages = fSrvrMessages;
+	initParams.inErrorLogStream = &sErrorLogStream;
 
 	QTSS_ModuleState theModuleState;
-	theModuleState.curRole = QTSS_Initialize_Role;
 	theModuleState.curTask = nullptr;
 	OSThread::SetMainThreadData(&theModuleState);
 
 	//
 	// Add the OPTIONS method as the one method the server handles by default (it handles
 	// it internally). Modules that handle other RTSP methods will add 
-	QTSS_RTSPMethod theOptionsMethod = qtssOptionsMethod;
-	(void)this->SetValue(qtssSvrHandledMethods, 0, &theOptionsMethod, sizeof(theOptionsMethod));
+	supportMethods.push_back(qtssOptionsMethod);
 
-
-	// For now just disable the SetParameter to be compatible with Real.  It should really be removed only for clients that have problems with their SetParameter implementations like (Real Players).
-	// At the moment it isn't necesary to add the option.
-	//   QTSS_RTSPMethod	theSetParameterMethod = qtssSetParameterMethod;
-	//    (void)this->SetValue(qtssSvrHandledMethods, 0, &theSetParameterMethod, sizeof(theSetParameterMethod));
-
-	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kInitializeRole))
-	{
-		theInitParams.initParams.inModule = theModule;
-		theModuleState.curModule = theModule;
-		QTSS_Error theErr = theModule->CallDispatch(QTSS_Initialize_Role, &theInitParams);
-
-		if (theErr != QTSS_NoErr)
-		{
-			// If the module reports an error when initializing itself,
-			// delete the module and pretend it was never there.
-			QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssMsgInitFailed, theErr,
-				theModule->GetValue(qtssModName)->Ptr);
-
-			auto it = std::find(sModuleQueue.begin(), sModuleQueue.end(), theModule);
-			if (it != sModuleQueue.end())
-				sModuleQueue.erase(it);
-			delete theModule;
-		}
-	}
+	initParams.inModule = nullptr;
+	QTSS_Error theErr = ReflectionModule::Initialize(&initParams);
 	this->SetupPublicHeader();
 
 	OSThread::SetMainThreadData(nullptr);
@@ -934,28 +865,14 @@ void QTSServer::SetupPublicHeader()
 	// After the Init role, all the modules have reported the methods that they handle.
 	// So, we can prune this attribute for duplicates, and construct a string to use in the
 	// Public: header of the OPTIONS response
-	QTSS_RTSPMethod* theMethod = nullptr;
-	uint32_t theLen = 0;
+	std::sort(supportMethods.begin(), supportMethods.end());
+	supportMethods.erase(std::unique(supportMethods.begin(), supportMethods.end()),
+		supportMethods.end());
 
-	bool theUniqueMethods[qtssNumMethods + 1];
-	::memset(theUniqueMethods, 0, sizeof(theUniqueMethods));
-
-	for (uint32_t y = 0; this->GetValuePtr(qtssSvrHandledMethods, y, (void**)&theMethod, &theLen) == QTSS_NoErr; y++)
-		theUniqueMethods[*theMethod] = true;
-
-	// Rewrite the qtssSvrHandledMethods, eliminating any duplicates that modules may have introduced
-	uint32_t uniqueMethodCount = 0;
-	for (QTSS_RTSPMethod z = 0; z < qtssNumMethods; z++)
-	{
-		if (theUniqueMethods[z])
-			this->SetValue(qtssSvrHandledMethods, uniqueMethodCount++, &z, sizeof(QTSS_RTSPMethod));
-	}
-	this->SetNumValues(qtssSvrHandledMethods, uniqueMethodCount);
-
-	for (uint32_t a = 0; this->GetValuePtr(qtssSvrHandledMethods, a, (void**)&theMethod, &theLen) == QTSS_NoErr; a++)
+	for (size_t a = 0; a < supportMethods.size(); a++)
 	{
 		if (a) sPublicHeaderStr += ", ";
-		sPublicHeaderStr += std::string(RTSPProtocol::GetMethodString(*theMethod));
+		sPublicHeaderStr += std::string(RTSPProtocol::GetMethodString(supportMethods[a]));
 	}
 }
 
@@ -1121,8 +1038,7 @@ QTSS_Error QTSServer::RereadPrefsService(QTSS_ServiceFunctionArgsPtr /*inArgs*/)
 	//
 	// Now that we are done rereading the prefs, invoke all modules in the RereadPrefs
 	// role so they can update their internal prefs caches.
-	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRereadPrefsRole))
-		theModule->CallDispatch(QTSS_RereadPrefs_Role, nullptr);
+	ReflectionModule::RereadPrefs();
 	return QTSS_NoErr;
 }
 

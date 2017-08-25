@@ -346,7 +346,6 @@ public:
 	// Call Register from the Register role, as this object has some QTSS API
 	// attributes to setup
 	static void Register();
-	static void Initialize(QTSS_ModulePrefsObject inPrefs);
 
 	//
 	// MODIFIERS

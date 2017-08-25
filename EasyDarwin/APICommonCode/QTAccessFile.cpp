@@ -514,7 +514,7 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     if (movieRootDirStr.empty())
         return QTSS_RequestFailed;
     
-	QTSS_UserProfileObject theUserProfile = theRTSPRequest->GetUserProfile();
+	QTSSUserProfile* theUserProfile = theRTSPRequest->GetUserProfile();
     if (nullptr == theUserProfile)
         return QTSS_RequestFailed;
 
@@ -524,7 +524,7 @@ QTSS_Error QTAccessFile::AuthorizeRequest(QTSS_StandardRTSP_Params* inParams, bo
     char* username = QTSSModuleUtils::GetUserName_Copy(theUserProfile);
     std::unique_ptr<char[]> usernameDeleter(username);
 
-    std::vector<std::string> groupCharPtrArray =  QTSSModuleUtils::GetGroupsArray_Copy(theUserProfile);
+    std::vector<std::string> groupCharPtrArray = theUserProfile->GetUserGroups();
     
     StrPtrLen accessFileBuf;
     (void)QTSSModuleUtils::ReadEntireFile(accessFilePath, &accessFileBuf);

@@ -40,10 +40,6 @@ class QTSSCallbacks
 {
 public:
 
-	// STARTUP ROUTINES
-
-	static QTSS_Error   QTSS_AddRole(QTSS_Role inRole);
-
 	// ADD ATTRIBUTE
 
 	static QTSS_Error   QTSS_AddStaticAttribute(QTSS_ObjectType inObjectType, const char* inAttrName, void* inUnused, QTSS_AttrDataType inAttrDataType);
@@ -57,21 +53,11 @@ public:
 	static QTSS_Error   QTSS_IDForAttr(QTSS_ObjectType inType, const char* inTag, QTSS_AttributeID* outID);
 
 	static QTSS_Error   QTSS_GetAttrInfoByName(QTSS_Object inObject, const char* inAttrName, QTSS_Object* outAttrInfoObject);
-	static QTSS_Error   QTSS_GetAttrInfoByID(QTSS_Object inObject, QTSS_AttributeID inAttrID, QTSS_Object* outAttrInfoObject);
-	static QTSS_Error   QTSS_GetAttrInfoByIndex(QTSS_Object inObject, uint32_t inIndex, QTSS_Object* outAttrInfoObject);
-
-	static QTSS_Error   QTSS_GetNumAttributes(QTSS_Object inObject, uint32_t* outNumValues);
 
 	// ATTRIBUTE VALUES
 
 	static QTSS_Error   QTSS_SetValue(QTSS_Object inDictionary, QTSS_AttributeID inID, uint32_t inIndex, const void* inBuffer, uint32_t inLen);
 	static QTSS_Error   QTSS_SetValuePtr(QTSS_Object inDictionary, QTSS_AttributeID inID, const void* inBuffer, uint32_t inLen);
-	static QTSS_Error   QTSS_GetNumValues(QTSS_Object inObject, QTSS_AttributeID inID, uint32_t* outNumValues);
-
-	// STREAM ROUTINES
-
-	static QTSS_Error   QTSS_Write(QTSS_StreamRef inStream, void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, QTSS_WriteFlags inFlags);
-	static QTSS_Error   QTSS_Read(QTSS_StreamRef inRef, void* ioBuffer, uint32_t inBufLen, uint32_t* outLengthRead);
 
 	// SERVICE ROUTINES
 
@@ -80,18 +66,7 @@ public:
 	static QTSS_Error   QTSS_DoService(QTSS_ServiceID inID, QTSS_ServiceFunctionArgsPtr inArgs);
 
 	// ASYNC I/O ROUTINES
-	static QTSS_Error   QTSS_RequestEvent(QTSS_StreamRef inStream, QTSS_EventType inEventMask);
 	static QTSS_Error   QTSS_SetIdleTimer(int64_t inMsecToWait);
-	static QTSS_Error   QTSS_SetIdleRoleTimer(int64_t inMsecToWait);
-
-
-	static QTSS_Error   QTSS_RequestLockedCallback();
-	static bool			QTSS_IsGlobalLocked();
-
-	// AUTHENTICATION AND AUTHORIZATION ROUTINE
-	static QTSS_Error   QTSS_Authenticate(const char* inAuthUserName, const char* inAuthResourceLocalPath, const char* inAuthMoviesDir, QTSS_ActionFlags inAuthRequestAction, QTSS_AuthScheme inAuthScheme, RTSPRequest* ioAuthRequestObject);
-	static QTSS_Error	QTSS_Authorize(RTSPRequest* inAuthRequestObject, std::string* outAuthRealm, bool* outAuthUserAllowed);
-
 };
 
 #endif //__QTSSCALLBACKS_H__

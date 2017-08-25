@@ -40,7 +40,7 @@ QTSSAttrInfoDict::AttrInfo  QTSSUserProfile::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
 	/* 0 */ { "qtssUserName",       nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
 	/* 1 */ { "qtssUserPassword",   nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite},
-	/* 2 */ { "qtssUserGroups",     nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite},
+	/* 2 */ {},
 	/* 3 */ { "qtssUserRealm",      nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite},
 	/* 4 */ { "qtssUserRights",      nullptr,  qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite},
 	/* 5 */ { "qtssUserExtendedRights",      nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe | qtssAttrModeWrite},

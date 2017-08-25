@@ -38,13 +38,17 @@
 #define __QTSSUSERPROFILE_H__
 
  //INCLUDES:
+#include <vector>
+#include <string>
 #include "QTSS.h"
 #include "QTSSDictionary.h"
 
 class QTSSUserProfile : public QTSSDictionary
 {
+	std::vector<std::string> userGroups;
 public:
-
+	void clearUserGroups() { userGroups.clear(); }
+	std::vector<std::string> GetUserGroups() { return userGroups; }
 	//Initialize
 	//Call initialize before instantiating this class. For maximum performance, this class builds
 	//any response header it can at startup time.

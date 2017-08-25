@@ -40,7 +40,6 @@ set (SRC
 	 QTSSExpirationDate.cpp QTSSExpirationDate.h
 	 RTSPRequestStream.cpp RTSPRequestStream.h
 	 GenerateXMLPrefs.cpp GenerateXMLPrefs.h
-	 QTSSErrorLogModule.cpp QTSSErrorLogModule.h
 	 RTCPTask.cpp RTCPTask.h)
 
 link_libraries(APIModules RTCPUtilitiesLib RTSPUtilitiesLib PrefsSourceLib

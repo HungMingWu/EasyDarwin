@@ -31,6 +31,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <boost/algorithm/string/predicate.hpp>
 #include "QTSSModuleUtils.h"
 #include "QTSS_Private.h"
 #include "QTSSDictionary.h"
@@ -43,6 +44,7 @@
 #include "RTPSession.h"
 #include "QTSSDataConverter.h"
 #include "RTSPRequest.h"
+#include "QTSSUserProfile.h"
 #ifndef __Win32__
 #include <netinet/in.h>
 #endif
@@ -55,13 +57,13 @@
 
 QTSS_TextMessagesObject     QTSSModuleUtils::sMessages = nullptr;
 QTSServerInterface*         QTSSModuleUtils::sServer = nullptr;
-QTSS_StreamRef              QTSSModuleUtils::sErrorLog = nullptr;
-bool                      QTSSModuleUtils::sEnableRTSPErrorMsg = false;
+QTSSStream*                 QTSSModuleUtils::sErrorLog = nullptr;
+bool                        QTSSModuleUtils::sEnableRTSPErrorMsg = false;
 QTSS_ErrorVerbosity         QTSSModuleUtils::sMissingPrefVerbosity = qtssMessageVerbosity;
 
 void    QTSSModuleUtils::Initialize(QTSS_TextMessagesObject inMessages,
                                     QTSServerInterface* inServer,
-                                    QTSS_StreamRef inErrorLog)
+                                    QTSSStream* inErrorLog)
 {
     sMessages = inMessages;
     sServer = inServer;
@@ -135,7 +137,6 @@ QTSS_Error QTSSModuleUtils::ReadEntireFile(char* inPath, StrPtrLen* outData, QTS
 			if(sdpContext)
 			{
 				recvLen = *theLength;
-				// theErr = QTSS_Read(theFileObject, outData->Ptr, outData->Len, &recvLen);
 				memcpy(outData->Ptr,sdpContext,*theLength);
 			}
 			
@@ -156,17 +157,6 @@ QTSS_Error QTSSModuleUtils::ReadEntireFile(char* inPath, StrPtrLen* outData, QTS
 #endif    
 		return theErr;
 	}
-
-
-void    QTSSModuleUtils::SetupSupportedMethods(QTSS_Object inServer, QTSS_RTSPMethod* inMethodArray, uint32_t inNumMethods)
-{
-    // Report to the server that this module handles DESCRIBE, SETUP, PLAY, PAUSE, and TEARDOWN
-    uint32_t theNumMethods = 0;
-    (void)QTSS_GetNumValues(inServer, qtssSvrHandledMethods, &theNumMethods);
-    
-    for (uint32_t x = 0; x < inNumMethods; x++)
-        (void)QTSS_SetValue(inServer, qtssSvrHandledMethods, theNumMethods++, (void*)&inMethodArray[x], sizeof(inMethodArray[x]));
-}
 
 void    QTSSModuleUtils::LogError(  QTSS_ErrorVerbosity inVerbosity,
                                     QTSS_AttributeID inTextMessage,
@@ -193,14 +183,14 @@ void    QTSSModuleUtils::LogError(  QTSS_ErrorVerbosity inVerbosity,
 							   std::string(inArgument) +
 							   std::string(inArg2);
     
-    (void)QTSS_Write(sErrorLog, theLogString.c_str(), theLogString.length(),
+    (void)sErrorLog->Write((char*)theLogString.c_str(), theLogString.length(),
                         nullptr, inVerbosity);
 }
 
 void QTSSModuleUtils::LogErrorStr( QTSS_ErrorVerbosity inVerbosity, char* inMessage) 
 {  	
 	if (inMessage == nullptr) return;  
-	(void)QTSS_Write(sErrorLog, inMessage, ::strlen(inMessage), nullptr, inVerbosity);
+	(void)sErrorLog->Write(inMessage, ::strlen(inMessage), nullptr, inVerbosity);
 }
 
 
@@ -214,7 +204,7 @@ void QTSSModuleUtils::LogPrefErrorStr( QTSS_ErrorVerbosity inVerbosity, char*  p
 	
 	snprintf(buffer,sizeof(buffer), "Server preference %s %s",  preference, inMessage);
    
-	(void)QTSS_Write(sErrorLog, buffer, ::strlen(buffer), nullptr, inVerbosity);
+	(void)sErrorLog->Write(buffer, ::strlen(buffer), nullptr, inVerbosity);
 }
                    
 QTSS_Error  QTSSModuleUtils::AppendRTPMetaInfoHeader(   RTSPRequest* inRequest,
@@ -771,39 +761,16 @@ QTSS_AttributeID QTSSModuleUtils::CreateAttribute(QTSS_Object inObject, char* in
     return theID;
 }
 
-char *QTSSModuleUtils::GetUserName_Copy(QTSS_UserProfileObject inUserProfile)
+char *QTSSModuleUtils::GetUserName_Copy(QTSSUserProfile* inUserProfile)
 {
     char*   username = nullptr;    
     (void)((QTSSDictionary*)inUserProfile)->GetValueAsString(qtssUserName, 0, &username);
     return username;
 }
 
-std::vector<std::string> QTSSModuleUtils::GetGroupsArray_Copy(QTSS_UserProfileObject inUserProfile)
-{   
-    if (nullptr == inUserProfile)
-		return {};
-
-	uint32_t outNumGroups;
-    QTSS_Error theErr = QTSS_GetNumValues (inUserProfile,qtssUserGroups, &outNumGroups);
-    if (theErr != QTSS_NoErr || outNumGroups == 0)
-		return {};
- 
-	std::vector<std::string> result(outNumGroups);
-    for (size_t index = 0; index < outNumGroups; index++)
-    {   
-		char *str = nullptr;
-		uint32_t len = 0;
-		((QTSSDictionary*)inUserProfile)->GetValuePtr(qtssUserGroups, index,(void **) &str, &len);
-		result[index] = std::string(str, len);
-		delete[] str;
-    }   
-
-    return result;
-}
-
-bool QTSSModuleUtils::UserInGroup(QTSS_UserProfileObject inUserProfile, char* inGroup, uint32_t inGroupLen)
+bool QTSSModuleUtils::UserInGroup(QTSSUserProfile* inUserProfile, boost::string_view inGroup)
 {
-	if (nullptr == inUserProfile || nullptr == inGroup  ||  inGroupLen == 0) 
+	if (nullptr == inUserProfile || inGroup.empty()) 
 		return false;
 		
 	char *userName = nullptr;
@@ -812,30 +779,16 @@ bool QTSSModuleUtils::UserInGroup(QTSS_UserProfileObject inUserProfile, char* in
 	if (len == 0 || userName == nullptr || userName[0] == 0) // no user to check
 		return false;
 
-	uint32_t numGroups = 0;
-	QTSS_GetNumValues (inUserProfile,qtssUserGroups, &numGroups);
-	if (numGroups == 0) // no groups to check
+	std::vector<std::string> userGroups = inUserProfile->GetUserGroups();
+
+	if (userGroups.empty()) // no groups to check
 		return false;
-
-	bool result = false;
-	char* userGroup = nullptr;
-	StrPtrLenDel userGroupStr; //deletes pointer in destructor
 	
-	for (uint32_t index = 0; index < numGroups; index++)
-	{  
-		userGroup = nullptr;
-		((QTSSDictionary*)inUserProfile)->GetValueAsString(qtssUserGroups, index, &userGroup); //allocates string
-		userGroupStr.Delete();
-		userGroupStr.Set(userGroup);					
-		if(userGroupStr.Equal(inGroup))
-		{	
-			result = true;
-			break;
-		}
-	}   
+	for (const auto &item : userGroups)
+		if (boost::equals(item, inGroup))
+			return true;
 
-	return result;
-	
+	return false;
 }
 
 
@@ -849,8 +802,7 @@ bool QTSSModuleUtils::AddressInList(QTSS_Object inObject, QTSS_AttributeID listI
     if (!inAddress.Valid())
         return false;
 
-    uint32_t numValues = 0;
-    (void) QTSS_GetNumValues(inObject, listID, &numValues);
+    uint32_t numValues = ((QTSSDictionary*)inObject)->GetNumValues(listID);
     
     for (uint32_t index = 0; index < numValues; index ++)
     { 
@@ -873,8 +825,7 @@ bool QTSSModuleUtils::FindStringInAttributeList(QTSS_Object inObject, QTSS_Attri
     if (nullptr == inStrPtr || nullptr == inStrPtr->Ptr || 0 == inStrPtr->Len)
         return false;
 
-    uint32_t numValues = 0;
-    (void) QTSS_GetNumValues(inObject, listID, &numValues);
+    uint32_t numValues = ((QTSSDictionary*)inObject)->GetNumValues(listID);
     
     for (uint32_t index = 0; index < numValues; index ++)
     { 

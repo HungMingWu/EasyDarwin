@@ -85,38 +85,6 @@ void ReflectorStream::Register()
 	(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sCantJoinMulticastGroup, &sCantJoinMulticastGroupErr);
 }
 
-void ReflectorStream::Initialize(QTSS_ModulePrefsObject inPrefs)
-{
-
-	QTSSModuleUtils::GetAttribute(inPrefs, "reflector_bucket_offset_delay_msec", qtssAttrDataTypeUInt32,
-		&ReflectorStream::sBucketDelayInMsec, &sDefaultBucketDelayInMsec, sizeof(sBucketDelayInMsec));
-
-	QTSSModuleUtils::GetAttribute(inPrefs, "reflector_buffer_size_sec", qtssAttrDataTypeUInt32,
-		&ReflectorStream::sOverBufferInSec, &sDefaultOverBufferInSec, sizeof(sDefaultOverBufferInSec));
-
-	
-	QTSSModuleUtils::GetAttribute(inPrefs, "rtp_reflector_threshold_msec", qtssAttrDataTypeUInt32,
-		&ReflectorStream::sRelocatePacketAgeMSec, &sDefaultRTPReflectorThresholdMsec, sizeof(sDefaultRTPReflectorThresholdMsec));
-
-	if(sRelocatePacketAgeMSec < 1000)
-		sRelocatePacketAgeMSec = 1000;
-
-	QTSSModuleUtils::GetAttribute(inPrefs, "reflector_use_in_packet_receive_time", qtssAttrDataTypeBool16,
-		&ReflectorStream::sUsePacketReceiveTime, &sDefaultUsePacketReceiveTime, sizeof(sDefaultUsePacketReceiveTime));
-
-	QTSSModuleUtils::GetAttribute(inPrefs, "reflector_in_packet_max_receive_sec", qtssAttrDataTypeUInt32,
-		&ReflectorStream::sMaxFuturePacketSec, &sDefaultMaxFuturePacketTimeSec, sizeof(sDefaultMaxFuturePacketTimeSec));
-
-	QTSSModuleUtils::GetAttribute(inPrefs, "reflector_rtp_info_offset_msec", qtssAttrDataTypeUInt32,
-		&ReflectorStream::sFirstPacketOffsetMsec, &sDefaultFirstPacketOffsetMsec, sizeof(sDefaultFirstPacketOffsetMsec));
-
-	ReflectorStream::sOverBufferInMsec = sOverBufferInSec * 1000;
-	ReflectorStream::sMaxFuturePacketMSec = sMaxFuturePacketSec * 1000;
-	ReflectorStream::sMaxPacketAgeMSec = (uint32_t)(sOverBufferInMsec * 10.0); //allow a little time before deleting.
-	if (ReflectorStream::sMaxPacketAgeMSec == 0)
-		ReflectorStream::sMaxPacketAgeMSec = 10000;
-}
-
 void ReflectorStream::GenerateSourceID(SourceInfo::StreamInfo* inInfo, char* ioBuffer)
 {
 

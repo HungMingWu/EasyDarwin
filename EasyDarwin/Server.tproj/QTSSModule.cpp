@@ -38,7 +38,7 @@ bool  QTSSModule::sHasRTSPAuthenticateModule = false;
 
 QTSSAttrInfoDict::AttrInfo  QTSSModule::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
-	/* 0 */ { "qtssModName",            nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
+	/* 0 */ {},
 	/* 1 */ { "qtssModDesc",            nullptr,                   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModeWrite },
 	/* 2 */ { "qtssModVersion",         nullptr,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModeWrite },
 	/* 3 */ { "qtssModRoles",           nullptr,                   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe },
@@ -85,7 +85,7 @@ void QTSSModule::Initialize()
 			sAttributes[x].fAttrDataType, sAttributes[x].fAttrPermission);
 }
 
-QTSSModule::QTSSModule(char* inName, char* inPath)
+QTSSModule::QTSSModule(char* inPath)
 	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kModuleDictIndex)),
 	fPath(nullptr),
 	fDispatchFunc(nullptr),
@@ -98,10 +98,6 @@ QTSSModule::QTSSModule(char* inName, char* inPath)
 
 	this->SetVal(qtssModPrefs, &fPrefs, sizeof(fPrefs));
 	this->SetVal(qtssModAttributes, &fAttributes, sizeof(fAttributes));
-
-	// If there is a name, copy it into the module object's internal buffer
-	if (inName != nullptr)
-		this->SetValue(qtssModName, 0, inName, ::strlen(inName), QTSSDictionary::kDontObeyReadOnly);
 
 	::memset(fRoleArray, 0, sizeof(fRoleArray));
 	::memset(&fModuleState, 0, sizeof(fModuleState));
@@ -134,14 +130,6 @@ QTSS_Error  QTSSModule::SetupModule(QTSS_CallbacksPtr inCallbacks, QTSS_MainEntr
 
 	fDispatchFunc = thePrivateArgs.outDispatchFunction;
 
-	//Log 
-	char msgStr[2048];
-	char* moduleName = nullptr;
-	(void)this->GetValueAsString(qtssModName, 0, &moduleName);
-	snprintf(msgStr, sizeof(msgStr), "Loading Module...%s", moduleName);
-	delete moduleName;
-	QTSServerInterface::LogError(qtssMessageVerbosity, msgStr);
-
 	return QTSS_NoErr;
 }
 
@@ -152,30 +140,20 @@ int32_t QTSSModule::GetPrivateRoleIndex(QTSS_Role apiRole)
 	{
 		// Map actual QTSS Role names to our private enum values. Turn on the proper one
 		// in the role array
-	case QTSS_Initialize_Role:          return kInitializeRole;
-	case QTSS_Shutdown_Role:            return kShutdownRole;
 	case QTSS_RTSPFilter_Role:          return kRTSPFilterRole;
-	case QTSS_RTSPRoute_Role:           return kRTSPRouteRole;
 	case QTSS_RTSPAuthenticate_Role:    return kRTSPAthnRole;
-	case QTSS_RTSPAuthorize_Role:       return kRTSPAuthRole;
-	case QTSS_RTSPPreProcessor_Role:    return kRTSPPreProcessorRole;
 	case QTSS_RTSPRequest_Role:         return kRTSPRequestRole;
-	case QTSS_RTSPPostProcessor_Role:   return kRTSPPostProcessorRole;
 	case QTSS_RTSPSessionClosing_Role:  return kRTSPSessionClosingRole;
 	case QTSS_RTPSendPackets_Role:      return kRTPSendPacketsRole;
-	case QTSS_ClientSessionClosing_Role:return kClientSessionClosingRole;
 	case QTSS_RTCPProcess_Role:         return kRTCPProcessRole;
 	case QTSS_ErrorLog_Role:            return kErrorLogRole;
-	case QTSS_RereadPrefs_Role:         return kRereadPrefsRole;
 	case QTSS_OpenFile_Role:            return kOpenFileRole;
 	case QTSS_OpenFilePreProcess_Role:  return kOpenFilePreProcessRole;
 	case QTSS_AdviseFile_Role:          return kAdviseFileRole;
 	case QTSS_ReadFile_Role:            return kReadFileRole;
 	case QTSS_CloseFile_Role:           return kCloseFileRole;
 	case QTSS_RequestEventFile_Role:    return kRequestEventFileRole;
-	case QTSS_RTSPIncomingData_Role:    return kRTSPIncomingDataRole;
 	case QTSS_StateChange_Role:         return kStateChangeRole;
-	case QTSS_Interval_Role:            return kTimedIntervalRole;
 	case Easy_HLSOpen_Role:				return kEasyHLSOpenRole;
 	case Easy_HLSClose_Role:			return kEasyHLSCloseRole;
 	case Easy_CMSFreeStream_Role:		return kEasyCMSFreeStreamRole;
@@ -211,40 +189,6 @@ QTSS_Error  QTSSModule::AddRole(QTSS_Role inRole)
 
 	fRoleArray[arrayID] = true;
 
-	/*
-		switch (inRole)
-		{
-			// Map actual QTSS Role names to our private enum values. Turn on the proper one
-			// in the role array
-			case QTSS_Initialize_Role:          fRoleArray[kInitializeRole] = true;         break;
-			case QTSS_Shutdown_Role:            fRoleArray[kShutdownRole] = true;           break;
-			case QTSS_RTSPFilter_Role:          fRoleArray[kRTSPFilterRole] = true;         break;
-			case QTSS_RTSPRoute_Role:           fRoleArray[kRTSPRouteRole] = true;          break;
-			case QTSS_RTSPAuthenticate_Role:    fRoleArray[kRTSPAthnRole] = true;           break;
-			case QTSS_RTSPAuthorize_Role:       fRoleArray[kRTSPAuthRole] = true;           break;
-			case QTSS_RTSPPreProcessor_Role:    fRoleArray[kRTSPPreProcessorRole] = true;   break;
-			case QTSS_RTSPRequest_Role:         fRoleArray[kRTSPRequestRole] = true;        break;
-			case QTSS_RTSPPostProcessor_Role:   fRoleArray[kRTSPPostProcessorRole] = true;  break;
-			case QTSS_RTSPSessionClosing_Role:  fRoleArray[kRTSPSessionClosingRole] = true; break;
-			case QTSS_RTPSendPackets_Role:      fRoleArray[kRTPSendPacketsRole] = true;     break;
-			case QTSS_ClientSessionClosing_Role:fRoleArray[kClientSessionClosingRole] = true;break;
-			case QTSS_RTCPProcess_Role:         fRoleArray[kRTCPProcessRole] = true;        break;
-			case QTSS_ErrorLog_Role:            fRoleArray[kErrorLogRole] = true;           break;
-			case QTSS_RereadPrefs_Role:         fRoleArray[kRereadPrefsRole] = true;        break;
-			case QTSS_OpenFile_Role:            fRoleArray[kOpenFileRole] = true;           break;
-			case QTSS_OpenFilePreProcess_Role:  fRoleArray[kOpenFilePreProcessRole] = true; break;
-			case QTSS_AdviseFile_Role:          fRoleArray[kAdviseFileRole] = true;         break;
-			case QTSS_ReadFile_Role:            fRoleArray[kReadFileRole] = true;           break;
-			case QTSS_CloseFile_Role:           fRoleArray[kCloseFileRole] = true;          break;
-			case QTSS_RequestEventFile_Role:    fRoleArray[kRequestEventFileRole] = true;   break;
-			case QTSS_RTSPIncomingData_Role:    fRoleArray[kRTSPIncomingDataRole] = true;   break;
-			case QTSS_StateChange_Role:         fRoleArray[kStateChangeRole] = true;        break;
-			case QTSS_Interval_Role:            fRoleArray[kTimedIntervalRole] = true;      break;
-			default:
-				return QTSS_BadArgument;
-		}
-	*/
-
 	if (inRole == QTSS_RTSPRequest_Role)
 		sHasRTSPRequestModule = true;
 	if (inRole == QTSS_OpenFile_Role)
@@ -271,24 +215,10 @@ int64_t QTSSModule::Run()
 
 	if (fRoleArray[kTimedIntervalRole])
 	{
-		if (events & Task::kIdleEvent || fModuleState.globalLockRequested)
+		if (events & Task::kIdleEvent)
 		{
 			fModuleState.curModule = this;  // this structure is setup in each thread
-			fModuleState.curRole = QTSS_Interval_Role;    // before invoking a module in a role. Sometimes
-			fModuleState.eventRequested = false;
 			fModuleState.curTask = this;
-			if (fModuleState.globalLockRequested)
-			{
-				fModuleState.globalLockRequested = false;
-				fModuleState.isGlobalLocked = true;
-			}
-
-			(void)this->CallDispatch(QTSS_Interval_Role, nullptr);
-			fModuleState.isGlobalLocked = false;
-
-			if (fModuleState.globalLockRequested) // call this request back locked
-				return this->CallLocked();
-
 			return fModuleState.idleTime; // If the module has requested idle time...
 		}
 	}

@@ -46,6 +46,7 @@
 #include "QTSSModuleUtils.h"
 #include "md5digest.h"
 #include "QTSSDataConverter.h"
+#include "QTSSReflectorModule.h"
 
 #if __FreeBSD__ || __hpux__	
 #include <unistd.h>
@@ -89,14 +90,13 @@ RTSPSession::RTSPSession()
 	QTSServerInterface::GetServer()->AlterCurrentRTSPSessionCount(1);
 
 	// Setup the QTSS param block, as none of these fields will change through the course of this session.
-	fRoleParams.rtspRequestParams.inRTSPSession = this;
-	fRoleParams.rtspRequestParams.inRTSPRequest = nullptr;
-	fRoleParams.rtspRequestParams.inClientSession = nullptr;
+	rtspParams.inRTSPSession = this;
+	rtspParams.inRTSPRequest = nullptr;
+	rtspParams.inClientSession = nullptr;
 
 	fModuleState.curModule = nullptr;
 	fModuleState.curTask = this;
 	fModuleState.curRole = 0;
-	fModuleState.globalLockRequested = false;
 
 	fLastRTPSessionID[0] = 0;
 	fLastRTPSessionIDPtr.Set(fLastRTPSessionID, 0);
@@ -241,7 +241,7 @@ int64_t RTSPSession::Run()
 				}
 				fRequest->ReInit(this);
 
-				fRoleParams.rtspRequestParams.inRTSPRequest = fRequest;
+				rtspParams.inRTSPRequest = fRequest;
 
 				// We have an RTSP request and are about to begin processing. We need to
 				// make sure that anyone sending interleaved data on this session won't
@@ -314,28 +314,11 @@ int64_t RTSPSession::Run()
 				// Invoke filter modules
 				for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPFilterRole))
 				{
-					if (fRequest->HasResponseBeenSent() && !fModuleState.eventRequested) break;
-					fModuleState.eventRequested = false;
 					fModuleState.idleTime = 0;
-					if (fModuleState.globalLockRequested)
-					{
-						fModuleState.globalLockRequested = false;
-						fModuleState.isGlobalLocked = true;
-					}
 
 					theModule->CallDispatch(QTSS_RTSPFilter_Role, &theFilterParams);
-					fModuleState.isGlobalLocked = false;
+	
 
-					// If this module has requested an event, return and wait for the event to transpire
-					if (fModuleState.globalLockRequested) // call this request back locked
-						return this->CallLocked();
-
-					if (fModuleState.eventRequested)
-					{
-						this->ForceSameThread();    // We are holding mutexes, so we need to force
-													// the same thread to be used for next Run()
-						return fModuleState.idleTime; // If the module has requested idle time...
-					}
 
 					//
 					// Check to see if this module has replaced the request. If so, check
@@ -387,31 +370,7 @@ int64_t RTSPSession::Run()
 					Assert(fRTPSession != nullptr);
 					OSMutexLocker   locker(fRTPSession->GetSessionMutex());
 
-					for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPRouteRole))
-					{
-						((!fRequest->HasResponseBeenSent()) || fModuleState.eventRequested);
-						fModuleState.eventRequested = false;
-						fModuleState.idleTime = 0;
-						if (fModuleState.globalLockRequested)
-						{
-							fModuleState.globalLockRequested = false;
-							fModuleState.isGlobalLocked = true;
-						}
-
-						theModule->CallDispatch(QTSS_RTSPRoute_Role, &fRoleParams);
-						fModuleState.isGlobalLocked = false;
-
-						if (fModuleState.globalLockRequested) // call this request back locked
-							return this->CallLocked();
-
-						// If this module has requested an event, return and wait for the event to transpire
-						if (fModuleState.eventRequested)
-						{
-							this->ForceSameThread();    // We are holding mutexes, so we need to force
-														// the same thread to be used for next Run()
-							return fModuleState.idleTime; // If the module has requested idle time...
-						}
-					}
+					ReflectionModule::RedirectBroadcast(&rtspParams);
 				}
 				fCurrentModule = 0;
 
@@ -502,7 +461,6 @@ int64_t RTSPSession::Run()
 				QTSS_RoleParams theAuthenticationParams;
 				theAuthenticationParams.rtspAthnParams.inRTSPRequest = fRequest;
 
-				fModuleState.eventRequested = false;
 				fModuleState.idleTime = 0;
 
 				fRequest->SetAllowed(allowed);
@@ -513,41 +471,14 @@ int64_t RTSPSession::Run()
 
 				for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPAthnRole))
 				{
-					if (fRequest->HasResponseBeenSent() && !fModuleState.eventRequested) break;
 					fRequest->SetAllowed(allowedDefault);
 					fRequest->SetHasUser(false);
 					fRequest->SetAuthHandled(false);
 
-
-					fModuleState.eventRequested = false;
-					fModuleState.idleTime = 0;
-					if (fModuleState.globalLockRequested)
-					{
-						fModuleState.globalLockRequested = false;
-						fModuleState.isGlobalLocked = true;
-					}
-
 					if (nullptr == theModule)
 						continue;
 
-					if (__RTSP_AUTH_DEBUG__)
-					{
-						theModule->GetValue(qtssModName)->PrintStr("QTSSModule::CallDispatch ENTER module=", "\n");
-					}
-
 					(void)theModule->CallDispatch(QTSS_RTSPAuthenticate_Role, &theAuthenticationParams);
-					fModuleState.isGlobalLocked = false;
-
-					if (fModuleState.globalLockRequested) // call this request back locked
-						return this->CallLocked();
-
-					// If this module has requested an event, return and wait for the event to transpire
-					if (fModuleState.eventRequested)
-					{
-						this->ForceSameThread();    // We are holding mutexes, so we need to force
-													// the same thread to be used for next Run()
-						return fModuleState.idleTime; // If the module has requested idle time...
-					}
 
 					allowed = fRequest->GetAllowed();
 					hasUser = fRequest->GetHasUser();
@@ -594,63 +525,24 @@ int64_t RTSPSession::Run()
 				fRequest->SetHasUser(hasUser);
 				fRequest->SetAuthHandled(handled);
 
-				for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPAuthRole))
-				{
-					if (fRequest->HasResponseBeenSent() && !fModuleState.eventRequested) break;
-					fRequest->SetHasUser(false);
-					fRequest->SetAuthHandled(false);
 
-					fModuleState.eventRequested = false;
-					fModuleState.idleTime = 0;
-					if (fModuleState.globalLockRequested)
-					{
-						fModuleState.globalLockRequested = false;
-						fModuleState.isGlobalLocked = true;
-					}
+				fRequest->SetHasUser(false);
+				fRequest->SetAuthHandled(false);
 
-					if (nullptr == theModule)
-						continue;
+				fModuleState.idleTime = 0;
 
-					if (__RTSP_AUTH_DEBUG__)
-					{
-						theModule->GetValue(qtssModName)->PrintStr("QTSSModule::CallDispatch ENTER module=", "\n");
-					}
+				(void)ReflectionModule::ReflectorAuthorizeRTSPRequest(&rtspParams);
 
 
-					(void)theModule->CallDispatch(QTSS_RTSPAuthorize_Role, &fRoleParams);
-					fModuleState.isGlobalLocked = false;
+				// allowed != default means a module has set the result
+				// handled means a module wants to be the primary for this request
+				// -- example qtaccess says only allow valid user and allowed default is false.  So module says handled, hasUser is false, allowed is false
+				// 
+				allowed = fRequest->GetAllowed();
+				hasUser = fRequest->GetHasUser();
+				handled = fRequest->GetAuthHandled();
+				debug_printf("RTSPSession::Run Role(kAuthorizingRequest) allowedDefault =%d allowed= %d hasUser = %d handled=%d \n", allowedDefault, allowed, hasUser, handled);
 
-					if (fModuleState.globalLockRequested) // call this request back locked
-						return this->CallLocked();
-
-					// If this module has requested an event, return and wait for the event to transpire
-					if (fModuleState.eventRequested)
-					{
-						this->ForceSameThread();    // We are holding mutexes, so we need to force
-													// the same thread to be used for next Run()
-						return fModuleState.idleTime; // If the module has requested idle time...
-					}
-
-					// allowed != default means a module has set the result
-					// handled means a module wants to be the primary for this request
-					// -- example qtaccess says only allow valid user and allowed default is false.  So module says handled, hasUser is false, allowed is false
-					// 
-					allowed = fRequest->GetAllowed();
-					hasUser = fRequest->GetHasUser();
-					handled = fRequest->GetAuthHandled();
-					debug_printf("RTSPSession::Run Role(kAuthorizingRequest) allowedDefault =%d allowed= %d hasUser = %d handled=%d \n", allowedDefault, allowed, hasUser, handled);
-
-					if (!allowed && !handled)  //old module break on !allowed
-					{
-						break;
-					}
-					if (!allowed && hasUser && handled)  //new module break on !allowed
-					{
-						break;
-					}
-
-
-				}
 				this->SaveRequestAuthorizationParams(fRequest);
 
 				if (!allowed)
@@ -719,37 +611,7 @@ int64_t RTSPSession::Run()
 					// a module is guarenteed to be atomic by the API.
 					Assert(fRTPSession != nullptr);
 					OSMutexLocker   locker(fRTPSession->GetSessionMutex());
-
-					for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPPreProcessorRole))
-					{
-						if (fRequest->HasResponseBeenSent() && !fModuleState.eventRequested) break;
-						fModuleState.eventRequested = false;
-						fModuleState.idleTime = 0;
-						if (fModuleState.globalLockRequested)
-						{
-							fModuleState.globalLockRequested = false;
-							fModuleState.isGlobalLocked = true;
-						}
-
-						theModule->CallDispatch(QTSS_RTSPPreProcessor_Role, &fRoleParams);
-						fModuleState.isGlobalLocked = false;
-
-						// The way the API is set up currently, the first module that adds a stream
-						// to the session is responsible for sending RTP packets for the session.
-						if (fRTPSession->HasAnRTPStream() && (fRTPSession->GetPacketSendingModule() == nullptr))
-							fRTPSession->SetPacketSendingModule(theModule);
-
-						if (fModuleState.globalLockRequested) // call this request back locked
-							return this->CallLocked();
-
-						// If this module has requested an event, return and wait for the event to transpire
-						if (fModuleState.eventRequested)
-						{
-							this->ForceSameThread();    // We are holding mutexes, so we need to force
-														// the same thread to be used for next Run()
-							return fModuleState.idleTime; // If the module has requested idle time...
-						}
-					}
+					ReflectionModule::ProcessRTSPRequest(&rtspParams);
 				}
 				fCurrentModule = 0;
 				if (fRequest->HasResponseBeenSent())
@@ -765,7 +627,6 @@ int64_t RTSPSession::Run()
 				// If no preprocessor sends a response, move onto the request processing module. It
 				// is ALWAYS supposed to send a response, but if it doesn't, we have a canned error
 				// to send back.
-				fModuleState.eventRequested = false;
 				fModuleState.idleTime = 0;
 				auto modules = QTSServerInterface::GetModule(QTSSModule::kRTSPRequestRole);
 				if (!modules.empty())
@@ -774,31 +635,6 @@ int64_t RTSPSession::Run()
 					// a module is guarenteed to be atomic by the API.
 					Assert(fRTPSession != nullptr);
 					OSMutexLocker   locker(fRTPSession->GetSessionMutex());
-
-					if (fModuleState.globalLockRequested)
-					{
-						fModuleState.globalLockRequested = false;
-						fModuleState.isGlobalLocked = true;
-					}
-
-					auto theModule = modules[0];
-					theModule->CallDispatch(QTSS_RTSPRequest_Role, &fRoleParams);
-					fModuleState.isGlobalLocked = false;
-
-					// Do the same check as above for the preprocessor
-					if (fRTPSession->HasAnRTPStream() && fRTPSession->GetPacketSendingModule() == nullptr)
-						fRTPSession->SetPacketSendingModule(theModule);
-
-					if (fModuleState.globalLockRequested) // call this request back locked
-						return this->CallLocked();
-
-					// If this module has requested an event, return and wait for the event to transpire
-					if (fModuleState.eventRequested)
-					{
-						this->ForceSameThread();    // We are holding mutexes, so we need to force
-													// the same thread to be used for next Run()
-						return fModuleState.idleTime; // If the module has requested idle time...
-					}
 				}
 
 				if (!fRequest->HasResponseBeenSent())
@@ -849,31 +685,6 @@ int64_t RTSPSession::Run()
 						if (this->IsLiveSession())
 							fRTPSession->UpdateRTSPSession(this);
 
-						for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPPostProcessorRole))
-						{
-							if (!fModuleState.eventRequested) break;
-							fModuleState.eventRequested = false;
-							fModuleState.idleTime = 0;
-							if (fModuleState.globalLockRequested)
-							{
-								fModuleState.globalLockRequested = false;
-								fModuleState.isGlobalLocked = true;
-							}
-
-							theModule->CallDispatch(QTSS_RTSPPostProcessor_Role, &fRoleParams);
-							fModuleState.isGlobalLocked = false;
-
-							if (fModuleState.globalLockRequested) // call this request back locked
-								return this->CallLocked();
-
-							// If this module has requested an event, return and wait for the event to transpire
-							if (fModuleState.eventRequested)
-							{
-								this->ForceSameThread();    // We are holding mutexes, so we need to force
-															// the same thread to be used for next Run()
-								return fModuleState.idleTime; // If the module has requested idle time...
-							}
-						}
 					}
 				}
 				fCurrentModule = 0;
@@ -1116,7 +927,7 @@ void RTSPSession::CheckAuthentication() {
 			debug_printf("erasing username from profile\n");
 			(void)profile->SetValue(qtssUserName, 0, sEmptyStr.Ptr, sEmptyStr.Len, QTSSDictionary::kDontObeyReadOnly);
 			(void)profile->SetValue(qtssUserPassword, 0, sEmptyStr.Ptr, sEmptyStr.Len, QTSSDictionary::kDontObeyReadOnly);
-			(void)profile->SetNumValues(qtssUserGroups, 0);
+			(void)profile->clearUserGroups();
 		}
 	}
 }
@@ -1263,7 +1074,7 @@ void RTSPSession::SetupRequest()
 	}
 
 	Assert(fRTPSession != nullptr); // At this point, we must have one!
-	fRoleParams.rtspRequestParams.inClientSession = fRTPSession;
+	rtspParams.inClientSession = fRTPSession;
 
 	// Setup Authorization params;
 	fRequest->ParseAuthHeader();
@@ -1279,7 +1090,7 @@ void RTSPSession::CleanupRequest()
 
 		// nullptr out any references to this RTP session
 		fRTPSession = nullptr;
-		fRoleParams.rtspRequestParams.inClientSession = nullptr;
+		rtspParams.inClientSession = nullptr;
 	}
 
 	if (this->IsLiveSession() == false) //clear out the ID so it can't be re-used.
@@ -1293,7 +1104,7 @@ void RTSPSession::CleanupRequest()
 		// nullptr out any references to the current request
 		//delete fRequest;
 		//fRequest = nullptr;
-		fRoleParams.rtspRequestParams.inRTSPRequest = nullptr;
+		rtspParams.inRTSPRequest = nullptr;
 	}
 
 	fSessionMutex.Unlock();
@@ -1575,15 +1386,14 @@ void RTSPSession::HandleIncomingDataPacket()
 
 	//
 	// We currently don't support async notifications from within this role
-	QTSS_RoleParams packetParams;
-	packetParams.rtspIncomingDataParams.inRTSPSession = this;
+	QTSS_IncomingData_Params rtspIncomingDataParams;
+	rtspIncomingDataParams.inRTSPSession = this;
 
-	packetParams.rtspIncomingDataParams.inClientSession = fRTPSession;
-	packetParams.rtspIncomingDataParams.inPacketData = fInputStream.GetRequestBuffer()->Ptr;
-	packetParams.rtspIncomingDataParams.inPacketLen = fInputStream.GetRequestBuffer()->Len;
+	rtspIncomingDataParams.inClientSession = fRTPSession;
+	rtspIncomingDataParams.inPacketData = fInputStream.GetRequestBuffer()->Ptr;
+	rtspIncomingDataParams.inPacketLen = fInputStream.GetRequestBuffer()->Len;
 
-	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPIncomingDataRole))
-		theModule->CallDispatch(QTSS_RTSPIncomingData_Role, &packetParams);
+	ReflectionModule::ProcessRTPData(&rtspIncomingDataParams);
 
 	fCurrentModule = 0;
 }

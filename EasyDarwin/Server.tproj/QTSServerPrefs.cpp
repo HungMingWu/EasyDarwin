@@ -279,7 +279,7 @@ QTSSAttrInfoDict::AttrInfo  QTSServerPrefs::sAttributes[] =
 
 
 QTSServerPrefs::QTSServerPrefs(XMLPrefsParser* inPrefsSource, bool inWriteMissingPrefs)
-	: QTSSPrefs(inPrefsSource, nullptr, QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kPrefsDictIndex), false),
+	: QTSSPrefs(inPrefsSource, QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kPrefsDictIndex), false),
 	fRTSPTimeoutInSecs(0),
 	fRTSPSessionTimeoutInSecs(0),
 	fRTPSessionTimeoutInSecs(0),

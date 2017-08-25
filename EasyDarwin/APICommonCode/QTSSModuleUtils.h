@@ -41,11 +41,14 @@
 #include "StrPtrLen.h"
 #include "RTPMetaInfoPacket.h"
 
+class QTSSStream;
+class QTSSUserProfile;
 class QTSSModuleUtils
 {
-    public:
-        // compatibiltiy features for certain players
-        
+
+public:
+	
+        // compatibiltiy features for certain players  
         enum    {  
                     kRequiresRTPInfoSeqAndTime  = 0, 
                     kAdjustBandwidth            = 1,
@@ -56,17 +59,11 @@ class QTSSModuleUtils
       
         static void     Initialize( QTSS_TextMessagesObject inMessages,
                                     QTSServerInterface* inServer,
-                                    QTSS_StreamRef inErrorLog);
+                                    QTSSStream* inErrorLog);
     
         // Read the complete contents of the file at inPath into the StrPtrLen.
         // This function allocates memory for the file data.
         static QTSS_Error   ReadEntireFile(char* inPath, StrPtrLen* outData, QTSS_TimeVal inModDate = -1, QTSS_TimeVal* outModDate = nullptr);
-
-        // If your module supports RTSP methods, call this function from your QTSS_Initialize
-        // role to tell the server what those methods are.
-        static void     SetupSupportedMethods(  QTSS_Object inServer,
-                                                QTSS_RTSPMethod* inMethodArray,
-                                                uint32_t inNumMethods);
                                                 
         // Using a message out of the text messages dictionary is a common
         // way to log errors to the error log. Here is a function to
@@ -190,14 +187,9 @@ class QTSSModuleUtils
         //
         /// Get the type of request. Returns qtssActionFlagsNoFlags on failure.
         //  Result is a bitmap of flags
-        //
- 
-        static QTSS_AttrRights GetRights(QTSS_UserProfileObject theUserProfileObject);
-        static char* GetExtendedRights(QTSS_UserProfileObject theUserProfileObject, uint32_t index);
-       
-        static char*  GetUserName_Copy(QTSS_UserProfileObject inUserProfile);
-        static std::vector<std::string> GetGroupsArray_Copy(QTSS_UserProfileObject inUserProfile);
-        static bool UserInGroup(QTSS_UserProfileObject inUserProfile, char* inGroupName, uint32_t inGroupNameLen);
+        //      
+        static char*  GetUserName_Copy(QTSSUserProfile* inUserProfile);
+        static bool UserInGroup(QTSSUserProfile* inUserProfile, boost::string_view inGroup);
 
         static void SetEnableRTSPErrorMsg(bool enable) {QTSSModuleUtils::sEnableRTSPErrorMsg = enable; }
         
@@ -223,7 +215,7 @@ class QTSSModuleUtils
 
         static QTSS_TextMessagesObject  sMessages;
         static QTSServerInterface*      sServer;
-        static QTSS_StreamRef           sErrorLog;
+        static QTSSStream*              sErrorLog;
         static bool                   sEnableRTSPErrorMsg;
         static QTSS_ErrorVerbosity      sMissingPrefVerbosity;
 };

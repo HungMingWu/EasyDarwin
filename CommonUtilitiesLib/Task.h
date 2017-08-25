@@ -122,11 +122,6 @@ protected:
 		if (TASK_DEBUG) if (fTaskName[0] == 0) ::strcpy(fTaskName, " corrupt task");
 		if (TASK_DEBUG) printf("Task::ForceSameThread fUseThisThread %p task %s enque elem=%p enclosing %p\n", (void*)fUseThisThread, fTaskName, (void *)&fTaskQueueElem, (void *)this);
 	}
-	int64_t                  CallLocked() {
-		ForceSameThread();
-		fWriteLock = true;
-		return (int64_t)10; // minimum of 10 milliseconds between locks
-	}
 
 private:
 

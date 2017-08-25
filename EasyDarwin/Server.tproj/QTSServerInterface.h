@@ -80,8 +80,13 @@ public:
 
 class QTSServerInterface : public QTSSDictionary
 {
+protected:
+	std::vector<QTSS_RTSPMethod> supportMethods;
 public:
-
+	void AppendSupportMehod(const std::vector<QTSS_RTSPMethod>& methods) { 
+		std::copy(begin(methods), end(methods), back_inserter(supportMethods)); 
+	}
+	std::vector<QTSS_RTSPMethod> GetSupportMehod() const { return supportMethods; }
 	//Initialize must be called right off the bat to initialize dictionary resources
 	static void     Initialize();
 

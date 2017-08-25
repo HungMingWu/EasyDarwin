@@ -43,7 +43,6 @@ class QTSSPrefs : public QTSSDictionary
 public:
 
 	QTSSPrefs(XMLPrefsParser* inPrefsSource,
-		StrPtrLen* inModuleName,
 		QTSSDictionaryMap* inMap,
 		bool areInstanceAttrsAllowed,
 		QTSSPrefs* parentDictionary = nullptr);

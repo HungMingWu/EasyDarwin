@@ -284,7 +284,6 @@ private:
 	bool  fAutoStart;
 	bool  fReliableUDP;
 	bool  fReliableUDPPrintfs;
-	bool  fEnableRTSPErrMsg;
 	bool  fEnableRTSPDebugPrintfs;
 	bool  fEnableRTSPServerInfo;
 	uint32_t  fNumThreads;

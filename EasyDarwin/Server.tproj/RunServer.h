@@ -76,5 +76,3 @@ void WritePid(bool forked);
 // clean the pid file
 void CleanPid(bool force);
 
-// make the status file
-void LogStatus(QTSS_ServerState theServerState);

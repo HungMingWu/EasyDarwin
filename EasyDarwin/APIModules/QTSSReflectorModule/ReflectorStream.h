@@ -341,13 +341,6 @@ public:
 	~ReflectorStream();
 
 	//
-	// SETUP
-	//
-	// Call Register from the Register role, as this object has some QTSS API
-	// attributes to setup
-	static void Register();
-
-	//
 	// MODIFIERS
 
 	// Call this to initialize the reflector sockets. Uses the QTSS_RTSPRequestObject

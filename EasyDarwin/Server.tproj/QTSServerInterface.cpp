@@ -63,8 +63,6 @@ std::string             QTSServerInterface::sServerHeader;
 
 std::string             QTSServerInterface::sPublicHeaderStr;
 
-std::array<std::vector<QTSSModule*>, QTSSModule::kNumRoles> QTSServerInterface::sModuleArray{};
-std::list<QTSSModule*>               QTSServerInterface::sModuleQueue;
 QTSSErrorLogStream      QTSServerInterface::sErrorLogStream;
 
 
@@ -192,13 +190,6 @@ QTSServerInterface::QTSServerInterface()
 
 void QTSServerInterface::LogError(QTSS_ErrorVerbosity inVerbosity, char* inBuffer)
 {
-	QTSS_RoleParams theParams;
-	theParams.errorParams.inVerbosity = inVerbosity;
-	theParams.errorParams.inBuffer = inBuffer;
-
-	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kErrorLogRole))
-		theModule->CallDispatch(QTSS_ErrorLog_Role, &theParams);
-
 	// If this is a fatal error, set the proper attribute in the RTSPServer dictionary
 	if ((inVerbosity == qtssFatalVerbosity) && (sServer != nullptr))
 	{
@@ -224,20 +215,6 @@ void QTSServerInterface::SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMa
 	if (inAttrIndex == qtssSvrState)
 	{
 		Assert(inNewValueLen == sizeof(QTSS_ServerState));
-
-		//
-		// Invoke the server state change role
-		QTSS_RoleParams theParams;
-		theParams.stateChangeParams.inNewState = *(QTSS_ServerState*)inNewValue;
-
-		static QTSS_ModuleState sStateChangeState = { nullptr, 0, nullptr, false };
-		if (OSThread::GetCurrent() == nullptr)
-			OSThread::SetMainThreadData(&sStateChangeState);
-		else
-			OSThread::GetCurrent()->SetThreadData(&sStateChangeState);
-
-		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kStateChangeRole))
-			theModule->CallDispatch(QTSS_StateChange_Role, &theParams);
 
 		//
 		// Make sure to clear out the thread data

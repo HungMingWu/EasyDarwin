@@ -184,7 +184,7 @@ QTSS_Error RTSPRequest::Parse()
 	//Make sure that there was some path that was extracted from this request. If not, there is no way
 	//we can process the request, so generate an error
 	if (GetAbsolutePath().empty())
-		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgNoURLInRequest, nullptr);
+		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest);
 
 	return QTSS_NoErr;
 }
@@ -194,7 +194,7 @@ QTSS_Error RTSPRequest::ParseFirstLine(boost::string_view method, boost::string_
 {
 	fMethod = RTSPProtocol::GetMethod(method);
 	if (fMethod == qtssIllegalMethod)
-		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest, qtssMsgBadRTSPMethod, nullptr);
+		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest);
 
 	//now parse the uri,for example rtsp://www.easydarwin.org:554/live.sdp?channel=1&token=888888
 	QTSS_Error err = ParseURI(fulluri);
@@ -239,7 +239,7 @@ QTSS_Error RTSPRequest::ParseURI(boost::string_view fulluri)
 	if (qtssSetupMethod != fMethod) // any method not a setup is not allowed to have a "/trackID=" in the url.
 	{
 		if (theAbsURL.find("/trackID=") != std::string::npos) // check for non-aggregate method and return error
-			return QTSSModuleUtils::SendErrorResponse(this, qtssClientAggregateOptionAllowed, qtssMsgBadRTSPMethod, nullptr);
+			return QTSSModuleUtils::SendErrorResponse(this, qtssClientAggregateOptionAllowed);
 	}
 
 	// don't allow non-aggregate operations like a setup on a playing session
@@ -247,7 +247,7 @@ QTSS_Error RTSPRequest::ParseURI(boost::string_view fulluri)
 	{
 		RTSPSession*  theSession = (RTSPSession *)GetSession();
 		if (theSession != nullptr && theSession->IsPlaying())
-			return QTSSModuleUtils::SendErrorResponse(this, qtssClientAggregateOptionAllowed, qtssMsgBadRTSPMethod, nullptr);
+			return QTSSModuleUtils::SendErrorResponse(this, qtssClientAggregateOptionAllowed);
 	}
 
 	//

@@ -238,147 +238,6 @@ void CleanPid(bool force)
 	}
 #endif
 }
-void LogStatus(QTSS_ServerState theServerState)
-{
-	static QTSS_ServerState lastServerState = 0;
-	static char *sPLISTHeader[] =
-	{ "<?xml version=\"1.0\" encoding=\"UTF-8\"?>",
-#if __MacOSX__
-		"<!DOCTYPE plist SYSTEM \"file://localhost/System/Library/DTDs/PropertyList.dtd\">",
-#else
-		"<!ENTITY % plistObject \"(array | data | date | dict | real | integer | string | true | false )\">",
-		"<!ELEMENT plist %plistObject;>",
-		"<!ATTLIST plist version CDATA \"0.9\">",
-		"",
-		"<!-- Collections -->",
-		"<!ELEMENT array (%plistObject;)*>",
-		"<!ELEMENT dict (key, %plistObject;)*>",
-		"<!ELEMENT key (#PCDATA)>",
-		"",
-		"<!--- Primitive types -->",
-		"<!ELEMENT string (#PCDATA)>",
-		"<!ELEMENT data (#PCDATA)> <!-- Contents interpreted as Base-64 encoded -->",
-		"<!ELEMENT date (#PCDATA)> <!-- Contents should conform to a subset of ISO 8601 (in particular, YYYY '-' MM '-' DD 'T' HH ':' MM ':' SS 'Z'.  Smaller units may be omitted with a loss of precision) -->",
-		"",
-		"<!-- Numerical primitives -->",
-		"<!ELEMENT true EMPTY>  <!-- Boolean constant true -->",
-		"<!ELEMENT false EMPTY> <!-- Boolean constant false -->",
-		"<!ELEMENT real (#PCDATA)> <!-- Contents should represent a floating point number matching (\"+\" | \"-\")? d+ (\".\"d*)? (\"E\" (\"+\" | \"-\") d+)? where d is a digit 0-9.  -->",
-		"<!ELEMENT integer (#PCDATA)> <!-- Contents should represent a (possibly signed) integer number in base 10 -->",
-		"]>",
-#endif
-	};
-
-	static int numHeaderLines = sizeof(sPLISTHeader) / sizeof(char*);
-
-	static char*    sPlistStart = "<plist version=\"0.9\">";
-	static char*    sPlistEnd = "</plist>";
-	static char*    sDictStart = "<dict>";
-	static char*    sDictEnd = "</dict>";
-
-	static char*    sKey = "     <key>%s</key>\n";
-	static char*    sValue = "     <string>%s</string>\n";
-
-	static char *sAttributes[] =
-	{
-		"qtssSvrServerName",
-		"qtssSvrServerVersion",
-		"qtssSvrServerBuild",
-		"qtssSvrServerPlatform",
-		"qtssSvrRTSPServerComment",
-		"qtssSvrServerBuildDate",
-		"qtssSvrStartupTime",
-		"qtssSvrCurrentTimeMilliseconds",
-		"qtssSvrCPULoadPercent",
-		 "qtssSvrState",
-		"qtssRTPSvrCurConn",
-		"qtssRTSPCurrentSessionCount",
-		"qtssRTSPHTTPCurrentSessionCount",
-		"qtssRTPSvrCurBandwidth",
-		"qtssRTPSvrCurPackets",
-		"qtssRTPSvrTotalConn",
-		"qtssRTPSvrTotalBytes"
-	};
-	static int numAttributes = sizeof(sAttributes) / sizeof(char*);
-
-	static StrPtrLen statsFileNameStr("server_status");
-
-	if (false == sServer->GetPrefs()->ServerStatFileEnabled())
-		return;
-
-	uint32_t interval = sServer->GetPrefs()->GetStatFileIntervalSec();
-	if (interval == 0 || (OS::UnixTime_Secs() % interval) > 0)
-		return;
-
-	// If the total number of RTSP sessions is 0  then we 
-	// might not need to update the "server_status" file.
-	char* thePrefStr = nullptr;
-	// We start lastRTSPSessionCount off with an impossible value so that
-	// we force the "server_status" file to be written at least once.
-	static int lastRTSPSessionCount = -1;
-	// Get the RTSP session count from the server.
-	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTSPCurrentSessionCount, 0, &thePrefStr);
-	int currentRTSPSessionCount = ::atoi(thePrefStr);
-	delete[] thePrefStr; thePrefStr = nullptr;
-	if (currentRTSPSessionCount == 0 && currentRTSPSessionCount == lastRTSPSessionCount)
-	{
-		// we don't need to update the "server_status" file except the
-		// first time we are in the idle state.
-		if (theServerState == qtssIdleState && lastServerState == qtssIdleState)
-		{
-			lastRTSPSessionCount = currentRTSPSessionCount;
-			lastServerState = theServerState;
-			return;
-		}
-	}
-	else
-	{
-		// save the RTSP session count for the next time we execute.
-		lastRTSPSessionCount = currentRTSPSessionCount;
-	}
-
-	StrPtrLenDel pathStr(sServer->GetPrefs()->GetErrorLogDir());
-	StrPtrLenDel fileNameStr(sServer->GetPrefs()->GetStatsMonitorFileName());
-	ResizeableStringFormatter pathBuffer(nullptr, 0);
-	pathBuffer.PutFilePath(&pathStr, &fileNameStr);
-	pathBuffer.PutTerminator();
-
-	char*   filePath = pathBuffer.GetBufPtr();
-	FILE*   statusFile = ::fopen(filePath, "w");
-	char*   theAttributeValue = nullptr;
-	int     i;
-
-	if (statusFile != nullptr)
-	{
-		::chmod(filePath, 0640);
-		for (i = 0; i < numHeaderLines; i++)
-		{
-			fprintf(statusFile, "%s\n", sPLISTHeader[i]);
-		}
-
-		fprintf(statusFile, "%s\n", sPlistStart);
-		fprintf(statusFile, "%s\n", sDictStart);
-
-		// show each element value
-		for (i = 0; i < numAttributes; i++)
-		{
-			(void)((QTSSDictionary*)sServer)->GetValueAsString(QTSSModuleUtils::GetAttrID(sServer, sAttributes[i]), 0, &theAttributeValue);
-			if (theAttributeValue != nullptr)
-			{
-				fprintf(statusFile, sKey, sAttributes[i]);
-				fprintf(statusFile, sValue, theAttributeValue);
-				delete[] theAttributeValue;
-				theAttributeValue = nullptr;
-			}
-		}
-
-		fprintf(statusFile, "%s\n", sDictEnd);
-		fprintf(statusFile, "%s\n\n", sPlistEnd);
-
-		::fclose(statusFile);
-	}
-	lastServerState = theServerState;
-}
 
 void print_status(FILE* file, FILE* console, char* format, char* theStr)
 {
@@ -617,7 +476,6 @@ void RunServer()
 	uint32_t debugLevel = 0;
 	bool printHeader = false;
 	bool printStatus = false;
-	uint32_t num = 0;
 
 	//just wait until someone stops the server or a fatal error occurs.
 	QTSS_ServerState theServerState = sServer->GetServerState();
@@ -629,19 +487,6 @@ void RunServer()
 #else
 		OSThread::Sleep(1000);
 #endif
-
-		//add,redis,定时保活
-		num++;
-		if (num % 5 == 0)
-		{
-			num = 0;
-
-			for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRedisTTLRole))
-				theModule->CallDispatch(Easy_RedisTTL_Role, nullptr);
-		}
-		//
-
-		LogStatus(theServerState);
 
 		if (sStatusUpdateInterval)
 		{
@@ -668,7 +513,7 @@ void RunServer()
 			//
 			// start the shutdown process
 			theServerState = qtssShuttingDownState;
-			(void)QTSS_SetValue(QTSServerInterface::GetServer(), qtssSvrState, 0, &theServerState, sizeof(theServerState));
+			QTSServerInterface::GetServer()->SetValue(qtssSvrState, 0, &theServerState, sizeof(theServerState));
 
 			if (sServer->SigIntSet())
 				restartServer = true;

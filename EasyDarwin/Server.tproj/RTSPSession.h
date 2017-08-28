@@ -122,7 +122,6 @@ private:
 
 
 	QTSS_StandardRTSP_Params     rtspParams;//module param blocks for roles.
-	QTSS_ModuleState    fModuleState;
 
 	QTSS_Error SetupAuthLocalPath(RTSPRequest *theRTSPRequest);
 

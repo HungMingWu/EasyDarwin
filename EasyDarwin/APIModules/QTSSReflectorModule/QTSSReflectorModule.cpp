@@ -36,7 +36,6 @@
 #include "OSRef.h"
 #include "OS.h"
 #include "ResizeableStringFormatter.h"
-#include "QTAccessFile.h"
 #include "RTPSession.h"
 #include "RTPSessionOutput.h"
 #include "SDPSourceInfo.h"
@@ -47,7 +46,6 @@
 
 #include "QueryParamList.h"
 #include "RTSPSession.h"
-#include "QTSSFile.h"
 #include "uri/decode.h"
 
 using namespace std;
@@ -74,15 +72,6 @@ static boost::string_view       sKillClientsEnabledName = "QTSSReflectorModuleTe
 //static boost::string_view       sSessionName = "QTSSReflectorModuleSession";
 // ATTRIBUTES
 static QTSS_AttributeID         sBufferOffsetAttr = qtssIllegalAttrID;
-static QTSS_AttributeID         sExpectedDigitFilenameErr = qtssIllegalAttrID;
-static QTSS_AttributeID         sReflectorBadTrackIDErr = qtssIllegalAttrID;
-static QTSS_AttributeID         sDuplicateBroadcastStreamErr = qtssIllegalAttrID;
-static QTSS_AttributeID         sAnnounceRequiresSDPinNameErr = qtssIllegalAttrID;
-static QTSS_AttributeID         sAnnounceDisabledNameErr = qtssIllegalAttrID;
-static QTSS_AttributeID         sSDPcontainsInvalidMinimumPortErr = qtssIllegalAttrID;
-static QTSS_AttributeID         sSDPcontainsInvalidMaximumPortErr = qtssIllegalAttrID;
-static QTSS_AttributeID         sStaticPortsConflictErr = qtssIllegalAttrID;
-static QTSS_AttributeID         sInvalidPortRangeErr = qtssIllegalAttrID;
 
 // STATIC DATA
 
@@ -130,7 +119,6 @@ static uint32_t   sBroadcasterSessionTimeoutMilliSecs = sBroadcasterSessionTimeo
 static uint16_t sLastMax = 0;
 static uint16_t sLastMin = 0;
 
-static bool   sEnforceStaticSDPPortRange = false;
 static bool   sDefaultEnforceStaticSDPPortRange = false;
 
 static uint32_t   sMaxAnnouncedSDPLengthInKbytes = 4;
@@ -202,7 +190,6 @@ static QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* i
 static QTSS_Error DestroySession(QTSS_ClientSessionClosing_Params* inParams);
 static void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* inSession, bool killClients);
 static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool isPush = false, bool *foundSessionPtr = nullptr, std::string* resultFilePath = nullptr);
-static bool InfoPortsOK(QTSS_StandardRTSP_Params* inParams, SDPSourceInfo* theInfo, boost::string_view inPath);
 void KillCommandPathInList();
 bool KillSession(boost::string_view sdpPath, bool killClients);
 
@@ -218,48 +205,6 @@ namespace ReflectionModule
 {
 	QTSS_Error Register(QTSS_Register_Params* inParams)
 	{
-		// Add text messages attributes
-		static char*        sExpectedDigitFilenameName = "QTSSReflectorModuleExpectedDigitFilename";
-		static char*        sReflectorBadTrackIDErrName = "QTSSReflectorModuleBadTrackID";
-		static char*        sDuplicateBroadcastStreamName = "QTSSReflectorModuleDuplicateBroadcastStream";
-		static char*        sAnnounceRequiresSDPinName = "QTSSReflectorModuleAnnounceRequiresSDPSuffix";
-		static char*        sAnnounceDisabledName = "QTSSReflectorModuleAnnounceDisabled";
-
-		(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sDuplicateBroadcastStreamName, nullptr, qtssAttrDataTypeCharArray);
-		(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sDuplicateBroadcastStreamName, &sDuplicateBroadcastStreamErr);
-
-		(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sAnnounceRequiresSDPinName, nullptr, qtssAttrDataTypeCharArray);
-		(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sAnnounceRequiresSDPinName, &sAnnounceRequiresSDPinNameErr);
-
-		(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sAnnounceDisabledName, nullptr, qtssAttrDataTypeCharArray);
-		(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sAnnounceDisabledName, &sAnnounceDisabledNameErr);
-
-
-		(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sExpectedDigitFilenameName, nullptr, qtssAttrDataTypeCharArray);
-		(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sExpectedDigitFilenameName, &sExpectedDigitFilenameErr);
-
-		(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sReflectorBadTrackIDErrName, nullptr, qtssAttrDataTypeCharArray);
-		(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sReflectorBadTrackIDErrName, &sReflectorBadTrackIDErr);
-
-		static char* sSDPcontainsInvalidMinumumPortErrName = "QTSSReflectorModuleSDPPortMinimumPort";
-		(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sSDPcontainsInvalidMinumumPortErrName, nullptr, qtssAttrDataTypeCharArray);
-		(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sSDPcontainsInvalidMinumumPortErrName, &sSDPcontainsInvalidMinimumPortErr);
-
-		static char* sSDPcontainsInvalidMaximumPortErrName = "QTSSReflectorModuleSDPPortMaximumPort";
-		(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sSDPcontainsInvalidMaximumPortErrName, nullptr, qtssAttrDataTypeCharArray);
-		(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sSDPcontainsInvalidMaximumPortErrName, &sSDPcontainsInvalidMaximumPortErr);
-
-		static char* sStaticPortsConflictErrName = "QTSSReflectorModuleStaticPortsConflict";
-		(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sStaticPortsConflictErrName, nullptr, qtssAttrDataTypeCharArray);
-		(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sStaticPortsConflictErrName, &sStaticPortsConflictErr);
-
-		static char* sInvalidPortRangeErrName = "QTSSReflectorModuleStaticPortPrefsBadRange";
-		(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sInvalidPortRangeErrName, nullptr, qtssAttrDataTypeCharArray);
-		(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sInvalidPortRangeErrName, &sInvalidPortRangeErr);
-
-		// Reflector session needs to setup some parameters too.
-		ReflectorStream::Register();
-
 		// Tell the server our name!
 		static char* sModuleName = "QTSSReflectorModule";
 		::strcpy(inParams->outModuleName, sModuleName);
@@ -271,7 +216,6 @@ namespace ReflectionModule
 	{
 		// Setup module utils
 		QTSSModuleUtils::Initialize(inParams->inMessages, inParams->inServer, inParams->inErrorLogStream);
-		QTAccessFile::Initialize();
 		sSessionMap = QTSServerInterface::GetServer()->GetReflectorSessionMap();
 		sServerPrefs = inParams->inPrefs;
 		sServer = inParams->inServer;
@@ -374,8 +318,6 @@ namespace ReflectionModule
 		//printf("ReflectorAuthorizeRTSPRequest authorizeAction=%d qtssActionFlagsWrite=%d\n", authorizeAction, qtssActionFlagsWrite);
 		bool outAllowAnyUser = false;
 		bool outAuthorized = false;
-		QTAccessFile accessFile;
-		accessFile.AuthorizeRequest(inParams, allowNoAccessFiles, noAction, authorizeAction, &outAuthorized, &outAllowAnyUser);
 
 		if ((outAuthorized == false) && (authorizeAction & qtssActionFlagsWrite)) //handle it
 		{
@@ -552,57 +494,9 @@ namespace ReflectionModule
 	QTSS_Error RereadPrefs()
 	{
 		sBroadcasterSessionTimeoutMilliSecs = sBroadcasterSessionTimeoutSecs * 1000;
-
-		if (sEnforceStaticSDPPortRange)
-		{
-			bool reportErrors = false;
-			if (sLastMax != sMaximumStaticSDPPort)
-			{
-				sLastMax = sMaximumStaticSDPPort;
-				reportErrors = true;
-			}
-
-			if (sLastMin != sMinimumStaticSDPPort)
-			{
-				sLastMin = sMinimumStaticSDPPort;
-				reportErrors = true;
-			}
-
-			if (reportErrors)
-			{
-				uint16_t minServerPort = 6970;
-				uint16_t maxServerPort = 9999;
-				char min[32];
-				char max[32];
-
-				if (((sMinimumStaticSDPPort <= minServerPort) && (sMaximumStaticSDPPort >= minServerPort))
-					|| ((sMinimumStaticSDPPort >= minServerPort) && (sMinimumStaticSDPPort <= maxServerPort))
-					)
-				{
-					sprintf(min, "%u", minServerPort);
-					sprintf(max, "%u", maxServerPort);
-					QTSSModuleUtils::LogError(qtssWarningVerbosity, sStaticPortsConflictErr, 0, min, max);
-				}
-
-				if (sMinimumStaticSDPPort > sMaximumStaticSDPPort)
-				{
-					sprintf(min, "%u", sMinimumStaticSDPPort);
-					sprintf(max, "%u", sMaximumStaticSDPPort);
-					QTSSModuleUtils::LogError(qtssWarningVerbosity, sInvalidPortRangeErr, 0, min, max);
-				}
-			}
-		}
-
 		KillCommandPathInList();
-
 		return QTSS_NoErr;
 	}
-}
-
-// FUNCTION IMPLEMENTATIONS
-QTSS_Error QTSSReflectorModule_Main(void* inPrivateArgs)
-{
-	return _stublibrary_main(inPrivateArgs, QTSSReflectorModuleDispatch);
 }
 
 QTSS_Error  QTSSReflectorModuleDispatch(QTSS_Role inRole, QTSS_RoleParamPtr inParams)
@@ -795,7 +689,7 @@ std::string DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ch
 QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 {
 	if (!sAnnounceEnabled)
-		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssPreconditionFailed, sAnnounceDisabledNameErr);
+		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssPreconditionFailed);
 
 	// If this is SDP data, the reflector has the ability to write the data
 	// to the file system location specified by the URL.
@@ -826,7 +720,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 
 	// Check for a .sdp at the end
 	if (!pathOK && !boost::ends_with(theFullPath, sSDPSuffix))
-		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssPreconditionFailed, sAnnounceRequiresSDPinNameErr);
+		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssPreconditionFailed);
 
 
 	// Ok, this is an sdp file. Retreive the entire contents of the SDP.
@@ -859,7 +753,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 		std::unique_ptr<char[]> charArrayPathDeleter(theRequestBody);
 		//
 		// NEED TO RETURN RTSP ERROR RESPONSE
-		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest, 0);
+		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest);
 	}
 
 	if ((theErr == QTSS_WouldBlock) || (theLen < theContentLen))
@@ -880,7 +774,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	{
 		boost::string_view t1(theFullPath.data(), theFullPath.length() - sSDPKillSuffix.length());
 		if (KillSession(t1, killBroadcast))
-			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssServerInternal, 0);
+			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssServerInternal);
 		else
 			return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssClientNotFound, &sKILLNotValidMessage);
 	}
@@ -899,11 +793,6 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	}
 
 	SDPSourceInfo theSDPSourceInfo(editedSDP.c_str(), editedSDP.length());
-
-	if (!InfoPortsOK(inParams, &theSDPSourceInfo, theFullPath)) // All validity checks like this check should be done before touching the file.
-	{
-		return QTSS_NoErr; // InfoPortsOK is sending back the error.
-	}
 
 	// ------------ reorder the sdp headers to make them proper.
 
@@ -1135,41 +1024,6 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	return QTSS_NoErr;
 }
 
-bool InfoPortsOK(QTSS_StandardRTSP_Params* inParams, SDPSourceInfo* theInfo, boost::string_view inPath)
-{
-	// Check the ports based on the Pref whether to enforce a static SDP port range.
-	bool isOK = true;
-
-	if (sEnforceStaticSDPPortRange)
-	{
-		for (uint32_t x = 0; x < theInfo->GetNumStreams(); x++)
-		{
-			uint16_t theInfoPort = theInfo->GetStreamInfo(x)->fPort;
-			QTSS_AttributeID theErrorMessageID = qtssIllegalAttrID;
-			if (theInfoPort != 0)
-			{
-				if (theInfoPort < sMinimumStaticSDPPort)
-					theErrorMessageID = sSDPcontainsInvalidMinimumPortErr;
-				else if (theInfoPort > sMaximumStaticSDPPort)
-					theErrorMessageID = sSDPcontainsInvalidMaximumPortErr;
-			}
-
-			if (theErrorMessageID != qtssIllegalAttrID)
-			{
-				std::string thePathPort = std::string(inPath) + ":" + std::to_string(theInfoPort);
-				(void)QTSSModuleUtils::LogError(qtssWarningVerbosity, theErrorMessageID, 0, (char *)thePathPort.c_str());
-
-				StrPtrLen thePortStr((char *)thePathPort.c_str());
-				(void)QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssUnsupportedMediaType, theErrorMessageID, &thePortStr);
-
-				return false;
-			}
-		}
-	}
-
-	return isOK;
-}
-
 ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRTSP_Params* inParams, uint32_t inChannel, StrPtrLen* inData, bool isPush, bool *foundSessionPtr)
 {
 	OSMutexLocker locker(sSessionMap->GetMutex());
@@ -1213,13 +1067,6 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 			return nullptr;
 		}
 
-		boost::string_view inPathV(inPath.Ptr, inPath.Len);
-		if (!InfoPortsOK(inParams, theInfo, inPathV))
-		{
-			delete theInfo;
-			return nullptr;
-		}
-
 		// Check if broadcast is allowed before doing anything else
 		// At this point we know it is a definitely a reflector session
 		// It is either incoming automatic broadcast setup or a client setup to view broadcast
@@ -1253,7 +1100,6 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 		{
 			//delete theSession;
 			CSdpCache::GetInstance()->eraseSdpMap(theSession->GetSourceID()->Ptr);
-			theSession->DelRedisLive();
 			theSession->StopTimer();
 			return nullptr;
 		}
@@ -1300,19 +1146,6 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 			if (theFileData.Len <= 0)
 				break;
 
-			auto* theInfo = new SDPSourceInfo(theFileData.Ptr, theFileData.Len);
-			if (theInfo == nullptr)
-				break;
-
-			boost::string_view inPathV(inPath.Ptr, inPath.Len);
-			if (!InfoPortsOK(inParams, theInfo, inPathV))
-			{
-				delete theInfo;
-				break;
-			}
-
-			delete theInfo;
-
 			theSession = (ReflectorSession*)theSessionRef->GetObject();
 			if (isPush && theSession && !(theSession->IsSetup()))
 			{
@@ -1357,7 +1190,6 @@ void DeleteReflectorPushSession(QTSS_StandardRTSP_Params* inParams, ReflectorSes
 		sSessionMap->UnRegister(theSessionRef);// we had an error while setting up-- don't let anyone get the session
 		//delete theSession;
 		CSdpCache::GetInstance()->eraseSdpMap(theSession->GetSourceID()->Ptr);
-		theSession->DelRedisLive();
 		theSession->StopTimer();
 	}
 }
@@ -1457,7 +1289,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	{
 		if (isPush)
 			DeleteReflectorPushSession(inParams, theSession, foundSession);
-		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest, sExpectedDigitFilenameErr);
+		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest);
 	}
 
 	uint32_t theTrackID = std::stoi(theDigitStr);
@@ -1472,14 +1304,13 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 		if (theStreamInfo == nullptr)
 		{
 			DeleteReflectorPushSession(inParams, theSession, foundSession);
-			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest,
-				sReflectorBadTrackIDErr);
+			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest);
 		}
 
 		if (!sAllowDuplicateBroadcasts && theStreamInfo->fSetupToReceive)
 		{
 			DeleteReflectorPushSession(inParams, theSession, foundSession);
-			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssPreconditionFailed, sDuplicateBroadcastStreamErr);
+			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssPreconditionFailed);
 		}
 
 		inParams->inRTSPRequest->SetUpServerPort(theStreamInfo->fPort);
@@ -1490,7 +1321,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 		if (theErr != QTSS_NoErr)
 		{
 			DeleteReflectorPushSession(inParams, theSession, foundSession);
-			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest, 0);
+			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest);
 		}
 
 		//send the setup response
@@ -1519,8 +1350,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	SourceInfo::StreamInfo* theStreamInfo = theSession->GetSourceInfo()->GetStreamInfoByTrackID(theTrackID);
 	// If theStreamInfo is NULL, we don't have a legit track, so return an error
 	if (theStreamInfo == nullptr)
-		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest,
-			sReflectorBadTrackIDErr);
+		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest);
 
 	boost::string_view thePayloadName = theStreamInfo->fPayloadName;
 	bool r = qi::phrase_parse(thePayloadName.cbegin(), thePayloadName.cend(),
@@ -1728,8 +1558,6 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 				}
 
 				//printf("QTSSReflectorModule:DoPlay  wait 100ms waitTimeLoopCount=%ld\n", waitTimeLoopCount);
-				int64_t interval = 1 * 100; // 100 millisecond
-				QTSS_SetIdleTimer(interval);
 				return QTSS_NoErr;
 			}
 		}
@@ -1787,16 +1615,6 @@ void KillCommandPathInList()
 		commandPath.PutTerminator();
 
 		char *theCommandPath = commandPath.GetBufPtr();
-		std::unique_ptr<QTSSFile> outFileObject(new QTSSFile);
-		QTSS_Error  err = outFileObject->Open(theCommandPath, qtssOpenFileNoFlags);
-		if (err == QTSS_NoErr)
-		{
-			outFileObject->Close();
-			::unlink(theCommandPath);
-			StrPtrLen *p1 = theRef->GetString();
-			boost::string_view t1(p1->Ptr, p1->Len);
-			KillSession(t1, true);
-		}
 	}
 
 }
@@ -1857,7 +1675,6 @@ void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* theSession, bool 
 				sSessionMap->UnRegister(theSessionRef);
 				//delete theSession;
 				CSdpCache::GetInstance()->eraseSdpMap(theSession->GetSourceID()->Ptr);
-				theSession->DelRedisLive();
 
 				theSession->StopTimer();
 			}

@@ -48,7 +48,6 @@
 #include "QTSSDictionary.h"
 #include "QTSServerPrefs.h"
 #include "QTSSMessages.h"
-#include "QTSSModule.h"
 #include "atomic.h"
 
 #include "OSMutex.h"
@@ -130,21 +129,6 @@ public:
 	{
 		(void)atomic_add(&fPeriodicRTPPacketsLost, packets);
 	}
-
-	// Also increments current RTP session count
-	void            IncrementTotalRTPSessions()
-	{
-		OSMutexLocker locker(&fMutex); fNumRTPSessions++; fTotalRTPSessions++;
-		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRedisSetRTSPLoadRole))
-			theModule->CallDispatch(Easy_RedisSetRTSPLoad_Role, nullptr);
-	}
-	void            AlterCurrentRTPSessionCount(int32_t inDifference)
-	{
-		OSMutexLocker locker(&fMutex); fNumRTPSessions += inDifference;
-		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRedisSetRTSPLoadRole))
-			theModule->CallDispatch(Easy_RedisSetRTSPLoad_Role, nullptr);
-	}
-
 
 	//track how many sessions are playing
 	void            AlterRTPPlayingSessions(int32_t inDifference)
@@ -269,19 +253,7 @@ public:
 	void                SetSigTerm() { fSigTerm = true; }
 
 	//
-	// MODULE STORAGE
-
-	// All module objects are stored here, and are accessable through
-	// these routines.
-
-	// Allows the caller to iterate over all modules that act in a given role           
-	static std::vector<QTSSModule*>  GetModule(QTSSModule::RoleIndex inRole)
-	{
-		return sModuleArray[inRole];
-	}
-
-	//
-	// We need to override this. This is how we implement the QTSS_StateChange_Role
+	// We need to override this.
 	void    SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
 		uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen) override;
 
@@ -335,9 +307,6 @@ protected:
 
 	//
 	// MODULE DATA
-
-	static std::array<std::vector<QTSSModule*>, QTSSModule::kNumRoles> sModuleArray;
-	static std::list<QTSSModule*>                  sModuleQueue;
 	static QTSSErrorLogStream       sErrorLogStream;
 
 private:

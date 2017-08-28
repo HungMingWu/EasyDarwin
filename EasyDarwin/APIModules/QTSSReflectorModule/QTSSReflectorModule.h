@@ -46,10 +46,4 @@ namespace ReflectionModule {
 	QTSS_Error DestroySession(QTSS_ClientSessionClosing_Params* inParams);
 	QTSS_Error RereadPrefs();
 };
-
-extern "C"
-{
-	EXPORT QTSS_Error QTSSReflectorModule_Main(void* inPrivateArgs);
-}
-
 #endif //_QTSSREFLECTORMODULE_H_

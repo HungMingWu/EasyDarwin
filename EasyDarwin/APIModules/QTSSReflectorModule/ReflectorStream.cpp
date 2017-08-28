@@ -45,11 +45,6 @@
 
 static ReflectorSocketPool  sSocketPool;
 
-// ATTRIBUTES
-
-static QTSS_AttributeID         sCantBindReflectorSocketErr = qtssIllegalAttrID;
-static QTSS_AttributeID         sCantJoinMulticastGroupErr = qtssIllegalAttrID;
-
 // PREFS
 static uint32_t                   sDefaultOverBufferInSec = 1;
 static uint32_t					sDefaultRTPReflectorThresholdMsec = 2000;
@@ -71,19 +66,6 @@ bool							ReflectorStream::sUsePacketReceiveTime = false;
 uint32_t                          ReflectorStream::sFirstPacketOffsetMsec = 500;
 
 uint32_t                          ReflectorStream::sRelocatePacketAgeMSec = 1000;
-
-void ReflectorStream::Register()
-{
-	// Add text messages attributes
-	static char*        sCantBindReflectorSocket = "QTSSReflectorModuleCantBindReflectorSocket";
-	static char*        sCantJoinMulticastGroup = "QTSSReflectorModuleCantJoinMulticastGroup";
-
-	(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sCantBindReflectorSocket, nullptr, qtssAttrDataTypeCharArray);
-	(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sCantBindReflectorSocket, &sCantBindReflectorSocketErr);
-
-	(void)QTSS_AddStaticAttribute(qtssTextMessagesObjectType, sCantJoinMulticastGroup, nullptr, qtssAttrDataTypeCharArray);
-	(void)QTSS_IDForAttr(qtssTextMessagesObjectType, sCantJoinMulticastGroup, &sCantJoinMulticastGroupErr);
-}
 
 void ReflectorStream::GenerateSourceID(SourceInfo::StreamInfo* inInfo, char* ioBuffer)
 {
@@ -386,14 +368,14 @@ QTSS_Error ReflectorStream::BindSockets(QTSS_StandardRTSP_Params* inParams, uint
 	}
 
 	if (fSockets == nullptr)
-		return QTSSModuleUtils::SendErrorResponse(inRequest, qtssServerInternal, sCantBindReflectorSocketErr);
+		return QTSSModuleUtils::SendErrorResponse(inRequest, qtssServerInternal);
 
 	// If we know the source IP address of this broadcast, we can demux incoming traffic
 	// on the same port by that source IP address. If we don't know the source IP addr,
 	// it is impossible for us to demux, and therefore we shouldn't allow multiple
 	// broadcasts on the same port.
 	if (((ReflectorSocket*)fSockets->GetSocketA())->HasSender() && (fStreamInfo.fSrcIPAddr == 0))
-		return QTSSModuleUtils::SendErrorResponse(inRequest, qtssServerInternal, sCantBindReflectorSocketErr);
+		return QTSSModuleUtils::SendErrorResponse(inRequest, qtssServerInternal);
 
 	//also put this stream onto the socket's queue of streams
 	((ReflectorSocket*)fSockets->GetSocketA())->AddSender(&fRTPSender);
@@ -433,7 +415,7 @@ QTSS_Error ReflectorStream::BindSockets(QTSS_StandardRTSP_Params* inParams, uint
 		if (err == QTSS_NoErr)
 			(void)fSockets->GetSocketB()->SetTtl(fStreamInfo.fTimeToLive);
 		if (err != QTSS_NoErr)
-			return QTSSModuleUtils::SendErrorResponse(inRequest, qtssServerInternal, sCantJoinMulticastGroupErr);
+			return QTSSModuleUtils::SendErrorResponse(inRequest, qtssServerInternal);
 	}
 
 	// If the port is 0, update the port to be the actual port value

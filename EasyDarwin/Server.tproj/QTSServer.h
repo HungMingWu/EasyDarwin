@@ -119,34 +119,11 @@ private:
 	static XMLPrefsParser* sPrefsSource;
 	static PrefsSource* sMessagesSource;
 
-	//
-	// Module loading & unloading routines
-
-	static QTSS_Callbacks   sCallbacks;
-
-	// Sets up QTSS API callback routines
-	void                    InitCallbacks();
-
-	// Loads compiled-in modules
-	void                    LoadCompiledInModules();
-
-	// Loads modules from disk
-	void                    LoadModules(QTSServerPrefs* inPrefs);
-	void                    CreateModule(char* inModuleFolderPath, char* inModuleName);
-
-	// Adds a module to the module array
-	bool                  AddModule(QTSSModule* inModule);
-
 	// Call module init roles
 	void                    DoInitRole();
 	void                    SetupPublicHeader();
 	uint32_t*                 GetRTSPIPAddrs(QTSServerPrefs* inPrefs, uint32_t* outNumAddrsPtr);
 	uint16_t*                 GetRTSPPorts(QTSServerPrefs* inPrefs, uint32_t* outNumPortsPtr);
-
-	// Build & destroy the optimized role / module arrays for invoking modules
-	void                    BuildModuleRoleArrays();
-	void                    DestroyModuleRoleArrays();
-
 
 #ifndef __Win32__
 	static pid_t            sMainPid;

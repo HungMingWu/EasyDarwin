@@ -44,7 +44,6 @@
 #include "Attributes.h"
 #include "QTSS.h"
 #include "QTSSDictionary.h"
-#include "QTSS_Private.h"
 
 #include "UDPDemuxer.h"
 #include "UDPSocketPool.h"
@@ -372,7 +371,6 @@ class RTPStream : public UDPDemuxerTask
         QTSS_Error  TCPWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags);
 
         static boost::string_view           sChannelNums[];
-        static QTSS_ModuleState             sRTCPProcessModuleState;
 
         static char *noType;
         static char *UDP;

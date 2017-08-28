@@ -48,9 +48,6 @@ RTPSession::RTPSession() :
 #endif
 
 	this->SetTaskName("RTPSession");
-	fModuleState.curModule = nullptr;
-	fModuleState.curTask = this;
-	fModuleState.curRole = 0;
 }
 
 RTPSession::~RTPSession()
@@ -103,7 +100,6 @@ RTPSession::~RTPSession()
 		}
 
 		Assert(y < theServer->GetNumRTPSessions());
-		theServer->AlterCurrentRTPSessionCount(-1);
 		if (!fIsFirstPlay) // The session was started playing (the counter ignores additional pause-play changes while session is active)
 			theServer->AlterRTPPlayingSessions(-1);
 
@@ -150,7 +146,6 @@ QTSS_Error  RTPSession::Activate(boost::string_view inSessionID)
 #if DEBUG
 	fActivateCalled = true;
 #endif
-	QTSServerInterface::GetServer()->IncrementTotalRTPSessions();
 	return QTSS_NoErr;
 }
 
@@ -381,8 +376,6 @@ int64_t RTPSession::Run()
 #if RTPSESSION_DEBUGGING
 	printf("RTPSession %" _S32BITARG_ ": In Run. Events %" _S32BITARG_ "\n", (int32_t)this, (int32_t)events);
 #endif
-	// Some callbacks look for this struct in the thread object
-	OSThreadDataSetter theSetter(&fModuleState, nullptr);
 
 	//if we have been instructed to go away, then let's delete ourselves
 	if ((events & Task::kKillEvent) || (events & Task::kTimeoutEvent) || (fModuleDoingAsyncStuff))
@@ -412,7 +405,6 @@ int64_t RTPSession::Run()
 			}
 
 			// The ClientSessionClosing role is allowed to do async stuff
-			fModuleState.curTask = this;
 			fModuleDoingAsyncStuff = true;  // So that we know to jump back to the
 			fCurrentModule = 0;             // right place in the code
 

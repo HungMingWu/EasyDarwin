@@ -432,32 +432,6 @@ enum
 };
 typedef uint32_t QTSS_RTSPSessionAttributes;
 
-enum
-{
-    //Easy_HTTPSessionObject parameters
-    easyHTTPSesID					= 0,        //read      //uint32_t        //This is a unique ID for each session since the server started up.
-    easyHTTPSesLocalAddr			= 1,        //read      //uint32_t        //Local IP address for this HTTP connection
-    easyHTTPSesLocalAddrStr			= 2,        //read      //char array	//Ditto, in dotted-decimal format.
-    easyHTTPSesLocalDNS				= 3,        //read      //char array	//DNS name of local IP address for this RTSP connection.
-    easyHTTPSesRemoteAddr			= 4,        //read      //uint32_t        //IP address of client.
-    easyHTTPSesRemoteAddrStr		= 5,        //read      //char array	//IP address addr of client, in dotted-decimal format.
-    easyHTTPSesEventCntxt			= 6,        //read      //QTSS_EventContextRef //An event context for the HTTP connection to the client. This should primarily be used to wait for EV_WR events if flow-controlled when responding to a client. 
-    easyHTTPSesLastUserName			= 7,		//read      //char array	// Private
-    easyHTTPSesLastUserPassword     = 8,		//read     //char array		// Private
-    easyHTTPSesLastURLRealm         = 9,		//read     //char array		// Private
-    
-    easyHTTPSesLocalPort			= 10,       //read      //UInt16        // This is the local port for the connection
-    easyHTTPSesRemotePort			= 11,       //read      //UInt16        // This is the client port for the connection
-    
-    easyHTTPSesLastToken			= 12,		//read      //char array	// Private
-
-	easyHTTPSesContentBody			= 13,		//read		//char array
-	easyHTTPSesContentBodyOffset	= 14,		//read		//uint32_t
-
-    easyHTTPSesNumParams			= 15
-};
-typedef uint32_t Easy_HTTPSessionAttributes;
-
 enum 
 {
     //All text names are identical to the enumerated type names
@@ -791,11 +765,6 @@ typedef uint32_t QTSS_ConnectedUserObjectAttributes;
 
 enum
 {
-    //Global
-    
-    QTSS_ErrorLog_Role =             FOUR_CHARS_TO_INT('e', 'l', 'o', 'g'), //elog //This gets called when the server wants to log an error.
-    QTSS_StateChange_Role =          FOUR_CHARS_TO_INT('s', 't', 'a', 't'), //stat //This gets called whenever the server changes state.
-    
     //RTSP-specific
     QTSS_RTSPFilter_Role =           FOUR_CHARS_TO_INT('f', 'i', 'l', 't'), //filt //Filter all RTSP requests before the server parses them
     QTSS_RTSPAuthenticate_Role =     FOUR_CHARS_TO_INT('a', 't', 'h', 'n'), //athn //Authenticate the RTSP request username.
@@ -887,7 +856,6 @@ typedef struct
     QTSS_PrefsObject            inPrefs;
     QTSS_TextMessagesObject     inMessages;
 	QTSSStream*                 inErrorLogStream;   // Writing to this stream causes modules to
-                                                    // be invoked in the QTSS_ErrorLog_Role
     QTSS_ModuleObject           inModule;
 } QTSS_Initialize_Params;
 

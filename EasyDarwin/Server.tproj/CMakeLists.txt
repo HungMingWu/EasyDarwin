@@ -15,8 +15,6 @@ include_directories(../../CommonUtilitiesLib ../../RTSPUtilitiesLib
 
 set (SRC 
      RunServer.cpp RunServer.h
-	 QTSSCallbacks.cpp QTSSCallbacks.h
-	 QTSSModule.cpp QTSSModule.h
 	 QTSServer.cpp QTSServer.h
      QTSSDictionary.cpp QTSSDictionary.h
 	 QTSServerInterface.cpp QTSServerInterface.h
@@ -28,7 +26,6 @@ set (SRC
      RTPOverbufferWindow.cpp RTPOverbufferWindow.h
      RTSPSessionInterface.cpp RTSPSessionInterface.h
      QTSSPrefs.cpp QTSSPrefs.h
-     QTSSFile.cpp QTSSFile.h
      RTPSessionInterface.cpp RTPSessionInterface.h
      QTSSMessages.cpp QTSSMessages.h
      RTSPSession.cpp RTSPSession.h
@@ -43,7 +40,7 @@ set (SRC
 	 RTCPTask.cpp RTCPTask.h)
 
 link_libraries(APIModules RTCPUtilitiesLib RTSPUtilitiesLib PrefsSourceLib
-               APICommonCode APIStubLib
+               APICommonCode
                CommonUtilitiesLib RTPMetaInfoLib)
 IF (MSVC)
 link_libraries(Ws2_32 Winmm)

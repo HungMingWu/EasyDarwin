@@ -76,8 +76,6 @@ ReflectorSession::ReflectorSession(boost::string_view inSourceID, uint32_t inCha
 		fSourceID.Ptr[strlen(streamID)] = '\0';
 		fSourceID.Len = strlen(streamID);
 		fRef.Set(fSourceID, this);
-
-		this->SetSessionName();
 	}
 	timer.async_wait(std::bind(&ReflectorSession::Run, this, std::placeholders::_1));
 }
@@ -98,21 +96,6 @@ ReflectorSession::~ReflectorSession()
 
 	delete fSourceInfo;
 	fSourceID.Delete();
-}
-
-QTSS_Error ReflectorSession::SetSessionName()
-{
-	if (fSourceID.Len > 0)
-	{
-		QTSS_RoleParams theParams;
-		theParams.easyStreamInfoParams.inStreamName = (char *)fSessionName.data();
-		theParams.easyStreamInfoParams.inChannel = fChannelNum;
-		theParams.easyStreamInfoParams.inNumOutputs = fNumOutputs;
-		theParams.easyStreamInfoParams.inAction = easyRedisActionSet;
-		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRedisUpdateStreamInfoRole))
-			theModule->CallDispatch(Easy_RedisUpdateStreamInfo_Role, &theParams);
-	}
-	return QTSS_NoErr;
 }
 
 QTSS_Error ReflectorSession::SetupReflectorSession(SourceInfo* inInfo, QTSS_StandardRTSP_Params* inParams, uint32_t inFlags, bool filterState, uint32_t filterTimeout)
@@ -232,14 +215,7 @@ void    ReflectorSession::RemoveOutput(ReflectorOutput* inOutput, bool isClient)
 	}
 
 	if (fNumOutputs == 0)
-	{
-		this->SetNoneOutputStartTimeMS();
-		QTSS_RoleParams theParams;
-		theParams.easyStreamInfoParams.inStreamName = (char *)fSessionName.data();
-		theParams.easyStreamInfoParams.inChannel = fChannelNum;
-		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kEasyCMSFreeStreamRole))
-			theModule->CallDispatch(Easy_CMSFreeStream_Role, &theParams);
-	}
+		SetNoneOutputStartTimeMS();
 }
 
 void ReflectorSession::TearDownAllOutputs()
@@ -283,19 +259,6 @@ void*   ReflectorSession::GetStreamCookie(uint32_t inStreamID)
 	return nullptr;
 }
 
-void ReflectorSession::DelRedisLive()
-{
-	QTSS_RoleParams theParams;
-	theParams.easyStreamInfoParams.inStreamName = (char *)fSessionName.data();
-	theParams.easyStreamInfoParams.inChannel = fChannelNum;
-	theParams.easyStreamInfoParams.inAction = easyRedisActionDelete;
-	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRedisUpdateStreamInfoRole))
-	{
-		printf("从redis中删除推流名称%s\n", fSourceID.Ptr);
-		theModule->CallDispatch(Easy_RedisUpdateStreamInfo_Role, &theParams);
-	}
-}
-
 void ReflectorSession::Run(const boost::system::error_code &ec)
 {
 	if (ec == boost::asio::error::operation_aborted) {
@@ -306,23 +269,9 @@ void ReflectorSession::Run(const boost::system::error_code &ec)
 	int64_t sNoneTime = GetNoneOutputStartTimeMS();
 	if ((GetNumOutputs() == 0) && (sNowTime - sNoneTime >= /*QTSServerInterface::GetServer()->GetPrefs()->GetRTPSessionTimeoutInSecs()*/35 * 1000))
 	{
-		QTSS_RoleParams theParams;
-		theParams.easyStreamInfoParams.inStreamName = (char *)fSessionName.data();
-		theParams.easyStreamInfoParams.inChannel = fChannelNum;
-		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kEasyCMSFreeStreamRole))
-			theModule->CallDispatch(Easy_CMSFreeStream_Role, &theParams);
 	}
 	else
 	{
-		QTSS_RoleParams theParams;
-		theParams.easyStreamInfoParams.inStreamName = (char *)fSessionName.data();
-		theParams.easyStreamInfoParams.inChannel = fChannelNum;
-		theParams.easyStreamInfoParams.inNumOutputs = fNumOutputs;
-		theParams.easyStreamInfoParams.inBitrate = GetBitRate();
-		theParams.easyStreamInfoParams.inAction = easyRedisActionSet;
-
-		for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRedisUpdateStreamInfoRole))
-			theModule->CallDispatch(Easy_RedisUpdateStreamInfo_Role, &theParams);
 	}
 	timer.expires_from_now(std::chrono::seconds(20));
 	timer.async_wait(std::bind(&ReflectorSession::Run, this, std::placeholders::_1));

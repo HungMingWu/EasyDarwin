@@ -95,9 +95,7 @@ public:
         // It always returns QTSS_RequestFailed.
 
         static QTSS_Error   SendErrorResponse(RTSPRequest* inRequest,
-                                                        QTSS_RTSPStatusCode inStatusCode,
-                                                        QTSS_AttributeID inTextMessage,
-                                                        StrPtrLen* inStringArg = nullptr);
+                                              QTSS_RTSPStatusCode inStatusCode);
 														
 		// This function sends an error to the RTSP client. You don't have to provide
 		// a text message ID, but instead you need to provide the error message in a
@@ -126,62 +124,7 @@ public:
                                                     iovec* describeData,
                                                     uint32_t inNumVectors,
                                                     uint32_t inTotalLength);
-
-                
-                // Called by SendDescribeResponse to coalesce iovec to a buffer
-                // Allocates memory - remember to delete it!
-                static char* CoalesceVectors(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength);
-                                                                                                                                                            
-        //
-        // GET MODULE PREFS OBJECT
-        static QTSS_ModulePrefsObject GetModulePrefsObject(QTSS_ModuleObject inModObject);
-        
-        // GET MODULE ATTRIBUTES OBJECT
-        static QTSS_Object GetModuleAttributesObject(QTSS_ModuleObject inModObject);
-        
-        //
-        // GET ATTRIBUTE
-        //
-        // This function retrieves an attribute 
-        // (from any QTSS_Object, including the QTSS_ModulePrefsObject)
-        // with the specified name and type
-        // out of the specified object.
-        //
-        // Caller should pass in a buffer for ioBuffer that is large enough
-        // to hold the attribute value. inBufferLen should be set to the length
-        // of this buffer.
-        //
-        // Pass in a buffer containing a default value to use for the attribute
-        // in the inDefaultValue parameter. If the attribute isn't found, or is
-        // of the wrong type, the default value will be copied into ioBuffer.
-        // Also, this function adds the default value to object if it is not
-        // found or is of the wrong type. If no default value is provided, the
-        // attribute is still added but no value is assigned to it.
-        //
-        // Pass in NULL for the default value or 0 for the default value length if it is not known.
-        //
-        // This function logs an error if there was a default value provided.
-        static void GetAttribute(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType,
-                            void* ioBuffer, void* inDefaultValue, uint32_t inBufferLen);
-                            
-        static void GetIOAttribute(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType,
-                            void* ioDefaultResultBuffer, uint32_t inBufferLen);
-        //
-        // GET STRING ATTRIBUTE
-        //
-        // Does the same thing as GetAttribute, but does it for string attribute. Returns a newly
-        // allocated buffer with the attribute value inside it.
-        //
-        // Pass in NULL for the default value or an empty string if the default is not known.
-        static char* GetStringAttribute(QTSS_Object inObject, char* inAttributeName, char* inDefaultValue);
-
-        //
-        // GET ATTR ID
-        //
-        // Given an attribute in an object, returns its attribute ID
-        // or qtssIllegalAttrID if it isn't found.
-        static QTSS_AttributeID GetAttrID(QTSS_Object inObject, char* inAttributeName);
-        
+                                                                                                                                                                                               
         //
         //
         //
@@ -190,11 +133,7 @@ public:
         //      
         static char*  GetUserName_Copy(QTSSUserProfile* inUserProfile);
         static bool UserInGroup(QTSSUserProfile* inUserProfile, boost::string_view inGroup);
-
-        static void SetEnableRTSPErrorMsg(bool enable) {QTSSModuleUtils::sEnableRTSPErrorMsg = enable; }
-        
-        static QTSS_AttributeID CreateAttribute(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType, void* inDefaultValue, uint32_t inBufferLen);
-  
+ 
         static bool AddressInList(QTSS_Object inObject, QTSS_AttributeID listID, StrPtrLen *theAddressPtr);
   
         static void SetMisingPrefLogVerbosity(QTSS_ErrorVerbosity verbosityLevel) { QTSSModuleUtils::sMissingPrefVerbosity = verbosityLevel;}
@@ -208,15 +147,9 @@ public:
         
          
     private:
-    
-        //
-        // Used in the implementation of the above functions
-        static QTSS_AttributeID CheckAttributeDataType(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType, void* inDefaultValue, uint32_t inBufferLen);    
-
         static QTSS_TextMessagesObject  sMessages;
         static QTSServerInterface*      sServer;
         static QTSSStream*              sErrorLog;
-        static bool                   sEnableRTSPErrorMsg;
         static QTSS_ErrorVerbosity      sMissingPrefVerbosity;
 };
 

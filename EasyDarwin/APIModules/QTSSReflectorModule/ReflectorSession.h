@@ -93,8 +93,6 @@ public:
 	QTSS_Error      SetupReflectorSession(SourceInfo* inInfo, QTSS_StandardRTSP_Params* inParams,
 		uint32_t inFlags = kMarkSetup, bool filterState = true, uint32_t filterTimeout = 30);
 
-	QTSS_Error		SetSessionName();
-
 	// Packets get forwarded by attaching ReflectorOutput objects to a ReflectorSession.
 
 	void    AddOutput(ReflectorOutput* inOutput, bool isClient);
@@ -157,7 +155,6 @@ public:
 	void	SetHasBufferedStreams(bool enableBuffer) { fHasBufferedStreams = enableBuffer; }
 	void	SetHasVideoKeyFrameUpdate(bool indexUpdate) { fHasVideoKeyFrameUpdate = indexUpdate; }
 
-	void	DelRedisLive();
 	void    StopTimer() { timer.cancel(); }
 private:
 

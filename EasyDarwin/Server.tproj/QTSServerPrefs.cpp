@@ -325,7 +325,6 @@ QTSServerPrefs::QTSServerPrefs(XMLPrefsParser* inPrefsSource, bool inWriteMissin
 	fAutoStart(false),
 	fReliableUDP(true),
 	fReliableUDPPrintfs(false),
-	fEnableRTSPErrMsg(false),
 	fEnableRTSPDebugPrintfs(false),
 	fEnableRTSPServerInfo(true),
 	fNumThreads(0),
@@ -415,7 +414,6 @@ void QTSServerPrefs::SetupAttributes()
 	this->SetVal(qtssPrefsStartThickingDelayInMsec, &fStartThickingTimeInMsec, sizeof(fStartThickingTimeInMsec));
 	this->SetVal(qtssPrefsThickAllTheWayDelayInMsec, &fThickAllTheWayTimeInMsec, sizeof(fThickAllTheWayTimeInMsec));
 	this->SetVal(qtssPrefsQualityCheckIntervalInMsec, &fQualityCheckIntervalInMsec, sizeof(fQualityCheckIntervalInMsec));
-	this->SetVal(qtssPrefsEnableRTSPErrorMessage, &fEnableRTSPErrMsg, sizeof(fEnableRTSPErrMsg));
 	this->SetVal(qtssPrefsEnableRTSPDebugPrintfs, &fEnableRTSPDebugPrintfs, sizeof(fEnableRTSPDebugPrintfs));
 	this->SetVal(qtssPrefsEnableRTSPServerInfo, &fEnableRTSPServerInfo, sizeof(fEnableRTSPServerInfo));
 	this->SetVal(qtssPrefsRunNumThreads, &fNumThreads, sizeof(fNumThreads));
@@ -562,7 +560,6 @@ void QTSServerPrefs::RereadServerPreferences(bool inWriteMissingPrefs)
 	// Do any special pref post-processing
 	this->UpdateAuthScheme();
 	this->UpdatePrintfOptions();
-	QTSSModuleUtils::SetEnableRTSPErrorMsg(fEnableRTSPErrMsg);
 
 	QTSSRollingLog::SetCloseOnWrite(fCloseLogsOnWrite);
 	//

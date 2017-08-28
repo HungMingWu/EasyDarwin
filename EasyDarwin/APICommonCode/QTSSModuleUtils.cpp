@@ -33,13 +33,11 @@
 #include <memory>
 #include <boost/algorithm/string/predicate.hpp>
 #include "QTSSModuleUtils.h"
-#include "QTSS_Private.h"
 #include "QTSSDictionary.h"
 #include "StrPtrLen.h"
 #include "MyAssert.h"
 #include "StringFormatter.h"
 #include "ResizeableStringFormatter.h"
-#include "QTAccessFile.h"
 #include "StringParser.h"
 #include "RTPSession.h"
 #include "QTSSDataConverter.h"
@@ -58,7 +56,6 @@
 QTSS_TextMessagesObject     QTSSModuleUtils::sMessages = nullptr;
 QTSServerInterface*         QTSSModuleUtils::sServer = nullptr;
 QTSSStream*                 QTSSModuleUtils::sErrorLog = nullptr;
-bool                        QTSSModuleUtils::sEnableRTSPErrorMsg = false;
 QTSS_ErrorVerbosity         QTSSModuleUtils::sMissingPrefVerbosity = qtssMessageVerbosity;
 
 void    QTSSModuleUtils::Initialize(QTSS_TextMessagesObject inMessages,
@@ -292,9 +289,7 @@ QTSS_Error  QTSSModuleUtils::AppendRTPMetaInfoHeader(   RTSPRequest* inRequest,
 }
 
 QTSS_Error  QTSSModuleUtils::SendErrorResponse( RTSPRequest* inRequest,
-                                                        QTSS_RTSPStatusCode inStatusCode,
-                                                        QTSS_AttributeID inTextMessage,
-                                                        StrPtrLen* inStringArg)
+                                                QTSS_RTSPStatusCode inStatusCode)
 {
     static bool sFalse = false;
     
@@ -302,61 +297,7 @@ QTSS_Error  QTSSModuleUtils::SendErrorResponse( RTSPRequest* inRequest,
 	inRequest->SetStatus(inStatusCode);
 	inRequest->SetResponseKeepAlive(sFalse);
     StringFormatter theErrorMsgFormatter(nullptr, 0);
-    char *messageBuffPtr = nullptr;
-    
-    if (sEnableRTSPErrorMsg)
-    {
-        // Retrieve the specified message out of the text messages dictionary.
-        StrPtrLen theMessage;
-		((QTSSDictionary*)sMessages)->GetValuePtr(inTextMessage, 0, (void**)&theMessage.Ptr, &theMessage.Len);
-
-        if ((theMessage.Ptr == nullptr) || (theMessage.Len == 0))
-        {
-            // If we couldn't find the specified message, get the default
-            // "No Message" message, and return that to the client instead.
-            
-			((QTSSDictionary*)sMessages)->GetValuePtr(qtssMsgNoMessage, 0, (void**)&theMessage.Ptr, &theMessage.Len);
-        }
-        Assert(theMessage.Ptr != nullptr);
-        Assert(theMessage.Len > 0);
-        
-        // Allocate a temporary buffer for the error message, and format the error message
-        // into that buffer
-        uint32_t theMsgLen = 256;
-        if (inStringArg != nullptr)
-            theMsgLen += inStringArg->Len;
-        
-        messageBuffPtr = new char[theMsgLen];
-        messageBuffPtr[0] = 0;
-        theErrorMsgFormatter.Set(messageBuffPtr, theMsgLen);
-        //
-        // Look for a %s in the string, and if one exists, replace it with the
-        // argument passed into this function.
-        
-        //we can safely assume that message is in fact NULL terminated
-        char* stringLocation = ::strstr(theMessage.Ptr, "%s");
-        if (stringLocation != nullptr)
-        {
-            //write first chunk
-            theErrorMsgFormatter.Put(theMessage.Ptr, stringLocation - theMessage.Ptr);
-            
-            if (inStringArg != nullptr && inStringArg->Len > 0)
-            {
-                //write string arg if it exists
-                theErrorMsgFormatter.Put(inStringArg->Ptr, inStringArg->Len);
-                stringLocation += 2;
-            }
-            //write last chunk
-            theErrorMsgFormatter.Put(stringLocation, (theMessage.Ptr + theMessage.Len) - stringLocation);
-        }
-        else
-            theErrorMsgFormatter.Put(theMessage);
-        
-        
-		std::string buff = std::to_string(theErrorMsgFormatter.GetBytesWritten());
-		inRequest->AppendHeader(qtssContentLengthHeader, buff);
-    }
-    
+       
     //send the response header. In all situations where errors could happen, we
     //don't really care, cause there's nothing we can do anyway!
 	inRequest->SendHeader();
@@ -367,7 +308,6 @@ QTSS_Error  QTSSModuleUtils::SendErrorResponse( RTSPRequest* inRequest,
 	inRequest->Write(theErrorMsgFormatter.GetBufPtr(), theErrorMsgFormatter.GetBytesWritten(), nullptr, 0);
 	inRequest->SetRespMsg({ theErrorMsgFormatter.GetBufPtr(), theErrorMsgFormatter.GetBytesWritten() });
     
-    delete [] messageBuffPtr;
     return QTSS_RequestFailed;
 }
 
@@ -380,19 +320,7 @@ QTSS_Error	QTSSModuleUtils::SendErrorResponseWithMessage( RTSPRequest* inRequest
 	//set RTSP headers necessary for this error response message
 	inRequest->SetStatus(inStatusCode);
 	inRequest->SetResponseKeepAlive(sFalse);
-    StrPtrLen theErrorMessage(nullptr, 0);
-    
-    if (sEnableRTSPErrorMsg)
-    {
-		Assert(inErrorMessagePtr != nullptr);
-		//Assert(inErrorMessagePtr->Ptr != NULL);
-		//Assert(inErrorMessagePtr->Len != 0);
-		theErrorMessage.Set(inErrorMessagePtr->Ptr, inErrorMessagePtr->Len);
-		
-        std::string buff = std::to_string(inErrorMessagePtr->Len);
-		inRequest->AppendHeader(qtssContentLengthHeader, buff);
-    }
-    
+    StrPtrLen theErrorMessage(nullptr, 0);    
     //send the response header. In all situations where errors could happen, we
     //don't really care, cause there's nothing we can do anyway!
 	inRequest->SendHeader();
@@ -546,219 +474,6 @@ void    QTSSModuleUtils::SendDescribeResponse(RTSPRequest* inRequest,
         // a single big buffer
 	inRequest->WriteV(describeData, inNumVectors, inTotalLength, nullptr);
 
-}
-
-char*   QTSSModuleUtils::CoalesceVectors(iovec* inVec, uint32_t inNumVectors, uint32_t inTotalLength)
-{
-    if (inTotalLength == 0)
-        return nullptr;
-    
-    auto* buffer = new char[inTotalLength];
-    uint32_t bufferOffset = 0;
-    
-    for (uint32_t index = 0; index < inNumVectors; index++)
-    {
-        ::memcpy (buffer + bufferOffset, inVec[index].iov_base, inVec[index].iov_len);
-        bufferOffset += inVec[index].iov_len;
-    }
-    
-    Assert (bufferOffset == inTotalLength);
-    
-    return buffer;
-}
-
-QTSS_ModulePrefsObject QTSSModuleUtils::GetModulePrefsObject(QTSS_ModuleObject inModObject)
-{
-    QTSS_ModulePrefsObject thePrefsObject = nullptr;
-    uint32_t theLen = sizeof(thePrefsObject);
-    QTSS_Error theErr = ((QTSSDictionary*)inModObject)->GetValue(qtssModPrefs, 0, &thePrefsObject, &theLen);
-    Assert(theErr == QTSS_NoErr);
-    
-    return thePrefsObject;
-}
-
-QTSS_Object QTSSModuleUtils::GetModuleAttributesObject(QTSS_ModuleObject inModObject)
-{
-    QTSS_Object theAttributesObject = nullptr;
-    uint32_t theLen = sizeof(theAttributesObject);
-    QTSS_Error theErr = ((QTSSDictionary*)inModObject)->GetValue(qtssModAttributes, 0, &theAttributesObject, &theLen);
-    Assert(theErr == QTSS_NoErr);
-    
-    return theAttributesObject;
-}
-
-void    QTSSModuleUtils::GetAttribute(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType, 
-                                                void* ioBuffer, void* inDefaultValue, uint32_t inBufferLen)
-{
-    //
-    // Check to make sure this attribute is the right type. If it's not, this will coerce
-    // it to be the right type. This also returns the id of the attribute
-    QTSS_AttributeID theID = QTSSModuleUtils::CheckAttributeDataType(inObject, inAttributeName, inType, inDefaultValue, inBufferLen);
-
-    //
-    // Get the attribute value.
-    QTSS_Error theErr = ((QTSSDictionary*)inObject)->GetValue(theID, 0, ioBuffer, &inBufferLen);
-    
-    //
-    // Caller should KNOW how big this attribute is
-    Assert(theErr != QTSS_NotEnoughSpace);
-    
-    if (theErr != QTSS_NoErr)
-    {
-        //
-        // If we couldn't get the attribute value for whatever reason, just use the
-        // default if it was provided.
-        ::memcpy(ioBuffer, inDefaultValue, inBufferLen);
-
-        if (inBufferLen > 0)
-        {
-            //
-            // Log an error for this pref only if there was a default value provided.
-            char* theValueAsString = QTSSDataConverter::ValueToString(inDefaultValue, inBufferLen, inType);
-
-            std::unique_ptr<char[]> theValueStr(theValueAsString);
-            QTSSModuleUtils::LogError(  sMissingPrefVerbosity, 
-                                        qtssServerPrefMissing,
-                                        0,
-                                        inAttributeName,
-                                        theValueStr.get());
-        }
-        
-        //
-        // Create an entry for this attribute                           
-        QTSSModuleUtils::CreateAttribute(inObject, inAttributeName, inType, inDefaultValue, inBufferLen);
-    }
-}
-
-char*   QTSSModuleUtils::GetStringAttribute(QTSS_Object inObject, char* inAttributeName, char* inDefaultValue)
-{
-    uint32_t theDefaultValLen = 0;
-    if (inDefaultValue != nullptr)
-        theDefaultValLen = ::strlen(inDefaultValue);
-    
-    //
-    // Check to make sure this attribute is the right type. If it's not, this will coerce
-    // it to be the right type
-    QTSS_AttributeID theID = QTSSModuleUtils::CheckAttributeDataType(inObject, inAttributeName, qtssAttrDataTypeCharArray, inDefaultValue, theDefaultValLen);
-
-    char* theString = nullptr;
-    (void)((QTSSDictionary*)inObject)->GetValueAsString(theID, 0, &theString);
-    if (theString != nullptr)
-        return theString;
-    
-    //
-    // If we get here the attribute must be missing, so create it and log
-    // an error.
-    
-    QTSSModuleUtils::CreateAttribute(inObject, inAttributeName, qtssAttrDataTypeCharArray, inDefaultValue, theDefaultValLen);
-    
-    //
-    // Return the default if it was provided. Only log an error if the default value was provided
-    if (theDefaultValLen > 0)
-    {
-        QTSSModuleUtils::LogError(  sMissingPrefVerbosity,
-                                    qtssServerPrefMissing,
-                                    0,
-                                    inAttributeName,
-                                    inDefaultValue);
-    }
-    
-    if (inDefaultValue != nullptr)
-    {
-        //
-        // Whether to return the default value or not from this function is dependent
-        // solely on whether the caller passed in a non-NULL pointer or not.
-        // This ensures that if the caller wants an empty-string returned as a default
-        // value, it can do that.
-        theString = new char[theDefaultValLen + 1];
-        ::strcpy(theString, inDefaultValue);
-        return theString;
-    }
-    return nullptr;
-}
-
-void    QTSSModuleUtils::GetIOAttribute(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType,
-                            void* ioDefaultResultBuffer, uint32_t inBufferLen)
-{
-    auto *defaultBuffPtr = new char[inBufferLen];
-    ::memcpy(defaultBuffPtr,ioDefaultResultBuffer,inBufferLen);
-    QTSSModuleUtils::GetAttribute(inObject, inAttributeName, inType, ioDefaultResultBuffer, defaultBuffPtr, inBufferLen);
-    delete [] defaultBuffPtr;
-
-}
-                            
-
-QTSS_AttributeID QTSSModuleUtils::GetAttrID(QTSS_Object inObject, char* inAttributeName)
-{
-    //
-    // Get the attribute ID of this attribute.
-    QTSS_Object theAttrInfo = nullptr;
-    QTSS_Error theErr = QTSS_GetAttrInfoByName(inObject, inAttributeName, &theAttrInfo);
-    if (theErr != QTSS_NoErr)
-        return qtssIllegalAttrID;
-
-    QTSS_AttributeID theID = qtssIllegalAttrID; 
-    uint32_t theLen = sizeof(theID);
-    theErr = ((QTSSDictionary*)theAttrInfo)->GetValue(qtssAttrID, 0, &theID, &theLen);
-    Assert(theErr == QTSS_NoErr);
-
-    return theID;
-}
-
-QTSS_AttributeID QTSSModuleUtils::CheckAttributeDataType(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType, void* inDefaultValue, uint32_t inBufferLen)
-{
-    //
-    // Get the attribute type of this attribute.
-    QTSS_Object theAttrInfo = nullptr;
-    QTSS_Error theErr = QTSS_GetAttrInfoByName(inObject, inAttributeName, &theAttrInfo);
-    if (theErr != QTSS_NoErr)
-        return qtssIllegalAttrID;
-
-    QTSS_AttrDataType theAttributeType = qtssAttrDataTypeUnknown;
-    uint32_t theLen = sizeof(theAttributeType);
-	QTSSDictionary *dict = (QTSSDictionary *)theAttrInfo;
-    theErr = dict->GetValue(qtssAttrDataType, 0, &theAttributeType, &theLen);
-    Assert(theErr == QTSS_NoErr);
-    
-    QTSS_AttributeID theID = qtssIllegalAttrID; 
-    theLen = sizeof(theID);
-    theErr = dict->GetValue(qtssAttrID, 0, &theID, &theLen);
-    Assert(theErr == QTSS_NoErr);
-
-    if (theAttributeType != inType)
-    {
-        char* theValueAsString = QTSSDataConverter::ValueToString(inDefaultValue, inBufferLen, inType);
-
-        std::unique_ptr<char[]> theValueStr(theValueAsString);
-        QTSSModuleUtils::LogError(  qtssWarningVerbosity,
-                                    qtssServerPrefWrongType,
-                                    0,
-                                    inAttributeName,
-                                    theValueStr.get());
-                                    
-        theErr = QTSS_RemoveInstanceAttribute( inObject, theID );
-        Assert(theErr == QTSS_NoErr);
-        return  QTSSModuleUtils::CreateAttribute(inObject, inAttributeName, inType, inDefaultValue, inBufferLen);
-    }
-    return theID;
-}
-
-QTSS_AttributeID QTSSModuleUtils::CreateAttribute(QTSS_Object inObject, char* inAttributeName, QTSS_AttrDataType inType, void* inDefaultValue, uint32_t inBufferLen)
-{
-    QTSS_Error theErr = QTSS_AddInstanceAttribute(inObject, inAttributeName, nullptr, inType);
-    Assert((theErr == QTSS_NoErr) || (theErr == QTSS_AttrNameExists));
-    
-    QTSS_AttributeID theID = QTSSModuleUtils::GetAttrID(inObject, inAttributeName);
-    Assert(theID != qtssIllegalAttrID);
-        
-    //
-    // Caller can pass in NULL for inDefaultValue, in which case we don't add the default
-    if (inDefaultValue != nullptr)
-    {
-        theErr = QTSS_SetValue(inObject, theID, 0, inDefaultValue, inBufferLen);
-        Assert(theErr == QTSS_NoErr);
-    }
-    return theID;
 }
 
 char *QTSSModuleUtils::GetUserName_Copy(QTSSUserProfile* inUserProfile)

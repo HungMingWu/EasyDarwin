@@ -91,8 +91,6 @@ char *RTPStream::UDP = "UDP";
 char *RTPStream::RUDP = "RUDP";
 char *RTPStream::TCP = "TCP";
 
-QTSS_ModuleState RTPStream::sRTCPProcessModuleState = { nullptr, 0, nullptr, false };
-
 RTPStream::RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession)
 	: fSession(inSession),
 	fSsrc(inSSRC),
@@ -296,19 +294,19 @@ QTSS_Error RTPStream::Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags)
 		// Sending data to other addresses could be used in malicious ways, therefore
 		// it is up to the module as to whether this sort of request might be allowed
 		if (!(inFlags & qtssASFlagsAllowDestination))
-			return QTSSModuleUtils::SendErrorResponse(request, qtssClientBadRequest, qtssMsgAltDestNotAllowed);
+			return QTSSModuleUtils::SendErrorResponse(request, qtssClientBadRequest);
 		fRemoteAddr = request->GetDestAddr();
 	}
 	fRemoteRTPPort = request->GetClientPortA();
 	fRemoteRTCPPort = request->GetClientPortB();
 
 	if ((fRemoteRTPPort == 0) || (fRemoteRTCPPort == 0))
-		return QTSSModuleUtils::SendErrorResponse(request, qtssClientBadRequest, qtssMsgNoClientPortInTransport);
+		return QTSSModuleUtils::SendErrorResponse(request, qtssClientBadRequest);
 
 	//make sure that the client is advertising an even-numbered RTP port,
 	//and that the RTCP port is actually one greater than the RTP port
 	if ((fRemoteRTPPort & 1) != 0)
-		return QTSSModuleUtils::SendErrorResponse(request, qtssClientBadRequest, qtssMsgRTPPortMustBeEven);
+		return QTSSModuleUtils::SendErrorResponse(request, qtssClientBadRequest);
 
 	// comment out check below. This allows the rtcp port to be non-contiguous with the rtp port.
 	//   if (fRemoteRTCPPort != (fRemoteRTPPort + 1))
@@ -346,7 +344,7 @@ QTSS_Error RTPStream::Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags)
 			if (err == QTSS_NoErr)
 				err = fSockets->GetSocketB()->SetMulticastInterface(fSockets->GetSocketB()->GetLocalAddr());
 			if (err != QTSS_NoErr)
-				return QTSSModuleUtils::SendErrorResponse(request, qtssServerInternal, qtssMsgCantSetupMulticast);
+				return QTSSModuleUtils::SendErrorResponse(request, qtssServerInternal);
 		}
 	}
 	else
@@ -354,7 +352,7 @@ QTSS_Error RTPStream::Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags)
 			fRemoteRTCPPort);
 
 	if (fSockets == nullptr)
-		return QTSSModuleUtils::SendErrorResponse(request, qtssServerInternal, qtssMsgOutOfPorts);
+		return QTSSModuleUtils::SendErrorResponse(request, qtssServerInternal);
 
 	else if (fTransportType == qtssRTPTransportTypeReliableUDP)
 	{
@@ -1446,13 +1444,6 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 	theParams.rtcpProcessParams.inClientSession = (RTPSession *)fSession;
 	theParams.rtcpProcessParams.inRTCPPacketData = inPacket->Ptr;
 	theParams.rtcpProcessParams.inRTCPPacketDataLen = inPacket->Len;
-
-	// We don't allow async events from this role, so just set an empty module state.
-	OSThreadDataSetter theSetter(&sRTCPProcessModuleState, nullptr);
-
-	// Invoke RTCP processing modules
-	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTCPProcessRole))
-		theModule->CallDispatch(QTSS_RTCPProcess_Role, &theParams);
 
 	fSession->GetSessionMutex()->Unlock();
 }

@@ -49,7 +49,6 @@
 #include "RTPSessionInterface.h"
 #include "RTSPRequestInterface.h"
 #include "RTPStream.h"
-#include "QTSSModule.h"
 
 
 class RTPSession : public RTPSessionInterface
@@ -178,7 +177,6 @@ private:
 	uint32_t fCurrentModuleIndex{0};
 	uint32_t fCurrentState{kStart};
 
-	QTSS_ModuleState    fModuleState;
 	QTSS_CliSesClosingReason fClosingReason{qtssCliSesCloseClientTeardown};
 
 	uint32_t              fCurrentModule{0};

@@ -94,10 +94,6 @@ RTSPSession::RTSPSession()
 	rtspParams.inRTSPRequest = nullptr;
 	rtspParams.inClientSession = nullptr;
 
-	fModuleState.curModule = nullptr;
-	fModuleState.curTask = this;
-	fModuleState.curRole = 0;
-
 	fLastRTPSessionID[0] = 0;
 	fLastRTPSessionIDPtr.Set(fLastRTPSessionID, 0);
 	Assert(fLastRTPSessionIDPtr.Ptr == &fLastRTPSessionID[0]);
@@ -106,14 +102,6 @@ RTSPSession::RTSPSession()
 
 RTSPSession::~RTSPSession()
 {
-	// Invoke the session closing modules
-	QTSS_RoleParams theParams;
-	theParams.rtspSessionClosingParams.inRTSPSession = this;
-
-	// Invoke modules
-	for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPSessionClosingRole))
-		theModule->CallDispatch(QTSS_RTSPSessionClosing_Role, &theParams);
-
 	fLiveSession = false; //used in Clean up request to remove the RTP session.
 	this->CleanupRequest();// Make sure that all our objects are deleted
 	if (fSessionType == qtssRTSPSession)
@@ -133,9 +121,6 @@ int64_t RTSPSession::Run()
 	EventFlags events = this->GetEvents();
 	QTSS_Error err = QTSS_NoErr;
 	Assert(fLastRTPSessionIDPtr.Ptr == &fLastRTPSessionID[0]);
-
-	// Some callbacks look for this struct in the thread object
-	OSThreadDataSetter theSetter(&fModuleState, nullptr);
 
 	//check for a timeout or a kill. If so, just consider the session dead
 	if ((events & Task::kTimeoutEvent) || (events & Task::kKillEvent))
@@ -260,16 +245,14 @@ int64_t RTSPSession::Run()
 				// Check for an overfilled buffer, and return an error.
 				if (err == E2BIG)
 				{
-					(void)QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientBadRequest,
-						qtssMsgRequestTooLong);
+					(void)QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientBadRequest);
 					fState = kPostProcessingRequest;
 					break;
 				}
 				// Check for a corrupt base64 error, return an error
 				if (err == QTSS_BadArgument)
 				{
-					(void)QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientBadRequest,
-						qtssMsgBadBase64);
+					(void)QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientBadRequest);
 					fState = kPostProcessingRequest;
 					break;
 				}
@@ -304,35 +287,6 @@ int64_t RTSPSession::Run()
 				// In case a module wants to replace the request
 				char* theReplacedRequest = nullptr;
 				char* oldReplacedRequest = nullptr;
-
-				// Setup the filter param block
-				QTSS_RoleParams theFilterParams;
-				theFilterParams.rtspFilterParams.inRTSPSession = this;
-				theFilterParams.rtspFilterParams.inRTSPRequest = fRequest;
-				theFilterParams.rtspFilterParams.outNewRequest = &theReplacedRequest;
-
-				// Invoke filter modules
-				for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPFilterRole))
-				{
-					fModuleState.idleTime = 0;
-
-					theModule->CallDispatch(QTSS_RTSPFilter_Role, &theFilterParams);
-	
-
-
-					//
-					// Check to see if this module has replaced the request. If so, check
-					// to see if there is an old replacement that we should delete
-					if (theReplacedRequest != nullptr)
-					{
-						if (oldReplacedRequest != nullptr)
-							delete[] oldReplacedRequest;
-
-						fRequest->SetFullRequest({ theReplacedRequest, ::strlen(theReplacedRequest) });
-						oldReplacedRequest = theReplacedRequest;
-						theReplacedRequest = nullptr;
-					}
-				}
 
 				fCurrentModule = 0;
 				if (fRequest->HasResponseBeenSent())
@@ -461,38 +415,10 @@ int64_t RTSPSession::Run()
 				QTSS_RoleParams theAuthenticationParams;
 				theAuthenticationParams.rtspAthnParams.inRTSPRequest = fRequest;
 
-				fModuleState.idleTime = 0;
-
 				fRequest->SetAllowed(allowed);
 				fRequest->SetHasUser(hasUser);
 				fRequest->SetAuthHandled(handled);
 				fRequest->SetDigestChallenge(lastDigestChallenge);
-
-
-				for (const auto &theModule : QTSServerInterface::GetModule(QTSSModule::kRTSPAthnRole))
-				{
-					fRequest->SetAllowed(allowedDefault);
-					fRequest->SetHasUser(false);
-					fRequest->SetAuthHandled(false);
-
-					if (nullptr == theModule)
-						continue;
-
-					(void)theModule->CallDispatch(QTSS_RTSPAuthenticate_Role, &theAuthenticationParams);
-
-					allowed = fRequest->GetAllowed();
-					hasUser = fRequest->GetHasUser();
-					handled = fRequest->GetAuthHandled();
-					debug_printf("RTSPSession::Run Role(kAuthenticatingRequest) allowedDefault =%d allowed= %d hasUser = %d handled=%d \n", allowedDefault, allowed, hasUser, handled);
-					if (handled)
-						wasHandled = handled;
-
-					if (hasUser || handled)
-					{
-						break;
-					}
-
-				}
 
 				if (!wasHandled) //don't check and possibly fail the user if it the user has already been checked.
 					this->CheckAuthentication();
@@ -528,8 +454,6 @@ int64_t RTSPSession::Run()
 
 				fRequest->SetHasUser(false);
 				fRequest->SetAuthHandled(false);
-
-				fModuleState.idleTime = 0;
 
 				(void)ReflectionModule::ReflectorAuthorizeRTSPRequest(&rtspParams);
 
@@ -627,16 +551,6 @@ int64_t RTSPSession::Run()
 				// If no preprocessor sends a response, move onto the request processing module. It
 				// is ALWAYS supposed to send a response, but if it doesn't, we have a canned error
 				// to send back.
-				fModuleState.idleTime = 0;
-				auto modules = QTSServerInterface::GetModule(QTSSModule::kRTSPRequestRole);
-				if (!modules.empty())
-				{
-					// Manipulation of the RTPSession from the point of view of
-					// a module is guarenteed to be atomic by the API.
-					Assert(fRTPSession != nullptr);
-					OSMutexLocker   locker(fRTPSession->GetSessionMutex());
-				}
-
 				if (!fRequest->HasResponseBeenSent())
 				{
 					// no modules took this one so send back a parameter error
@@ -647,7 +561,7 @@ int64_t RTSPSession::Run()
 					}
 					else
 					{
-						QTSSModuleUtils::SendErrorResponse(fRequest, qtssServerInternal, qtssMsgNoModuleForRequest);
+						QTSSModuleUtils::SendErrorResponse(fRequest, qtssServerInternal);
 					}
 				}
 
@@ -1041,7 +955,7 @@ void RTSPSession::SetupRequest()
 	{
 		if (!fRequest->GetHeaderDict().Get(qtssSessionHeader).empty())
 		{
-			(void)QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientHeaderFieldNotValid, qtssMsgNoSesIDOnDescribe);
+			(void)QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientHeaderFieldNotValid);
 			return;
 		}
 	}
@@ -1301,19 +1215,16 @@ QTSS_Error RTSPSession::IsOkToAddNewRTPSession()
 		(theServerState == qtssIdleState) ||
 		(theServerState == qtssFatalErrorState) ||
 		(theServerState == qtssShuttingDownState))
-		return QTSSModuleUtils::SendErrorResponse(fRequest, qtssServerUnavailable,
-			qtssMsgRefusingConnections);
+		return QTSSModuleUtils::SendErrorResponse(fRequest, qtssServerUnavailable);
 
 	//if the max connection limit has been hit 
 	if (this->OverMaxConnections(0))
-		return QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientNotEnoughBandwidth,
-			qtssMsgTooManyClients);
+		return QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientNotEnoughBandwidth);
 
 	//if the max bandwidth limit has been hit
 	int32_t maxKBits = theServer->GetPrefs()->GetMaxKBitsBandwidth();
 	if ((maxKBits > -1) && (theServer->GetCurBandwidthInBits() >= ((uint32_t)maxKBits * 1024)))
-		return QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientNotEnoughBandwidth,
-			qtssMsgTooMuchThruput);
+		return QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientNotEnoughBandwidth);
 
 	//if the server is too loaded down (CPU too high, whatever)
 	// --INSERT WORKING CODE HERE--

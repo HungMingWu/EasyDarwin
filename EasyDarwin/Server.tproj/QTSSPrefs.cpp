@@ -339,9 +339,6 @@ void    QTSSPrefs::RemoveValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* 
 	Assert(pref != nullptr);
 	if (pref != nullptr)
 		fPrefsSource->RemovePrefValue(pref, inValueIndex);
-
-	if (fPrefsSource->WritePrefsFile())
-		QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssMsgCantWriteFile, 0);
 }
 
 void    QTSSPrefs::RemoveInstanceAttrComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap)
@@ -353,9 +350,6 @@ void    QTSSPrefs::RemoveInstanceAttrComplete(uint32_t inAttrIndex, QTSSDictiona
 	{
 		fPrefsSource->RemovePref(pref);
 	}
-
-	if (fPrefsSource->WritePrefsFile())
-		QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssMsgCantWriteFile, 0);
 }
 
 void QTSSPrefs::SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
@@ -376,9 +370,6 @@ void QTSSPrefs::SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
 		std::unique_ptr<char[]> theValueAsString(QTSSDataConverter::ValueToString(inNewValue, inNewValueLen, inMap->GetAttrType(inAttrIndex)));
 		fPrefsSource->SetPrefValue(pref, inValueIndex, theValueAsString.get());
 	}
-
-	if (fPrefsSource->WritePrefsFile())
-		QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssMsgCantWriteFile, 0);
 }
 
 ContainerRef QTSSPrefs::GetContainerRefForObject(QTSSPrefs* object)

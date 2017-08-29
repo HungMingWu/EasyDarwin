@@ -53,18 +53,11 @@
 #include "sdpCache.h"
 
 
-QTSS_TextMessagesObject     QTSSModuleUtils::sMessages = nullptr;
 QTSServerInterface*         QTSSModuleUtils::sServer = nullptr;
-QTSSStream*                 QTSSModuleUtils::sErrorLog = nullptr;
-QTSS_ErrorVerbosity         QTSSModuleUtils::sMissingPrefVerbosity = qtssMessageVerbosity;
 
-void    QTSSModuleUtils::Initialize(QTSS_TextMessagesObject inMessages,
-                                    QTSServerInterface* inServer,
-                                    QTSSStream* inErrorLog)
+void    QTSSModuleUtils::Initialize(QTSServerInterface* inServer)
 {
-    sMessages = inMessages;
     sServer = inServer;
-    sErrorLog = inErrorLog;
 }
 
 QTSS_Error QTSSModuleUtils::ReadEntireFile(char* inPath, StrPtrLen* outData, QTSS_TimeVal inModDate, QTSS_TimeVal* outModDate)
@@ -154,56 +147,7 @@ QTSS_Error QTSSModuleUtils::ReadEntireFile(char* inPath, StrPtrLen* outData, QTS
 #endif    
 		return theErr;
 	}
-
-void    QTSSModuleUtils::LogError(  QTSS_ErrorVerbosity inVerbosity,
-                                    QTSS_AttributeID inTextMessage,
-                                    uint32_t /*inErrNumber*/,
-                                    boost::string_view inArgument,
-                                    boost::string_view inArg2)
-{  
-    if (sMessages == nullptr)
-        return;
-        
-    // Retrieve the specified text message from the text messages dictionary.
-    
-    StrPtrLen theMessage;
-    ((QTSSDictionary*)sMessages)->GetValuePtr(inTextMessage, 0, (void**)&theMessage.Ptr, &theMessage.Len);
-    if ((theMessage.Ptr == nullptr) || (theMessage.Len == 0))
-		((QTSSDictionary*)sMessages)->GetValuePtr(qtssMsgNoMessage, 0, (void**)&theMessage.Ptr, &theMessage.Len);
-
-    if ((theMessage.Ptr == nullptr) || (theMessage.Len == 0))
-        return;
-    
-    // Create a new string, and put the argument into the new string.
-    
-    std::string theLogString = std::string(theMessage.Ptr) +
-							   std::string(inArgument) +
-							   std::string(inArg2);
-    
-    (void)sErrorLog->Write((char*)theLogString.c_str(), theLogString.length(),
-                        nullptr, inVerbosity);
-}
-
-void QTSSModuleUtils::LogErrorStr( QTSS_ErrorVerbosity inVerbosity, char* inMessage) 
-{  	
-	if (inMessage == nullptr) return;  
-	(void)sErrorLog->Write(inMessage, ::strlen(inMessage), nullptr, inVerbosity);
-}
-
-
-void QTSSModuleUtils::LogPrefErrorStr( QTSS_ErrorVerbosity inVerbosity, char*  preference, char* inMessage)
-{  	
-	if (inMessage == nullptr || preference == nullptr) 
-	{  Assert(0);
-	   return;  
-	}
-	char buffer[1024];
-	
-	snprintf(buffer,sizeof(buffer), "Server preference %s %s",  preference, inMessage);
-   
-	(void)sErrorLog->Write(buffer, ::strlen(buffer), nullptr, inVerbosity);
-}
-                   
+          
 QTSS_Error  QTSSModuleUtils::AppendRTPMetaInfoHeader(   RTSPRequest* inRequest,
                                                         StrPtrLen* inRTPMetaInfoHeader,
                                                         RTPMetaInfoPacket::FieldID* inFieldIDArray)
@@ -312,24 +256,16 @@ QTSS_Error  QTSSModuleUtils::SendErrorResponse( RTSPRequest* inRequest,
 }
 
 QTSS_Error	QTSSModuleUtils::SendErrorResponseWithMessage( RTSPRequest* inRequest,
-														QTSS_RTSPStatusCode inStatusCode,
-														StrPtrLen* inErrorMessagePtr)
+														QTSS_RTSPStatusCode inStatusCode)
 {
     static bool sFalse = false;
     
 	//set RTSP headers necessary for this error response message
 	inRequest->SetStatus(inStatusCode);
-	inRequest->SetResponseKeepAlive(sFalse);
-    StrPtrLen theErrorMessage(nullptr, 0);    
+	inRequest->SetResponseKeepAlive(sFalse);  
     //send the response header. In all situations where errors could happen, we
     //don't really care, cause there's nothing we can do anyway!
 	inRequest->SendHeader();
-
-    //
-    // Now that we've formatted the message into the temporary buffer,
-    // write it out to the request stream and the Client Session object
-	inRequest->Write(theErrorMessage.Ptr, theErrorMessage.Len, nullptr, 0);
-	inRequest->SetRespMsg({ theErrorMessage.Ptr, theErrorMessage.Len });
     
     return QTSS_RequestFailed;
 }
@@ -476,11 +412,9 @@ void    QTSSModuleUtils::SendDescribeResponse(RTSPRequest* inRequest,
 
 }
 
-char *QTSSModuleUtils::GetUserName_Copy(QTSSUserProfile* inUserProfile)
+boost::string_view QTSSModuleUtils::GetUserName(QTSSUserProfile* inUserProfile)
 {
-    char*   username = nullptr;    
-    (void)((QTSSDictionary*)inUserProfile)->GetValueAsString(qtssUserName, 0, &username);
-    return username;
+	return inUserProfile->GetUserName();
 }
 
 bool QTSSModuleUtils::UserInGroup(QTSSUserProfile* inUserProfile, boost::string_view inGroup)
@@ -488,10 +422,8 @@ bool QTSSModuleUtils::UserInGroup(QTSSUserProfile* inUserProfile, boost::string_
 	if (nullptr == inUserProfile || inGroup.empty()) 
 		return false;
 		
-	char *userName = nullptr;
-	uint32_t len = 0;
-	((QTSSDictionary*)inUserProfile)->GetValuePtr(qtssUserName, 0, (void **)&userName, &len);
-	if (len == 0 || userName == nullptr || userName[0] == 0) // no user to check
+	boost::string_view userName = inUserProfile->GetUserName();
+	if (userName.empty()) // no user to check
 		return false;
 
 	std::vector<std::string> userGroups = inUserProfile->GetUserGroups();

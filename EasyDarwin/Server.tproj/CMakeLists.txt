@@ -27,14 +27,12 @@ set (SRC
      RTSPSessionInterface.cpp RTSPSessionInterface.h
      QTSSPrefs.cpp QTSSPrefs.h
      RTPSessionInterface.cpp RTPSessionInterface.h
-     QTSSMessages.cpp QTSSMessages.h
      RTSPSession.cpp RTSPSession.h
      RTPPacketResender.cpp RTPPacketResender.h
      RTPBandwidthTracker.cpp RTPBandwidthTracker.h
-     QTSSUserProfile.cpp QTSSUserProfile.h
+     QTSSUserProfile.h
      RTSPResponseStream.cpp RTSPResponseStream.h
      RTSPRequest.cpp RTSPRequest.h
-	 QTSSExpirationDate.cpp QTSSExpirationDate.h
 	 RTSPRequestStream.cpp RTSPRequestStream.h
 	 GenerateXMLPrefs.cpp GenerateXMLPrefs.h
 	 RTCPTask.cpp RTCPTask.h)

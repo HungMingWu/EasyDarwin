@@ -260,35 +260,6 @@ void DebugLevel_1(FILE*   statusFile, FILE*   stdOut, bool printHeader)
 
 	}
 
-	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTPSvrCurConn, 0, &thePrefStr);
-	print_status(statusFile, stdOut, "%11s", thePrefStr);
-
-	delete[] thePrefStr; thePrefStr = nullptr;
-
-	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTSPCurrentSessionCount, 0, &thePrefStr);
-	print_status(statusFile, stdOut, "%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = nullptr;
-
-	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTSPHTTPCurrentSessionCount, 0, &thePrefStr);
-	print_status(statusFile, stdOut, "%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = nullptr;
-
-	uint32_t curBandwidth = 0;
-	theLen = sizeof(curBandwidth);
-	(void)((QTSSDictionary*)sServer)->GetValue(qtssRTPSvrCurBandwidth, 0, &curBandwidth, &theLen);
-	snprintf(numStr, 11, "%"   _U32BITARG_   "", curBandwidth / 1024);
-	print_status(statusFile, stdOut, "%11s", numStr);
-
-	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTPSvrCurPackets, 0, &thePrefStr);
-	print_status(statusFile, stdOut, "%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = nullptr;
-
-
-	uint32_t currentPlaying = sServer->GetNumRTPPlayingSessions();
-	snprintf(numStr, sizeof(numStr) - 1, "%"   _U32BITARG_   "", currentPlaying);
-	print_status(statusFile, stdOut, "%14s", numStr);
-
-
 	//is the server keeping up with the streams?
 	//what quality are the streams?
 	int64_t totalRTPPaackets = sServer->GetTotalRTPPackets();
@@ -418,31 +389,6 @@ void PrintStatus(bool printHeader)
 		printf("     RTP-Conns RTSP-Conns HTTP-Conns  kBits/Sec   Pkts/Sec    TotConn     TotBytes   TotPktsLost          Time\n");
 	}
 
-	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTPSvrCurConn, 0, &thePrefStr);
-	printf("%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = nullptr;
-
-	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTSPCurrentSessionCount, 0, &thePrefStr);
-	printf("%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = nullptr;
-
-	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTSPHTTPCurrentSessionCount, 0, &thePrefStr);
-	printf("%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = nullptr;
-
-	uint32_t curBandwidth = 0;
-	theLen = sizeof(curBandwidth);
-	((QTSSDictionary*)sServer)->GetValue(qtssRTPSvrCurBandwidth, 0, &curBandwidth, &theLen);
-	printf("%11"   _U32BITARG_, curBandwidth / 1024);
-
-	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTPSvrCurPackets, 0, &thePrefStr);
-	printf("%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = nullptr;
-
-	(void)((QTSSDictionary*)sServer)->GetValueAsString(qtssRTPSvrTotalConn, 0, &thePrefStr);
-	printf("%11s", thePrefStr);
-	delete[] thePrefStr; thePrefStr = nullptr;
-
 	uint64_t totalBytes = sServer->GetTotalRTPBytes();
 	char  displayBuff[32] = "";
 	FormattedTotalBytesBuffer(displayBuff, sizeof(displayBuff), totalBytes);
@@ -512,8 +458,7 @@ void RunServer()
 		{
 			//
 			// start the shutdown process
-			theServerState = qtssShuttingDownState;
-			QTSServerInterface::GetServer()->SetValue(qtssSvrState, 0, &theServerState, sizeof(theServerState));
+			QTSServerInterface::GetServer()->SetServerState(qtssShuttingDownState);
 
 			if (sServer->SigIntSet())
 				restartServer = true;
@@ -528,8 +473,6 @@ void RunServer()
 	// Kill all the sessions and wait for them to die,
 	// but don't wait more than 5 seconds
 	sServer->KillAllRTPSessions();
-	for (uint32_t shutdownWaitCount = 0; (sServer->GetNumRTPSessions() > 0) && (shutdownWaitCount < 5); shutdownWaitCount++)
-		OSThread::Sleep(1000);
 
 	//Now, make sure that the server can't do any work
 	TaskThreadPool::RemoveThreads();

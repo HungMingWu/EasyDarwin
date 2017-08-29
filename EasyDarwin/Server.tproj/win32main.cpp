@@ -33,7 +33,6 @@
 #include "FilePrefsSource.h"
 #include "RunServer.h"
 #include "QTSServer.h"
-#include "QTSSExpirationDate.h"
 #include "GenerateXMLPrefs.h"
 
 boost::asio::io_service io_service;
@@ -81,13 +80,13 @@ int main(int argc, char * argv[])
 #endif
 
 	printf("%s/%s ( Build/%s; Platform/%s; %s%s) Built on: %s\n",
-		QTSServerInterface::GetServerName().Ptr,
-		QTSServerInterface::GetServerVersion().Ptr,
-		QTSServerInterface::GetServerBuild().Ptr,
+		QTSServerInterface::GetServerName().data(),
+		QTSServerInterface::GetServerVersion().data(),
+		QTSServerInterface::GetServerBuild().data(),
 		QTSServerInterface::GetServerPlatform().Ptr,
 		compileType,
-		QTSServerInterface::GetServerComment().Ptr,
-		QTSServerInterface::GetServerBuildDate().Ptr);
+		QTSServerInterface::GetServerComment().data(),
+		QTSServerInterface::GetServerBuildDate().data());
 
 
 	while ((ch = getopt(argc, argv, "vdxp:o:c:irsS:I")) != EOF) // opt: means requires option
@@ -97,15 +96,15 @@ int main(int argc, char * argv[])
 		case 'v':
 
 			printf("%s/%s ( Build/%s; Platform/%s; %s%s) Built on: %s\n", 
-				QTSServerInterface::GetServerName().Ptr,
-				QTSServerInterface::GetServerVersion().Ptr,
-				QTSServerInterface::GetServerBuild().Ptr,
+				QTSServerInterface::GetServerName().data(),
+				QTSServerInterface::GetServerVersion().data(),
+				QTSServerInterface::GetServerBuild().data(),
 				QTSServerInterface::GetServerPlatform().Ptr,
 				compileType,
-				QTSServerInterface::GetServerComment().Ptr,
-				QTSServerInterface::GetServerBuildDate().Ptr);
+				QTSServerInterface::GetServerComment().data(),
+				QTSServerInterface::GetServerBuildDate().data());
 
-			printf("usage: %s [ -d | -p port | -v | -c /myconfigpath.xml | -o /myconfigpath.conf | -x | -S numseconds | -I | -h ]\n", QTSServerInterface::GetServerName().Ptr);
+			printf("usage: %s [ -d | -p port | -v | -c /myconfigpath.xml | -o /myconfigpath.conf | -x | -S numseconds | -I | -h ]\n", QTSServerInterface::GetServerName().data());
 			printf("-d: Don't run as a Win32 Service\n");
 			printf("-p XXX: Specify the default RTSP listening port of the server\n");
 			printf("-c c:\\myconfigpath.xml: Specify a config file path\n");
@@ -160,15 +159,6 @@ int main(int argc, char * argv[])
 		default:
 			break;
 		}
-	}
-
-	//
-	// Check expiration date
-	QTSSExpirationDate::PrintExpirationDate();
-	if (QTSSExpirationDate::IsSoftwareExpired())
-	{
-		printf("Streaming Server has expired\n");
-		::exit(0);
 	}
 
 	//
@@ -358,9 +348,8 @@ void WINAPI ServiceControl(DWORD inControlCode)
 
 			//
 			// Signal the server to shut down.
-			theState = qtssShuttingDownState;
 			if (theServer != NULL)
-				theServer->SetValue(qtssSvrState, 0, &theState, sizeof(theState));
+				theServer->SetServerState(qtssShuttingDownState);
 			break;
 		}
 	case SERVICE_CONTROL_PAUSE:
@@ -370,10 +359,8 @@ void WINAPI ServiceControl(DWORD inControlCode)
 
 			//
 			// Signal the server to refuse new connections.
-			theState = qtssRefusingConnectionsState;
 			if (theServer != NULL)
-				theServer->SetValue(qtssSvrState, 0, &theState, sizeof(theState));
-			break;
+				theServer->SetServerState(qtssRefusingConnectionsState);
 		}
 	case SERVICE_CONTROL_CONTINUE:
 		{
@@ -382,9 +369,8 @@ void WINAPI ServiceControl(DWORD inControlCode)
 
 			//
 			// Signal the server to refuse new connections.
-			theState = qtssRefusingConnectionsState;
 			if (theServer != NULL)
-				theServer->SetValue(qtssSvrState, 0, &theState, sizeof(theState));
+				theServer->SetServerState(qtssRefusingConnectionsState);
 			break;
 		}
 	case SERVICE_CONTROL_INTERROGATE:

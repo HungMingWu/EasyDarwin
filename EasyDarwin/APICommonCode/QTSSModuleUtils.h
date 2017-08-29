@@ -57,27 +57,12 @@ public:
                 };
     
       
-        static void     Initialize( QTSS_TextMessagesObject inMessages,
-                                    QTSServerInterface* inServer,
-                                    QTSSStream* inErrorLog);
+        static void     Initialize(QTSServerInterface* inServer);
     
         // Read the complete contents of the file at inPath into the StrPtrLen.
         // This function allocates memory for the file data.
         static QTSS_Error   ReadEntireFile(char* inPath, StrPtrLen* outData, QTSS_TimeVal inModDate = -1, QTSS_TimeVal* outModDate = nullptr);
-                                                
-        // Using a message out of the text messages dictionary is a common
-        // way to log errors to the error log. Here is a function to
-        // make that process very easy.
-        
-        static void     LogError(   QTSS_ErrorVerbosity inVerbosity,
-                                    QTSS_AttributeID inTextMessage,
-                                    uint32_t inErrNumber,
-                                    boost::string_view inArgument = {},
-                                    boost::string_view inArg2 = {});
-                                    
-        static void   LogErrorStr( QTSS_ErrorVerbosity inVerbosity, char* inMessage);
-        static void   LogPrefErrorStr( QTSS_ErrorVerbosity inVerbosity, char*  preference, char* inMessage);
-     
+                                                                                    
         //
         // This function does 2 things:
         // 1.   Compares the enabled fields in the field ID array with the fields in the
@@ -103,8 +88,7 @@ public:
 		// 
 		// It always returns QTSS_RequestFailed
 		static QTSS_Error	SendErrorResponseWithMessage(RTSPRequest* inRequest,
-														QTSS_RTSPStatusCode inStatusCode,
-														StrPtrLen* inErrorMessageStr);
+														QTSS_RTSPStatusCode inStatusCode);
 
         // Sends and HTTP 1.1 error message with an error message in HTML if errorMessage != NULL.
         // The session must be flagged by KillSession set to true to kill.
@@ -131,14 +115,11 @@ public:
         /// Get the type of request. Returns qtssActionFlagsNoFlags on failure.
         //  Result is a bitmap of flags
         //      
-        static char*  GetUserName_Copy(QTSSUserProfile* inUserProfile);
+        static boost::string_view  GetUserName(QTSSUserProfile* inUserProfile);
         static bool UserInGroup(QTSSUserProfile* inUserProfile, boost::string_view inGroup);
  
         static bool AddressInList(QTSS_Object inObject, QTSS_AttributeID listID, StrPtrLen *theAddressPtr);
-  
-        static void SetMisingPrefLogVerbosity(QTSS_ErrorVerbosity verbosityLevel) { QTSSModuleUtils::sMissingPrefVerbosity = verbosityLevel;}
-        static QTSS_ErrorVerbosity GetMisingPrefLogVerbosity() { return QTSSModuleUtils::sMissingPrefVerbosity;}
-  
+ 
         static bool FindStringInAttributeList(QTSS_Object inObject, QTSS_AttributeID listID, StrPtrLen *inStrPtr);
 
         static bool HavePlayerProfile(QTSS_PrefsObject inPrefObjectToCheck, QTSS_StandardRTSP_Params* inParams, uint32_t feature);
@@ -147,10 +128,7 @@ public:
         
          
     private:
-        static QTSS_TextMessagesObject  sMessages;
         static QTSServerInterface*      sServer;
-        static QTSSStream*              sErrorLog;
-        static QTSS_ErrorVerbosity      sMissingPrefVerbosity;
 };
 
 

@@ -40,38 +40,25 @@
  //INCLUDES:
 #include <vector>
 #include <string>
-#include "QTSS.h"
-#include "QTSSDictionary.h"
+#include <boost/utility/string_view.hpp>
 
-class QTSSUserProfile : public QTSSDictionary
+class QTSSUserProfile
 {
 	std::vector<std::string> userGroups;
 public:
 	void clearUserGroups() { userGroups.clear(); }
 	std::vector<std::string> GetUserGroups() { return userGroups; }
-	//Initialize
-	//Call initialize before instantiating this class. For maximum performance, this class builds
-	//any response header it can at startup time.
-	static void         Initialize();
 
 	//CONSTRUCTOR & DESTRUCTOR
-	QTSSUserProfile();
-	~QTSSUserProfile() override = default;
-
+	QTSSUserProfile() = default;
+	~QTSSUserProfile() = default;
+	void SetUserName(boost::string_view name) { fUserName = std::string(name); }
+	boost::string_view GetUserName() { return fUserName; }
+	void SetPassWord(boost::string_view password) { fUserPassword = std::string(password); }
+	boost::string_view GetPassWord() { return fUserPassword; }
 protected:
-
-	enum
-	{
-		kMaxUserProfileNameLen = 32,
-		kMaxUserProfilePasswordLen = 32
-	};
-
-	char    fUserNameBuf[kMaxUserProfileNameLen];       // Set by RTSPRequest object
-	char    fUserPasswordBuf[kMaxUserProfilePasswordLen];// Set by authentication module through API
-
-	uint32_t  fUserRights;  //Set by authorization module.
-	//Dictionary support
-	static QTSSAttrInfoDict::AttrInfo   sAttributes[];
+	std::string    fUserName;       // Set by RTSPRequest object
+	std::string    fUserPassword;   // Set by authentication module through API
 };
 #endif // __QTSSUSERPROFILE_H__
 

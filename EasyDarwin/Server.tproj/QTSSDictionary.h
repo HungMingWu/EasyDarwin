@@ -405,7 +405,7 @@ public:
 		kModuleDictIndex = 10,
 		kModulePrefsDictIndex = 11,
 		kAttrInfoDictIndex = 12,
-		kQTSSUserProfileDictIndex = 13,
+
 		kQTSSConnectedUserDictIndex = 14,
 
 		kHTTPSessionDictIndex = 15,

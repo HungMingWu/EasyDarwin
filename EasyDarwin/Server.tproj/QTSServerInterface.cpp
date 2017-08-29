@@ -46,86 +46,59 @@
 // STATIC DATA
 
 QTSServerInterface*     QTSServerInterface::sServer = nullptr;
-#if __MacOSX__
-StrPtrLen               QTSServerInterface::sServerNameStr("EasyDarwin");
-#else
-StrPtrLen               QTSServerInterface::sServerNameStr("EasyDarwin");
-#endif
+boost::string_view      QTSServerInterface::sServerNameStr("EasyDarwin");
 
 // kVersionString from revision.h, include with -i at project level
-StrPtrLen               QTSServerInterface::sServerVersionStr(kVersionString);
-StrPtrLen               QTSServerInterface::sServerBuildStr(kBuildString);
-StrPtrLen               QTSServerInterface::sServerCommentStr(kCommentString);
+boost::string_view      QTSServerInterface::sServerVersionStr(kVersionString);
+boost::string_view      QTSServerInterface::sServerBuildStr(kBuildString);
+boost::string_view      QTSServerInterface::sServerCommentStr(kCommentString);
 
 StrPtrLen               QTSServerInterface::sServerPlatformStr(kPlatformNameString);
-StrPtrLen               QTSServerInterface::sServerBuildDateStr(__DATE__ ", " __TIME__);
+boost::string_view      QTSServerInterface::sServerBuildDateStr(__DATE__ ", " __TIME__);
 std::string             QTSServerInterface::sServerHeader;
 
 std::string             QTSServerInterface::sPublicHeaderStr;
-
-QTSSErrorLogStream      QTSServerInterface::sErrorLogStream;
-
-
-QTSSAttrInfoDict::AttrInfo  QTSServerInterface::sConnectedUserAttributes[] =
-{   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
-	/* 0  */ { "qtssConnectionType",                    nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 1  */ { "qtssConnectionCreateTimeInMsec",        nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 2  */ { "qtssConnectionTimeConnectedInMsec",     TimeConnected,  qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 3  */ { "qtssConnectionBytesSent",               nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 4  */ { "qtssConnectionMountPoint",              nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 5  */ { "qtssConnectionHostName",                nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe } ,
-
-	/* 6  */ { "qtssConnectionSessRemoteAddrStr",       nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 7  */ { "qtssConnectionSessLocalAddrStr",        nullptr,   qtssAttrDataTypeCharArray,      qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-
-	/* 8  */ { "qtssConnectionCurrentBitRate",          nullptr,   qtssAttrDataTypeUInt32,         qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	/* 9  */ { "qtssConnectionPacketLossPercent",       nullptr,   qtssAttrDataTypeFloat32,        qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-	// this last parameter is a workaround for the current dictionary implementation.  For qtssConnectionTimeConnectedInMsec above we have a param
-	// retrieval function.  This needs storage to keep the value returned, but if it sets its own param then the function no longer gets called.
-	/* 10 */ { "qtssConnectionTimeStorage",             nullptr,   qtssAttrDataTypeTimeVal,        qtssAttrModeRead | qtssAttrModeWrite | qtssAttrModePreempSafe },
-};
-
 
 QTSSAttrInfoDict::AttrInfo  QTSServerInterface::sAttributes[] =
 {   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
 	/* 0  */ {},
 	/* 1  */ { "qtssSvrDefaultDNSName",         nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead },
 	/* 2  */ { "qtssSvrDefaultIPAddr",          nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead },
-	/* 3  */ { "qtssSvrServerName",             nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 4  */ { "qtssRTSPSvrServerVersion",      nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 5  */ { "qtssRTSPSvrServerBuildDate",    nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 6  */ { "qtssSvrRTSPPorts",              nullptr,   qtssAttrDataTypeUInt16,     qtssAttrModeRead },
-	/* 7  */ { "qtssSvrRTSPServerHeader",       nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 8  */ { "qtssSvrState",              nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModeWrite  },
-	/* 9  */ { "qtssSvrIsOutOfDescriptors",     IsOutOfDescriptors,     qtssAttrDataTypeBool16, qtssAttrModeRead },
-	/* 10 */ { "qtssRTSPCurrentSessionCount",   nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead },
-	/* 11 */ { "qtssRTSPHTTPCurrentSessionCount",nullptr,  qtssAttrDataTypeUInt32,     qtssAttrModeRead },
-	/* 12 */ { "qtssRTPSvrNumUDPSockets",       GetTotalUDPSockets,     qtssAttrDataTypeUInt32, qtssAttrModeRead },
-	/* 13 */ { "qtssRTPSvrCurConn",             nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead },
-	/* 14 */ { "qtssRTPSvrTotalConn",           nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead },
-	/* 15 */ { "qtssRTPSvrCurBandwidth",        nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead },
-	/* 16 */ { "qtssRTPSvrTotalBytes",          nullptr,   qtssAttrDataTypeuint64_t,     qtssAttrModeRead },
-	/* 17 */ { "qtssRTPSvrAvgBandwidth",        nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead },
-	/* 18 */ { "qtssRTPSvrCurPackets",          nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead },
-	/* 19 */ { "qtssRTPSvrTotalPackets",        nullptr,   qtssAttrDataTypeuint64_t,     qtssAttrModeRead },
+	/* 3  */ {},
+	/* 4  */ {},
+	/* 5  */ {},
+	/* 6  */ {},
+	/* 7  */ {},
+	/* 8  */ {},
+	/* 9  */ {},
+	/* 10 */ {},
+	/* 11 */ {},
+	/* 12 */ {},
+	/* 13 */ {},
+	/* 14 */ {},
+	/* 15 */ {},
+	/* 16 */ {},
+	/* 17 */ {},
+	/* 18 */ {},
+	/* 19 */ {},
 	/* 20 */ {},
-	/* 21 */ { "qtssSvrModuleObjects",          nullptr,   qtssAttrDataTypeQTSS_Object,qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 22 */ { "qtssSvrStartupTime",            nullptr,   qtssAttrDataTypeTimeVal,    qtssAttrModeRead },
-	/* 23 */ { "qtssSvrGMTOffsetInHrs",         nullptr,   qtssAttrDataTypeint32_t,     qtssAttrModeRead },
+	/* 21 */ {},
+	/* 22 */ {},
+	/* 23 */ {},
 	/* 24 */ { "qtssSvrDefaultIPAddrStr",       nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead },
-	/* 25 */ { "qtssSvrPreferences",            nullptr,   qtssAttrDataTypeQTSS_Object,qtssAttrModeRead | qtssAttrModeInstanceAttrAllowed},
-	/* 26 */ { "qtssSvrMessages",               nullptr,   qtssAttrDataTypeQTSS_Object,qtssAttrModeRead },
-	/* 27 */ { "qtssSvrClientSessions",         nullptr,   qtssAttrDataTypeQTSS_Object,qtssAttrModeRead },
-	/* 28 */ { "qtssSvrCurrentTimeMilliseconds",CurrentUnixTimeMilli,   qtssAttrDataTypeTimeVal,qtssAttrModeRead},
-	/* 29 */ { "qtssSvrCPULoadPercent",         nullptr,   qtssAttrDataTypeFloat32,    qtssAttrModeRead},
+	/* 25 */ {},
+	/* 26 */ {},
+	/* 27 */ {},
+	/* 28 */ {},
+	/* 29 */ {},
 	/* 30 */ {},
-	/* 31 */ { "qtssSvrReliableUDPWastageInBytes",GetNumWastedBytes, qtssAttrDataTypeUInt32,        qtssAttrModeRead },
-	/* 32 */ { "qtssSvrConnectedUsers",         nullptr, qtssAttrDataTypeQTSS_Object,      qtssAttrModeRead | qtssAttrModeWrite },
-	/* 33  */ { "qtssSvrServerBuild",           nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 34  */ { "qtssSvrServerPlatform",        nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 35  */ { "qtssSvrRTSPServerComment",     nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 36  */ { "qtssSvrNumThinned",            nullptr,   qtssAttrDataTypeint32_t,     qtssAttrModeRead | qtssAttrModePreempSafe },
-	/* 37  */ { "qtssSvrNumThreads",            nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead | qtssAttrModePreempSafe }
+	/* 31 */ {},
+	/* 32 */ {},
+	/* 33  */ {},
+	/* 34  */ {},
+	/* 35  */ {},
+	/* 36  */ {},
+	/* 37  */ {}
 };
 
 void    QTSServerInterface::Initialize()
@@ -135,23 +108,18 @@ void    QTSServerInterface::Initialize()
 		SetAttribute(x, sAttributes[x].fAttrName, sAttributes[x].fFuncPtr,
 			sAttributes[x].fAttrDataType, sAttributes[x].fAttrPermission);
 
-	for (uint32_t y = 0; y < qtssConnectionNumParams; y++)
-		QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kQTSSConnectedUserDictIndex)->
-		SetAttribute(y, sConnectedUserAttributes[y].fAttrName, sConnectedUserAttributes[y].fFuncPtr,
-			sConnectedUserAttributes[y].fAttrDataType, sConnectedUserAttributes[y].fAttrPermission);
-
 	//Write out a premade server header
 	sServerHeader = std::string(RTSPProtocol::GetHeaderString(qtssServerHeader))
-		          + ": " + std::string(sServerNameStr.Ptr, sServerNameStr.Len)
-				  + "/" + std::string(sServerVersionStr.Ptr, sServerVersionStr.Len)
-		          + " (Build/" + std::string(sServerBuildStr.Ptr, sServerBuildStr.Len)
+		          + ": " + std::string(sServerNameStr)
+				  + "/" + std::string(sServerVersionStr)
+		          + " (Build/" + std::string(sServerBuildStr)
 		          + "; Platform/" + std::string(sServerPlatformStr.Ptr, sServerPlatformStr.Len)
 		          + ";";
 
-	if (sServerCommentStr.Len > 0)
+	if (!sServerCommentStr.empty())
 	{
 		sServerHeader += " ";
-		sServerHeader += std::string(sServerCommentStr.Ptr, sServerCommentStr.Len);
+		sServerHeader += std::string(sServerCommentStr);
 	}
 	sServerHeader += ")";
 }
@@ -159,43 +127,9 @@ void    QTSServerInterface::Initialize()
 QTSServerInterface::QTSServerInterface()
 	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kServerDictIndex), &fMutex)
 {
-	this->SetVal(qtssSvrState, &fServerState, sizeof(fServerState));
 	this->SetVal(qtssSvrDefaultIPAddr, &fDefaultIPAddr, sizeof(fDefaultIPAddr));
-	this->SetVal(qtssSvrServerName, sServerNameStr.Ptr, sServerNameStr.Len);
-	this->SetVal(qtssSvrServerVersion, sServerVersionStr.Ptr, sServerVersionStr.Len);
-	this->SetVal(qtssSvrServerBuildDate, sServerBuildDateStr.Ptr, sServerBuildDateStr.Len);
-	this->SetVal(qtssRTSPCurrentSessionCount, &fNumRTSPSessions, sizeof(fNumRTSPSessions));
-	this->SetVal(qtssRTSPHTTPCurrentSessionCount, &fNumRTSPHTTPSessions, sizeof(fNumRTSPHTTPSessions));
-	this->SetVal(qtssRTPSvrCurConn, &fNumRTPSessions, sizeof(fNumRTPSessions));
-	this->SetVal(qtssRTPSvrTotalConn, &fTotalRTPSessions, sizeof(fTotalRTPSessions));
-	this->SetVal(qtssRTPSvrCurBandwidth, &fCurrentRTPBandwidthInBits, sizeof(fCurrentRTPBandwidthInBits));
-	this->SetVal(qtssRTPSvrTotalBytes, &fTotalRTPBytes, sizeof(fTotalRTPBytes));
-	this->SetVal(qtssRTPSvrAvgBandwidth, &fAvgRTPBandwidthInBits, sizeof(fAvgRTPBandwidthInBits));
-	this->SetVal(qtssRTPSvrCurPackets, &fRTPPacketsPerSecond, sizeof(fRTPPacketsPerSecond));
-	this->SetVal(qtssRTPSvrTotalPackets, &fTotalRTPPackets, sizeof(fTotalRTPPackets));
-	this->SetVal(qtssSvrStartupTime, &fStartupTime_UnixMilli, sizeof(fStartupTime_UnixMilli));
-	this->SetVal(qtssSvrGMTOffsetInHrs, &fGMTOffset, sizeof(fGMTOffset));
-	this->SetVal(qtssSvrCPULoadPercent, &fCPUPercent, sizeof(fCPUPercent));
-
-	this->SetVal(qtssSvrServerBuild, sServerBuildStr.Ptr, sServerBuildStr.Len);
-	this->SetVal(qtssSvrRTSPServerComment, sServerCommentStr.Ptr, sServerCommentStr.Len);
-	this->SetVal(qtssSvrServerPlatform, sServerPlatformStr.Ptr, sServerPlatformStr.Len);
-
-	this->SetVal(qtssSvrNumThinned, &fNumThinned, sizeof(fNumThinned));
-	this->SetVal(qtssSvrNumThreads, &fNumThreads, sizeof(fNumThreads));
 
 	sServer = this;
-}
-
-
-void QTSServerInterface::LogError(QTSS_ErrorVerbosity inVerbosity, char* inBuffer)
-{
-	// If this is a fatal error, set the proper attribute in the RTSPServer dictionary
-	if ((inVerbosity == qtssFatalVerbosity) && (sServer != nullptr))
-	{
-		QTSS_ServerState theState = qtssFatalErrorState;
-		(void)sServer->SetValue(qtssSvrState, 0, &theState, sizeof(theState));
-	}
 }
 
 void QTSServerInterface::KillAllRTPSessions()
@@ -212,17 +146,6 @@ void QTSServerInterface::KillAllRTPSessions()
 void QTSServerInterface::SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
 	uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen)
 {
-	if (inAttrIndex == qtssSvrState)
-	{
-		Assert(inNewValueLen == sizeof(QTSS_ServerState));
-
-		//
-		// Make sure to clear out the thread data
-		if (OSThread::GetCurrent() == nullptr)
-			OSThread::SetMainThreadData(nullptr);
-		else
-			OSThread::GetCurrent()->SetThreadData(nullptr);
-	}
 }
 
 extern boost::asio::io_service io_service;
@@ -408,93 +331,4 @@ RTPSessionInterface* RTPStatsUpdaterTask::GetNewestSession(OSRefTable* inRTPSess
 		}
 	}
 	return theNewestSession;
-}
-
-
-
-void* QTSServerInterface::CurrentUnixTimeMilli(QTSSDictionary* inServer, uint32_t* outLen)
-{
-	auto* theServer = (QTSServerInterface*)inServer;
-	theServer->fCurrentTime_UnixMilli = OS::TimeMilli_To_UnixTimeMilli(OS::Milliseconds());
-
-	// Return the result
-	*outLen = sizeof(theServer->fCurrentTime_UnixMilli);
-	return &theServer->fCurrentTime_UnixMilli;
-}
-
-void* QTSServerInterface::GetTotalUDPSockets(QTSSDictionary* inServer, uint32_t* outLen)
-{
-	auto* theServer = (QTSServerInterface*)inServer;
-	// Multiply by 2 because this is returning the number of socket *pairs*
-	theServer->fTotalUDPSockets = theServer->fSocketPool->GetSocketQueue().size() * 2;
-
-	// Return the result
-	*outLen = sizeof(theServer->fTotalUDPSockets);
-	return &theServer->fTotalUDPSockets;
-}
-
-void* QTSServerInterface::IsOutOfDescriptors(QTSSDictionary* inServer, uint32_t* outLen)
-{
-	auto* theServer = (QTSServerInterface*)inServer;
-
-	theServer->fIsOutOfDescriptors = false;
-	for (uint32_t x = 0; x < theServer->fNumListeners; x++)
-	{
-		if (theServer->fListeners[x]->IsOutOfDescriptors())
-		{
-			theServer->fIsOutOfDescriptors = true;
-			break;
-		}
-	}
-	// Return the result
-	*outLen = sizeof(theServer->fIsOutOfDescriptors);
-	return &theServer->fIsOutOfDescriptors;
-}
-
-void* QTSServerInterface::GetNumWastedBytes(QTSSDictionary* inServer, uint32_t* outLen)
-{
-	// This param retrieval function must be invoked each time it is called,
-	// because whether we are out of descriptors or not is continually changing
-	auto* theServer = (QTSServerInterface*)inServer;
-
-	theServer->fUDPWastageInBytes = RTPPacketResender::GetWastedBufferBytes();
-
-	// Return the result
-	*outLen = sizeof(theServer->fUDPWastageInBytes);
-	return &theServer->fUDPWastageInBytes;
-}
-
-void* QTSServerInterface::TimeConnected(QTSSDictionary* inConnection, uint32_t* outLen)
-{
-	int64_t connectTime;
-	void* result;
-	uint32_t len = sizeof(connectTime);
-	inConnection->GetValue(qtssConnectionCreateTimeInMsec, 0, &connectTime, &len);
-	int64_t timeConnected = OS::Milliseconds() - connectTime;
-	*outLen = sizeof(timeConnected);
-	inConnection->SetValue(qtssConnectionTimeStorage, 0, &timeConnected, sizeof(connectTime));
-	inConnection->GetValuePtr(qtssConnectionTimeStorage, 0, &result, outLen);
-
-	// Return the result
-	return result;
-}
-
-
-QTSS_Error  QTSSErrorLogStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags)
-{
-	// For the error log stream, the flags are considered to be the verbosity
-	// of the error.
-	if (inFlags >= qtssIllegalVerbosity)
-		inFlags = qtssMessageVerbosity;
-
-	QTSServerInterface::LogError(inFlags, (char*)inBuffer);
-	if (outLenWritten != nullptr)
-		*outLenWritten = inLen;
-
-	return QTSS_NoErr;
-}
-
-void QTSSErrorLogStream::LogAssert(char* inMessage)
-{
-	QTSServerInterface::LogError(qtssAssertVerbosity, inMessage);
 }

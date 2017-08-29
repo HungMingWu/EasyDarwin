@@ -38,7 +38,6 @@ public:
 };
 
 // If a logger is provided, asserts will be logged. Otherwise, asserts will cause a bus error
-void SetAssertLogger(AssertLogger* theLogger);
 #endif
 
 #if ASSERT  

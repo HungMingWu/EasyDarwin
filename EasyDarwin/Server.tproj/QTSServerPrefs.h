@@ -102,8 +102,6 @@ public:
 
 	uint32_t  GetMaxErrorLogBytes() { return fErrorLogBytes; }
 	uint32_t  GetErrorRollIntervalInDays() { return fErrorRollIntervalInDays; }
-	uint32_t  GetErrorLogVerbosity() { return fErrorLogVerbosity; }
-	void    SetErrorLogVerbosity(uint32_t verbosity) { fErrorLogVerbosity = verbosity; }
 	bool  GetAppendSrcAddrInTransport() { return fAppendSrcAddrInTransport; }
 
 	//
@@ -244,7 +242,6 @@ private:
 
 	uint32_t  fErrorRollIntervalInDays;
 	uint32_t  fErrorLogBytes;
-	uint32_t  fErrorLogVerbosity;
 	bool  fScreenLoggingEnabled;
 	bool  fErrorLogEnabled;
 

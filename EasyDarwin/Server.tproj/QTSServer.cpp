@@ -140,7 +140,6 @@ QTSServer::~QTSServer()
 	delete fReflectorSessionMap;
 
 	delete fSocketPool;
-	delete fSrvrMessages;
 	delete locker;
 	delete serverlocker;
 	delete fSrvrPrefs;
@@ -160,12 +159,10 @@ bool QTSServer::Initialize(XMLPrefsParser* inPrefsSource, PrefsSource* inMessage
 	// DICTIONARY INITIALIZATION
 
 	QTSServerPrefs::Initialize();
-	QTSSMessages::Initialize();
 	RTSPRequestInterface::Initialize();
 
 	RTSPSessionInterface::Initialize();
 	RTSPSession::Initialize();
-	QTSSUserProfile::Initialize();
 
 	//
 	// STUB SERVER INITIALIZATION
@@ -175,16 +172,7 @@ bool QTSServer::Initialize(XMLPrefsParser* inPrefsSource, PrefsSource* inMessage
 	// their QTSSDictionaryMaps will presumably be modified when modules get loaded.
 
 	fSrvrPrefs = new QTSServerPrefs(inPrefsSource, false); // First time, don't write changes to the prefs file
-	fSrvrMessages = new QTSSMessages(inMessagesSource);
-	QTSSModuleUtils::Initialize(fSrvrMessages, this, QTSServerInterface::GetErrorLogStream());
-
-	//
-	// SETUP ASSERT BEHAVIOR
-	//
-	// Depending on the server preference, we will either break when we hit an
-	// assert, or log the assert to the error log
-	if (!fSrvrPrefs->ShouldServerBreakOnAssert())
-		SetAssertLogger(this->GetErrorLogStream());// the error log stream is our assert logger
+	QTSSModuleUtils::Initialize(this);
 
 	//
 	// CREATE GLOBAL OBJECTS
@@ -199,23 +187,15 @@ bool QTSServer::Initialize(XMLPrefsParser* inPrefsSource, PrefsSource* inMessage
 
 	//
 	// STARTUP TIME - record it
-	fStartupTime_UnixMilli = OS::Milliseconds();
 	fGMTOffset = OS::GetGMTOffset();
 
 	//
 	// BEGIN LISTENING
 	if (createListeners)
-	{
-		if (!this->CreateListeners(false, fSrvrPrefs, inPortOverride))
-			QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssMsgSomePortsFailed, 0);
-	}
+		CreateListeners(false, fSrvrPrefs, inPortOverride);
 
 	if (fNumListeners == 0)
-	{
-		if (createListeners)
-			QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssMsgNoPortsSucceeded, 0);
 		return false;
-	}
 
 	fServerState = qtssStartingUpState;
 	return true;
@@ -229,26 +209,17 @@ void QTSServer::InitModules(QTSS_ServerState inEndState)
 	// temporarily set the verbosity on missing prefs when starting up to debug level
 	// This keeps all the pref messages being written to the config file from being logged.
 	// don't exit until the verbosity level is reset back to the initial prefs.
-
-	fSrvrPrefs->SetErrorLogVerbosity(qtssWarningVerbosity); // turn off info messages while initializing compiled in modules.
    //
 	// CREATE MODULE OBJECTS AND READ IN MODULE PREFS
 
 	// Finish setting up modules. Create our final prefs & messages objects,
 	// register all global dictionaries, and invoke the modules in their Init roles.
 	fStubSrvrPrefs = fSrvrPrefs;
-	fStubSrvrMessages = fSrvrMessages;
 
 	fSrvrPrefs = new QTSServerPrefs(sPrefsSource, true); // Now write changes to the prefs file. First time, we don't because the error messages won't get printed.
-	QTSS_ErrorVerbosity serverLevel = fSrvrPrefs->GetErrorLogVerbosity(); // get the real prefs verbosity and save it.
-	fSrvrPrefs->SetErrorLogVerbosity(qtssWarningVerbosity); // turn off info messages while loading dynamic modules
 
 
-	fSrvrMessages = new QTSSMessages(sMessagesSource);
-	QTSSModuleUtils::Initialize(fSrvrMessages, this, QTSServerInterface::GetErrorLogStream());
-
-	this->SetVal(qtssSvrMessages, &fSrvrMessages, sizeof(fSrvrMessages));
-	this->SetVal(qtssSvrPreferences, &fSrvrPrefs, sizeof(fSrvrPrefs));
+	QTSSModuleUtils::Initialize(this);
 
 	//
 	// ADD REREAD PREFERENCES SERVICE
@@ -261,9 +232,6 @@ void QTSServer::InitModules(QTSS_ServerState inEndState)
 
 	if (fServerState != qtssFatalErrorState)
 		fServerState = inEndState; // Server is done starting up!   
-
-
-	fSrvrPrefs->SetErrorLogVerbosity(serverLevel); // reset the server's verbosity back to the original prefs level.
 }
 
 void QTSServer::StartTasks()
@@ -281,10 +249,7 @@ bool QTSServer::SetDefaultIPAddr()
 {
 	//check to make sure there is an available ip interface
 	if (SocketUtils::GetNumIPAddrs() == 0)
-	{
-		QTSSModuleUtils::LogError(qtssFatalVerbosity, qtssMsgNotConfiguredForIP, 0);
 		return false;
-	}
 
 	//find out what our default IP addr is & dns name
 	uint32_t theNumAddrs = 0;
@@ -307,12 +272,7 @@ bool QTSServer::SetDefaultIPAddr()
 		}
 	}
 	if (this->GetValue(qtssSvrDefaultDNSName)->Ptr == nullptr)
-	{
-		//If we've gotten here, what has probably happened is the IP address (explicitly
-		//entered as a preference) doesn't exist
-		QTSSModuleUtils::LogError(qtssFatalVerbosity, qtssMsgDefaultRTSPAddrUnavail, 0);
 		return false;
-	}
 	return true;
 }
 
@@ -408,21 +368,12 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 			newListenerArray[curPortIndex] = new RTSPListenerSocket();
 			QTSS_Error err = newListenerArray[curPortIndex]->Initialize(theRTSPPortTrackers[count3].fIPAddr, theRTSPPortTrackers[count3].fPort);
 
-			char thePortStr[20];
-			sprintf(thePortStr, "%hu", theRTSPPortTrackers[count3].fPort);
-
 			//
 			// If there was an error creating this listener, destroy it and log an error
 			if ((startListeningNow) && (err != QTSS_NoErr))
 				delete newListenerArray[curPortIndex];
 
-			if (err == EADDRINUSE)
-				QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssListenPortInUse, 0, thePortStr);
-			else if (err == EACCES)
-				QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssListenPortAccessDenied, 0, thePortStr);
-			else if (err != QTSS_NoErr)
-				QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssListenPortError, 0, thePortStr);
-			else
+			if (err == QTSS_NoErr)
 			{
 				//
 				// This listener was successfully created.
@@ -453,18 +404,6 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 	// Finally, make our server attributes and fListener privy to the new...
 	fListeners = newListenerArray;
 	fNumListeners = curPortIndex;
-	uint32_t portIndex = 0;
-
-	for (uint32_t count6 = 0; count6 < fNumListeners; count6++)
-	{
-		if (fListeners[count6]->GetLocalAddr() != INADDR_LOOPBACK)
-		{
-			uint16_t thePort = fListeners[count6]->GetLocalPort();
-			(void)this->SetValue(qtssSvrRTSPPorts, portIndex, &thePort, sizeof(thePort), QTSSDictionary::kDontObeyReadOnly);
-			portIndex++;
-		}
-	}
-	this->SetNumValues(qtssSvrRTSPPorts, portIndex);
 
 	delete[] theRTSPPortTrackers;
 	return (fNumListeners > 0);
@@ -619,8 +558,6 @@ void QTSServer::DoInitRole()
 	QTSS_Initialize_Params initParams;
 	initParams.inServer = this;
 	initParams.inPrefs = fSrvrPrefs;
-	initParams.inMessages = fSrvrMessages;
-	initParams.inErrorLogStream = &sErrorLogStream;
 
 
 	//
@@ -628,7 +565,6 @@ void QTSServer::DoInitRole()
 	// it internally). Modules that handle other RTSP methods will add 
 	supportMethods.push_back(qtssOptionsMethod);
 
-	initParams.inModule = nullptr;
 	QTSS_Error theErr = ReflectionModule::Initialize(&initParams);
 	this->SetupPublicHeader();
 
@@ -671,23 +607,7 @@ Task*   RTSPListenerSocket::GetSessionTask(TCPSocket** outSocket)
 
 bool RTSPListenerSocket::OverMaxConnections(uint32_t buffer)
 {
-	QTSServerInterface* theServer = QTSServerInterface::GetServer();
-	int32_t maxConns = theServer->GetPrefs()->GetMaxConnections();
-	bool overLimit = false;
-
-	if (maxConns > -1) // limit connections
-	{
-		maxConns += buffer;
-		if ((theServer->GetNumRTPSessions() > (uint32_t)maxConns)
-			||
-			(theServer->GetNumRTSPSessions() + theServer->GetNumRTSPHTTPSessions() > (uint32_t)maxConns)
-			)
-		{
-			overLimit = true;
-		}
-	}
-	return overLimit;
-
+	return false;
 }
 
 UDPSocketPair*  RTPSocketPool::ConstructUDPSocketPair()
@@ -731,17 +651,6 @@ void RTPSocketPool::SetUDPSocketOptions(UDPSocketPair* inPair)
 		theErr = inPair->GetSocketB()->SetSocketRcvBufSize(theRcvBufSize * 1024);
 		if (theErr != OS_NoErr)
 			theRcvBufSize >>= 1;
-	}
-
-	//
-	// Report an error if we couldn't set the socket buffer size the user requested
-	if (theRcvBufSize != QTSServerInterface::GetServer()->GetPrefs()->GetRTCPSocketRcvBufSizeinK())
-	{
-		char theRcvBufSizeStr[20];
-		sprintf(theRcvBufSizeStr, "%"   _U32BITARG_   "", theRcvBufSize);
-		//
-		// For now, do not log an error, though we should enable this in the future.
-		//QTSSModuleUtils::LogError(qtssWarningVerbosity, qtssMsgSockBufSizesTooLarge, theRcvBufSizeStr);
 	}
 }
 

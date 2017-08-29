@@ -170,12 +170,6 @@ static int32_t   sWaitTimeLoopCount = 10;
 static boost::string_view    sSDPKillSuffix(".kill");
 static boost::string_view    sSDPSuffix("");
 static boost::string_view    sMOVSuffix(".mov");
-static StrPtrLen    sSDPTooLongMessage("Announced SDP is too long");
-static StrPtrLen    sSDPNotValidMessage("Announced SDP is not a valid SDP");
-static StrPtrLen    sKILLNotValidMessage("Announced .kill is not a valid SDP");
-static StrPtrLen    sSDPTimeNotValidMessage("SDP time is not valid or movie not available at this time.");
-static StrPtrLen    sBroadcastNotAllowed("Broadcast is not allowed.");
-static StrPtrLen    sBroadcastNotActive("Broadcast is not active.");
 static boost::string_view    sTheNowRangeHeader("npt=now-");
 
 // FUNCTION PROTOTYPES
@@ -215,7 +209,7 @@ namespace ReflectionModule
 	QTSS_Error Initialize(QTSS_Initialize_Params* inParams)
 	{
 		// Setup module utils
-		QTSSModuleUtils::Initialize(inParams->inMessages, inParams->inServer, inParams->inErrorLogStream);
+		QTSSModuleUtils::Initialize(inParams->inServer);
 		sSessionMap = QTSServerInterface::GetServer()->GetReflectorSessionMap();
 		sServerPrefs = inParams->inPrefs;
 		sServer = inParams->inServer;
@@ -735,7 +729,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	// Check if the content-length is more than the imposed maximum
 	// if it is then return error response
 	if ((sMaxAnnouncedSDPLengthInKbytes != 0) && theContentLen > (sMaxAnnouncedSDPLengthInKbytes * 1024))
-		return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssPreconditionFailed, &sSDPTooLongMessage);
+		return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssPreconditionFailed);
 
 	//
 	// Check for the existence of 2 attributes in the request: a pointer to our buffer for
@@ -776,7 +770,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 		if (KillSession(t1, killBroadcast))
 			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssServerInternal);
 		else
-			return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssClientNotFound, &sKILLNotValidMessage);
+			return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssClientNotFound);
 	}
 
 	// ------------  Clean up missing required SDP lines
@@ -789,7 +783,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	checkedSDPContainer.SetSDPBuffer(editedSDP);
 	if (!checkedSDPContainer.IsSDPBufferValid())
 	{
-		return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssUnsupportedMediaType, &sSDPNotValidMessage);
+		return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssUnsupportedMediaType);
 	}
 
 	SDPSourceInfo theSDPSourceInfo(editedSDP.c_str(), editedSDP.length());
@@ -983,7 +977,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 		if(theRefCount)
 			sSessionMap->Release(theSession->GetRef());
 
-		return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssUnsupportedMediaType, &sSDPNotValidMessage);
+		return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssUnsupportedMediaType);
 	}
 
 
@@ -1073,7 +1067,7 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 		// In either case, verify whether the broadcast is allowed, and send forbidden response back
 		if (!sReflectBroadcasts)
 		{
-			(void)QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssClientForbidden, &sBroadcastNotAllowed);
+			(void)QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssClientForbidden);
 			return nullptr;
 		}
 
@@ -1130,7 +1124,7 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 		{
 			if (!sReflectBroadcasts)
 			{
-				(void)QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssClientForbidden, &sBroadcastNotAllowed);
+				(void)QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssClientForbidden);
 				break;
 			}
 
@@ -1552,7 +1546,7 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 				{
 					int32_t waitTimeLoopCount = boost::any_cast<int32_t>(opt.value());
 					if (waitTimeLoopCount < 1)
-						return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssClientNotFound, &sBroadcastNotActive);
+						return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssClientNotFound);
 
 					inParams->inClientSession->addAttribute(sRTPInfoWaitTime, waitTimeLoopCount - 1);
 				}

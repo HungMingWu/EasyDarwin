@@ -76,43 +76,6 @@ RTPSession::~RTPSession()
 
 	for (auto theStream : fStreamBuffer)
 		delete theStream;
-
-	QTSServerInterface* theServer = QTSServerInterface::GetServer();
-
-	{
-		OSMutexLocker theLocker(theServer->GetMutex());
-
-		RTPSession** theSession = nullptr;
-		//
-		// Remove this session from the qtssSvrClientSessions attribute
-		uint32_t y = 0;
-		for (; y < theServer->GetNumRTPSessions(); y++)
-		{
-			uint32_t theLen = 0;
-			QTSS_Error theErr = theServer->GetValuePtr(qtssSvrClientSessions, y, (void**)&theSession, &theLen, true);
-			Assert(theErr == QTSS_NoErr);
-
-			if (*theSession == this)
-			{
-				theErr = theServer->RemoveValue(qtssSvrClientSessions, y, QTSSDictionary::kDontObeyReadOnly);
-				break;
-			}
-		}
-
-		Assert(y < theServer->GetNumRTPSessions());
-		if (!fIsFirstPlay) // The session was started playing (the counter ignores additional pause-play changes while session is active)
-			theServer->AlterRTPPlayingSessions(-1);
-
-	}
-
-	//we better not be in the RTPSessionMap anymore!
-#if DEBUG
-/* does not compile???
-	Assert(!fRTPMapElem.IsInTable());
-	OSRef* theRef = QTSServerInterface::GetServer()->GetRTPSessionMap()->Resolve(&fRTSPSessionID);
-	Assert(theRef == NULL);
-*/
-#endif
 }
 
 QTSS_Error  RTPSession::Activate(boost::string_view inSessionID)
@@ -128,19 +91,6 @@ QTSS_Error  RTPSession::Activate(boost::string_view inSessionID)
 	QTSS_Error err = theServer->GetRTPSessionMap()->Register(&fRTPMapElem);
 	if (err == EPERM)
 		return err;
-	Assert(err == QTSS_NoErr);
-
-	//
-	// Adding this session into the qtssSvrClientSessions attr and incrementing the number of sessions must be atomic
-	OSMutexLocker locker(theServer->GetMutex());
-
-	//
-	// Put this session into the qtssSvrClientSessions attribute of the server
-#if DEBUG
-	Assert(theServer->GetNumValues(qtssSvrClientSessions) == theServer->GetNumRTPSessions());
-#endif
-	RTPSession* theSession = this;
-	err = theServer->SetValue(qtssSvrClientSessions, theServer->GetNumRTPSessions(), &theSession, sizeof(theSession), QTSSDictionary::kDontObeyReadOnly);
 	Assert(err == QTSS_NoErr);
 
 #if DEBUG
@@ -220,7 +170,6 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 	fState = qtssPlayingState;
 	fIsFirstPlay = false;
 	fPlayFlags = inFlags;
-	QTSServerInterface::GetServer()->AlterRTPPlayingSessions(1);
 
 	uint32_t theWindowSize;
 	uint32_t bitRate = this->GetMovieAvgBitrate();

@@ -271,32 +271,12 @@ enum
     qtssModuleObjectType            = FOUR_CHARS_TO_INT('m', 'o', 'd', 'o'), //modo
     qtssModulePrefsObjectType       = FOUR_CHARS_TO_INT('m', 'o', 'd', 'p'), //modp
     qtssAttrInfoObjectType          = FOUR_CHARS_TO_INT('a', 't', 't', 'r'), //attr
-    qtssUserProfileObjectType       = FOUR_CHARS_TO_INT('u', 's', 'p', 'o'), //uspo
+
     qtssConnectedUserObjectType     = FOUR_CHARS_TO_INT('c', 'u', 's', 'r'), //cusr
 	easyHTTPSessionObjectType		= FOUR_CHARS_TO_INT('e', 'h', 's', 'o')  //ehso
     
 };
 typedef uint32_t QTSS_ObjectType;
-
-/**********************************/
-// ERROR LOG VERBOSITIES
-//
-// This provides some information to the module on the priority or
-// type of this error message.
-//
-// When modules write to the error log stream (see below),
-// the verbosity is qtssMessageVerbosity.
-enum
-{
-    qtssFatalVerbosity              = 0,
-    qtssWarningVerbosity            = 1,
-    qtssMessageVerbosity            = 2,
-    qtssAssertVerbosity             = 3,
-    qtssDebugVerbosity              = 4,
-    
-    qtssIllegalVerbosity            = 5
-};
-typedef uint32_t QTSS_ErrorVerbosity;
 
 enum
 {
@@ -381,19 +361,6 @@ enum
 };
 typedef uint32_t QTSS_AttrPermission;
 
-
-enum
-{
-    qtssAttrRightNone           = 0,    
-    qtssAttrRightRead           = 1 << 0,
-    qtssAttrRightWrite          = 1 << 1,
-    qtssAttrRightAdmin          = 1 << 2,
-    qtssAttrRightExtended       = 1 << 30, // Set this flag in the qtssUserRights when defining a new right. The right is a string i.e. "myauthmodule.myright" store the string in the QTSS_UserProfileObject attribute qtssUserExtendedRights
-    qtssAttrRightQTSSExtended   = 1 << 31  // This flag is reserved for future use by the server. Additional rights are stored in qtssUserQTSSExtendedRights.
-};
-typedef uint32_t QTSS_AttrRights; // see QTSS_UserProfileObject
-
-
 /**********************************/
 //BUILT IN SERVER ATTRIBUTES
 
@@ -454,46 +421,25 @@ enum
     qtssSvrDefaultDNSName           = 1,    //read		//char array        //The "default" DNS name of the server
     qtssSvrDefaultIPAddr            = 2,    //read		//uint32_t            //The "default" IP address of the server
     qtssSvrServerName               = 3,    //read		//char array        //Name of the server
-    qtssSvrServerVersion            = 4,    //read		//char array        //Version of the server
-    qtssSvrServerBuildDate          = 5,    //read		//char array        //When was the server built?
     qtssSvrRTSPPorts                = 6,    //read		// NOT PREEMPTIVE SAFE!//UInt16         //Indexed parameter: all the ports the server is listening on
 
     // These parameters are NOT pre-emptive safe, they cannot be accessed
     // via. QTSS_GetValuePtr. Some exceptions noted below
     
-    qtssSvrState                    = 8,    //r/w		//QTSS_ServerState  //The current state of the server. If a module sets the server state, the server will respond in the appropriate fashion. Setting to qtssRefusingConnectionsState causes the server to refuse connections, setting to qtssFatalErrorState or qtssShuttingDownState causes the server to quit.
     qtssSvrIsOutOfDescriptors       = 9,    //read		//bool            //true if the server has run out of file descriptors, false otherwise
-    qtssRTSPCurrentSessionCount     = 10,   //read		//uint32_t            //Current number of connected clients over standard RTSP
-    qtssRTSPHTTPCurrentSessionCount = 11,   //read		//uint32_t            //Current number of connected clients over RTSP / HTTP
 
     qtssRTPSvrNumUDPSockets         = 12,   //read      //uint32_t    //Number of UDP sockets currently being used by the server
-    qtssRTPSvrCurConn               = 13,   //read      //uint32_t    //Number of clients currently connected to the server
-    qtssRTPSvrTotalConn             = 14,   //read      //uint32_t    //Total number of clients since startup
-    qtssRTPSvrCurBandwidth          = 15,   //read      //uint32_t    //Current bandwidth being output by the server in bits per second
-    qtssRTPSvrTotalBytes            = 16,   //read      //uint64_t    //Total number of bytes served since startup
-    qtssRTPSvrAvgBandwidth          = 17,   //read      //uint32_t    //Average bandwidth being output by the server in bits per second
-    qtssRTPSvrCurPackets            = 18,   //read      //uint32_t    //Current packets per second being output by the server
+
     qtssRTPSvrTotalPackets          = 19,   //read      //uint64_t    //Total number of bytes served since startup
     
     qtssSvrModuleObjects            = 21,   //read		//this IS PREMPTIVE SAFE!  //QTSS_ModuleObject // A module object representing each module
-    qtssSvrStartupTime              = 22,   //read      //QTSS_TimeVal  //Time the server started up
-    qtssSvrGMTOffsetInHrs           = 23,   //read      //int32_t        //Server time zone (offset from GMT in hours)
     qtssSvrDefaultIPAddrStr         = 24,   //read      //char array    //The "default" IP address of the server as a string
 
     qtssSvrPreferences              = 25,   //read      //QTSS_PrefsObject  // An object representing each the server's preferences
-    qtssSvrMessages                 = 26,   //read      //QTSS_Object   // An object containing the server's error messages.
-    qtssSvrClientSessions           = 27,   //read      //QTSS_Object // An object containing all client sessions stored as indexed QTSS_ClientSessionObject(s).
-    qtssSvrCurrentTimeMilliseconds  = 28,   //read      //QTSS_TimeVal  //Server's current time in milliseconds. Retrieving this attribute is equivalent to calling QTSS_Milliseconds
-    qtssSvrCPULoadPercent           = 29,   //read      //Float32       //Current % CPU being used by the server
-
+    
     qtssSvrReliableUDPWastageInBytes= 31,   //read      //uint32_t    //Amount of data in the reliable UDP buffers being wasted
     qtssSvrConnectedUsers           = 32,   //r/w       //QTSS_Object   //List of connected user sessions (updated by modules for their sessions)
 
-    qtssSvrServerBuild              = 33,   //read      //char array //build of the server
-    qtssSvrServerPlatform           = 34,   //read      //char array //Platform (OS) of the server
-    qtssSvrRTSPServerComment        = 35,   //read      //char array //RTSP comment for the server header    
-    qtssSvrNumThinned               = 36,   //read      //int32_t    //Number of thinned sessions
-    qtssSvrNumThreads               = 37,   //read		//uint32_t    //Number of task threads // see also qtssPrefsRunNumThreads
     qtssSvrNumParams                = 38
 };
 typedef uint32_t QTSS_ServerAttributes;
@@ -528,7 +474,6 @@ enum
     qtssPrefsErrorLogDir					= 14,   //"error_logfile_dir"           //char array        //Path to error log file directory
     qtssPrefsErrorRollInterval				= 15,   //"error_logfile_interval"      //uint32_t    //Interval in days between error logfile rolls
     qtssPrefsMaxErrorLogSize				= 16,   //"error_logfile_size"          //uint32_t    //Max size in bytes of the error log
-    qtssPrefsErrorLogVerbosity				= 17,   //"error_logfile_verbosity"     //uint32_t    //Max verbosity level of messages the error logger will log
     qtssPrefsScreenLogging					= 18,   //"screen_logging"              //bool        //Should the error logger echo messages to the screen?
     qtssPrefsErrorLogEnabled				= 19,   //"error_logging"               //bool        //Is error logging enabled?
 
@@ -717,22 +662,6 @@ typedef uint32_t QTSS_AttrInfoObjectAttributes;
 
 enum
 {
-    //QTSS_UserProfileObject parameters
-    
-    // All of these parameters are preemptive-safe.
-    
-    qtssUserName                = 0, //read  //char array
-    qtssUserPassword            = 1, //r/w   //char array                                      //              make them all of the same length 
-    qtssUserRealm               = 3, //r/w   //char array -  the authentication realm for username
-    qtssUserRights              = 4, //r/w   //QTSS_AttrRights - rights granted this user
-    qtssUserExtendedRights      = 5, //r/w   //qtssAttrDataTypeCharArray - a list of strings with extended rights granted to the user.
-    qtssUserQTSSExtendedRights  = 6, //r/w   //qtssAttrDataTypeCharArray - a private list of strings with extended rights granted to the user and reserved by QTSS/Apple.
-    qtssUserNumParams           = 7,
-};
-typedef uint32_t QTSS_UserProfileObjectAttributes;
-
-enum
-{
     //QTSS_ConnectedUserObject parameters
     
     //All of these are preemptive safe
@@ -818,9 +747,7 @@ typedef int64_t          QTSS_TimeVal;
 
 typedef QTSS_Object             QTSS_RTPStreamObject;
 typedef QTSS_Object             QTSS_PrefsObject;
-typedef QTSS_Object             QTSS_TextMessagesObject;
 typedef QTSS_Object             QTSS_FileObject;
-typedef QTSS_Object             QTSS_ModuleObject;
 typedef QTSS_Object             QTSS_ModulePrefsObject;
 typedef QTSS_Object             QTSS_AttrInfoObject;
 typedef QTSS_Object             QTSS_ConnectedUserObject;
@@ -854,14 +781,10 @@ typedef struct
 {
 	QTSServerInterface*         inServer;           // Global dictionaries
     QTSS_PrefsObject            inPrefs;
-    QTSS_TextMessagesObject     inMessages;
-	QTSSStream*                 inErrorLogStream;   // Writing to this stream causes modules to
-    QTSS_ModuleObject           inModule;
 } QTSS_Initialize_Params;
 
 typedef struct
 {
-    QTSS_ErrorVerbosity         inVerbosity;
     char*                       inBuffer;
     
 } QTSS_ErrorLog_Params;
@@ -1036,10 +959,7 @@ typedef struct
 
 typedef QTSS_Error (*QTSS_MainEntryPointPtr)(void* inPrivateArgs);
 typedef QTSS_Error (*QTSS_DispatchFuncPtr)(QTSS_Role inRole, QTSS_RoleParamPtr inParamBlock);
-
-// STUB LIBRARY MAIN
-QTSS_Error _stublibrary_main(void* inPrivateArgs, QTSS_DispatchFuncPtr inDispatchFunc);
-                                                                                                            
+                                                                                                           
 /********************************************************************/
 //  QTSS_AddStaticAttribute
 //

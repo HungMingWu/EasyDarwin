@@ -591,22 +591,7 @@ void RTSPRequest::ParseClientPortSubHeader(boost::string_view inClientPortSubHea
 		fClientPortB = portB;
 	}
 	if (fClientPortB != fClientPortA + 1) // an error in the port values
-	{
-		// The following to setup and log the error as a message level 2.
-		boost::string_view userAgent = fHeaderDict.Get(qtssUserAgentHeader);
-		ResizeableStringFormatter errorPortMessage;
-		errorPortMessage.Put(sErrorMessage);
-		if (!userAgent.empty())
-			errorPortMessage.Put(userAgent);
-		errorPortMessage.PutSpace();
-		errorPortMessage.Put(inClientPortSubHeader);
-		errorPortMessage.PutTerminator();
-		QTSSModuleUtils::LogError(qtssMessageVerbosity, qtssMsgNoMessage, 0, errorPortMessage.GetBufPtr(), nullptr);
-
-
-		//fix the rtcp port and hope it works.
 		fClientPortB = fClientPortA + 1;
-	}
 }
 
 void RTSPRequest::ParseTimeToLiveSubHeader(boost::string_view inTimeToLiveSubHeader)
@@ -665,7 +650,7 @@ QTSS_Error RTSPRequest::ParseBasicHeader(boost::string_view inParsedAuthLine)
 	SetPassWord(password);
 
 	// Also set the qtssUserName attribute in the qtssRTSPReqUserProfile object attribute of the Request Object
-	(void)fUserProfile.SetValue(qtssUserName, 0, name.c_str(), name.length(), QTSSDictionary::kDontObeyReadOnly);
+	fUserProfile.SetUserName(name);
 
 	return theErr;
 }
@@ -700,7 +685,7 @@ QTSS_Error RTSPRequest::ParseDigestHeader(boost::string_view inParsedAuthLine)
 			// Set the qtssRTSPReqUserName attribute in the Request object
 			SetAuthUserName(fieldValue);
 			// Also set the qtssUserName attribute in the qtssRTSPReqUserProfile object attribute of the Request Object
-			(void)fUserProfile.SetValue(qtssUserName, 0, fieldValue.c_str(), fieldValue.length(), QTSSDictionary::kDontObeyReadOnly);
+			fUserProfile.SetUserName(fieldValue);
 		}
 		else if (boost::equals(fieldName, sRealmStr)) {
 			fAuthRealm = fieldValue;

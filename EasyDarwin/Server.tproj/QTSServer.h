@@ -36,6 +36,7 @@
 #define __QTSSERVER_H__
 
 #include "QTSServerInterface.h"
+#include "PrefsSource.h"
 #include "Task.h"
 
 class RTCPTask;

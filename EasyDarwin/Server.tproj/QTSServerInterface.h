@@ -47,7 +47,6 @@
 #include "QTSS.h"
 #include "QTSSDictionary.h"
 #include "QTSServerPrefs.h"
-#include "QTSSMessages.h"
 #include "atomic.h"
 
 #include "OSMutex.h"
@@ -62,20 +61,6 @@ class QTSServerPrefs;
 class QTSSMessages;
 //class RTPStatsUpdaterTask;
 class RTPSessionInterface;
-
-// This object also functions as our assert logger
-class QTSSErrorLogStream : public QTSSStream, public AssertLogger
-{
-public:
-
-	// This QTSSStream is used by modules to write to the error log
-
-	QTSSErrorLogStream() = default;
-	~QTSSErrorLogStream() override = default;
-
-	QTSS_Error  Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags) override;
-	void        LogAssert(char* inMessage) override;
-};
 
 class QTSServerInterface : public QTSSDictionary
 {
@@ -100,19 +85,6 @@ public:
 	// STATISTICS MANIPULATION
 	// These functions are how the server keeps its statistics current
 
-	void                AlterCurrentRTSPSessionCount(int32_t inDifference)
-	{
-		OSMutexLocker locker(&fMutex); fNumRTSPSessions += inDifference;
-	}
-	void                AlterCurrentRTSPHTTPSessionCount(int32_t inDifference)
-	{
-		OSMutexLocker locker(&fMutex); fNumRTSPHTTPSessions += inDifference;
-	}
-	void                SwapFromRTSPToHTTP()
-	{
-		OSMutexLocker locker(&fMutex); fNumRTSPSessions--; fNumRTSPHTTPSessions++;
-	}
-
 	//total rtp bytes sent by the server
 	void            IncrementTotalRTPBytes(uint32_t bytes)
 	{
@@ -129,13 +101,6 @@ public:
 	{
 		(void)atomic_add(&fPeriodicRTPPacketsLost, packets);
 	}
-
-	//track how many sessions are playing
-	void            AlterRTPPlayingSessions(int32_t inDifference)
-	{
-		OSMutexLocker locker(&fMutex); fNumRTPPlayingSessions += inDifference;
-	}
-
 
 	void            IncrementTotalLate(int64_t milliseconds)
 	{
@@ -175,12 +140,7 @@ public:
 	// ACCESSORS
 
 	QTSS_ServerState    GetServerState() { return fServerState; }
-	uint32_t              GetNumRTPSessions() { return fNumRTPSessions; }
-	uint32_t              GetNumRTSPSessions() { return fNumRTSPSessions; }
-	uint32_t              GetNumRTSPHTTPSessions() { return fNumRTSPHTTPSessions; }
-
-	uint32_t              GetTotalRTPSessions() { return fTotalRTPSessions; }
-	uint32_t              GetNumRTPPlayingSessions() { return fNumRTPPlayingSessions; }
+	void                SetServerState(QTSS_ServerState state) { fServerState = state; }
 
 	uint32_t              GetCurBandwidthInBits() { return fCurrentRTPBandwidthInBits; }
 	uint32_t              GetAvgBandwidthInBits() { return fAvgRTPBandwidthInBits; }
@@ -223,19 +183,18 @@ public:
 	UDPSocketPool*      GetSocketPool() { return fSocketPool; }
 
 	QTSServerPrefs*     GetPrefs() { return fSrvrPrefs; }
-	QTSSMessages*       GetMessages() { return fSrvrMessages; }
 
 	//
 	//
 	// SERVER NAME & VERSION
 
-	static StrPtrLen&   GetServerName() { return sServerNameStr; }
-	static StrPtrLen&   GetServerVersion() { return sServerVersionStr; }
+	static boost::string_view   GetServerName() { return sServerNameStr; }
+	static boost::string_view   GetServerVersion() { return sServerVersionStr; }
 	static StrPtrLen&   GetServerPlatform() { return sServerPlatformStr; }
-	static StrPtrLen&   GetServerBuildDate() { return sServerBuildDateStr; }
+	static boost::string_view GetServerBuildDate() { return sServerBuildDateStr; }
 	static boost::string_view GetServerHeader() { return sServerHeader; }
-	static StrPtrLen&   GetServerBuild() { return sServerBuildStr; }
-	static StrPtrLen&   GetServerComment() { return sServerCommentStr; }
+	static boost::string_view GetServerBuild() { return sServerBuildStr; }
+	static boost::string_view GetServerComment() { return sServerCommentStr; }
 
 	//
 	// PUBLIC HEADER
@@ -258,15 +217,6 @@ public:
 		uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen) override;
 
 	//
-	// ERROR LOGGING
-
-	// Invokes the error logging modules with some data
-	static void     LogError(QTSS_ErrorVerbosity inVerbosity, char* inBuffer);
-
-	// Returns the error log stream
-	static QTSSErrorLogStream* GetErrorLogStream() { return &sErrorLogStream; }
-
-	//
 	// LOCKING DOWN THE SERVER OBJECT
 	OSMutex*        GetServerObjectMutex() { return &fMutex; }
 
@@ -287,10 +237,8 @@ protected:
 	OSRefTable*					fReflectorSessionMap{nullptr};
 
 	QTSServerPrefs*             fSrvrPrefs{nullptr};
-	QTSSMessages*               fSrvrMessages{nullptr};
 
 	QTSServerPrefs*				fStubSrvrPrefs;
-	QTSSMessages*				fStubSrvrMessages;
 
 	QTSS_ServerState            fServerState{qtssStartingUpState};
 	uint32_t                      fDefaultIPAddr{0};
@@ -299,15 +247,9 @@ protected:
 	TCPListenerSocket**         fListeners{nullptr};
 	uint32_t                      fNumListeners{0}; // Number of elements in the array
 
-	// startup time
-	int64_t						fStartupTime_UnixMilli{0};
 	int32_t						fGMTOffset{0};
 
 	static std::string                  sPublicHeaderStr;
-
-	//
-	// MODULE DATA
-	static QTSSErrorLogStream       sErrorLogStream;
 
 private:
 
@@ -316,27 +258,16 @@ private:
 		kMaxServerHeaderLen = 1000
 	};
 
-	static void* TimeConnected(QTSSDictionary* inConnection, uint32_t* outLen);
-
-	static StrPtrLen    sServerNameStr;
-	static StrPtrLen    sServerVersionStr;
-	static StrPtrLen    sServerBuildStr;
-	static StrPtrLen    sServerCommentStr;
+	static boost::string_view sServerNameStr;
+	static boost::string_view sServerVersionStr;
+	static boost::string_view sServerBuildStr;
+	static boost::string_view sServerCommentStr;
 	static StrPtrLen    sServerPlatformStr;
-	static StrPtrLen    sServerBuildDateStr;
+	static boost::string_view    sServerBuildDateStr;
 	static std::string  sServerHeader;
 
 	OSMutex             fMutex;
 
-	uint32_t              fNumRTSPSessions{0};
-	uint32_t              fNumRTSPHTTPSessions{0};
-	uint32_t              fNumRTPSessions{0};
-
-	//stores the current number of playing connections.
-	uint32_t              fNumRTPPlayingSessions{0};
-
-	//stores the total number of connections since startup.
-	uint32_t              fTotalRTPSessions{0};
 	//stores the total number of bytes served since startup
 	uint64_t              fTotalRTPBytes{0};
 	//total number of rtp packets sent since startup
@@ -362,16 +293,6 @@ private:
 	float             fCPUPercent{0};
 	float             fCPUTimeUsedInSec{0};
 
-	// stores # of UDP sockets in the server currently (gets updated lazily via.
-	// param retrieval function)
-	uint32_t              fTotalUDPSockets;
-
-	// are we out of descriptors?
-	bool              fIsOutOfDescriptors;
-
-	// Storage for current time attribute
-	int64_t              fCurrentTime_UnixMilli;
-
 	// Stats for UDP retransmits
 	uint32_t              fUDPWastageInBytes{0};
 	uint32_t              fNumUDPBuffers{0};
@@ -390,15 +311,8 @@ private:
 	int32_t          fNumThinned{0};
 	uint32_t          fNumThreads{0};
 
-	// Param retrieval functions
-	static void* CurrentUnixTimeMilli(QTSSDictionary* inServer, uint32_t* outLen);
-	static void* GetTotalUDPSockets(QTSSDictionary* inServer, uint32_t* outLen);
-	static void* IsOutOfDescriptors(QTSSDictionary* inServer, uint32_t* outLen);
-	static void* GetNumWastedBytes(QTSSDictionary* inServer, uint32_t* outLen);
-
 	static QTSServerInterface*  sServer;
 	static QTSSAttrInfoDict::AttrInfo   sAttributes[];
-	static QTSSAttrInfoDict::AttrInfo   sConnectedUserAttributes[];
 
 	friend class RTPStatsUpdaterTask;
 };

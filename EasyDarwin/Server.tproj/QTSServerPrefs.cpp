@@ -292,7 +292,6 @@ QTSServerPrefs::QTSServerPrefs(XMLPrefsParser* inPrefsSource, bool inWriteMissin
 	fSafePlayDurationInSecs(0),
 	fErrorRollIntervalInDays(0),
 	fErrorLogBytes(0),
-	fErrorLogVerbosity(0),
 	fScreenLoggingEnabled(true),
 	fErrorLogEnabled(false),
 	fDropAllPacketsTimeInMsec(0),
@@ -377,7 +376,6 @@ void QTSServerPrefs::SetupAttributes()
 
 	this->SetVal(qtssPrefsErrorRollInterval, &fErrorRollIntervalInDays, sizeof(fErrorRollIntervalInDays));
 	this->SetVal(qtssPrefsMaxErrorLogSize, &fErrorLogBytes, sizeof(fErrorLogBytes));
-	this->SetVal(qtssPrefsErrorLogVerbosity, &fErrorLogVerbosity, sizeof(fErrorLogVerbosity));
 	this->SetVal(qtssPrefsScreenLogging, &fScreenLoggingEnabled, sizeof(fScreenLoggingEnabled));
 	this->SetVal(qtssPrefsErrorLogEnabled, &fErrorLogEnabled, sizeof(fErrorLogEnabled));
 
@@ -466,19 +464,6 @@ void QTSServerPrefs::RereadServerPreferences(bool inWriteMissingPrefs)
 		{
 			//
 			// There is no pref, use the default and log an error
-			if (::strlen(sPrefInfo[x].fDefaultValue) > 0)
-			{
-				//
-				// Only log this as an error if there is a default (an empty string
-				// doesn't count). If there is no default, we will constantly print
-				// out an error message...
-				QTSSModuleUtils::LogError(QTSSModuleUtils::GetMisingPrefLogVerbosity(),
-					qtssServerPrefMissing,
-					0,
-					sAttributes[x].fAttrName,
-					sPrefInfo[x].fDefaultValue);
-			}
-
 			this->SetPrefValue(x, 0, sPrefInfo[x].fDefaultValue, sAttributes[x].fAttrDataType);
 			if (sPrefInfo[x].fAdditionalDefVals != nullptr)
 			{
@@ -510,19 +495,6 @@ void QTSServerPrefs::RereadServerPreferences(bool inWriteMissingPrefs)
 		{
 			//
 			// The pref in the file has the wrong type, use the default and log an error
-
-			if (::strlen(sPrefInfo[x].fDefaultValue) > 0)
-			{
-				//
-				// Only log this as an error if there is a default (an empty string
-				// doesn't count). If there is no default, we will constantly print
-				// out an error message...
-				QTSSModuleUtils::LogError(qtssWarningVerbosity,
-					qtssServerPrefWrongType,
-					0,
-					sAttributes[x].fAttrName,
-					sPrefInfo[x].fDefaultValue);
-			}
 
 			this->SetPrefValue(x, 0, sPrefInfo[x].fDefaultValue, sAttributes[x].fAttrDataType);
 			if (sPrefInfo[x].fAdditionalDefVals != nullptr)

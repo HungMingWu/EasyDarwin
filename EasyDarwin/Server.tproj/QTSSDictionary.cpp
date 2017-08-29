@@ -866,7 +866,7 @@ void QTSSDictionaryMap::Initialize()
 	sDictionaryMaps[kFileDictIndex] = new QTSSDictionaryMap(qtssFlObjNumParams);
 	sDictionaryMaps[kModuleDictIndex] = new QTSSDictionaryMap(qtssModNumParams);
 	sDictionaryMaps[kModulePrefsDictIndex] = new QTSSDictionaryMap(0, QTSSDictionaryMap::kInstanceAttrsAllowed | QTSSDictionaryMap::kCompleteFunctionsAllowed);
-	sDictionaryMaps[kQTSSUserProfileDictIndex] = new QTSSDictionaryMap(qtssUserNumParams);
+
 	sDictionaryMaps[kQTSSConnectedUserDictIndex] = new QTSSDictionaryMap(qtssConnectionNumParams);
 	sDictionaryMaps[kHTTPSessionDictIndex] = new QTSSDictionaryMap(qtssRTSPSesNumParams);
 }
@@ -1124,7 +1124,6 @@ uint32_t  QTSSDictionaryMap::GetMapIndex(QTSS_ObjectType inType)
 	case qtssModuleObjectType:          return kModuleDictIndex;
 	case qtssModulePrefsObjectType:     return kModulePrefsDictIndex;
 	case qtssAttrInfoObjectType:        return kAttrInfoDictIndex;
-	case qtssUserProfileObjectType:     return kQTSSUserProfileDictIndex;
 	case qtssConnectedUserObjectType:   return kQTSSConnectedUserDictIndex;
 
 	case easyHTTPSessionObjectType:     return kHTTPSessionDictIndex;

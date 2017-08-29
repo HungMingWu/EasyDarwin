@@ -79,15 +79,13 @@ static boost::string_view    sContentType("application/x-random-data");
 
 static StrPtrLen    sAuthAlgorithm("md5");
 static boost::string_view    sAuthQop("auth");
-static StrPtrLen    sEmptyStr("");
+static boost::string_view    sEmptyStr("");
 
 RTSPSession::RTSPSession()
 	: RTSPSessionInterface(),
 	fReadMutex()
 {
 	this->SetTaskName("RTSPSession");
-
-	QTSServerInterface::GetServer()->AlterCurrentRTSPSessionCount(1);
 
 	// Setup the QTSS param block, as none of these fields will change through the course of this session.
 	rtspParams.inRTSPSession = this;
@@ -104,10 +102,6 @@ RTSPSession::~RTSPSession()
 {
 	fLiveSession = false; //used in Clean up request to remove the RTP session.
 	this->CleanupRequest();// Make sure that all our objects are deleted
-	if (fSessionType == qtssRTSPSession)
-		QTSServerInterface::GetServer()->AlterCurrentRTSPSessionCount(-1);
-	else
-		QTSServerInterface::GetServer()->AlterCurrentRTSPHTTPSessionCount(-1);
 
 	if (fRequest)
 	{
@@ -709,8 +703,7 @@ int64_t RTSPSession::Run()
 void RTSPSession::CheckAuthentication() {
 
 	QTSSUserProfile* profile = fRequest->GetUserProfile();
-	StrPtrLen* userPassword = profile->GetValue(qtssUserPassword);
-	boost::string_view userPaddwordV(userPassword->Ptr, userPassword->Len);
+	boost::string_view userPassword = profile->GetPassWord();
 	QTSS_AuthScheme scheme = fRequest->GetAuthScheme();
 	bool authenticated = true;
 
@@ -721,9 +714,9 @@ void RTSPSession::CheckAuthentication() {
 	else if (scheme == qtssAuthBasic) {
 		// For basic authentication, the authentication module returns the crypt of the password, 
 		std::string reqPasswdStr(fRequest->GetPassWord());
-		char* userPasswdStr = userPassword->GetAsCString(); // memory allocated
+		std::string userPasswdStr(userPassword); // memory allocated
 
-		if (userPassword->Len == 0)
+		if (userPassword.empty())
 		{
 			authenticated = false;
 		}
@@ -733,8 +726,8 @@ void RTSPSession::CheckAuthentication() {
 			// The password is md5 encoded for win32
 			char md5EncodeResult[120];
 			// no memory is allocated in this function call
-			MD5Encode((char *)reqPasswdStr.c_str(), userPasswdStr, md5EncodeResult, sizeof(md5EncodeResult));
-			if (::strcmp(userPasswdStr, md5EncodeResult) != 0)
+			MD5Encode((char *)reqPasswdStr.c_str(), &userPasswdStr[0], md5EncodeResult, sizeof(md5EncodeResult));
+			if (::strcmp(userPasswdStr.c_str(), md5EncodeResult) != 0)
 				authenticated = false;
 #else
 			if (::strcmp(userPasswdStr, (char*)crypt(reqPasswdStr, userPasswdStr)) != 0)
@@ -742,7 +735,6 @@ void RTSPSession::CheckAuthentication() {
 #endif
 		}
 
-		delete[] userPasswdStr;    // deleting allocated memory
 		userPasswdStr = nullptr;
 	}
 	else if (scheme == qtssAuthDigest) {
@@ -810,14 +802,14 @@ void RTSPSession::CheckAuthentication() {
 				}
 
 				// allocates memory for requestDigest.Ptr
-				requestDigest = CalcRequestDigest(userPaddwordV, nonce, nonceCount, cNonce, sAuthQop, method, digestUri, emptyStr);
+				requestDigest = CalcRequestDigest(userPassword, nonce, nonceCount, cNonce, sAuthQop, method, digestUri, emptyStr);
 				// If they are equal, check if nonce used by client is same as the one sent by the server
 
 			}   // For No qop
 			else if (qop == RTSPSessionInterface::kNoQop)
 			{
 				// allocates memory for requestDigest->Ptr
-				requestDigest = CalcRequestDigest(userPaddwordV, nonce, emptyStr, emptyStr, emptyStr, method, digestUri, emptyStr);
+				requestDigest = CalcRequestDigest(userPassword, nonce, emptyStr, emptyStr, emptyStr, method, digestUri, emptyStr);
 			}
 
 			// hA1 is allocated memory 
@@ -839,9 +831,9 @@ void RTSPSession::CheckAuthentication() {
 	{
 		if ((!authenticated) || (authenticated && (fRequest->GetStale()))) {
 			debug_printf("erasing username from profile\n");
-			(void)profile->SetValue(qtssUserName, 0, sEmptyStr.Ptr, sEmptyStr.Len, QTSSDictionary::kDontObeyReadOnly);
-			(void)profile->SetValue(qtssUserPassword, 0, sEmptyStr.Ptr, sEmptyStr.Len, QTSSDictionary::kDontObeyReadOnly);
-			(void)profile->clearUserGroups();
+			profile->SetUserName(sEmptyStr);
+			profile->SetPassWord(sEmptyStr);
+			profile->clearUserGroups();
 		}
 	}
 }
@@ -1169,7 +1161,6 @@ uint32_t RTSPSession::GenerateNewSessionID(char* ioBuffer)
 	theSecondRandom += theServer->GetAvgBandwidthInBits();
 	theSecondRandom += theServer->GetRTPPacketsPerSec();
 	theSecondRandom += (uint32_t)theServer->GetTotalRTPBytes();
-	theSecondRandom += theServer->GetTotalRTPSessions();
 
 	::srand((unsigned int)theSecondRandom);
 	theSecondRandom = ::rand();
@@ -1184,24 +1175,7 @@ uint32_t RTSPSession::GenerateNewSessionID(char* ioBuffer)
 
 bool RTSPSession::OverMaxConnections(uint32_t buffer)
 {
-	QTSServerInterface* theServer = QTSServerInterface::GetServer();
-	int32_t maxConns = theServer->GetPrefs()->GetMaxConnections();
-	bool overLimit = false;
-
-	if (maxConns > -1) // limit connections
-	{
-		uint32_t maxConnections = (uint32_t)maxConns + buffer;
-		if ((theServer->GetNumRTPSessions() > maxConnections)
-			||
-			(theServer->GetNumRTSPSessions() + theServer->GetNumRTSPHTTPSessions() > maxConnections)
-			)
-		{
-			overLimit = true;
-		}
-	}
-
-	return overLimit;
-
+	return false;
 }
 
 QTSS_Error RTSPSession::IsOkToAddNewRTPSession()

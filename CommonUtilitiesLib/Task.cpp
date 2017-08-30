@@ -217,7 +217,7 @@ void TaskThread::Entry()
 			if (theTask->fWriteLock)
 			{
 				OSMutexWriteLocker mutexLocker(&TaskThreadPool::sMutexRW);
-				if (TASK_DEBUG) printf("TaskThread::Entry run global locked TaskName=%s CurMSec=%.3f thread=%p task=%p\n", theTask->fTaskName, OS::StartTimeMilli_Float(), (void *) this, (void *)theTask);
+				if (TASK_DEBUG) printf("TaskThread::Entry run global locked TaskName=%s thread=%p task=%p\n", theTask->fTaskName, (void *) this, (void *)theTask);
 
 				theTimeout = theTask->Run();
 				theTask->fWriteLock = false;
@@ -225,7 +225,7 @@ void TaskThread::Entry()
 			else
 			{
 				OSMutexReadLocker mutexLocker(&TaskThreadPool::sMutexRW);
-				if (TASK_DEBUG) printf("TaskThread::Entry run TaskName=%s CurMSec=%.3f thread=%p task=%p\n", theTask->fTaskName, OS::StartTimeMilli_Float(), (void *) this, (void *)theTask);
+				if (TASK_DEBUG) printf("TaskThread::Entry run TaskName=%s thread=%p task=%p\n", theTask->fTaskName, (void *) this, (void *)theTask);
 
 				theTimeout = theTask->Run();
 
@@ -239,7 +239,7 @@ void TaskThread::Entry()
 			{
 				if (TASK_DEBUG)
 				{
-					printf("TaskThread::Entry delete TaskName=%s CurMSec=%.3f thread=%p task=%p\n", theTask->fTaskName, OS::StartTimeMilli_Float(), (void *) this, (void *)theTask);
+					printf("TaskThread::Entry delete TaskName=%s thread=%p task=%p\n", theTask->fTaskName, (void *) this, (void *)theTask);
 
 					theTask->fUseThisThread = nullptr;
 

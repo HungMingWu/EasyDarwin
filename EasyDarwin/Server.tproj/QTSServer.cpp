@@ -117,21 +117,9 @@ public:
 
 char*           QTSServer::sPortPrefString = "rtsp_port";
 XMLPrefsParser* QTSServer::sPrefsSource = nullptr;
-PrefsSource*    QTSServer::sMessagesSource = nullptr;
 
 QTSServer::~QTSServer()
 {
-	//
-	// Grab the server mutex. This is to make sure all gets & set values on this
-	// object complete before we start deleting stuff
-	auto* serverlocker = new OSMutexLocker(this->GetServerObjectMutex());
-
-	//
-	// Grab the prefs mutex. This is to make sure we can't reread prefs
-	// WHILE shutting down, which would cause some weirdness for QTSS API
-	// (some modules could get QTSS_RereadPrefs_Role after QTSS_Shutdown, which would be bad)
-	auto* locker = new OSMutexLocker(this->GetPrefs()->GetMutex());
-
 	ReflectionModule::Shutdown();
 
 	OSThread::SetMainThreadData(nullptr);
@@ -140,18 +128,15 @@ QTSServer::~QTSServer()
 	delete fReflectorSessionMap;
 
 	delete fSocketPool;
-	delete locker;
-	delete serverlocker;
 	delete fSrvrPrefs;
 }
 
-bool QTSServer::Initialize(XMLPrefsParser* inPrefsSource, PrefsSource* inMessagesSource, uint16_t inPortOverride, bool createListeners, const char*inAbsolutePath)
+bool QTSServer::Initialize(XMLPrefsParser* inPrefsSource, uint16_t inPortOverride, bool createListeners, const char*inAbsolutePath)
 {
 	static const uint32_t kRTPSessionMapSize = 2000;
 	static const uint32_t kReflectorSessionMapSize = 2000;
 	fServerState = qtssFatalErrorState;
 	sPrefsSource = inPrefsSource;
-	sMessagesSource = inMessagesSource;
 	memset(sAbsolutePath, 0, MAX_PATH);
 	strcpy(sAbsolutePath, inAbsolutePath);
 
@@ -222,11 +207,6 @@ void QTSServer::InitModules(QTSS_ServerState inEndState)
 	QTSSModuleUtils::Initialize(this);
 
 	//
-	// ADD REREAD PREFERENCES SERVICE
-	(void)QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kServiceDictIndex)->
-		AddAttribute(QTSS_REREAD_PREFS_SERVICE, (QTSS_AttrFunctionPtr)QTSServer::RereadPrefsService, qtssAttrDataTypeUnknown, qtssAttrModeRead);
-
-	//
 	// INVOKE INITIALIZE ROLE
 	this->DoInitRole();
 
@@ -247,32 +227,7 @@ void QTSServer::StartTasks()
 
 bool QTSServer::SetDefaultIPAddr()
 {
-	//check to make sure there is an available ip interface
-	if (SocketUtils::GetNumIPAddrs() == 0)
-		return false;
-
-	//find out what our default IP addr is & dns name
-	uint32_t theNumAddrs = 0;
-	uint32_t* theIPAddrs = this->GetRTSPIPAddrs(fSrvrPrefs, &theNumAddrs);
-	if (theNumAddrs == 1)
-		fDefaultIPAddr = SocketUtils::GetIPAddr(0);
-	else
-		fDefaultIPAddr = theIPAddrs[0];
-	delete[] theIPAddrs;
-
-	for (uint32_t ipAddrIter = 0; ipAddrIter < SocketUtils::GetNumIPAddrs(); ipAddrIter++)
-	{
-		if (SocketUtils::GetIPAddr(ipAddrIter) == fDefaultIPAddr)
-		{
-			this->SetVal(qtssSvrDefaultDNSName, SocketUtils::GetDNSNameStr(ipAddrIter));
-			Assert(this->GetValue(qtssSvrDefaultDNSName)->Ptr != nullptr);
-			this->SetVal(qtssSvrDefaultIPAddrStr, SocketUtils::GetIPAddrStr(ipAddrIter));
-			Assert(this->GetValue(qtssSvrDefaultDNSName)->Ptr != nullptr);
-			break;
-		}
-	}
-	if (this->GetValue(qtssSvrDefaultDNSName)->Ptr == nullptr)
-		return false;
+	fDefaultIPAddr = INADDR_ANY;
 	return true;
 }
 
@@ -298,45 +253,28 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 	uint32_t theTotalRTSPPortTrackers = 0;
 
 	// Get the IP addresses from the pref
-	uint32_t theNumAddrs = 0;
-	uint32_t* theIPAddrs = this->GetRTSPIPAddrs(inPrefs, &theNumAddrs);
 	uint32_t index = 0;
 
 	// Stat Total Num of RTSP Port
 	if (inPortOverride != 0)
 	{
-		theTotalRTSPPortTrackers = theNumAddrs; // one port tracking struct for each IP addr
+		theTotalRTSPPortTrackers = 1; // one port tracking struct for each IP addr
 		theRTSPPortTrackers = new PortTracking[theTotalRTSPPortTrackers];
-		for (index = 0; index < theNumAddrs; index++)
+		for (index = 0; index < 1; index++)
 		{
 			theRTSPPortTrackers[index].fPort = inPortOverride;
-			theRTSPPortTrackers[index].fIPAddr = theIPAddrs[index];
+			theRTSPPortTrackers[index].fIPAddr = INADDR_ANY;
 		}
 	}
 	else
 	{
-		uint32_t theNumPorts = 0;
-		uint16_t* thePorts = GetRTSPPorts(inPrefs, &theNumPorts);
-		theTotalRTSPPortTrackers = theNumAddrs * theNumPorts;
+		theTotalRTSPPortTrackers = 1;
 		theRTSPPortTrackers = new PortTracking[theTotalRTSPPortTrackers];
 
-		uint32_t currentIndex = 0;
-
-		for (index = 0; index < theNumAddrs; index++)
-		{
-			for (uint32_t portIndex = 0; portIndex < theNumPorts; portIndex++)
-			{
-				currentIndex = (theNumPorts * index) + portIndex;
-
-				theRTSPPortTrackers[currentIndex].fPort = thePorts[portIndex];
-				theRTSPPortTrackers[currentIndex].fIPAddr = theIPAddrs[index];
-			}
-		}
-
-		delete[] thePorts;
+		theRTSPPortTrackers[0].fPort = 554;
+		theRTSPPortTrackers[0].fIPAddr = INADDR_ANY;
 	}
 
-	delete[] theIPAddrs;
 	//
 	// Now figure out which of these ports we are *already* listening on.
 	// If we already are listening on that port, just move the pointer to the
@@ -409,79 +347,6 @@ bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs,
 	return (fNumListeners > 0);
 }
 
-uint32_t* QTSServer::GetRTSPIPAddrs(QTSServerPrefs* inPrefs, uint32_t* outNumAddrsPtr)
-{
-	uint32_t numAddrs = inPrefs->GetNumValues(qtssPrefsRTSPIPAddr);
-	uint32_t* theIPAddrArray = nullptr;
-
-	if (numAddrs == 0)
-	{
-		*outNumAddrsPtr = 1;
-		theIPAddrArray = new uint32_t[1];
-		theIPAddrArray[0] = INADDR_ANY;
-	}
-	else
-	{
-		theIPAddrArray = new uint32_t[numAddrs + 1];
-		uint32_t arrIndex = 0;
-
-		for (uint32_t theIndex = 0; theIndex < numAddrs; theIndex++)
-		{
-			// Get the ip addr out of the prefs dictionary
-			QTSS_Error theErr = QTSS_NoErr;
-
-			char* theIPAddrStr = nullptr;
-			theErr = inPrefs->GetValueAsString(qtssPrefsRTSPIPAddr, theIndex, &theIPAddrStr);
-			if (theErr != QTSS_NoErr)
-			{
-				delete[] theIPAddrStr;
-				break;
-			}
-
-
-			uint32_t theIPAddr = 0;
-			if (theIPAddrStr != nullptr)
-			{
-				theIPAddr = SocketUtils::ConvertStringToAddr(theIPAddrStr);
-				delete[] theIPAddrStr;
-
-				if (theIPAddr != 0)
-					theIPAddrArray[arrIndex++] = theIPAddr;
-			}
-		}
-
-		if ((numAddrs == 1) && (arrIndex == 0))
-			theIPAddrArray[arrIndex++] = INADDR_ANY;
-		else
-			theIPAddrArray[arrIndex++] = INADDR_LOOPBACK;
-
-		*outNumAddrsPtr = arrIndex;
-	}
-
-	return theIPAddrArray;
-}
-
-uint16_t* QTSServer::GetRTSPPorts(QTSServerPrefs* inPrefs, uint32_t* outNumPortsPtr)
-{
-	*outNumPortsPtr = inPrefs->GetNumValues(qtssPrefsRTSPPorts);
-
-	if (*outNumPortsPtr == 0)
-		return nullptr;
-
-	auto* thePortArray = new uint16_t[*outNumPortsPtr];
-
-	for (uint32_t theIndex = 0; theIndex < *outNumPortsPtr; theIndex++)
-	{
-		// Get the ip addr out of the prefs dictionary
-		uint32_t theLen = sizeof(uint16_t);
-		QTSS_Error theErr = QTSS_NoErr;
-		theErr = inPrefs->GetValue(qtssPrefsRTSPPorts, theIndex, &thePortArray[theIndex], &theLen);
-		Assert(theErr == QTSS_NoErr);
-	}
-
-	return thePortArray;
-}
-
 bool  QTSServer::SetupUDPSockets()
 {
 	//function finds all IP addresses on this machine, and binds 1 RTP / RTCP
@@ -504,52 +369,6 @@ bool  QTSServer::SetupUDPSockets()
 		fServerState = qtssFatalErrorState; // also set the state to fatal error
 		return false;
 	}
-	return true;
-}
-
-bool  QTSServer::SwitchPersonality()
-{
-#ifndef __Win32__  //not supported
-	std::unique_ptr<char[]> runGroupName(fSrvrPrefs->GetRunGroupName());
-	std::unique_ptr<char[]> runUserName(fSrvrPrefs->GetRunUserName());
-
-	int groupID = 0;
-
-	if (::strlen(runGroupName.get()) > 0)
-	{
-		struct group* gr = ::getgrnam(runGroupName.get());
-		if (gr == nullptr || ::setgid(gr->gr_gid) == -1)
-		{
-#define kErrorStrSize 256
-			char buffer[kErrorStrSize];
-
-			::strncpy(buffer, ::strerror(OSThread::GetErrno()), kErrorStrSize);
-			buffer[kErrorStrSize - 1] = 0;  //make sure it is null terminated even if truncated.
-			QTSSModuleUtils::LogError(qtssFatalVerbosity, qtssMsgCannotSetRunGroup, 0,
-				runGroupName.get(), buffer);
-			return false;
-		}
-		groupID = gr->gr_gid;
-	}
-
-	if (::strlen(runUserName.get()) > 0)
-	{
-		struct passwd* pw = ::getpwnam(runUserName.get());
-
-#if __MacOSX__
-		if (pw != nullptr && groupID != 0) //call initgroups before doing a setuid
-			(void) initgroups(runUserName.get(), groupID);
-#endif  
-
-		if (pw == nullptr || ::setuid(pw->pw_uid) == -1)
-		{
-			QTSSModuleUtils::LogError(qtssFatalVerbosity, qtssMsgCannotSetRunUser, 0,
-				runUserName.get(), strerror(OSThread::GetErrno()));
-			return false;
-		}
-	}
-
-#endif  
 	return true;
 }
 
@@ -640,7 +459,7 @@ void RTPSocketPool::SetUDPSocketOptions(UDPSocketPair* inPair)
 	//
 	// Always set the Rcv buf size for the RTCP sockets. This is important because the
 	// server is going to be getting many many acks.
-	uint32_t theRcvBufSize = QTSServerInterface::GetServer()->GetPrefs()->GetRTCPSocketRcvBufSizeinK();
+	uint32_t theRcvBufSize = ServerPrefs::GetRTCPSocketRcvBufSizeinK();
 
 	//
 	// In case the rcv buf size is too big for the system, retry, dividing the requested size by 2.
@@ -653,64 +472,3 @@ void RTPSocketPool::SetUDPSocketOptions(UDPSocketPair* inPair)
 			theRcvBufSize >>= 1;
 	}
 }
-
-
-
-QTSS_Error QTSServer::RereadPrefsService(QTSS_ServiceFunctionArgsPtr /*inArgs*/)
-{
-	//
-	// This function can only be called safely when the server is completely running.
-	// Ensuring this is a bit complicated because of preemption. Here's how it's done...
-
-	QTSServerInterface* theServer = QTSServerInterface::GetServer();
-
-	// This is to make sure this function isn't being called before the server is
-	// completely started up.
-	if ((theServer == nullptr) || (theServer->GetServerState() != qtssRunningState))
-		return QTSS_OutOfState;
-
-	// Because the server must have started up, and because this object always stays
-	// around (until the process dies), we can now safely get this object.
-	QTSServerPrefs* thePrefs = theServer->GetPrefs();
-
-	// Grab the prefs mutex. We want to make sure that calls to RereadPrefsService
-	// are serialized. This also prevents the server from shutting down while in
-	// this function, because the QTSServer destructor grabs this mutex as well.
-	OSMutexLocker locker(thePrefs->GetMutex());
-
-	// Finally, check the server state again. The state may have changed
-	// to qtssShuttingDownState or qtssFatalErrorState in this time, though
-	// at this point we have the prefs mutex, so we are guarenteed that the
-	// server can't actually shut down anymore
-	if (theServer->GetServerState() != qtssRunningState)
-		return QTSS_OutOfState;
-
-	// Ok, we're ready to reread preferences now.
-
-	//
-	// Reread preferences
-	sPrefsSource->Parse();
-	thePrefs->RereadServerPreferences(true);
-
-	{
-		//
-		// Update listeners, ports, and IP addrs.
-		OSMutexLocker locker(theServer->GetServerObjectMutex());
-		(void)((QTSServer*)theServer)->SetDefaultIPAddr();
-		(void)((QTSServer*)theServer)->CreateListeners(true, thePrefs, 0);
-	}
-
-	// Delete all the streams
-	uint32_t theLen = 0;
-
-	//
-	// Go through each module's prefs object and have those reread as well
-
-	//
-	// Now that we are done rereading the prefs, invoke all modules in the RereadPrefs
-	// role so they can update their internal prefs caches.
-	ReflectionModule::RereadPrefs();
-	return QTSS_NoErr;
-}
-
-

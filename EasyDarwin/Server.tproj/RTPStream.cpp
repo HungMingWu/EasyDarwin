@@ -94,11 +94,11 @@ char *RTPStream::TCP = "TCP";
 RTPStream::RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession)
 	: fSession(inSession),
 	fSsrc(inSSRC),
-	fQualityLevel(QTSServerInterface::GetServer()->GetPrefs()->GetDefaultStreamQuality()),
+	fQualityLevel(ServerPrefs::GetDefaultStreamQuality()),
 
 	fStreamStartTimeOSms(OS::Milliseconds()),
-	fDisableThinning(QTSServerInterface::GetServer()->GetPrefs()->GetDisableThinning()),
-	fDefaultQualityLevel(QTSServerInterface::GetServer()->GetPrefs()->GetDefaultStreamQuality()),
+	fDisableThinning(ServerPrefs::GetDisableThinning()),
+	fDefaultQualityLevel(ServerPrefs::GetDefaultStreamQuality()),
 	fMaxQualityLevel(fDefaultQualityLevel),
 	fUDPMonitorEnabled(QTSServerInterface::GetServer()->GetPrefs()->GetUDPMonitorEnabled()),
 	fMonitorVideoDestPort(QTSServerInterface::GetServer()->GetPrefs()->GetUDPMonitorVideoPort()),
@@ -454,8 +454,8 @@ void RTPStream::AppendTransport(RTSPRequestInterface* request)
 		//
 		std::string theSrcIPAddress = QTSServerInterface::GetServer()->GetPrefs()->GetTransportSrcAddr();
 		if (theSrcIPAddress.empty()) {
-			StrPtrLen *p = fSockets->GetSocketA()->GetLocalAddrStr();
-			theSrcIPAddress = std::string(p->Ptr, p->Len);
+			//StrPtrLen *p = fSockets->GetSocketA()->GetLocalAddrStr();
+			theSrcIPAddress = std::string("127.0.0.1");
 		}
 
 

@@ -197,52 +197,6 @@ bool  SourceInfo::SetActiveNTPTimes(uint32_t startTimeNTP,uint32_t endTimeNTP)
     return accepted;
 }
 
-bool  SourceInfo::IsActiveTime(time_t unixTimeSecs)
-{ 
-    // order of tests are important here
-    // we do it this way because of the special case time value of 0 for end time
-    // start - 0 = unbounded 
-    // 0 - 0 = permanent
-    if (false == fHasValidTime)
-        return false;
-        
-    if (unixTimeSecs < 0) //check valid value
-        return false;
-        
-    if (IsPermanentSource()) //check for 0 0
-        return true;
-    
-    if (unixTimeSecs < fStartTimeUnixSecs)
-        return false; //too early
-
-    if (fEndTimeUnixSecs == 0)  
-        return true;// accept any time after start
-
-    if (unixTimeSecs > fEndTimeUnixSecs)
-        return false; // too late
-
-    return true; // ok start <= time <= end
-
-}
-
-
-uint32_t SourceInfo::GetDurationSecs() 
-{    
-    
-    if (fEndTimeUnixSecs == 0) // unbounded time
-        return (uint32_t) ~0; // max time
-    
-    time_t timeNow = OS::UnixTime_Secs();
-    if (fEndTimeUnixSecs <= timeNow) // the active time has past or duration is 0 so return the minimum duration
-        return (uint32_t) 0; 
-            
-    if (fStartTimeUnixSecs == 0) // relative duration = from "now" to end time
-        return fEndTimeUnixSecs - timeNow;
-    
-    return fEndTimeUnixSecs - fStartTimeUnixSecs; // this must be a duration because of test for endtime above
-
-}
-
 bool SourceInfo::Equal(SourceInfo* inInfo)
 {
     // Check to make sure the # of streams matches up

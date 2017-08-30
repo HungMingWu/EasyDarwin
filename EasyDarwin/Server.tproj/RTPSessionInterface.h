@@ -193,10 +193,6 @@ public:
 	std::vector<RTPStream*> GetStreams()  { return fStreamBuffer; }
 	void SetUserName(boost::string_view name) { fUserName = std::string(name); }
 	boost::string_view GetUserName() const { return fUserName; }
-	void SetLocalDNS(boost::string_view local) { fRTSPSessLocalDNS = std::string(local); }
-	boost::string_view GetLocalDNS() const { return fRTSPSessLocalDNS; }
-	void SetLocalAddr(boost::string_view local) { fRTSPSessLocalAddrStr = std::string(local); }
-	boost::string_view GetLocalAddr() const { return fRTSPSessLocalAddrStr; }
 	void SetRemoteAddr(boost::string_view remote) {	fRTSPSessRemoteAddrStr = std::string(fRTSPSessRemoteAddrStr); }
 	boost::string_view GetRemoteAddr() const { return fRTSPSessRemoteAddrStr; }
 	void SetPassword(boost::string_view password) { fUserPassword = std::string(password); }
@@ -289,13 +285,11 @@ private:
 	// but we need to store copies of them for logging purposes.
 
 	std::string        fRTSPSessRemoteAddrStr;
-	std::string        fRTSPSessLocalDNS;
-	std::string        fRTSPSessLocalAddrStr;
 
 	
 	std::string        fUserPassword;
 	std::string        fUserRealm;
-	uint32_t      fLastRTSPReqRealStatusCode{200};
+	uint32_t           fLastRTSPReqRealStatusCode{200};
 
 	//for timing out this session
 

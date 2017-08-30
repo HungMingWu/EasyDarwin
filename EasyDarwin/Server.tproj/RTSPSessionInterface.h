@@ -143,8 +143,6 @@ public:
 	};
 	void SetDigestChallenge(boost::string_view digest) { lastDigestChallenge = std::string(digest); }
 	boost::string_view GetDigestChallenge() const { return lastDigestChallenge;  }
-	std::string GetLocalAddr();
-	std::string GetLocalDNS();
 	std::string GetRemoteAddr();
 	void SetLastURLRealm(boost::string_view realm) { fUserRealm = std::string(realm); }
 	boost::string_view GetLastURLRealm() const { return fUserRealm; }

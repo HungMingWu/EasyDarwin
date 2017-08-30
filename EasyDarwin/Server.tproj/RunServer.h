@@ -37,16 +37,6 @@
 #include "QTSS.h"
 #include "QTSServer.h"
 
-enum {
-	kRunServerDebug_Off = 0,
-	kRunServerDebugDisplay_On = 1 << 0,
-	kRunServerDebugLogging_On = 1 << 1 // not implemented
-};
-
-inline bool DebugOn(QTSServer* server) { return (server->GetDebugOptions() != kRunServerDebug_Off) ? true : false; }
-inline bool DebugDisplayOn(QTSServer* server) { return (server->GetDebugOptions() & kRunServerDebugDisplay_On) ? true : false; }
-inline bool DebugLogOn(QTSServer* server) { return (server->GetDebugOptions() & kRunServerDebugLogging_On) ? true : false; }
-
 //
 // This function starts the Streaming Server. Pass in a source
 // for preferences, a source for text messages, and an optional
@@ -56,23 +46,13 @@ inline bool DebugLogOn(QTSServer* server) { return (server->GetDebugOptions() & 
 // is qtssFatalErrorState, something went horribly wrong and caller
 // should just die.
 QTSS_ServerState StartServer(XMLPrefsParser* inPrefsSource,
-	PrefsSource* inMessagesSource,
 	uint16_t inPortOverride,
-	int statsUpdateInterval,
 	QTSS_ServerState inInitialState,
 	bool inDontFork,
-	uint32_t debugLevel,
-	uint32_t debugOptions,
 	const char* sAbsolutePath);
 
 //
 // Call this after StartServer if it doesn't return qtssFatalError.
 // This will not return until the server is going away
 void RunServer();
-
-// write pid to file
-void WritePid(bool forked);
-
-// clean the pid file
-void CleanPid(bool force);
 

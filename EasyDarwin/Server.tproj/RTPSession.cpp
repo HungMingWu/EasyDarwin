@@ -289,11 +289,6 @@ void RTPSession::Teardown()
 	this->Signal(Task::kKillEvent);
 }
 
-void RTPSession::ResetTimeout(uint32_t timeout)
-{
-	fTimeoutTask.SetTimeout((int64_t)timeout);
-}
-
 void RTPSession::SendPlayResponse(RTSPRequestInterface* request, uint32_t inFlags)
 {
 	QTSS_RTSPHeader theHeader = qtssRTPInfoHeader;

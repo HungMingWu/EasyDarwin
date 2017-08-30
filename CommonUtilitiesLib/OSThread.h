@@ -84,9 +84,6 @@ public:
 
 	static void*    GetMainThreadData() { return sMainThreadData; }
 	static void     SetMainThreadData(void* inData) { sMainThreadData = inData; }
-	static void     SetUser(char* user) { ::strncpy(sUser, user, sizeof(sUser) - 1); sUser[sizeof(sUser) - 1] = 0; }
-	static void     SetGroup(char* group) { ::strncpy(sGroup, group, sizeof(sGroup) - 1); sGroup[sizeof(sGroup) - 1] = 0; }
-	static void     SetPersonality(char* user, char* group) { SetUser(user); SetGroup(group); };
 	bool          SwitchPersonality();
 #if DEBUG
 	uint32_t          GetNumLocksHeld() { return 0; }

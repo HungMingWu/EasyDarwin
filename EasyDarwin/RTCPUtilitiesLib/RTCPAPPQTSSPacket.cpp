@@ -101,7 +101,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, uint32_t in
 		// DMS - There is no guarentee that qtssDataBuffer will be 4 byte aligned, because
 		// individual APP packet fields can be 6 bytes or 4 bytes or 8 bytes. So we have to
 		// use the 4-byte align protection functions. Sparc and MIPS processors will crash otherwise
-		uint32_t theHeader = ntohl(OS::GetUInt32FromMemory((uint32_t*)&qtssDataBuffer[kQTSSItemTypeOffset]));
+		uint32_t theHeader = ntohl(*(uint32_t*)&qtssDataBuffer[kQTSSItemTypeOffset]);
 		auto itemType = (uint16_t)((theHeader & kQTSSItemTypeMask) >> kQTSSItemTypeShift);
 		auto itemVersion = (uint8_t)((theHeader & kQTSSItemVersionMask) >> kQTSSItemVersionShift);
 		auto itemLengthInBytes = (uint8_t)(theHeader & kQTSSItemLengthMask);
@@ -125,7 +125,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, uint32_t in
 		{
 		case  TW0_CHARS_TO_INT('r', 'r'): //'rr': //'rrcv':
 			{
-				fReceiverBitRate = ntohl(OS::GetUInt32FromMemory((uint32_t*)qtssDataBuffer));
+				fReceiverBitRate = ntohl(*(uint32_t*)qtssDataBuffer);
 				qtssDataBuffer += sizeof(fReceiverBitRate);
 				APPEND_TO_DUMP_ARRAY(", rcvr_bit_rate=%"   _U32BITARG_   "", fReceiverBitRate);
 			}
@@ -177,19 +177,19 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, uint32_t in
 
 		case TW0_CHARS_TO_INT('e', 'y'): //'ey':   //'eyes':
 			{
-				fNumEyes = ntohl(OS::GetUInt32FromMemory((uint32_t*)qtssDataBuffer));
+				fNumEyes = ntohl(*(uint32_t*)qtssDataBuffer);
 				qtssDataBuffer += sizeof(fNumEyes);
 				APPEND_TO_DUMP_ARRAY(", eyes=%"   _U32BITARG_   "", fNumEyes);
 
 				if (itemLengthInBytes >= 2)
 				{
-					fNumEyesActive = ntohl(OS::GetUInt32FromMemory((uint32_t*)qtssDataBuffer));
+					fNumEyesActive = ntohl(*(uint32_t*)qtssDataBuffer);
 					qtssDataBuffer += sizeof(fNumEyesActive);
 					APPEND_TO_DUMP_ARRAY(", eyes_actv=%"   _U32BITARG_   "", fNumEyesActive);
 				}
 				if (itemLengthInBytes >= 3)
 				{
-					fNumEyesPaused = ntohl(OS::GetUInt32FromMemory((uint32_t*)qtssDataBuffer));
+					fNumEyesPaused = ntohl(*(uint32_t*)qtssDataBuffer);
 					qtssDataBuffer += sizeof(fNumEyesPaused);
 					APPEND_TO_DUMP_ARRAY(", eyes_pausd=%"   _U32BITARG_   "", fNumEyesPaused);
 				}
@@ -198,7 +198,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, uint32_t in
 
 		case TW0_CHARS_TO_INT('p', 'r'): // 'pr':  //'prcv':
 			{
-				fTotalPacketsReceived = ntohl(OS::GetUInt32FromMemory((uint32_t*)qtssDataBuffer));
+				fTotalPacketsReceived = ntohl(*(uint32_t*)qtssDataBuffer);
 				qtssDataBuffer += sizeof(fTotalPacketsReceived);
 				APPEND_TO_DUMP_ARRAY(", pckts_rcvd=%"   _U32BITARG_   "", fTotalPacketsReceived);
 			}
@@ -258,7 +258,7 @@ bool RTCPCompressedQTSSPacket::ParseAPPData(uint8_t* inPacketBuffer, uint32_t in
 
 		case TW0_CHARS_TO_INT('o', 'b'): //'ob': // overbuffer window size
 			{
-				fOverbufferWindowSize = ntohl(OS::GetUInt32FromMemory((uint32_t*)qtssDataBuffer));
+				fOverbufferWindowSize = ntohl(*(uint32_t*)qtssDataBuffer);
 				qtssDataBuffer += sizeof(fOverbufferWindowSize);
 				APPEND_TO_DUMP_ARRAY(", ovr_buffr_windw_siz=%"   _U32BITARG_   "", fOverbufferWindowSize);
 			}

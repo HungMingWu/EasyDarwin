@@ -27,6 +27,7 @@
 	Contains:   Implementation of QTSSReflectorModule class.
 */
 
+#include <chrono>
 #include <boost/spirit/include/qi.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include "QTSServerInterface.h"
@@ -112,9 +113,7 @@ static bool   sDefaultOneSSRCPerStream = true;
 static uint32_t   sTimeoutSSRCSecs = 30;
 static uint32_t   sDefaultTimeoutSSRCSecs = 30;
 
-static uint32_t   sBroadcasterSessionTimeoutSecs = 30;
 static uint32_t   sDefaultBroadcasterSessionTimeoutSecs = 30;
-static uint32_t   sBroadcasterSessionTimeoutMilliSecs = sBroadcasterSessionTimeoutSecs * 1000;
 
 static uint16_t sLastMax = 0;
 static uint16_t sLastMin = 0;
@@ -487,7 +486,6 @@ namespace ReflectionModule
 
 	QTSS_Error RereadPrefs()
 	{
-		sBroadcasterSessionTimeoutMilliSecs = sBroadcasterSessionTimeoutSecs * 1000;
 		KillCommandPathInList();
 		return QTSS_NoErr;
 	}
@@ -637,7 +635,8 @@ std::string DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ch
 		}
 
 		if (!checkedSDPContainer.HasLineType('o'))
-		{ // add o line
+		{
+			// add o line
 			editedSDP += "o=";
 			char tempBuff[256] = ""; tempBuff[255] = 0;
 			char *nameStr = tempBuff;
@@ -666,7 +665,9 @@ std::string DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ch
 			editedSDP += std::string(inParams->inClientSession->GetSessionID());
 
 			editedSDP += " ";
-			snprintf(tempBuff, sizeof(tempBuff) - 1, "%" _64BITARG_ "d", (int64_t)OS::UnixTime_Secs() + 2208988800LU);
+			std::chrono::system_clock::time_point today = std::chrono::system_clock::now();
+			time_t tp = std::chrono::system_clock::to_time_t(today);
+			snprintf(tempBuff, sizeof(tempBuff) - 1, "%" _64BITARG_ "d", (int64_t)tp + 2208988800LU);
 			editedSDP += tempBuff;
 
 			editedSDP += " IN IP4 ";
@@ -1263,9 +1264,6 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 			}
 
 			inParams->inClientSession->addAttribute(sBroadcasterSessionName, theSession);
-
-			//printf("QTSSReflectorModule.cpp:SET Session sClientBroadcastSessionAttr=%"   _U32BITARG_   " theSession=%"   _U32BITARG_   " err=%" _S32BITARG_ " \n",(uint32_t)sClientBroadcastSessionAttr, (uint32_t) theSession,theErr);
-			inParams->inClientSession->ResetTimeout(sBroadcasterSessionTimeoutMilliSecs);
 		}
 	}
 	else

@@ -33,6 +33,7 @@
 #define debug_printf if (__RTSP_AUTH_DEBUG__) printf
 
 #include <memory>
+#include <random>
 #include <fmt/format.h>
 #include <boost/algorithm/string/predicate.hpp>
 
@@ -1112,62 +1113,15 @@ void RTSPSession::SetupClientSessionAttrs()
 
 	// store RTSP session info in the RTPSession.   
 	fRTPSession->SetRemoteAddr(GetRemoteAddr());
-	fRTPSession->SetLocalDNS(GetLocalDNS());
-	fRTPSession->SetLocalAddr(GetLocalAddr());
 }
 
 uint32_t RTSPSession::GenerateNewSessionID(char* ioBuffer)
 {
-	//RANDOM NUMBER GENERATOR
+	std::random_device rd;
+	std::mt19937 mt(rd());
+	std::uniform_int_distribution<int64_t> dist;
 
-	//We want to make our session IDs as random as possible, so use a bunch of
-	//current server statistics to generate a random int64_t.
-
-	//Generate the random number in two uint32_t parts. The first uint32_t uses
-	//statistics out of a random RTP session.
-	int64_t theMicroseconds = OS::Microseconds();
-	::srand((unsigned int)theMicroseconds);
-	uint32_t theFirstRandom = ::rand();
-
-	QTSServerInterface* theServer = QTSServerInterface::GetServer();
-
-	{
-		OSMutexLocker locker(theServer->GetRTPSessionMap()->GetMutex());
-		OSRefHashTable* theHashTable = theServer->GetRTPSessionMap()->GetHashTable();
-		if (theHashTable->GetNumEntries() > 0)
-		{
-			theFirstRandom %= theHashTable->GetNumEntries();
-			theFirstRandom >>= 2;
-
-			OSRefHashTableIter theIter(theHashTable);
-			//Iterate through the session map, finding a random session
-			for (uint32_t theCount = 0; theCount < theFirstRandom; theIter.Next(), theCount++)
-				Assert(!theIter.IsDone());
-
-			auto* theSession = (RTPSession*)theIter.GetCurrent()->GetObject();
-			theFirstRandom += theSession->GetPacketsSent();
-			theFirstRandom += (uint32_t)theSession->GetSessionCreateTime();
-			theFirstRandom += (uint32_t)theSession->GetPlayTime();
-			theFirstRandom += (uint32_t)theSession->GetBytesSent();
-		}
-	}
-	//Generate the first half of the random number
-	::srand((unsigned int)theFirstRandom);
-	theFirstRandom = ::rand();
-
-	//Now generate the second half
-	uint32_t theSecondRandom = ::rand();
-	theSecondRandom += theServer->GetCurBandwidthInBits();
-	theSecondRandom += theServer->GetAvgBandwidthInBits();
-	theSecondRandom += theServer->GetRTPPacketsPerSec();
-	theSecondRandom += (uint32_t)theServer->GetTotalRTPBytes();
-
-	::srand((unsigned int)theSecondRandom);
-	theSecondRandom = ::rand();
-
-	auto theSessionID = (int64_t)theFirstRandom;
-	theSessionID <<= 32;
-	theSessionID += (int64_t)theSecondRandom;
+	int64_t theSessionID = dist(mt);
 	sprintf(ioBuffer, "%" _64BITARG_ "d", theSessionID);
 	Assert(::strlen(ioBuffer) < QTSS_MAX_SESSION_ID_LENGTH);
 	return ::strlen(ioBuffer);

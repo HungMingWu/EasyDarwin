@@ -40,9 +40,7 @@ boost::asio::io_service io_service;
  // Data
 static FilePrefsSource sPrefsSource(true); // Allow dups
 static XMLPrefsParser* sXMLParser = NULL;
-static FilePrefsSource sMessagesSource;
 static uint16_t sPort = 0; //port can be set on the command line
-static int sStatsUpdateInterval = 0;
 static SERVICE_STATUS_HANDLE sServiceStatusHandle = 0;
 static QTSS_ServerState sInitialState = qtssRunningState;
 
@@ -127,10 +125,6 @@ int main(int argc, char * argv[])
 			Assert(optarg != NULL);// this means we didn't declare getopt options correctly or there is a bug in getopt.
 			theXMLFilePath = optarg;
 			break;
-		case 'S':
-			Assert(optarg != NULL);// this means we didn't declare getopt options correctly or there is a bug in getopt.
-			sStatsUpdateInterval = ::atoi(optarg);
-			break;
 		case 'o':
 			Assert(optarg != NULL);// this means we didn't declare getopt options correctly or there is a bug in getopt.
 			theConfigFilePath = optarg;
@@ -214,10 +208,6 @@ int main(int argc, char * argv[])
 	}
 
 	//
-	// Construct a messages source object
-	sMessagesSource.InitFromConfigFile("qtssmessages.txt");
-
-	//
 	// Start Win32 DLLs
 	WORD wsVersion = MAKEWORD(1, 1);
 	WSADATA wsData;
@@ -226,7 +216,7 @@ int main(int argc, char * argv[])
 	if (notAService)
 	{
 		// If we're running off the command-line, don't do the service initiation crap.
-		::StartServer(sXMLParser, &sMessagesSource, sPort, sStatsUpdateInterval, sInitialState, false, 0, kRunServerDebug_Off, sAbsolutePath); // No stats update interval for now
+		::StartServer(sXMLParser, sPort, sInitialState, false, sAbsolutePath); // No stats update interval for now
 		::RunServer();
 		::exit(0);
 	}
@@ -306,7 +296,7 @@ void __stdcall ServiceMain(DWORD /*argc*/, LPTSTR *argv)
 
 	//
 	// Start & Run the server - no stats update interval for now
-	if (::StartServer(sXMLParser, &sMessagesSource, sPort, sStatsUpdateInterval, sInitialState, false, 0, kRunServerDebug_Off, sAbsolutePath) != qtssFatalErrorState)
+	if (::StartServer(sXMLParser, sPort, sInitialState, false, sAbsolutePath) != qtssFatalErrorState)
 	{
 		::ReportStatus(SERVICE_RUNNING, NO_ERROR);
 		::RunServer(); // This function won't return until the server has died

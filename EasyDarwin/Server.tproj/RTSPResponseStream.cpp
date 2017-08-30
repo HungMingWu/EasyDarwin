@@ -50,19 +50,6 @@ QTSS_Error RTSPResponseStream::WriteV(iovec* inVec, uint32_t inNumVectors, uint3
 		inVec[0].iov_len = amtInBuffer;
 		theErr = fSocket->WriteV(inVec, inNumVectors, &theLengthSent);
 
-		if (fPrintRTSP)
-		{
-			DateBuffer theDate;
-			DateTranslator::UpdateDateBuffer(&theDate, 0); // get the current GMT date and time
-
-			printf("\n#S->C:\n#time: ms=%"   _U32BITARG_   " date=%s\n", (uint32_t)OS::StartTimeMilli_Int(), theDate.GetDateBuffer());
-			for (uint32_t i = 0; i < inNumVectors; i++)
-			{
-				StrPtrLen str((char*)inVec[i].iov_base, (uint32_t)inVec[i].iov_len);
-				str.PrintStrEOL();
-			}
-		}
-
 		if (theLengthSent >= amtInBuffer)
 		{
 			// We were able to send all the data in the buffer. Great. Flush it.
@@ -149,16 +136,6 @@ QTSS_Error RTSPResponseStream::Flush()
 	uint32_t amtInBuffer = formater.GetCurrentOffset() - fBytesSentInBuffer;
 	if (amtInBuffer > 0)
 	{
-		if (fPrintRTSP)
-		{
-			DateBuffer theDate;
-			DateTranslator::UpdateDateBuffer(&theDate, 0); // get the current GMT date and time
-
-			printf("\n#S->C:\n#time: ms=%"   _U32BITARG_   " date=%s\n", (uint32_t)OS::StartTimeMilli_Int(), theDate.GetDateBuffer());
-			StrPtrLen str(formater.GetBufPtr() + fBytesSentInBuffer, amtInBuffer);
-			str.PrintStrEOL();
-		}
-
 		uint32_t theLengthSent = 0;
 		(void)fSocket->Send(formater.GetBufPtr() + fBytesSentInBuffer, amtInBuffer, &theLengthSent);
 

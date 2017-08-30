@@ -35,6 +35,32 @@
 #include "StrPtrLen.h"
 #include "QTSSPrefs.h"
 #include "XMLPrefsParser.h"
+namespace ServerPrefs {
+	inline uint32_t GetSafePlayDurationInSecs() {
+		constexpr uint32_t  fSafePlayDurationInSecs = 600;
+		return fSafePlayDurationInSecs;
+	}
+	inline uint32_t GetTotalBytesUpdateTimeInSecs() { 
+		constexpr uint32_t  fTBUpdateTimeInSecs = 1;
+		return fTBUpdateTimeInSecs; 
+	}
+	inline uint32_t  GetRTCPSocketRcvBufSizeinK() {
+		constexpr uint32_t  fRTCPSocketRcvBufSizeInK = 768;
+		return fRTCPSocketRcvBufSizeInK; 
+	}
+	inline uint32_t GetAvgBandwidthUpdateTimeInSecs() {
+		constexpr uint32_t  fABUpdateTimeInSecs = 60;
+		return fABUpdateTimeInSecs;
+	}
+	inline bool GetDisableThinning() {
+		constexpr bool fDisableThinning = false;
+		return fDisableThinning; 
+	}
+	inline uint16_t GetDefaultStreamQuality() {
+		constexpr uint16_t fDefaultStreamQuality = 0;
+		return fDefaultStreamQuality;
+	}
+};
 
 class QTSServerPrefs : public QTSSPrefs
 {
@@ -91,10 +117,6 @@ public:
 	bool      ShouldServerBreakOnAssert() { return fBreakOnAssert; }
 	bool      IsAutoRestartEnabled() { return fAutoRestart; }
 
-	uint32_t      GetTotalBytesUpdateTimeInSecs() { return fTBUpdateTimeInSecs; }
-	uint32_t      GetAvgBandwidthUpdateTimeInSecs() { return fABUpdateTimeInSecs; }
-	uint32_t      GetSafePlayDurationInSecs() { return fSafePlayDurationInSecs; }
-
 	// For the compiled-in error logging module
 
 	bool  IsErrorLogEnabled() { return fErrorLogEnabled; }
@@ -110,12 +132,10 @@ public:
 	uint32_t  GetMaxRetransmitDelayInMsec() { return fMaxRetransDelayInMsec; }
 	bool  IsAckLoggingEnabled() { return fIsAckLoggingEnabled; }
 	uint32_t  GetRTCPPollIntervalInMsec() { return fRTCPPollIntervalInMsec; }
-	uint32_t  GetRTCPSocketRcvBufSizeinK() { return fRTCPSocketRcvBufSizeInK; }
 	uint32_t  GetSendIntervalInMsec() { return fSendIntervalInMsec; }
 	uint32_t  GetMaxSendAheadTimeInSecs() { return fMaxSendAheadTimeInSecs; }
 	bool  IsSlowStartEnabled() { return fIsSlowStartEnabled; }
 	bool  GetReliableUDPPrintfsEnabled() { return fReliableUDPPrintfs; }
-	bool  GetRTSPDebugPrintfs() { return fEnableRTSPDebugPrintfs; }
 	bool  GetRTSPServerInfoEnabled() { return fEnableRTSPServerInfo; }
 
 	float    GetOverbufferRate() { return fOverbufferRate; }
@@ -167,15 +187,6 @@ public:
 		return this->GetStringPref(qtssPrefsDefaultAuthorizationRealm);
 	}
 
-	char*   GetRunUserName()
-	{
-		return this->GetStringPref(qtssPrefsRunUserName);
-	}
-	char*   GetRunGroupName()
-	{
-		return this->GetStringPref(qtssPrefsRunGroupName);
-	}
-
 	char*   GetPidFilePath()
 	{
 		return this->GetStringPref(qtssPrefsPidFile);
@@ -200,12 +211,6 @@ public:
 
 	uint32_t DeleteSDPFilesInterval() { return fsdp_file_delete_interval_seconds; }
 
-	uint32_t  GetNumThreads() { return fNumThreads; } //short tasks threads
-	uint32_t  GetNumBlockingThreads() { return fNumRTSPThreads; } //return the number of threads that long tasks will be scheduled on -- RTSP processing for example.
-
-	bool  GetDisableThinning() { return fDisableThinning; }
-
-	uint16_t  GetDefaultStreamQuality() { return fDefaultStreamQuality; }
 	bool  GetUDPMonitorEnabled() { return fUDPMonitorEnabled; }
 	uint16_t  GetUDPMonitorVideoPort() { return fUDPMonitorVideoPort; }
 	uint16_t  GetUDPMonitorAudioPort() { return fUDPMonitorAudioPort; }
@@ -236,10 +241,7 @@ private:
 
 	bool  fBreakOnAssert;
 	bool  fAutoRestart;
-	uint32_t  fTBUpdateTimeInSecs;
-	uint32_t  fABUpdateTimeInSecs;
-	uint32_t  fSafePlayDurationInSecs;
-
+	
 	uint32_t  fErrorRollIntervalInDays;
 	uint32_t  fErrorLogBytes;
 	bool  fScreenLoggingEnabled;
@@ -269,7 +271,7 @@ private:
 	uint32_t  fMaxRetransDelayInMsec;
 	bool  fIsAckLoggingEnabled;
 	uint32_t  fRTCPPollIntervalInMsec;
-	uint32_t  fRTCPSocketRcvBufSizeInK;
+
 	bool  fIsSlowStartEnabled;
 	uint32_t  fSendIntervalInMsec;
 	uint32_t  fMaxSendAheadTimeInSecs;
@@ -281,10 +283,7 @@ private:
 	bool  fAutoStart;
 	bool  fReliableUDP;
 	bool  fReliableUDPPrintfs;
-	bool  fEnableRTSPDebugPrintfs;
 	bool  fEnableRTSPServerInfo;
-	uint32_t  fNumThreads;
-	uint32_t  fNumRTSPThreads;
 
 	uint16_t	fServiceLANPort;
 	uint16_t	fServiceWANPort;
@@ -298,8 +297,6 @@ private:
 	uint32_t fPacketHeaderPrintfOptions;
 	bool   fCloseLogsOnWrite;
 
-	bool   fDisableThinning;
-	uint16_t fDefaultStreamQuality;
 	bool   fUDPMonitorEnabled;
 	uint16_t fUDPMonitorVideoPort;
 	uint16_t fUDPMonitorAudioPort;

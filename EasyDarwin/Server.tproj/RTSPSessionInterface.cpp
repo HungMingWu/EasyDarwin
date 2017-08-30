@@ -28,6 +28,7 @@
 	 Contains:   Implementation of RTSPSessionInterface object.
  */
 
+#include <random>
 #include <boost/algorithm/string/predicate.hpp>
 
 #include "RTSPSessionInterface.h"
@@ -48,10 +49,11 @@ uint32_t					RTSPSessionInterface::sOptionsRequestBody[kMaxRandomDataSize / size
 
 void    RTSPSessionInterface::Initialize()
 {
-	// DJM PROTOTYPE
-	::srand((unsigned int)OS::Microseconds());
+	std::random_device rd;
+	std::mt19937 mt(rd());
+	std::uniform_int_distribution<uint32_t> dist;
 	for (unsigned int i = 0; i < kMaxRandomDataSize / sizeof(uint32_t); i++)
-		RTSPSessionInterface::sOptionsRequestBody[i] = ::rand();
+		RTSPSessionInterface::sOptionsRequestBody[i] = dist(mt);
 	((char *)RTSPSessionInterface::sOptionsRequestBody)[0] = 0; //always set first byte so it doesn't hit any client parser bugs for \r or \n.
 
 }
@@ -72,9 +74,6 @@ RTSPSessionInterface::RTSPSessionInterface()
 
 	//fSessionID = (uint32_t)atomic_add(&sSessionIDCounter, 1);
 	fSessionID = ++sSessionIDCounter;
-
-	fInputStream.ShowRTSP(QTSServerInterface::GetServer()->GetPrefs()->GetRTSPDebugPrintfs());
-	fOutputStream.ShowRTSP(QTSServerInterface::GetServer()->GetPrefs()->GetRTSPDebugPrintfs());
 }
 
 
@@ -302,18 +301,6 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, uint32_t inLen
 
 	return err;
 
-}
-
-std::string RTSPSessionInterface::GetLocalAddr()
-{
-	StrPtrLen* theLocalAddrStr = fSocket.GetLocalAddrStr();
-	return std::string(theLocalAddrStr->Ptr, theLocalAddrStr->Len);
-}
-
-std::string RTSPSessionInterface::GetLocalDNS()
-{
-	StrPtrLen* theLocalDNSStr = fSocket.GetLocalDNSStr();
-	return std::string(theLocalDNSStr->Ptr, theLocalDNSStr->Len);
 }
 
 std::string RTSPSessionInterface::GetRemoteAddr()

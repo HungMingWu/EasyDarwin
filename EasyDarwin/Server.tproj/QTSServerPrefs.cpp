@@ -287,9 +287,6 @@ QTSServerPrefs::QTSServerPrefs(XMLPrefsParser* inPrefsSource, bool inWriteMissin
 	fMaxBandwidthInKBits(0),
 	fBreakOnAssert(false),
 	fAutoRestart(false),
-	fTBUpdateTimeInSecs(0),
-	fABUpdateTimeInSecs(0),
-	fSafePlayDurationInSecs(0),
 	fErrorRollIntervalInDays(0),
 	fErrorLogBytes(0),
 	fScreenLoggingEnabled(true),
@@ -314,7 +311,6 @@ QTSServerPrefs::QTSServerPrefs(XMLPrefsParser* inPrefsSource, bool inWriteMissin
 	fMaxRetransDelayInMsec(0),
 	fIsAckLoggingEnabled(false),
 	fRTCPPollIntervalInMsec(0),
-	fRTCPSocketRcvBufSizeInK(0),
 	fIsSlowStartEnabled(false),
 	fSendIntervalInMsec(0),
 	fMaxSendAheadTimeInSecs(0),
@@ -324,10 +320,7 @@ QTSServerPrefs::QTSServerPrefs(XMLPrefsParser* inPrefsSource, bool inWriteMissin
 	fAutoStart(false),
 	fReliableUDP(true),
 	fReliableUDPPrintfs(false),
-	fEnableRTSPDebugPrintfs(false),
 	fEnableRTSPServerInfo(true),
-	fNumThreads(0),
-	fNumRTSPThreads(0),
 #if __MacOSX__
 	fEnableMonitorStatsFile(false),
 #else
@@ -338,8 +331,6 @@ QTSServerPrefs::QTSServerPrefs(XMLPrefsParser* inPrefsSource, bool inWriteMissin
 	fEnablePacketHeaderPrintfs(false),
 	fPacketHeaderPrintfOptions(kRTPALL | kRTCPSR | kRTCPRR | kRTCPAPP | kRTCPACK),
 	fCloseLogsOnWrite(false),
-	fDisableThinning(false),
-	fDefaultStreamQuality(0),
 	fUDPMonitorEnabled(false),
 	fUDPMonitorVideoPort(0),
 	fUDPMonitorAudioPort(0),
@@ -370,9 +361,6 @@ void QTSServerPrefs::SetupAttributes()
 	this->SetVal(qtssPrefsMaximumBandwidth, &fMaxBandwidthInKBits, sizeof(fMaxBandwidthInKBits));
 	this->SetVal(qtssPrefsBreakOnAssert, &fBreakOnAssert, sizeof(fBreakOnAssert));
 	this->SetVal(qtssPrefsAutoRestart, &fAutoRestart, sizeof(fAutoRestart));
-	this->SetVal(qtssPrefsTotalBytesUpdate, &fTBUpdateTimeInSecs, sizeof(fTBUpdateTimeInSecs));
-	this->SetVal(qtssPrefsAvgBandwidthUpdate, &fABUpdateTimeInSecs, sizeof(fABUpdateTimeInSecs));
-	this->SetVal(qtssPrefsSafePlayDuration, &fSafePlayDurationInSecs, sizeof(fSafePlayDurationInSecs));
 
 	this->SetVal(qtssPrefsErrorRollInterval, &fErrorRollIntervalInDays, sizeof(fErrorRollIntervalInDays));
 	this->SetVal(qtssPrefsMaxErrorLogSize, &fErrorLogBytes, sizeof(fErrorLogBytes));
@@ -394,7 +382,6 @@ void QTSServerPrefs::SetupAttributes()
 	this->SetVal(qtssPrefsMaxRetransDelayInMsec, &fMaxRetransDelayInMsec, sizeof(fMaxRetransDelayInMsec));
 	this->SetVal(qtssPrefsAckLoggingEnabled, &fIsAckLoggingEnabled, sizeof(fIsAckLoggingEnabled));
 	this->SetVal(qtssPrefsRTCPPollIntervalInMsec, &fRTCPPollIntervalInMsec, sizeof(fRTCPPollIntervalInMsec));
-	this->SetVal(qtssPrefsRTCPSockRcvBufSizeInK, &fRTCPSocketRcvBufSizeInK, sizeof(fRTCPSocketRcvBufSizeInK));
 	this->SetVal(qtssPrefsSendInterval, &fSendIntervalInMsec, sizeof(fSendIntervalInMsec));
 	this->SetVal(qtssPrefsMaxAdvanceSendTimeInSec, &fMaxSendAheadTimeInSecs, sizeof(fMaxSendAheadTimeInSecs));
 	this->SetVal(qtssPrefsReliableUDPSlowStart, &fIsSlowStartEnabled, sizeof(fIsSlowStartEnabled));
@@ -412,25 +399,20 @@ void QTSServerPrefs::SetupAttributes()
 	this->SetVal(qtssPrefsStartThickingDelayInMsec, &fStartThickingTimeInMsec, sizeof(fStartThickingTimeInMsec));
 	this->SetVal(qtssPrefsThickAllTheWayDelayInMsec, &fThickAllTheWayTimeInMsec, sizeof(fThickAllTheWayTimeInMsec));
 	this->SetVal(qtssPrefsQualityCheckIntervalInMsec, &fQualityCheckIntervalInMsec, sizeof(fQualityCheckIntervalInMsec));
-	this->SetVal(qtssPrefsEnableRTSPDebugPrintfs, &fEnableRTSPDebugPrintfs, sizeof(fEnableRTSPDebugPrintfs));
 	this->SetVal(qtssPrefsEnableRTSPServerInfo, &fEnableRTSPServerInfo, sizeof(fEnableRTSPServerInfo));
-	this->SetVal(qtssPrefsRunNumThreads, &fNumThreads, sizeof(fNumThreads));
 	this->SetVal(qtssPrefsEnableMonitorStatsFile, &fEnableMonitorStatsFile, sizeof(fEnableMonitorStatsFile));
 	this->SetVal(qtssPrefsMonitorStatsFileIntervalSec, &fStatsFileIntervalSeconds, sizeof(fStatsFileIntervalSeconds));
 
 	this->SetVal(qtssPrefsEnablePacketHeaderPrintfs, &fEnablePacketHeaderPrintfs, sizeof(fEnablePacketHeaderPrintfs));
 	this->SetVal(qtssPrefsCloseLogsOnWrite, &fCloseLogsOnWrite, sizeof(fCloseLogsOnWrite));
 	this->SetVal(qtssPrefsOverbufferRate, &fOverbufferRate, sizeof(fOverbufferRate));
-	this->SetVal(qtssPrefsDisableThinning, &fDisableThinning, sizeof(fDisableThinning));
 
-	this->SetVal(qtssPrefsDefaultStreamQuality, &fDefaultStreamQuality, sizeof(fDefaultStreamQuality)); //default_stream_quality
 	this->SetVal(qtssPrefsEnableUDPMonitor, &fUDPMonitorEnabled, sizeof(fUDPMonitorEnabled));
 	this->SetVal(qtssPrefsUDPMonitorAudioPort, &fUDPMonitorVideoPort, sizeof(fUDPMonitorVideoPort));
 	this->SetVal(qtssPrefsUDPMonitorVideoPort, &fUDPMonitorAudioPort, sizeof(fUDPMonitorAudioPort));
 	this->SetVal(qtssPrefsUDPMonitorDestIPAddr, &fUDPMonitorDestAddr, sizeof(fUDPMonitorDestAddr));
 	this->SetVal(qtssPrefsUDPMonitorSourceIPAddr, &fUDPMonitorSrcAddr, sizeof(fUDPMonitorSrcAddr));
 	this->SetVal(qtssPrefsEnableAllowGuestDefault, &fAllowGuestAuthorizeDefault, sizeof(fAllowGuestAuthorizeDefault)); //enable_allow_guest_authorize_default
-	this->SetVal(qtssPrefsNumRTSPThreads, &fNumRTSPThreads, sizeof(fNumRTSPThreads));
 
 	this->SetVal(easyPrefsHTTPServiceLanPort, &fServiceLANPort, sizeof(fServiceLANPort));
 	this->SetVal(easyPrefsHTTPServiceWanPort, &fServiceWANPort, sizeof(fServiceWANPort));

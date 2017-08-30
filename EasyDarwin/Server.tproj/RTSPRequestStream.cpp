@@ -46,8 +46,7 @@ RTSPRequestStream::RTSPRequestStream(TCPSocket* sock)
 	fEncodedBytesRemaining(0),
 	fRequest(fRequestBuffer, 0),
 	fRequestPtr(nullptr),
-	fDecode(false),
-	fPrintRTSP(false)
+	fDecode(false)
 {}
 
 QTSS_Error RTSPRequestStream::ReadRequest()
@@ -160,42 +159,6 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 			return QTSS_RequestArrived;
 		}
 		fIsDataPacket = false;
-
-		if (fPrintRTSP)
-		{
-			DateBuffer theDate;
-			DateTranslator::UpdateDateBuffer(&theDate, 0); // get the current GMT date and time
-			printf("\n\n#C->S:\n#time: ms=%"   _U32BITARG_   " date=%s\n", (uint32_t)OS::StartTimeMilli_Int(), theDate.GetDateBuffer());
-
-			if (fSocket != nullptr)
-			{
-				uint16_t serverPort = fSocket->GetLocalPort();
-				uint16_t clientPort = fSocket->GetRemotePort();
-				StrPtrLen* theLocalAddrStr = fSocket->GetLocalAddrStr();
-				StrPtrLen* theRemoteAddrStr = fSocket->GetRemoteAddrStr();
-				if (theLocalAddrStr != nullptr)
-				{
-					printf("#server: ip="); theLocalAddrStr->PrintStr(); printf(" port=%u\n", serverPort);
-				}
-				else
-				{
-					printf("#server: ip=NULL port=%u\n", serverPort);
-				}
-
-				if (theRemoteAddrStr != nullptr)
-				{
-					printf("#client: ip="); theRemoteAddrStr->PrintStr(); printf(" port=%u\n", clientPort);
-				}
-				else
-				{
-					printf("#client: ip=NULL port=%u\n", clientPort);
-				}
-
-			}
-
-			StrPtrLen str(fRequest);
-			str.PrintStrEOL("\n\r\n", "\n");// print the request but stop on \n\r\n and add a \n afterwards.
-		}
 
 		//use a StringParser object to search for a double EOL, which signifies the end of
 		//the header.

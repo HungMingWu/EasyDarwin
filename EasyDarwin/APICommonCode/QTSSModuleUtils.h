@@ -90,16 +90,6 @@ public:
 		static QTSS_Error	SendErrorResponseWithMessage(RTSPRequest* inRequest,
 														QTSS_RTSPStatusCode inStatusCode);
 
-        // Sends and HTTP 1.1 error message with an error message in HTML if errorMessage != NULL.
-        // The session must be flagged by KillSession set to true to kill.
-        // Use the QTSS_RTSPStatusCodes for the inStatusCode, for now they are the same as HTTP.
-        //
-		// It always returns QTSS_RequestFailed
-        static QTSS_Error	SendHTTPErrorResponse(RTSPRequest* inRequest,
-													QTSS_SessionStatusCode inStatusCode,
-                                                    bool inKillSession,
-                                                    char *errorMessage);
-
         //Modules most certainly don't NEED to use this function, but it is awfully handy
         //if they want to take advantage of it. Using the SDP data provided in the iovec,
         //this function sends a standard describe response.

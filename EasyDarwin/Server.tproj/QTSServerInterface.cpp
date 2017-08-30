@@ -55,81 +55,24 @@ boost::string_view      QTSServerInterface::sServerCommentStr(kCommentString);
 
 StrPtrLen               QTSServerInterface::sServerPlatformStr(kPlatformNameString);
 boost::string_view      QTSServerInterface::sServerBuildDateStr(__DATE__ ", " __TIME__);
-std::string             QTSServerInterface::sServerHeader;
 
 std::string             QTSServerInterface::sPublicHeaderStr;
 
-QTSSAttrInfoDict::AttrInfo  QTSServerInterface::sAttributes[] =
-{   /*fields:   fAttrName, fFuncPtr, fAttrDataType, fAttrPermission */
-	/* 0  */ {},
-	/* 1  */ { "qtssSvrDefaultDNSName",         nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead },
-	/* 2  */ { "qtssSvrDefaultIPAddr",          nullptr,   qtssAttrDataTypeUInt32,     qtssAttrModeRead },
-	/* 3  */ {},
-	/* 4  */ {},
-	/* 5  */ {},
-	/* 6  */ {},
-	/* 7  */ {},
-	/* 8  */ {},
-	/* 9  */ {},
-	/* 10 */ {},
-	/* 11 */ {},
-	/* 12 */ {},
-	/* 13 */ {},
-	/* 14 */ {},
-	/* 15 */ {},
-	/* 16 */ {},
-	/* 17 */ {},
-	/* 18 */ {},
-	/* 19 */ {},
-	/* 20 */ {},
-	/* 21 */ {},
-	/* 22 */ {},
-	/* 23 */ {},
-	/* 24 */ { "qtssSvrDefaultIPAddrStr",       nullptr,   qtssAttrDataTypeCharArray,  qtssAttrModeRead },
-	/* 25 */ {},
-	/* 26 */ {},
-	/* 27 */ {},
-	/* 28 */ {},
-	/* 29 */ {},
-	/* 30 */ {},
-	/* 31 */ {},
-	/* 32 */ {},
-	/* 33  */ {},
-	/* 34  */ {},
-	/* 35  */ {},
-	/* 36  */ {},
-	/* 37  */ {}
-};
-
-void    QTSServerInterface::Initialize()
+QTSServerInterface::QTSServerInterface()
 {
-	for (uint32_t x = 0; x < qtssSvrNumParams; x++)
-		QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kServerDictIndex)->
-		SetAttribute(x, sAttributes[x].fAttrName, sAttributes[x].fFuncPtr,
-			sAttributes[x].fAttrDataType, sAttributes[x].fAttrPermission);
-
-	//Write out a premade server header
-	sServerHeader = std::string(RTSPProtocol::GetHeaderString(qtssServerHeader))
-		          + ": " + std::string(sServerNameStr)
-				  + "/" + std::string(sServerVersionStr)
-		          + " (Build/" + std::string(sServerBuildStr)
-		          + "; Platform/" + std::string(sServerPlatformStr.Ptr, sServerPlatformStr.Len)
-		          + ";";
-
-	if (!sServerCommentStr.empty())
-	{
-		sServerHeader += " ";
-		sServerHeader += std::string(sServerCommentStr);
-	}
-	sServerHeader += ")";
+	sServer = this;
 }
 
-QTSServerInterface::QTSServerInterface()
-	: QTSSDictionary(QTSSDictionaryMap::GetMap(QTSSDictionaryMap::kServerDictIndex), &fMutex)
+boost::string_view QTSServerInterface::GetServerHeader()
 {
-	this->SetVal(qtssSvrDefaultIPAddr, &fDefaultIPAddr, sizeof(fDefaultIPAddr));
-
-	sServer = this;
+	static std::string sServerHeader =
+		std::string(RTSPProtocol::GetHeaderString(qtssServerHeader))
+		+ ": " + std::string(sServerNameStr)
+		+ "/" + std::string(sServerVersionStr)
+		+ " (Build/" + std::string(sServerBuildStr)
+		+ "; Platform/" + std::string(sServerPlatformStr.Ptr, sServerPlatformStr.Len)
+		+ "; " + std::string(sServerCommentStr) + ")";
+	return sServerHeader;
 }
 
 void QTSServerInterface::KillAllRTPSessions()
@@ -141,11 +84,6 @@ void QTSServerInterface::KillAllRTPSessions()
 		auto* theSession = (RTPSessionInterface*)theRef->GetObject();
 		theSession->Signal(Task::kKillEvent);
 	}
-}
-
-void QTSServerInterface::SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
-	uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen)
-{
 }
 
 extern boost::asio::io_service io_service;
@@ -233,7 +171,7 @@ void RTPStatsUpdaterTask::Run(const boost::system::error_code &ec)
 		// Prevent divide by zero errror
 		if (delta < 1000) {
 			WarnV(delta >= 1000, "delta < 1000");
-			timer.expires_from_now(std::chrono::seconds(theServer->GetPrefs()->GetTotalBytesUpdateTimeInSecs()));
+			timer.expires_from_now(std::chrono::seconds(ServerPrefs::GetTotalBytesUpdateTimeInSecs()));
 			timer.async_wait(std::bind(&RTPStatsUpdaterTask::Run, this, std::placeholders::_1));
 			return;
 		}
@@ -269,7 +207,7 @@ void RTPStatsUpdaterTask::Run(const boost::system::error_code &ec)
 	//the fLastBandwidthAvg, a timestamp of the last time we did an average, and
 	//fLastBytesSent, the number of bytes sent when we last did an average.
 	if ((fLastBandwidthAvg != 0) && (curTime > (fLastBandwidthAvg +
-		(theServer->GetPrefs()->GetAvgBandwidthUpdateTimeInSecs() * 1000))))
+		(ServerPrefs::GetAvgBandwidthUpdateTimeInSecs() * 1000))))
 	{
 		auto delta = (uint32_t)(curTime - fLastBandwidthAvg);
 		int64_t bytesSent = theServer->fTotalRTPBytes - fLastBytesSent;
@@ -297,7 +235,7 @@ void RTPStatsUpdaterTask::Run(const boost::system::error_code &ec)
 			RTPSessionInterface* theSession = this->GetNewestSession(theServer->fRTPMap);
 			if (theSession != nullptr)
 				if ((curTime - theSession->GetSessionCreateTime()) <
-					theServer->GetPrefs()->GetSafePlayDurationInSecs() * 1000)
+					ServerPrefs::GetSafePlayDurationInSecs() * 1000)
 					theSession->Signal(Task::kKillEvent);
 		}
 	}
@@ -307,7 +245,7 @@ void RTPStatsUpdaterTask::Run(const boost::system::error_code &ec)
 		fLastBytesSent = theServer->fTotalRTPBytes;
 	}
 
-	timer.expires_from_now(std::chrono::seconds(theServer->GetPrefs()->GetTotalBytesUpdateTimeInSecs()));
+	timer.expires_from_now(std::chrono::seconds(ServerPrefs::GetTotalBytesUpdateTimeInSecs()));
 	timer.async_wait(std::bind(&RTPStatsUpdaterTask::Run, this, std::placeholders::_1));
 }
 

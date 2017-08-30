@@ -50,7 +50,7 @@ public:
 	// on the socket.
 	RTSPResponseStream(TCPSocket* inSocket, TimeoutTask* inTimeoutTask)
 		: formater(fOutputBuf, kOutputBufferSizeInBytes),
-		fSocket(inSocket), fBytesSentInBuffer(0), fTimeoutTask(inTimeoutTask), fPrintRTSP(false) {}
+		fSocket(inSocket), fBytesSentInBuffer(0), fTimeoutTask(inTimeoutTask) {}
 
 	~RTSPResponseStream() = default;
 
@@ -84,8 +84,6 @@ public:
 	// this returns QTSS_NoErr, otherwise, it returns EWOULDBLOCK
 	QTSS_Error Flush();
 
-	void        ShowRTSP(bool enable) { fPrintRTSP = enable; }
-
 	uint32_t    GetBytesWritten() { return formater.GetBytesWritten(); }
 	void        Reset(uint32_t inNumBytesToLeave = 0) { formater.Reset(inNumBytesToLeave);  }
 	void        PutEOL() { formater.PutEOL(); }
@@ -108,7 +106,6 @@ private:
 	TCPSocket*              fSocket;
 	uint32_t                  fBytesSentInBuffer;
 	TimeoutTask*            fTimeoutTask;
-	bool                  fPrintRTSP;     // debugging printfs
 
 	friend class RTSPRequestInterface;
 };

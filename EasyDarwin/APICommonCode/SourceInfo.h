@@ -138,14 +138,11 @@ class SourceInfo
         bool  SetActiveNTPTimes(uint32_t startNTPTime,uint32_t endNTPTime);
         bool  IsValidNTPSecs(uint32_t time) {return time >= (uint32_t) kNTP_Offset_From_1970 ? true : false;}
         bool  IsPermanentSource() { return ((fStartTimeUnixSecs == 0) && (fEndTimeUnixSecs == 0)) ? true : false; }
-        bool  IsActiveTime(time_t unixTimeSecs);
-        bool  IsActiveNow() { return IsActiveTime(OS::UnixTime_Secs()); }
         bool  IsRTSPControlled() {return (fSessionControlType == kRTSPSessionControl) ? true : false; }
         bool  HasTCPStreams();
         bool  HasIncomingBroacast();
         time_t  GetStartTimeUnixSecs() {return fStartTimeUnixSecs; }
         time_t  GetEndTimeUnixSecs() {return fEndTimeUnixSecs; }
-        uint32_t  GetDurationSecs();
         enum {kSDPTimeControl, kRTSPSessionControl};
     protected:
         

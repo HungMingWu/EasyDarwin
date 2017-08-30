@@ -45,7 +45,6 @@
 #include <boost/asio/steady_timer.hpp>
 
 #include "QTSS.h"
-#include "QTSSDictionary.h"
 #include "QTSServerPrefs.h"
 #include "atomic.h"
 
@@ -62,7 +61,7 @@ class QTSSMessages;
 //class RTPStatsUpdaterTask;
 class RTPSessionInterface;
 
-class QTSServerInterface : public QTSSDictionary
+class QTSServerInterface
 {
 protected:
 	std::vector<QTSS_RTSPMethod> supportMethods;
@@ -71,14 +70,12 @@ public:
 		std::copy(begin(methods), end(methods), back_inserter(supportMethods)); 
 	}
 	std::vector<QTSS_RTSPMethod> GetSupportMehod() const { return supportMethods; }
-	//Initialize must be called right off the bat to initialize dictionary resources
-	static void     Initialize();
 
 	//
 	// CONSTRUCTOR / DESTRUCTOR
 
 	QTSServerInterface();
-	~QTSServerInterface() override = default;
+	virtual ~QTSServerInterface() = default;
 
 	//
 	//
@@ -152,11 +149,6 @@ public:
 	bool              SigIntSet() { return fSigInt; }
 	bool				SigTermSet() { return fSigTerm; }
 
-	uint32_t              GetDebugLevel() { return fDebugLevel; }
-	uint32_t              GetDebugOptions() { return fDebugOptions; }
-	void                SetDebugLevel(uint32_t debugLevel) { fDebugLevel = debugLevel; }
-	void                SetDebugOptions(uint32_t debugOptions) { fDebugOptions = debugOptions; }
-
 	int64_t				GetMaxLate() { return fMaxLate; };
 	int64_t				GetTotalLate() { return fTotalLate; };
 	int64_t				GetCurrentMaxLate() { return fCurrentMaxLate; };
@@ -173,8 +165,6 @@ public:
 
 	//Allows you to map RTP session IDs (strings) to actual RTP session objects
 	OSRefTable*         GetRTPSessionMap() { return fRTPMap; }
-	OSRefTable*			GetHLSSessionMap() { return fHLSMap; }
-	OSRefTable*			GetRTMPSessionMap() { return fRTMPMap; }
 	OSRefTable*			GetReflectorSessionMap() { return fReflectorSessionMap; }
 
 	//Server provides a statically created & bound UDPSocket / Demuxer pair
@@ -192,7 +182,7 @@ public:
 	static boost::string_view   GetServerVersion() { return sServerVersionStr; }
 	static StrPtrLen&   GetServerPlatform() { return sServerPlatformStr; }
 	static boost::string_view GetServerBuildDate() { return sServerBuildDateStr; }
-	static boost::string_view GetServerHeader() { return sServerHeader; }
+	static boost::string_view GetServerHeader();
 	static boost::string_view GetServerBuild() { return sServerBuildStr; }
 	static boost::string_view GetServerComment() { return sServerCommentStr; }
 
@@ -212,11 +202,6 @@ public:
 	void                SetSigTerm() { fSigTerm = true; }
 
 	//
-	// We need to override this.
-	void    SetValueComplete(uint32_t inAttrIndex, QTSSDictionaryMap* inMap,
-		uint32_t inValueIndex, void* inNewValue, uint32_t inNewValueLen) override;
-
-	//
 	// LOCKING DOWN THE SERVER OBJECT
 	OSMutex*        GetServerObjectMutex() { return &fMutex; }
 
@@ -232,8 +217,6 @@ protected:
 
 	// All RTP sessions are put into this map
 	OSRefTable*                 fRTPMap{nullptr};
-	OSRefTable*					fHLSMap{nullptr};
-	OSRefTable*					fRTMPMap{nullptr};
 	OSRefTable*					fReflectorSessionMap{nullptr};
 
 	QTSServerPrefs*             fSrvrPrefs{nullptr};
@@ -264,7 +247,6 @@ private:
 	static boost::string_view sServerCommentStr;
 	static StrPtrLen    sServerPlatformStr;
 	static boost::string_view    sServerBuildDateStr;
-	static std::string  sServerHeader;
 
 	OSMutex             fMutex;
 
@@ -300,10 +282,6 @@ private:
 	bool              fSigInt{false};
 	bool              fSigTerm{false};
 
-	uint32_t              fDebugLevel{0};
-	uint32_t              fDebugOptions{0};
-
-
 	int64_t          fMaxLate{0};
 	int64_t          fTotalLate{0};
 	int64_t          fCurrentMaxLate{0};
@@ -312,7 +290,6 @@ private:
 	uint32_t          fNumThreads{0};
 
 	static QTSServerInterface*  sServer;
-	static QTSSAttrInfoDict::AttrInfo   sAttributes[];
 
 	friend class RTPStatsUpdaterTask;
 };

@@ -176,40 +176,6 @@ int64_t OS::Milliseconds()
 
 }
 
-int64_t OS::Microseconds()
-{
-	/*
-	#if __MacOSX__
-		UnsignedWide theMicros;
-		::Microseconds(&theMicros);
-		int64_t theMillis = theMicros.hi;
-		theMillis <<= 32;
-		theMillis += theMicros.lo;
-		return theMillis;
-	*/
-#if __Win32__
-	int64_t curTime = (int64_t)::timeGetTime(); //  system time in milliseconds
-	curTime -= sInitialMsec; // convert to application time
-	curTime *= 1000; // convert to microseconds                   
-	return curTime;
-#else
-	struct timeval t;
-#if !defined(EASY_DEVICE)
-	int theErr = easy_gettimeofday(&t);
-#else
-	int theErr = ::gettimeofday(&t, NULL);
-#endif
-	Assert(theErr == 0);
-
-	int64_t curTime;
-	curTime = t.tv_sec;
-	curTime *= 1000000;     // sec -> usec
-	curTime += t.tv_usec;
-
-	return curTime - (sInitialMsec * 1000);
-#endif
-}
-
 int32_t OS::GetGMTOffset()
 {
 #ifdef __Win32__

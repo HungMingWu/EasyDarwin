@@ -84,7 +84,6 @@ public:
 		//RequestArrived).
 	StrPtrLen*  GetRequestBuffer() { return fRequestPtr; }
 	bool      IsDataPacket() { return fIsDataPacket; }
-	void        ShowRTSP(bool enable) { fPrintRTSP = enable; }
 
 private:
 
@@ -111,8 +110,6 @@ private:
 	StrPtrLen*              fRequestPtr;    // pointer to a request header
 	bool                  fDecode;        // should we base 64 decode?
 	bool                  fIsDataPacket;  // is this a data packet? Like for a record?
-	bool                  fPrintRTSP;     // debugging printfs
-
 };
 
 #endif

@@ -414,32 +414,6 @@ typedef uint32_t QTSS_RTSPRequestAttributes;
 
 enum
 {
-    //QTSS_ServerObject parameters
-    
-    // These parameters ARE pre-emptive safe.
-    
-    qtssSvrDefaultDNSName           = 1,    //read		//char array        //The "default" DNS name of the server
-    qtssSvrDefaultIPAddr            = 2,    //read		//uint32_t            //The "default" IP address of the server
-    qtssSvrServerName               = 3,    //read		//char array        //Name of the server
-    qtssSvrRTSPPorts                = 6,    //read		// NOT PREEMPTIVE SAFE!//UInt16         //Indexed parameter: all the ports the server is listening on
-
-    // These parameters are NOT pre-emptive safe, they cannot be accessed
-    // via. QTSS_GetValuePtr. Some exceptions noted below
-    
-    qtssSvrIsOutOfDescriptors       = 9,    //read		//bool            //true if the server has run out of file descriptors, false otherwise
-
-    qtssRTPSvrNumUDPSockets         = 12,   //read      //uint32_t    //Number of UDP sockets currently being used by the server
-
-    qtssRTPSvrTotalPackets          = 19,   //read      //uint64_t    //Total number of bytes served since startup
-    
-    qtssSvrModuleObjects            = 21,   //read		//this IS PREMPTIVE SAFE!  //QTSS_ModuleObject // A module object representing each module
-    qtssSvrDefaultIPAddrStr         = 24,   //read      //char array    //The "default" IP address of the server as a string
-
-    qtssSvrPreferences              = 25,   //read      //QTSS_PrefsObject  // An object representing each the server's preferences
-    
-    qtssSvrReliableUDPWastageInBytes= 31,   //read      //uint32_t    //Amount of data in the reliable UDP buffers being wasted
-    qtssSvrConnectedUsers           = 32,   //r/w       //QTSS_Object   //List of connected user sessions (updated by modules for their sessions)
-
     qtssSvrNumParams                = 38
 };
 typedef uint32_t QTSS_ServerAttributes;
@@ -459,12 +433,8 @@ enum
     qtssPrefsMaximumConnections				= 3,    //"maximum_connections"         //int32_t    //Maximum # of concurrent RTP connections allowed by the server. -1 means unlimited.
     qtssPrefsMaximumBandwidth				= 4,    //"maximum_bandwidth"           //int32_t    //Maximum amt of bandwidth the server is allowed to serve in K bits. -1 means unlimited.
     qtssPrefsMovieFolder					= 5,    //"movie_folder"           //char array    //Path to the root movie folder
-    qtssPrefsRTSPIPAddr						= 6,    //"bind_ip_addr"                //char array    //IP address the server should accept RTSP connections on. 0.0.0.0 means all addresses on the machine.
     qtssPrefsBreakOnAssert					= 7,    //"break_on_assert"             //bool        //If true, the server will break in the debugger when an assert fails.
     qtssPrefsAutoRestart					= 8,    //"auto_restart"                //bool        //If true, the server will automatically restart itself if it crashes.
-    qtssPrefsTotalBytesUpdate				= 9,    //"total_bytes_update"          //uint32_t    //Interval in seconds between updates of the server's total bytes and current bandwidth statistics
-    qtssPrefsAvgBandwidthUpdate				= 10,   //"average_bandwidth_update"    //uint32_t    //Interval in seconds between computations of the server's average bandwidth
-    qtssPrefsSafePlayDuration				= 11,   //"safe_play_duration"          //uint32_t    //Hard to explain... see streamingserver.conf
     qtssPrefsModuleFolder					= 12,   //"module_folder"               //char array    //Path to the module folder
 
     // There is a compiled-in error log module that loads before all the other modules
@@ -487,18 +457,14 @@ enum
     qtssPrefsTCPSecondsToBuffer             = 26,   // "tcp_seconds_to_buffer" //Float32 // When streaming over TCP, the size of the TCP send buffer is scaled based on the bitrate of the movie. It will fit all the data that gets sent in this amount of time.
     
     qtssPrefsDefaultAuthorizationRealm      = 28,   // "default_authorization_realm" //char array   //
-    
-    qtssPrefsRunUserName                    = 29,   // "run_user_name"       //char array        //Run under this user's account
-    qtssPrefsRunGroupName                   = 30,   // "run_group_name"      //char array        //Run under this group's account
-    
+        
     qtssPrefsSrcAddrInTransport             = 31,   // "append_source_addr_in_transport" // bool   //If true, the server will append the src address to the Transport header responses
-    qtssPrefsRTSPPorts                      = 32,   // "rtsp_ports"          // UInt16   
 
     qtssPrefsMaxRetransDelayInMsec          = 33,   // "max_retransmit_delay" // uint32_t  //maximum interval between when a retransmit is supposed to be sent and when it actually gets sent. Lower values means smoother flow but slower server performance
     qtssPrefsSmallWindowSizeInK             = 34,   // "small_window_size"  // uint32_t    //default size that will be used for low bitrate movies
     qtssPrefsAckLoggingEnabled              = 35,   // "ack_logging_enabled"  // bool  //Debugging only: turns on detailed logging of UDP acks / retransmits
     qtssPrefsRTCPPollIntervalInMsec         = 36,   // "rtcp_poll_interval"      // uint32_t   //interval (in Msec) between poll for RTCP packets
-    qtssPrefsRTCPSockRcvBufSizeInK          = 37,   // "rtcp_rcv_buf_size"   // uint32_t   //Size of the receive socket buffer for udp sockets used to receive rtcp packets
+
     qtssPrefsSendInterval                   = 38,   // "send_interval"  // uint32_t    //
     qtssPrefsThickAllTheWayDelayInMsec      = 39,   // "thick_all_the_way_delay"     // uint32_t   //
     qtssPrefsAltTransportIPAddr             = 40,   // "alt_transport_src_ipaddr"// char     //If empty, the server uses its own IP addr in the source= param of the transport header. Otherwise, it uses this addr.
@@ -530,15 +496,13 @@ enum
     qtssPrefsMediumWindowSizeInK            = 63,   // "medium_window_size" // uint32_t    //default size that will be used for medium bitrate movies
     qtssPrefsWindowSizeMaxThreshold         = 64,   // "window_size_threshold"  // uint32_t    //bitrate at which we switch from medium to large window size
     qtssPrefsEnableRTSPServerInfo           = 65,   // "RTSP_server_info" //Boo1l6 // Adds server info to the RTSP responses.
-    qtssPrefsRunNumThreads                  = 66,   // "run_num_threads" //uint32_t // if value is non-zero, will  create that many task threads; otherwise a thread will be created for each processor
+
     qtssPrefsPidFile                        = 67,   // "pid_file" //Char Array //path to pid file
     qtssPrefsCloseLogsOnWrite               = 68,   // "force_logs_close_on_write" //bool // force log files to close after each write.
-    qtssPrefsDisableThinning                = 69,   // "disable_thinning" //bool // Usually used for performance testing. Turn off stream thinning from packet loss or stream lateness.
     qtssPrefsPlayersReqRTPHeader            = 70,   // "player_requires_rtp_header_info" //Char array //name of player to match against the player's user agent header
     qtssPrefsPlayersReqBandAdjust           = 71,   // "player_requires_bandwidth_adjustment //Char array //name of player to match against the player's user agent header
     qtssPrefsPlayersReqNoPauseTimeAdjust    = 72,   // "player_requires_no_pause_time_adjustment //Char array //name of player to match against the player's user agent header
 
-	qtssPrefsDefaultStreamQuality           = 73,   // "default_stream_quality //UInt16 //0 is all day and best quality. Higher values are worse maximum depends on the media and the media module
     qtssPrefsPlayersReqRTPStartTimeAdjust   = 74,   // "player_requires_rtp_start_time_adjust" //Char Array //name of players to match against the player's user agent header
 
 	qtssPrefsEnableUDPMonitor               = 75,   // "enable_udp_monitor_stream" //Boo1l6 // reflect all udp streams to the monitor ports, use an sdp to view
@@ -547,7 +511,6 @@ enum
     qtssPrefsUDPMonitorDestIPAddr           = 78,   // "udp_monitor_dest_ip"    //char array    //IP address the server should send RTP monitor reflected streams. 
     qtssPrefsUDPMonitorSourceIPAddr         = 79,   // "udp_monitor_src_ip"    //char array    //client IP address the server monitor should reflect. *.*.*.* means all client addresses.
     qtssPrefsEnableAllowGuestDefault        = 80,   // "enable_allow_guest_authorize_default" //Boo1l6 // server hint to access modules to allow guest access as the default (can be overriden in a qtaccess file or other means)
-    qtssPrefsNumRTSPThreads                 = 81,   // "run_num_rtsp_threads" //uint32_t // if value is non-zero, the server will  create that many task threads; otherwise a single thread will be created.
 	
 	easyPrefsHTTPServiceLanPort				= 82,	// "service_lan_port"	//UInt16
 	easyPrefsHTTPServiceWanPort				= 83,	// "service_wan_port"	//UInt16

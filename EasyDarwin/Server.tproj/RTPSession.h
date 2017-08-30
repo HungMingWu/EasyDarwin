@@ -133,7 +133,6 @@ public:
 	boost::string_view GetUserAgent() const { return userAgent; }
 	void SetRespMsg(boost::string_view msg) { respMsg = std::string(msg); }
 	boost::string_view GetRespMsg() const { return respMsg; }
-	void ResetTimeout(uint32_t timeout);
 	inline void addAttribute(boost::string_view key, boost::any value) {
 		attr.addAttribute(key, value);
 	}

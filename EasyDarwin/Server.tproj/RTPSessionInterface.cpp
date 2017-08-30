@@ -29,6 +29,7 @@
  */
 
 #include <memory>
+#include <random>
 #include "RTPSessionInterface.h"
 #include "QTSServerInterface.h"
 #include "RTSPRequestInterface.h"
@@ -196,11 +197,10 @@ void RTPSessionInterface::SetChallengeParams(QTSS_AuthScheme scheme, uint32_t qo
 			this->CreateDigestAuthenticationNonce();
 
 		if (createOpaque) {
-			// Generate a random uint32_t and convert it to a string 
-			// The base64 encoded form of the string is made the opaque value
-			int64_t theMicroseconds = OS::Microseconds();
-			::srand((unsigned int)theMicroseconds);
-			std::string randomNumStr = std::to_string(::rand());
+			std::random_device rd;
+			std::mt19937 mt(rd());
+			std::uniform_int_distribution<uint32_t> dist;
+			std::string randomNumStr = std::to_string(dist(mt));
 			fAuthOpaque = base64_encode(randomNumStr.c_str(), randomNumStr.length());
 		}
 		else {
@@ -221,11 +221,10 @@ void RTPSessionInterface::UpdateDigestAuthChallengeParams(bool newNonce, bool cr
 
 
 	if (createOpaque) {
-		// Generate a random uint32_t and convert it to a string 
-		// The base64 encoded form of the string is made the opaque value
-		int64_t theMicroseconds = OS::Microseconds();
-		::srand((unsigned int)theMicroseconds);
-		std::string randomNumStr = std::to_string(::rand());
+		std::random_device rd;
+		std::mt19937 mt(rd());
+		std::uniform_int_distribution<uint32_t> dist;
+		std::string randomNumStr = std::to_string(dist(mt));
 		fAuthOpaque = base64_encode(randomNumStr.c_str(), randomNumStr.length());
 	}
 	else {

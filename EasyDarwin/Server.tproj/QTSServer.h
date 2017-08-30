@@ -60,7 +60,7 @@ public:
 	// This function *must* be called before the server creates any threads,
 	// because one of its actions is to change the server to the right UID / GID.
 	// Threads will only inherit these if they are created afterwards.
-	bool Initialize(XMLPrefsParser* inPrefsSource, PrefsSource* inMessagesSource,
+	bool Initialize(XMLPrefsParser* inPrefsSource,
 		uint16_t inPortOverride, bool createListeners, const char*inAbsolutePath);
 
 	//
@@ -80,17 +80,6 @@ public:
 	// going, and it must be called after Initialize                
 	void StartTasks();
 
-
-	//
-	// RereadPrefsService
-	//
-	// This service is registered by the server (calling "RereadPreferences").
-	// It rereads the preferences. Anyone can call this to reread the preferences,
-	// and it may be called safely at any time, though it will fail with a
-	// QTSS_OutOfState if the server isn't in the qtssRunningState.
-
-	static QTSS_Error RereadPrefsService(QTSS_ServiceFunctionArgsPtr inArgs);
-
 	//
 	// CreateListeners
 	//
@@ -107,8 +96,6 @@ public:
 
 	bool                  SetupUDPSockets();
 
-	bool                  SwitchPersonality();
-
 	char sAbsolutePath[MAX_PATH];
 private:
 
@@ -118,13 +105,10 @@ private:
 	RTPStatsUpdaterTask*fStatsTask;
 	static char*        sPortPrefString;
 	static XMLPrefsParser* sPrefsSource;
-	static PrefsSource* sMessagesSource;
 
 	// Call module init roles
 	void                    DoInitRole();
 	void                    SetupPublicHeader();
-	uint32_t*                 GetRTSPIPAddrs(QTSServerPrefs* inPrefs, uint32_t* outNumAddrsPtr);
-	uint16_t*                 GetRTSPPorts(QTSServerPrefs* inPrefs, uint32_t* outNumPortsPtr);
 
 #ifndef __Win32__
 	static pid_t            sMainPid;

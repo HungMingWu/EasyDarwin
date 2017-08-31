@@ -43,7 +43,6 @@
 
 #include "Attributes.h"
 #include "QTSS.h"
-#include "QTSSDictionary.h"
 
 #include "UDPDemuxer.h"
 #include "UDPSocketPool.h"
@@ -386,10 +385,8 @@ class RTPStream : public UDPDemuxerTask
         char *GetStreamTypeStr();
         enum { rtp = 0, rtcpSR = 1, rtcpRR = 2, rtcpACK = 3, rtcpAPP = 4 };
 		float GetStreamStartTimeSecs();
-        void PrintPacket(char *inBuffer, uint32_t inLen, int32_t inType); 
         void PrintRTP(char* packetBuff, uint32_t inLen);
         void PrintRTCPSenderReport(char* packetBuff, uint32_t inLen);
-inline  void PrintPacketPrefEnabled(char *inBuffer,uint32_t inLen, int32_t inType) { if (QTSServerInterface::GetServer()->GetPrefs()->PacketHeaderPrintfsEnabled() ) this->PrintPacket(inBuffer,inLen, inType); }
 
         void SetOverBufferState(RTSPRequestInterface* request);
         

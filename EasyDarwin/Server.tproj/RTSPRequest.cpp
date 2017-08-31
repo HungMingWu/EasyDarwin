@@ -40,13 +40,13 @@
 
 #include "RTSPSession.h"
 #include "RTSPSessionInterface.h"
-#include "StringTranslator.h"
 #include "QTSS.h"
 #include "QTSSModuleUtils.h"
 #include "base64.h"
 #include "DateTranslator.h"
 #include "SocketUtils.h"
 #include "uri/decode.h"
+#include "ServerPrefs.h"
 
 static boost::string_view    sDefaultRealm("Streaming Server");
 static boost::string_view    sAuthBasicStr("Basic");
@@ -752,17 +752,14 @@ QTSS_Error RTSPRequest::SendDigestChallenge(uint32_t qop, boost::string_view non
 	ResizeableStringFormatter challengeFormatter(challengeBuf, kAuthChallengeHeaderBufSize);
 
 	boost::string_view realm;
-	char *prefRealmPtr = nullptr;
 	boost::string_view realmPtr = GetURLRealm();              // Get auth realm set by the module
 	if (!realmPtr.empty()) {
 		realm = realmPtr;
 	}
 	else {                                                                  // If module hasn't set the realm
-		QTSServerInterface* theServer = QTSServerInterface::GetServer();    // get the realm from prefs
-		prefRealmPtr = theServer->GetPrefs()->GetAuthorizationRealm();      // allocates memory
-		Assert(prefRealmPtr != nullptr);
-		if (prefRealmPtr != nullptr) {
-			realm = boost::string_view(prefRealmPtr, strlen(prefRealmPtr));
+		boost::string_view prefRealm = ServerPrefs::GetAuthorizationRealm();
+		if (!prefRealm.empty()) {
+			realm = prefRealm;
 		}
 		else {
 			realm = sDefaultRealm;
@@ -799,19 +796,12 @@ QTSS_Error RTSPRequest::SendDigestChallenge(uint32_t qop, boost::string_view non
 	this->AppendHeader(qtssWWWAuthenticateHeader, challengePtr);
 	this->SendHeader();
 
-	// deleting the memory that was allocated in GetPrefs call above
-	if (prefRealmPtr != nullptr)
-	{
-		delete[] prefRealmPtr;
-	}
-
 	return theErr;
 }
 
 QTSS_Error RTSPRequest::SendBasicChallenge(void)
 {
 	QTSS_Error theErr = QTSS_NoErr;
-	char *prefRealmPtr = nullptr;
 
 	do
 	{
@@ -828,12 +818,10 @@ QTSS_Error RTSPRequest::SendBasicChallenge(void)
 		{
 			theErr = QTSS_NoErr;
 			// Get the default realm from the config file or use the static default if config realm is not found
-			QTSServerInterface* theServer = QTSServerInterface::GetServer();
-			prefRealmPtr = theServer->GetPrefs()->GetAuthorizationRealm(); // allocates memory
-			Assert(prefRealmPtr != nullptr);
-			if (prefRealmPtr != nullptr)
+			boost::string_view prefRealm = ServerPrefs::GetAuthorizationRealm();
+			if (!prefRealm.empty())
 			{
-				whichRealm = boost::string_view(prefRealmPtr, strlen(prefRealmPtr));
+				whichRealm = prefRealm;
 			}
 			else
 			{
@@ -877,11 +865,6 @@ QTSS_Error RTSPRequest::SendBasicChallenge(void)
 
 
 	} while (false);
-
-	if (prefRealmPtr != nullptr)
-	{
-		delete[] prefRealmPtr;
-	}
 
 	return theErr;
 }

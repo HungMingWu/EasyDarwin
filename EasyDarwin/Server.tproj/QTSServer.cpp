@@ -64,6 +64,7 @@
 
 #include "RTPStream.h"
 #include "RTCPTask.h"
+#include "ServerPrefs.h"
 
 #ifdef _WIN32
 #include "CreateDump.h"
@@ -116,7 +117,6 @@ public:
 
 
 char*           QTSServer::sPortPrefString = "rtsp_port";
-XMLPrefsParser* QTSServer::sPrefsSource = nullptr;
 
 QTSServer::~QTSServer()
 {
@@ -128,22 +128,19 @@ QTSServer::~QTSServer()
 	delete fReflectorSessionMap;
 
 	delete fSocketPool;
-	delete fSrvrPrefs;
 }
 
-bool QTSServer::Initialize(XMLPrefsParser* inPrefsSource, uint16_t inPortOverride, bool createListeners, const char*inAbsolutePath)
+bool QTSServer::Initialize(uint16_t inPortOverride, bool createListeners, const char*inAbsolutePath)
 {
 	static const uint32_t kRTPSessionMapSize = 2000;
 	static const uint32_t kReflectorSessionMapSize = 2000;
 	fServerState = qtssFatalErrorState;
-	sPrefsSource = inPrefsSource;
 	memset(sAbsolutePath, 0, MAX_PATH);
 	strcpy(sAbsolutePath, inAbsolutePath);
 
 	//
 	// DICTIONARY INITIALIZATION
 
-	QTSServerPrefs::Initialize();
 	RTSPRequestInterface::Initialize();
 
 	RTSPSessionInterface::Initialize();
@@ -156,7 +153,6 @@ bool QTSServer::Initialize(XMLPrefsParser* inPrefsSource, uint16_t inPortOverrid
 	// both of these to initialize the server, but they have to be stubs because
 	// their QTSSDictionaryMaps will presumably be modified when modules get loaded.
 
-	fSrvrPrefs = new QTSServerPrefs(inPrefsSource, false); // First time, don't write changes to the prefs file
 	QTSSModuleUtils::Initialize(this);
 
 	//
@@ -177,7 +173,7 @@ bool QTSServer::Initialize(XMLPrefsParser* inPrefsSource, uint16_t inPortOverrid
 	//
 	// BEGIN LISTENING
 	if (createListeners)
-		CreateListeners(false, fSrvrPrefs, inPortOverride);
+		CreateListeners(false, inPortOverride);
 
 	if (fNumListeners == 0)
 		return false;
@@ -199,10 +195,6 @@ void QTSServer::InitModules(QTSS_ServerState inEndState)
 
 	// Finish setting up modules. Create our final prefs & messages objects,
 	// register all global dictionaries, and invoke the modules in their Init roles.
-	fStubSrvrPrefs = fSrvrPrefs;
-
-	fSrvrPrefs = new QTSServerPrefs(sPrefsSource, true); // Now write changes to the prefs file. First time, we don't because the error messages won't get printed.
-
 
 	QTSSModuleUtils::Initialize(this);
 
@@ -238,7 +230,7 @@ bool QTSServer::SetDefaultIPAddr()
 *	Date:		2015/11/22
 *
 */
-bool QTSServer::CreateListeners(bool startListeningNow, QTSServerPrefs* inPrefs, uint16_t inPortOverride)
+bool QTSServer::CreateListeners(bool startListeningNow, uint16_t inPortOverride)
 {
 	struct PortTracking
 	{
@@ -376,8 +368,6 @@ void QTSServer::DoInitRole()
 {
 	QTSS_Initialize_Params initParams;
 	initParams.inServer = this;
-	initParams.inPrefs = fSrvrPrefs;
-
 
 	//
 	// Add the OPTIONS method as the one method the server handles by default (it handles

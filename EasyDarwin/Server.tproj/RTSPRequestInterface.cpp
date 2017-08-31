@@ -49,6 +49,7 @@
 #include "DateTranslator.h"
 #include "QTSSDataConverter.h"
 #include "QTSServerInterface.h"
+#include "ServerPrefs.h"
 
 std::string RTSPRequestInterface::sPremadeHeader;
 std::string RTSPRequestInterface::sPremadeNoHeader;
@@ -415,7 +416,7 @@ void RTSPRequestInterface::WriteStandardHeaders()
 
 	//if this is a "200 OK" response (most HTTP responses), we have some special
 	//optmizations here
-	bool sendServerInfo = QTSServerInterface::GetServer()->GetPrefs()->GetRTSPServerInfoEnabled();
+	bool sendServerInfo = ServerPrefs::GetRTSPServerInfoEnabled();
 	if (fStatus == qtssSuccessOK)
 	{
 

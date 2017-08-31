@@ -41,7 +41,6 @@
 #include <map>
 #include <boost/utility/string_view.hpp>
 #include "QTSS.h"
-#include "QTSSDictionary.h"
 
 #include "StrPtrLen.h"
 #include "RTSPSessionInterface.h"

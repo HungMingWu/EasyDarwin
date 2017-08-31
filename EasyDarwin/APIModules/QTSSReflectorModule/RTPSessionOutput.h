@@ -44,7 +44,7 @@ class RTPSessionOutput : public ReflectorOutput
 {
 public:
 	RTPSessionOutput(RTPSession* inRTPSession, ReflectorSession* inReflectorSession,
-		QTSS_Object serverPrefs, boost::string_view inCookieAddrName);
+		boost::string_view inCookieAddrName);
 	~RTPSessionOutput() override = default;
 
 	ReflectorSession* GetReflectorSession() { return fReflectorSession; }

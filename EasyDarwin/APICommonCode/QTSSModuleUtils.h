@@ -107,12 +107,8 @@ public:
         //      
         static boost::string_view  GetUserName(QTSSUserProfile* inUserProfile);
         static bool UserInGroup(QTSSUserProfile* inUserProfile, boost::string_view inGroup);
- 
-        static bool AddressInList(QTSS_Object inObject, QTSS_AttributeID listID, StrPtrLen *theAddressPtr);
- 
-        static bool FindStringInAttributeList(QTSS_Object inObject, QTSS_AttributeID listID, StrPtrLen *inStrPtr);
-
-        static bool HavePlayerProfile(QTSS_PrefsObject inPrefObjectToCheck, QTSS_StandardRTSP_Params* inParams, uint32_t feature);
+  
+        static bool HavePlayerProfile(QTSS_StandardRTSP_Params* inParams, uint32_t feature);
         
         static QTSS_Error AuthorizeRequest(RTSPRequest* theRTSPRequest, bool allowed, bool haveUser,bool authContinue);
         
@@ -120,45 +116,4 @@ public:
     private:
         static QTSServerInterface*      sServer;
 };
-
-
-class IPComponentStr
-{
-    public:
-    enum { kNumComponents = 4 };
-    
-    StrPtrLen   fAddressComponent[kNumComponents];
-    bool      fIsValid{false};
-    static IPComponentStr sLocalIPCompStr;
-
-    IPComponentStr() {}
-    IPComponentStr(char *theAddress);
-    IPComponentStr(StrPtrLen *sourceStrPtr);
-    
-inline  StrPtrLen*  GetComponent(uint16_t which);
-        bool      Equal(IPComponentStr *testAddressPtr);
-        bool      Set(StrPtrLen *theAddressStrPtr);
-        bool      Valid() { return fIsValid; }
-inline  bool      IsLocal();
-
-};
-
-
-bool  IPComponentStr::IsLocal()
-{
-    if (this->Equal(&sLocalIPCompStr))
-        return true;
-    
-    return false;
-}
-
-StrPtrLen* IPComponentStr::GetComponent(uint16_t which) 
-{
-   if (which < IPComponentStr::kNumComponents) 
-        return &fAddressComponent[which]; 
-   
-   Assert(0);
-   return nullptr; 
-}
-
 #endif //_QTSS_MODULE_UTILS_H_

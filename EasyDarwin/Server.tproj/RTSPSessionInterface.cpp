@@ -35,7 +35,8 @@
 #include "QTSServerInterface.h"
 #include "RTSPProtocol.h"
 #include <errno.h>
-
+#include "ServerPrefs.h"
+#include "StringParser.h"
 
 #if DEBUG
 #define RTSP_SESSION_INTERFACE_DEBUGGING 1
@@ -61,7 +62,7 @@ void    RTSPSessionInterface::Initialize()
 
 RTSPSessionInterface::RTSPSessionInterface()
 	: Task(),
-	fTimeoutTask(nullptr, QTSServerInterface::GetServer()->GetPrefs()->GetRTSPSessionTimeoutInSecs() * 1000),
+	fTimeoutTask(nullptr, ServerPrefs::GetRTSPSessionTimeoutInSecs() * 1000),
 	fInputStream(&fSocket),
 	fOutputStream(&fSocket, &fTimeoutTask),
 	fSessionMutex(),

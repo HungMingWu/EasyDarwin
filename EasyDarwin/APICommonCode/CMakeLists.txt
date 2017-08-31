@@ -3,7 +3,7 @@ include_directories(../../CommonUtilitiesLib
                     ../../HTTPUtilitiesLib
 					../../Include
                     ../RTPMetaInfoLib ../RTCPUtilitiesLib 
-					../PrefsSourceLib ../Server.tproj)
+					../Server.tproj)
 add_library (APICommonCode QTSSRollingLog.h QTSSRollingLog.cpp
              QTSSModuleUtils.cpp QTSSModuleUtils.h
 	         SourceInfo.cpp SourceInfo.h

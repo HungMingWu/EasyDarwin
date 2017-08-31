@@ -37,7 +37,6 @@
 #define _RTPSESSIONINTERFACE_H_
 
 #include <vector>
-#include "QTSSDictionary.h"
 
 #include "RTCPSRPacket.h"
 #include "RTSPSessionInterface.h"

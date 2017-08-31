@@ -40,7 +40,6 @@
 #include "RTSPResponseStream.h"
 #include "Task.h"
 #include "QTSS.h"
-#include "QTSSDictionary.h"
 #include "atomic.h"
 
 class RTSPSessionInterface : public Task

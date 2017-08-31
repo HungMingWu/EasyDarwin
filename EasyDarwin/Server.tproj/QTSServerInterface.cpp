@@ -42,6 +42,7 @@
 #include "RTSPProtocol.h"
 #include "RTPPacketResender.h"
 #include "revision.h"
+#include "ServerPrefs.h"
 
 // STATIC DATA
 
@@ -227,7 +228,7 @@ void RTPStatsUpdaterTask::Run(const boost::system::error_code &ec)
 
 		//if the bandwidth is above the bandwidth setting, disconnect 1 user by sending them
 		//a BYE RTCP packet.
-		int32_t maxKBits = theServer->GetPrefs()->GetMaxKBitsBandwidth();
+		int32_t maxKBits = ServerPrefs::GetMaxKBitsBandwidth();
 		if ((maxKBits > -1) && (theServer->fAvgRTPBandwidthInBits > ((uint32_t)maxKBits * 1024)))
 		{
 			//we need to make sure that all of this happens atomically wrt the session map

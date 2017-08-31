@@ -46,7 +46,6 @@
 #endif
 #include "QTSServerInterface.h"
 #include "QTSServer.h"
-
 #include <stdlib.h>
 #include <QTSSModuleUtils.h>
 
@@ -61,7 +60,7 @@ int64_t sLastDebugTotalQuality = 0;
 #include <sched.h>
 #endif
 
-QTSS_ServerState StartServer(XMLPrefsParser* inPrefsSource, uint16_t inPortOverride, QTSS_ServerState inInitialState, bool inDontFork, const char* sAbsolutePath)
+QTSS_ServerState StartServer(uint16_t inPortOverride, QTSS_ServerState inInitialState, bool inDontFork, const char* sAbsolutePath)
 {
 	//Mark when we are done starting up. If auto-restart is enabled, we want to make sure
 	//to always exit with a status of 0 if we encountered a problem WHILE STARTING UP. This
@@ -87,17 +86,13 @@ QTSS_ServerState StartServer(XMLPrefsParser* inPrefsSource, uint16_t inPortOverr
 #endif
 
 	//start the server
-	QTSSDictionaryMap::Initialize();
 	sServer = new QTSServer();
-
-	// re-parse config file
-	inPrefsSource->Parse();
 
 	bool createListeners = true;
 	if (qtssShuttingDownState == inInitialState)
 		createListeners = false;
 
-	sServer->Initialize(inPrefsSource, inPortOverride, createListeners, sAbsolutePath);
+	sServer->Initialize(inPortOverride, createListeners, sAbsolutePath);
 
 	if (inInitialState == qtssShuttingDownState)
 	{

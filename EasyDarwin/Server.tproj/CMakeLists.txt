@@ -1,31 +1,20 @@
 include_directories(../../CommonUtilitiesLib ../../RTSPUtilitiesLib 
 					../../HTTPUtilitiesLib ../../Include
-					../../EasyProtocol/Include ../../EasyProtocol/jsoncpp/include
 					../APIModules/QTSSReflectorModule 
-					../APIModules/EasyCMSModule
-					../APIModules/QTSSAccessLogModule
-					../APIModules/QTSSFlowControlModule
-					../APIModules/EasyCMSModule 
-					../APIModules/QTSSPOSIXFileSysModule
-					../APIModules/EasyRedisModule
-					../APIModules/QTSSAccessModule
-					../PrefsSourceLib ../APIStubLib ../RTCPUtilitiesLib ../APICommonCode
+					../RTCPUtilitiesLib ../APICommonCode
 					../RTPMetaInfoLib
 					../)
 
 set (SRC 
      RunServer.cpp RunServer.h
 	 QTSServer.cpp QTSServer.h
-     QTSSDictionary.cpp QTSSDictionary.h
 	 QTSServerInterface.cpp QTSServerInterface.h
      RTSPRequestInterface.cpp RTSPRequestInterface.h
-     QTSServerPrefs.cpp QTSServerPrefs.h
      QTSSDataConverter.cpp QTSSDataConverter.h
      RTPSession.cpp RTPSession.h
      RTPStream.cpp RTPStream.h
      RTPOverbufferWindow.cpp RTPOverbufferWindow.h
      RTSPSessionInterface.cpp RTSPSessionInterface.h
-     QTSSPrefs.cpp QTSSPrefs.h
      RTPSessionInterface.cpp RTPSessionInterface.h
      RTSPSession.cpp RTSPSession.h
      RTPPacketResender.cpp RTPPacketResender.h
@@ -34,10 +23,10 @@ set (SRC
      RTSPResponseStream.cpp RTSPResponseStream.h
      RTSPRequest.cpp RTSPRequest.h
 	 RTSPRequestStream.cpp RTSPRequestStream.h
-	 GenerateXMLPrefs.cpp GenerateXMLPrefs.h
-	 RTCPTask.cpp RTCPTask.h)
+	 RTCPTask.cpp RTCPTask.h
+	 ServerPrefs.h ServerPrefs.cpp)
 
-link_libraries(APIModules RTCPUtilitiesLib RTSPUtilitiesLib PrefsSourceLib
+link_libraries(APIModules RTCPUtilitiesLib RTSPUtilitiesLib
                APICommonCode
                CommonUtilitiesLib RTPMetaInfoLib)
 IF (MSVC)

@@ -48,7 +48,6 @@
 #include "OS.h"
 #include "OSThread.h"
 #include "MyAssert.h"
-#include "OSFileSource.h"
 
 #if __MacOSX__
 

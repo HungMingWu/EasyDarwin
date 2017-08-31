@@ -45,7 +45,6 @@
 #include <boost/asio/steady_timer.hpp>
 
 #include "QTSS.h"
-#include "QTSServerPrefs.h"
 #include "atomic.h"
 
 #include "OSMutex.h"
@@ -172,8 +171,6 @@ public:
 	//this function. This returns a pair pre-bound to the IPAddr specified.
 	UDPSocketPool*      GetSocketPool() { return fSocketPool; }
 
-	QTSServerPrefs*     GetPrefs() { return fSrvrPrefs; }
-
 	//
 	//
 	// SERVER NAME & VERSION
@@ -218,10 +215,6 @@ protected:
 	// All RTP sessions are put into this map
 	OSRefTable*                 fRTPMap{nullptr};
 	OSRefTable*					fReflectorSessionMap{nullptr};
-
-	QTSServerPrefs*             fSrvrPrefs{nullptr};
-
-	QTSServerPrefs*				fStubSrvrPrefs;
 
 	QTSS_ServerState            fServerState{qtssStartingUpState};
 	uint32_t                      fDefaultIPAddr{0};

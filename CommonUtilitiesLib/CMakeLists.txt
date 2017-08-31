@@ -12,7 +12,6 @@ set (SRC
 			 ResizeableStringFormatter.cpp ResizeableStringFormatter.h
 			 OSMutex.cpp OSMutex.h
 			 OSQueue.cpp OSQueue.h
-			 OSFileSource.cpp OSFileSource.h
 			 MyAssert.cpp MyAssert.h
 			 Task.cpp Task.h
 			 SocketUtils.cpp SocketUtils.h
@@ -24,14 +23,12 @@ set (SRC
 			 OS.cpp OS.h
 			 OSMutexRW.cpp OSMutexRW.h
 			 Socket.cpp Socket.h
-			 ConfParser.cpp ConfParser.h
 			 TimeoutTask.cpp TimeoutTask.h
 			 OSCond.cpp OSCond.h
 			 UDPSocketPool.cpp UDPSocketPool.h
 			 UDPSocket.cpp UDPSocket.h
 			 TCPSocket.cpp TCPSocket.h
 			 TCPListenerSocket.cpp TCPListenerSocket.h
-			 GetWord.c GetWord.h
 			 OSHeap.cpp OSHeap.h
 			 base64.cpp base64.h
 			 sdpCache.cpp sdpCache.h
@@ -39,7 +36,6 @@ set (SRC
 			 md5digest.cpp md5digest.h
 			 QueryParamList.cpp QueryParamList.h
 			 DateTranslator.cpp DateTranslator.h
-			 StringTranslator.cpp StringTranslator.h
 			 SDPUtils.cpp SDPUtils.h
 			 keyframecache.cpp keyframecache.h
 			 Attributes.h

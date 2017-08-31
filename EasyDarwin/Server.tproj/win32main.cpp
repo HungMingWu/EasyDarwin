@@ -30,16 +30,12 @@
 #include <thread>
 #include <boost/asio/io_service.hpp>
 #include "getopt.h"
-#include "FilePrefsSource.h"
 #include "RunServer.h"
 #include "QTSServer.h"
-#include "GenerateXMLPrefs.h"
 
 boost::asio::io_service io_service;
 
  // Data
-static FilePrefsSource sPrefsSource(true); // Allow dups
-static XMLPrefsParser* sXMLParser = NULL;
 static uint16_t sPort = 0; //port can be set on the command line
 static SERVICE_STATUS_HANDLE sServiceStatusHandle = 0;
 static QTSS_ServerState sInitialState = qtssRunningState;
@@ -156,58 +152,6 @@ int main(int argc, char * argv[])
 	}
 
 	//
-	// Create an XML prefs parser object using the specified path
-	sXMLParser = new XMLPrefsParser(theXMLFilePath);
-
-	//
-	// Check to see if the XML file exists as a directory. If it does,
-	// just bail because we do not want to overwrite a directory
-	if (sXMLParser->DoesFileExistAsDirectory())
-	{
-		printf("Directory located at location where streaming server prefs file should be.\n");
-		::exit(0);
-	}
-
-	if (!sXMLParser->CanWriteFile())
-	{
-		printf("Cannot write to the streaming server prefs file.\n");
-		::exit(0);
-	}
-
-	// If we aren't forced to create a new XML prefs file, whether
-	// we do or not depends solely on whether the XML prefs file exists currently.
-	if (theXMLPrefsExist)
-		theXMLPrefsExist = sXMLParser->DoesFileExist();
-
-	if (!theXMLPrefsExist)
-	{
-		//
-		//Construct a Prefs Source object to get server preferences
-
-		int prefsErr = sPrefsSource.InitFromConfigFile(theConfigFilePath);
-		if (prefsErr)
-			printf("Could not load configuration file at %s.\n Generating a new prefs file at %s\n", theConfigFilePath, theXMLFilePath);
-
-		//
-		// Generate a brand-new XML prefs file out of the old prefs
-		int xmlGenerateErr = GenerateAllXMLPrefs(&sPrefsSource, sXMLParser);
-		if (xmlGenerateErr)
-		{
-			printf("Fatal Error: Could not create new prefs file at: %s. (%d)\n", theConfigFilePath, OSThread::GetErrno());
-			::exit(-1);
-		}
-	}
-
-	//
-	// Parse the configs from the XML file
-	int xmlParseErr = sXMLParser->Parse();
-	if (xmlParseErr)
-	{
-		printf("Fatal Error: Could not load configuration file at %s. (%d)\n", theXMLFilePath, OSThread::GetErrno());
-		::exit(-1);
-	}
-
-	//
 	// Start Win32 DLLs
 	WORD wsVersion = MAKEWORD(1, 1);
 	WSADATA wsData;
@@ -216,7 +160,7 @@ int main(int argc, char * argv[])
 	if (notAService)
 	{
 		// If we're running off the command-line, don't do the service initiation crap.
-		::StartServer(sXMLParser, sPort, sInitialState, false, sAbsolutePath); // No stats update interval for now
+		::StartServer(sPort, sInitialState, false, sAbsolutePath); // No stats update interval for now
 		::RunServer();
 		::exit(0);
 	}
@@ -296,7 +240,7 @@ void __stdcall ServiceMain(DWORD /*argc*/, LPTSTR *argv)
 
 	//
 	// Start & Run the server - no stats update interval for now
-	if (::StartServer(sXMLParser, sPort, sInitialState, false, sAbsolutePath) != qtssFatalErrorState)
+	if (::StartServer(sPort, sInitialState, false, sAbsolutePath) != qtssFatalErrorState)
 	{
 		::ReportStatus(SERVICE_RUNNING, NO_ERROR);
 		::RunServer(); // This function won't return until the server has died

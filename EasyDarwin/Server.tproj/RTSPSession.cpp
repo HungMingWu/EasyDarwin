@@ -48,6 +48,7 @@
 #include "md5digest.h"
 #include "QTSSDataConverter.h"
 #include "QTSSReflectorModule.h"
+#include "ServerPrefs.h"
 
 #if __FreeBSD__ || __hpux__	
 #include <unistd.h>
@@ -358,18 +359,15 @@ int64_t RTSPSession::Run()
 
 		case kAuthenticatingRequest:
 			{
-				bool      allowedDefault = QTSServerInterface::GetServer()->GetPrefs()->GetAllowGuestDefault();
+				bool      allowedDefault = ServerPrefs::GetAllowGuestDefault();
 				bool      allowed = allowedDefault; //server pref?
 				bool      hasUser = false;
 				bool      handled = false;
 				bool      wasHandled = false;
 
-				StrPtrLenDel prefRealm(QTSServerInterface::GetServer()->GetPrefs()->GetAuthorizationRealm());
-				if (prefRealm.Ptr != nullptr)
-				{
-					fRequest->SetURLRealm({ prefRealm.Ptr, prefRealm.Len });
-				}
-
+				boost::string_view prefRealm(ServerPrefs::GetAuthorizationRealm());
+				if (!prefRealm.empty())
+					fRequest->SetURLRealm(prefRealm);
 
 				QTSS_RTSPMethod method = fRequest->GetMethod();
 				if (method != qtssIllegalMethod) do
@@ -396,7 +394,7 @@ int64_t RTSPSession::Run()
 
 				if (fRequest->GetAuthScheme() == qtssAuthNone)
 				{
-					QTSS_AuthScheme scheme = QTSServerInterface::GetServer()->GetPrefs()->GetAuthScheme();
+					QTSS_AuthScheme scheme = ServerPrefs::GetAuthScheme();
 					if (scheme == qtssAuthBasic)
 						fRequest->SetAuthScheme(qtssAuthBasic);
 					else if (scheme == qtssAuthDigest)
@@ -429,7 +427,7 @@ int64_t RTSPSession::Run()
 		case kAuthorizingRequest:
 			{
 				// Invoke authorization modules
-				bool      allowedDefault = QTSServerInterface::GetServer()->GetPrefs()->GetAllowGuestDefault();
+				bool      allowedDefault = ServerPrefs::GetAllowGuestDefault();
 				bool      allowed = true;
 				bool      hasUser = false;
 				bool      handled = false;
@@ -1150,7 +1148,7 @@ QTSS_Error RTSPSession::IsOkToAddNewRTPSession()
 		return QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientNotEnoughBandwidth);
 
 	//if the max bandwidth limit has been hit
-	int32_t maxKBits = theServer->GetPrefs()->GetMaxKBitsBandwidth();
+	int32_t maxKBits = ServerPrefs::GetMaxKBitsBandwidth();
 	if ((maxKBits > -1) && (theServer->GetCurBandwidthInBits() >= ((uint32_t)maxKBits * 1024)))
 		return QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientNotEnoughBandwidth);
 
@@ -1176,11 +1174,9 @@ void RTSPSession::SaveRequestAuthorizationParams(RTSPRequest *theRTSPRequest)
 	if (tempPtr.empty())
 	{
 		// If there is no realm explicitly specified in the request, then let's get the default out of the prefs
-		std::unique_ptr<char[]> theDefaultRealm(QTSServerInterface::GetServer()->GetPrefs()->GetAuthorizationRealm());
-		char *realm = theDefaultRealm.get();
-		uint32_t len = ::strlen(theDefaultRealm.get());
-		SetLastURLRealm({ realm, len });
-		fRTPSession->SetRealm({ realm, len });
+		boost::string_view theDefaultRealm(ServerPrefs::GetAuthorizationRealm());
+		SetLastURLRealm(theDefaultRealm);
+		fRTPSession->SetRealm(theDefaultRealm);
 	}
 	else
 	{

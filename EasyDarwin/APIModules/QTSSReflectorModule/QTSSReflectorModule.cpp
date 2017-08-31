@@ -48,6 +48,7 @@
 #include "QueryParamList.h"
 #include "RTSPSession.h"
 #include "uri/decode.h"
+#include "ServerPrefs.h"
 
 using namespace std;
 namespace qi = boost::spirit::qi;
@@ -79,7 +80,6 @@ static QTSS_AttributeID         sBufferOffsetAttr = qtssIllegalAttrID;
 // ref to the prefs dictionary object
 static OSRefTable*      sSessionMap = nullptr;
 static const boost::string_view kCacheControlHeader("no-cache");
-static QTSS_PrefsObject sServerPrefs = nullptr;
 static QTSServerInterface* sServer = nullptr;
 
 //
@@ -210,7 +210,6 @@ namespace ReflectionModule
 		// Setup module utils
 		QTSSModuleUtils::Initialize(inParams->inServer);
 		sSessionMap = QTSServerInterface::GetServer()->GetReflectorSessionMap();
-		sServerPrefs = inParams->inPrefs;
 		sServer = inParams->inServer;
 #if QTSS_REFLECTOR_EXTERNAL_MODULE
 		// The reflector is dependent on a number of objects in the Common Utilities
@@ -525,9 +524,7 @@ char *GetTrimmedKeyWord(char *prefKeyWord)
 
 void SetMoviesRelativeDir()
 {
-	char* movieFolderString = nullptr;
-	(void)((QTSSDictionary*)sServerPrefs)->GetValueAsString(qtssPrefsMovieFolder, 0, &movieFolderString);
-	std::unique_ptr<char[]> deleter(movieFolderString);
+	boost::string_view movieFolderString = ServerPrefs::GetMovieFolder();
 
 	ResizeableStringFormatter redirectPath(nullptr, 0);
 	redirectPath.Put(movieFolderString);
@@ -884,53 +881,6 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 
 	theRefCount++;
 
-	//	//redis,streamid/serial/channel.sdp,for example "./Movies/\streamid\serial\channel0.sdp"
-	//	if(true)
-	//	{
-	//		//1.get the path
-	//		char* theFileNameStr = NULL;
-	//		QTSS_Error theErrEx = QTSS_GetValueAsString(inParams->inRTSPRequest, qtssRTSPReqLocalPath, 0, &theFileNameStr);
-	//		Assert(theErrEx == QTSS_NoErr);
-	//		std::unique_ptr<char[]> theFileNameStrDeleter(theFileNameStr);
-	//
-	//		//2.get SessionID
-	//		char chStreamId[64]={0};
-	//#ifdef __Win32__//it's different between linux and windows
-	//
-	//		char movieFolder[256] = { 0 };
-	//		uint32_t thePathLen = 256;
-	//		QTSServerInterface::GetServer()->GetPrefs()->GetMovieFolder(&movieFolder[0], &thePathLen);
-	//		StringParser parser(&StrPtrLen(theFileNameStr));
-	//		StrPtrLen strName;
-	//		parser.ConsumeLength(NULL,thePathLen);
-	//		parser.Expect('\\');
-	//		parser.ConsumeUntil(&strName,'\\');
-	//		memcpy(chStreamId,strName.Ptr,strName.Len);
-	//#else 
-	//
-	//#endif
-	//		//3.auth the streamid in redis
-	//		char chResult = 0;
-	//		QTSS_RoleParams theParams;
-	//		theParams.JudgeStreamIDParams.inStreanID = chStreamId;
-	//		theParams.JudgeStreamIDParams.outresult = &chResult;
-	//
-	//		uint32_t numModules = QTSServerInterface::GetNumModulesInRole(QTSSModule::kRedisJudgeStreamIDRole);
-	//		for ( uint32_t currentModule=0;currentModule < numModules; currentModule++)
-	//		{
-	//			QTSSModule* theModule = QTSServerInterface::GetModule(QTSSModule::kRedisJudgeStreamIDRole, currentModule);
-	//			(void)theModule->CallDispatch(Easy_RedisJudgeStreamID_Role, &theParams);
-	//		}
-	//		//if(chResult == 0)
-	//		if(false)
-	//		{
-	//			sSessionMap->Release(theSession->GetRef());//don't forget
-	//			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest,0);;
-	//		}
-	//		//auth sucessfully
-	//	}
-	//	//redis
-
 	uint32_t theLen = 0;
 	auto opt = inParams->inClientSession->getAttribute(sOutputName);
 
@@ -987,7 +937,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	bool adjustMediaBandwidth = false;
 
 	if (sPlayerCompatibility)
-		adjustMediaBandwidth = QTSSModuleUtils::HavePlayerProfile(sServerPrefs, inParams, QTSSModuleUtils::kAdjustBandwidth);
+		adjustMediaBandwidth = QTSSModuleUtils::HavePlayerProfile(inParams, QTSSModuleUtils::kAdjustBandwidth);
 
 	if (adjustMediaBandwidth)
 		adjustMediaBandwidthPercent = (float)sAdjustMediaBandwidthPercent / 100.0;
@@ -1245,7 +1195,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 			if (theSession == nullptr)
 				return QTSS_RequestFailed;
 
-			auto* theNewOutput = new RTPSessionOutput(inParams->inClientSession, theSession, sServerPrefs, sStreamCookieName);
+			auto* theNewOutput = new RTPSessionOutput(inParams->inClientSession, theSession, sStreamCookieName);
 			theSession->AddOutput(theNewOutput, true);
 			inParams->inClientSession->addAttribute(sOutputName, theNewOutput);
 		}
@@ -1514,7 +1464,7 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 		}
 
 		if (sPlayerCompatibility)
-			rtpInfoEnabled = QTSSModuleUtils::HavePlayerProfile(sServerPrefs, inParams, QTSSModuleUtils::kRequiresRTPInfoSeqAndTime);
+			rtpInfoEnabled = QTSSModuleUtils::HavePlayerProfile(inParams, QTSSModuleUtils::kRequiresRTPInfoSeqAndTime);
 
 		if (sForceRTPInfoSeqAndTime)
 			rtpInfoEnabled = true;
@@ -1691,6 +1641,7 @@ bool AcceptSession(QTSS_StandardRTSP_Params* inParams)
 	boost::string_view remoteAddress = inRTSPSession->GetRemoteAddr();
 	StrPtrLen theClientIPAddressStr((char *)remoteAddress.data(), remoteAddress.length());
 
+#if 0
 	if (IPComponentStr(&theClientIPAddressStr).IsLocal())
 	{
 		if (sAuthenticateLocalBroadcast)
@@ -1698,6 +1649,7 @@ bool AcceptSession(QTSS_StandardRTSP_Params* inParams)
 		else
 			return true;
 	}
+#endif
 
 	//if (QTSSModuleUtils::AddressInList(sPrefs, sIPAllowListID, &theClientIPAddressStr))
 	//	return true;

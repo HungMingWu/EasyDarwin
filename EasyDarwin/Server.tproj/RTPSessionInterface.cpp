@@ -39,23 +39,24 @@
 #include "md5.h"
 #include "md5digest.h"
 #include "base64.h"
+#include "ServerPrefs.h"
 
 unsigned int            RTPSessionInterface::sRTPSessionIDCounter = 0;
 
 RTPSessionInterface::RTPSessionInterface()
 	: Task(),
 	// assume true until proven false!
-	fTimeoutTask(nullptr, QTSServerInterface::GetServer()->GetPrefs()->GetRTPSessionTimeoutInSecs() * 1000),
-	fTracker(QTSServerInterface::GetServer()->GetPrefs()->IsSlowStartEnabled()),
-	fOverbufferWindow(QTSServerInterface::GetServer()->GetPrefs()->GetSendIntervalInMsec(), UINT32_MAX, QTSServerInterface::GetServer()->GetPrefs()->GetMaxSendAheadTimeInSecs(),
-		QTSServerInterface::GetServer()->GetPrefs()->GetOverbufferRate()),
-	fAuthScheme(QTSServerInterface::GetServer()->GetPrefs()->GetAuthScheme())
+	fTimeoutTask(nullptr, ServerPrefs::GetRTPSessionTimeoutInSecs() * 1000),
+	fTracker(ServerPrefs::IsSlowStartEnabled()),
+	fOverbufferWindow(ServerPrefs::GetSendIntervalInMsec(), UINT32_MAX, ServerPrefs::GetMaxSendAheadTimeInSecs(),
+		ServerPrefs::GetOverbufferRate()),
+	fAuthScheme(ServerPrefs::GetAuthScheme())
 {
 	//don't actually setup the fTimeoutTask until the session has been bound!
 	//(we don't want to get timeouts before the session gets bound)
 
 	fTimeoutTask.SetTask(this);
-	fTimeout = QTSServerInterface::GetServer()->GetPrefs()->GetRTPSessionTimeoutInSecs() * 1000;
+	fTimeout = ServerPrefs::GetRTPSessionTimeoutInSecs() * 1000;
 	//fUniqueID = (uint32_t)atomic_add(&sRTPSessionIDCounter, 1);
 	fUniqueID = ++sRTPSessionIDCounter;
 
@@ -85,8 +86,8 @@ QTSS_Error RTPSessionInterface::DoSessionSetupResponse(RTSPRequestInterface* inR
 	// This function appends a session header to the SETUP response, and
 	// checks to see if it is a 304 Not Modified. If it is, it sends the entire
 	// response and returns an error
-	if (QTSServerInterface::GetServer()->GetPrefs()->GetRTSPTimeoutInSecs() > 0)  // adv the timeout
-		inRequest->AppendSessionHeaderWithTimeout(GetSessionID(), QTSServerInterface::GetServer()->GetPrefs()->GetRTSPTimeoutAsString());
+	if (ServerPrefs::GetRTSPTimeoutInSecs() > 0)  // adv the timeout
+		inRequest->AppendSessionHeaderWithTimeout(GetSessionID(), std::to_string(ServerPrefs::GetRTSPTimeoutInSecs()));
 	else
 		inRequest->AppendSessionHeaderWithTimeout(GetSessionID(), {}); // no timeout in resp.
 

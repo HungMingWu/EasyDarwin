@@ -32,8 +32,6 @@
 
 
 #include "OSHeaders.h"
-#include "XMLPrefsParser.h"
-#include "PrefsSource.h"
 #include "QTSS.h"
 #include "QTSServer.h"
 
@@ -45,8 +43,7 @@
 // Returns the server state upon completion of startup. If this
 // is qtssFatalErrorState, something went horribly wrong and caller
 // should just die.
-QTSS_ServerState StartServer(XMLPrefsParser* inPrefsSource,
-	uint16_t inPortOverride,
+QTSS_ServerState StartServer(uint16_t inPortOverride,
 	QTSS_ServerState inInitialState,
 	bool inDontFork,
 	const char* sAbsolutePath);

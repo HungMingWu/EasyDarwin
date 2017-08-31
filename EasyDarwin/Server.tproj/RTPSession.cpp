@@ -37,6 +37,7 @@
 #include "OS.h"
 #include "RTSPRequest.h"
 #include "QTSSReflectorModule.h"
+#include "ServerPrefs.h"
 
 #define RTPSESSION_DEBUGGING 0
 
@@ -53,27 +54,6 @@ RTPSession::RTPSession() :
 RTPSession::~RTPSession()
 {
 	// Delete all the streams
-
-	if (QTSServerInterface::GetServer()->GetPrefs()->GetReliableUDPPrintfsEnabled())
-	{
-		int32_t theNumLatePacketsDropped = 0;
-		int32_t theNumResends = 0;
-
-		for (auto theStream : fStreamBuffer)
-		{
-			theNumLatePacketsDropped += theStream->GetStalePacketsDropped();
-			theNumResends += theStream->GetResender()->GetNumResends();
-		}
-
-		RTPBandwidthTracker* tracker = this->GetBandwidthTracker();
-
-		printf("Client complete. URL: %s.\n", absoluteURL.c_str());
-		printf("Max congestion window: %" _S32BITARG_ ". Min congestion window: %" _S32BITARG_ ". Avg congestion window: %" _S32BITARG_ "\n", tracker->GetMaxCongestionWindowSize(), tracker->GetMinCongestionWindowSize(), tracker->GetAvgCongestionWindowSize());
-		printf("Max RTT: %" _S32BITARG_ ". Min RTT: %" _S32BITARG_ ". Avg RTT: %" _S32BITARG_ "\n", tracker->GetMaxRTO(), tracker->GetMinRTO(), tracker->GetAvgRTO());
-		printf("Num resends: %" _S32BITARG_ ". Num skipped frames: %" _S32BITARG_ ". Num late packets dropped: %" _S32BITARG_ "\n", theNumResends, this->GetFramesSkipped(), theNumLatePacketsDropped);
-
-	}
-
 	for (auto theStream : fStreamBuffer)
 		delete theStream;
 }
@@ -173,12 +153,12 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 
 	uint32_t theWindowSize;
 	uint32_t bitRate = this->GetMovieAvgBitrate();
-	if ((bitRate == 0) || (bitRate > QTSServerInterface::GetServer()->GetPrefs()->GetWindowSizeMaxThreshold() * 1024))
-		theWindowSize = 1024 * QTSServerInterface::GetServer()->GetPrefs()->GetLargeWindowSizeInK();
-	else if (bitRate > QTSServerInterface::GetServer()->GetPrefs()->GetWindowSizeThreshold() * 1024)
-		theWindowSize = 1024 * QTSServerInterface::GetServer()->GetPrefs()->GetMediumWindowSizeInK();
+	if ((bitRate == 0) || (bitRate > ServerPrefs::GetWindowSizeMaxThreshold() * 1024))
+		theWindowSize = 1024 * ServerPrefs::GetLargeWindowSizeInK();
+	else if (bitRate > ServerPrefs::GetWindowSizeThreshold() * 1024)
+		theWindowSize = 1024 * ServerPrefs::GetMediumWindowSizeInK();
 	else
-		theWindowSize = 1024 * QTSServerInterface::GetServer()->GetPrefs()->GetSmallWindowSizeInK();
+		theWindowSize = 1024 * ServerPrefs::GetSmallWindowSizeInK();
 
 	//  printf("bitrate = %d, window size = %d\n", bitRate, theWindowSize);
 	this->GetBandwidthTracker()->SetWindowSize(theWindowSize);
@@ -210,8 +190,7 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 	// movies to prevent us from buffering lots of data that the client can't use
 
 	// If we don't know any better, assume maximum buffer size.
-	QTSServerPrefs* thePrefs = QTSServerInterface::GetServer()->GetPrefs();
-	uint32_t theBufferSize = thePrefs->GetMaxTCPBufferSizeInBytes();
+	uint32_t theBufferSize = ServerPrefs::GetMaxTCPBufferSizeInBytes();
 
 #if RTPSESSION_DEBUGGING
 	printf("RTPSession GetMovieAvgBitrate %li\n", (int32_t)this->GetMovieAvgBitrate());
@@ -220,7 +199,7 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 	if (this->GetMovieAvgBitrate() > 0)
 	{
 		// We have a bit rate... use it.
-		float realBufferSize = (float)this->GetMovieAvgBitrate() * thePrefs->GetTCPSecondsToBuffer();
+		float realBufferSize = (float)this->GetMovieAvgBitrate() * ServerPrefs::GetTCPSecondsToBuffer();
 		theBufferSize = (uint32_t)realBufferSize;
 		theBufferSize >>= 3; // Divide by 8 to convert from bits to bytes
 
@@ -229,12 +208,12 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 
 		// This is how much data we should buffer based on the scaling factor... if it is
 		// lower than the min, raise to min
-		if (theBufferSize < thePrefs->GetMinTCPBufferSizeInBytes())
-			theBufferSize = thePrefs->GetMinTCPBufferSizeInBytes();
+		if (theBufferSize < ServerPrefs::GetMinTCPBufferSizeInBytes())
+			theBufferSize = ServerPrefs::GetMinTCPBufferSizeInBytes();
 
 		// Same deal for max buffer size
-		if (theBufferSize > thePrefs->GetMaxTCPBufferSizeInBytes())
-			theBufferSize = thePrefs->GetMaxTCPBufferSizeInBytes();
+		if (theBufferSize > ServerPrefs::GetMaxTCPBufferSizeInBytes())
+			theBufferSize = ServerPrefs::GetMaxTCPBufferSizeInBytes();
 
 	}
 
@@ -428,8 +407,8 @@ int64_t RTPSession::Run()
 	//
 	// Make sure the duration between calls to Run() isn't greater than the
 	// max retransmit delay interval.
-	uint32_t theRetransDelayInMsec = QTSServerInterface::GetServer()->GetPrefs()->GetMaxRetransmitDelayInMsec();
-	uint32_t theSendInterval = QTSServerInterface::GetServer()->GetPrefs()->GetSendIntervalInMsec();
+	uint32_t theRetransDelayInMsec = ServerPrefs::GetMaxRetransmitDelayInMsec();
+	uint32_t theSendInterval = ServerPrefs::GetSendIntervalInMsec();
 
 	//
 	// We want to avoid waking up to do retransmits, and then going back to sleep for like, 1 msec. So, 

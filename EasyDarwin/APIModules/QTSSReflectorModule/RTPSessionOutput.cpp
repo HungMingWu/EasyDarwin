@@ -61,7 +61,7 @@ static boost::string_view        sStreamByteCount = "qtssReflectorStreamByteCoun
 //static boost::string_view        sFirstRTCPCurrentTime = "qtssReflectorStreamStartRTCPCurrent";
 
 RTPSessionOutput::RTPSessionOutput(RTPSession* inClientSession, ReflectorSession* inReflectorSession,
-	QTSS_Object serverPrefs, boost::string_view inCookieAddrName)
+	boost::string_view inCookieAddrName)
 	: fClientSession(inClientSession),
 	fReflectorSession(inReflectorSession),
 	fCookieAttrName(inCookieAddrName),

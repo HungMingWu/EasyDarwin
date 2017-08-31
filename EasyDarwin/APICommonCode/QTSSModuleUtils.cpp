@@ -33,7 +33,6 @@
 #include <memory>
 #include <boost/algorithm/string/predicate.hpp>
 #include "QTSSModuleUtils.h"
-#include "QTSSDictionary.h"
 #include "StrPtrLen.h"
 #include "MyAssert.h"
 #include "StringFormatter.h"
@@ -43,6 +42,8 @@
 #include "QTSSDataConverter.h"
 #include "RTSPRequest.h"
 #include "QTSSUserProfile.h"
+#include "ServerPrefs.h"
+
 #ifndef __Win32__
 #include <netinet/in.h>
 #endif
@@ -346,93 +347,43 @@ bool QTSSModuleUtils::UserInGroup(QTSSUserProfile* inUserProfile, boost::string_
 	return false;
 }
 
-
-bool QTSSModuleUtils::AddressInList(QTSS_Object inObject, QTSS_AttributeID listID, StrPtrLen *inAddressPtr)
+bool QTSSModuleUtils::HavePlayerProfile(QTSS_StandardRTSP_Params* inParams, uint32_t feature)
 {
-    StrPtrLenDel strDeleter;
-    char*   theAttributeString = nullptr;    
-    IPComponentStr inAddress(inAddressPtr);
-    IPComponentStr addressFromList;
-    
-    if (!inAddress.Valid())
-        return false;
+    std::string userAgentStr(inParams->inClientSession->GetUserAgent());
+	std::vector<std::string> ret;
 
-    uint32_t numValues = ((QTSSDictionary*)inObject)->GetNumValues(listID);
-    
-    for (uint32_t index = 0; index < numValues; index ++)
-    { 
-        strDeleter.Delete();
-        (void)((QTSSDictionary*)inObject)->GetValueAsString(listID, index, &theAttributeString);
-        strDeleter.Set(theAttributeString);
- 
-        addressFromList.Set(&strDeleter);
-        if (addressFromList.Equal(&inAddress))
-            return true;
-    }
-
-    return false;
-}
-
-bool QTSSModuleUtils::FindStringInAttributeList(QTSS_Object inObject, QTSS_AttributeID listID, StrPtrLen *inStrPtr)
-{
-    StrPtrLenDel tempString;
-     
-    if (nullptr == inStrPtr || nullptr == inStrPtr->Ptr || 0 == inStrPtr->Len)
-        return false;
-
-    uint32_t numValues = ((QTSSDictionary*)inObject)->GetNumValues(listID);
-    
-    for (uint32_t index = 0; index < numValues; index ++)
-    { 
-        tempString.Delete();
-        (void)((QTSSDictionary*)inObject)->GetValueAsString(listID, index, &tempString.Ptr);
-        tempString.Set(tempString.Ptr);
-		if (tempString.Ptr == nullptr)
-			return false;
-			
-        if (tempString.Equal(StrPtrLen("*",1)))
-            return true;
-        
-        if (inStrPtr->FindString(tempString.Ptr))
-            return true;
-            
-   }
-
-    return false;
-}
-
-bool QTSSModuleUtils::HavePlayerProfile(QTSS_PrefsObject inPrefObjectToCheck, QTSS_StandardRTSP_Params* inParams, uint32_t feature)
-{
-    std::string userAgentStrV(inParams->inClientSession->GetUserAgent());
-    StrPtrLen userAgentStr((char *)userAgentStrV.c_str());
-    
     switch (feature)
     {
         case QTSSModuleUtils::kRequiresRTPInfoSeqAndTime:
-        {        
-            return QTSSModuleUtils::FindStringInAttributeList(inPrefObjectToCheck,  qtssPrefsPlayersReqRTPHeader, &userAgentStr);
+        {
+			ret = ServerPrefs::GetPlayersReqRTPHeader();
         }
         break;
         
         case QTSSModuleUtils::kAdjustBandwidth:
         {
-            return QTSSModuleUtils::FindStringInAttributeList(inPrefObjectToCheck,  qtssPrefsPlayersReqBandAdjust, &userAgentStr);
+			ret = ServerPrefs::GetPlayersReqBandAdjust();
         }
         break;
 		
         case QTSSModuleUtils::kDisablePauseAdjustedRTPTime:
         {
-            return QTSSModuleUtils::FindStringInAttributeList(inPrefObjectToCheck,  qtssPrefsPlayersReqNoPauseTimeAdjust, &userAgentStr);
+			ret = ServerPrefs::GetPlayersReqNoPauseTimeAdjust();
         }
         break;
         
         case QTSSModuleUtils::kDelayRTPStreamsUntilAfterRTSPResponse:
         {
-            return QTSSModuleUtils::FindStringInAttributeList(inPrefObjectToCheck,  qtssPrefsPlayersReqRTPStartTimeAdjust, &userAgentStr);
+			ret = ServerPrefs::GetReqRTPStartTimeAdjust();
         }
         break;        
     }
-    
+	for (const auto &str : ret)
+	{
+		size_t pos = userAgentStr.find(str);
+		if (pos != std::string::npos)
+			return true;
+	}
     return false;
 }
 
@@ -445,72 +396,3 @@ QTSS_Error QTSSModuleUtils::AuthorizeRequest(RTSPRequest* theRTSPRequest, bool a
         
     return QTSS_NoErr;
 }
-
-
-
-
-
-IPComponentStr IPComponentStr::sLocalIPCompStr("127.0.0.*");
-
-IPComponentStr::IPComponentStr(char *theAddressPtr)
-{
-    StrPtrLen sourceStr(theAddressPtr);
-     (void) this->Set(&sourceStr);    
-}
-
-IPComponentStr::IPComponentStr(StrPtrLen *sourceStrPtr)
-{
-    (void) this->Set(sourceStrPtr);    
-}
-
-bool IPComponentStr::Set(StrPtrLen *theAddressStrPtr)
-{
-    fIsValid = false;
-   
-    StringParser IP_Paser(theAddressStrPtr);
-    StrPtrLen *piecePtr = &fAddressComponent[0];
-
-    while (IP_Paser.GetDataRemaining() > 0) 
-    {
-        IP_Paser.ConsumeUntil(piecePtr,'.');    
-        if (piecePtr->Len == 0) 
-            break;
-        
-        IP_Paser.ConsumeLength(nullptr, 1);
-        if (piecePtr == &fAddressComponent[IPComponentStr::kNumComponents -1])
-        {
-           fIsValid = true;
-           break;
-        }
-        
-        piecePtr++;
-    };
-     
-    return fIsValid;
-}
-
-
-bool IPComponentStr::Equal(IPComponentStr *testAddressPtr)
-{
-    if (testAddressPtr == nullptr) 
-        return false;
-    
-    if ( !this->Valid() || !testAddressPtr->Valid() )
-        return false;
-
-    for (uint16_t component= 0 ; component < IPComponentStr::kNumComponents ; component ++)
-    {
-        StrPtrLen *allowedPtr = this->GetComponent(component);
-        StrPtrLen *testPtr = testAddressPtr->GetComponent(component);
-                       
-        if ( testPtr->Equal("*") || allowedPtr->Equal("*") )
-            continue;
-            
-        if (!testPtr->Equal(*allowedPtr) ) 
-            return false; 
-    };  
-    
-    return true;
-}
-
-

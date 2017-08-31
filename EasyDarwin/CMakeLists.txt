@@ -1,4 +1,3 @@
-add_subdirectory (PrefsSourceLib)
 add_subdirectory (APIModules)
 add_subdirectory (APICommonCode)
 add_subdirectory (RTCPUtilitiesLib)

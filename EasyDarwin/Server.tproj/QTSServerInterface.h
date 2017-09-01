@@ -155,13 +155,6 @@ public:
 	int32_t				GetNumThinned() { return fNumThinned; };
 	uint32_t				GetNumThreads() { return fNumThreads; };
 
-	//
-	//
-	// GLOBAL OBJECTS REPOSITORY
-	// This object is in fact global, so there is an accessor for it as well.
-
-	static QTSServerInterface*  GetServer() { return sServer; }
-
 	//Allows you to map RTP session IDs (strings) to actual RTP session objects
 	OSRefTable*         GetRTPSessionMap() { return fRTPMap; }
 	OSRefTable*			GetReflectorSessionMap() { return fReflectorSessionMap; }
@@ -282,8 +275,6 @@ private:
 	int32_t          fNumThinned{0};
 	uint32_t          fNumThreads{0};
 
-	static QTSServerInterface*  sServer;
-
 	friend class RTPStatsUpdaterTask;
 };
 
@@ -306,5 +297,5 @@ private:
 	int64_t fLastBandwidthAvg{0};
 	int64_t fLastBytesSent{0};
 };
-
+QTSServerInterface* getSingleton();
 #endif // __QTSSERVERINTERFACE_H__

@@ -62,7 +62,7 @@ public:
 	~RTPSessionInterface() override
 	{
 		if (GetQualityLevel() != 0)
-			QTSServerInterface::GetServer()->IncrementNumThinned(-1);
+			getSingleton()->IncrementNumThinned(-1);
 		if (fRTSPSession != nullptr)
 			fRTSPSession->DecrementObjectHolderCount();
 	}
@@ -168,9 +168,9 @@ public:
 	int32_t*         GetQualityLevelPtr() { return &fSessionQualityLevel; }
 	void            SetQualityLevel(int32_t level) {
 		if (fSessionQualityLevel == 0 && level != 0)
-			QTSServerInterface::GetServer()->IncrementNumThinned(1);
+			getSingleton()->IncrementNumThinned(1);
 		else if (fSessionQualityLevel != 0 && level == 0)
-			QTSServerInterface::GetServer()->IncrementNumThinned(-1);
+			getSingleton()->IncrementNumThinned(-1);
 		fSessionQualityLevel = level;
 	}
 	int64_t          fLastQualityCheckTime{0};

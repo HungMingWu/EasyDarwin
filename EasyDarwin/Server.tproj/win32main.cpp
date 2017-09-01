@@ -262,7 +262,7 @@ void __stdcall ServiceMain(DWORD /*argc*/, LPTSTR *argv)
 void WINAPI ServiceControl(DWORD inControlCode)
 {
 	QTSS_ServerState theState;
-	QTSServerInterface* theServer = QTSServerInterface::GetServer();
+	QTSServerInterface* theServer = getSingleton();
 	DWORD theStatusReport = SERVICE_START_PENDING;
 
 	if (theServer != NULL)

@@ -104,8 +104,13 @@ public:
 	boost::string_view GetURLRealm() const { return uRLRealm; }
 	void SetRespMsg(boost::string_view msg) { respMsg = std::string(msg); }
 	boost::string_view GetRespMsg() const { return respMsg; }
+	QTSS_Error SendErrorResponse(QTSS_RTSPStatusCode inStatusCode);
+	QTSS_Error SendErrorResponseWithMessage(QTSS_RTSPStatusCode inStatusCode);
+	void SendDescribeResponse(iovec* describeData,
+		uint32_t inNumVectors,
+		uint32_t inTotalLength);
 private:
-
+	void ReqSendDescribeResponse();
 	//PARSING
 	enum { kAuthChallengeHeaderBufSize = 512 };
 

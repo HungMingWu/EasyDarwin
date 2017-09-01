@@ -46,7 +46,7 @@
 
 // STATIC DATA
 
-QTSServerInterface*     QTSServerInterface::sServer = nullptr;
+static QTSServerInterface* sServer = nullptr;
 boost::string_view      QTSServerInterface::sServerNameStr("EasyDarwin");
 
 // kVersionString from revision.h, include with -i at project level
@@ -74,6 +74,11 @@ boost::string_view QTSServerInterface::GetServerHeader()
 		+ "; Platform/" + std::string(sServerPlatformStr.Ptr, sServerPlatformStr.Len)
 		+ "; " + std::string(sServerCommentStr) + ")";
 	return sServerHeader;
+}
+
+QTSServerInterface* getSingleton()
+{
+	return sServer;
 }
 
 void QTSServerInterface::KillAllRTPSessions()
@@ -131,7 +136,7 @@ void RTPStatsUpdaterTask::Run(const boost::system::error_code &ec)
 		return;
 	}
 
-	QTSServerInterface* theServer = QTSServerInterface::sServer;
+	QTSServerInterface* theServer = getSingleton();
 
 	// All of this must happen atomically wrt dictionary values we are manipulating
 	OSMutexLocker locker(&theServer->fMutex);

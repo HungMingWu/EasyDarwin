@@ -30,7 +30,6 @@
 
 #include "RTPSession.h"
 #include "ReflectorStream.h"
-#include "QTSSModuleUtils.h"
 #include "SocketUtils.h"
 #include "RTCPPacket.h"
 #include "ReflectorSession.h"
@@ -99,13 +98,12 @@ ReflectorStream::ReflectorStream(SourceInfo::StreamInfo* inInfo)
 	fFirst_RTCP_RTP_Time(0),
 	fFirst_RTCP_Arrival_Time(0),
 	fTransportType(qtssRTPTransportTypeUDP),
-	fMyReflectorSession(nullptr)
+	fMyReflectorSession(nullptr),
+	fStreamInfo(*inInfo)
 {
 
 	fRTPSender.fStream = this;
 	fRTCPSender.fStream = this;
-
-	fStreamInfo.Copy(*inInfo);
 
 	// ALLOCATE BUCKET ARRAY
 	this->AllocateBucketArray(kMinNumBuckets);
@@ -368,14 +366,14 @@ QTSS_Error ReflectorStream::BindSockets(QTSS_StandardRTSP_Params* inParams, uint
 	}
 
 	if (fSockets == nullptr)
-		return QTSSModuleUtils::SendErrorResponse(inRequest, qtssServerInternal);
+		return inRequest->SendErrorResponse(qtssServerInternal);
 
 	// If we know the source IP address of this broadcast, we can demux incoming traffic
 	// on the same port by that source IP address. If we don't know the source IP addr,
 	// it is impossible for us to demux, and therefore we shouldn't allow multiple
 	// broadcasts on the same port.
 	if (((ReflectorSocket*)fSockets->GetSocketA())->HasSender() && (fStreamInfo.fSrcIPAddr == 0))
-		return QTSSModuleUtils::SendErrorResponse(inRequest, qtssServerInternal);
+		return inRequest->SendErrorResponse(qtssServerInternal);
 
 	//also put this stream onto the socket's queue of streams
 	((ReflectorSocket*)fSockets->GetSocketA())->AddSender(&fRTPSender);
@@ -415,7 +413,7 @@ QTSS_Error ReflectorStream::BindSockets(QTSS_StandardRTSP_Params* inParams, uint
 		if (err == QTSS_NoErr)
 			(void)fSockets->GetSocketB()->SetTtl(fStreamInfo.fTimeToLive);
 		if (err != QTSS_NoErr)
-			return QTSSModuleUtils::SendErrorResponse(inRequest, qtssServerInternal);
+			return inRequest->SendErrorResponse(qtssServerInternal);
 	}
 
 	// If the port is 0, update the port to be the actual port value

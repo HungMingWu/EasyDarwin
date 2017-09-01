@@ -41,7 +41,6 @@
 #include "RTSPSession.h"
 #include "RTSPSessionInterface.h"
 #include "QTSS.h"
-#include "QTSSModuleUtils.h"
 #include "base64.h"
 #include "DateTranslator.h"
 #include "SocketUtils.h"
@@ -184,7 +183,7 @@ QTSS_Error RTSPRequest::Parse()
 	//Make sure that there was some path that was extracted from this request. If not, there is no way
 	//we can process the request, so generate an error
 	if (GetAbsolutePath().empty())
-		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest);
+		return SendErrorResponse(qtssClientBadRequest);
 
 	return QTSS_NoErr;
 }
@@ -194,7 +193,7 @@ QTSS_Error RTSPRequest::ParseFirstLine(boost::string_view method, boost::string_
 {
 	fMethod = RTSPProtocol::GetMethod(method);
 	if (fMethod == qtssIllegalMethod)
-		return QTSSModuleUtils::SendErrorResponse(this, qtssClientBadRequest);
+		return SendErrorResponse(qtssClientBadRequest);
 
 	//now parse the uri,for example rtsp://www.easydarwin.org:554/live.sdp?channel=1&token=888888
 	QTSS_Error err = ParseURI(fulluri);
@@ -239,7 +238,7 @@ QTSS_Error RTSPRequest::ParseURI(boost::string_view fulluri)
 	if (qtssSetupMethod != fMethod) // any method not a setup is not allowed to have a "/trackID=" in the url.
 	{
 		if (theAbsURL.find("/trackID=") != std::string::npos) // check for non-aggregate method and return error
-			return QTSSModuleUtils::SendErrorResponse(this, qtssClientAggregateOptionAllowed);
+			return SendErrorResponse(qtssClientAggregateOptionAllowed);
 	}
 
 	// don't allow non-aggregate operations like a setup on a playing session
@@ -247,7 +246,7 @@ QTSS_Error RTSPRequest::ParseURI(boost::string_view fulluri)
 	{
 		RTSPSession*  theSession = (RTSPSession *)GetSession();
 		if (theSession != nullptr && theSession->IsPlaying())
-			return QTSSModuleUtils::SendErrorResponse(this, qtssClientAggregateOptionAllowed);
+			return SendErrorResponse(qtssClientAggregateOptionAllowed);
 	}
 
 	//
@@ -876,4 +875,77 @@ QTSS_Error RTSPRequest::SendForbiddenResponse(void)
 	this->SendHeader();
 
 	return QTSS_NoErr;
+}
+
+QTSS_Error RTSPRequest::SendErrorResponseWithMessage(QTSS_RTSPStatusCode inStatusCode)
+{
+	//set RTSP headers necessary for this error response message
+	SetStatus(inStatusCode);
+	SetResponseKeepAlive(false);
+	//send the response header. In all situations where errors could happen, we
+	//don't really care, cause there's nothing we can do anyway!
+	SendHeader();
+
+	return QTSS_RequestFailed;
+}
+
+void RTSPRequest::ReqSendDescribeResponse()
+{
+	if (GetStatus() == qtssRedirectNotModified)
+	{
+		SendHeader();
+		return;
+	}
+
+	// write date and expires
+	AppendDateAndExpires();
+
+	//write content type header
+	static boost::string_view sContentType("application/sdp");
+	AppendHeader(qtssContentTypeHeader, sContentType);
+
+	// write x-Accept-Retransmit header
+	static boost::string_view sRetransmitProtocolName("our-retransmit");
+	AppendHeader(qtssXAcceptRetransmitHeader, sRetransmitProtocolName);
+
+	// write x-Accept-Dynamic-Rate header
+	static boost::string_view dynamicRateEnabledStr("1");
+	AppendHeader(qtssXAcceptDynamicRateHeader, dynamicRateEnabledStr);
+
+	//write content base header
+
+	AppendContentBaseHeader(GetAbsoluteURL());
+
+	//I believe the only error that can happen is if the client has disconnected.
+	//if that's the case, just ignore it, hopefully the calling module will detect
+	//this and return control back to the server ASAP 
+	SendHeader();
+}
+
+void RTSPRequest::SendDescribeResponse(iovec* describeData,
+	uint32_t inNumVectors,
+	uint32_t inTotalLength)
+{
+	//write content size header
+	AppendHeader(qtssContentLengthHeader, std::to_string(inTotalLength));
+
+	ReqSendDescribeResponse();
+
+	// On solaris, the maximum # of vectors is very low (= 16) so to ensure that we are still able to
+	// send the SDP if we have a number greater than the maximum allowed, we coalesce the vectors into
+	// a single big buffer
+	WriteV(describeData, inNumVectors, inTotalLength, nullptr);
+}
+
+QTSS_Error RTSPRequest::SendErrorResponse(QTSS_RTSPStatusCode inStatusCode)
+{
+	//set RTSP headers necessary for this error response message
+	SetStatus(inStatusCode);
+	SetResponseKeepAlive(false);
+
+	//send the response header. In all situations where errors could happen, we
+	//don't really care, cause there's nothing we can do anyway!
+	SendHeader();
+
+	return QTSS_RequestFailed;
 }

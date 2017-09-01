@@ -33,55 +33,19 @@
 #include "SourceInfo.h"
 #include "SocketUtils.h"
 
-SourceInfo::SourceInfo(const SourceInfo& copy)
-:   fStreamArray(nullptr), fNumStreams(copy.fNumStreams), 
-    fOutputArray(nullptr), fNumOutputs(copy.fNumOutputs),
-    fTimeSet(copy.fTimeSet),fStartTimeUnixSecs(copy.fStartTimeUnixSecs),
-    fEndTimeUnixSecs(copy.fEndTimeUnixSecs), fSessionControlType(copy.fSessionControlType),
-    fHasValidTime(false)
-{   
-    
-    if(copy.fStreamArray != nullptr && fNumStreams != 0)
-    {
-        fStreamArray = new StreamInfo[fNumStreams];
-        for (uint32_t index=0; index < fNumStreams; index++)
-            fStreamArray[index].Copy(copy.fStreamArray[index]);
-    }
-    
-    if(copy.fOutputArray != nullptr && fNumOutputs != 0)
-    {
-        fOutputArray = new OutputInfo[fNumOutputs];
-        for (uint32_t index2=0; index2 < fNumOutputs; index2++)
-            fOutputArray[index2].Copy(copy.fOutputArray[index2]);
-    }
-    
-}
-
-SourceInfo::~SourceInfo()
-{
-    if(fStreamArray != nullptr)
-        delete [] fStreamArray;
-
-    if(fOutputArray != nullptr)
-        delete [] fOutputArray;
-        
-}
-
 bool  SourceInfo::IsReflectable()
 {
-    if (fStreamArray == nullptr)
+    if (fStreamArray.empty())
         return false;
-    if (fNumStreams == 0)
-        return false;
-        
+
     //each stream's info must meet certain criteria
-    for (uint32_t x = 0; x < fNumStreams; x++)
+    for (const auto & stream : fStreamArray)
     {
-        if (fStreamArray[x].fIsTCP)
+        if (stream.fIsTCP)
             continue;
             
-        if ((!this->IsReflectableIPAddr(fStreamArray[x].fDestIPAddr)) ||
-            (fStreamArray[x].fTimeToLive == 0))
+        if ((!this->IsReflectableIPAddr(stream.fDestIPAddr)) ||
+            (stream.fTimeToLive == 0))
             return false;
     }
     return true;
@@ -99,30 +63,23 @@ bool  SourceInfo::IsReflectableIPAddr(uint32_t inIPAddr)
 bool  SourceInfo::HasTCPStreams()
 {   
     //each stream's info must meet certain criteria
-    for (uint32_t x = 0; x < fNumStreams; x++)
-    {
-        if (fStreamArray[x].fIsTCP)
+    for (const auto &stream : fStreamArray)
+        if (stream.fIsTCP)
             return true;
-    }
     return false;
 }
 
 bool  SourceInfo::HasIncomingBroacast()
 {   
     //each stream's info must meet certain criteria
-    for (uint32_t x = 0; x < fNumStreams; x++)
-    {
-        if (fStreamArray[x].fSetupToReceive)
+    for (const auto &stream : fStreamArray)
+        if (stream.fSetupToReceive)
             return true;
-    }
     return false;
 }
 SourceInfo::StreamInfo* SourceInfo::GetStreamInfo(uint32_t inIndex)
 {
-    Assert(inIndex < fNumStreams);
-    if (fStreamArray == nullptr)
-        return nullptr;
-    if (inIndex < fNumStreams)
+    if (inIndex < fStreamArray.size())
         return &fStreamArray[inIndex];
     else
         return nullptr;
@@ -130,22 +87,17 @@ SourceInfo::StreamInfo* SourceInfo::GetStreamInfo(uint32_t inIndex)
 
 SourceInfo::StreamInfo* SourceInfo::GetStreamInfoByTrackID(uint32_t inTrackID)
 {
-    if (fStreamArray == nullptr)
+    if (fStreamArray.empty())
         return nullptr;
-    for (uint32_t x = 0; x < fNumStreams; x++)
-    {
-        if (fStreamArray[x].fTrackID == inTrackID)
-            return &fStreamArray[x];
-    }
+    for (auto &stream : fStreamArray)
+        if (stream.fTrackID == inTrackID)
+            return &stream;
     return nullptr;
 }
 
 SourceInfo::OutputInfo* SourceInfo::GetOutputInfo(uint32_t inIndex)
 {
-    Assert(inIndex < fNumOutputs);
-    if (fOutputArray == nullptr)
-        return nullptr;
-    if (inIndex < fNumOutputs)
+    if (inIndex < fOutputArray.size())
         return &fOutputArray[inIndex];
     else
         return nullptr;
@@ -154,11 +106,9 @@ SourceInfo::OutputInfo* SourceInfo::GetOutputInfo(uint32_t inIndex)
 uint32_t SourceInfo::GetNumNewOutputs()
 {
     uint32_t theNumNewOutputs = 0;
-    for (uint32_t x = 0; x < fNumOutputs; x++)
-    {
-        if (!fOutputArray[x].fAlreadySetup)
+    for (const auto &output : fOutputArray)
+        if (!output.fAlreadySetup)
             theNumNewOutputs++;
-    }
     return theNumNewOutputs;
 }
 
@@ -221,41 +171,6 @@ bool SourceInfo::Equal(SourceInfo* inInfo)
             return false;
     }
     return true;
-}
-
-void SourceInfo::StreamInfo::Copy(const StreamInfo& copy)
-{
-    fSrcIPAddr = copy.fSrcIPAddr;
-    fDestIPAddr = copy.fDestIPAddr;
-    fPort = copy.fPort;
-    fTimeToLive = copy.fTimeToLive;
-    fPayloadType = copy.fPayloadType;
-    fPayloadName = copy.fPayloadName;
-    fTrackID = copy.fTrackID;
-	fTrackName = copy.fTrackName;
-    fBufferDelay = copy.fBufferDelay;
-    fIsTCP = copy.fIsTCP;
-    fSetupToReceive = copy.fSetupToReceive;
-    fTimeScale = copy.fTimeScale;    
-}
-
-SourceInfo::StreamInfo::~StreamInfo()
-{
-}
-
-void SourceInfo::OutputInfo::Copy(const OutputInfo& copy)
-{
-    fDestAddr = copy.fDestAddr;
-    fLocalAddr = copy.fLocalAddr;
-    fTimeToLive = copy.fTimeToLive;
-    fNumPorts = copy.fNumPorts;
-    if(fNumPorts != 0)
-    {
-        fPortArray = new uint16_t[fNumPorts];
-        ::memcpy(fPortArray, copy.fPortArray, fNumPorts * sizeof(uint16_t));
-    }
-    fBasePort = copy.fBasePort;
-    fAlreadySetup = copy.fAlreadySetup;
 }
 
 SourceInfo::OutputInfo::~OutputInfo()

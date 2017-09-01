@@ -52,9 +52,7 @@
 #include "TCPListenerSocket.h"
 #include "Task.h"
 
-#include "QTSSModuleUtils.h"
-
- //Compile time modules
+//Compile time modules
 #include "QTSSReflectorModule.h"
 
 #include "RTSPRequestInterface.h"
@@ -147,15 +145,6 @@ bool QTSServer::Initialize(uint16_t inPortOverride, bool createListeners, const 
 	RTSPSession::Initialize();
 
 	//
-	// STUB SERVER INITIALIZATION
-	//
-	// Construct stub versions of the prefs and messages dictionaries. We need
-	// both of these to initialize the server, but they have to be stubs because
-	// their QTSSDictionaryMaps will presumably be modified when modules get loaded.
-
-	QTSSModuleUtils::Initialize(this);
-
-	//
 	// CREATE GLOBAL OBJECTS
 	fSocketPool = new RTPSocketPool();
 	fRTPMap = new OSRefTable(kRTPSessionMapSize);
@@ -184,20 +173,6 @@ bool QTSServer::Initialize(uint16_t inPortOverride, bool createListeners, const 
 
 void QTSServer::InitModules(QTSS_ServerState inEndState)
 {
-	//
-	// LOAD AND INITIALIZE ALL MODULES
-
-	// temporarily set the verbosity on missing prefs when starting up to debug level
-	// This keeps all the pref messages being written to the config file from being logged.
-	// don't exit until the verbosity level is reset back to the initial prefs.
-   //
-	// CREATE MODULE OBJECTS AND READ IN MODULE PREFS
-
-	// Finish setting up modules. Create our final prefs & messages objects,
-	// register all global dictionaries, and invoke the modules in their Init roles.
-
-	QTSSModuleUtils::Initialize(this);
-
 	//
 	// INVOKE INITIALIZE ROLE
 	this->DoInitRole();
@@ -421,7 +396,7 @@ bool RTSPListenerSocket::OverMaxConnections(uint32_t buffer)
 
 UDPSocketPair*  RTPSocketPool::ConstructUDPSocketPair()
 {
-	Task* theTask = ((QTSServer*)QTSServerInterface::GetServer())->fRTCPTask;
+	Task* theTask = ((QTSServer*)getSingleton())->fRTCPTask;
 
 	//construct a pair of UDP sockets, the lower one for RTP data (outgoing only, no demuxer
 	//necessary), and one for RTCP data (incoming, so definitely need a demuxer).

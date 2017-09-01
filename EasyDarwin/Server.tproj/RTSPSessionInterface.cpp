@@ -66,23 +66,13 @@ RTSPSessionInterface::RTSPSessionInterface()
 	fInputStream(&fSocket),
 	fOutputStream(&fSocket, &fTimeoutTask),
 	fSessionMutex(),
-	fSocket(nullptr, Socket::kNonBlockingSocketType),
-	fOutputSocketP(&fSocket),
-	fInputSocketP(&fSocket)
+	fSocket(nullptr, Socket::kNonBlockingSocketType)
 {
 	fTimeoutTask.SetTask(this);
 	fSocket.SetTask(this);
 
 	//fSessionID = (uint32_t)atomic_add(&sSessionIDCounter, 1);
 	fSessionID = ++sSessionIDCounter;
-}
-
-
-RTSPSessionInterface::~RTSPSessionInterface()
-{
-	// If the input socket is != output socket, the input socket was created dynamically
-	if (fInputSocketP != fOutputSocketP)
-		delete fInputSocketP;
 }
 
 void RTSPSessionInterface::DecrementObjectHolderCount()
@@ -147,9 +137,7 @@ QTSS_Error RTSPSessionInterface::Read(void* ioBuffer, uint32_t inLength, uint32_
 QTSS_Error RTSPSessionInterface::RequestEvent(QTSS_EventType inEventMask)
 {
 	if (inEventMask & QTSS_ReadableEvent)
-		fInputSocketP->RequestEvent(EV_RE);
-	if (inEventMask & QTSS_WriteableEvent)
-		fOutputSocketP->RequestEvent(EV_WR);
+		fSocket.RequestEvent(EV_RE);
 
 	return QTSS_NoErr;
 }

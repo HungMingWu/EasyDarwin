@@ -38,7 +38,7 @@ int64_t RTCPTask::Run()
 	const uint32_t kMaxRTCPPacketSize = 2048;
 	char thePacketBuffer[kMaxRTCPPacketSize];
 	StrPtrLen thePacket(thePacketBuffer, 0);
-	QTSServerInterface* theServer = QTSServerInterface::GetServer();
+	QTSServerInterface* theServer = getSingleton();
 
 	//This task goes through all the UDPSockets in the RTPSocketPool, checking to see
 	//if they have data. If they do, it demuxes the packets and sends the packet onto

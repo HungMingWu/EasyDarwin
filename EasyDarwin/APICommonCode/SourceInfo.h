@@ -42,19 +42,17 @@
 #include "QTSS.h"
 #include "StrPtrLen.h"
 #include "OS.h"
+#include <vector>
 
 class SourceInfo
 {
     public:
     
-        SourceInfo() {}
-        SourceInfo(const SourceInfo& copy);// Does copy dynamically allocated data
-        virtual ~SourceInfo(); // Deletes the dynamically allocated data
+		SourceInfo() = default;
+        SourceInfo(const SourceInfo&) = default;
+        virtual ~SourceInfo() = default;
         
-        enum
-        {
-            eDefaultBufferDelay = 3
-        };
+		constexpr static float eDefaultBufferDelay = 3.0;
         
         // Returns whether this source is reflectable.
         bool  IsReflectable();
@@ -63,11 +61,8 @@ class SourceInfo
         // the following metadata.
         struct StreamInfo
         {
-            StreamInfo() : fBufferDelay((float) eDefaultBufferDelay) {}
-            ~StreamInfo(); // Deletes the memory allocated for the fPayloadName string 
-            
-            void Copy(const StreamInfo& copy);// Does copy dynamically allocated data
-            
+			StreamInfo() = default;
+            ~StreamInfo() = default; // Deletes the memory allocated for the fPayloadName string             
             uint32_t fSrcIPAddr{0};  // Src IP address of content (this may be 0 if not known for sure)
             uint32_t fDestIPAddr{0}; // Dest IP address of content (destination IP addr for source broadcast!)
             uint16_t fPort{0};       // Dest (RTP) port of source content
@@ -76,14 +71,14 @@ class SourceInfo
             std::string fPayloadName; // Payload name of this stream
             uint32_t fTrackID{0};    // ID of this stream
 			std::string fTrackName;//Track Name of this stream
-            float fBufferDelay; // buffer delay (default is 3 seconds)
+			float fBufferDelay = eDefaultBufferDelay; // buffer delay (default is 3 seconds)
             bool  fIsTCP{false};     // Is this a TCP broadcast? If this is the case, the port and ttl are not valid
             bool  fSetupToReceive{false};    // If true then a push to the server is setup on this stream.
             uint32_t  fTimeScale{0};
         };
         
         // Returns the number of StreamInfo objects (number of Streams in this source)
-        uint32_t      GetNumStreams() { return fNumStreams; }
+        uint32_t      GetNumStreams() { return fStreamArray.size(); }
         StreamInfo* GetStreamInfo(uint32_t inStreamIndex);
         StreamInfo* GetStreamInfoByTrackID(uint32_t inTrackID);
          
@@ -99,8 +94,6 @@ class SourceInfo
             
             // Returns true if the two are equal
             bool Equal(const OutputInfo& info);
-            
-            void Copy(const OutputInfo& copy);// Does copy dynamically allocated data
 
             uint32_t fDestAddr{0};       // Destination address to forward the input onto
             uint32_t fLocalAddr{0};      // Address of local interface to send out on (may be 0)
@@ -112,7 +105,7 @@ class SourceInfo
         };
 
         // Returns the number of OutputInfo objects.
-        uint32_t      GetNumOutputs() { return fNumOutputs; }
+        uint32_t      GetNumOutputs() { return fOutputArray.size(); }
         uint32_t      GetNumNewOutputs(); // Returns # of outputs not already setup
 
         OutputInfo* GetOutputInfo(uint32_t inOutputIndex);
@@ -149,11 +142,8 @@ class SourceInfo
         //utility function used by IsReflectable
         bool IsReflectableIPAddr(uint32_t inIPAddr);
 
-        StreamInfo* fStreamArray{nullptr};
-        uint32_t      fNumStreams{0};
-        
-        OutputInfo* fOutputArray{nullptr};
-        uint32_t      fNumOutputs{0};
+        std::vector<StreamInfo> fStreamArray;
+        std::vector<OutputInfo> fOutputArray;
         
         bool      fTimeSet{false};
         time_t      fStartTimeUnixSecs{0};

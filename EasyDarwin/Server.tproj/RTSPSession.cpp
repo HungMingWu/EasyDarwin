@@ -44,7 +44,6 @@
 #include "MyAssert.h"
 
 #include "QTSS.h"
-#include "QTSSModuleUtils.h"
 #include "md5digest.h"
 #include "QTSSDataConverter.h"
 #include "QTSSReflectorModule.h"
@@ -62,7 +61,7 @@
 
 static RTPSession* GetRTPSession(StrPtrLen *str)
 {
-	OSRefTable* theMap = QTSServerInterface::GetServer()->GetRTPSessionMap();
+	OSRefTable* theMap = getSingleton()->GetRTPSessionMap();
 	OSRef* theRef = theMap->Resolve(str);
 	if (theRef != nullptr)
 		return (RTPSession*)theRef->GetObject();
@@ -139,7 +138,7 @@ int64_t RTSPSession::Run()
 					// and still don't have a full request. Wait for more data.
 
 					//+rt use the socket that reads the data, may be different now.
-					fInputSocketP->RequestEvent(EV_RE);
+					fSocket.RequestEvent(EV_RE);
 					return 0;
 				}
 
@@ -178,7 +177,7 @@ int64_t RTSPSession::Run()
 					// and still don't have a full request. Wait for more data.
 
 					//+rt use the socket that reads the data, may be different now.
-					fInputSocketP->RequestEvent(EV_RE);
+					fSocket.RequestEvent(EV_RE);
 					return 0;
 				}
 
@@ -188,15 +187,9 @@ int64_t RTSPSession::Run()
 					// We should only kill the whole session if we aren't doing HTTP.
 					// (If we are doing HTTP, the POST connection can go away)
 					Assert(err > 0);
-					if (fOutputSocketP->IsConnected())
+					if (fSocket.IsConnected())
 					{
-						// If we've gotten here, this must be an HTTP session with
-						// a dead input connection. If that's the case, we should
-						// clean up immediately so as to not have an open socket
-						// needlessly lingering around, taking up space.
-						Assert(fOutputSocketP != fInputSocketP);
-						Assert(!fInputSocketP->IsConnected());
-						fInputSocketP->Cleanup();
+						fSocket.Cleanup();
 						return 0;
 					}
 					else
@@ -241,14 +234,14 @@ int64_t RTSPSession::Run()
 				// Check for an overfilled buffer, and return an error.
 				if (err == E2BIG)
 				{
-					(void)QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientBadRequest);
+					(void)fRequest->SendErrorResponse(qtssClientBadRequest);
 					fState = kPostProcessingRequest;
 					break;
 				}
 				// Check for a corrupt base64 error, return an error
 				if (err == QTSS_BadArgument)
 				{
-					(void)QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientBadRequest);
+					(void)fRequest->SendErrorResponse(qtssClientBadRequest);
 					fState = kPostProcessingRequest;
 					break;
 				}
@@ -284,7 +277,6 @@ int64_t RTSPSession::Run()
 				char* theReplacedRequest = nullptr;
 				char* oldReplacedRequest = nullptr;
 
-				fCurrentModule = 0;
 				if (fRequest->HasResponseBeenSent())
 				{
 					fState = kPostProcessingRequest;
@@ -322,7 +314,6 @@ int64_t RTSPSession::Run()
 
 					ReflectionModule::RedirectBroadcast(&rtspParams);
 				}
-				fCurrentModule = 0;
 
 				// SetupAuthLocalPath must happen after kRoutingRequest and before kAuthenticatingRequest
 				// placed here so that if the state is shifted to kPostProcessingRequest from a response being sent
@@ -416,7 +407,6 @@ int64_t RTSPSession::Run()
 				if (!wasHandled) //don't check and possibly fail the user if it the user has already been checked.
 					this->CheckAuthentication();
 
-				fCurrentModule = 0;
 				if (fRequest->HasResponseBeenSent())
 				{
 					fState = kPostProcessingRequest;
@@ -493,7 +483,6 @@ int64_t RTSPSession::Run()
 						if (QTSS_NoErr != theErr) // We had an error so bail on the request quit the session and post process the request.
 						{
 							fRequest->SetResponseKeepAlive(false);
-							fCurrentModule = 0;
 							fState = kPostProcessingRequest;
 							break;
 
@@ -501,7 +490,6 @@ int64_t RTSPSession::Run()
 					}
 				}
 
-				fCurrentModule = 0;
 				if (fRequest->HasResponseBeenSent())
 				{
 					fState = kPostProcessingRequest;
@@ -530,7 +518,6 @@ int64_t RTSPSession::Run()
 					OSMutexLocker   locker(fRTPSession->GetSessionMutex());
 					ReflectionModule::ProcessRTSPRequest(&rtspParams);
 				}
-				fCurrentModule = 0;
 				if (fRequest->HasResponseBeenSent())
 				{
 					fState = kPostProcessingRequest;
@@ -554,7 +541,7 @@ int64_t RTSPSession::Run()
 					}
 					else
 					{
-						QTSSModuleUtils::SendErrorResponse(fRequest, qtssServerInternal);
+						fRequest->SendErrorResponse(qtssServerInternal);
 					}
 				}
 
@@ -594,7 +581,6 @@ int64_t RTSPSession::Run()
 
 					}
 				}
-				fCurrentModule = 0;
 				fState = kSendingResponse;
 			}
 
@@ -651,7 +637,7 @@ int64_t RTSPSession::Run()
 
 					if (err == EAGAIN)
 					{
-						fInputSocketP->RequestEvent(EV_RE);
+						fSocket.RequestEvent(EV_RE);
 						this->ForceSameThread();    // We are holding mutexes, so we need to force
 													// the same thread to be used for next Run()
 						return 0;
@@ -670,7 +656,7 @@ int64_t RTSPSession::Run()
 
 	//fObjectHolders--  
 	if (!IsLiveSession() && fObjectHolders > 0) {
-		OSRefTable* theMap = QTSServerInterface::GetServer()->GetRTPSessionMap();
+		OSRefTable* theMap = getSingleton()->GetRTPSessionMap();
 		OSRef* theRef = theMap->Resolve(&fLastRTPSessionIDPtr);
 		if (theRef != nullptr) {
 			fRTPSession = (RTPSession*)theRef->GetObject();
@@ -946,7 +932,7 @@ void RTSPSession::SetupRequest()
 	{
 		if (!fRequest->GetHeaderDict().Get(qtssSessionHeader).empty())
 		{
-			(void)QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientHeaderFieldNotValid);
+			(void)fRequest->SendErrorResponse(qtssClientHeaderFieldNotValid);
 			return;
 		}
 	}
@@ -990,7 +976,7 @@ void RTSPSession::CleanupRequest()
 	if (fRTPSession != nullptr)
 	{
 		// Release the ref.
-		OSRefTable* theMap = QTSServerInterface::GetServer()->GetRTPSessionMap();
+		OSRefTable* theMap = getSingleton()->GetRTPSessionMap();
 		theMap->Release(fRTPSession->GetRef());
 
 		// nullptr out any references to this RTP session
@@ -1085,7 +1071,7 @@ QTSS_Error  RTSPSession::CreateNewRTPSession()
 	// Activate adds this session into the RTP session map. We need to therefore
 	// make sure to resolve the RTPSession object out of the map, even though
 	// we don't actually need to pointer.
-	OSRef* theRef = QTSServerInterface::GetServer()->GetRTPSessionMap()->Resolve(&fLastRTPSessionIDPtr);
+	OSRef* theRef = getSingleton()->GetRTPSessionMap()->Resolve(&fLastRTPSessionIDPtr);
 	Assert(theRef != nullptr);
 
 	return QTSS_NoErr;
@@ -1132,7 +1118,7 @@ bool RTSPSession::OverMaxConnections(uint32_t buffer)
 
 QTSS_Error RTSPSession::IsOkToAddNewRTPSession()
 {
-	QTSServerInterface* theServer = QTSServerInterface::GetServer();
+	QTSServerInterface* theServer = getSingleton();
 	QTSS_ServerState theServerState = theServer->GetServerState();
 
 	//we may want to deny this connection for a couple of different reasons
@@ -1141,16 +1127,16 @@ QTSS_Error RTSPSession::IsOkToAddNewRTPSession()
 		(theServerState == qtssIdleState) ||
 		(theServerState == qtssFatalErrorState) ||
 		(theServerState == qtssShuttingDownState))
-		return QTSSModuleUtils::SendErrorResponse(fRequest, qtssServerUnavailable);
+		return fRequest->SendErrorResponse(qtssServerUnavailable);
 
 	//if the max connection limit has been hit 
 	if (this->OverMaxConnections(0))
-		return QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientNotEnoughBandwidth);
+		return fRequest->SendErrorResponse(qtssClientNotEnoughBandwidth);
 
 	//if the max bandwidth limit has been hit
 	int32_t maxKBits = ServerPrefs::GetMaxKBitsBandwidth();
 	if ((maxKBits > -1) && (theServer->GetCurBandwidthInBits() >= ((uint32_t)maxKBits * 1024)))
-		return QTSSModuleUtils::SendErrorResponse(fRequest, qtssClientNotEnoughBandwidth);
+		return fRequest->SendErrorResponse(qtssClientNotEnoughBandwidth);
 
 	//if the server is too loaded down (CPU too high, whatever)
 	// --INSERT WORKING CODE HERE--
@@ -1229,6 +1215,4 @@ void RTSPSession::HandleIncomingDataPacket()
 	rtspIncomingDataParams.inPacketLen = fInputStream.GetRequestBuffer()->Len;
 
 	ReflectionModule::ProcessRTPData(&rtspIncomingDataParams);
-
-	fCurrentModule = 0;
 }

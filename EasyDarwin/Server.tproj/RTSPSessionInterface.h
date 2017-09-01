@@ -51,7 +51,7 @@ public:
 	static void     SetBase64Decoding(bool newVal) { sDoBase64Decoding = newVal; }
 
 	RTSPSessionInterface();
-	~RTSPSessionInterface() override;
+	~RTSPSessionInterface() override = default;
 
 	//Is this session alive? If this returns false, clean up and begone as
 	//fast as possible
@@ -179,8 +179,6 @@ protected:
 
 	//+rt  socket we get from "accept()"
 	TCPSocket           fSocket;
-	TCPSocket*          fOutputSocketP;
-	TCPSocket*          fInputSocketP;  // <-- usually same as fSocketP, unless we're HTTP Proxying
 
 	// What session type are we?
 	QTSS_RTSPSessionType    fSessionType{qtssRTSPSession};

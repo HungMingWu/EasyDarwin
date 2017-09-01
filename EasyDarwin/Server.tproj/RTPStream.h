@@ -41,6 +41,7 @@
 #ifndef __RTPSTREAM_H__
 #define __RTPSTREAM_H__
 
+#include <algorithm>
 #include "Attributes.h"
 #include "QTSS.h"
 
@@ -51,13 +52,6 @@
 #include "RTPPacketResender.h"
 #include "QTSServerInterface.h"
 #include "RTCPPacket.h"
-
-#ifndef MIN
-#define	MIN(a,b) (((a)<(b))?(a):(b))
-#endif /* MIN */
-#ifndef MAX
-#define	MAX(a,b) (((a)>(b))?(a):(b))
-#endif	/* MAX */
 
 class RTPSessionInterface;
 
@@ -161,8 +155,8 @@ class RTPStream : public UDPDemuxerTask
 		}
 		void			SetMaxQualityLevelLimit(int32_t newMaxLimit) //Changes what is the best quality level possible
 		{
-			int32_t minLevel = MAX(0, (int32_t) fNumQualityLevels - 2); //do not drop down  to key frames
-			fMaxQualityLevel = MAX(MIN(minLevel, newMaxLimit), 0);
+			int32_t minLevel = std::max<int32_t>(0, fNumQualityLevels - 2); //do not drop down  to key frames
+			fMaxQualityLevel = std::max<int32_t>(std::min<int32_t>(minLevel, newMaxLimit), 0);
 			SetQualityLevel(GetQualityLevel());
 		}
 

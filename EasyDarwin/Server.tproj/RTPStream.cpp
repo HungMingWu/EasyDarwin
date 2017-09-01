@@ -41,7 +41,6 @@
 #include "RTPStream.h"
 #include "RTPSessionInterface.h"
 
-#include "QTSSModuleUtils.h"
 #include "QTSServerInterface.h"
 #include "OS.h"
 
@@ -135,7 +134,7 @@ RTPStream::~RTPStream()
 			UnregisterTask(fRemoteAddr, fRemoteRTCPPort, this);
 		Assert(err == QTSS_NoErr);
 
-		QTSServerInterface::GetServer()->GetSocketPool()->ReleaseUDPSocketPair(fSockets);
+		getSingleton()->GetSocketPool()->ReleaseUDPSocketPair(fSockets);
 	}
 
 #if RTP_PACKET_RESENDER_DEBUGGING
@@ -162,7 +161,7 @@ RTPStream::~RTPStream()
 int32_t RTPStream::GetQualityLevel()
 {
 	if (fTransportType == qtssRTPTransportTypeUDP)
-		return MIN(fQualityLevel, (int32_t)fNumQualityLevels - 1);
+		return std::min<int32_t>(fQualityLevel, fNumQualityLevels - 1);
 	else
 		return fSession->GetQualityLevel();
 }
@@ -172,8 +171,8 @@ void RTPStream::SetQualityLevel(int32_t level)
 	if (fDisableThinning)
 		return;
 
-	int32_t minLevel = MAX(0, (int32_t)fNumQualityLevels - 1);
-	level = MIN(MAX(level, fMaxQualityLevel), minLevel);
+	int32_t minLevel = std::max<int32_t>(0, fNumQualityLevels - 1);
+	level = std::min<int32_t>(std::max<int32_t>(level, fMaxQualityLevel), minLevel);
 
 	if (level == minLevel) //Instead of going down to key-frames only, go down to key-frames plus 1 P frame instead.
 		level++;
@@ -294,19 +293,19 @@ QTSS_Error RTPStream::Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags)
 		// Sending data to other addresses could be used in malicious ways, therefore
 		// it is up to the module as to whether this sort of request might be allowed
 		if (!(inFlags & qtssASFlagsAllowDestination))
-			return QTSSModuleUtils::SendErrorResponse(request, qtssClientBadRequest);
+			return request->SendErrorResponse(qtssClientBadRequest);
 		fRemoteAddr = request->GetDestAddr();
 	}
 	fRemoteRTPPort = request->GetClientPortA();
 	fRemoteRTCPPort = request->GetClientPortB();
 
 	if ((fRemoteRTPPort == 0) || (fRemoteRTCPPort == 0))
-		return QTSSModuleUtils::SendErrorResponse(request, qtssClientBadRequest);
+		return request->SendErrorResponse(qtssClientBadRequest);
 
 	//make sure that the client is advertising an even-numbered RTP port,
 	//and that the RTCP port is actually one greater than the RTP port
 	if ((fRemoteRTPPort & 1) != 0)
-		return QTSSModuleUtils::SendErrorResponse(request, qtssClientBadRequest);
+		return request->SendErrorResponse(qtssClientBadRequest);
 
 	// comment out check below. This allows the rtcp port to be non-contiguous with the rtp port.
 	//   if (fRemoteRTCPPort != (fRemoteRTPPort + 1))
@@ -330,7 +329,7 @@ QTSS_Error RTPStream::Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags)
 	// a dedicated set of sockets
 	if (SocketUtils::IsMulticastIPAddr(fRemoteAddr))
 	{
-		fSockets = QTSServerInterface::GetServer()->GetSocketPool()->CreateUDPSocketPair(sourceAddr, 0);
+		fSockets = getSingleton()->GetSocketPool()->CreateUDPSocketPair(sourceAddr, 0);
 
 		if (fSockets != nullptr)
 		{
@@ -344,15 +343,15 @@ QTSS_Error RTPStream::Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags)
 			if (err == QTSS_NoErr)
 				err = fSockets->GetSocketB()->SetMulticastInterface(fSockets->GetSocketB()->GetLocalAddr());
 			if (err != QTSS_NoErr)
-				return QTSSModuleUtils::SendErrorResponse(request, qtssServerInternal);
+				return request->SendErrorResponse(qtssServerInternal);
 		}
 	}
 	else
-		fSockets = QTSServerInterface::GetServer()->GetSocketPool()->GetUDPSocketPair(sourceAddr, 0, fRemoteAddr,
+		fSockets = getSingleton()->GetSocketPool()->GetUDPSocketPair(sourceAddr, 0, fRemoteAddr,
 			fRemoteRTCPPort);
 
 	if (fSockets == nullptr)
-		return QTSSModuleUtils::SendErrorResponse(request, qtssServerInternal);
+		return request->SendErrorResponse(qtssServerInternal);
 
 	else if (fTransportType == qtssRTPTransportTypeReliableUDP)
 	{
@@ -977,11 +976,11 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 			fSession->GetOverbufferWindow()->AddPacketToWindow(inLen);
 			fSession->UpdatePacketsSent(1);
 			fSession->UpdateBytesSent(inLen);
-			QTSServerInterface::GetServer()->IncrementTotalRTPBytes(inLen);
-			QTSServerInterface::GetServer()->IncrementTotalPackets();
+			getSingleton()->IncrementTotalRTPBytes(inLen);
+			getSingleton()->IncrementTotalPackets();
 
-			QTSServerInterface::GetServer()->IncrementTotalLate(theCurrentPacketDelay);
-			QTSServerInterface::GetServer()->IncrementTotalQuality(this->GetQualityLevel());
+			getSingleton()->IncrementTotalLate(theCurrentPacketDelay);
+			getSingleton()->IncrementTotalQuality(this->GetQualityLevel());
 
 			// Record the RTP timestamp for RTCPs
 			auto* timeStampP = (uint32_t*)(thePacket->packetData);
@@ -1294,7 +1293,7 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 				if (curTotalLostPackets > fTotalLostPackets)
 				{
 					//increment the server total by the new delta
-					QTSServerInterface::GetServer()->IncrementTotalRTPPacketsLost(curTotalLostPackets - fTotalLostPackets);
+					getSingleton()->IncrementTotalRTPPacketsLost(curTotalLostPackets - fTotalLostPackets);
 					fCurPacketsLostInRTCPInterval = curTotalLostPackets - fTotalLostPackets;
 					//                  printf("fCurPacketsLostInRTCPInterval = %d\n", fCurPacketsLostInRTCPInterval);
 					fTotalLostPackets = curTotalLostPackets;
@@ -1326,7 +1325,7 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 
 					if (measuredRTT < 60000) //make sure that the RTT is not some ridiculously large value
 					{
-						fEstRTT = fEstRTT == 0 ? measuredRTT : MIN(measuredRTT, fEstRTT);
+						fEstRTT = fEstRTT == 0 ? measuredRTT : std::min<int32_t>(measuredRTT, fEstRTT);
 					}
 				}
 			}

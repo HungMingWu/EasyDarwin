@@ -47,7 +47,6 @@
 #include "QTSServerInterface.h"
 #include "QTSServer.h"
 #include <stdlib.h>
-#include <QTSSModuleUtils.h>
 
 void select_startevents();
 
@@ -205,7 +204,7 @@ void RunServer()
 		{
 			//
 			// start the shutdown process
-			QTSServerInterface::GetServer()->SetServerState(qtssShuttingDownState);
+			getSingleton()->SetServerState(qtssShuttingDownState);
 
 			if (sServer->SigIntSet())
 				restartServer = true;

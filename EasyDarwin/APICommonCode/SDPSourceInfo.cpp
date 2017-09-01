@@ -172,7 +172,7 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
     if (!fSDPData.empty())
         return;
         
-    Assert(fStreamArray == nullptr);
+    Assert(fStreamArray.empty());
     
     fSDPData = std::string(sdpData, sdpLen);
 
@@ -185,8 +185,9 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
                                     //individual streams
 
     uint32_t theStreamIndex = 0;
-
+	size_t fNumStreams = 0;
 	std::vector<std::string> sdpLines = spirit_direct(fSDPData, "\r\n");
+
     // walk through the SDP, counting up the number of tracks
     // Repeat until there's no more data in the SDP
 	for (const auto &sdpLine : sdpLines)
@@ -196,8 +197,7 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
     //We should scale the # of StreamInfos to the # of trax, but we can't because
     //of an annoying compiler bug...
     
-    fStreamArray = new StreamInfo[fNumStreams];
-	::memset(fStreamArray, 0, sizeof(StreamInfo) * fNumStreams);
+    fStreamArray.resize(fNumStreams);
 
     // set the default destination as our default IP address and set the default ttl
     theGlobalStreamInfo.fDestIPAddr = INADDR_ANY;

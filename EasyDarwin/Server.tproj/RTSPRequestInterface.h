@@ -253,6 +253,12 @@ public:
 	std::string GetTruncatedPath();
 	void SetAbsolutePath(boost::string_view path) { absolutePath = std::string(path); }
 	boost::string_view GetAbsolutePath() const { return absolutePath; }
+	void Authorize(bool allowed, bool foundUser, bool authContinue)
+	{
+		SetUserAllow(allowed);
+		SetUserFound(foundUser);
+		SetAuthHandle(authContinue);
+	}
 protected:
 
 	//ALL THIS STUFF HERE IS SETUP BY RTSPREQUEST object (derived)

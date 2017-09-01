@@ -116,7 +116,6 @@ private:
 		kHaveNonTunnelMessage = 14                  // we've looked at the message, and its not an HTTP tunnle message
 	};
 
-	uint32_t fCurrentModule{ 0 };
 	uint32_t fState{ kReadingFirstRequest };
 
 

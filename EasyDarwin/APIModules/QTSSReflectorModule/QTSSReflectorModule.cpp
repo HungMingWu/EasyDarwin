@@ -32,7 +32,6 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include "QTSServerInterface.h"
 #include "QTSSReflectorModule.h"
-#include "QTSSModuleUtils.h"
 #include "ReflectorSession.h"
 #include "OSRef.h"
 #include "OS.h"
@@ -173,7 +172,6 @@ static boost::string_view    sTheNowRangeHeader("npt=now-");
 
 // FUNCTION PROTOTYPES
 
-static QTSS_Error QTSSReflectorModuleDispatch(QTSS_Role inRole, QTSS_RoleParamPtr inParams);
 static QTSS_Error Shutdown();
 static QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams);
 static QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams);
@@ -194,6 +192,53 @@ inline void KeepSession(RTSPRequest* theRequest, bool keep)
 	theRequest->SetResponseKeepAlive(keep);
 }
 
+enum {
+	kRequiresRTPInfoSeqAndTime = 0,
+	kAdjustBandwidth = 1,
+	kDisablePauseAdjustedRTPTime = 2,
+	kDelayRTPStreamsUntilAfterRTSPResponse = 3,
+};
+
+static bool HavePlayerProfile(QTSS_StandardRTSP_Params* inParams, uint32_t feature)
+{
+	std::string userAgentStr(inParams->inClientSession->GetUserAgent());
+	std::vector<std::string> ret;
+
+	switch (feature)
+	{
+	case kRequiresRTPInfoSeqAndTime:
+	{
+		ret = ServerPrefs::GetPlayersReqRTPHeader();
+	}
+	break;
+
+	case kAdjustBandwidth:
+	{
+		ret = ServerPrefs::GetPlayersReqBandAdjust();
+	}
+	break;
+
+	case kDisablePauseAdjustedRTPTime:
+	{
+		ret = ServerPrefs::GetPlayersReqNoPauseTimeAdjust();
+	}
+	break;
+
+	case kDelayRTPStreamsUntilAfterRTSPResponse:
+	{
+		ret = ServerPrefs::GetReqRTPStartTimeAdjust();
+	}
+	break;
+	}
+	for (const auto &str : ret)
+	{
+		size_t pos = userAgentStr.find(str);
+		if (pos != std::string::npos)
+			return true;
+	}
+	return false;
+}
+
 namespace ReflectionModule
 {
 	QTSS_Error Register(QTSS_Register_Params* inParams)
@@ -208,8 +253,7 @@ namespace ReflectionModule
 	QTSS_Error Initialize(QTSS_Initialize_Params* inParams)
 	{
 		// Setup module utils
-		QTSSModuleUtils::Initialize(inParams->inServer);
-		sSessionMap = QTSServerInterface::GetServer()->GetReflectorSessionMap();
+		sSessionMap = getSingleton()->GetReflectorSessionMap();
 		sServer = inParams->inServer;
 #if QTSS_REFLECTOR_EXTERNAL_MODULE
 		// The reflector is dependent on a number of objects in the Common Utilities
@@ -298,9 +342,7 @@ namespace ReflectionModule
 	{
 		if (AcceptSession(inParams))
 		{
-			bool allowed = true;
-			RTSPRequest* request = inParams->inRTSPRequest;
-			(void)QTSSModuleUtils::AuthorizeRequest(request, &allowed, &allowed, &allowed);
+			inParams->inRTSPRequest->Authorize(true, true, true);
 			return QTSS_NoErr;
 		}
 
@@ -314,8 +356,7 @@ namespace ReflectionModule
 		if ((outAuthorized == false) && (authorizeAction & qtssActionFlagsWrite)) //handle it
 		{
 			//printf("ReflectorAuthorizeRTSPRequest SET not allowed\n");
-			bool allowed = false;
-			(void)QTSSModuleUtils::AuthorizeRequest(inParams->inRTSPRequest, &allowed, &allowed, &allowed);
+			inParams->inRTSPRequest->Authorize(false, false, false);
 		}
 		return QTSS_NoErr;
 	}
@@ -488,15 +529,6 @@ namespace ReflectionModule
 		KillCommandPathInList();
 		return QTSS_NoErr;
 	}
-}
-
-QTSS_Error  QTSSReflectorModuleDispatch(QTSS_Role inRole, QTSS_RoleParamPtr inParams)
-{
-	switch (inRole)
-	{
-	default: break;
-	}
-	return QTSS_NoErr;
 }
 
 static std::string buildStreamName(boost::string_view theStreamName, uint32_t theChannelNum)
@@ -681,7 +713,7 @@ std::string DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ch
 QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 {
 	if (!sAnnounceEnabled)
-		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssPreconditionFailed);
+		return inParams->inRTSPRequest->SendErrorResponse(qtssPreconditionFailed);
 
 	// If this is SDP data, the reflector has the ability to write the data
 	// to the file system location specified by the URL.
@@ -712,7 +744,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 
 	// Check for a .sdp at the end
 	if (!pathOK && !boost::ends_with(theFullPath, sSDPSuffix))
-		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssPreconditionFailed);
+		return inParams->inRTSPRequest->SendErrorResponse(qtssPreconditionFailed);
 
 
 	// Ok, this is an sdp file. Retreive the entire contents of the SDP.
@@ -727,7 +759,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	// Check if the content-length is more than the imposed maximum
 	// if it is then return error response
 	if ((sMaxAnnouncedSDPLengthInKbytes != 0) && theContentLen > (sMaxAnnouncedSDPLengthInKbytes * 1024))
-		return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssPreconditionFailed);
+		return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssPreconditionFailed);
 
 	//
 	// Check for the existence of 2 attributes in the request: a pointer to our buffer for
@@ -745,7 +777,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 		std::unique_ptr<char[]> charArrayPathDeleter(theRequestBody);
 		//
 		// NEED TO RETURN RTSP ERROR RESPONSE
-		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest);
+		return inParams->inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
 	}
 
 	if ((theErr == QTSS_WouldBlock) || (theLen < theContentLen))
@@ -766,9 +798,9 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	{
 		boost::string_view t1(theFullPath.data(), theFullPath.length() - sSDPKillSuffix.length());
 		if (KillSession(t1, killBroadcast))
-			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssServerInternal);
+			return inParams->inRTSPRequest->SendErrorResponse(qtssServerInternal);
 		else
-			return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssClientNotFound);
+			return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssClientNotFound);
 	}
 
 	// ------------  Clean up missing required SDP lines
@@ -781,7 +813,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	checkedSDPContainer.SetSDPBuffer(editedSDP);
 	if (!checkedSDPContainer.IsSDPBufferValid())
 	{
-		return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssUnsupportedMediaType);
+		return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssUnsupportedMediaType);
 	}
 
 	SDPSourceInfo theSDPSourceInfo(editedSDP.c_str(), editedSDP.length());
@@ -870,6 +902,79 @@ std::string DoDescribeAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, Re
 	return editedSDP;
 }
 
+static QTSS_Error   ReadEntireFile(char* inPath, StrPtrLen* outData, QTSS_TimeVal inModDate = -1, QTSS_TimeVal* outModDate = nullptr)
+{
+	QTSS_Error theErr = QTSS_NoErr;
+
+	outData->Ptr = nullptr;
+	outData->Len = 0;
+
+	do {
+		uint32_t theParamLen = 8;
+		QTSS_TimeVal* theModDate = nullptr;
+		unsigned long long date = 0;
+		//theErr = QTSS_GetValuePtr(theFileObject, qtssFlObjModDate, 0, (void**)&theModDate, &theParamLen);
+		date = CSdpCache::GetInstance()->getSdpCacheDate(inPath);
+		theModDate = (QTSS_TimeVal*)&date;
+		Assert(theParamLen == sizeof(QTSS_TimeVal));
+		if (theParamLen != sizeof(QTSS_TimeVal))
+			break;
+		if (outModDate != nullptr)
+			*outModDate = (QTSS_TimeVal)*theModDate;
+
+		if (inModDate != -1) {
+			// If file hasn't been modified since inModDate, don't have to read the file
+			if (*theModDate <= inModDate)
+				break;
+		}
+
+		theParamLen = 8;
+		uint64_t* theLength = nullptr;
+		uint64_t sdpLen = 0;
+		//theErr = QTSS_GetValuePtr(theFileObject, qtssFlObjLength, 0, (void**)&theLength, &theParamLen);
+		char *sdpContext = CSdpCache::GetInstance()->getSdpMap(inPath);
+		if (sdpContext == nullptr)
+		{
+			theErr = QTSS_RequestFailed;
+		}
+		else
+		{
+			sdpLen = strlen(sdpContext);
+		}
+
+		theLength = &sdpLen;
+
+		if (theParamLen != sizeof(uint64_t))
+			break;
+
+		if (*theLength > INT32_MAX)
+			break;
+
+		// Allocate memory for the file data
+		outData->Ptr = new char[(int32_t)(*theLength + 1)];
+		outData->Len = (int32_t)*theLength;
+		outData->Ptr[outData->Len] = 0;
+
+		// Read the data
+		uint32_t recvLen = 0;
+		if (sdpContext)
+		{
+			recvLen = *theLength;
+			memcpy(outData->Ptr, sdpContext, *theLength);
+		}
+
+		if (theErr != QTSS_NoErr)
+		{
+			outData->Delete();
+			break;
+		}
+		Assert(outData->Len == recvLen);
+
+	} while (false);
+
+	return theErr;
+}
+
 QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 {
 	uint32_t theRefCount = 0;
@@ -903,7 +1008,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	StrPtrLen theFileData;
 	QTSS_TimeVal outModDate = 0;
 	QTSS_TimeVal inModDate = -1;
-	(void)QTSSModuleUtils::ReadEntireFile((char *)theFileName.c_str(), &theFileData, inModDate, &outModDate);
+	(void)ReadEntireFile((char *)theFileName.c_str(), &theFileData, inModDate, &outModDate);
 	std::unique_ptr<char[]> fileDataDeleter(theFileData.Ptr);
 
 	// -------------- process SDP to remove connection info and add track IDs, port info, and default c= line
@@ -928,7 +1033,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 		if(theRefCount)
 			sSessionMap->Release(theSession->GetRef());
 
-		return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssUnsupportedMediaType);
+		return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssUnsupportedMediaType);
 	}
 
 
@@ -937,7 +1042,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	bool adjustMediaBandwidth = false;
 
 	if (sPlayerCompatibility)
-		adjustMediaBandwidth = QTSSModuleUtils::HavePlayerProfile(inParams, QTSSModuleUtils::kAdjustBandwidth);
+		adjustMediaBandwidth = HavePlayerProfile(inParams, kAdjustBandwidth);
 
 	if (adjustMediaBandwidth)
 		adjustMediaBandwidthPercent = (float)sAdjustMediaBandwidthPercent / 100.0;
@@ -956,8 +1061,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 
 	inParams->inRTSPRequest->AppendHeader(qtssCacheControlHeader,
 		kCacheControlHeader);
-	QTSSModuleUtils::SendDescribeResponse(inParams->inRTSPRequest, 
-		&theDescribeVec[0], 3, sessLen + mediaLen);
+	inParams->inRTSPRequest->SendDescribeResponse(&theDescribeVec[0], 3, sessLen + mediaLen);
 
 	if (theRefCount)
 		sSessionMap->Release(theSession->GetRef());
@@ -992,7 +1096,7 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 
 		if (inData == nullptr)
 		{
-			(void)QTSSModuleUtils::ReadEntireFile(inPath.Ptr, &theFileDeleteData);
+			(void)ReadEntireFile(inPath.Ptr, &theFileDeleteData);
 			theFileData = theFileDeleteData;
 		}
 		else
@@ -1018,7 +1122,7 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 		// In either case, verify whether the broadcast is allowed, and send forbidden response back
 		if (!sReflectBroadcasts)
 		{
-			(void)QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssClientForbidden);
+			(void)inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssClientForbidden);
 			return nullptr;
 		}
 
@@ -1075,7 +1179,7 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 		{
 			if (!sReflectBroadcasts)
 			{
-				(void)QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssClientForbidden);
+				(void)inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssClientForbidden);
 				break;
 			}
 
@@ -1085,7 +1189,7 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 			StrPtrLen theFileData;
 
 			if (inData == nullptr)
-				(void)QTSSModuleUtils::ReadEntireFile(inPath.Ptr, &theFileData);
+				(void)ReadEntireFile(inPath.Ptr, &theFileData);
 			std::unique_ptr<char[]> charArrayDeleter(theFileData.Ptr);
 
 			if (theFileData.Len <= 0)
@@ -1231,7 +1335,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	{
 		if (isPush)
 			DeleteReflectorPushSession(inParams, theSession, foundSession);
-		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest);
+		return inParams->inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
 	}
 
 	uint32_t theTrackID = std::stoi(theDigitStr);
@@ -1246,13 +1350,13 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 		if (theStreamInfo == nullptr)
 		{
 			DeleteReflectorPushSession(inParams, theSession, foundSession);
-			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest);
+			return inParams->inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
 		}
 
 		if (!sAllowDuplicateBroadcasts && theStreamInfo->fSetupToReceive)
 		{
 			DeleteReflectorPushSession(inParams, theSession, foundSession);
-			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssPreconditionFailed);
+			return inParams->inRTSPRequest->SendErrorResponse(qtssPreconditionFailed);
 		}
 
 		inParams->inRTSPRequest->SetUpServerPort(theStreamInfo->fPort);
@@ -1263,7 +1367,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 		if (theErr != QTSS_NoErr)
 		{
 			DeleteReflectorPushSession(inParams, theSession, foundSession);
-			return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest);
+			return inParams->inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
 		}
 
 		//send the setup response
@@ -1292,7 +1396,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	SourceInfo::StreamInfo* theStreamInfo = theSession->GetSourceInfo()->GetStreamInfoByTrackID(theTrackID);
 	// If theStreamInfo is NULL, we don't have a legit track, so return an error
 	if (theStreamInfo == nullptr)
-		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientBadRequest);
+		return inParams->inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
 
 	boost::string_view thePayloadName = theStreamInfo->fPayloadName;
 	bool r = qi::phrase_parse(thePayloadName.cbegin(), thePayloadName.cend(),
@@ -1464,7 +1568,7 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 		}
 
 		if (sPlayerCompatibility)
-			rtpInfoEnabled = QTSSModuleUtils::HavePlayerProfile(inParams, QTSSModuleUtils::kRequiresRTPInfoSeqAndTime);
+			rtpInfoEnabled = HavePlayerProfile(inParams, kRequiresRTPInfoSeqAndTime);
 
 		if (sForceRTPInfoSeqAndTime)
 			rtpInfoEnabled = true;
@@ -1494,7 +1598,7 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 				{
 					int32_t waitTimeLoopCount = boost::any_cast<int32_t>(opt.value());
 					if (waitTimeLoopCount < 1)
-						return QTSSModuleUtils::SendErrorResponseWithMessage(inParams->inRTSPRequest, qtssClientNotFound);
+						return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssClientNotFound);
 
 					inParams->inClientSession->addAttribute(sRTPInfoWaitTime, waitTimeLoopCount - 1);
 				}
@@ -1625,6 +1729,26 @@ void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* theSession, bool 
 	delete inOutput;
 }
 
+static bool UserInGroup(QTSSUserProfile* inUserProfile, boost::string_view inGroup)
+{
+	if (nullptr == inUserProfile || inGroup.empty())
+		return false;
+
+	boost::string_view userName = inUserProfile->GetUserName();
+	if (userName.empty()) // no user to check
+		return false;
+
+	std::vector<std::string> userGroups = inUserProfile->GetUserGroups();
+
+	if (userGroups.empty()) // no groups to check
+		return false;
+
+	for (const auto &item : userGroups)
+		if (boost::equals(item, inGroup))
+			return true;
+
+	return false;
+}
 
 bool AcceptSession(QTSS_StandardRTSP_Params* inParams)
 {
@@ -1635,7 +1759,7 @@ bool AcceptSession(QTSS_StandardRTSP_Params* inParams)
 	if (action != qtssActionFlagsWrite)
 		return false;
 
-	if (QTSSModuleUtils::UserInGroup(theRTSPRequest->GetUserProfile(), sBroadcasterGroup))
+	if (UserInGroup(theRTSPRequest->GetUserProfile(), sBroadcasterGroup))
 		return true; // ok we are allowing this broadcaster user
 
 	boost::string_view remoteAddress = inRTSPSession->GetRemoteAddr();

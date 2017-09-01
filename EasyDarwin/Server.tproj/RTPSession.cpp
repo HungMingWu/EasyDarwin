@@ -65,7 +65,7 @@ QTSS_Error  RTPSession::Activate(boost::string_view inSessionID)
 	fRTSPSessionIDV.Set((char *)fRTSPSessionID.c_str(), fRTSPSessionID.length());
 	fRTPMapElem.Set(fRTSPSessionIDV, this);
 
-	QTSServerInterface* theServer = QTSServerInterface::GetServer();
+	QTSServerInterface* theServer = getSingleton();
 
 	//Activate puts the session into the RTPSession Map
 	QTSS_Error err = theServer->GetRTPSessionMap()->Register(&fRTPMapElem);
@@ -319,7 +319,7 @@ int64_t RTPSession::Run()
 #endif
 			// We cannot block waiting to UnRegister, because we have to
 			// give the RTSPSessionTask a chance to release the RTPSession.
-			OSRefTable* sessionTable = QTSServerInterface::GetServer()->GetRTPSessionMap();
+			OSRefTable* sessionTable = getSingleton()->GetRTPSessionMap();
 			Assert(sessionTable != nullptr);
 			if (!sessionTable->TryUnRegister(&fRTPMapElem))
 			{

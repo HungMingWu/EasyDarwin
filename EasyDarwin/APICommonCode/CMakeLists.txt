@@ -4,6 +4,6 @@ include_directories(../../CommonUtilitiesLib
 					../../Include
                     ../RTPMetaInfoLib ../RTCPUtilitiesLib 
 					../Server.tproj)
-add_library (APICommonCode QTSSRollingLog.h QTSSRollingLog.cpp
+add_library (APICommonCode
 	         SourceInfo.cpp SourceInfo.h
 	         SDPSourceInfo.cpp SDPSourceInfo.h)

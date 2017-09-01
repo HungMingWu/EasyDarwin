@@ -37,13 +37,7 @@
 #include "Task.h"
 #include "IdleTask.h"
 #include "TimeoutTask.h"
-#include "QTSSRollingLog.h"
 
-#ifndef __Win32__
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#endif
 #include "QTSServerInterface.h"
 #include "QTSServer.h"
 #include <stdlib.h>

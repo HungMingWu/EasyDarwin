@@ -28,7 +28,7 @@ set (SRC
 
 link_libraries(APIModules RTCPUtilitiesLib RTSPUtilitiesLib
                APICommonCode
-               CommonUtilitiesLib RTPMetaInfoLib)
+               CommonUtilitiesLib)
 IF (MSVC)
 link_libraries(Ws2_32 Winmm)
 set (SRC ${SRC} win32main.cpp)

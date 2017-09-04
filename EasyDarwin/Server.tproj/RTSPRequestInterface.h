@@ -366,8 +366,6 @@ private:
 
 	//optimized preformatted response header strings
 	static std::string      sPremadeHeader;
-
-	static std::string      sPremadeNoHeader;
 };
 #endif // __RTSPREQUESTINTERFACE_H__
 

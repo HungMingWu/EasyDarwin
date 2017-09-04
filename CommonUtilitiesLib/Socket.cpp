@@ -44,7 +44,7 @@
 #endif
 
 #include <errno.h>
-
+#include <string>
 #include "Socket.h"
 #include "SocketUtils.h"
 
@@ -306,6 +306,7 @@ OS_Error Socket::Send(const char* inData, const uint32_t inLength, uint32_t* out
 	if (!(fState & kConnected))
 		return (OS_Error)ENOTCONN;
 
+	std::string temp(inData, inLength);
 	int err;
 	do {
 		err = ::send(fFileDesc, inData, inLength, 0);//flags??

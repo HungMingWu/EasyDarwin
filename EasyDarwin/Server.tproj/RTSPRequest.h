@@ -48,7 +48,9 @@
 #ifndef __RTSPREQUEST_H__
 #define __RTSPREQUEST_H__
 
+#include <sstream>
 #include <boost/utility/string_view.hpp>
+#include <boost/asio/streambuf.hpp>
 #include "RTSPRequestInterface.h"
 #include "RTSPSessionInterface.h"
 #include "StringParser.h"
@@ -147,6 +149,38 @@ private:
 	void 	ParseDynamicRateHeader(boost::string_view header);
 	void	ParseRandomDataSizeHeader(boost::string_view header);
 	void    ParseBandwidthHeader(boost::string_view header);
+};
+
+class Content : public std::istream {
+	friend class RTSPRequest1;
+public:
+	size_t size() noexcept {
+		return streambuf.size();
+	}
+	/// Convenience function to return std::string. The stream buffer is consumed.
+	std::string string() noexcept {
+		try {
+			std::stringstream ss;
+			ss << rdbuf();
+			return ss.str();
+		}
+		catch (...) {
+			return std::string();
+		}
+	}
+
+private:
+	boost::asio::streambuf &streambuf;
+	Content(boost::asio::streambuf &streambuf) noexcept : std::istream(&streambuf), streambuf(streambuf) {}
+};
+
+class RTSPRequest1 {
+	boost::asio::streambuf streambuf;
+	Content content;
+	std::string method, path, query_string, rtsp_version;
+public:
+	RTSPRequest1() noexcept : content(streambuf) {}
+	~RTSPRequest1() = default;
 };
 #endif // __RTSPREQUEST_H__
 

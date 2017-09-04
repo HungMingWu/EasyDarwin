@@ -58,7 +58,7 @@ public:
 	};
 
 
-	RTCPPacket() {}
+	RTCPPacket() = default;
 	virtual ~RTCPPacket() = default;
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
@@ -74,8 +74,6 @@ public:
 	uint8_t* GetPacketBuffer() { return fReceiverPacketBuffer; }
 
 	//bool IsValidPacket();
-
-	virtual void Dump();
 
 	enum
 	{
@@ -134,8 +132,7 @@ private:
 class RTCPReceiverPacket : public RTCPPacket
 {
 public:
-
-	RTCPReceiverPacket() : RTCPPacket() {}
+	using RTCPPacket::RTCPPacket;
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
 	virtual bool ParseReport(uint8_t* inPacketBuffer, uint32_t inPacketLength);
@@ -153,8 +150,6 @@ public:
 	uint32_t GetCumulativeJitter();
 
 	//bool IsValidPacket();
-
-	void Dump() override; //Override
 
 protected:
 	inline int RecordOffset(int inReportNum);

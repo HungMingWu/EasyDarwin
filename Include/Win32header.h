@@ -83,5 +83,4 @@
 #define _CRT_NONSTDC_NO_WARNINGS
 
 #include "PlatformHeader.h"
-#include "revision.h"
 #include <fcntl.h>

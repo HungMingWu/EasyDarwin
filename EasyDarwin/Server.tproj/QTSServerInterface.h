@@ -168,13 +168,7 @@ public:
 	//
 	// SERVER NAME & VERSION
 
-	static boost::string_view   GetServerName() { return sServerNameStr; }
-	static boost::string_view   GetServerVersion() { return sServerVersionStr; }
-	static StrPtrLen&   GetServerPlatform() { return sServerPlatformStr; }
 	static boost::string_view GetServerBuildDate() { return sServerBuildDateStr; }
-	static boost::string_view GetServerHeader();
-	static boost::string_view GetServerBuild() { return sServerBuildStr; }
-	static boost::string_view GetServerComment() { return sServerCommentStr; }
 
 	//
 	// PUBLIC HEADER
@@ -227,11 +221,6 @@ private:
 		kMaxServerHeaderLen = 1000
 	};
 
-	static boost::string_view sServerNameStr;
-	static boost::string_view sServerVersionStr;
-	static boost::string_view sServerBuildStr;
-	static boost::string_view sServerCommentStr;
-	static StrPtrLen    sServerPlatformStr;
 	static boost::string_view    sServerBuildDateStr;
 
 	OSMutex             fMutex;

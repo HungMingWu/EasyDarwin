@@ -1082,7 +1082,7 @@ void RTPStream::ProcessIncomingInterleavedData(uint8_t inChannelNum, RTSPSession
 
 bool RTPStream::ProcessNADUPacket(RTCPPacket &rtcpPacket, int64_t &curTime, StrPtrLen &currentPtr, uint32_t highestSeqNum)
 {
-	RTCPNaduPacket naduPacket(false);
+	RTCPNaduPacket naduPacket;
 	uint8_t* packetBuffer = rtcpPacket.GetPacketBuffer();
 	uint32_t packetLen = (rtcpPacket.GetPacketLength() * 4) + RTCPPacket::kRTCPHeaderSizeInBytes;
 

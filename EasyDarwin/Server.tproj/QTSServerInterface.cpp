@@ -29,9 +29,6 @@
 
  //INCLUDES:
 
-#ifndef kVersionString
-#include "revision.h"
-#endif
 #include <boost/asio/io_service.hpp>
 
 #include "QTSServerInterface.h"
@@ -41,20 +38,12 @@
 #include "UDPSocketPool.h"
 #include "RTSPProtocol.h"
 #include "RTPPacketResender.h"
-#include "revision.h"
 #include "ServerPrefs.h"
 
 // STATIC DATA
 
 static QTSServerInterface* sServer = nullptr;
-boost::string_view      QTSServerInterface::sServerNameStr("EasyDarwin");
 
-// kVersionString from revision.h, include with -i at project level
-boost::string_view      QTSServerInterface::sServerVersionStr(kVersionString);
-boost::string_view      QTSServerInterface::sServerBuildStr(kBuildString);
-boost::string_view      QTSServerInterface::sServerCommentStr(kCommentString);
-
-StrPtrLen               QTSServerInterface::sServerPlatformStr(kPlatformNameString);
 boost::string_view      QTSServerInterface::sServerBuildDateStr(__DATE__ ", " __TIME__);
 
 std::string             QTSServerInterface::sPublicHeaderStr;
@@ -62,18 +51,6 @@ std::string             QTSServerInterface::sPublicHeaderStr;
 QTSServerInterface::QTSServerInterface()
 {
 	sServer = this;
-}
-
-boost::string_view QTSServerInterface::GetServerHeader()
-{
-	static std::string sServerHeader =
-		std::string(RTSPProtocol::GetHeaderString(qtssServerHeader))
-		+ ": " + std::string(sServerNameStr)
-		+ "/" + std::string(sServerVersionStr)
-		+ " (Build/" + std::string(sServerBuildStr)
-		+ "; Platform/" + std::string(sServerPlatformStr.Ptr, sServerPlatformStr.Len)
-		+ "; " + std::string(sServerCommentStr) + ")";
-	return sServerHeader;
 }
 
 QTSServerInterface* getSingleton()

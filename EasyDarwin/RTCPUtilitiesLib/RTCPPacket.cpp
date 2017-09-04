@@ -62,27 +62,6 @@ bool RTCPPacket::ParsePacket(uint8_t* inPacketBuffer, uint32_t inPacketLen)
     return true;
 }
 
-void RTCPReceiverPacket::Dump()//Override
-{
-    RTCPPacket::Dump();
-    printf("\n");
-    for (int i = 0;i<this->GetReportCount(); i++)
-    {
-        printf( "              RTCP RR Report[%d] H_ssrc=%"   _U32BITARG_   ", H_frac_lost=%d, H_tot_lost=%"   _U32BITARG_   ", H_high_seq=%"   _U32BITARG_   " H_jit=%"   _U32BITARG_   ", H_last_sr_time=%"   _U32BITARG_   ", H_last_sr_delay=%"   _U32BITARG_   " \n",
-                             i,
-                             this->GetReportSourceID(i),
-                             this->GetFractionLostPackets(i),
-                             this->GetTotalLostPackets(i),
-                             this->GetHighestSeqNumReceived(i),
-                             this->GetJitter(i),
-                             this->GetLastSenderReportTime(i),
-                             this->GetLastSenderReportDelay(i) );
-    }
-
-
-}
-
-
 bool RTCPReceiverPacket::ParseReport(uint8_t* inPacketBuffer, uint32_t inPacketLength)
 {
     bool ok = this->ParsePacket(inPacketBuffer, inPacketLength);
@@ -160,17 +139,3 @@ bool RTCPSenderReportPacket::ParseReport(uint8_t* inPacketBuffer, uint32_t inPac
         
     return true;
 }
-
-
-void RTCPPacket::Dump()
-{  
-    printf( "H_vers=%d, H_pad=%d, H_rprt_count=%d, H_type=%d, H_length=%d, H_ssrc=%" _S32BITARG_ "",
-             this->GetVersion(),
-             (int)this->GetHasPadding(),
-             this->GetReportCount(),
-             (int)this->GetPacketType(),
-             (int)this->GetPacketLength(),
-             this->GetPacketSSRC() );
-}
-
-

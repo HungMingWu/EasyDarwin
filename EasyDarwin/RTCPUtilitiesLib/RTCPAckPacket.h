@@ -77,7 +77,6 @@ public:
 	inline uint32_t GetAckMaskSizeInBits() { return fAckMaskSize * 8; }
 	inline bool IsNthBitEnabled(uint32_t inBitNumber);
 	inline uint16_t GetPacketLength();
-	void   Dump() override;
 	static void GetTestPacket(StrPtrLen* resultPtr) {} //todo
 
 	enum

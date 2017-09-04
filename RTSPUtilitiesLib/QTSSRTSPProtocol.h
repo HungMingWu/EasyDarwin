@@ -114,28 +114,27 @@ enum
     //Additional response headers
     qtssAllowHeader             = 39,
     qtssPublicHeader            = 40,
-    qtssServerHeader            = 41,
-    qtssUnsupportedHeader       = 42,
-    qtssWWWAuthenticateHeader   = 43,
-    qtssSameAsLastHeader        = 44,
+    qtssUnsupportedHeader       = 41,
+    qtssWWWAuthenticateHeader   = 42,
+    qtssSameAsLastHeader        = 43,
     
     //Newly added headers
-    qtssExtensionHeaders        = 45,
+    qtssExtensionHeaders        = 44,
     
-    qtssXRetransmitHeader       = 45,
-    qtssXAcceptRetransmitHeader = 46,
-    qtssXRTPMetaInfoHeader      = 47,
-    qtssXTransportOptionsHeader = 48,
-    qtssXPacketRangeHeader      = 49,
-    qtssXPreBufferHeader        = 50,
-	qtssXDynamicRateHeader      = 51,
-	qtssXAcceptDynamicRateHeader= 52,
+    qtssXRetransmitHeader       = 44,
+    qtssXAcceptRetransmitHeader = 45,
+    qtssXRTPMetaInfoHeader      = 46,
+    qtssXTransportOptionsHeader = 47,
+    qtssXPacketRangeHeader      = 48,
+    qtssXPreBufferHeader        = 49,
+	qtssXDynamicRateHeader      = 50,
+	qtssXAcceptDynamicRateHeader= 51,
 	
 	// QT Player random data request
-	qtssXRandomDataSizeHeader   = 53,
+	qtssXRandomDataSizeHeader   = 52,
 	
-	qtssNumHeaders				= 54,
-	qtssIllegalHeader 			= 54
+	qtssNumHeaders				= 53,
+	qtssIllegalHeader 			= 53
     
 };
 typedef uint32_t QTSS_RTSPHeader;

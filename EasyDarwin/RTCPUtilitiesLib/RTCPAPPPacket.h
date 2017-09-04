@@ -38,15 +38,12 @@
 #include "StrPtrLen.h"
 #include "ResizeableStringFormatter.h"
 
-#define APPEND_TO_DUMP_ARRAY(f, v) {if (fDebug && mDumpArray != NULL) { (void)snprintf(mDumpArray,kmDumpArraySize, f, v); fDumpReport.Put(mDumpArray); }   }
-
 class RTCPAPPPacket : public RTCPPacket
 {
 
 public:
-	RTCPAPPPacket(bool debug = false);
+	using RTCPPacket::RTCPPacket;
 	~RTCPAPPPacket() override = default;;
-	void Dump() override;
 	virtual bool ParseAPPPacket(uint8_t* inPacketBuffer, uint32_t inPacketLength); //default app header check
 	virtual bool ParseAPPData(uint8_t* inPacketBuffer, uint32_t inPacketLength) { return false; }; //derived class implements
 	inline FourCharCode GetAppPacketName(char *outName = nullptr, uint32_t len = 0);
@@ -65,10 +62,7 @@ public:
 		kmDumpArraySize = 1024
 	};
 
-	char*           mDumpArray{nullptr};
-	StrPtrLenDel    mDumpArrayStrDeleter;
 	ResizeableStringFormatter fDumpReport;
-	bool fDebug;
 
 private:
 	virtual bool ParseAPPPacketHeader(uint8_t* inPacketBuffer, uint32_t inPacketLength);

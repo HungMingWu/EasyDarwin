@@ -89,7 +89,6 @@ static bool   sDefaultAllowNonSDPURLs = true;
 static bool   sRTPInfoDisabled = false;
 static bool   sDefaultRTPInfoDisabled = false;
 
-static bool   sAnnounceEnabled = true;
 static bool   sDefaultAnnounceEnabled = true;
 static bool   sBroadcastPushEnabled = true;
 static bool   sDefaultBroadcastPushEnabled = true;
@@ -119,7 +118,6 @@ static uint16_t sLastMin = 0;
 
 static bool   sDefaultEnforceStaticSDPPortRange = false;
 
-static uint32_t   sMaxAnnouncedSDPLengthInKbytes = 4;
 //static uint32_t   sDefaultMaxAnnouncedSDPLengthInKbytes = 4;
 
 static QTSS_AttributeID sIPAllowListID = qtssIllegalAttrID;
@@ -165,7 +163,6 @@ static QTSS_AttributeID sBroadcastDirListID = qtssIllegalAttrID;
 static int32_t   sWaitTimeLoopCount = 10;
 
 // Important strings
-static boost::string_view    sSDPKillSuffix(".kill");
 static boost::string_view    sSDPSuffix("");
 static boost::string_view    sMOVSuffix(".mov");
 static boost::string_view    sTheNowRangeHeader("npt=now-");
@@ -181,8 +178,6 @@ static QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* i
 static QTSS_Error DestroySession(QTSS_ClientSessionClosing_Params* inParams);
 static void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* inSession, bool killClients);
 static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool isPush = false, bool *foundSessionPtr = nullptr, std::string* resultFilePath = nullptr);
-void KillCommandPathInList();
-bool KillSession(boost::string_view sdpPath, bool killClients);
 
 static bool AcceptSession(QTSS_StandardRTSP_Params* inParams);
 
@@ -526,7 +521,6 @@ namespace ReflectionModule
 
 	QTSS_Error RereadPrefs()
 	{
-		KillCommandPathInList();
 		return QTSS_NoErr;
 	}
 }
@@ -712,40 +706,12 @@ std::string DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ch
 
 QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 {
-	if (!sAnnounceEnabled)
-		return inParams->inRTSPRequest->SendErrorResponse(qtssPreconditionFailed);
-
-	// If this is SDP data, the reflector has the ability to write the data
-	// to the file system location specified by the URL.
-
-	//
-	// This is a completely stateless action. No ReflectorSession gets created (obviously).
-
-	//
-	// Eventually, we should really require access control before we do this.
-	//printf("QTSSReflectorModule:DoAnnounce\n");
-	//
-	// Get the full path to this file
 	std::string theFullPath = inParams->inRTSPRequest->GetFileName();
 
 	uint32_t theChannelNum = GetChannel(inParams->inRTSPRequest);
 
 
 	std::string theStreamName = buildStreamName(theFullPath, theChannelNum);
-
-	// Check for a .kill at the end
-	bool pathOK = false;
-	bool killBroadcast = false;
-	if (sAnnouncedKill && boost::ends_with(theFullPath, sSDPKillSuffix))
-	{
-		pathOK = true;
-		killBroadcast = true;
-	}
-
-	// Check for a .sdp at the end
-	if (!pathOK && !boost::ends_with(theFullPath, sSDPSuffix))
-		return inParams->inRTSPRequest->SendErrorResponse(qtssPreconditionFailed);
-
 
 	// Ok, this is an sdp file. Retreive the entire contents of the SDP.
 	// This has to be done asynchronously (in case the SDP stuff is fragmented across
@@ -755,11 +721,6 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	// We need to know the content length to manage memory
 	uint32_t theLen = 0;
 	uint32_t theContentLen = inParams->inRTSPRequest->GetContentLength();
-
-	// Check if the content-length is more than the imposed maximum
-	// if it is then return error response
-	if ((sMaxAnnouncedSDPLengthInKbytes != 0) && theContentLen > (sMaxAnnouncedSDPLengthInKbytes * 1024))
-		return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssPreconditionFailed);
 
 	//
 	// Check for the existence of 2 attributes in the request: a pointer to our buffer for
@@ -788,20 +749,6 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	}
 
 	Assert(theErr == QTSS_NoErr);
-
-
-	//
-	// If we've gotten here, we have the entire content body in our buffer.
-	//
-
-	if (killBroadcast)
-	{
-		boost::string_view t1(theFullPath.data(), theFullPath.length() - sSDPKillSuffix.length());
-		if (KillSession(t1, killBroadcast))
-			return inParams->inRTSPRequest->SendErrorResponse(qtssServerInternal);
-		else
-			return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssClientNotFound);
-	}
 
 	// ------------  Clean up missing required SDP lines
 
@@ -1625,44 +1572,6 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 #endif
 
 	return QTSS_NoErr;
-}
-
-
-bool KillSession(boost::string_view sdpPathStr, bool killClients)
-{
-	StrPtrLen v1((char *)sdpPathStr.data(), sdpPathStr.length());
-	OSRef* theSessionRef = sSessionMap->Resolve(&v1);
-	if (theSessionRef != nullptr)
-	{
-		auto*   theSession = (ReflectorSession*)theSessionRef->GetObject();
-		RemoveOutput(nullptr, theSession, killClients);
-		theSession->GetBroadcasterSession()->Teardown();
-		return true;
-	}
-	return false;
-}
-
-
-void KillCommandPathInList()
-{
-	char filePath[128] = "";
-	ResizeableStringFormatter commandPath((char*)filePath, sizeof(filePath)); // ResizeableStringFormatter is safer and more efficient than StringFormatter for most paths.
-	OSMutexLocker locker(sSessionMap->GetMutex());
-
-	for (OSRefHashTableIter theIter(sSessionMap->GetHashTable()); !theIter.IsDone(); theIter.Next())
-	{
-		OSRef* theRef = theIter.GetCurrent();
-		if (theRef == nullptr)
-			continue;
-
-		commandPath.Reset();
-		commandPath.Put(*(theRef->GetString()));
-		commandPath.Put(sSDPKillSuffix);
-		commandPath.PutTerminator();
-
-		char *theCommandPath = commandPath.GetBufPtr();
-	}
-
 }
 
 void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* theSession, bool killClients)

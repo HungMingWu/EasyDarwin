@@ -42,7 +42,7 @@ class RTCPCompressedQTSSPacket : public RTCPAPPPacket
 {
 public:
 
-	RTCPCompressedQTSSPacket(bool debug = false);
+	using RTCPAPPPacket::RTCPAPPPacket;
 	~RTCPCompressedQTSSPacket() override = default;
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
@@ -75,8 +75,6 @@ public:
 	inline uint16_t GetExpectedFrameRate() { return fExpectedFrameRate; }
 	inline uint16_t GetAudioDryCount() { return fAudioDryCount; }
 
-	void Dump() override; //Override
-
 	static void GetTestPacket(StrPtrLen* resultPtr) {}
 
 	uint32_t fReceiverBitRate{0};
@@ -88,7 +86,7 @@ public:
 	uint32_t fNumEyes{0};
 	uint32_t fNumEyesActive{0};
 	uint32_t fNumEyesPaused{0};
-	uint32_t fOverbufferWindowSize;
+	uint32_t fOverbufferWindowSize{ UINT32_MAX };
 
 	//Proposed - are these there yet?
 	uint32_t fTotalPacketsReceived{0};

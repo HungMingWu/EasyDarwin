@@ -41,7 +41,7 @@ class RTCPNaduPacket : public RTCPAPPPacket
 {
 public:
 
-	RTCPNaduPacket(bool debug = false);
+	using RTCPAPPPacket::RTCPAPPPacket;
 	~RTCPNaduPacket() override = default;
 
 	//Call this before any accessor method. Returns true if successful, false otherwise
@@ -67,7 +67,6 @@ public:
 	void DumpNaduPacket();
 
 	static void GetTestPacket(StrPtrLen* resultPtr);
-	void Dump() override; //Override
 
 	enum
 	{
@@ -217,8 +216,6 @@ public:
 	uint32_t          LastReportedFreeBuffSizeBytes();
 	uint32_t          LastReportedTimeDelayMilli();
 	uint16_t			GetLastReportedNSN();
-
-	void DumpList();
 
 private:
 	uint32_t GetReportIndex(uint32_t id);

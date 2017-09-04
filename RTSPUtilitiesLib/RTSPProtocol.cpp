@@ -116,7 +116,6 @@ boost::string_view RTSPProtocol::sHeaders[] =
 	"Via",
 	"Allow",
 	"Public",
-	"Server",
 	"Unsupported",
 	"WWW-Authenticate",
 	",",

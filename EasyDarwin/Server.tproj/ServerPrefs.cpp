@@ -106,10 +106,6 @@ namespace ServerPrefs {
 		boost::string_view srcIP("0.0.0.0");
 		return srcIP;
 	}
-	bool GetRTSPServerInfoEnabled() {
-		constexpr bool  fEnableRTSPServerInfo = true;
-		return fEnableRTSPServerInfo;
-	}
 	uint32_t GetMaxTCPBufferSizeInBytes() {
 		constexpr uint32_t fMaxTCPBufferSizeInBytes = 200000;
 		return fMaxTCPBufferSizeInBytes;

@@ -60,12 +60,6 @@
  */
 char RTCPNaduPacket::sRTCPTestBuffer[];
 
-
-RTCPNaduPacket::RTCPNaduPacket(bool debug) :
-	RTCPAPPPacket(debug)
-{
-}
-
 void RTCPNaduPacket::GetTestPacket(StrPtrLen* resultPtr)
 {
 	/*
@@ -465,12 +459,6 @@ uint16_t RTCPNaduPacket::GetFBS(int32_t index)
 	return fbs;
 }
 
-void   RTCPNaduPacket::Dump()
-{
-	this->DumpNaduPacket();
-
-}
-
 /* class NaduReport */
 NaduReport::NaduReport(uint8_t* inPacketBuffer, uint32_t inPacketLength, uint32_t id)
 {
@@ -621,30 +609,4 @@ uint16_t NaduList::GetLastReportedNSN()
 		return 0;
 
 	return theNADUPacketData->GetNSN(0);
-}
-
-void NaduList::DumpList()
-{
-
-	printf("\nDumping Nadu List (list size = %"   _U32BITARG_   "  record count=%"   _U32BITARG_   ")\n", fListSize, fcurrentIndexCount);
-	printf("-------------------------------------------------------------\n");
-	NaduReport* lastReportPtr = this->GetLastReport();
-	NaduReport* earliestReportPtr = this->GetEarliestReport();
-	uint32_t thisID = 0;
-	uint32_t stopID = 0;
-	if (earliestReportPtr)
-		stopID = earliestReportPtr->getID();
-
-	while (lastReportPtr)
-	{
-		thisID = lastReportPtr->getID();
-		printf("NADU Record: list_index = %"   _U32BITARG_   " list_recordID = %"   _U32BITARG_   "\n", this->GetReportIndex(thisID), thisID);
-		lastReportPtr->GetNaduPacket()->Dump();
-		if (thisID == stopID)
-			break;
-
-		thisID--;
-		lastReportPtr = this->GetReport(thisID);
-	}
-
 }

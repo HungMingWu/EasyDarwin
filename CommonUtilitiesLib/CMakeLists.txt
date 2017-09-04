@@ -4,7 +4,6 @@ include_directories(../EasyDarwin/APICommonCode ../EasyDarwin/APIStubLib
 
 
 set (SRC 
-             getopt.c getopt.h 
 			 OSThread.cpp OSThread.h
 			 StrPtrLen.cpp StrPtrLen.h
 			 StringParser.cpp StringParser.h

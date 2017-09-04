@@ -37,31 +37,6 @@
 #include "ResizeableStringFormatter.h"
 
 
-RTCPAPPPacket::RTCPAPPPacket(bool debug) :
-	mDumpArrayStrDeleter(nullptr),
-	fDumpReport(),
-	fDebug(debug)
-{
-	if (fDebug)
-	{
-		mDumpArray = new char[kmDumpArraySize];
-		mDumpArray[0] = '\0';
-		mDumpArrayStrDeleter.Set(mDumpArray);
-	}
-
-}
-
-void RTCPAPPPacket::Dump()//Override
-{
-
-
-	RTCPPacket::Dump();
-	fDumpReport.PutTerminator();
-	printf("%s\n", fDumpReport.GetBufPtr());
-	fDumpReport.Reset();
-}
-
-
 bool RTCPAPPPacket::ParseAPPPacketHeader(uint8_t* inPacketBuffer, uint32_t inPacketLength)
 {
 	if (inPacketLength < kRTCPPacketSizeInBytes + kRTCPAPPHeaderSizeInBytes)
@@ -78,6 +53,3 @@ bool RTCPAPPPacket::ParseAPPPacket(uint8_t* inPacketBuffer, uint32_t inPacketLen
 	return this->ParseAPPPacketHeader(inPacketBuffer, inPacketLength);
 
 }
-
-
-

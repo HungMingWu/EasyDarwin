@@ -84,32 +84,3 @@ bool RTCPAckPacket::IsAckPacketType()
 
 	return this->IsAckType(theAppType);
 }
-
-void   RTCPAckPacket::Dump()
-{
-	uint16_t theSeqNum = this->GetAckSeqNum();
-	uint16_t thePacketLen = this->GetPacketLength();
-	uint32_t theAckMaskSizeInBits = this->GetAckMaskSizeInBits();
-
-	char name[5];
-	name[4] = 0;
-
-	::memcpy(name, &fRTCPAckBuffer[kAppPacketTypeOffset], 4);
-	auto numBufferBytes = (uint16_t)((7 * theAckMaskSizeInBits) + 1);
-	auto *maskBytesBuffer = new char[numBufferBytes];
-	std::unique_ptr<char[]> deleter(maskBytesBuffer);
-	maskBytesBuffer[0] = 0;
-	maskBytesBuffer[numBufferBytes - 1] = 0;
-	for (uint32_t maskCount = 0; maskCount < theAckMaskSizeInBits; maskCount++)
-	{
-		if (this->IsNthBitEnabled(maskCount))
-		{
-			sprintf(&maskBytesBuffer[::strlen(maskBytesBuffer)], "%"   _U32BITARG_   ", ", theSeqNum + 1 + maskCount);
-		}
-	}
-	Assert(::strlen(maskBytesBuffer) < numBufferBytes);
-	printf(" H_name=%s H_seq=%u H_len=%u mask_size=%"   _U32BITARG_   " seq_nums_bit_set=%s\n",
-		name, theSeqNum, thePacketLen, theAckMaskSizeInBits, maskBytesBuffer);
-
-}
-

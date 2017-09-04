@@ -52,8 +52,6 @@
 #include "ServerPrefs.h"
 
 std::string RTSPRequestInterface::sPremadeHeader;
-std::string RTSPRequestInterface::sPremadeNoHeader;
-
 
 static boost::string_view ColonSpace(": ");
 
@@ -69,12 +67,7 @@ void  RTSPRequestInterface::Initialize(void)
 {
 	//make a partially complete header
 	sPremadeHeader = ::PutStatusLine(qtssSuccessOK, RTSPProtocol::k10Version);
-
-	sPremadeHeader += std::string(QTSServerInterface::GetServerHeader()) + "\r\n";
 	sPremadeHeader += std::string(RTSPProtocol::GetHeaderString(qtssCSeqHeader)) + ": ";
-
-	sPremadeNoHeader = ::PutStatusLine(qtssSuccessOK, RTSPProtocol::k10Version);
-	sPremadeNoHeader += std::string(RTSPProtocol::GetHeaderString(qtssCSeqHeader)) + ": ";
 }
 
 void RTSPRequestInterface::ReInit(RTSPSessionInterface *session)
@@ -416,18 +409,9 @@ void RTSPRequestInterface::WriteStandardHeaders()
 
 	//if this is a "200 OK" response (most HTTP responses), we have some special
 	//optmizations here
-	bool sendServerInfo = ServerPrefs::GetRTSPServerInfoEnabled();
 	if (fStatus == qtssSuccessOK)
 	{
-
-		if (sendServerInfo)
-		{
-			fOutputStream->Put(sPremadeHeader);
-		}
-		else
-		{
-			fOutputStream->Put(sPremadeNoHeader);
-		}
+		fOutputStream->Put(sPremadeHeader);
 		boost::string_view cSeq = fHeaderDict.Get(qtssCSeqHeader);
 		if (!cSeq.empty())
 			fOutputStream->Put(cSeq);
@@ -444,11 +428,6 @@ void RTSPRequestInterface::WriteStandardHeaders()
 #endif 
 		//other status codes just get built on the fly
 		PutStatusLine(fOutputStream, fStatus, RTSPProtocol::k10Version);
-		if (sendServerInfo)
-		{
-			fOutputStream->Put(QTSServerInterface::GetServerHeader());
-			fOutputStream->PutEOL();
-		}
 		AppendHeader(qtssCSeqHeader, fHeaderDict.Get(qtssCSeqHeader));
 	}
 

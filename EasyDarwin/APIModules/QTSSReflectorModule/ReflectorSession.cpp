@@ -57,14 +57,14 @@ FileDeleter::~FileDeleter()
 	fFilePath.Len = 0;
 }
 
-extern boost::asio::io_service io_service;
+extern std::shared_ptr<boost::asio::io_service> io_service;
 ReflectorSession::ReflectorSession(boost::string_view inSourceID, uint32_t inChannelNum, SourceInfo* inInfo) :
 	fSessionName(inSourceID),
 	fChannelNum(inChannelNum),
 	fSourceInfo(inInfo),
 	fInitTimeMS(OS::Milliseconds()),
 	fNoneOutputStartTimeMS(OS::Milliseconds()),
-	timer(io_service)
+	timer(*io_service)
 {
 	if (!fSessionName.empty())
 	{

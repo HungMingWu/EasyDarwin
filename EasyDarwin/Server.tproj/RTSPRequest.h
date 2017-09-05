@@ -49,6 +49,7 @@
 #define __RTSPREQUEST_H__
 
 #include <sstream>
+#include <unordered_map>
 #include <boost/utility/string_view.hpp>
 #include <boost/asio/streambuf.hpp>
 #include "RTSPRequestInterface.h"
@@ -174,13 +175,116 @@ private:
 	Content(boost::asio::streambuf &streambuf) noexcept : std::istream(&streambuf), streambuf(streambuf) {}
 };
 
+inline bool case_insensitive_equal(const std::string &str1, const std::string &str2) noexcept {
+	return str1.size() == str2.size() &&
+		std::equal(str1.begin(), str1.end(), str2.begin(), [](char a, char b) {
+		return tolower(a) == tolower(b);
+	});
+}
+class CaseInsensitiveEqual {
+public:
+	bool operator()(const std::string &str1, const std::string &str2) const noexcept {
+		return case_insensitive_equal(str1, str2);
+	}
+};
+
+// Based on https://stackoverflow.com/questions/2590677/how-do-i-combine-hash-values-in-c0x/2595226#2595226
+class CaseInsensitiveHash {
+public:
+	size_t operator()(const std::string &str) const noexcept {
+		size_t h = 0;
+		std::hash<int> hash;
+		for (auto c : str)
+			h ^= hash(tolower(c)) + 0x9e3779b9 + (h << 6) + (h >> 2);
+		return h;
+	}
+};
+
+typedef std::unordered_multimap<std::string, std::string, CaseInsensitiveHash, CaseInsensitiveEqual> CaseInsensitiveMultimap;
+class RTSPHeader {
+public:
+	/// Parse header fields
+	static void parse(std::istream &stream, CaseInsensitiveMultimap &header) noexcept {
+		std::string line;
+		getline(stream, line);
+		size_t param_end;
+		while ((param_end = line.find(':')) != std::string::npos) {
+			size_t value_start = param_end + 1;
+			if (value_start < line.size()) {
+				if (line[value_start] == ' ')
+					value_start++;
+				if (value_start < line.size())
+					header.emplace(line.substr(0, param_end), line.substr(value_start, line.size() - value_start - 1));
+			}
+
+			getline(stream, line);
+		}
+	}
+};
+
+class RequestMessage {
+public:
+	/// Parse request line and header fields
+	static bool parse(std::istream &stream, std::string &method, std::string &path, std::string &query_string, std::string &version, CaseInsensitiveMultimap &header) noexcept {
+		header.clear();
+		std::string line;
+		getline(stream, line);
+		size_t method_end;
+		if ((method_end = line.find(' ')) != std::string::npos) {
+			method = line.substr(0, method_end);
+
+			size_t query_start = std::string::npos;
+			size_t path_and_query_string_end = std::string::npos;
+			for (size_t i = method_end + 1; i < line.size(); ++i) {
+				if (line[i] == '?' && (i + 1) < line.size())
+					query_start = i + 1;
+				else if (line[i] == ' ') {
+					path_and_query_string_end = i;
+					break;
+				}
+			}
+			if (path_and_query_string_end != std::string::npos) {
+				if (query_start != std::string::npos) {
+					path = line.substr(method_end + 1, query_start - method_end - 2);
+					query_string = line.substr(query_start, path_and_query_string_end - query_start);
+				}
+				else
+					path = line.substr(method_end + 1, path_and_query_string_end - method_end - 1);
+
+				size_t protocol_end;
+				if ((protocol_end = line.find('/', path_and_query_string_end + 1)) != std::string::npos) {
+					if (line.compare(path_and_query_string_end + 1, protocol_end - path_and_query_string_end - 1, "RTSP") != 0)
+						return false;
+					version = line.substr(protocol_end + 1, line.size() - protocol_end - 2);
+				}
+				else
+					return false;
+
+				RTSPHeader::parse(stream, header);
+			}
+			else
+				return false;
+		}
+		else
+			return false;
+		return true;
+	}
+};
+
 class RTSPRequest1 {
+	friend class RTSPServer;
 	boost::asio::streambuf streambuf;
 	Content content;
 	std::string method, path, query_string, rtsp_version;
+	std::string remote_endpoint_address;
+	unsigned short remote_endpoint_port;
+	CaseInsensitiveMultimap header;
 public:
-	RTSPRequest1() noexcept : content(streambuf) {}
+	RTSPRequest1(const std::string &remote_endpoint_address = std::string(), unsigned short remote_endpoint_port = 0) noexcept
+		: content(streambuf), remote_endpoint_address(remote_endpoint_address), remote_endpoint_port(remote_endpoint_port) {}
+
 	~RTSPRequest1() = default;
 };
+
 #endif // __RTSPREQUEST_H__
 

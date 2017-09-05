@@ -627,83 +627,6 @@ static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool
 	}
 }
 
-std::string DoAnnounceAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, char* theSDPPtr)
-{
-	std::string editedSDP;
-	SDPContainer checkedSDPContainer;
-	boost::string_view SDPStr(theSDPPtr, strlen(theSDPPtr));
-	checkedSDPContainer.SetSDPBuffer(SDPStr);
-	if (!checkedSDPContainer.HasReqLines())
-	{
-		if (!checkedSDPContainer.HasLineType('v'))
-		{ // add v line
-			editedSDP += "v=0\r\n";
-		}
-
-		if (!checkedSDPContainer.HasLineType('s'))
-		{
-			// add s line
-			boost::string_view theSDPName = ((RTSPRequest*)inParams->inRTSPRequest)->GetAbsolutePath();
-			if (theSDPName.empty())
-				editedSDP += "s=unknown\r\n";
-			else
-			{
-				editedSDP += "s=" + std::string(theSDPName) + "\r\n";
-			}
-		}
-
-		if (!checkedSDPContainer.HasLineType('t'))
-		{ // add t line
-			editedSDP += "t=0 0\r\n";
-		}
-
-		if (!checkedSDPContainer.HasLineType('o'))
-		{
-			// add o line
-			editedSDP += "o=";
-			char tempBuff[256] = ""; tempBuff[255] = 0;
-			char *nameStr = tempBuff;
-			uint32_t buffLen = sizeof(tempBuff) - 1;
-			std::string userAgent(inParams->inClientSession->GetUserAgent());
-			nameStr = (char *)userAgent.c_str();
-			buffLen = userAgent.length();
-			for (uint32_t c = 0; c < buffLen; c++)
-			{
-				if (StringParser::sEOLWhitespaceMask[(uint8_t)nameStr[c]])
-				{
-					nameStr[c] = 0;
-					break;
-				}
-			}
-
-			buffLen = ::strlen(nameStr);
-			if (buffLen == 0)
-				editedSDP += "announced_broadcast";
-			else
-				editedSDP += std::string(nameStr, buffLen);
-
-			editedSDP += " ";
-
-			buffLen = sizeof(tempBuff) - 1;
-			editedSDP += std::string(inParams->inClientSession->GetSessionID());
-
-			editedSDP += " ";
-			std::chrono::system_clock::time_point today = std::chrono::system_clock::now();
-			time_t tp = std::chrono::system_clock::to_time_t(today);
-			snprintf(tempBuff, sizeof(tempBuff) - 1, "%" _64BITARG_ "d", (int64_t)tp + 2208988800LU);
-			editedSDP += tempBuff;
-
-			editedSDP += " IN IP4 ";
-			editedSDP += std::string(inParams->inClientSession->GetRemoteAddr());
-			editedSDP += "\r\n";
-		}
-	}
-
-	editedSDP += theSDPPtr;
-	return editedSDP;
-}
-
-
 QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 {
 	std::string theFullPath = inParams->inRTSPRequest->GetFileName();
@@ -752,7 +675,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 
 	// ------------  Clean up missing required SDP lines
 
-	std::string editedSDP = DoAnnounceAddRequiredSDPLines(inParams, theRequestBody);
+	std::string editedSDP = std::string(theRequestBody);
 
 	// ------------ Check the headers
 
@@ -762,8 +685,6 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	{
 		return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssUnsupportedMediaType);
 	}
-
-	SDPSourceInfo theSDPSourceInfo(editedSDP.c_str(), editedSDP.length());
 
 	// ------------ reorder the sdp headers to make them proper.
 

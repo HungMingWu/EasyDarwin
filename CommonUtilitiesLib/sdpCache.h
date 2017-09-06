@@ -1,29 +1,21 @@
 #ifndef __SDPCACHE_H__
 #define __SDPCACHE_H__
 
-#include <stdio.h>
+#include <boost/utility/string_view.hpp>
 
 class CSdpCache
 {
 private:
-	static CSdpCache* cache;
-	CSdpCache()
-	= default;
+	CSdpCache()	= default;
 public:
-	~CSdpCache()
-	= default;
+	~CSdpCache() = default;
 
 	static CSdpCache* GetInstance();
 
-	void setSdpMap(char* path, char* context);
+	void setSdpMap(boost::string_view path, boost::string_view context);
 
-	char* getSdpMap(char* path);
+	boost::string_view getSdpMap(boost::string_view path);
 
-	bool eraseSdpMap(char* path);
-
-	unsigned long long getSdpCacheDate(char* path);
-
-	int getSdpCacheLen(char* path);
-
+	void eraseSdpMap(boost::string_view path);
 };
 #endif

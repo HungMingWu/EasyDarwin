@@ -23,11 +23,12 @@
  *
  */
 
+#include <initializer_list>
+#include <vector>
 #include <algorithm>
 #include "SDPUtils.h"
 
 #include "StrPtrLen.h"
-#include "ResizeableStringFormatter.h"
 #include "StringParser.h"
 
 static std::vector<boost::string_view> 
@@ -62,12 +63,15 @@ boost::string_view SDPContainer::GetMediaSDP() const
 		fSDPBuffer.length() - (size_t)(spiltLine.data() - fSDPBuffer.data()));
 }
 
-void SDPContainer::Parse()
+SDPContainer::SDPContainer(boost::string_view sdpBuffer) :fSDPBuffer(sdpBuffer)
+{
+	Parse();
+}
+
+bool SDPContainer::Parse()
 {
 	char*	    validChars = "vosiuepcbtrzkam";
 	char        nameValueSeparator = '=';
-
-	bool      valid = true;
 
 	StrPtrLen fSDPBufferV(const_cast<char *>(fSDPBuffer.data()), fSDPBuffer.length());
 	StringParser	sdpParser(&fSDPBufferV);
@@ -93,76 +97,27 @@ void SDPContainer::Parse()
 		if (firstChar == '\0')
 			continue; //skip over blank lines
 
-		fFieldStr[(uint8_t)firstChar] = firstChar;
-		switch (firstChar)
-		{
-		case 'v': fReqLines |= kV;
-			break;
-
-		case 's': fReqLines |= kS;
-			break;
-
-		case 't': fReqLines |= kT;
-			break;
-
-		case 'o': fReqLines |= kO;
-			break;
-
-		}
-
 		lineParser.ConsumeUntil(&fieldName, nameValueSeparator);
 		if ((fieldName.Len != 1) || (::strchr(validChars, fieldName.Ptr[0]) == nullptr))
-		{
-			valid = false; // line doesn't begin with one of the valid characters followed by an "="
-			break;
-		}
+			return false; // line doesn't begin with one of the valid characters followed by an "="
 
 		if (!lineParser.Expect(nameValueSeparator))
-		{
-			valid = false; // line doesn't have the "=" after the first char
-			break;
-		}
+			return false; // line doesn't have the "=" after the first char
 
 		lineParser.ConsumeUntil(&space, StringParser::sWhitespaceMask);
 
 		if (space.Len != 0)
-		{
-			valid = false; // line has whitespace after the "=" 
-			break;
-		}
+			return false; // line has whitespace after the "=" 
+
 		boost::string_view lineView(line.Ptr, line.Len);
 		if (lineView.empty()) continue;
 		fSDPLines.push_back(lineView);
 	}
 
-	if (fSDPLines.empty()) // didn't add any lines
-	{
-		valid = false;
-	}
-	fValid = valid;
-
+	return !fSDPLines.empty();
 }
 
-void SDPContainer::Initialize()
-{
-	fValid = false;
-	fReqLines = 0;
-	::memset(fFieldStr, sizeof(fFieldStr), 0);
-}
-
-bool SDPContainer::SetSDPBuffer(boost::string_view sdpBuffer)
-{
-	Initialize();
-	if (!sdpBuffer.empty())
-	{
-		fSDPBuffer = sdpBuffer;
-		Parse();
-	}
-
-	return IsSDPBufferValid();
-}
-
-bool SDPLineSorter::ValidateSessionHeader(boost::string_view theHeaderLine)
+static bool ValidateSessionHeader(boost::string_view theHeaderLine, boost::string_view fSessionHeaders)
 {
 	if (theHeaderLine.empty())
 		return false;
@@ -176,85 +131,40 @@ bool SDPLineSorter::ValidateSessionHeader(boost::string_view theHeaderLine)
 	return true;
 }
 
+// chars are order dependent: declared by rfc 2327
+static std::initializer_list<char> SDPLineSessionOrdered = { 
+	'v', 'o', 's', 'i', 'u', 'e', 'p', 'c', 'b', 't', 'r', 'z', 'k', 'a' 
+};
 
-char SDPLineSorter::sSessionOrderedLines[] = "vosiuepcbtrzka"; // chars are order dependent: declared by rfc 2327
-char SDPLineSorter::sessionSingleLines[] = "vtosiuepcbzk";    // return only 1 of each of these session field types
+// return only 1 of each of these session field types
+static std::initializer_list<char> SDPLineSessionSingle = {
+	'v', 't', 'o', 's', 'i', 'u', 'e', 'p', 'c', 'b', 'z', 'k'
+};
+
 static boost::string_view sEOL("\r\n");
-static boost::string_view sMaxBandwidthTag("b=AS:");
 
-SDPLineSorter::SDPLineSorter(const SDPContainer &rawSDPContainer, float adjustMediaBandwidthPercent)
+std::string SortSDPLine(const SDPContainer &rawSDPContainer)
 {
-	boost::string_view theMediaSDP = rawSDPContainer.GetMediaSDP();
-	if (!theMediaSDP.empty())
-	{
-		StrPtrLen theMediaV(const_cast<char *>(theMediaSDP.data()), theMediaSDP.length());
-		StringParser sdpParser(&theMediaV);
-		SDPLine sdpLine;
-		bool foundLine = false;
-		bool newMediaSection = true;
-
-		while (sdpParser.GetDataRemaining() > 0)
-		{
-			foundLine = sdpParser.GetThruEOL(&sdpLine);
-			if (!foundLine)
-			{
-				break;
-			}
-			if (sdpLine.GetHeaderType() == 'm')
-				newMediaSection = true;
-
-			if (('b' == sdpLine.GetHeaderType()) && (1.0 != adjustMediaBandwidthPercent))
-			{
-				StringParser bLineParser(&sdpLine);
-				bLineParser.ConsumeUntilDigit();
-				auto bandwidth = (uint32_t)(.5 + (adjustMediaBandwidthPercent * (float)bLineParser.ConsumeInteger()));
-				if (bandwidth < 1)
-					bandwidth = 1;
-
-				char bandwidthStr[10];
-				snprintf(bandwidthStr, sizeof(bandwidthStr) - 1, "%"   _U32BITARG_   "", bandwidth);
-				bandwidthStr[sizeof(bandwidthStr) - 1] = 0;
-
-				fMediaHeaders += std::string(sMaxBandwidthTag);
-				fMediaHeaders += bandwidthStr;
-			}
-			else
-				fMediaHeaders += std::string(sdpLine.Ptr, sdpLine.Len);
-
-			fMediaHeaders += std::string(sEOL);
-		}
-	}
-
+	std::string fSessionHeaders, fMediaHeaders(rawSDPContainer.GetMediaSDP());
 	std::vector<boost::string_view> fSessionSDP = rawSDPContainer.GetNonMediaLines();
 
 	//printf("\nSession raw Lines:\n"); fSessionSDPContainer.PrintAllLines();
 
-	int16_t numHeaderTypes = sizeof(SDPLineSorter::sSessionOrderedLines) - 1;
-
-	for (int16_t fieldTypeIndex = 0; fieldTypeIndex < numHeaderTypes; fieldTypeIndex++)
+	for (const auto &fieldType : SDPLineSessionOrdered)
 	{
-		std::vector<boost::string_view> theHeaderLines = 
-			FindHeaderTypeLines(fSessionSDP, SDPLineSorter::sSessionOrderedLines[fieldTypeIndex]);
+		std::vector<boost::string_view> theHeaderLines = FindHeaderTypeLines(fSessionSDP, fieldType);
 
 		for (const auto &line : theHeaderLines)
 		{
-			bool addLine = this->ValidateSessionHeader(line);
-			if (addLine)
-			{
-				fSessionHeaders += std::string(line);
-				fSessionHeaders += std::string(sEOL);
-			}
+			if (ValidateSessionHeader(line, fSessionHeaders))
+				fSessionHeaders += std::string(line) + std::string(sEOL);;
 
-			if (nullptr != ::strchr(sessionSingleLines, line[0])) // allow 1 of this type: use first found
-				break; // move on to next line type
-
+			// allow 1 of this type: use first found
+			// move on to next line type
+			auto it = std::find(begin(SDPLineSessionSingle), end(SDPLineSessionSingle), line[0]);
+			if (it != end(SDPLineSessionSingle))
+				break;
 		}
 	}
+	return std::move(fSessionHeaders) + std::move(fMediaHeaders);
 }
-
-std::string SDPLineSorter::GetSortedSDPStr()
-{
-	return fSessionHeaders + fMediaHeaders;
-}
-
-

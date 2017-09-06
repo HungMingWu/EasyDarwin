@@ -35,7 +35,6 @@
 
 #include <vector>
 #include <boost/utility/string_view.hpp>
-#include "OS.h"
 #include "StrPtrLen.h"
 #include "StringParser.h"
 
@@ -50,67 +49,16 @@ public:
 
 class SDPContainer
 {
-	enum { kBaseLines = 20, kLineTypeArraySize = 256 };
-
-	enum {
-		kVPos = 0,
-		kSPos,
-		kTPos,
-		kOPos
-	};
-
-	enum {
-		kV = 1 << kVPos,
-		kS = 1 << kSPos,
-		kT = 1 << kTPos,
-		kO = 1 << kOPos,
-		kAllReq = kV | kS | kT | kO
-	};
-
 	std::vector<boost::string_view> fSDPLines;
 	boost::string_view fSDPBuffer;
 public:
-
-	SDPContainer()
-	{
-		Initialize();
-	}
-
+	SDPContainer(boost::string_view sdpBuffer);
 	~SDPContainer() = default;
-	void		Initialize();
 	std::vector<boost::string_view> GetNonMediaLines() const;
 	boost::string_view GetMediaSDP() const;
-	boost::string_view GetFullSDP() const { return fSDPBuffer; }
-	void        Parse();
-	bool      SetSDPBuffer(boost::string_view sdpBuffer);
-	bool      IsSDPBufferValid() { return fValid; }
-	bool      HasReqLines() { return (bool)(fReqLines == kAllReq); }
-	bool      HasLineType(char lineType) { return (bool)(lineType == fFieldStr[(uint8_t)lineType]); }
-	char*       GetReqLinesArray;
+	bool Parse();
 	const std::vector<boost::string_view>& GetLines() const { return fSDPLines; }
-	
-	bool      fValid;
-	uint16_t      fReqLines;
-
-	char        fFieldStr[kLineTypeArraySize]; // 
-	char*       fLineSearchTypeArray;
 };
 
-
-
-class SDPLineSorter {
-	bool ValidateSessionHeader(boost::string_view theHeaderLine);
-	std::string fSessionHeaders;
-	std::string fMediaHeaders;
-
-	static char sSessionOrderedLines[];// = "vosiuepcbtrzka"; // chars are order dependent: declared by rfc 2327
-	static char sessionSingleLines[];//  = "vosiuepcbzk";    // return only 1 of each of these session field types
-public:
-	SDPLineSorter(const SDPContainer &rawSDPContainer, float adjustMediaBandwidthPercent = 1.0);
-
-	boost::string_view GetSessionHeaders() { return fSessionHeaders; }
-	boost::string_view GetMediaHeaders() { return fMediaHeaders; }
-	std::string GetSortedSDPStr();
-};
-
+std::string SortSDPLine(const SDPContainer &rawSDPContainer);
 #endif

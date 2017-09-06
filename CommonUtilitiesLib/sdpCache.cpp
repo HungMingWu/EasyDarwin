@@ -1,87 +1,38 @@
 #include "sdpCache.h"
 #include <unordered_map>
 #include <string>
-#include <time.h>
 
 using namespace std;
 
-CSdpCache* CSdpCache::cache = nullptr;
-
-typedef struct sdpCache_Tag
-{
-	unsigned long long date;
-	string context;
-} SdpCache;
-
-static unordered_map<string, SdpCache> sdpmap;
+static unordered_map<string, string> sdpmap;
 
 CSdpCache* CSdpCache::GetInstance()
 {
-	if (cache == nullptr)
-	{
-		cache = new CSdpCache();
-	}
-	return cache;
+	static CSdpCache cache;
+	return &cache;
 }
 
-void CSdpCache::setSdpMap(char* path, char* context)
+void CSdpCache::setSdpMap(boost::string_view path, boost::string_view context)
 {
-	if (path == nullptr || context == nullptr)
-	{
+	if (path.empty() || context.empty())
 		return;
-	}
-	SdpCache cache = { 0 };
-	cache.date = time(nullptr);
-	cache.context = string(context);
 
-	sdpmap[string(path)] = cache;
+	sdpmap[string(path)] = string(context);
 }
 
-char* CSdpCache::getSdpMap(char* path)
+boost::string_view CSdpCache::getSdpMap(boost::string_view path)
 {
 	auto it = sdpmap.find(string(path));
 	if (it == sdpmap.end())
-	{
-		return nullptr;
-	}
+		return {};
 
-	return (char*)it->second.context.c_str();
+	return it->second;
 }
 
-bool CSdpCache::eraseSdpMap(char* path)
+void CSdpCache::eraseSdpMap(boost::string_view path)
 {
 	auto it = sdpmap.find(string(path));
 	if (it == sdpmap.end())
-	{
-		return true;
-	}
+		return;
 	sdpmap.erase(it);
-	return true;
-}
-
-unsigned long long CSdpCache::getSdpCacheDate(char *path)
-{
-	unsigned long long date = 0;
-	int length = 0;
-	auto it = sdpmap.find(string(path));
-	if (it == sdpmap.end())
-	{
-		return 0;
-	}
-
-	date = it->second.date;
-	return date;
-}
-
-int CSdpCache::getSdpCacheLen(char* path)
-{
-	int length = 0;
-	auto it = sdpmap.find(string(path));
-	if (it == sdpmap.end())
-	{
-		return 0;
-	}
-
-	length = it->second.context.size();
-	return length;
 }

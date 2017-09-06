@@ -43,12 +43,12 @@ class SDPSourceInfo : public SourceInfo
     public:
     
         // Uses the SDP Data to build up the StreamInfo structures
-        SDPSourceInfo(const char* sdpData, uint32_t sdpLen) { Parse(sdpData, sdpLen); }
+        SDPSourceInfo(boost::string_view sdpData) { Parse(sdpData); }
         SDPSourceInfo() = default;
         ~SDPSourceInfo() override;
         
         // Parses out the SDP file provided, sets up the StreamInfo structures
-        void    Parse(const char* sdpData, uint32_t sdpLen);
+        void    Parse(boost::string_view sdpData);
 
         // This function uses the Parsed SDP file, and strips out all the network information,
         // producing an SDP file that appears to be local.

@@ -157,14 +157,12 @@ std::string SDPSourceInfo::GetLocalSDP()
     if ((trackIndex > 0) && (!hasControlLine))
 		localSDP += fmt::format("a=control:trackID={}\r\n",trackIndex);
     
-    SDPContainer rawSDPContainer; 
-    (void) rawSDPContainer.SetSDPBuffer(localSDP);
-    SDPLineSorter sortedSDP(rawSDPContainer);
+    SDPContainer rawSDPContainer(localSDP); 
 
-    return sortedSDP.GetSortedSDPStr(); // return a new copy of the sorted SDP
+    return SortSDPLine(rawSDPContainer); // return a new copy of the sorted SDP
 }
 
-void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
+void SDPSourceInfo::Parse(boost::string_view sdpData)
 {
     //
     // There are some situations in which Parse can be called twice.
@@ -174,7 +172,7 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
         
     Assert(fStreamArray.empty());
     
-    fSDPData = std::string(sdpData, sdpLen);
+    fSDPData = std::string(sdpData);
 
     // If there is no trackID information in this SDP, we make the track IDs start
     // at 1 -> N
@@ -345,7 +343,8 @@ void SDPSourceInfo::Parse(const char* sdpData, uint32_t sdpLen)
     
     uint32_t count = 0;
     while (count < fNumStreams)
-    {   fStreamArray[count].fBufferDelay = bufferDelay;
+    {
+		fStreamArray[count].fBufferDelay = bufferDelay;
         count ++;
     }
         

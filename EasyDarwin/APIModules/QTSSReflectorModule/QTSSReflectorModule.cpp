@@ -83,7 +83,6 @@ static QTSServerInterface* sServer = nullptr;
 
 //
 // Prefs
-static bool   sAllowNonSDPURLs = true;
 static bool   sDefaultAllowNonSDPURLs = true;
 
 static bool   sRTPInfoDisabled = false;
@@ -91,7 +90,6 @@ static bool   sDefaultRTPInfoDisabled = false;
 
 static bool   sDefaultAnnounceEnabled = true;
 static bool   sBroadcastPushEnabled = true;
-static bool   sDefaultBroadcastPushEnabled = true;
 static bool   sAllowDuplicateBroadcasts = false;
 static bool   sDefaultAllowDuplicateBroadcasts = false;
 
@@ -127,11 +125,9 @@ static char*            sLocalLoopBackAddress = "127.0.0.*";
 static bool   sAuthenticateLocalBroadcast = false;
 static bool   sDefaultAuthenticateLocalBroadcast = false;
 
-static bool	sDisableOverbuffering = false;
 static bool	sDefaultDisableOverbuffering = false;
 static bool	sFalse = false;
 
-static bool   sReflectBroadcasts = true;
 static bool   sDefaultReflectBroadcasts = true;
 
 static bool   sAnnouncedKill = true;
@@ -164,7 +160,6 @@ static int32_t   sWaitTimeLoopCount = 10;
 
 // Important strings
 static boost::string_view    sSDPSuffix("");
-static boost::string_view    sMOVSuffix(".mov");
 static boost::string_view    sTheNowRangeHeader("npt=now-");
 
 // FUNCTION PROTOTYPES
@@ -172,12 +167,12 @@ static boost::string_view    sTheNowRangeHeader("npt=now-");
 static QTSS_Error Shutdown();
 static QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams);
 static QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams);
-ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRTSP_Params* inParams, uint32_t inChannel = 0, StrPtrLen* inData = nullptr, bool isPush = false, bool *foundSessionPtr = nullptr);
+ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRTSP_Params* inParams, bool isPush = false, bool *foundSessionPtr = nullptr);
 static QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams);
 static QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSession);
 static QTSS_Error DestroySession(QTSS_ClientSessionClosing_Params* inParams);
 static void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* inSession, bool killClients);
-static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool isPush = false, bool *foundSessionPtr = nullptr, std::string* resultFilePath = nullptr);
+static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool isPush, bool *foundSessionPtr = nullptr, std::string* resultFilePath = nullptr);
 
 static bool AcceptSession(QTSS_StandardRTSP_Params* inParams);
 
@@ -525,11 +520,6 @@ namespace ReflectionModule
 	}
 }
 
-static std::string buildStreamName(boost::string_view theStreamName, uint32_t theChannelNum)
-{
-	return std::string(theStreamName) + EASY_KEY_SPLITER + std::to_string(theChannelNum);
-}
-
 char *GetTrimmedKeyWord(char *prefKeyWord)
 {
 	StrPtrLen redirKeyWordStr(prefKeyWord);
@@ -566,34 +556,11 @@ void SetMoviesRelativeDir()
 
 }
 
-static std::string getQueryString(RTSPRequest *pReq) {
-	std::string theQueryString = std::string(pReq->GetQueryString());
-	if (!theQueryString.empty())
-		theQueryString = boost::network::uri::decoded(theQueryString);
-	return theQueryString;
-};
-
-static uint32_t GetChannel(RTSPRequest *pReq) {
-#if 0
-	std::string queryTemp = getQueryString(pReq);
-	QueryParamList parList(const_cast<char *>(queryTemp.c_str()));
-	const char* chnNum = parList.DoFindCGIValueForParam(EASY_TAG_CHANNEL);
-	if (chnNum)
-		return std::stoi(chnNum);
-#endif
-	return 1;
-}
-
 static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool isPush, bool *foundSessionPtr, std::string* resultFilePath)
 {
 	std::string theFullPath = inParams->inRTSPRequest->GetFileName();
 
-	uint32_t theChannelNum = GetChannel(inParams->inRTSPRequest);
-
-	if (boost::ends_with(theFullPath, sMOVSuffix))
-		return nullptr;
-
-	if (sAllowNonSDPURLs && !isPush)
+	if (!isPush)
 	{
 		// Check and see if the full path to this file matches an existing ReflectorSession
 		std::string fileName = inParams->inRTSPRequest->GetFileName();
@@ -605,12 +572,10 @@ static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool
 
 		if (resultFilePath != nullptr)
 			*resultFilePath = thePathPtr;
-		return FindOrCreateSession(thePathPtr, inParams, theChannelNum);
+		return FindOrCreateSession(thePathPtr, inParams);
 	}
 	else
 	{
-		if (!sDefaultBroadcastPushEnabled)
-			return nullptr;
 		//
 		// We aren't supposed to auto-append a .sdp, so just get the URL path out of the server
 		//StrPtrLen theFullPath;
@@ -621,7 +586,7 @@ static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool
 		{
 			if (resultFilePath != nullptr)
 				*resultFilePath = theFullPath;
-			return FindOrCreateSession(theFullPath, inParams, theChannelNum, nullptr, isPush, foundSessionPtr);
+			return FindOrCreateSession(theFullPath, inParams, isPush, foundSessionPtr);
 		}
 		return nullptr;
 	}
@@ -631,10 +596,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 {
 	std::string theFullPath = inParams->inRTSPRequest->GetFileName();
 
-	uint32_t theChannelNum = GetChannel(inParams->inRTSPRequest);
-
-
-	std::string theStreamName = buildStreamName(theFullPath, theChannelNum);
+	std::string theStreamName = theFullPath;
 
 	// Ok, this is an sdp file. Retreive the entire contents of the SDP.
 	// This has to be done asynchronously (in case the SDP stuff is fragmented across
@@ -675,172 +637,32 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 
 	// ------------  Clean up missing required SDP lines
 
-	std::string editedSDP = std::string(theRequestBody);
+	std::string editedSDP = std::string(theRequestBody, theContentLen);
 
 	// ------------ Check the headers
 
-	SDPContainer checkedSDPContainer;
-	checkedSDPContainer.SetSDPBuffer(editedSDP);
-	if (!checkedSDPContainer.IsSDPBufferValid())
+	SDPContainer checkedSDPContainer(editedSDP);
+	if (!checkedSDPContainer.Parse())
 	{
 		return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssUnsupportedMediaType);
 	}
 
 	// ------------ reorder the sdp headers to make them proper.
 
-	SDPLineSorter sortedSDP(checkedSDPContainer);
+	auto sortedSDP = SortSDPLine(checkedSDPContainer);
 
 	// ------------ Write the SDP 
 
 	// sortedSDP.GetSessionHeaders()->PrintStrEOL();
 	// sortedSDP.GetMediaHeaders()->PrintStrEOL();
 
-#if 0
-	   // write the file !! need error reporting
-	FILE* theSDPFile = ::fopen(theFullPath.Ptr, "wb");//open 
-	if (theSDPFile != NULL)
-	{
-		fprintf(theSDPFile, "%s", sessionHeaders);
-		fprintf(theSDPFile, "%s", mediaHeaders);
-		::fflush(theSDPFile);
-		::fclose(theSDPFile);
-	}
-	else
-	{
-		return QTSSModuleUtils::SendErrorResponse(inParams->inRTSPRequest, qtssClientForbidden, 0);
-	}
-#endif 
-	std::string sdpContext = sortedSDP.GetSortedSDPStr();
-	CSdpCache::GetInstance()->setSdpMap((char *)theStreamName.c_str(), const_cast<char *>(sdpContext.c_str()));
+	CSdpCache::GetInstance()->setSdpMap(theStreamName, sortedSDP);
 
 
 	//printf("QTSSReflectorModule:DoAnnounce SendResponse OK=200\n");
 
 	inParams->inRTSPRequest->SendHeader();
 	return QTSS_NoErr;
-}
-
-std::string DoDescribeAddRequiredSDPLines(QTSS_StandardRTSP_Params* inParams, ReflectorSession* theSession, 
-	QTSS_TimeVal modDate, boost::string_view theSDP)
-{
-	std::string editedSDP;
-	SDPContainer checkedSDPContainer;
-	checkedSDPContainer.SetSDPBuffer(theSDP);
-	if (!checkedSDPContainer.HasReqLines())
-	{
-		if (!checkedSDPContainer.HasLineType('v'))
-		{ // add v line
-			editedSDP += "v=0\r\n";
-		}
-
-		if (!checkedSDPContainer.HasLineType('s'))
-		{
-			// add s line
-			boost::string_view theSDPName = ((RTSPRequest*)inParams->inRTSPRequest)->GetAbsolutePath();
-			editedSDP += "s=";
-			editedSDP += std::string(theSDPName);
-			editedSDP += "\r\n";
-		}
-
-		if (!checkedSDPContainer.HasLineType('t'))
-		{ // add t line
-			editedSDP += "t=0 0\r\n";
-		}
-
-		if (!checkedSDPContainer.HasLineType('o'))
-		{ // add o line
-			editedSDP += "o=broadcast_sdp ";
-			char tempBuff[256] = "";
-			tempBuff[255] = 0;
-			snprintf(tempBuff, sizeof(tempBuff) - 1, "%"   _U32BITARG_   "", *(uint32_t *)&theSession);
-			editedSDP += tempBuff;
-
-			editedSDP += " ";
-			// modified date is in milliseconds.  Convert to NTP seconds as recommended by rfc 2327
-			snprintf(tempBuff, sizeof(tempBuff) - 1, "%" _64BITARG_ "d", (int64_t)(modDate / 1000) + 2208988800LU);
-			editedSDP += tempBuff;
-
-			editedSDP += " IN IP4 ";
-			editedSDP += std::string(inParams->inClientSession->GetHost());
-			editedSDP += "\r\n";
-		}
-	}
-
-	editedSDP += std::string(theSDP);
-	return editedSDP;
-}
-
-static QTSS_Error   ReadEntireFile(char* inPath, StrPtrLen* outData, QTSS_TimeVal inModDate = -1, QTSS_TimeVal* outModDate = nullptr)
-{
-	QTSS_Error theErr = QTSS_NoErr;
-
-	outData->Ptr = nullptr;
-	outData->Len = 0;
-
-	do {
-		uint32_t theParamLen = 8;
-		QTSS_TimeVal* theModDate = nullptr;
-		unsigned long long date = 0;
-		//theErr = QTSS_GetValuePtr(theFileObject, qtssFlObjModDate, 0, (void**)&theModDate, &theParamLen);
-		date = CSdpCache::GetInstance()->getSdpCacheDate(inPath);
-		theModDate = (QTSS_TimeVal*)&date;
-		Assert(theParamLen == sizeof(QTSS_TimeVal));
-		if (theParamLen != sizeof(QTSS_TimeVal))
-			break;
-		if (outModDate != nullptr)
-			*outModDate = (QTSS_TimeVal)*theModDate;
-
-		if (inModDate != -1) {
-			// If file hasn't been modified since inModDate, don't have to read the file
-			if (*theModDate <= inModDate)
-				break;
-		}
-
-		theParamLen = 8;
-		uint64_t* theLength = nullptr;
-		uint64_t sdpLen = 0;
-		//theErr = QTSS_GetValuePtr(theFileObject, qtssFlObjLength, 0, (void**)&theLength, &theParamLen);
-		char *sdpContext = CSdpCache::GetInstance()->getSdpMap(inPath);
-		if (sdpContext == nullptr)
-		{
-			theErr = QTSS_RequestFailed;
-		}
-		else
-		{
-			sdpLen = strlen(sdpContext);
-		}
-
-		theLength = &sdpLen;
-
-		if (theParamLen != sizeof(uint64_t))
-			break;
-
-		if (*theLength > INT32_MAX)
-			break;
-
-		// Allocate memory for the file data
-		outData->Ptr = new char[(int32_t)(*theLength + 1)];
-		outData->Len = (int32_t)*theLength;
-		outData->Ptr[outData->Len] = 0;
-
-		// Read the data
-		uint32_t recvLen = 0;
-		if (sdpContext)
-		{
-			recvLen = *theLength;
-			memcpy(outData->Ptr, sdpContext, *theLength);
-		}
-
-		if (theErr != QTSS_NoErr)
-		{
-			outData->Delete();
-			break;
-		}
-		Assert(outData->Len == recvLen);
-
-	} while (false);
-
-	return theErr;
 }
 
 QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
@@ -872,16 +694,11 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 
 	Assert(!theSession->GetLocalSDP().empty());
 
-
-	StrPtrLen theFileData;
-	QTSS_TimeVal outModDate = 0;
-	QTSS_TimeVal inModDate = -1;
-	(void)ReadEntireFile((char *)theFileName.c_str(), &theFileData, inModDate, &outModDate);
-	std::unique_ptr<char[]> fileDataDeleter(theFileData.Ptr);
+	boost::string_view theFileData = CSdpCache::GetInstance()->getSdpMap(theFileName);
 
 	// -------------- process SDP to remove connection info and add track IDs, port info, and default c= line
 
-	SDPSourceInfo tempSDPSourceInfo(theFileData.Ptr, theFileData.Len); // will make a copy and delete in destructor
+	SDPSourceInfo tempSDPSourceInfo(theFileData); // will make a copy and delete in destructor
 	std::string theSDPData = tempSDPSourceInfo.GetLocalSDP(); // returns a new buffer with processed sdp
 
 	if (theSDPData.empty()) // can't find it on disk or it failed to parse just use the one in the session.
@@ -890,13 +707,12 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 
 	// ------------  Clean up missing required SDP lines
 
-	std::string editedSDP = DoDescribeAddRequiredSDPLines(inParams, theSession, outModDate, theSDPData);
+	std::string editedSDP(theSDPData);
 
 	// ------------ Check the headers
 
-	SDPContainer checkedSDPContainer;
-	checkedSDPContainer.SetSDPBuffer(editedSDP);
-	if (!checkedSDPContainer.IsSDPBufferValid())
+	SDPContainer checkedSDPContainer(editedSDP);
+	if (!checkedSDPContainer.Parse())
 	{
 		if(theRefCount)
 			sSessionMap->Release(theSession->GetRef());
@@ -906,30 +722,16 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 
 
 	// ------------ Put SDP header lines in correct order
-	float adjustMediaBandwidthPercent = 1.0;
-	bool adjustMediaBandwidth = false;
-
-	if (sPlayerCompatibility)
-		adjustMediaBandwidth = HavePlayerProfile(inParams, kAdjustBandwidth);
-
-	if (adjustMediaBandwidth)
-		adjustMediaBandwidthPercent = (float)sAdjustMediaBandwidthPercent / 100.0;
-
-	SDPLineSorter sortedSDP(checkedSDPContainer, adjustMediaBandwidthPercent);
+	auto sortedSDP = SortSDPLine(checkedSDPContainer);
 
 	// ------------ Write the SDP 
 
-	uint32_t sessLen = sortedSDP.GetSessionHeaders().length();
-	uint32_t mediaLen = sortedSDP.GetMediaHeaders().length();
-	theDescribeVec[1].iov_base = const_cast<char *>(sortedSDP.GetSessionHeaders().data());
-	theDescribeVec[1].iov_len = sortedSDP.GetSessionHeaders().length();
-
-	theDescribeVec[2].iov_base = const_cast<char *>(sortedSDP.GetMediaHeaders().data());
-	theDescribeVec[2].iov_len = sortedSDP.GetMediaHeaders().length();
+	theDescribeVec[1].iov_base = const_cast<char *>(sortedSDP.data());
+	theDescribeVec[1].iov_len = sortedSDP.length();
 
 	inParams->inRTSPRequest->AppendHeader(qtssCacheControlHeader,
 		kCacheControlHeader);
-	inParams->inRTSPRequest->SendDescribeResponse(&theDescribeVec[0], 3, sessLen + mediaLen);
+	inParams->inRTSPRequest->SendDescribeResponse(&theDescribeVec[0], 2, sortedSDP.length());
 
 	if (theRefCount)
 		sSessionMap->Release(theSession->GetRef());
@@ -941,11 +743,11 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	return QTSS_NoErr;
 }
 
-ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRTSP_Params* inParams, uint32_t inChannel, StrPtrLen* inData, bool isPush, bool *foundSessionPtr)
+ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRTSP_Params* inParams, bool isPush, bool *foundSessionPtr)
 {
 	OSMutexLocker locker(sSessionMap->GetMutex());
 
-	std::string theStreamName = buildStreamName(inName, inChannel);
+	std::string theStreamName(inName);
 
 	StrPtrLen inPath((char *)theStreamName.c_str());
 
@@ -959,38 +761,16 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 			return nullptr;
 		}
 
-		StrPtrLen theFileData;
-		StrPtrLen theFileDeleteData;
+		boost::string_view theFileData = CSdpCache::GetInstance()->getSdpMap(theStreamName);
 
-		if (inData == nullptr)
-		{
-			(void)ReadEntireFile(inPath.Ptr, &theFileDeleteData);
-			theFileData = theFileDeleteData;
-		}
-		else
-		{
-			theFileData = *inData;
-		}
-		std::unique_ptr<char[]> fileDataDeleter(theFileDeleteData.Ptr);
-
-		if (theFileData.Len <= 0)
+		if (theFileData.empty())
 			return nullptr;
 
-		auto* theInfo = new SDPSourceInfo(theFileData.Ptr, theFileData.Len); // will make a copy
+		auto* theInfo = new SDPSourceInfo(theFileData); // will make a copy
 
 		if (!theInfo->IsReflectable())
 		{
 			delete theInfo;
-			return nullptr;
-		}
-
-		// Check if broadcast is allowed before doing anything else
-		// At this point we know it is a definitely a reflector session
-		// It is either incoming automatic broadcast setup or a client setup to view broadcast
-		// In either case, verify whether the broadcast is allowed, and send forbidden response back
-		if (!sReflectBroadcasts)
-		{
-			(void)inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssClientForbidden);
 			return nullptr;
 		}
 
@@ -1002,11 +782,7 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 		if (isPush)
 			theSetupFlag |= ReflectorSession::kIsPushSession;
 
-		theSession = new ReflectorSession(inName, inChannel);
-		if (theSession == nullptr)
-		{
-			return nullptr;
-		}
+		theSession = new ReflectorSession(inName);
 
 		theSession->SetHasBufferedStreams(true); // buffer the incoming streams for clients
 
@@ -1016,7 +792,7 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 		if (theErr != QTSS_NoErr)
 		{
 			//delete theSession;
-			CSdpCache::GetInstance()->eraseSdpMap(theSession->GetSourceID()->Ptr);
+			CSdpCache::GetInstance()->eraseSdpMap(theSession->GetStreamName());
 			theSession->StopTimer();
 			return nullptr;
 		}
@@ -1025,13 +801,6 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 		//put the session's ID into the session map.
 		theErr = sSessionMap->Register(theSession->GetRef());
 		Assert(theErr == QTSS_NoErr);
-
-		// unless we do this, the refcount won't increment (and we'll delete the session prematurely
-		//if (!isPush)
-		{
-			OSRef* debug = sSessionMap->Resolve(&inPath);
-			Assert(debug == theSession->GetRef());
-		}
 	}
 	else
 	{
@@ -1045,22 +814,12 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 		// back
 		do
 		{
-			if (!sReflectBroadcasts)
-			{
-				(void)inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssClientForbidden);
-				break;
-			}
-
 			if (foundSessionPtr)
 				*foundSessionPtr = true;
 
-			StrPtrLen theFileData;
+			boost::string_view theFileData = CSdpCache::GetInstance()->getSdpMap(theStreamName);
 
-			if (inData == nullptr)
-				(void)ReadEntireFile(inPath.Ptr, &theFileData);
-			std::unique_ptr<char[]> charArrayDeleter(theFileData.Ptr);
-
-			if (theFileData.Len <= 0)
+			if (theFileData.empty())
 				break;
 
 			theSession = (ReflectorSession*)theSessionRef->GetObject();
@@ -1082,10 +841,6 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 
 	Assert(theSession != nullptr);
 
-	// Turn off overbuffering if the "disable_overbuffering" pref says so
-	if (sDisableOverbuffering)
-		inParams->inClientSession->SetOverBufferEnable(sFalse);
-
 	return theSession;
 }
 
@@ -1106,7 +861,7 @@ void DeleteReflectorPushSession(QTSS_StandardRTSP_Params* inParams, ReflectorSes
 		theSession->TearDownAllOutputs(); // just to be sure because we are about to delete the session.
 		sSessionMap->UnRegister(theSessionRef);// we had an error while setting up-- don't let anyone get the session
 		//delete theSession;
-		CSdpCache::GetInstance()->eraseSdpMap(theSession->GetSourceID()->Ptr);
+		CSdpCache::GetInstance()->eraseSdpMap(theSession->GetStreamName());
 		theSession->StopTimer();
 	}
 }
@@ -1151,19 +906,15 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 {
 	ReflectorSession* theSession = nullptr;
 
-	uint32_t theLen = 0;
 	bool isPush = inParams->inRTSPRequest->IsPushRequest();
 	bool foundSession = false;
 
 	auto opt = inParams->inClientSession->getAttribute(sOutputName);
 	if (!opt)
 	{
-		//theLen = sizeof(theSession);
-		//theErr = QTSS_GetValue(inParams->inClientSession, sSessionAttr, 0, &theSession, &theLen);
-
 		if (!isPush)
 		{
-			theSession = DoSessionSetup(inParams);
+			theSession = DoSessionSetup(inParams, isPush);
 			if (theSession == nullptr)
 				return QTSS_RequestFailed;
 
@@ -1388,15 +1139,10 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 {
 	QTSS_Error theErr = QTSS_NoErr;
 	uint32_t flags = 0;
-	uint32_t theLen = 0;
 	bool rtpInfoEnabled = false;
 
 	if (inSession == nullptr)
 	{
-		if (!sDefaultBroadcastPushEnabled)
-			return QTSS_RequestFailed;
-
-		theLen = sizeof(inSession);
 		auto opt = inParams->inClientSession->getAttribute(sBroadcasterSessionName);
 		if (!opt) return QTSS_RequestFailed;
 		inSession = boost::any_cast<ReflectorSession*>(opt.value());
@@ -1412,8 +1158,6 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 	}
 	else
 	{
-
-		theLen = 0;
 		auto opt = inParams->inClientSession->getAttribute(sOutputName);
 		if (!opt)
 			return QTSS_RequestFailed;
@@ -1478,15 +1222,14 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 		else
 		{
 			theErr = inParams->inClientSession->Play(
-				(RTSPRequestInterface*)inParams->inRTSPRequest, qtssPlayFlagsAppendServerInfo);
+				inParams->inRTSPRequest, qtssPlayFlagsAppendServerInfo);
 			if (theErr != QTSS_NoErr)
 				return theErr;
-
 		}
 
 	}
 
-	inParams->inClientSession->SendPlayResponse((RTSPRequestInterface*)inParams->inRTSPRequest, flags);
+	inParams->inClientSession->SendPlayResponse(inParams->inRTSPRequest, flags);
 
 #ifdef REFLECTORSESSION_DEBUG
 	printf("QTSSReflectorModule.cpp:DoPlay Session =%p refcount=%"   _U32BITARG_   "\n", inSession->GetRef(), inSession->GetRef()->GetRefCount());
@@ -1550,7 +1293,7 @@ void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* theSession, bool 
 #endif
 				sSessionMap->UnRegister(theSessionRef);
 				//delete theSession;
-				CSdpCache::GetInstance()->eraseSdpMap(theSession->GetSourceID()->Ptr);
+				CSdpCache::GetInstance()->eraseSdpMap(theSession->GetStreamName());
 
 				theSession->StopTimer();
 			}

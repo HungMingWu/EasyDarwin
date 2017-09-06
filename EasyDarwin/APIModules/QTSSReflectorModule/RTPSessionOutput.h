@@ -56,8 +56,6 @@ public:
 	QTSS_Error  WritePacket(const std::vector<char> &inPacketData, void* inStreamCookie, uint32_t inFlags, int64_t packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSec, bool firstPacket) override;
 	void TearDown() override;
 
-	int64_t                  GetReflectorSessionInitTime() { return fReflectorSession->GetInitTimeMS(); }
-
 	bool  IsUDP() override;
 
 	bool  IsPlaying() override;

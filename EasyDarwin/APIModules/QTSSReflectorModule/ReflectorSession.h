@@ -43,20 +43,6 @@
 #include "SourceInfo.h"
 #include "Task.h"//add
 
-#ifndef _FILE_DELETER_
-#define _FILE_DELETER_
-
-class FileDeleter
-{
-public:
-	FileDeleter(StrPtrLen* inSDPPath);
-	~FileDeleter();
-
-private:
-	StrPtrLen fFilePath;
-};
-#endif
-
 #ifndef __REFLECTOR_SESSION__
 #define __REFLECTOR_SESSION__
 
@@ -71,7 +57,7 @@ public:
 	//
 	// Caller may also provide a SourceInfo object, though it is not needed and
 	// will also need to be provided to SetupReflectorSession when that is called.
-	ReflectorSession(boost::string_view inSourceID, uint32_t inChannelNum = 0, SourceInfo* inInfo = nullptr);
+	ReflectorSession(boost::string_view inSourceID, SourceInfo* inInfo = nullptr);
 	~ReflectorSession();
 
 	//
@@ -110,9 +96,7 @@ public:
 	SourceInfo*     GetSourceInfo() { return fSourceInfo; }
 	boost::string_view GetLocalSDP()	{ return fLocalSDP; }
 
-	StrPtrLen*      GetSourceID()	{ return &fSourceID; }
 	boost::string_view  GetStreamName() { return fSessionName; }
-	uint32_t			GetChannelNum() { return fChannelNum; }
 
 	bool			IsSetup() { return fIsSetup; }
 	bool			HasVideoKeyFrameUpdate() { return fHasVideoKeyFrameUpdate; }
@@ -148,10 +132,6 @@ public:
 		kNumQualityLevels = 2       //uint32_t
 	};
 
-	int64_t  GetInitTimeMS() { return fInitTimeMS; }
-	int64_t	GetNoneOutputStartTimeMS() { return fNoneOutputStartTimeMS;	}
-	void	SetNoneOutputStartTimeMS() { fNoneOutputStartTimeMS = OS::Milliseconds(); }
-
 	void	SetHasBufferedStreams(bool enableBuffer) { fHasBufferedStreams = enableBuffer; }
 	void	SetHasVideoKeyFrameUpdate(bool indexUpdate) { fHasVideoKeyFrameUpdate = indexUpdate; }
 
@@ -163,10 +143,8 @@ private:
 
 	// For storage in the session map       
 	OSRef       fRef;
-	StrPtrLen   fSourceID;
 
 	std::string	fSessionName;
-	uint32_t		fChannelNum;
 
 	unsigned int        fNumOutputs{ 0 };
 
@@ -180,8 +158,6 @@ private:
 	// For the QTSSSplitterModule, this object can cache a QTSS_StreamRef
 	QTSS_StreamRef fSocketStream{ nullptr };
 	RTPSession* fBroadcasterSession{ nullptr };
-	int64_t		fInitTimeMS;
-	int64_t		fNoneOutputStartTimeMS;
 
 	bool		fHasBufferedStreams{ false };
 	bool		fHasVideoKeyFrameUpdate{ false };

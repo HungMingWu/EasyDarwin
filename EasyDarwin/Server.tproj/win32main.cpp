@@ -37,6 +37,8 @@
 #include <boost/asio/read_until.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/streambuf.hpp>
+#include "SDPUtils.h"
+#include "sdpCache.h"
 #include "RunServer.h"
 #include "QTSServer.h"
 #include "RTSPRequest.h"
@@ -170,7 +172,7 @@ class Response : public std::enable_shared_from_this<Response>, public std::ostr
 	Response(std::shared_ptr<Session> session, long timeout_content) noexcept : std::ostream(&streambuf), session(std::move(session)), timeout_content(timeout_content) {}
 
 	template <typename size_type>
-	void write_header(const CaseInsensitiveMultimap &header, size_type size) {
+	void write_header(const CaseInsensitiveMap &header, size_type size) {
 		bool content_length_written = false;
 		bool chunked_transfer_encoding = false;
 		for (auto &field : header) {
@@ -355,8 +357,7 @@ public:
 				// streambuf (maybe some bytes of the content) is appended to in the async_read-function below (for retrieving content).
 				size_t num_additional_bytes = session->request->streambuf.size() - bytes_transferred;
 
-				if (!RequestMessage::parse(session->request->content, session->request->method, session->request->path,
-					session->request->query_string, session->request->rtsp_version, session->request->header)) {
+				if (!RequestMessage::parse(session->request->content, *session->request)) {
 					if (on_error) {
 					//	on_error(session->request, make_error_code::make_error_code(boost::system::errc::protocol_error));
 					}
@@ -433,25 +434,29 @@ public:
 	void operate_request(const std::shared_ptr<Session> &session) {
 		if (session->request->method == "OPTIONS") {
 			write_response(session, [](std::shared_ptr<Response> response, std::shared_ptr<RTSPRequest1> request) {
-				auto it = request->header.find("CSeq");
 				*response << "RTSP/1.0 200 OK\r\n" 
-					      << "Cseq: " << it->second << "\r\n"
+					      << "Cseq: " << request->header["CSeq"] << "\r\n"
 					      << "Public: DESCRIBE, SETUP, TEARDOWN, PLAY, PAUSE, OPTIONS, ANNOUNCE, RECORD\r\n\r\n";
 			});
 		}
 		else if (session->request->method == "ANNOUNCE") {
-			std::string s = session->request->content.string();
+			std::string sdp = session->request->content.string();
+			SDPContainer checkedSDPContainer(sdp);
+			if (!checkedSDPContainer.Parse())
+			{
+				//return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssUnsupportedMediaType);
+			}
+			CSdpCache::GetInstance()->setSdpMap("live.sdp", sdp);
 			write_response(session, [](std::shared_ptr<Response> response, std::shared_ptr<RTSPRequest1> request) {
-				auto it = request->header.find("CSeq");
 				*response << "RTSP/1.0 200 OK\r\n"
-					      << "Cseq: " << it->second << "\r\n\r\n";
+					      << "Cseq: " << request->header["CSeq"] << "\r\n\r\n";
 			});
 		}
 		else if (session->request->method == "SETUP") {
+			std::string sdp = session->request->content.string();
 			write_response(session, [](std::shared_ptr<Response> response, std::shared_ptr<RTSPRequest1> request) {
-				auto it = request->header.find("CSeq");
 				*response << "RTSP/1.0 200 OK\r\n"
-					      << "Cseq: " << it->second << "\r\n"
+					      << "Cseq: " << request->header["CSeq"] << "\r\n"
 					      << "Cache-Control: no-cache\r\n"
 					      << "Session: 972255884303327207\r\n"
 					      << "Date: Mon, 04 Sep 2017 07:20:12 GMT\r\n"

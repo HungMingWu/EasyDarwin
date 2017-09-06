@@ -136,15 +136,12 @@ private:
 	void    ParseRangeHeader(boost::string_view header);
 	void    ParseTransportHeader(boost::string_view header);
 	void    ParseIfModSinceHeader(boost::string_view header);
-	void    ParseAddrSubHeader(boost::string_view inSubHeader, boost::string_view inHeaderName, uint32_t* outAddr);
 	void    ParseRetransmitHeader(boost::string_view header);
 	void    ParseContentLengthHeader(boost::string_view header);
 	void    ParseSpeedHeader(boost::string_view header);
 	void    ParsePrebufferHeader(boost::string_view header);
 	void    ParseTransportOptionsHeader(boost::string_view header);
 	void    ParseSessionHeader(boost::string_view header);
-	void    ParseClientPortSubHeader(boost::string_view inClientPortSubHeader);
-	void    ParseTimeToLiveSubHeader(boost::string_view inTimeToLiveSubHeader);
 	void    ParseModeSubHeader(boost::string_view inModeSubHeader);
 	bool    ParseNetworkModeSubHeader(boost::string_view inSubHeader);
 	void 	ParseDynamicRateHeader(boost::string_view header);
@@ -200,11 +197,11 @@ public:
 	}
 };
 
-typedef std::unordered_multimap<std::string, std::string, CaseInsensitiveHash, CaseInsensitiveEqual> CaseInsensitiveMultimap;
+typedef std::unordered_map<std::string, std::string, CaseInsensitiveHash, CaseInsensitiveEqual> CaseInsensitiveMap;
 class RTSPHeader {
 public:
 	/// Parse header fields
-	static void parse(std::istream &stream, CaseInsensitiveMultimap &header) noexcept {
+	static void parse(std::istream &stream, CaseInsensitiveMap &header) noexcept {
 		std::string line;
 		getline(stream, line);
 		size_t param_end;
@@ -222,16 +219,41 @@ public:
 	}
 };
 
+class RequestMessage;
+
+class RTSPRequest1 {
+	friend class RTSPServer;
+	friend class RequestMessage;
+	boost::asio::streambuf streambuf;
+	Content content;
+	std::string method, path, query_string, rtsp_version;
+	std::string remote_endpoint_address;
+	unsigned short remote_endpoint_port;
+	CaseInsensitiveMap header;
+	QTSS_RTPNetworkMode fNetworkMode;
+	QTSS_RTPTransportType fTransportType;
+	QTSS_RTPTransportMode fTransportMode;
+public:
+	RTSPRequest1(const std::string &remote_endpoint_address = std::string(), unsigned short remote_endpoint_port = 0) noexcept
+		: content(streambuf), remote_endpoint_address(remote_endpoint_address), remote_endpoint_port(remote_endpoint_port) {}
+
+	~RTSPRequest1() = default;
+	bool IsPushRequest() { return (fTransportMode == qtssRTPTransportModeRecord) ? true : false; }
+};
+
 class RequestMessage {
+	static bool ParseNetworkModeSubHeader(boost::string_view inModeSubHeader, RTSPRequest1& req);
+	static bool ParseModeSubHeader(boost::string_view inModeSubHeader, RTSPRequest1& req);
+	static bool parse_setup(RTSPRequest1& req);
 public:
 	/// Parse request line and header fields
-	static bool parse(std::istream &stream, std::string &method, std::string &path, std::string &query_string, std::string &version, CaseInsensitiveMultimap &header) noexcept {
-		header.clear();
+	static bool parse(std::istream &stream, RTSPRequest1& req) noexcept {
+		req.header.clear();
 		std::string line;
 		getline(stream, line);
 		size_t method_end;
 		if ((method_end = line.find(' ')) != std::string::npos) {
-			method = line.substr(0, method_end);
+			req.method = line.substr(0, method_end);
 
 			size_t query_start = std::string::npos;
 			size_t path_and_query_string_end = std::string::npos;
@@ -245,22 +267,27 @@ public:
 			}
 			if (path_and_query_string_end != std::string::npos) {
 				if (query_start != std::string::npos) {
-					path = line.substr(method_end + 1, query_start - method_end - 2);
-					query_string = line.substr(query_start, path_and_query_string_end - query_start);
+					req.path = line.substr(method_end + 1, query_start - method_end - 2);
+					req.query_string = line.substr(query_start, path_and_query_string_end - query_start);
 				}
 				else
-					path = line.substr(method_end + 1, path_and_query_string_end - method_end - 1);
+					req.path = line.substr(method_end + 1, path_and_query_string_end - method_end - 1);
 
 				size_t protocol_end;
 				if ((protocol_end = line.find('/', path_and_query_string_end + 1)) != std::string::npos) {
 					if (line.compare(path_and_query_string_end + 1, protocol_end - path_and_query_string_end - 1, "RTSP") != 0)
 						return false;
-					version = line.substr(protocol_end + 1, line.size() - protocol_end - 2);
+					req.rtsp_version = line.substr(protocol_end + 1, line.size() - protocol_end - 2);
 				}
 				else
 					return false;
 
-				RTSPHeader::parse(stream, header);
+				RTSPHeader::parse(stream, req.header);
+				auto it = req.header.find("CSeq");
+				if (it == req.header.end())
+					return false;
+				if (req.method == "SETUP")
+					return parse_setup(req);
 			}
 			else
 				return false;
@@ -271,20 +298,7 @@ public:
 	}
 };
 
-class RTSPRequest1 {
-	friend class RTSPServer;
-	boost::asio::streambuf streambuf;
-	Content content;
-	std::string method, path, query_string, rtsp_version;
-	std::string remote_endpoint_address;
-	unsigned short remote_endpoint_port;
-	CaseInsensitiveMultimap header;
-public:
-	RTSPRequest1(const std::string &remote_endpoint_address = std::string(), unsigned short remote_endpoint_port = 0) noexcept
-		: content(streambuf), remote_endpoint_address(remote_endpoint_address), remote_endpoint_port(remote_endpoint_port) {}
 
-	~RTSPRequest1() = default;
-};
 
 #endif // __RTSPREQUEST_H__
 

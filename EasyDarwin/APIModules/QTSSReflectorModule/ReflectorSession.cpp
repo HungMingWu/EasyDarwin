@@ -30,53 +30,16 @@
 #include <chrono>
 #include "ReflectorSession.h"
 #include "SocketUtils.h"
-#include "OS.h"
 #include "QTSServerInterface.h"
 #include <boost/asio/io_service.hpp>
 
-#ifndef __Win32__
-#include <unistd.h>
-#endif
-
-FileDeleter::FileDeleter(StrPtrLen* inSDPPath)
-{
-	Assert(inSDPPath);
-	fFilePath.Len = inSDPPath->Len;
-	fFilePath.Ptr = new char[inSDPPath->Len + 1];
-	Assert(fFilePath.Ptr);
-	memcpy(fFilePath.Ptr, inSDPPath->Ptr, inSDPPath->Len);
-	fFilePath.Ptr[inSDPPath->Len] = 0;
-}
-
-FileDeleter::~FileDeleter()
-{
-	//printf("FileDeleter::~FileDeleter delete = %s \n",fFilePath.Ptr);
-	::unlink(fFilePath.Ptr);
-	delete fFilePath.Ptr;
-	fFilePath.Ptr = nullptr;
-	fFilePath.Len = 0;
-}
-
 extern std::shared_ptr<boost::asio::io_service> io_service;
-ReflectorSession::ReflectorSession(boost::string_view inSourceID, uint32_t inChannelNum, SourceInfo* inInfo) :
+ReflectorSession::ReflectorSession(boost::string_view inSourceID, SourceInfo* inInfo) :
 	fSessionName(inSourceID),
-	fChannelNum(inChannelNum),
 	fSourceInfo(inInfo),
-	fInitTimeMS(OS::Milliseconds()),
-	fNoneOutputStartTimeMS(OS::Milliseconds()),
 	timer(*io_service)
 {
-	if (!fSessionName.empty())
-	{
-		char streamID[QTSS_MAX_NAME_LENGTH + 10] = { 0 };
-
-		sprintf(streamID, "%s%s%d", fSessionName.c_str(), EASY_KEY_SPLITER, fChannelNum);
-		fSourceID.Ptr = new char[::strlen(streamID) + 1];
-		::strncpy(fSourceID.Ptr, streamID, strlen(streamID));
-		fSourceID.Ptr[strlen(streamID)] = '\0';
-		fSourceID.Len = strlen(streamID);
-		fRef.Set(fSourceID, this);
-	}
+	fRef.Set(&fSessionName[0], this);
 	timer.async_wait(std::bind(&ReflectorSession::Run, this, std::placeholders::_1));
 }
 
@@ -95,7 +58,6 @@ ReflectorSession::~ReflectorSession()
 	// We own this object when it is given to us, so delete it now
 
 	delete fSourceInfo;
-	fSourceID.Delete();
 }
 
 QTSS_Error ReflectorSession::SetupReflectorSession(SourceInfo* inInfo, QTSS_StandardRTSP_Params* inParams, uint32_t inFlags, bool filterState, uint32_t filterTimeout)
@@ -213,9 +175,6 @@ void    ReflectorSession::RemoveOutput(ReflectorOutput* inOutput, bool isClient)
 		if (isClient)
 			fStreamArray[y]->DecEyeCount();
 	}
-
-	if (fNumOutputs == 0)
-		SetNoneOutputStartTimeMS();
 }
 
 void ReflectorSession::TearDownAllOutputs()
@@ -264,14 +223,6 @@ void ReflectorSession::Run(const boost::system::error_code &ec)
 	if (ec == boost::asio::error::operation_aborted) {
 		printf("ReflectorSession timer canceled\n");
 		return;
-	}
-	int64_t sNowTime = OS::Milliseconds();
-	int64_t sNoneTime = GetNoneOutputStartTimeMS();
-	if ((GetNumOutputs() == 0) && (sNowTime - sNoneTime >= /*QTSServerInterface::GetServer()->GetPrefs()->GetRTPSessionTimeoutInSecs()*/35 * 1000))
-	{
-	}
-	else
-	{
 	}
 	timer.expires_from_now(std::chrono::seconds(20));
 	timer.async_wait(std::bind(&ReflectorSession::Run, this, std::placeholders::_1));

@@ -19,12 +19,12 @@ set (SRC
      RTSPSession.cpp RTSPSession.h
      RTPPacketResender.cpp RTPPacketResender.h
      RTPBandwidthTracker.cpp RTPBandwidthTracker.h
-     QTSSUserProfile.h
      RTSPResponseStream.cpp RTSPResponseStream.h
      RTSPRequest.cpp RTSPRequest.h
 	 RTSPRequestStream.cpp RTSPRequestStream.h
 	 RTCPTask.cpp RTCPTask.h
-	 ServerPrefs.h ServerPrefs.cpp)
+	 ServerPrefs.h ServerPrefs.cpp
+	 RTSPConnection.h RTSPUtility.h)
 
 link_libraries(APIModules RTCPUtilitiesLib RTSPUtilitiesLib
                APICommonCode

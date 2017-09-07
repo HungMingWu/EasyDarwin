@@ -46,7 +46,6 @@
 #include "RTSPSessionInterface.h"
 #include "RTSPResponseStream.h"
 #include "RTSPProtocol.h"
-#include "QTSSUserProfile.h"
 
 class HeaderDict {
 	std::map<int, std::string> infos;
@@ -65,7 +64,6 @@ public:
 class RTSPRequestInterface
 {
 	//The full local path to the file. This Attribute is first set after the Routing Role has run and before any other role is called. 
-	std::string localPath;
 	std::string rootDir;
 	std::string fullRequest;
 	std::string absoluteURL;
@@ -82,7 +80,6 @@ public:
 	RTSPRequestInterface(RTSPSessionInterface *session);
 	virtual ~RTSPRequestInterface()
 	{
-		if (fMovieFolderPtr != &fMovieFolderPath[0]) delete[] fMovieFolderPtr;
 	}
 
 	//FUNCTIONS FOR SENDING OUTPUT:
@@ -190,38 +187,12 @@ public:
 	RTSPSessionInterface*       GetSession() { return fSession; }
 	const HeaderDict&           GetHeaderDict() const { return fHeaderDict; }
 
-	bool                      GetAllowed() { return fAllowed; }
-	void                        SetAllowed(bool allowed) { fAllowed = allowed; }
-
-	bool                      GetHasUser() { return fHasUser; }
-	void                        SetHasUser(bool hasUser) { fHasUser = hasUser; }
-
-	bool                      GetAuthHandled() { return fAuthHandled; }
-	void                        SetAuthHandled(bool handled) { fAuthHandled = handled; }
-
-	QTSS_ActionFlags            GetAction() { return fAction; }
-	void                        SetAction(QTSS_ActionFlags action) { fAction = action; }
-
 	bool						IsPushRequest() { return (fTransportMode == qtssRTPTransportModeRecord) ? true : false; }
 	uint16_t                      GetSetUpServerPort() { return fSetUpServerPort; }
 	QTSS_RTPTransportMode       GetTransportMode() { return fTransportMode; }
 
-	QTSS_AuthScheme             GetAuthScheme() { return fAuthScheme; }
-	void                        SetAuthScheme(QTSS_AuthScheme scheme) { fAuthScheme = scheme; }
-	boost::string_view          GetAuthRealm() { return fAuthRealm; }
-	boost::string_view          GetAuthNonce() { return fAuthNonce; }
-	boost::string_view          GetAuthUri() { return fAuthUri; }
-	uint32_t                    GetAuthQop() { return fAuthQop; }
-	boost::string_view          GetAuthNonceCount() { return fAuthNonceCount; }
-	boost::string_view          GetAuthCNonce() { return fAuthCNonce; }
-	boost::string_view          GetAuthResponse() { return fAuthResponse; }
-	boost::string_view          GetAuthOpaque() { return fAuthOpaque; }
-	QTSSUserProfile*            GetUserProfile() { return fUserProfilePtr; }
-
 	bool                      GetStale() { return fStale; }
 	void                        SetStale(bool stale) { fStale = stale; }
-
-	bool                      SkipAuthorization() { return fSkipAuthorization; }
 
 	int32_t                      GetDynamicRateState() { return fEnableDynamicRateState; }
 
@@ -230,19 +201,11 @@ public:
 
 	uint32_t                      GetBandwidthHeaderBits() { return fBandwidthBits; }
 
-	boost::string_view                  GetRequestChallenge() { return fAuthDigestChallenge; }
-
-	void SetLocalPath(boost::string_view localpath) { localPath = std::string(localpath); }
-	boost::string_view GetLocalPath();
 	//If the URI ends with one or more digits, this points to those.
 	std::string         GetFileDigit();
 	void SetUpServerPort(uint16_t port) { fSetUpServerPort = port; }
 	//Everything after the last path separator in the file system path
 	std::string GetFileName();
-	uint32_t        GetRealStatusCode();
-	void SetUserAllow(bool allow) { fAllowed = allow; }
-	void SetUserFound(bool found) { fHasUser = found; }
-	void SetAuthHandle(bool handle) { fAuthHandled = handle; }
 	std::string GetAbsTruncatedPath();
 	void SetRootDir(boost::string_view root) { rootDir = std::string(root); }
 	boost::string_view GetRootDir() const { return rootDir; }
@@ -253,12 +216,6 @@ public:
 	std::string GetTruncatedPath();
 	void SetAbsolutePath(boost::string_view path) { absolutePath = std::string(path); }
 	boost::string_view GetAbsolutePath() const { return absolutePath; }
-	void Authorize(bool allowed, bool foundUser, bool authContinue)
-	{
-		SetUserAllow(allowed);
-		SetUserFound(foundUser);
-		SetAuthHandle(authContinue);
-	}
 protected:
 
 	//ALL THIS STUFF HERE IS SETUP BY RTSPREQUEST object (derived)
@@ -306,40 +263,14 @@ protected:
 	//Because of URL decoding issues, we need to make a copy of the file path.
 	//Here is a buffer for it.
 	std::string                 fFilePath;
-	char                        fMovieFolderPath[kMovieFolderBufSizeInBytes];
-	char*                       fMovieFolderPtr;
-
 	HeaderDict                  fHeaderDict;
-
-	//Default is server pref based, set to false if request is denied. Missing or bad movie files should allow the server to handle the situation and return true.
-	bool                      fAllowed;
-	//Default is false, set to true if the user is found in the authenticate role and the module wants to take ownership of authenticating the user.
-	bool                      fHasUser;
-	//Default is false, set to true in the authorize role to take ownerhsip of authorizing the request. 
-	bool                      fAuthHandled;
 
 	// A setup request from the client.
 	QTSS_RTPTransportMode       fTransportMode;
 
 	uint16_t                      fSetUpServerPort;           //send this back as the server_port if is SETUP request
 
-	QTSS_ActionFlags            fAction;    // The action that will be performed for this request
-											// Set to a combination of QTSS_ActionFlags 
-
-	QTSS_AuthScheme             fAuthScheme;
-	std::string                 fAuthRealm;
-	std::string                 fAuthNonce;
-	std::string                 fAuthUri;
-	uint32_t                    fAuthQop;
-	std::string                 fAuthNonceCount;
-	std::string                 fAuthCNonce;
-	std::string                 fAuthResponse;
-	std::string                 fAuthOpaque;
-	QTSSUserProfile             fUserProfile;
-	QTSSUserProfile*            fUserProfilePtr;
 	bool                      fStale;
-
-	bool                      fSkipAuthorization;
 
 	// -1 not in request, 0 off, 1 on
 	int32_t                      fEnableDynamicRateState;
@@ -348,8 +279,6 @@ protected:
 	uint32_t						fRandomDataSize;
 
 	uint32_t                      fBandwidthBits;
-	std::string                   fAuthDigestChallenge;
-	std::string                   fAuthDigestResponse;
 private:
 
 	RTSPSessionInterface*   fSession;
@@ -361,8 +290,6 @@ private:
 	static void             PutStatusLine(RTSPResponseStream* putStream,
 		QTSS_RTSPStatusCode status,
 		RTSPProtocol::RTSPVersion version);
-
-	boost::string_view	GetAuthDigestResponse();
 
 	//optimized preformatted response header strings
 	static std::string      sPremadeHeader;

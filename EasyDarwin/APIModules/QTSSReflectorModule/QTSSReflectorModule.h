@@ -39,8 +39,6 @@ namespace ReflectionModule {
 	QTSS_Error Register(QTSS_Register_Params* inParams);
 	QTSS_Error Initialize(QTSS_Initialize_Params* inParams);
 	QTSS_Error ProcessRTSPRequest(QTSS_StandardRTSP_Params* inParams);
-	QTSS_Error ReflectorAuthorizeRTSPRequest(QTSS_StandardRTSP_Params* inParams);
-	QTSS_Error RedirectBroadcast(QTSS_StandardRTSP_Params* inParams);
 	QTSS_Error ProcessRTPData(QTSS_IncomingData_Params* inParams);
 	QTSS_Error Shutdown();
 	QTSS_Error DestroySession(QTSS_ClientSessionClosing_Params* inParams);

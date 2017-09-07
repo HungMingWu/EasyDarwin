@@ -37,7 +37,6 @@
 
 #include <boost/utility/string_view.hpp>
 #include "QTSSRTSPProtocol.h"
-#include "StrPtrLen.h"
 
 class RTSPProtocol
 {
@@ -75,11 +74,7 @@ public:
 	{
 		return sStatusCodeStrings[inStat];
 	}
-	//returns error number for this error
-	static int32_t           GetStatusCode(QTSS_RTSPStatusCode inStat)
-	{
-		return sStatusCodes[inStat];
-	}
+
 	//returns error number as a string
 	static boost::string_view       GetStatusCodeAsString(QTSS_RTSPStatusCode inStat)
 	{
@@ -112,7 +107,6 @@ private:
 	static  boost::string_view             sHeaders[];
 	static boost::string_view            sStatusCodeStrings[];
 	static boost::string_view            sStatusCodeAsStrings[];
-	static int32_t               sStatusCodes[];
 	static boost::string_view    sVersionString[];
 
 	static boost::string_view            sRetrProtName;

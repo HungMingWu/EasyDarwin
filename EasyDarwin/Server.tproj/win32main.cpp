@@ -32,16 +32,18 @@
 #include <iostream>
 #include <unordered_set>
 #include <boost/asio/io_service.hpp>
-#include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/read.hpp>
 #include <boost/asio/read_until.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/asio/streambuf.hpp>
+#include <boost/optional.hpp>
 #include "SDPUtils.h"
 #include "sdpCache.h"
 #include "RunServer.h"
 #include "QTSServer.h"
 #include "RTSPRequest.h"
+#include "RTSPSession.h"
+#include "RTSPUtility.h"
 
 std::shared_ptr<boost::asio::io_service> io_service = std::make_shared<boost::asio::io_service>();
 
@@ -49,127 +51,14 @@ std::shared_ptr<boost::asio::io_service> io_service = std::make_shared<boost::as
 static uint16_t sPort = 0; //port can be set on the command line
 static QTSS_ServerState sInitialState = qtssRunningState;
 
-#ifdef __SSE2__
-#include <emmintrin.h>
-inline void spin_loop_pause() noexcept { _mm_pause(); }
-#elif defined(_MSC_VER) && _MSC_VER >= 1800 && (defined(_M_X64) || defined(_M_IX86))
-#include <intrin.h>
-inline void spin_loop_pause() noexcept { _mm_pause(); }
-#else
-inline void spin_loop_pause() noexcept {}
-#endif
-
-class ScopeRunner {
-	/// Scope count that is set to -1 if scopes are to be canceled
-	std::atomic<long> count{ 0 };
-
-public:
-	class SharedLock {
-		friend class ScopeRunner;
-		std::atomic<long> &count;
-		SharedLock(std::atomic<long> &count) noexcept : count(count) {}
-		SharedLock &operator=(const SharedLock &) = delete;
-		SharedLock(const SharedLock &) = delete;
-
-	public:
-		~SharedLock() noexcept {
-			count.fetch_sub(1);
-		}
-	};
-
-	ScopeRunner() noexcept = default;
-
-	/// Returns nullptr if scope should be exited, or a shared lock otherwise
-	std::unique_ptr<SharedLock> continue_lock() noexcept {
-		long expected = count;
-		while (expected >= 0 && !count.compare_exchange_weak(expected, expected + 1))
-			spin_loop_pause();
-
-		if (expected < 0)
-			return nullptr;
-		else
-			return std::unique_ptr<SharedLock>(new SharedLock(count));
-	}
-
-	/// Blocks until all shared locks are released, then prevents future shared locks
-	void stop() noexcept {
-		long expected = 0;
-		while (!count.compare_exchange_weak(expected, -1)) {
-			if (expected < 0)
-				return;
-			expected = 0;
-			spin_loop_pause();
-		}
-	}
-};
-
-class Connection : public std::enable_shared_from_this<Connection> {
-public:
-	template <typename... Args>
-	Connection(std::shared_ptr<ScopeRunner> handler_runner, Args &&... args) noexcept : handler_runner(std::move(handler_runner)), socket(std::forward<Args>(args)...) {}
-
-	std::shared_ptr<ScopeRunner> handler_runner;
-
-	boost::asio::ip::tcp::socket socket;
-	std::mutex socket_close_mutex;
-
-	std::unique_ptr<boost::asio::steady_timer> timer;
-
-	void close() noexcept {
-		boost::system::error_code ec;
-		std::unique_lock<std::mutex> lock(socket_close_mutex); // The following operations seems to be needed to run sequentially
-		socket.lowest_layer().shutdown(boost::asio::ip::tcp::socket::shutdown_both, ec);
-		socket.lowest_layer().close(ec);
-	}
-
-	void set_timeout(long seconds) noexcept {
-		if (seconds == 0) {
-			timer = nullptr;
-			return;
-		}
-
-		timer = std::make_unique<boost::asio::steady_timer>(socket.get_io_service());
-		timer->expires_from_now(std::chrono::seconds(seconds));
-		auto self = this->shared_from_this();
-		timer->async_wait([self](const boost::system::error_code &ec) {
-			if (!ec)
-				self->close();
-		});
-	}
-
-	void cancel_timeout() noexcept {
-		if (timer) {
-			boost::system::error_code ec;
-			timer->cancel(ec);
-		}
-	}
-};
-
-class Session {
-public:
-	Session(std::shared_ptr<Connection> connection) noexcept : connection(std::move(connection)) {
-		try {
-			//auto remote_endpoint = connection->socket.lowest_layer().remote_endpoint();
-			//request = std::make_shared<RTSPRequest1>(remote_endpoint.address().to_string(), remote_endpoint.port());
-			request = std::make_shared<RTSPRequest1>();
-		}
-		catch (...) {
-			request = std::make_shared<RTSPRequest1>();
-		}
-	}
-
-	std::shared_ptr<Connection> connection;
-	std::shared_ptr<RTSPRequest1> request;
-};
-
 class Response : public std::enable_shared_from_this<Response>, public std::ostream {
 	friend class RTSPServer;
 	boost::asio::streambuf streambuf;
 
-	std::shared_ptr<Session> session;
+	std::shared_ptr<RTSPSession1> session;
 	long timeout_content;
 
-	Response(std::shared_ptr<Session> session, long timeout_content) noexcept : std::ostream(&streambuf), session(std::move(session)), timeout_content(timeout_content) {}
+	Response(std::shared_ptr<RTSPSession1> session, long timeout_content) noexcept : std::ostream(&streambuf), session(std::move(session)), timeout_content(timeout_content) {}
 
 	template <typename size_type>
 	void write_header(const CaseInsensitiveMap &header, size_type size) {
@@ -319,7 +208,7 @@ public:
 		accept();
 	}
 	void accept() {
-		auto session = std::make_shared<Session>(create_connection(*io_service));
+		auto session = std::make_shared<RTSPSession1>(create_connection(*io_service));
 
 		acceptor_.async_accept(session->connection->socket, [this, session](const boost::system::error_code &ec) {
 			auto lock = session->connection->handler_runner->continue_lock();
@@ -342,7 +231,7 @@ public:
 		});
 
 	}
-	void read_request_and_content(const std::shared_ptr<Session> &session) {
+	void read_request_and_content(const std::shared_ptr<RTSPSession1> &session) {
 		session->connection->set_timeout(config.timeout_request);
 		boost::asio::async_read_until(session->connection->socket, session->request->streambuf, "\r\n\r\n", 
 			[this, session](const boost::system::error_code &ec, size_t bytes_transferred) {
@@ -403,7 +292,7 @@ public:
 				on_error(session->request, ec);
 		});
 	}
-	void write_response(const std::shared_ptr<Session> &session,
+	void write_response(const std::shared_ptr<RTSPSession1> &session,
 		std::function<void(std::shared_ptr<Response>, std::shared_ptr<RTSPRequest1>)> resource_function) {
 		session->connection->set_timeout(config.timeout_content);
 		auto response = std::shared_ptr<Response>(new Response(session, config.timeout_content), [this](Response *response_ptr) {
@@ -413,7 +302,7 @@ public:
 					if (response->close_connection_after_response)
 						return;
 
-					auto new_session = std::make_shared<Session>(response->session->connection);
+					auto new_session = std::make_shared<RTSPSession1>(response->session->connection);
 					read_request_and_content(new_session);;
 				}
 				else if (this->on_error)
@@ -431,7 +320,7 @@ public:
 			return;
 		}
 	}
-	void operate_request(const std::shared_ptr<Session> &session) {
+	void operate_request(const std::shared_ptr<RTSPSession1> &session) {
 		if (session->request->method == "OPTIONS") {
 			write_response(session, [](std::shared_ptr<Response> response, std::shared_ptr<RTSPRequest1> request) {
 				*response << "RTSP/1.0 200 OK\r\n" 
@@ -453,7 +342,7 @@ public:
 			});
 		}
 		else if (session->request->method == "SETUP") {
-			std::string sdp = session->request->content.string();
+			session->do_setup();
 			write_response(session, [](std::shared_ptr<Response> response, std::shared_ptr<RTSPRequest1> request) {
 				*response << "RTSP/1.0 200 OK\r\n"
 					      << "Cseq: " << request->header["CSeq"] << "\r\n"

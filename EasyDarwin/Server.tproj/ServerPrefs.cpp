@@ -50,10 +50,6 @@ namespace ServerPrefs {
 		constexpr float	fOverbufferRate = 2.0;
 		return fOverbufferRate;
 	}
-	QTSS_AuthScheme GetAuthScheme() {
-		QTSS_AuthScheme fAuthScheme = qtssAuthDigest;
-		return fAuthScheme;
-	}
 	uint32_t GetWindowSizeMaxThreshold() {
 		constexpr uint32_t fWindowSizeMaxThreshold = 200;
 		return fWindowSizeMaxThreshold;
@@ -183,18 +179,6 @@ namespace ServerPrefs {
 	boost::string_view GetMovieFolder()
 	{
 		return boost::string_view("./");
-	}
-	std::vector<std::string> GetPlayersReqRTPHeader()
-	{
-		return { "Android", "EasyPlayer" };
-	}
-	std::vector<std::string> GetPlayersReqBandAdjust()
-	{
-		return { "Android", "EasyPlayer" };
-	}
-	std::vector<std::string> GetPlayersReqNoPauseTimeAdjust()
-	{
-		return { "Android", "EasyPlayer" };
 	}
 	std::vector<std::string> GetReqRTPStartTimeAdjust()
 	{

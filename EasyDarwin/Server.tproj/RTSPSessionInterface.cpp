@@ -45,20 +45,6 @@
 #endif
 
 unsigned int            RTSPSessionInterface::sSessionIDCounter = kFirstRTSPSessionID;
-bool                  RTSPSessionInterface::sDoBase64Decoding = true;
-uint32_t					RTSPSessionInterface::sOptionsRequestBody[kMaxRandomDataSize / sizeof(uint32_t)];
-
-void    RTSPSessionInterface::Initialize()
-{
-	std::random_device rd;
-	std::mt19937 mt(rd());
-	std::uniform_int_distribution<uint32_t> dist;
-	for (unsigned int i = 0; i < kMaxRandomDataSize / sizeof(uint32_t); i++)
-		RTSPSessionInterface::sOptionsRequestBody[i] = dist(mt);
-	((char *)RTSPSessionInterface::sOptionsRequestBody)[0] = 0; //always set first byte so it doesn't hit any client parser bugs for \r or \n.
-
-}
-
 
 RTSPSessionInterface::RTSPSessionInterface()
 	: Task(),
@@ -296,67 +282,4 @@ std::string RTSPSessionInterface::GetRemoteAddr()
 {
 	StrPtrLen* theRemoteAddrStr = fSocket.GetRemoteAddrStr();
 	return std::string(theRemoteAddrStr->Ptr, theRemoteAddrStr->Len);
-}
-
-void RTSPSessionInterface::SaveOutputStream()
-{
-	Assert(fOldOutputStreamBuffer.Ptr == nullptr);
-	fOldOutputStreamBuffer.Ptr = new char[fOutputStream.GetBytesWritten()];
-	fOldOutputStreamBuffer.Len = fOutputStream.GetBytesWritten();
-	::memcpy(fOldOutputStreamBuffer.Ptr, fOutputStream.GetBufPtr(), fOldOutputStreamBuffer.Len);
-}
-
-void RTSPSessionInterface::RevertOutputStream()
-{
-	Assert(fOldOutputStreamBuffer.Ptr != nullptr);
-	Assert(fOldOutputStreamBuffer.Len != 0);
-	static boost::string_view theRTTStr(";rtt=");
-
-	if (fOldOutputStreamBuffer.Ptr != nullptr)
-	{
-		//fOutputStream.Put(fOldOutputStreamBuffer);		
-		StringParser theStreamParser(&fOldOutputStreamBuffer);
-		StrPtrLen theHeader;
-		StrPtrLen theEOL;
-		StrPtrLen theField;
-		StrPtrLen theValue;
-		while (theStreamParser.GetDataRemaining() != 0)
-		{
-			theStreamParser.ConsumeUntil(&theHeader, StringParser::sEOLMask);
-			if (theHeader.Len != 0)
-			{
-				boost::string_view theHeaderV(theHeader.Ptr, theHeader.Len);
-				fOutputStream.Put(theHeaderV);
-
-				StringParser theHeaderParser(&theHeader);
-				theHeaderParser.ConsumeUntil(&theField, ':');
-				if (theHeaderParser.PeekFast() == ':')
-				{
-					boost::string_view theFieldV(theField.Ptr, theField.Len);
-					if (boost::iequals(theFieldV, RTSPProtocol::GetHeaderString(qtssXDynamicRateHeader)))
-					{
-						fOutputStream.Put(theRTTStr);
-						fOutputStream.Put(std::to_string(fRoundTripTime));
-					}
-				}
-			}
-			theStreamParser.ConsumeEOL(&theEOL);
-			fOutputStream.PutEOL();
-		}
-
-		fOldOutputStreamBuffer.Delete();
-	}
-}
-
-void RTSPSessionInterface::SendOptionsRequest()
-{
-	static boost::string_view	sOptionsRequestHeader("OPTIONS * RTSP/1.0\r\nContent-Type: application/x-random-data\r\nContent-Length: 1400\r\n\r\n");
-
-	fOutputStream.Put(sOptionsRequestHeader);
-	fOutputStream.Put(
-		boost::string_view((char*)(RTSPSessionInterface::sOptionsRequestBody), 1400));
-
-	fOptionsRequestSendTime = OS::Milliseconds();
-	fSentOptionsRequest = true;
-	fRoundTripTimeCalculation = false;
 }

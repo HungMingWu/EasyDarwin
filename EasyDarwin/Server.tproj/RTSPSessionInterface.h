@@ -45,11 +45,6 @@
 class RTSPSessionInterface : public Task
 {
 public:
-
-	//Initialize must be called right off the bat to initialize dictionary resources
-	static void     Initialize();
-	static void     SetBase64Decoding(bool newVal) { sDoBase64Decoding = newVal; }
-
 	RTSPSessionInterface();
 	~RTSPSessionInterface() override = default;
 
@@ -113,50 +108,13 @@ public:
 	// performs RTP over RTSP
 	QTSS_Error  InterleavedWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, unsigned char channel);
 
-	// OPTIONS request
-	void		SaveOutputStream();
-	void		RevertOutputStream();
-	void		ResetOutputStream() { fOutputStream.Reset(); fOutputStream.ResetBytesWritten(); }
-	void		SendOptionsRequest();
-	bool		SentOptionsRequest() { return fSentOptionsRequest; }
-	int32_t		RoundTripTime() { return fRoundTripTime; }
-
-	enum
-	{
-		kMaxUserNameLen = 32,
-		kMaxUserPasswordLen = 32,
-		kMaxUserRealmLen = 64
-	};
-
-	enum                        // Quality of protection
-	{
-		kNoQop = 0,    // No Quality of protection
-		kAuthQop = 1,    // Authentication
-		kAuthIntQop = 2     // Authentication with Integrity        
-	};
-
-	// DJM PROTOTYPE
-	enum
-	{
-		kMaxRandomDataSize = 256 * 1024,
-	};
-	void SetDigestChallenge(boost::string_view digest) { lastDigestChallenge = std::string(digest); }
-	boost::string_view GetDigestChallenge() const { return lastDigestChallenge;  }
 	std::string GetRemoteAddr();
-	void SetLastURLRealm(boost::string_view realm) { fUserRealm = std::string(realm); }
-	boost::string_view GetLastURLRealm() const { return fUserRealm; }
-	void SetPassword(boost::string_view password) { fUserPassword = std::string(password); }
 protected:
 	enum
 	{
 		kFirstRTSPSessionID = 1,    //uint32_t
 	};
-	std::string lastDigestChallenge;
 	//Each RTSP session has a unique number that identifies it.
-
-	std::string         fUserName;
-	std::string         fUserPassword;
-	std::string         fUserRealm;
 
 	TimeoutTask         fTimeoutTask;//allows the session to be timed out
 
@@ -191,18 +149,7 @@ protected:
 	uint32_t              fSessionID;
 	int32_t              fRequestBodyLen{-1};
 
-	// For OPTIONS request
-	StrPtrLen				fOldOutputStreamBuffer;
-	bool					fSentOptionsRequest{false};
-	int64_t					fOptionsRequestSendTime{-1};
-	int32_t					fRoundTripTime{-1};
-	bool					fRoundTripTimeCalculation{true};
-
 	static unsigned int sSessionIDCounter;
-
-	static bool           sDoBase64Decoding;
-
-	static 	uint32_t			sOptionsRequestBody[kMaxRandomDataSize / sizeof(uint32_t)];
 };
 #endif // __RTSPSESSIONINTERFACE_H__
 

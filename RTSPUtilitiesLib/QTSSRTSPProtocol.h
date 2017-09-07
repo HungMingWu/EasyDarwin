@@ -129,10 +129,7 @@ enum
     qtssXPreBufferHeader        = 49,
 	qtssXDynamicRateHeader      = 50,
 	qtssXAcceptDynamicRateHeader= 51,
-	
-	// QT Player random data request
-	qtssXRandomDataSizeHeader   = 52,
-	
+		
 	qtssNumHeaders				= 53,
 	qtssIllegalHeader 			= 53
     

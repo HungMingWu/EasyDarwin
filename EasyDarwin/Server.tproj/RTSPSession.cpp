@@ -44,20 +44,11 @@
 #include "MyAssert.h"
 
 #include "QTSS.h"
-#include "md5digest.h"
 #include "QTSSDataConverter.h"
 #include "QTSSReflectorModule.h"
 #include "ServerPrefs.h"
 
-#if __FreeBSD__ || __hpux__	
-#include <unistd.h>
-#endif
-
 #include <errno.h>
-
-#if __solaris__ || __linux__ || __sgi__	|| __hpux__
-#include <crypt.h>
-#endif
 
 static RTPSession* GetRTPSession(StrPtrLen *str)
 {
@@ -78,8 +69,6 @@ static StrPtrLen    sControlStr("control");
 static StrPtrLen    sBufferDelayStr("x-bufferdelay");
 static boost::string_view    sContentType("application/x-random-data");
 
-static StrPtrLen    sAuthAlgorithm("md5");
-static boost::string_view    sAuthQop("auth");
 static boost::string_view    sEmptyStr("");
 
 RTSPSession::RTSPSession()
@@ -272,27 +261,13 @@ int64_t RTSPSession::Run()
 					break;
 				}
 
-				//
-				// In case a module wants to replace the request
-				char* theReplacedRequest = nullptr;
-				char* oldReplacedRequest = nullptr;
-
 				if (fRequest->HasResponseBeenSent())
 				{
 					fState = kPostProcessingRequest;
 					break;
 				}
 
-				if (fSentOptionsRequest && this->ParseOptionsResponse())
-				{
-					fRoundTripTime = (int32_t)(OS::Milliseconds() - fOptionsRequestSendTime);
-					//printf("RTSPSession::Run RTT time = %" _S32BITARG_ " msec\n", fRoundTripTime);
-					fState = kSendingResponse;
-					break;
-				}
-				else
-					// Otherwise, this is a normal request, so parse it and get the RTPSession.
-					this->SetupRequest();
+				this->SetupRequest();
 
 				// This might happen if there is some syntax or other error,
 				// or if it is an OPTIONS request
@@ -301,211 +276,7 @@ int64_t RTSPSession::Run()
 					fState = kPostProcessingRequest;
 					break;
 				}
-				fState = kRoutingRequest;
-			}
-		case kRoutingRequest:
-			{
-				// Invoke router modules
-				{
-					// Manipulation of the RTPSession from the point of view of
-					// a module is guaranteed to be atomic by the API.
-					Assert(fRTPSession != nullptr);
-					OSMutexLocker   locker(fRTPSession->GetSessionMutex());
-
-					ReflectionModule::RedirectBroadcast(&rtspParams);
-				}
-
-				// SetupAuthLocalPath must happen after kRoutingRequest and before kAuthenticatingRequest
-				// placed here so that if the state is shifted to kPostProcessingRequest from a response being sent
-				// then the AuthLocalPath will still be set.
-				fRequest->SetupAuthLocalPath();
-
-				if (fRequest->HasResponseBeenSent())
-				{
-					fState = kPostProcessingRequest;
-					break;
-				}
-
-				if (fRequest->SkipAuthorization())
-				{
-					// Skip the authentication and authorization states
-
-					// The foll. normally gets executed at the end of the authorization state 
-					// Prepare for kPreprocessingRequest state.
-					fState = kPreprocessingRequest;
-
-					if (fRequest->GetMethod() == qtssSetupMethod)
-						// Make sure to erase the session ID stored in the request at this point.
-						// If we fail to do so, this same session would be used if another
-						// SETUP was issued on this same TCP connection.
-						fLastRTPSessionIDPtr.Len = 0;
-					else if (fLastRTPSessionIDPtr.Len == 0)
-						fLastRTPSessionIDPtr.Len = ::strlen(fLastRTPSessionIDPtr.Ptr);
-
-					break;
-				}
-				else
-					fState = kAuthenticatingRequest;
-			}
-
-		case kAuthenticatingRequest:
-			{
-				bool      allowedDefault = ServerPrefs::GetAllowGuestDefault();
-				bool      allowed = allowedDefault; //server pref?
-				bool      hasUser = false;
-				bool      handled = false;
-				bool      wasHandled = false;
-
-				boost::string_view prefRealm(ServerPrefs::GetAuthorizationRealm());
-				if (!prefRealm.empty())
-					fRequest->SetURLRealm(prefRealm);
-
-				QTSS_RTSPMethod method = fRequest->GetMethod();
-				if (method != qtssIllegalMethod) do
-				{   //Set the request action before calling the authentication module
-
-					if ((method == qtssAnnounceMethod) || ((method == qtssSetupMethod) && fRequest->IsPushRequest()))
-					{
-						fRequest->SetAction(qtssActionFlagsWrite);
-						break;
-					}
-
-					if (fRTPSession->getAttribute(sBroadcasterSessionName))
-					{
-						fRequest->SetAction(qtssActionFlagsWrite); // an incoming broadcast session
-						break;
-					}
-
-					fRequest->SetAction(qtssActionFlagsRead);
-				} while (false);
-				else
-				{
-					Assert(0);
-				}
-
-				if (fRequest->GetAuthScheme() == qtssAuthNone)
-				{
-					QTSS_AuthScheme scheme = ServerPrefs::GetAuthScheme();
-					if (scheme == qtssAuthBasic)
-						fRequest->SetAuthScheme(qtssAuthBasic);
-					else if (scheme == qtssAuthDigest)
-						fRequest->SetAuthScheme(qtssAuthDigest);
-
-					if (scheme == qtssAuthDigest)
-						debug_printf("RTSPSession.cpp:kAuthenticatingRequest  scheme == qtssAuthDigest\n");
-				}
-
-				// Setup the authentication param block
-				QTSS_RoleParams theAuthenticationParams;
-				theAuthenticationParams.rtspAthnParams.inRTSPRequest = fRequest;
-
-				fRequest->SetAllowed(allowed);
-				fRequest->SetHasUser(hasUser);
-				fRequest->SetAuthHandled(handled);
-				fRequest->SetDigestChallenge(lastDigestChallenge);
-
-				if (!wasHandled) //don't check and possibly fail the user if it the user has already been checked.
-					this->CheckAuthentication();
-
-				if (fRequest->HasResponseBeenSent())
-				{
-					fState = kPostProcessingRequest;
-					break;
-				}
-				fState = kAuthorizingRequest;
-			}
-		case kAuthorizingRequest:
-			{
-				// Invoke authorization modules
-				bool      allowedDefault = ServerPrefs::GetAllowGuestDefault();
-				bool      allowed = true;
-				bool      hasUser = false;
-				bool      handled = false;
-				QTSS_Error  theErr = QTSS_NoErr;
-
-				// Invoke authorization modules
-
-				// Manipulation of the RTPSession from the point of view of
-				// a module is guaranteed to be atomic by the API.
-				Assert(fRTPSession != nullptr);
-				OSMutexLocker   locker(fRTPSession->GetSessionMutex());
-
-				fRequest->SetAllowed(allowed);
-				fRequest->SetHasUser(hasUser);
-				fRequest->SetAuthHandled(handled);
-
-
-				fRequest->SetHasUser(false);
-				fRequest->SetAuthHandled(false);
-
-				(void)ReflectionModule::ReflectorAuthorizeRTSPRequest(&rtspParams);
-
-
-				// allowed != default means a module has set the result
-				// handled means a module wants to be the primary for this request
-				// -- example qtaccess says only allow valid user and allowed default is false.  So module says handled, hasUser is false, allowed is false
-				// 
-				allowed = fRequest->GetAllowed();
-				hasUser = fRequest->GetHasUser();
-				handled = fRequest->GetAuthHandled();
-				debug_printf("RTSPSession::Run Role(kAuthorizingRequest) allowedDefault =%d allowed= %d hasUser = %d handled=%d \n", allowedDefault, allowed, hasUser, handled);
-
-				this->SaveRequestAuthorizationParams(fRequest);
-
-				if (!allowed)
-				{
-					if (false == fRequest->HasResponseBeenSent())
-					{
-						QTSS_AuthScheme challengeScheme = fRequest->GetAuthScheme();
-
-						if (challengeScheme == qtssAuthDigest)
-						{
-							debug_printf("RTSPSession.cpp:kAuthorizingRequest  scheme == qtssAuthDigest)\n");
-						}
-						else if (challengeScheme == qtssAuthBasic)
-						{
-							debug_printf("RTSPSession.cpp:kAuthorizingRequest  scheme == qtssAuthBasic)\n");
-						}
-
-						if (challengeScheme == qtssAuthBasic) {
-							fRTPSession->SetAuthScheme(qtssAuthBasic);
-							theErr = fRequest->SendBasicChallenge();
-						}
-						else if (challengeScheme == qtssAuthDigest) {
-							fRTPSession->UpdateDigestAuthChallengeParams(false, false, RTSPSessionInterface::kNoQop);
-							theErr = fRequest->SendDigestChallenge(fRTPSession->GetAuthQop(), fRTPSession->GetAuthNonce(), fRTPSession->GetAuthOpaque());
-						}
-						else {
-							// No authentication scheme is given and the request was not allowed,
-							// so send a 403: Forbidden message
-							theErr = fRequest->SendForbiddenResponse();
-						}
-						if (QTSS_NoErr != theErr) // We had an error so bail on the request quit the session and post process the request.
-						{
-							fRequest->SetResponseKeepAlive(false);
-							fState = kPostProcessingRequest;
-							break;
-
-						}
-					}
-				}
-
-				if (fRequest->HasResponseBeenSent())
-				{
-					fState = kPostProcessingRequest;
-					break;
-				}
-
-				// Prepare for kPreprocessingRequest state.
 				fState = kPreprocessingRequest;
-
-				if (fRequest->GetMethod() == qtssSetupMethod)
-					// Make sure to erase the session ID stored in the request at this point.
-					// If we fail to do so, this same session would be used if another
-					// SETUP was issued on this same TCP connection.
-					fLastRTPSessionIDPtr.Len = 0;
-				else if (fLastRTPSessionIDPtr.Len == 0)
-					fLastRTPSessionIDPtr.Len = ::strlen(fLastRTPSessionIDPtr.Ptr);
 			}
 
 		case kPreprocessingRequest:
@@ -566,12 +337,6 @@ int64_t RTSPSession::Run()
 						// a module is guarenteed to be atomic by the API.
 						OSMutexLocker   locker(fRTPSession->GetSessionMutex());
 
-						// Make sure the RTPSession contains a copy of the realStatusCode in this request
-						uint32_t realStatusCode = RTSPProtocol::GetStatusCode(fRequest->GetStatus());
-						fRTPSession->SetStatusCode(realStatusCode);
-
-						fRTPSession->SetRespMsg(fRequest->GetRespMsg());
-
 						// Set the current RTSP session for this RTP session.
 						// We do this here because we need to make sure the SessionMutex
 						// is grabbed while we do this. Only do this if the RTSP session
@@ -589,22 +354,6 @@ int64_t RTSPSession::Run()
 				// Sending the RTSP response consists of making sure the
 				// RTSP request output buffer is completely flushed to the socket.
 				Assert(fRequest != nullptr);
-
-				// If x-dynamic-rate header is sent with a value of 1, send OPTIONS request
-				if ((fRequest->GetMethod() == qtssSetupMethod) && (fRequest->GetStatus() == qtssSuccessOK)
-					&& (fRequest->GetDynamicRateState() == 1) && fRoundTripTimeCalculation)
-				{
-					this->SaveOutputStream();
-					this->ResetOutputStream();
-					this->SendOptionsRequest();
-				}
-
-				if (fSentOptionsRequest && (fRequest->GetMethod() == qtssIllegalMethod))
-				{
-					this->ResetOutputStream();
-					this->RevertOutputStream();
-					fSentOptionsRequest = false;
-				}
 
 				err = fOutputStream.Flush();
 
@@ -685,156 +434,6 @@ int64_t RTSPSession::Run()
 	return 0;
 }
 
-void RTSPSession::CheckAuthentication() {
-
-	QTSSUserProfile* profile = fRequest->GetUserProfile();
-	boost::string_view userPassword = profile->GetPassWord();
-	QTSS_AuthScheme scheme = fRequest->GetAuthScheme();
-	bool authenticated = true;
-
-	// Check if authorization information returned by the client is for the scheme that the server sent the challenge
-	if (scheme != (fRTPSession->GetAuthScheme())) {
-		authenticated = false;
-	}
-	else if (scheme == qtssAuthBasic) {
-		// For basic authentication, the authentication module returns the crypt of the password, 
-		std::string reqPasswdStr(fRequest->GetPassWord());
-		std::string userPasswdStr(userPassword); // memory allocated
-
-		if (userPassword.empty())
-		{
-			authenticated = false;
-		}
-		else
-		{
-#ifdef __Win32__
-			// The password is md5 encoded for win32
-			char md5EncodeResult[120];
-			// no memory is allocated in this function call
-			MD5Encode((char *)reqPasswdStr.c_str(), &userPasswdStr[0], md5EncodeResult, sizeof(md5EncodeResult));
-			if (::strcmp(userPasswdStr.c_str(), md5EncodeResult) != 0)
-				authenticated = false;
-#else
-			if (::strcmp(userPasswdStr, (char*)crypt(reqPasswdStr, userPasswdStr)) != 0)
-				authenticated = false;
-#endif
-		}
-
-		userPasswdStr = nullptr;
-	}
-	else if (scheme == qtssAuthDigest) {
-		// For digest authentication, md5 digest comparison
-		// The text returned by the authentication module in qtssUserPassword is MD5 hash of (username:realm:password)
-
-		uint32_t qop = fRequest->GetAuthQop();
-		boost::string_view opaque = fRequest->GetAuthOpaque();
-		boost::string_view sessionOpaque = fRTPSession->GetAuthOpaque();
-		uint32_t sessionQop = fRTPSession->GetAuthQop();
-
-		do {
-			// The Opaque string should be the same as that sent by the server
-			// The QoP should be the same as that sent by the server
-			if (!boost::iequals(sessionOpaque, opaque)) {
-				authenticated = false;
-				break;
-			}
-
-			if (sessionQop != qop) {
-				authenticated = false;
-				break;
-			}
-
-			// All these are just pointers to existing memory... no new memory is allocated
-			//StrPtrLen* userName = profile->GetValue(qtssUserName);
-			//StrPtrLen* realm = fRequest->GetAuthRealm();
-			boost::string_view nonce = fRequest->GetAuthNonce();
-			boost::string_view method = RTSPProtocol::GetMethodString(fRequest->GetMethod());
-			boost::string_view digestUri = fRequest->GetAuthUri();
-			boost::string_view responseDigest = fRequest->GetAuthResponse();
-			//StrPtrLen hA1;
-			std::string requestDigest;
-			boost::string_view emptyStr;
-
-			boost::string_view cNonce = fRequest->GetAuthCNonce();
-			// Since qtssUserPassword = md5(username:realm:password)
-			// Just convert the 16 bit hash to a 32 bit char array to get HA1
-			//HashToString((unsigned char *)userPassword->Ptr, &hA1);
-			//CalcHA1(&sAuthAlgorithm, userName, realm, userPassword, nonce, cNonce, &hA1);
-
-
-			// For qop="auth"
-			if (qop == RTSPSessionInterface::kAuthQop) {
-				boost::string_view nonceCount = fRequest->GetAuthNonceCount();
-				uint32_t ncValue = 0;
-
-				// Convert nounce count (which is a string of 8 hex digits) into a uint32_t
-				if (!nonceCount.empty())
-				{
-					// Convert nounce count (which is a string of 8 hex digits) into a uint32_t                 
-					uint32_t bufSize = sizeof(ncValue);
-					std::string tempString(nonceCount);
-					//tempString.ToUpper();
-					QTSSDataConverter::ConvertCHexStringToBytes((char *)tempString.c_str(),
-						&ncValue,
-						&bufSize);
-					ncValue = ntohl(ncValue);
-
-				}
-				// nonce count must not be repeated by the client
-				if (ncValue < (fRTPSession->GetAuthNonceCount())) {
-					authenticated = false;
-					break;
-				}
-
-				// allocates memory for requestDigest.Ptr
-				requestDigest = CalcRequestDigest(userPassword, nonce, nonceCount, cNonce, sAuthQop, method, digestUri, emptyStr);
-				// If they are equal, check if nonce used by client is same as the one sent by the server
-
-			}   // For No qop
-			else if (qop == RTSPSessionInterface::kNoQop)
-			{
-				// allocates memory for requestDigest->Ptr
-				requestDigest = CalcRequestDigest(userPassword, nonce, emptyStr, emptyStr, emptyStr, method, digestUri, emptyStr);
-			}
-
-			// hA1 is allocated memory 
-			//delete [] hA1.Ptr;
-
-			if (boost::equals(responseDigest, requestDigest)) {
-				if (!boost::equals(nonce, fRTPSession->GetAuthNonce()))
-					fRequest->SetStale(true);
-				authenticated = true;
-			}
-			else {
-				authenticated = false;
-			}
-
-		} while (false);
-	}
-
-	if (!fRequest->GetAuthHandled())
-	{
-		if ((!authenticated) || (authenticated && (fRequest->GetStale()))) {
-			debug_printf("erasing username from profile\n");
-			profile->SetUserName(sEmptyStr);
-			profile->SetPassWord(sEmptyStr);
-			profile->clearUserGroups();
-		}
-	}
-}
-
-bool RTSPSession::ParseOptionsResponse()
-{
-	boost::string_view t1(fRequest->GetFullRequest());
-	StrPtrLen t1V((char *)t1.data(), t1.length());
-	StringParser parser(&t1V);
-	static StrPtrLen sRTSPStr("RTSP", 4);
-	StrPtrLen theProtocol;
-	parser.ConsumeLength(&theProtocol, 4);
-
-	return (theProtocol.Equal(sRTSPStr));
-}
-
 void RTSPSession::SetupRequest()
 {
 	// First parse the request
@@ -874,14 +473,6 @@ void RTSPSession::SetupRequest()
 
 		// DJM PROTOTYPE
 		boost::string_view require = fRequest->GetHeaderDict().Get(qtssRequireHeader);
-		if (boost::iequals(require, RTSPProtocol::GetHeaderString(qtssXRandomDataSizeHeader)))
-		{
-			body = (char*)RTSPSessionInterface::sOptionsRequestBody;
-			bodySizeBytes = fRequest->GetRandomDataSize();
-			Assert(bodySizeBytes <= sizeof(RTSPSessionInterface::sOptionsRequestBody));
-			fRequest->AppendHeader(qtssContentTypeHeader, sContentType);
-			fRequest->AppendContentLength(bodySizeBytes);
-		}
 
 		fRequest->SendHeader();
 
@@ -967,8 +558,6 @@ void RTSPSession::SetupRequest()
 	Assert(fRTPSession != nullptr); // At this point, we must have one!
 	rtspParams.inClientSession = fRTPSession;
 
-	// Setup Authorization params;
-	fRequest->ParseAuthHeader();
 }
 
 void RTSPSession::CleanupRequest()
@@ -1049,10 +638,6 @@ QTSS_Error  RTSPSession::CreateNewRTPSession()
 		// unusual event there is a timeout while we are doing this.
 		OSMutexLocker locker(fRTPSession->GetSessionMutex());
 
-		// Because this is a new RTP session, setup some dictionary attributes
-		// pertaining to RTSP that only need to be set once
-		this->SetupClientSessionAttrs();
-
 		// So, generate a session ID for this session
 		QTSS_Error activationError = EPERM;
 		while (activationError == EPERM)
@@ -1075,28 +660,6 @@ QTSS_Error  RTSPSession::CreateNewRTPSession()
 	Assert(theRef != nullptr);
 
 	return QTSS_NoErr;
-}
-
-void RTSPSession::SetupClientSessionAttrs()
-{
-	// get and pass presentation url
-	fRTPSession->SetPresentationURL(fRequest->GetURI());
-
-	// get and pass full request url
-	fRTPSession->SetAbsoluteURL(fRequest->GetAbsoluteURL());
-
-	// get and pass request host name
-	fRTPSession->SetHost(fRequest->GetHeaderDict().Get(qtssHostHeader));
-
-	// get and pass user agent header
-	fRTPSession->SetUserAgent(fRequest->GetHeaderDict().Get(qtssUserAgentHeader));
-
-	// get and pass CGI params
-	if (fRequest->GetMethod() == qtssDescribeMethod)
-		fRTPSession->SetQueryString(fRequest->GetQueryString());
-
-	// store RTSP session info in the RTPSession.   
-	fRTPSession->SetRemoteAddr(GetRemoteAddr());
 }
 
 uint32_t RTSPSession::GenerateNewSessionID(char* ioBuffer)
@@ -1144,34 +707,6 @@ QTSS_Error RTSPSession::IsOkToAddNewRTPSession()
 	return QTSS_NoErr;
 }
 
-void RTSPSession::SaveRequestAuthorizationParams(RTSPRequest *theRTSPRequest)
-{
-	// Set the RTSP session's copy of the user name
-	boost::string_view userName = theRTSPRequest->GetAuthUserName();
-	fUserName = std::string(userName);
-	fRTPSession->SetUserName(userName);
-
-	// Same thing... user password
-	boost::string_view password = theRTSPRequest->GetPassWord();
-	SetPassword(password);
-	fRTPSession->SetPassword(password);
-
-	boost::string_view tempPtr = theRTSPRequest->GetURLRealm();
-	if (tempPtr.empty())
-	{
-		// If there is no realm explicitly specified in the request, then let's get the default out of the prefs
-		boost::string_view theDefaultRealm(ServerPrefs::GetAuthorizationRealm());
-		SetLastURLRealm(theDefaultRealm);
-		fRTPSession->SetRealm(theDefaultRealm);
-	}
-	else
-	{
-		SetLastURLRealm(tempPtr);
-		fRTPSession->SetRealm(tempPtr);
-	}
-
-}
-
 QTSS_Error RTSPSession::DumpRequestData()
 {
 	char theDumpBuffer[2048];
@@ -1215,4 +750,57 @@ void RTSPSession::HandleIncomingDataPacket()
 	rtspIncomingDataParams.inPacketLen = fInputStream.GetRequestBuffer()->Len;
 
 	ReflectionModule::ProcessRTPData(&rtspIncomingDataParams);
+}
+
+RTSPSession1::RTSPSession1(std::shared_ptr<Connection> connection) noexcept : connection(std::move(connection)) 
+{
+	try {
+		//auto remote_endpoint = connection->socket.lowest_layer().remote_endpoint();
+		//request = std::make_shared<RTSPRequest1>(remote_endpoint.address().to_string(), remote_endpoint.port());
+		request = std::make_shared<RTSPRequest1>();
+	}
+	catch (...) {
+		request = std::make_shared<RTSPRequest1>();
+	}
+}
+
+void RTSPSession1::do_setup()
+{
+	bool isPush = request->IsPushRequest();
+	if (0) //!outputSession)
+	{
+		if (!isPush)
+		{
+#if 0
+			theSession = DoSessionSetup(inParams, isPush);
+			if (theSession == nullptr)
+				return QTSS_RequestFailed;
+			auto* theNewOutput = new RTPSessionOutput(inParams->inClientSession, theSession, sStreamCookieName);
+			theSession->AddOutput(theNewOutput, true);
+			inParams->inClientSession->addAttribute(sOutputName, theNewOutput);
+#endif
+		}
+		else
+		{
+#if 0
+			auto opt = inParams->inClientSession->getAttribute(sBroadcasterSessionName);
+			if (!opt)
+			{
+				theSession = DoSessionSetup(inParams, isPush, &foundSession);
+				if (theSession == nullptr)
+					return QTSS_RequestFailed;
+			}
+			else
+			{
+				theSession = boost::any_cast<ReflectorSession*>(opt.value());
+			}
+
+			inParams->inClientSession->addAttribute(sBroadcasterSessionName, theSession);
+#endif
+		}
+	}
+	else
+	{
+		//auto theSession = outputSession.value().GetReflectorSession();
+	}
 }

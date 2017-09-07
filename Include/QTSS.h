@@ -114,19 +114,6 @@ enum
     qtssSetupRespDontWriteSSRC      = 0x00000002
 };
 
-
-// Flags for the qtssRTSPReqAction attribute in a QTSS_RTSPRequestObject.
-enum 
-{
-    qtssActionFlagsNoFlags      = 0x00000000,
-    qtssActionFlagsRead         = 0x00000001,
-    qtssActionFlagsWrite        = 0x00000002,
-    qtssActionFlagsAdmin        = 0x00000004,
-    qtssActionFlagsExtended     = 0x40000000,
-    qtssActionQTSSExtended      = 0x80000000,
-};
-typedef uint32_t QTSS_ActionFlags;
-
 enum
 {
 	easyRedisActionDelete		= 0,
@@ -182,16 +169,6 @@ enum
     QTSS_WriteableEvent     = 2
 };
 typedef uint32_t  QTSS_EventType;
-
-// Authentication schemes
-enum
-{
-    qtssAuthNone        = 0,
-    qtssAuthBasic       = 1,
-    qtssAuthDigest      = 2
-};
-typedef uint32_t  QTSS_AuthScheme;
-
 
 /**********************************/
 // RTSP SESSION TYPES

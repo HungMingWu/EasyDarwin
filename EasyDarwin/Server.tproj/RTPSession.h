@@ -53,18 +53,6 @@
 
 class RTPSession : public RTPSessionInterface
 {
-	// full Presentation URL for this session. Same as presentationURL, 
-	// but includes rtsp://domain.com prefix
-	std::string absoluteURL;
-	// Presentation URL for this session. This URL is the "base" URL for the session. 
-	// RTSP requests to this URL are assumed to affect all streams on the session.
-	std::string presentationURL;
-	// Query string from the request that creates this  client session
-	std::string queryString;
-	//requestes host name for s session. Just the "domain.com" portion
-	std::string hostName;
-	std::string userAgent;
-	std::string respMsg;
 public:
 
 	RTPSession();
@@ -111,28 +99,6 @@ public:
 
 	int32_t          GetQualityLevel();
 	void            SetQualityLevel(int32_t level);
-	void            SetQueryString(boost::string_view query) {
-		queryString = std::string(queryString);
-	}
-	boost::string_view GetQueryString() const { return queryString; }
-	void            SetPresentationURL(boost::string_view url) {
-		presentationURL = std::string(url);
-	}
-	boost::string_view GetPresentationURL() const { return presentationURL; }
-	void            SetAbsoluteURL(boost::string_view url) {
-		absoluteURL = std::string(url);
-	}
-	boost::string_view GetAbsoluteURL() const { return absoluteURL; }
-	void            SetHost(boost::string_view url) {
-		hostName = std::string(url);
-	}
-	boost::string_view GetHost() const { return hostName; }
-	void            SetUserAgent(boost::string_view useragent) {
-		userAgent = std::string(useragent);
-	}
-	boost::string_view GetUserAgent() const { return userAgent; }
-	void SetRespMsg(boost::string_view msg) { respMsg = std::string(msg); }
-	boost::string_view GetRespMsg() const { return respMsg; }
 	inline void addAttribute(boost::string_view key, boost::any value) {
 		attr.addAttribute(key, value);
 	}

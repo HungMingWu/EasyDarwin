@@ -29,10 +29,7 @@ set (SRC
 			 TCPSocket.cpp TCPSocket.h
 			 TCPListenerSocket.cpp TCPListenerSocket.h
 			 OSHeap.cpp OSHeap.h
-			 base64.cpp base64.h
 			 sdpCache.cpp sdpCache.h
-			 md5.c md5.h
-			 md5digest.cpp md5digest.h
 			 QueryParamList.cpp QueryParamList.h
 			 DateTranslator.cpp DateTranslator.h
 			 SDPUtils.cpp SDPUtils.h

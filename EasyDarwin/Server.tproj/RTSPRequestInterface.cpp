@@ -105,19 +105,9 @@ RTSPRequestInterface::RTSPRequestInterface(RTSPSessionInterface *session)
 	fLateTolerance(-1),
 	fPrebufferAmt(-1),
 	fWindowSize(0),
-	fMovieFolderPtr(&fMovieFolderPath[0]),
-	fAllowed(true),
-	fHasUser(false),
-	fAuthHandled(false),
 	fTransportMode(qtssRTPTransportModePlay),
 	fSetUpServerPort(0),
-	fAction(qtssActionFlagsNoFlags),
-	fAuthScheme(qtssAuthNone),
-	fAuthQop(RTSPSessionInterface::kNoQop),
-	fUserProfile(),
-	fUserProfilePtr(&fUserProfile),
 	fStale(false),
-	fSkipAuthorization(true),
 	fEnableDynamicRateState(-1),// -1 undefined, 0 disabled, 1 enabled
 	// DJM PROTOTYPE
 	fRandomDataSize(0),
@@ -530,50 +520,4 @@ std::string RTSPRequestInterface::GetFileDigit()
 	theFileDigit.Ptr++;
 
 	return std::string(theFileDigit.Ptr, theFileDigit.Len);
-}
-
-uint32_t RTSPRequestInterface::GetRealStatusCode()
-{
-	// Current RTSP status num of this request
-	// Set the fRealStatusCode variable based on the current fStatusCode.
-	// This function always gets called
-	return RTSPProtocol::GetStatusCode(fStatus);
-}
-
-boost::string_view RTSPRequestInterface::GetLocalPath() {
-
-	if (!localPath.empty())
-		return localPath;
-
-	// This function always gets called	
-	std::string filePath(GetAbsolutePath());
-
-	// Get the truncated path on a setup, because setups have the trackID appended
-	if (GetMethod() == qtssSetupMethod)
-		filePath = GetTruncatedPath();
-
-	boost::string_view theRootDir = GetRootDir();
-
-	char rootDir[512] = { 0 };
-	::strncpy(rootDir, theRootDir.data(), theRootDir.length());
-	OS::RecursiveMakeDir(rootDir);
-
-	uint32_t fullPathLen = filePath.length() + theRootDir.length();
-	auto* theFullPath = new char[fullPathLen + 1];
-	theFullPath[fullPathLen] = '\0';
-
-	::memcpy(theFullPath, theRootDir.data(), theRootDir.length());
-	::memcpy(theFullPath + theRootDir.length(), filePath.c_str(), filePath.length());
-
-	SetLocalPath({ theFullPath, fullPathLen });
-
-	// delete our copy of the data
-	delete[] theFullPath;
-
-	return localPath; 
-}
-
-boost::string_view RTSPRequestInterface::GetAuthDigestResponse()
-{
-	return fAuthDigestResponse;
 }

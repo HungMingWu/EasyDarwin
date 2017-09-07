@@ -40,6 +40,8 @@
 #include "RTSPRequestStream.h"
 #include "RTSPRequest.h"
 #include "RTPSession.h"
+#include "RTSPConnection.h"
+#include "RTPSessionOutput.h"
 
 class RTSPSession : public RTSPSessionInterface
 {
@@ -65,22 +67,16 @@ private:
 	// Gets & creates RTP session for this request.
 	RTPSession*  FindRTPSession();
 	QTSS_Error  CreateNewRTPSession();
-	void        SetupClientSessionAttrs();
 
 	// Does request prep & request cleanup, respectively
 	void SetupRequest();
 	void CleanupRequest();
-
-	bool ParseOptionsResponse();
 
 	// Fancy random number generator
 	uint32_t GenerateNewSessionID(char* ioBuffer);
 
 	// Sends an error response & returns error if not ok.
 	QTSS_Error IsOkToAddNewRTPSession();
-
-	// Checks authentication parameters
-	void CheckAuthentication();
 
 	// test current connections handled by this object against server pref connection limit
 	bool OverMaxConnections(uint32_t buffer);
@@ -101,9 +97,7 @@ private:
 	{
 		kReadingRequest = 0,
 		kFilteringRequest = 1,
-		kRoutingRequest = 2,
-		kAuthenticatingRequest = 3,
-		kAuthorizingRequest = 4,
+
 		kPreprocessingRequest = 5,
 		kProcessingRequest = 6,
 		kSendingResponse = 7,
@@ -125,13 +119,22 @@ private:
 	QTSS_Error SetupAuthLocalPath(RTSPRequest *theRTSPRequest);
 
 
-	void SaveRequestAuthorizationParams(RTSPRequest *theRTSPRequest);
 	QTSS_Error DumpRequestData();
 
 	uint64_t fMsgCount{ 0 };
 	Attributes attr;
     //friend class RTSPSessionHandler;
 
+};
+
+class RTSPSession1 {
+public:
+	RTSPSession1(std::shared_ptr<Connection> connection) noexcept;
+	void do_setup();
+	std::unique_ptr<ReflectorSession> broadcastSession;
+	std::unique_ptr<RTPSessionOutput1> outputSession;
+	std::shared_ptr<Connection> connection;
+	std::shared_ptr<RTSPRequest1> request;
 };
 
 #endif // __RTSPSESSION_H__

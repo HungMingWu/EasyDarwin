@@ -17,7 +17,6 @@ namespace ServerPrefs {
 	uint32_t GetSendIntervalInMsec();
 	float GetOverbufferRate();
 	uint16_t GetDefaultStreamQuality();
-	QTSS_AuthScheme GetAuthScheme();
 	uint32_t GetWindowSizeMaxThreshold();
 	uint32_t GetLargeWindowSizeInK();
 	uint32_t GetWindowSizeThreshold();
@@ -49,8 +48,5 @@ namespace ServerPrefs {
 	float GetTCPSecondsToBuffer();
 	bool IsPathInsideReliableUDPDir(boost::string_view inPath);
 	boost::string_view GetMovieFolder();
-	std::vector<std::string> GetPlayersReqRTPHeader();
-	std::vector<std::string> GetPlayersReqBandAdjust();
-	std::vector<std::string> GetPlayersReqNoPauseTimeAdjust();
 	std::vector<std::string> GetReqRTPStartTimeAdjust();
 }

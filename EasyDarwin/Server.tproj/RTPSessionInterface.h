@@ -143,27 +143,6 @@ public:
 	// case interleaved data or commands need to be sent back to the client. 
 	void            UpdateRTSPSession(RTSPSessionInterface* inNewRTSPSession);
 
-	// let's RTSP Session pass along it's query string
-	void            SetQueryString(StrPtrLen* queryString);
-
-	// SETTERS and ACCESSORS for auth information
-	// Authentication information that needs to be kept around
-	// for the duration of the session      
-	QTSS_AuthScheme GetAuthScheme() { return fAuthScheme; }
-	boost::string_view GetAuthNonce() { return fAuthNonce; }
-	uint32_t          GetAuthQop() { return fAuthQop; }
-	uint32_t          GetAuthNonceCount() { return fAuthNonceCount; }
-	boost::string_view GetAuthOpaque() { return fAuthOpaque; }
-	void            SetAuthScheme(QTSS_AuthScheme scheme) { fAuthScheme = scheme; }
-	// Use this if the auth scheme or the qop has to be changed from the defaults 
-	// of scheme = Digest, and qop = auth
-	void            SetChallengeParams(QTSS_AuthScheme scheme, uint32_t qop, bool newNonce, bool createOpaque);
-	// Use this otherwise...if newNonce == true, it will create a new nonce
-	// and reset nonce count. If newNonce == false but nonce was never created earlier
-	// a nonce will be created. If newNonce == false, and there is an existing nonce,
-	// the nounce count will be incremented.
-	void            UpdateDigestAuthChallengeParams(bool newNonce, bool createOpaque, uint32_t qop);
-
 	int32_t          GetQualityLevel() { return fSessionQualityLevel; }
 	int32_t*         GetQualityLevelPtr() { return &fSessionQualityLevel; }
 	void            SetQualityLevel(int32_t level) {
@@ -190,18 +169,9 @@ public:
 	uint32_t          GetMaxBandwidthBits() { uint32_t maxRTSP = GetLastRTSPBandwithBits();  return  maxRTSP; }
 	boost::string_view GetSessionID() const { return fRTSPSessionID; }
 	std::vector<RTPStream*> GetStreams()  { return fStreamBuffer; }
-	void SetUserName(boost::string_view name) { fUserName = std::string(name); }
-	boost::string_view GetUserName() const { return fUserName; }
-	void SetRemoteAddr(boost::string_view remote) {	fRTSPSessRemoteAddrStr = std::string(fRTSPSessRemoteAddrStr); }
-	boost::string_view GetRemoteAddr() const { return fRTSPSessRemoteAddrStr; }
-	void SetPassword(boost::string_view password) { fUserPassword = std::string(password); }
-	void SetRealm(boost::string_view realm) { fUserRealm = std::string(realm); }
-	boost::string_view GetRealm() const { return fUserRealm; }
 	float GetPacketLossPercent();
 	uint64_t GetMovieSizeInBytes() const { return fMovieSizeInBytes; }
 	double GetMovieDuration() const { return fMovieDuration; }
-	void SetStatusCode(uint32_t code) { fLastRTSPReqRealStatusCode = code; }
-	uint32_t GetStatusCode() const { return fLastRTSPReqRealStatusCode; }
 	void SetOverBufferEnable(bool enabled) {
 		GetOverbufferWindow()->TurnOverbuffering(enabled);
 	}
@@ -250,45 +220,12 @@ protected:
 	RTSPSessionInterface* fRTSPSession{nullptr};
 
 	std::vector<RTPStream*>       fStreamBuffer;
-	std::string fUserName;
 	TimeoutTask fTimeoutTask;
 private:
 
 	//
 	// Utility function for calculating current bit rate
 	void UpdateBitRateInternal(const int64_t& curTime);
-
-	
-
-	// Create nonce
-	void CreateDigestAuthenticationNonce();
-
-	// One of the RTP session attributes is an iterated list of all streams.
-	// As an optimization, we preallocate a "large" buffer of stream pointers,
-	// even though we don't know how many streams we need at first.
-	enum
-	{
-		kFullRequestURLBufferSize = 256,
-
-		kIPAddrStrBufSize = 20,
-
-		kAuthNonceBufSize = 32,
-		kAuthOpaqueBufSize = 32,
-
-	};
-
-
-
-
-	// theses are dictionary items picked up by the RTSPSession
-	// but we need to store copies of them for logging purposes.
-
-	std::string        fRTSPSessRemoteAddrStr;
-
-	
-	std::string        fUserPassword;
-	std::string        fUserRealm;
-	uint32_t           fLastRTSPReqRealStatusCode{200};
 
 	//for timing out this session
 
@@ -326,13 +263,6 @@ private:
 
 	static unsigned int sRTPSessionIDCounter;
 
-	// Authentication information that needs to be kept around
-	// for the duration of the session      
-	QTSS_AuthScheme             fAuthScheme;
-	std::string                 fAuthNonce;
-	uint32_t                      fAuthQop{RTSPSessionInterface::kNoQop};
-	uint32_t                      fAuthNonceCount{0};
-	std::string                 fAuthOpaque;
 	uint32_t                      fQualityUpdate;
 
 	uint32_t                      fFramesSkipped{0};

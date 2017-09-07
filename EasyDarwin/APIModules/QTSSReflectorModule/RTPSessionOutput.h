@@ -38,6 +38,7 @@
 
 #include "ReflectorOutput.h"
 #include "ReflectorSession.h"
+#include "RTPStream.h"
 #include "QTSS.h"
 
 class RTPSessionOutput : public ReflectorOutput
@@ -90,7 +91,6 @@ private:
 	QTSS_Error TrackPackets(QTSS_RTPStreamObject *theStreamPtr, StrPtrLen* inPacketStrPtr, int64_t *currentTimePtr, uint32_t inFlags, int64_t *packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr);
 };
 
-
 bool RTPSessionOutput::PacketMatchesStream(void* inStreamCookie, RTPStream *theStreamPtr)
 {
 	boost::optional<boost::any> opt = theStreamPtr->getAttribute(fCookieAttrName);
@@ -100,4 +100,8 @@ bool RTPSessionOutput::PacketMatchesStream(void* inStreamCookie, RTPStream *theS
 
 	return false;
 }
+
+class RTPSessionOutput1 {
+
+};
 #endif //__RTSP_REFLECTOR_OUTPUT_H__

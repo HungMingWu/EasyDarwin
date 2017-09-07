@@ -227,58 +227,6 @@ boost::string_view RTSPProtocol::sStatusCodeStrings[] =
 	"Option Not Supported"                   //kServerOptionNotSupported
 };
 
-int32_t RTSPProtocol::sStatusCodes[] =
-{
-	100,        //kContinue
-	200,        //kSuccessOK
-	201,        //kSuccessCreated
-	202,        //kSuccessAccepted
-	204,        //kSuccessNoContent
-	206,        //kSuccessPartialContent
-	250,        //kSuccessLowOnStorage
-	300,        //kMultipleChoices
-	301,        //kRedirectPermMoved
-	302,        //kRedirectTempMoved
-	303,        //kRedirectSeeOther
-	304,        //kRedirectNotModified
-	305,        //kUseProxy
-	400,        //kClientBadRequest
-	401,        //kClientUnAuthorized
-	402,        //kPaymentRequired
-	403,        //kClientForbidden
-	404,        //kClientNotFound
-	405,        //kClientMethodNotAllowed
-	406,        //kNotAcceptable
-	407,        //kProxyAuthenticationRequired
-	408,        //kRequestTimeout
-	409,        //kClientConflict
-	410,        //kGone
-	411,        //kLengthRequired
-	412,        //kPreconditionFailed
-	413,        //kRequestEntityTooLarge
-	414,        //kRequestURITooLarge
-	415,        //kUnsupportedMediaType
-	451,        //kClientParameterNotUnderstood
-	452,        //kClientConferenceNotFound
-	453,        //kClientNotEnoughBandwidth
-	454,        //kClientSessionNotFound
-	455,        //kClientMethodNotValidInState
-	456,        //kClientHeaderFieldNotValid
-	457,        //kClientInvalidRange
-	458,        //kClientReadOnlyParameter
-	459,        //kClientAggregateOptionNotAllowed
-	460,        //kClientAggregateOptionAllowed
-	461,        //kClientUnsupportedTransport
-	462,        //kClientDestinationUnreachable
-	500,        //kServerInternal
-	501,        //kServerNotImplemented
-	502,        //kServerBadGateway
-	503,        //kServerUnavailable
-	504,        //kServerGatewayTimeout
-	505,        //kRTSPVersionNotSupported
-	551         //kServerOptionNotSupported
-};
-
 boost::string_view RTSPProtocol::sStatusCodeAsStrings[] =
 {
 	"100",       //kContinue

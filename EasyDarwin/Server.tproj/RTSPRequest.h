@@ -63,12 +63,6 @@ class RTSPRequest : public RTSPRequestInterface
 	std::string queryString;
 	//URI for this request
 	std::string uriPath;
-	//Challenge used by the server for Digest authentication
-	std::string digestChallenge;
-	//decoded Authentication information when provided by the RTSP request. See RTSPSessLastUserName.
-	std::string userName;
-	std::string passWord;
-	std::string uRLRealm;
 	std::string respMsg;
 public:
 
@@ -84,27 +78,9 @@ public:
 	//in parsing.
 	QTSS_Error Parse();
 
-	QTSS_Error ParseAuthHeader(void);
-	// called by ParseAuthHeader
-	QTSS_Error ParseBasicHeader(boost::string_view inParsedAuthLinePtr);
-
-	// called by ParseAuthHeader
-	QTSS_Error ParseDigestHeader(boost::string_view inParsedAuthLine);
-
-	void SetupAuthLocalPath(void);
-	QTSS_Error SendBasicChallenge(void);
-	QTSS_Error SendDigestChallenge(uint32_t qop, boost::string_view nonce, boost::string_view opaque);
-	QTSS_Error SendForbiddenResponse(void);
 	boost::string_view GetQueryString() const { return queryString; }
 	uint32_t GetContentLength() const { return fContentLength; }
 	boost::string_view GetURI() const { return uriPath; }
-	void SetDigestChallenge(boost::string_view digest) { digestChallenge = std::string(digest); }
-	void SetAuthUserName(boost::string_view name) { userName = std::string(name); }
-	boost::string_view GetAuthUserName() const { return userName; }
-	void SetPassWord(boost::string_view password) { passWord = std::string(password); }
-	boost::string_view GetPassWord() const { return passWord; }
-	void SetURLRealm(boost::string_view realm) { uRLRealm = std::string(realm); }
-	boost::string_view GetURLRealm() const { return uRLRealm; }
 	void SetRespMsg(boost::string_view msg) { respMsg = std::string(msg); }
 	boost::string_view GetRespMsg() const { return respMsg; }
 	QTSS_Error SendErrorResponse(QTSS_RTSPStatusCode inStatusCode);
@@ -114,8 +90,6 @@ public:
 		uint32_t inTotalLength);
 private:
 	void ReqSendDescribeResponse();
-	//PARSING
-	enum { kAuthChallengeHeaderBufSize = 512 };
 
 	//Parsing the URI line (first line of request
 	QTSS_Error ParseFirstLine(boost::string_view method, boost::string_view fulluri, boost::string_view ver);
@@ -145,7 +119,6 @@ private:
 	void    ParseModeSubHeader(boost::string_view inModeSubHeader);
 	bool    ParseNetworkModeSubHeader(boost::string_view inSubHeader);
 	void 	ParseDynamicRateHeader(boost::string_view header);
-	void	ParseRandomDataSizeHeader(boost::string_view header);
 	void    ParseBandwidthHeader(boost::string_view header);
 };
 

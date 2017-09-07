@@ -31,7 +31,6 @@
 
 #include "RTSPRequestStream.h"
 #include "StringParser.h"
-#include "base64.h"
 #include "OS.h"
 
 #include <errno.h>

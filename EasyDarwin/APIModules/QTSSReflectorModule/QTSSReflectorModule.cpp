@@ -90,7 +90,6 @@ static bool   sDefaultRTPInfoDisabled = false;
 
 static bool   sDefaultAnnounceEnabled = true;
 static bool   sBroadcastPushEnabled = true;
-static bool   sAllowDuplicateBroadcasts = false;
 static bool   sDefaultAllowDuplicateBroadcasts = false;
 
 static uint32_t   sMaxBroadcastAnnounceDuration = 0;
@@ -148,8 +147,6 @@ static bool   sDefaultForceRTPInfoSeqAndTime = false;
 
 static std::string	sRedirectBroadcastsKeyword;
 static char*    sDefaultRedirectBroadcastsKeyword = "";
-static std::string  sBroadcastsRedirectDir;
-static char*    sDefaultBroadcastsRedirectDir = ""; // match none
 static char*    sDefaultBroadcastsDir = ""; // match all
 static char*	sDefaultsBroadcasterGroup = "broadcaster";
 static std::string sBroadcasterGroup;
@@ -174,59 +171,9 @@ static QTSS_Error DestroySession(QTSS_ClientSessionClosing_Params* inParams);
 static void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* inSession, bool killClients);
 static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool isPush, bool *foundSessionPtr = nullptr, std::string* resultFilePath = nullptr);
 
-static bool AcceptSession(QTSS_StandardRTSP_Params* inParams);
-
-
 inline void KeepSession(RTSPRequest* theRequest, bool keep)
 {
 	theRequest->SetResponseKeepAlive(keep);
-}
-
-enum {
-	kRequiresRTPInfoSeqAndTime = 0,
-	kAdjustBandwidth = 1,
-	kDisablePauseAdjustedRTPTime = 2,
-	kDelayRTPStreamsUntilAfterRTSPResponse = 3,
-};
-
-static bool HavePlayerProfile(QTSS_StandardRTSP_Params* inParams, uint32_t feature)
-{
-	std::string userAgentStr(inParams->inClientSession->GetUserAgent());
-	std::vector<std::string> ret;
-
-	switch (feature)
-	{
-	case kRequiresRTPInfoSeqAndTime:
-	{
-		ret = ServerPrefs::GetPlayersReqRTPHeader();
-	}
-	break;
-
-	case kAdjustBandwidth:
-	{
-		ret = ServerPrefs::GetPlayersReqBandAdjust();
-	}
-	break;
-
-	case kDisablePauseAdjustedRTPTime:
-	{
-		ret = ServerPrefs::GetPlayersReqNoPauseTimeAdjust();
-	}
-	break;
-
-	case kDelayRTPStreamsUntilAfterRTSPResponse:
-	{
-		ret = ServerPrefs::GetReqRTPStartTimeAdjust();
-	}
-	break;
-	}
-	for (const auto &str : ret)
-	{
-		size_t pos = userAgentStr.find(str);
-		if (pos != std::string::npos)
-			return true;
-	}
-	return false;
 }
 
 namespace ReflectionModule
@@ -284,11 +231,8 @@ namespace ReflectionModule
 
 	QTSS_Error ProcessRTSPRequest(QTSS_StandardRTSP_Params* inParams)
 	{
-		OSMutexLocker locker(sSessionMap->GetMutex()); //operating on sOutputAttr
-
-													   //printf("QTSSReflectorModule:ProcessRTSPRequest inClientSession=%"   _U32BITARG_   "\n", (uint32_t) inParams->inClientSession);
-		uint32_t theLen = 0;
-		QTSS_RTSPMethod theMethod = ((RTSPRequest*)inParams->inRTSPRequest)->GetMethod();
+		OSMutexLocker locker(sSessionMap->GetMutex());
+		QTSS_RTSPMethod theMethod = inParams->inRTSPRequest->GetMethod();
 
 		if (theMethod == qtssAnnounceMethod)
 			return DoAnnounce(inParams);
@@ -296,7 +240,6 @@ namespace ReflectionModule
 			return DoDescribe(inParams);
 		if (theMethod == qtssSetupMethod)
 			return DoSetup(inParams);
-
 
 		auto opt = inParams->inClientSession->getAttribute(sOutputName);
 		if (!opt) // a broadcaster push session
@@ -325,51 +268,6 @@ namespace ReflectionModule
 		default:
 			break;
 		}
-		return QTSS_NoErr;
-	}
-
-	QTSS_Error ReflectorAuthorizeRTSPRequest(QTSS_StandardRTSP_Params* inParams)
-	{
-		if (AcceptSession(inParams))
-		{
-			inParams->inRTSPRequest->Authorize(true, true, true);
-			return QTSS_NoErr;
-		}
-
-		bool allowNoAccessFiles = false;
-		QTSS_ActionFlags noAction = ~qtssActionFlagsWrite; //no action anything but a write
-		QTSS_ActionFlags authorizeAction = ((RTSPRequest*)inParams->inRTSPRequest)->GetAction();
-		//printf("ReflectorAuthorizeRTSPRequest authorizeAction=%d qtssActionFlagsWrite=%d\n", authorizeAction, qtssActionFlagsWrite);
-		bool outAllowAnyUser = false;
-		bool outAuthorized = false;
-
-		if ((outAuthorized == false) && (authorizeAction & qtssActionFlagsWrite)) //handle it
-		{
-			//printf("ReflectorAuthorizeRTSPRequest SET not allowed\n");
-			inParams->inRTSPRequest->Authorize(false, false, false);
-		}
-		return QTSS_NoErr;
-	}
-
-	QTSS_Error RedirectBroadcast(QTSS_StandardRTSP_Params* inParams)
-	{
-		RTSPRequest* theRequest = inParams->inRTSPRequest;
-
-		boost::string_view requestPathStr = theRequest->GetAbsolutePath();
-		std::string theFirstPath, theStrippedRequestPath;
-		bool r = qi::phrase_parse(requestPathStr.cbegin(), requestPathStr.cend(),
-			"/" >> +(qi::char_ - "/") >> +(qi::char_), qi::ascii::blank, theFirstPath, theStrippedRequestPath);
-
-		Assert(r && !theFirstPath.empty());
-
-		// If the redirect_broadcast_keyword and redirect_broadcast_dir prefs are set & the first part of the path matches the keyword
-		if (!sBroadcastsRedirectDir.empty() && boost::iequals(theFirstPath, sRedirectBroadcastsKeyword))
-		{
-			// set qtssRTSPReqRootDir
-			theRequest->SetRootDir(sBroadcastsRedirectDir);
-			theRequest->SetAbsolutePath(theStrippedRequestPath);
-		}
-
 		return QTSS_NoErr;
 	}
 
@@ -518,42 +416,6 @@ namespace ReflectionModule
 	{
 		return QTSS_NoErr;
 	}
-}
-
-char *GetTrimmedKeyWord(char *prefKeyWord)
-{
-	StrPtrLen redirKeyWordStr(prefKeyWord);
-	StringParser theRequestPathParser(&redirKeyWordStr);
-
-	// trim leading / from the keyword
-	while (theRequestPathParser.Expect(kPathDelimiterChar)) {};
-
-	StrPtrLen theKeyWordStr;
-	theRequestPathParser.ConsumeUntil(&theKeyWordStr, kPathDelimiterChar); // stop when we see a / and don't include
-
-	auto *keyword = new char[theKeyWordStr.Len + 1];
-	::memcpy(keyword, theKeyWordStr.Ptr, theKeyWordStr.Len);
-	keyword[theKeyWordStr.Len] = 0;
-
-	return keyword;
-}
-
-void SetMoviesRelativeDir()
-{
-	boost::string_view movieFolderString = ServerPrefs::GetMovieFolder();
-
-	ResizeableStringFormatter redirectPath(nullptr, 0);
-	redirectPath.Put(movieFolderString);
-	if (redirectPath.GetBytesWritten() > 0 && kPathDelimiterChar != redirectPath.GetBufPtr()[redirectPath.GetBytesWritten() - 1])
-		redirectPath.PutChar(kPathDelimiterChar);
-	redirectPath.Put(sBroadcastsRedirectDir);
-
-	auto *newMovieRelativeDir = new char[redirectPath.GetBytesWritten() + 1];
-	::memcpy(newMovieRelativeDir, redirectPath.GetBufPtr(), redirectPath.GetBytesWritten());
-	newMovieRelativeDir[redirectPath.GetBytesWritten()] = 0;
-
-	sBroadcastsRedirectDir = newMovieRelativeDir;
-
 }
 
 static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool isPush, bool *foundSessionPtr, std::string* resultFilePath)
@@ -972,7 +834,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 			return inParams->inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
 		}
 
-		if (!sAllowDuplicateBroadcasts && theStreamInfo->fSetupToReceive)
+		if (theStreamInfo->fSetupToReceive)
 		{
 			DeleteReflectorPushSession(inParams, theSession, foundSession);
 			return inParams->inRTSPRequest->SendErrorResponse(qtssPreconditionFailed);
@@ -1179,9 +1041,6 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 				inParams->inRTSPRequest->AppendHeader(qtssRangeHeader, sTheNowRangeHeader);
 		}
 
-		if (sPlayerCompatibility)
-			rtpInfoEnabled = HavePlayerProfile(inParams, kRequiresRTPInfoSeqAndTime);
-
 		if (sForceRTPInfoSeqAndTime)
 			rtpInfoEnabled = true;
 
@@ -1301,56 +1160,3 @@ void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* theSession, bool 
 	}
 	delete inOutput;
 }
-
-static bool UserInGroup(QTSSUserProfile* inUserProfile, boost::string_view inGroup)
-{
-	if (nullptr == inUserProfile || inGroup.empty())
-		return false;
-
-	boost::string_view userName = inUserProfile->GetUserName();
-	if (userName.empty()) // no user to check
-		return false;
-
-	std::vector<std::string> userGroups = inUserProfile->GetUserGroups();
-
-	if (userGroups.empty()) // no groups to check
-		return false;
-
-	for (const auto &item : userGroups)
-		if (boost::equals(item, inGroup))
-			return true;
-
-	return false;
-}
-
-bool AcceptSession(QTSS_StandardRTSP_Params* inParams)
-{
-	RTSPSession* inRTSPSession = inParams->inRTSPSession;
-	RTSPRequest* theRTSPRequest = inParams->inRTSPRequest;
-
-	QTSS_ActionFlags action = theRTSPRequest->GetAction();
-	if (action != qtssActionFlagsWrite)
-		return false;
-
-	if (UserInGroup(theRTSPRequest->GetUserProfile(), sBroadcasterGroup))
-		return true; // ok we are allowing this broadcaster user
-
-	boost::string_view remoteAddress = inRTSPSession->GetRemoteAddr();
-	StrPtrLen theClientIPAddressStr((char *)remoteAddress.data(), remoteAddress.length());
-
-#if 0
-	if (IPComponentStr(&theClientIPAddressStr).IsLocal())
-	{
-		if (sAuthenticateLocalBroadcast)
-			return false;
-		else
-			return true;
-	}
-#endif
-
-	//if (QTSSModuleUtils::AddressInList(sPrefs, sIPAllowListID, &theClientIPAddressStr))
-	//	return true;
-
-	return false;
-}
-

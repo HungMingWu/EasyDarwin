@@ -141,9 +141,6 @@ bool QTSServer::Initialize(uint16_t inPortOverride, bool createListeners, const 
 
 	RTSPRequestInterface::Initialize();
 
-	RTSPSessionInterface::Initialize();
-	RTSPSession::Initialize();
-
 	//
 	// CREATE GLOBAL OBJECTS
 	fSocketPool = new RTPSocketPool();

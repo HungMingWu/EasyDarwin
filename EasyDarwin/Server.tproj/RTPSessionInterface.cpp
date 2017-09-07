@@ -36,9 +36,6 @@
 #include "QTSS.h"
 #include "OS.h"
 #include "RTPStream.h"
-#include "md5.h"
-#include "md5digest.h"
-#include "base64.h"
 #include "ServerPrefs.h"
 
 unsigned int            RTPSessionInterface::sRTPSessionIDCounter = 0;
@@ -49,8 +46,7 @@ RTPSessionInterface::RTPSessionInterface()
 	fTimeoutTask(nullptr, ServerPrefs::GetRTPSessionTimeoutInSecs() * 1000),
 	fTracker(ServerPrefs::IsSlowStartEnabled()),
 	fOverbufferWindow(ServerPrefs::GetSendIntervalInMsec(), UINT32_MAX, ServerPrefs::GetMaxSendAheadTimeInSecs(),
-		ServerPrefs::GetOverbufferRate()),
-	fAuthScheme(ServerPrefs::GetAuthScheme())
+		ServerPrefs::GetOverbufferRate())
 {
 	//don't actually setup the fTimeoutTask until the session has been bound!
 	//(we don't want to get timeouts before the session gets bound)
@@ -155,83 +151,4 @@ float RTPSessionInterface::GetPacketLossPercent()
 		fPacketLossPercent = 0.0;
 
 	return fPacketLossPercent;
-}
-
-void RTPSessionInterface::CreateDigestAuthenticationNonce() {
-
-	// Calculate nonce: MD5 of sessionid:timestamp
-	int64_t curTime = OS::Milliseconds();
-	auto* curTimeStr = new char[128];
-	sprintf(curTimeStr, "%" _64BITARG_ "d", curTime);
-
-	MD5_CTX ctxt;
-	unsigned char nonceStr[16];
-	unsigned char colon[] = ":";
-	MD5_Init(&ctxt);
-	boost::string_view sesID = this->GetSessionID();
-	MD5_Update(&ctxt, (unsigned char *)sesID.data(), sesID.length());
-	MD5_Update(&ctxt, (unsigned char *)colon, 1);
-	MD5_Update(&ctxt, (unsigned char *)curTimeStr, ::strlen(curTimeStr));
-	MD5_Final(nonceStr, &ctxt);
-	fAuthNonce = HashToString(nonceStr);
-
-	delete[] curTimeStr; // No longer required once nonce is created
-
-	// Set the nonce count value to zero 
-	// as a new nonce has been created  
-	fAuthNonceCount = 0;
-
-}
-
-void RTPSessionInterface::SetChallengeParams(QTSS_AuthScheme scheme, uint32_t qop, bool newNonce, bool createOpaque)
-{
-	// Set challenge params 
-	// Set authentication scheme
-	fAuthScheme = scheme;
-
-	if (fAuthScheme == qtssAuthDigest) {
-		// Set Quality of Protection 
-		// auth-int (Authentication with integrity) not supported yet
-		fAuthQop = qop;
-
-		if (newNonce || fAuthNonce.empty())
-			this->CreateDigestAuthenticationNonce();
-
-		if (createOpaque) {
-			std::random_device rd;
-			std::mt19937 mt(rd());
-			std::uniform_int_distribution<uint32_t> dist;
-			std::string randomNumStr = std::to_string(dist(mt));
-			fAuthOpaque = base64_encode(randomNumStr.c_str(), randomNumStr.length());
-		}
-		else {
-			fAuthOpaque.clear();
-		}
-		// Increase the Nonce Count by one
-		// This number is a count of the next request the server
-		// expects with this nonce. (Implies that the server
-		// has already received nonce count - 1 requests that 
-		// sent authorization with this nonce
-		fAuthNonceCount++;
-	}
-}
-
-void RTPSessionInterface::UpdateDigestAuthChallengeParams(bool newNonce, bool createOpaque, uint32_t qop) {
-	if (newNonce || fAuthNonce.empty())
-		this->CreateDigestAuthenticationNonce();
-
-
-	if (createOpaque) {
-		std::random_device rd;
-		std::mt19937 mt(rd());
-		std::uniform_int_distribution<uint32_t> dist;
-		std::string randomNumStr = std::to_string(dist(mt));
-		fAuthOpaque = base64_encode(randomNumStr.c_str(), randomNumStr.length());
-	}
-	else {
-		fAuthOpaque.clear();
-	}
-	fAuthNonceCount++;
-
-	fAuthQop = qop;
 }

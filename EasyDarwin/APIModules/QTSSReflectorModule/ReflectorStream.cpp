@@ -34,6 +34,7 @@
 #include "RTCPPacket.h"
 #include "ReflectorSession.h"
 #include "RTSPRequest.h"
+#include "SDPSourceInfo.h"
 
 #if DEBUG
 #define REFLECTOR_STREAM_DEBUGGING 0
@@ -66,7 +67,7 @@ uint32_t                          ReflectorStream::sFirstPacketOffsetMsec = 500;
 
 uint32_t                          ReflectorStream::sRelocatePacketAgeMSec = 1000;
 
-void ReflectorStream::GenerateSourceID(SourceInfo::StreamInfo* inInfo, char* ioBuffer)
+void ReflectorStream::GenerateSourceID(SDPSourceInfo::StreamInfo* inInfo, char* ioBuffer)
 {
 
 	::memcpy(ioBuffer, &inInfo->fSrcIPAddr, sizeof(inInfo->fSrcIPAddr));
@@ -74,7 +75,7 @@ void ReflectorStream::GenerateSourceID(SourceInfo::StreamInfo* inInfo, char* ioB
 }
 
 
-ReflectorStream::ReflectorStream(SourceInfo::StreamInfo* inInfo)
+ReflectorStream::ReflectorStream(SDPSourceInfo::StreamInfo* inInfo)
 	: fPacketCount(0),
 	fSockets(nullptr),
 	fRTPSender(nullptr, qtssWriteFlagsIsRTP),
@@ -1634,7 +1635,7 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 
 		// TODO:A、对H264视频RTP包进行关键帧过滤，保存最新关键帧首个RTP包指针
 		// 1、判断是否为视频H.264 RTP
-		SourceInfo::StreamInfo* streamInfo = theSender->fStream->GetStreamInfo();
+		SDPSourceInfo::StreamInfo* streamInfo = theSender->fStream->GetStreamInfo();
 		if (!(thePacket->IsRTCP()) && (streamInfo->fPayloadType == qtssVideoPayloadType) && (streamInfo->fPayloadName =="H264/90000"))
 		{
 			// 2、在这里判断上面插入的thePacket是否为关键帧起始RTP包，如果是，这记录thePacket->fQueueElem

@@ -35,22 +35,7 @@
 #ifndef __OSTHREAD__
 #define __OSTHREAD__
 
-#ifndef __Win32__
-#if __PTHREADS__
-#if __solaris__ || __sgi__ || __hpux__
-#include <errno.h>
-#else
-#include <sys/errno.h>
-#endif
-#include <pthread.h>
-#else
-#include <mach/mach.h>
-#include <mach/cthreads.h>
-#endif
-#endif
-
 #include "OSHeaders.h"
-#include "DateTranslator.h"
 
 class OSThread
 {
@@ -78,9 +63,6 @@ public:
 
 	void*           GetThreadData() { return fThreadData; }
 	void            SetThreadData(void* inThreadData) { fThreadData = inThreadData; }
-
-	// As a convienence to higher levels, each thread has its own date buffer
-	DateBuffer*     GetDateBuffer() { return &fDateBuffer; }
 
 	static void*    GetMainThreadData() { return sMainThreadData; }
 	static void     SetMainThreadData(void* inData) { sMainThreadData = inData; }
@@ -134,7 +116,6 @@ private:
 	uint32_t          fThreadID;
 #endif
 	void*           fThreadData{nullptr};
-	DateBuffer      fDateBuffer;
 
 	static void*    sMainThreadData;
 #ifdef __Win32__

@@ -63,8 +63,8 @@ public:
 
 class RTSPRequestInterface
 {
+protected:
 	//The full local path to the file. This Attribute is first set after the Routing Role has run and before any other role is called. 
-	std::string rootDir;
 	std::string fullRequest;
 	std::string absoluteURL;
 	std::string absolutePath;
@@ -104,7 +104,6 @@ public:
 		boost::string_view ssrc, boost::string_view rtpTime, bool lastRTPInfo);
 
 	void    AppendContentLength(uint32_t contentLength);
-	void    AppendDateAndExpires();
 	void    AppendSessionHeaderWithTimeout(boost::string_view inSessionID, boost::string_view inTimeout);
 	void    AppendRetransmitHeader(uint32_t inAckTimeout);
 
@@ -206,16 +205,10 @@ public:
 	void SetUpServerPort(uint16_t port) { fSetUpServerPort = port; }
 	//Everything after the last path separator in the file system path
 	std::string GetFileName();
-	std::string GetAbsTruncatedPath();
-	void SetRootDir(boost::string_view root) { rootDir = std::string(root); }
-	boost::string_view GetRootDir() const { return rootDir; }
 	void SetFullRequest(boost::string_view req) { fullRequest = std::string(req); }
 	boost::string_view GetFullRequest() const { return fullRequest; }
 	void SetAbsoluteURL(boost::string_view url) { absoluteURL = std::string(url); }
 	boost::string_view GetAbsoluteURL() const { return absoluteURL; }
-	std::string GetTruncatedPath();
-	void SetAbsolutePath(boost::string_view path) { absolutePath = std::string(path); }
-	boost::string_view GetAbsolutePath() const { return absolutePath; }
 protected:
 
 	//ALL THIS STUFF HERE IS SETUP BY RTSPREQUEST object (derived)
@@ -247,7 +240,6 @@ protected:
 	// Content length of incoming RTSP request body
 	uint32_t                      fContentLength;
 
-	int64_t                      fIfModSinceDate;
 	float                     fSpeed;
 	float                     fLateTolerance;
 	std::string               fLateToleranceStr;
@@ -262,7 +254,6 @@ protected:
 
 	//Because of URL decoding issues, we need to make a copy of the file path.
 	//Here is a buffer for it.
-	std::string                 fFilePath;
 	HeaderDict                  fHeaderDict;
 
 	// A setup request from the client.

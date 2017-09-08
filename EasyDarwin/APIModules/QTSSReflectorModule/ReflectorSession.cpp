@@ -34,7 +34,7 @@
 #include <boost/asio/io_service.hpp>
 
 extern std::shared_ptr<boost::asio::io_service> io_service;
-ReflectorSession::ReflectorSession(boost::string_view inSourceID, SourceInfo* inInfo) :
+ReflectorSession::ReflectorSession(boost::string_view inSourceID, SDPSourceInfo* inInfo) :
 	fSessionName(inSourceID),
 	fSourceInfo(inInfo),
 	timer(*io_service)
@@ -60,7 +60,7 @@ ReflectorSession::~ReflectorSession()
 	delete fSourceInfo;
 }
 
-QTSS_Error ReflectorSession::SetupReflectorSession(SourceInfo* inInfo, QTSS_StandardRTSP_Params* inParams, uint32_t inFlags, bool filterState, uint32_t filterTimeout)
+QTSS_Error ReflectorSession::SetupReflectorSession(SDPSourceInfo* inInfo, QTSS_StandardRTSP_Params* inParams, uint32_t inFlags, bool filterState, uint32_t filterTimeout)
 {
 	// use the current SourceInfo
 	if (inInfo == nullptr)
@@ -201,11 +201,6 @@ uint32_t  ReflectorSession::GetBitRate()
 			retval += streamArray->GetBitRate();
 
 	return retval;
-}
-
-bool ReflectorSession::Equal(SourceInfo* inInfo)
-{
-	return fSourceInfo->Equal(inInfo);
 }
 
 void*   ReflectorSession::GetStreamCookie(uint32_t inStreamID)

@@ -405,7 +405,6 @@ void RTPStream::SendSetupResponse(RTSPRequestInterface* inRequest)
 	if (fSession->DoSessionSetupResponse(inRequest) != QTSS_NoErr)
 		return;
 
-	inRequest->AppendDateAndExpires();
 	this->AppendTransport(inRequest);
 
 	//

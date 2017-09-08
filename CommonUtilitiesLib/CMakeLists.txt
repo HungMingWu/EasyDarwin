@@ -31,7 +31,6 @@ set (SRC
 			 OSHeap.cpp OSHeap.h
 			 sdpCache.cpp sdpCache.h
 			 QueryParamList.cpp QueryParamList.h
-			 DateTranslator.cpp DateTranslator.h
 			 SDPUtils.cpp SDPUtils.h
 			 keyframecache.cpp keyframecache.h
 			 Attributes.h

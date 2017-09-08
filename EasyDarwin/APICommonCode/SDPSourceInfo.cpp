@@ -75,6 +75,41 @@ SDPSourceInfo::~SDPSourceInfo()
     */
 }
 
+bool  SDPSourceInfo::IsReflectable()
+{
+	if (fStreamArray.empty())
+		return false;
+
+	//each stream's info must meet certain criteria
+	for (const auto & stream : fStreamArray)
+	{
+		if (stream.fIsTCP)
+			continue;
+
+		if (stream.fTimeToLive == 0)
+			return false;
+	}
+	return true;
+}
+
+SDPSourceInfo::StreamInfo* SDPSourceInfo::GetStreamInfo(uint32_t inIndex)
+{
+	if (inIndex < fStreamArray.size())
+		return &fStreamArray[inIndex];
+	else
+		return nullptr;
+}
+
+SDPSourceInfo::StreamInfo* SDPSourceInfo::GetStreamInfoByTrackID(uint32_t inTrackID)
+{
+	if (fStreamArray.empty())
+		return nullptr;
+	for (auto &stream : fStreamArray)
+		if (stream.fTrackID == inTrackID)
+			return &stream;
+	return nullptr;
+}
+
 std::string SDPSourceInfo::GetLocalSDP()
 {
     Assert(!fSDPData.empty());
@@ -348,4 +383,39 @@ void SDPSourceInfo::Parse(boost::string_view sdpData)
         count ++;
     }
         
+}
+
+bool  SDPSourceInfo::SetActiveNTPTimes(uint32_t startTimeNTP, uint32_t endTimeNTP)
+{   // right now only handles earliest start and latest end time.
+
+	//printf("SourceInfo::SetActiveNTPTimes start=%"   _U32BITARG_   " end=%"   _U32BITARG_   "\n",startTimeNTP,endTimeNTP);
+	bool accepted = false;
+	do
+	{
+		if ((startTimeNTP > 0) && (endTimeNTP > 0) && (endTimeNTP < startTimeNTP)) break; // not valid NTP time
+
+		uint32_t startTimeUnixSecs = 0;
+		uint32_t endTimeUnixSecs = 0;
+
+		if (startTimeNTP != 0 && IsValidNTPSecs(startTimeNTP)) // allow anything less than 1970 
+			startTimeUnixSecs = NTPSecs_to_UnixSecs(startTimeNTP);// convert to 1970 time
+
+		if (endTimeNTP != 0 && !IsValidNTPSecs(endTimeNTP)) // don't allow anything less than 1970
+			break;
+
+		if (endTimeNTP != 0) // convert to 1970 time
+			endTimeUnixSecs = NTPSecs_to_UnixSecs(endTimeNTP);
+
+		fStartTimeUnixSecs = startTimeUnixSecs;
+		fEndTimeUnixSecs = endTimeUnixSecs;
+		accepted = true;
+
+	} while (0);
+
+	//char buffer[kTimeStrSize];
+	//printf("SourceInfo::SetActiveNTPTimes fStartTimeUnixSecs=%"   _U32BITARG_   " fEndTimeUnixSecs=%"   _U32BITARG_   "\n",fStartTimeUnixSecs,fEndTimeUnixSecs);
+	//printf("SourceInfo::SetActiveNTPTimes start time = %s",std::ctime(&fStartTimeUnixSecs) );
+	//printf("SourceInfo::SetActiveNTPTimes end time = %s",std::ctime(&fEndTimeUnixSecs) );
+	fHasValidTime = accepted;
+	return accepted;
 }

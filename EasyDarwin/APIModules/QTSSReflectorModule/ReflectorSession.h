@@ -40,7 +40,7 @@
 #include "ResizeableStringFormatter.h"
 
 #include "ReflectorStream.h"
-#include "SourceInfo.h"
+#include "SDPSourceInfo.h"
 #include "Task.h"//add
 
 #ifndef __REFLECTOR_SESSION__
@@ -57,7 +57,7 @@ public:
 	//
 	// Caller may also provide a SourceInfo object, though it is not needed and
 	// will also need to be provided to SetupReflectorSession when that is called.
-	ReflectorSession(boost::string_view inSourceID, SourceInfo* inInfo = nullptr);
+	ReflectorSession(boost::string_view inSourceID, SDPSourceInfo* inInfo = nullptr);
 	~ReflectorSession();
 
 	//
@@ -76,7 +76,7 @@ public:
 		kIsPushSession = 4  // When setting up streams handle port conflicts by allocating.
 	};
 
-	QTSS_Error      SetupReflectorSession(SourceInfo* inInfo, QTSS_StandardRTSP_Params* inParams,
+	QTSS_Error      SetupReflectorSession(SDPSourceInfo* inInfo, QTSS_StandardRTSP_Params* inParams,
 		uint32_t inFlags = kMarkSetup, bool filterState = true, uint32_t filterTimeout = 30);
 
 	// Packets get forwarded by attaching ReflectorOutput objects to a ReflectorSession.
@@ -93,7 +93,7 @@ public:
 	OSRef*          GetRef() { return &fRef; }
 	uint32_t          GetNumOutputs() { return fNumOutputs; }
 	uint32_t          GetNumStreams() { return fSourceInfo->GetNumStreams(); }
-	SourceInfo*     GetSourceInfo() { return fSourceInfo; }
+	SDPSourceInfo*     GetSourceInfo() { return fSourceInfo; }
 	boost::string_view GetLocalSDP()	{ return fLocalSDP; }
 
 	boost::string_view  GetStreamName() { return fSessionName; }
@@ -113,10 +113,6 @@ public:
 	// stream is reflecting (RTP only). Initially, this will return 0
 	// until enough time passes to compute an accurate average.
 	uint32_t          GetBitRate();
-
-	// Returns true if this SourceInfo structure is equivalent to this
-	// ReflectorSession.
-	bool Equal(SourceInfo* inInfo);
 
 	// Each stream has a cookie associated with it. When the stream writes a packet
 	// to an output, this cookie is used to identify which stream is writing the packet.
@@ -152,7 +148,7 @@ private:
 
 	// The reflector session needs to hang onto the source info object
 	// for it's entire lifetime. Right now, this is used for reflector-as-client.
-	SourceInfo* fSourceInfo;
+	SDPSourceInfo* fSourceInfo;
 	std::string fLocalSDP;
 
 	// For the QTSSSplitterModule, this object can cache a QTSS_StreamRef

@@ -34,6 +34,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 
+#include <time.h>
 #include <math.h>
 
 #ifndef __Win32__

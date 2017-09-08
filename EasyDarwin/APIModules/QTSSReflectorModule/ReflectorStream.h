@@ -37,7 +37,7 @@
 #include "QTSS.h"
 
 #include "IdleTask.h"
-#include "SourceInfo.h"
+#include "SDPSourceInfo.h"
 
 #include "UDPSocket.h"
 #include "UDPSocketPool.h"
@@ -335,9 +335,9 @@ public:
 	};
 
 	// Uses a StreamInfo to generate a unique ID
-	static void GenerateSourceID(SourceInfo::StreamInfo* inInfo, char* ioBuffer);
+	static void GenerateSourceID(SDPSourceInfo::StreamInfo* inInfo, char* ioBuffer);
 
-	ReflectorStream(SourceInfo::StreamInfo* inInfo);
+	ReflectorStream(SDPSourceInfo::StreamInfo* inInfo);
 	~ReflectorStream();
 
 	//
@@ -370,7 +370,7 @@ public:
 	//
 	// ACCESSORS
 	uint32_t                  GetBitRate() { return fCurrentBitRate; }
-	SourceInfo::StreamInfo* GetStreamInfo() { return &fStreamInfo; }
+	SDPSourceInfo::StreamInfo* GetStreamInfo() { return &fStreamInfo; }
 	OSMutex*                GetMutex() { return &fBucketMutex; }
 	void*                   GetStreamCookie() { return this; }
 	int16_t                  GetRTPChannel() { return fRTPChannel; }
@@ -425,7 +425,7 @@ private:
 	SequenceNumberMap   fSequenceNumberMap; //for removing duplicate packets
 
 	// All the necessary info about this stream
-	SourceInfo::StreamInfo  fStreamInfo;
+	SDPSourceInfo::StreamInfo  fStreamInfo;
 
 	enum
 	{

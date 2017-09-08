@@ -46,7 +46,6 @@
 
 #include "StringParser.h"
 #include "OSThread.h"
-#include "DateTranslator.h"
 #include "QTSSDataConverter.h"
 #include "QTSServerInterface.h"
 #include "ServerPrefs.h"
@@ -100,7 +99,6 @@ RTSPRequestInterface::RTSPRequestInterface(RTSPSessionInterface *session)
 	fTransportType(qtssRTPTransportTypeTCP),
 	fNetworkMode(qtssRTPNetworkModeDefault),
 	fContentLength(0),
-	fIfModSinceDate(0),
 	fSpeed(0),
 	fLateTolerance(-1),
 	fPrebufferAmt(-1),
@@ -151,22 +149,6 @@ void RTSPRequestInterface::AppendContentLength(uint32_t contentLength)
 
 	this->AppendHeader(qtssContentLengthHeader, std::to_string(contentLength));
 }
-
-void RTSPRequestInterface::AppendDateAndExpires()
-{
-	if (!fStandardHeadersWritten)
-		this->WriteStandardHeaders();
-
-	Assert(OSThread::GetCurrent() != nullptr);
-	DateBuffer* theDateBuffer = OSThread::GetCurrent()->GetDateBuffer();
-	theDateBuffer->InexactUpdate(); // Update the date buffer to the current date & time
-	std::string theDate(theDateBuffer->GetDateBuffer(), DateBuffer::kDateBufferLen);
-
-	// Append dates, and have this response expire immediately
-	this->AppendHeader(qtssDateHeader, theDate);
-	this->AppendHeader(qtssExpiresHeader, theDate);
-}
-
 
 void RTSPRequestInterface::AppendSessionHeaderWithTimeout(boost::string_view inSessionID, boost::string_view inTimeout)
 {
@@ -461,35 +443,10 @@ RTSPRequestInterface::WriteV(iovec* inVec, uint32_t inNumVectors, uint32_t inTot
 	return QTSS_NoErr;
 }
 
-//param retrieval functions described in .h file
-std::string RTSPRequestInterface::GetAbsTruncatedPath()
-{
-	// This function gets called only once
-	// if qtssRTSPReqAbsoluteURL = rtsp://www.easydarwin.org:554/live.sdp?channel=1&token=888888/trackID=1 
-	// then qtssRTSPReqTruncAbsoluteURL = rtsp://www.easydarwin.org:554/live.sdp?channel=1&token=888888
-	std::string absTruncatedURL(GetAbsoluteURL());
-	size_t pos = absTruncatedURL.rfind("/");
-	if (pos == std::string::npos)
-		return absTruncatedURL;
-	else
-		return absTruncatedURL.substr(0, pos);
-}
-
-std::string RTSPRequestInterface::GetTruncatedPath()
-{
-	// This function always gets called
-	std::string absTruncatedPath(GetAbsolutePath());
-	size_t pos = absTruncatedPath.rfind("/");
-	if (pos == std::string::npos)
-		return absTruncatedPath;
-	else
-		return absTruncatedPath.substr(0, pos);
-}
-
 std::string RTSPRequestInterface::GetFileName()
 {
 	// This function always gets called
-	std::string str(GetAbsolutePath());
+	std::string str(absolutePath);
 	if (str[0] == '/') str = str.substr(1);
 	size_t nextDelimiter = str.find("/");
 	if (nextDelimiter == std::string::npos)
@@ -504,7 +461,13 @@ std::string RTSPRequestInterface::GetFileDigit()
 	std::string theFileDigitV(GetAbsoluteURL());
 	StrPtrLen theFileDigit((char *)theFileDigitV.c_str());
 
-	std::string theFilePathV = GetAbsTruncatedPath();
+	std::string theFilePathV;
+	size_t pos = theFileDigitV.rfind("/");
+	if (pos == std::string::npos)
+		theFilePathV = theFileDigitV;
+	else
+		theFilePathV = theFileDigitV.substr(0, pos);
+
 	StrPtrLen theFilePath((char *)theFilePathV.c_str());
 
 	theFileDigit.Ptr += theFileDigit.Len -1;

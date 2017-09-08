@@ -109,7 +109,6 @@ private:
 	//for modules)
 	void    ParseRangeHeader(boost::string_view header);
 	void    ParseTransportHeader(boost::string_view header);
-	void    ParseIfModSinceHeader(boost::string_view header);
 	void    ParseRetransmitHeader(boost::string_view header);
 	void    ParseContentLengthHeader(boost::string_view header);
 	void    ParseSpeedHeader(boost::string_view header);

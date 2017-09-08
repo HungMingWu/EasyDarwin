@@ -118,10 +118,6 @@ char*           QTSServer::sPortPrefString = "rtsp_port";
 
 QTSServer::~QTSServer()
 {
-	ReflectionModule::Shutdown();
-
-	OSThread::SetMainThreadData(nullptr);
-
 	delete fRTPMap;
 	delete fReflectorSessionMap;
 

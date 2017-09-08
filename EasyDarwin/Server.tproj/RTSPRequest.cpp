@@ -41,7 +41,6 @@
 #include "RTSPSession.h"
 #include "RTSPSessionInterface.h"
 #include "QTSS.h"
-#include "DateTranslator.h"
 #include "SocketUtils.h"
 #include "uri/decode.h"
 #include "ServerPrefs.h"
@@ -181,7 +180,7 @@ QTSS_Error RTSPRequest::Parse()
 
 	//Make sure that there was some path that was extracted from this request. If not, there is no way
 	//we can process the request, so generate an error
-	if (GetAbsolutePath().empty())
+	if (absolutePath.empty())
 		return SendErrorResponse(qtssClientBadRequest);
 
 	return QTSS_NoErr;
@@ -248,26 +247,8 @@ QTSS_Error RTSPRequest::ParseURI(boost::string_view fulluri)
 			return SendErrorResponse(qtssClientAggregateOptionAllowed);
 	}
 
-	//
-	// If the is a '*', return right now because '*' is not a path
-	// so the below functions don't make any sense.
-	if (theAbsURL == "*")
-	{
-		SetAbsolutePath(theAbsURL);
-
-		return QTSS_NoErr;
-	}
-
-	//path strings are statically allocated. Therefore, if they are longer than
-	//this length we won't be able to handle the request.
 	std::string theURLParam(GetURI());
-
-	//decode the URL, put the result in the separate buffer for the file path,
-	//set the file path StrPtrLen to the proper value
-	fFilePath = boost::network::uri::decoded(theURLParam);
-
-	//this->SetVal(qtssRTSPReqFilePath, fFilePath, theBytesWritten);
-	SetAbsolutePath(fFilePath);
+	absolutePath = boost::network::uri::decoded(theURLParam);
 
 	return QTSS_NoErr;
 }
@@ -300,7 +281,6 @@ QTSS_Error RTSPRequest::ParseHeaders(const std::map<std::string, std::string>& h
 		case qtssSessionHeader:             ParseSessionHeader(theHeaderVal); break;
 		case qtssTransportHeader:           ParseTransportHeader(theHeaderVal); break;
 		case qtssRangeHeader:               ParseRangeHeader(theHeaderVal);     break;
-		case qtssIfModifiedSinceHeader:     ParseIfModSinceHeader(theHeaderVal); break;
 		case qtssXRetransmitHeader:         ParseRetransmitHeader(theHeaderVal); break;
 		case qtssContentLengthHeader:       ParseContentLengthHeader(theHeaderVal); break;
 		case qtssSpeedHeader:               ParseSpeedHeader(theHeaderVal);     break;
@@ -485,12 +465,6 @@ void  RTSPRequest::ParseDynamicRateHeader(boost::string_view header)
 		fEnableDynamicRateState = 0;
 }
 
-void  RTSPRequest::ParseIfModSinceHeader(boost::string_view header)
-{
-	StrPtrLen t((char *)header.data(), header.length());
-	fIfModSinceDate = DateTranslator::ParseDate(&t);
-}
-
 void RTSPRequest::ParseSpeedHeader(boost::string_view header)
 {
 	auto iter = header.cbegin(), end = header.cend();
@@ -553,9 +527,6 @@ void RTSPRequest::ReqSendDescribeResponse()
 		SendHeader();
 		return;
 	}
-
-	// write date and expires
-	AppendDateAndExpires();
 
 	//write content type header
 	static boost::string_view sContentType("application/sdp");

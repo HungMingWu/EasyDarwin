@@ -669,7 +669,7 @@ void ReflectorSender::ReflectRelayPackets(int64_t* ioWakeupTime)
 	if ((fStream->fLastBitRateSample + ReflectorStream::kBitRateAvgIntervalInMilSecs) < currentTime)
 	{
 		unsigned int intervalBytes = fStream->fBytesSentInThisInterval;
-		(void)atomic_sub(&fStream->fBytesSentInThisInterval, intervalBytes);
+		fStream->fBytesSentInThisInterval -= intervalBytes;
 
 		// Multiply by 1000 to convert from milliseconds to seconds, and by 8 to convert from bytes to bits
 		float bps = (float)(intervalBytes * 8) / (float)(currentTime - fStream->fLastBitRateSample);
@@ -1698,7 +1698,7 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 			// don't check for duplicate packets, they may be needed to keep in sync.
 			// Because this is an RTP packet make sure to atomic add this because
 			// multiple sockets can be adding to this variable simultaneously
-			(void)atomic_add(&theSender->fStream->fBytesSentInThisInterval, thePacket->fPacket.size());
+			theSender->fStream->fBytesSentInThisInterval += thePacket->fPacket.size();
 			//printf("ReflectorSocket::ProcessPacket received RTP id=%qu\n", thePacket->fStreamCountID); 
 			theSender->fStream->SetHasFirstRTP(true);
 		}

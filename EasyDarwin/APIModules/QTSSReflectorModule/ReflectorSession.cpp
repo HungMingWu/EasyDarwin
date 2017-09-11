@@ -167,7 +167,6 @@ void    ReflectorSession::AddOutput(ReflectorOutput* inOutput, bool isClient)
 
 void    ReflectorSession::RemoveOutput(ReflectorOutput* inOutput, bool isClient)
 {
-	//(void)atomic_sub(&fNumOutputs, 1);
 	--fNumOutputs;
 	for (uint32_t y = 0; y < fSourceInfo->GetNumStreams(); y++)
 	{

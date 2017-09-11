@@ -39,13 +39,13 @@
 #define __QTSSERVERINTERFACE_H__
 
 #include <array>
+#include <atomic>
 #include <list>
 #include <vector>
 #include <boost/utility/string_view.hpp>
 #include <boost/asio/steady_timer.hpp>
 
 #include "QTSS.h"
-#include "atomic.h"
 
 #include "OSMutex.h"
 #include "Task.h"
@@ -82,9 +82,9 @@ public:
 	// These functions are how the server keeps its statistics current
 
 	//total rtp bytes sent by the server
-	void            IncrementTotalRTPBytes(uint32_t bytes)
+	void            IncrementTotalRTPBytes(size_t bytes)
 	{
-		(void)atomic_add(&fPeriodicRTPBytes, bytes);
+		fPeriodicRTPBytes += bytes;
 	}
 	//total rtp packets sent by the server
 	void            IncrementTotalPackets()
@@ -93,9 +93,9 @@ public:
 		++fPeriodicRTPPackets;
 	}
 	//total rtp bytes reported as lost by the clients
-	void            IncrementTotalRTPPacketsLost(uint32_t packets)
+	void            IncrementTotalRTPPacketsLost(size_t packets)
 	{
-		(void)atomic_add(&fPeriodicRTPPacketsLost, packets);
+		fPeriodicRTPPacketsLost -= packets;
 	}
 
 	void            IncrementTotalLate(int64_t milliseconds)
@@ -236,11 +236,11 @@ private:
 	//implement total byte counting by atomic adding to this variable, then every
 	//once in awhile updating the sTotalBytes.
 	
-	unsigned int        fPeriodicRTPBytes{0};
+	std::atomic_size_t         fPeriodicRTPBytes{0};
 
-	unsigned int        fPeriodicRTPPacketsLost{0};
+	std::atomic_size_t         fPeriodicRTPPacketsLost{0};
 
-	unsigned int        fPeriodicRTPPackets{0};
+	std::atomic_size_t         fPeriodicRTPPackets{0};
 
 	//stores the current served bandwidth in BITS per second
 	uint32_t              fCurrentRTPBandwidthInBits{0};

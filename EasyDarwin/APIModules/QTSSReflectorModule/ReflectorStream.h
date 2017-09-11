@@ -34,6 +34,7 @@
 #ifndef _REFLECTOR_STREAM_H_
 #define _REFLECTOR_STREAM_H_
 
+#include <atomic>
 #include "QTSS.h"
 
 #include "IdleTask.h"
@@ -50,7 +51,6 @@
 
 #include "RTCPSRPacket.h"
 #include "ReflectorOutput.h"
-#include "atomic.h"
 
  /*fantasy add this*/
 #include "keyframecache.h"
@@ -460,7 +460,7 @@ private:
 	uint32_t              fCurrentBitRate;
 	int64_t              fLastBitRateSample;
 	
-	unsigned int        fBytesSentInThisInterval;// unsigned int because we need to atomic_add 
+	std::atomic_size_t   fBytesSentInThisInterval;// unsigned int because we need to atomic_add 
 
 	// If incoming data is RTSP interleaved
 	int16_t              fRTPChannel; //These will be -1 if not set to anything
@@ -502,7 +502,7 @@ void    ReflectorStream::UpdateBitRate(int64_t currentTime)
 	if ((fLastBitRateSample + ReflectorStream::kBitRateAvgIntervalInMilSecs) < currentTime)
 	{
 		unsigned int intervalBytes = fBytesSentInThisInterval;
-		(void)atomic_sub(&fBytesSentInThisInterval, intervalBytes);
+		fBytesSentInThisInterval -= intervalBytes;
 
 		// Multiply by 1000 to convert from milliseconds to seconds, and by 8 to convert from bytes to bits
 		float bps = (float)(intervalBytes * 8) / (float)(currentTime - fLastBitRateSample);

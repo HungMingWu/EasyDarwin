@@ -37,6 +37,7 @@
 #define __RTP_PACKET_RESENDER_H__
 
 #include <vector>
+#include <atomic>
 
 #include "RTPBandwidthTracker.h"
 #include "UDPSocket.h"
@@ -153,7 +154,7 @@ private:
 	void RemovePacket(uint32_t packetIndex, bool reuse = true);
 	void RemovePacket(RTPResenderEntry* inEntry);
 
-	static unsigned int sNumWastedBytes;
+	static std::atomic_size_t sNumWastedBytes;
 
 	void            UpdateCongestionWindow(int32_t bytesToOpenBy);
 };

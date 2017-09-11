@@ -126,18 +126,18 @@ void RTPStatsUpdaterTask::Run(const boost::system::error_code &ec)
 	// atomic_add. On PowerPC, assignments are atomic, so the assignment below is ok.
 	// On a non-PowerPC platform, the following would be thread safe:
 	//unsigned int periodicBytes = atomic_add(&theServer->fPeriodicRTPBytes, 0);-----------
-	unsigned int periodicBytes = theServer->fPeriodicRTPBytes;
-	(void)atomic_sub(&theServer->fPeriodicRTPBytes, periodicBytes);
+	size_t periodicBytes = theServer->fPeriodicRTPBytes;
+	theServer->fPeriodicRTPBytes -= periodicBytes;
 	theServer->fTotalRTPBytes += periodicBytes;
 
 	// Same deal for packet totals
-	unsigned int periodicPackets = theServer->fPeriodicRTPPackets;
-	(void)atomic_sub(&theServer->fPeriodicRTPPackets, periodicPackets);
+	size_t periodicPackets = theServer->fPeriodicRTPPackets;
+	theServer->fPeriodicRTPPackets -= periodicPackets;
 	theServer->fTotalRTPPackets += periodicPackets;
 
 	// ..and for lost packet totals
-	unsigned int periodicPacketsLost = theServer->fPeriodicRTPPacketsLost;
-	(void)atomic_sub(&theServer->fPeriodicRTPPacketsLost, periodicPacketsLost);
+	size_t periodicPacketsLost = theServer->fPeriodicRTPPacketsLost;
+	theServer->fPeriodicRTPPacketsLost -= periodicPacketsLost;
 
 	theServer->fTotalRTPPacketsLost += periodicPacketsLost;
 

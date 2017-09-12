@@ -33,11 +33,11 @@
 #include "QTSServerInterface.h"
 #include <boost/asio/io_service.hpp>
 
-extern std::shared_ptr<boost::asio::io_service> io_service;
+extern boost::asio::io_service io_service;
 ReflectorSession::ReflectorSession(boost::string_view inSourceID, SDPSourceInfo* inInfo) :
 	fSessionName(inSourceID),
 	fSourceInfo(inInfo),
-	timer(*io_service)
+	timer(io_service)
 {
 	fRef.Set(&fSessionName[0], this);
 	timer.async_wait(std::bind(&ReflectorSession::Run, this, std::placeholders::_1));
@@ -220,4 +220,10 @@ void ReflectorSession::Run(const boost::system::error_code &ec)
 	}
 	timer.expires_from_now(std::chrono::seconds(20));
 	timer.async_wait(std::bind(&ReflectorSession::Run, this, std::placeholders::_1));
+}
+
+ReflectorSession1::ReflectorSession1(boost::string_view inSourceID, SDPSourceInfo* inInfo) :
+	fSessionName(inSourceID),
+	fSourceInfo(inInfo)
+{
 }

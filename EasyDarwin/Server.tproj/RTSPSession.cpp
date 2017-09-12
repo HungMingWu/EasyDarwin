@@ -47,6 +47,8 @@
 #include "QTSSDataConverter.h"
 #include "QTSSReflectorModule.h"
 #include "ServerPrefs.h"
+#include "RTSPServer.h"
+#include "sdpCache.h"
 
 #include <errno.h>
 
@@ -752,7 +754,8 @@ void RTSPSession::HandleIncomingDataPacket()
 	ReflectionModule::ProcessRTPData(&rtspIncomingDataParams);
 }
 
-RTSPSession1::RTSPSession1(std::shared_ptr<Connection> connection) noexcept : connection(std::move(connection)) 
+RTSPSession1::RTSPSession1(RTSPServer &server, std::shared_ptr<Connection> connection) noexcept 
+: mServer(server), connection(std::move(connection)) 
 {
 	try {
 		//auto remote_endpoint = connection->socket.lowest_layer().remote_endpoint();
@@ -764,10 +767,53 @@ RTSPSession1::RTSPSession1(std::shared_ptr<Connection> connection) noexcept : co
 	}
 }
 
+std::unique_ptr<ReflectorSession> RTSPSession1::CreateSession(boost::string_view sessionName)
+{
+	std::lock_guard<std::mutex> lock(mServer.session_mutex);
+	auto it = mServer.sessionMap.find(std::string(sessionName));
+	if (it == mServer.sessionMap.end()) {
+		boost::string_view theFileData = CSdpCache::GetInstance()->getSdpMap(sessionName);
+
+		if (theFileData.empty())
+			return nullptr;
+
+		auto* theInfo = new SDPSourceInfo(theFileData); // will make a copy
+
+		if (!theInfo->IsReflectable())
+		{
+			delete theInfo;
+			return nullptr;
+		}
+
+		//
+		// Setup a ReflectorSession and bind the sockets. If we are negotiating,
+		// make sure to let the session know that this is a Push Session so
+		// ports may be modified.
+		uint32_t theSetupFlag = ReflectorSession::kMarkSetup | ReflectorSession::kIsPushSession;
+
+		ReflectorSession1 *theSession = new ReflectorSession1(sessionName);
+
+		//theSession->SetHasBufferedStreams(true); // buffer the incoming streams for clients
+
+												 // SetupReflectorSession stores theInfo in theSession so DONT delete the Info if we fail here, leave it alone.
+												 // deleting the session will delete the info.
+		QTSS_Error theErr = QTSS_NoErr;// theSession->SetupReflectorSession(theInfo, inParams, theSetupFlag, sOneSSRCPerStream, sTimeoutSSRCSecs);
+		if (theErr != QTSS_NoErr)
+		{
+			//delete theSession;
+			//CSdpCache::GetInstance()->eraseSdpMap(theSession->GetStreamName());
+			//theSession->StopTimer();
+			return nullptr;
+		}
+		mServer.sessionMap.insert(std::make_pair(sessionName, theSession));
+	}
+	return {};
+}
+
 void RTSPSession1::do_setup()
 {
 	bool isPush = request->IsPushRequest();
-	if (0) //!outputSession)
+	if (!rtp_OutputSession)
 	{
 		if (!isPush)
 		{
@@ -782,21 +828,12 @@ void RTSPSession1::do_setup()
 		}
 		else
 		{
-#if 0
-			auto opt = inParams->inClientSession->getAttribute(sBroadcasterSessionName);
-			if (!opt)
+			if (!broadcastSession)
 			{
-				theSession = DoSessionSetup(inParams, isPush, &foundSession);
-				if (theSession == nullptr)
-					return QTSS_RequestFailed;
+				broadcastSession = CreateSession("live.sdp");
+				//if (theSession == nullptr)
+//					return QTSS_RequestFailed;
 			}
-			else
-			{
-				theSession = boost::any_cast<ReflectorSession*>(opt.value());
-			}
-
-			inParams->inClientSession->addAttribute(sBroadcasterSessionName, theSession);
-#endif
 		}
 	}
 	else

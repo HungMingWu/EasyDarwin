@@ -69,9 +69,9 @@ void QTSServerInterface::KillAllRTPSessions()
 	}
 }
 
-extern std::shared_ptr<boost::asio::io_service> io_service;
+extern boost::asio::io_service io_service;
 RTPStatsUpdaterTask::RTPStatsUpdaterTask()
-	: timer(*io_service)
+	: timer(io_service)
 {
 	timer.async_wait(std::bind(&RTPStatsUpdaterTask::Run, this, std::placeholders::_1));
 }

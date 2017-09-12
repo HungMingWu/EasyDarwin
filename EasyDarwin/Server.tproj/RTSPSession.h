@@ -127,12 +127,15 @@ private:
 
 };
 
+class RTSPServer;
 class RTSPSession1 {
+	RTSPServer& mServer;
+	std::unique_ptr<ReflectorSession> CreateSession(boost::string_view sessionName);
 public:
-	RTSPSession1(std::shared_ptr<Connection> connection) noexcept;
+	RTSPSession1(RTSPServer&, std::shared_ptr<Connection> connection) noexcept;
 	void do_setup();
 	std::unique_ptr<ReflectorSession> broadcastSession;
-	std::unique_ptr<RTPSessionOutput1> outputSession;
+	std::unique_ptr<RTPSessionOutput1> rtp_OutputSession;
 	std::shared_ptr<Connection> connection;
 	std::shared_ptr<RTSPRequest1> request;
 };

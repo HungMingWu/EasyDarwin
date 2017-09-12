@@ -1,6 +1,8 @@
 #pragma once
+#include <memory>
 #include <mutex>
 #include <boost/asio/ip/tcp.hpp>
+#include <boost/asio/steady_timer.hpp>
 #include "RTSPUtility.h"
 
 class Connection : public std::enable_shared_from_this<Connection> {

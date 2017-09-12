@@ -163,5 +163,11 @@ private:
 	void Run(const boost::system::error_code &ec);
 };
 
+class ReflectorSession1 {
+	std::string	fSessionName;
+	SDPSourceInfo* fSourceInfo;
+public:
+	ReflectorSession1(boost::string_view inSourceID, SDPSourceInfo* inInfo = nullptr);
+};
 #endif
 

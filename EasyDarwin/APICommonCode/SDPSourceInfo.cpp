@@ -217,20 +217,7 @@ void SDPSourceInfo::Parse(boost::string_view sdpData)
     StreamInfo theGlobalStreamInfo; //needed if there is one c= header independent of
                                     //individual streams
 
-    uint32_t theStreamIndex = 0;
-	size_t fNumStreams = 0;
 	std::vector<std::string> sdpLines = spirit_direct(fSDPData, "\r\n");
-
-    // walk through the SDP, counting up the number of tracks
-    // Repeat until there's no more data in the SDP
-	for (const auto &sdpLine : sdpLines)
-		if (!sdpLine.empty() && sdpLine[0] == 'm')
-			fNumStreams++;
-
-    //We should scale the # of StreamInfos to the # of trax, but we can't because
-    //of an annoying compiler bug...
-    
-    fStreamArray.resize(fNumStreams);
 
     // set the default destination as our default IP address and set the default ttl
     theGlobalStreamInfo.fDestIPAddr = INADDR_ANY;
@@ -260,12 +247,13 @@ void SDPSourceInfo::Parse(boost::string_view sdpData)
             
             case 'm':
             {
+				StreamInfo newInfo;
                 if (hasGlobalStreamInfo)
                 {
-                    fStreamArray[theStreamIndex].fDestIPAddr = theGlobalStreamInfo.fDestIPAddr;
-                    fStreamArray[theStreamIndex].fTimeToLive = theGlobalStreamInfo.fTimeToLive;
+                    newInfo.fDestIPAddr = theGlobalStreamInfo.fDestIPAddr;
+                    newInfo.fTimeToLive = theGlobalStreamInfo.fTimeToLive;
                 }
-                fStreamArray[theStreamIndex].fTrackID = currentTrack;
+                newInfo.fTrackID = currentTrack;
                 currentTrack++;
                 
 				std::string theStreamType, transportID;
@@ -275,18 +263,18 @@ void SDPSourceInfo::Parse(boost::string_view sdpData)
 					qi::ascii::blank, theStreamType, tempPort, transportID);
                 
                 if (theStreamType == sVideoStr)
-                    fStreamArray[theStreamIndex].fPayloadType = qtssVideoPayloadType;
+                    newInfo.fPayloadType = qtssVideoPayloadType;
                 else if (theStreamType == sAudioStr)
-                    fStreamArray[theStreamIndex].fPayloadType = qtssAudioPayloadType;
+                    newInfo.fPayloadType = qtssAudioPayloadType;
 
                 if ((tempPort > 0) && (tempPort < 65536))
-                    fStreamArray[theStreamIndex].fPort = tempPort;
+                    newInfo.fPort = tempPort;
 
                 static const std::string kTCPTransportStr("RTP/AVP/TCP");
                 if (transportID == kTCPTransportStr)
-                    fStreamArray[theStreamIndex].fIsTCP = true;
+                    newInfo.fIsTCP = true;
                     
-                theStreamIndex++;
+				fStreamArray.push_back(std::move(newInfo));
             }
             break;
             case 'a':
@@ -311,7 +299,7 @@ void SDPSourceInfo::Parse(boost::string_view sdpData)
                 }
 
                 //if we haven't even hit an 'm' line yet, just ignore all 'a' lines
-                if (theStreamIndex == 0)
+                if (fStreamArray.empty())
                     break;
                     
                 if (aLineType == sRtpMapStr)
@@ -322,8 +310,8 @@ void SDPSourceInfo::Parse(boost::string_view sdpData)
 						qi::ascii::blank, codecName);
                     //mark the codec type if this line has a codec name on it. If we already
                     //have a codec type for this track, just ignore this line
-					if (fStreamArray[theStreamIndex - 1].fPayloadName.empty())
-						fStreamArray[theStreamIndex - 1].fPayloadName = std::move(codecName);
+					if (fStreamArray.back().fPayloadName.empty())
+						fStreamArray.back().fPayloadName = std::move(codecName);
                 }
                 else if (aLineType == sControlStr)
                 {
@@ -332,8 +320,8 @@ void SDPSourceInfo::Parse(boost::string_view sdpData)
 						qi::omit[+(qi::alpha)] >> "=" >> qi::uint_,
 						qi::ascii::blank, trackID);
 
-					fStreamArray[theStreamIndex - 1].fTrackName = rest;
-					fStreamArray[theStreamIndex - 1].fTrackID = trackID;
+					fStreamArray.back().fTrackName = rest;
+					fStreamArray.back().fTrackID = trackID;
                 }
                 else if (aLineType == sBufferDelayStr)
                 {
@@ -356,12 +344,12 @@ void SDPSourceInfo::Parse(boost::string_view sdpData)
 
                 uint32_t tempIPAddr = SocketUtils::ConvertStringToAddr(IP.c_str());
  
-                if (theStreamIndex > 0)
+                if (!fStreamArray.empty())
                 {
                     //if this c= line is part of a stream, it overrides the
                     //global stream information
-                    fStreamArray[theStreamIndex - 1].fDestIPAddr = tempIPAddr;
-                    fStreamArray[theStreamIndex - 1].fTimeToLive = (uint16_t) tempTtl;
+                    fStreamArray.back().fDestIPAddr = tempIPAddr;
+                    fStreamArray.back().fTimeToLive = (uint16_t) tempTtl;
                 } else {
                     theGlobalStreamInfo.fDestIPAddr = tempIPAddr;
                     theGlobalStreamInfo.fTimeToLive = (uint16_t) tempTtl;
@@ -376,13 +364,8 @@ void SDPSourceInfo::Parse(boost::string_view sdpData)
     if (theGlobalStreamInfo.fBufferDelay != (float) eDefaultBufferDelay)
         bufferDelay = theGlobalStreamInfo.fBufferDelay;
     
-    uint32_t count = 0;
-    while (count < fNumStreams)
-    {
-		fStreamArray[count].fBufferDelay = bufferDelay;
-        count ++;
-    }
-        
+    for (auto &stream : fStreamArray)
+		stream.fBufferDelay = bufferDelay;
 }
 
 bool  SDPSourceInfo::SetActiveNTPTimes(uint32_t startTimeNTP, uint32_t endTimeNTP)

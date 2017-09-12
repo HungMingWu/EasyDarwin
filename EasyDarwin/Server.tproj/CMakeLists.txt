@@ -24,7 +24,8 @@ set (SRC
 	 RTSPRequestStream.cpp RTSPRequestStream.h
 	 RTCPTask.cpp RTCPTask.h
 	 ServerPrefs.h ServerPrefs.cpp
-	 RTSPConnection.h RTSPUtility.h)
+	 RTSPConnection.h RTSPUtility.h
+	 RTSPServer.h RTSPServer.cpp)
 
 link_libraries(APIModules RTCPUtilitiesLib RTSPUtilitiesLib
                APICommonCode

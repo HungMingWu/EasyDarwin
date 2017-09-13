@@ -47,9 +47,8 @@ UDPSocketPair* UDPSocketPool::GetUDPSocketPair(uint32_t inIPAddr, uint16_t inPor
 			{
 				//check to make sure this source IP & port is not already in the demuxer.
 				//If not, we can return this socket pair.
-				if ((theElem->fSocketB->GetDemuxer() == nullptr) ||
-					((!theElem->fSocketB->GetDemuxer()->AddrInMap(0, 0)) &&
-					(!theElem->fSocketB->GetDemuxer()->AddrInMap(inSrcIPAddr, inSrcPort))))
+				if (((!theElem->GetSocketBDemux().AddrInMap({ 0, 0 })) &&
+					(!theElem->GetSocketBDemux().AddrInMap({ inSrcIPAddr, inSrcPort }))))
 				{
 					theElem->fRefCount++;
 					return theElem;

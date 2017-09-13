@@ -76,7 +76,7 @@ public:
 		kIsPushSession = 4  // When setting up streams handle port conflicts by allocating.
 	};
 
-	QTSS_Error      SetupReflectorSession(SDPSourceInfo* inInfo, QTSS_StandardRTSP_Params* inParams,
+	QTSS_Error      SetupReflectorSession(SDPSourceInfo* inInfo, QTSS_StandardRTSP_Params& inParams,
 		uint32_t inFlags = kMarkSetup, bool filterState = true, uint32_t filterTimeout = 30);
 
 	// Packets get forwarded by attaching ReflectorOutput objects to a ReflectorSession.
@@ -102,8 +102,7 @@ public:
 	bool			HasVideoKeyFrameUpdate() { return fHasVideoKeyFrameUpdate; }
 
 	ReflectorStream*	GetStreamByIndex(uint32_t inIndex) { return fStreamArray[inIndex].get(); }
-	void AddBroadcasterClientSession(QTSS_StandardRTSP_Params* inParams);
-	RTPSession* GetBroadcasterSession() { return fBroadcasterSession; }
+	void AddBroadcasterClientSession(QTSS_StandardRTSP_Params& inParams);
 
 	// For the QTSSSplitterModule, this object can cache a QTSS_StreamRef
 	void            SetSocketStream(QTSS_StreamRef inStream) { fSocketStream = inStream; }
@@ -153,7 +152,6 @@ private:
 
 	// For the QTSSSplitterModule, this object can cache a QTSS_StreamRef
 	QTSS_StreamRef fSocketStream{ nullptr };
-	RTPSession* fBroadcasterSession{ nullptr };
 
 	bool		fHasBufferedStreams{ false };
 	bool		fHasVideoKeyFrameUpdate{ false };
@@ -166,6 +164,7 @@ private:
 class ReflectorSession1 {
 	std::string	fSessionName;
 	SDPSourceInfo* fSourceInfo;
+	bool fHasBufferedStreams{ true };
 public:
 	ReflectorSession1(boost::string_view inSourceID, SDPSourceInfo* inInfo = nullptr);
 };

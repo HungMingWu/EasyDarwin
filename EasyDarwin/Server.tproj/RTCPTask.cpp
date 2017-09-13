@@ -59,38 +59,28 @@ int64_t RTCPTask::Run()
 
 			for (uint32_t x = 0; x < 2; x++)
 			{
+				auto &theDemuxer = (x == 0) ? thePair->GetSocketADemux() : thePair->GetSocketBDemux();
 				UDPSocket* theSocket = nullptr;
 				if (x == 0)
 					theSocket = thePair->GetSocketA();
 				else
 					theSocket = thePair->GetSocketB();
 
-				UDPDemuxer* theDemuxer = theSocket->GetDemuxer();
-				if (theDemuxer == nullptr)
-					continue;
-				else
+				while (true) //get all the outstanding packets for this socket
 				{
-					theDemuxer->GetMutex()->Lock();
-					while (true) //get all the outstanding packets for this socket
+					thePacket.Len = 0;
+					theSocket->RecvFrom(&theRemoteAddr, &theRemotePort, thePacket.Ptr,
+						kMaxRTCPPacketSize, &thePacket.Len);
+					if (thePacket.Len == 0)
 					{
-						thePacket.Len = 0;
-						theSocket->RecvFrom(&theRemoteAddr, &theRemotePort, thePacket.Ptr,
-							kMaxRTCPPacketSize, &thePacket.Len);
-						if (thePacket.Len == 0)
-						{
-							theSocket->RequestEvent(EV_RE);
-							break;//no more packets on this socket!
-						}
-
-						//if this socket has a demuxer, find the target RTPStream
-						if (theDemuxer != nullptr)
-						{
-							auto* theStream = (RTPStream*)theDemuxer->GetTask(theRemoteAddr, theRemotePort);
-							if (theStream != nullptr)
-								theStream->ProcessIncomingRTCPPacket(&thePacket);
-						}
+						theSocket->RequestEvent(EV_RE);
+						break;//no more packets on this socket!
 					}
-					theDemuxer->GetMutex()->Unlock();
+
+					//if this socket has a demuxer, find the target RTPStream
+					RTPStream* theStream = theDemuxer.GetTask({ theRemoteAddr, theRemotePort });
+					if (theStream != nullptr)
+						theStream->ProcessIncomingRTCPPacket(&thePacket);
 				}
 			}
 		}

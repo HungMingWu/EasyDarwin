@@ -397,7 +397,7 @@ UDPSocketPair*  RTPSocketPool::ConstructUDPSocketPair()
 	// They do receive events - we don't poll from them anymore
 	return new
 		UDPSocketPair(new UDPSocket(theTask, Socket::kNonBlockingSocketType),
-			new UDPSocket(theTask, UDPSocket::kWantsDemuxer | Socket::kNonBlockingSocketType));
+			new UDPSocket(theTask, Socket::kNonBlockingSocketType));
 }
 
 void RTPSocketPool::DestructUDPSocketPair(UDPSocketPair* inPair)

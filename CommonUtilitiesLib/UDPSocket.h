@@ -36,28 +36,14 @@
 #ifndef __UDPSOCKET_H__
 #define __UDPSOCKET_H__
 
-#ifndef __Win32__
-#include <sys/socket.h>
-#include <sys/uio.h>
-#endif
-
 #include "Socket.h"
-#include "UDPDemuxer.h"
 
 
 class UDPSocket : public Socket
 {
 public:
-
-	//Another socket type flag (in addition to the ones defined in Socket.h).
-	//The value of this can't conflict with those!
-	enum
-	{
-		kWantsDemuxer = 0x0100 //uint32_t
-	};
-
 	UDPSocket(Task* inTask, uint32_t inSocketType);
-	~UDPSocket() override { if (fDemuxer != nullptr) delete fDemuxer; }
+	~UDPSocket() override = default;
 
 	//Open
 	OS_Error    Open() { return Socket::Open(SOCK_DGRAM); }
@@ -74,14 +60,7 @@ public:
 	OS_Error        RecvFrom(uint32_t* outRemoteAddr, uint16_t* outRemotePort,
 		void* ioBuffer, uint32_t inBufLen, uint32_t* outRecvLen);
 
-	//A UDP socket may or may not have a demuxer associated with it. The demuxer
-	//is a data structure so the socket can associate incoming data with the proper
-	//task to process that data (based on source IP addr & port)
-	UDPDemuxer*         GetDemuxer() { return fDemuxer; }
-
 private:
-
-	UDPDemuxer* fDemuxer;
 	struct sockaddr_in  fMsgAddr;
 };
 #endif // __UDPSOCKET_H__

@@ -42,7 +42,6 @@
 
 #include "UDPSocket.h"
 #include "UDPSocketPool.h"
-#include "UDPDemuxer.h"
 #include "SequenceNumberMap.h"
 
 #include "OSMutex.h"
@@ -186,11 +185,11 @@ public:
 
 	ReflectorSocket();
 	~ReflectorSocket() override = default;
-	void    AddBroadcasterSession(RTPSession* inSession) { OSMutexLocker locker(this->GetDemuxer()->GetMutex()); fBroadcasterClientSession = inSession; }
-	void    RemoveBroadcasterSession(RTPSession* inSession) { OSMutexLocker locker(this->GetDemuxer()->GetMutex()); if (inSession == fBroadcasterClientSession) fBroadcasterClientSession = nullptr; }
+	void    AddBroadcasterSession(RTPSession* inSession) { fBroadcasterClientSession = inSession; }
+	void    RemoveBroadcasterSession(RTPSession* inSession) { if (inSession == fBroadcasterClientSession) fBroadcasterClientSession = nullptr; }
 	void    AddSender(ReflectorSender* inSender);
 	void    RemoveSender(ReflectorSender* inStreamElem);
-	bool  HasSender() { return (this->GetDemuxer()->GetHashTable()->GetNumEntries() > 0); }
+	bool  HasSender() { return !fDemuxer.empty(); }
 	bool  ProcessPacket(const int64_t& inMilliseconds, ReflectorPacket* thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort);
 	ReflectorPacket*    GetPacket();
 	int64_t      Run() override;
@@ -222,7 +221,7 @@ private:
 	uint64_t  fFirstReceiveTime{0};
 	int64_t  fFirstArrivalTime{0};
 	uint32_t  fCurrentSSRC{0};
-
+	SyncUnorderMap<ReflectorSender*> fDemuxer;
 };
 
 
@@ -241,11 +240,11 @@ public:
 
 };
 
-class ReflectorSender : public UDPDemuxerTask
+class ReflectorSender
 {
 public:
 	ReflectorSender(ReflectorStream* inStream, uint32_t inWriteFlag);
-	~ReflectorSender() override = default;
+	~ReflectorSender() = default;
 
 	int64_t  fSleepTime;
 
@@ -334,9 +333,6 @@ public:
 		kStreamIDSize = sizeof(uint32_t) + sizeof(uint16_t)
 	};
 
-	// Uses a StreamInfo to generate a unique ID
-	static void GenerateSourceID(SDPSourceInfo::StreamInfo* inInfo, char* ioBuffer);
-
 	ReflectorStream(SDPSourceInfo::StreamInfo* inInfo);
 	~ReflectorStream();
 
@@ -346,7 +342,7 @@ public:
 	// Call this to initialize the reflector sockets. Uses the QTSS_RTSPRequestObject
 	// if provided to report any errors that occur 
 	// Passes the QTSS_ClientSessionObject to the socket so the socket can update the session if needed.
-	QTSS_Error BindSockets(QTSS_StandardRTSP_Params* inParams, uint32_t inReflectorSessionFlags, bool filterState, uint32_t timeout);
+	QTSS_Error BindSockets(QTSS_StandardRTSP_Params& inParams, uint32_t inReflectorSessionFlags, bool filterState, uint32_t timeout);
 
 	// This stream reflects packets from the broadcast to specific ReflectorOutputs.
 	// You attach outputs to ReflectorStreams this way. You can force the ReflectorStream

@@ -289,7 +289,7 @@ int64_t RTSPSession::Run()
 					// a module is guarenteed to be atomic by the API.
 					Assert(fRTPSession != nullptr);
 					OSMutexLocker   locker(fRTPSession->GetSessionMutex());
-					ReflectionModule::ProcessRTSPRequest(&rtspParams);
+					ReflectionModule::ProcessRTSPRequest(rtspParams);
 				}
 				if (fRequest->HasResponseBeenSent())
 				{
@@ -793,10 +793,6 @@ std::unique_ptr<ReflectorSession> RTSPSession1::CreateSession(boost::string_view
 
 		ReflectorSession1 *theSession = new ReflectorSession1(sessionName);
 
-		//theSession->SetHasBufferedStreams(true); // buffer the incoming streams for clients
-
-												 // SetupReflectorSession stores theInfo in theSession so DONT delete the Info if we fail here, leave it alone.
-												 // deleting the session will delete the info.
 		QTSS_Error theErr = QTSS_NoErr;// theSession->SetupReflectorSession(theInfo, inParams, theSetupFlag, sOneSSRCPerStream, sTimeoutSSRCSecs);
 		if (theErr != QTSS_NoErr)
 		{

@@ -67,14 +67,6 @@ uint32_t                          ReflectorStream::sFirstPacketOffsetMsec = 500;
 
 uint32_t                          ReflectorStream::sRelocatePacketAgeMSec = 1000;
 
-void ReflectorStream::GenerateSourceID(SDPSourceInfo::StreamInfo* inInfo, char* ioBuffer)
-{
-
-	::memcpy(ioBuffer, &inInfo->fSrcIPAddr, sizeof(inInfo->fSrcIPAddr));
-	::memcpy(&ioBuffer[sizeof(inInfo->fSrcIPAddr)], &inInfo->fPort, sizeof(inInfo->fPort));
-}
-
-
 ReflectorStream::ReflectorStream(SDPSourceInfo::StreamInfo* inInfo)
 	: fPacketCount(0),
 	fSockets(nullptr),
@@ -311,19 +303,16 @@ void  ReflectorStream::TearDownAllOutputs()
 }
 
 
-QTSS_Error ReflectorStream::BindSockets(QTSS_StandardRTSP_Params* inParams, uint32_t inReflectorSessionFlags, bool filterState, uint32_t timeout)
+QTSS_Error ReflectorStream::BindSockets(QTSS_StandardRTSP_Params& inParams, uint32_t inReflectorSessionFlags, bool filterState, uint32_t timeout)
 {
 	// If the incoming data is RTSP interleaved, we don't need to do anything here
 	if (inReflectorSessionFlags & ReflectorSession::kIsPushSession)
 		fStreamInfo.fSetupToReceive = true;
 
-	RTSPRequest* inRequest = nullptr;
-	if (inParams != nullptr)
-		inRequest = inParams->inRTSPRequest;
+	RTSPRequest* inRequest = inParams.inRTSPRequest;
 
 	// Set the transport Type a Broadcaster
-	if (inParams != nullptr)
-		fTransportType = inParams->inRTSPRequest->GetTransportType();
+	fTransportType = inParams.inRTSPRequest->GetTransportType();
 
 	// get a pair of sockets. The socket must be bound on INADDR_ANY because we don't know
 	// which interface has access to this broadcast. If there is a source IP address
@@ -381,10 +370,10 @@ QTSS_Error ReflectorStream::BindSockets(QTSS_StandardRTSP_Params* inParams, uint
 	((ReflectorSocket*)fSockets->GetSocketB())->AddSender(&fRTCPSender);
 
 	// A broadcaster is setting up a UDP session so let the sockets update the session
-	if (fStreamInfo.fSetupToReceive &&  qtssRTPTransportTypeUDP == fTransportType && inParams != nullptr)
+	if (fStreamInfo.fSetupToReceive &&  qtssRTPTransportTypeUDP == fTransportType)
 	{
-		((ReflectorSocket*)fSockets->GetSocketA())->AddBroadcasterSession(inParams->inClientSession);
-		((ReflectorSocket*)fSockets->GetSocketB())->AddBroadcasterSession(inParams->inClientSession);
+		((ReflectorSocket*)fSockets->GetSocketA())->AddBroadcasterSession(inParams.inClientSession);
+		((ReflectorSocket*)fSockets->GetSocketB())->AddBroadcasterSession(inParams.inClientSession);
 	}
 
 	((ReflectorSocket*)fSockets->GetSocketA())->SetSSRCFilter(filterState, timeout);
@@ -466,7 +455,6 @@ void ReflectorStream::PushPacket(char *packet, uint32_t packetLen, bool isRTCP)
 				return;
 			}
 
-			OSMutexLocker locker(((ReflectorSocket*)(fSockets->GetSocketB()))->GetDemuxer()->GetMutex());
 			thePacket->SetPacketData(packet, packetLen);
 			((ReflectorSocket*)fSockets->GetSocketB())->ProcessPacket(OS::Milliseconds(), thePacket, 0, 0);
 			((ReflectorSocket*)fSockets->GetSocketB())->Signal(Task::kIdleEvent);
@@ -481,7 +469,6 @@ void ReflectorStream::PushPacket(char *packet, uint32_t packetLen, bool isRTCP)
 				return;
 			}
 
-			OSMutexLocker locker(((ReflectorSocket*)(fSockets->GetSocketA()))->GetDemuxer()->GetMutex());
 			thePacket->SetPacketData(packet, packetLen);
 
 			//if(this->fStreamInfo.fPayloadName.Equal("H264/90000"))
@@ -1411,7 +1398,7 @@ void ReflectorSocketPool::DestructUDPSocketPair(UDPSocketPair *inPair)
 
 ReflectorSocket::ReflectorSocket()
 	: IdleTask(),
-	UDPSocket(nullptr, Socket::kNonBlockingSocketType | UDPSocket::kWantsDemuxer)
+	UDPSocket(nullptr, Socket::kNonBlockingSocketType)
 {
 	//construct all the preallocated packets
 	this->SetTaskName("ReflectorSocket");
@@ -1420,20 +1407,17 @@ ReflectorSocket::ReflectorSocket()
 
 void    ReflectorSocket::AddSender(ReflectorSender* inSender)
 {
-	OSMutexLocker locker(this->GetDemuxer()->GetMutex());
-	QTSS_Error err = this->GetDemuxer()->RegisterTask(inSender->fStream->fStreamInfo.fSrcIPAddr, 0, inSender);
-	Assert(err == QTSS_NoErr);
+	Assert(true == fDemuxer.RegisterTask(
+	{ inSender->fStream->fStreamInfo.fSrcIPAddr, 0 }, inSender));
 	fSenderQueue.push_back(inSender);
 }
 
 void    ReflectorSocket::RemoveSender(ReflectorSender* inSender)
 {
-	OSMutexLocker locker(this->GetDemuxer()->GetMutex());
 	auto it = std::find(fSenderQueue.begin(), fSenderQueue.end(), inSender);
 	if (it != fSenderQueue.end())
 		fSenderQueue.erase(it);
-	QTSS_Error err = this->GetDemuxer()->UnregisterTask(inSender->fStream->fStreamInfo.fSrcIPAddr, 0, inSender);
-	Assert(err == QTSS_NoErr);
+	fDemuxer.UnregisterTask({ inSender->fStream->fStreamInfo.fSrcIPAddr, 0 });
 }
 
 int64_t ReflectorSocket::Run()
@@ -1448,7 +1432,6 @@ int64_t ReflectorSocket::Run()
 	if (theEvents & Task::kKillEvent)
 		return -1;
 
-	OSMutexLocker locker(this->GetDemuxer()->GetMutex());
 	int64_t theMilliseconds = OS::Milliseconds();
 
 	//Only check for data on the socket if we've actually been notified to that effect
@@ -1580,10 +1563,10 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 			this->FilterInvalidSSRCs(thePacket, GetLocalPort() & 1);// thePacket->fPacketPtr.Len is set to 0 for invalid SSRCs.
 
 		// Find the appropriate ReflectorSender for this packet.
-		auto* theSender = (ReflectorSender*)this->GetDemuxer()->GetTask(theRemoteAddr, 0);
+		ReflectorSender* theSender = fDemuxer.GetTask({ theRemoteAddr, 0 });
 		// If there is a generic sender for this socket, use it.
 		if (theSender == nullptr)
-			theSender = (ReflectorSender*)this->GetDemuxer()->GetTask(0, 0);
+			theSender = fDemuxer.GetTask({ 0, 0 });
 
 		if (theSender == nullptr)
 		{
@@ -1766,7 +1749,6 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 
 void ReflectorSocket::GetIncomingData(const int64_t& inMilliseconds)
 {
-	OSMutexLocker locker(this->GetDemuxer()->GetMutex());
 	uint32_t theRemoteAddr = 0;
 	uint16_t theRemotePort = 0;
 	//get all the outstanding packets for this socket
@@ -1791,6 +1773,5 @@ void ReflectorSocket::GetIncomingData(const int64_t& inMilliseconds)
 
 ReflectorPacket* ReflectorSocket::GetPacket()
 {
-	OSMutexLocker locker(this->GetDemuxer()->GetMutex());
 	return new ReflectorPacket();
 }

@@ -129,9 +129,7 @@ RTPStream::~RTPStream()
 	if (fSockets != nullptr)
 	{
 		// If there is an UDP socket pair associated with this stream, make sure to free it up
-		Assert(fSockets->GetSocketB()->GetDemuxer() != nullptr);
-		fSockets->GetSocketB()->GetDemuxer()->
-			UnregisterTask(fRemoteAddr, fRemoteRTCPPort, this);
+		fSockets->GetSocketBDemux().UnregisterTask({ fRemoteAddr, fRemoteRTCPPort });
 		Assert(err == QTSS_NoErr);
 
 		getSingleton()->GetSocketPool()->ReleaseUDPSocketPair(fSockets);
@@ -393,10 +391,7 @@ QTSS_Error RTPStream::Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags)
 	fLocalRTPPort = fSockets->GetSocketA()->GetLocalPort();
 
 	//finally, register with the demuxer to get RTCP packets from the proper address
-	Assert(fSockets->GetSocketB()->GetDemuxer() != nullptr);
-	QTSS_Error err = fSockets->GetSocketB()->GetDemuxer()->RegisterTask(fRemoteAddr, fRemoteRTCPPort, this);
-	//errors should only be returned if there is a routing problem, there should be none
-	Assert(err == QTSS_NoErr);
+	Assert(true == fSockets->GetSocketBDemux().RegisterTask({ fRemoteAddr, fRemoteRTCPPort }, this));
 	return QTSS_NoErr;
 }
 

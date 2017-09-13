@@ -160,14 +160,14 @@ static boost::string_view    sTheNowRangeHeader("npt=now-");
 // FUNCTION PROTOTYPES
 
 static QTSS_Error Shutdown();
-static QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams);
-static QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams);
-ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRTSP_Params* inParams, bool isPush = false, bool *foundSessionPtr = nullptr);
-static QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams);
-static QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSession);
+static QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params& inParams);
+static QTSS_Error DoDescribe(QTSS_StandardRTSP_Params& inParams);
+ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRTSP_Params &inParams, bool isPush = false, bool *foundSessionPtr = nullptr);
+static QTSS_Error DoSetup(QTSS_StandardRTSP_Params &inParams);
+static QTSS_Error DoPlay(QTSS_StandardRTSP_Params& inParams, ReflectorSession* inSession);
 static QTSS_Error DestroySession(QTSS_ClientSessionClosing_Params* inParams);
 static void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* inSession, bool killClients);
-static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool isPush, bool *foundSessionPtr = nullptr, std::string* resultFilePath = nullptr);
+static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params &inParams, bool isPush, bool *foundSessionPtr = nullptr, std::string* resultFilePath = nullptr);
 
 inline void KeepSession(RTSPRequest* theRequest, bool keep)
 {
@@ -207,10 +207,10 @@ namespace ReflectionModule
 		return QTSS_NoErr;
 	}
 
-	QTSS_Error ProcessRTSPRequest(QTSS_StandardRTSP_Params* inParams)
+	QTSS_Error ProcessRTSPRequest(QTSS_StandardRTSP_Params& inParams)
 	{
 		OSMutexLocker locker(sSessionMap->GetMutex());
-		QTSS_RTSPMethod theMethod = inParams->inRTSPRequest->GetMethod();
+		QTSS_RTSPMethod theMethod = inParams.inRTSPRequest->GetMethod();
 
 		if (theMethod == qtssAnnounceMethod)
 			return DoAnnounce(inParams);
@@ -219,7 +219,7 @@ namespace ReflectionModule
 		if (theMethod == qtssSetupMethod)
 			return DoSetup(inParams);
 
-		auto opt = inParams->inClientSession->getAttribute(sOutputName);
+		auto opt = inParams.inClientSession->getAttribute(sOutputName);
 		if (!opt) // a broadcaster push session
 		{
 			if (theMethod == qtssPlayMethod || theMethod == qtssRecordMethod)
@@ -235,13 +235,13 @@ namespace ReflectionModule
 			return DoPlay(inParams, theOutput->GetReflectorSession());
 		case qtssTeardownMethod:
 			// Tell the server that this session should be killed, and send a TEARDOWN response
-			inParams->inClientSession->Teardown();
-			inParams->inRTSPRequest->SetKeepAlive(false);
-			inParams->inRTSPRequest->SendHeader();
+			inParams.inClientSession->Teardown();
+			inParams.inRTSPRequest->SetKeepAlive(false);
+			inParams.inRTSPRequest->SendHeader();
 			break;
 		case qtssPauseMethod:
-			inParams->inClientSession->Pause();
-			inParams->inRTSPRequest->SendHeader();
+			inParams.inClientSession->Pause();
+			inParams.inRTSPRequest->SendHeader();
 			break;
 		default:
 			break;
@@ -383,9 +383,9 @@ namespace ReflectionModule
 	}
 }
 
-static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool isPush, bool *foundSessionPtr, std::string* resultFilePath)
+static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params &inParams, bool isPush, bool *foundSessionPtr, std::string* resultFilePath)
 {
-	std::string theFullPath = inParams->inRTSPRequest->GetFileName();
+	std::string theFullPath = inParams.inRTSPRequest->GetFileName();
 
 	if (!isPush)
 	{
@@ -406,9 +406,9 @@ static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params* inParams, bool
 	}
 }
 
-QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
+QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params& inParams)
 {
-	std::string theFullPath = inParams->inRTSPRequest->GetFileName();
+	std::string theFullPath = inParams.inRTSPRequest->GetFileName();
 
 	std::string theStreamName = theFullPath;
 
@@ -419,7 +419,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	//
 	// We need to know the content length to manage memory
 	uint32_t theLen = 0;
-	uint32_t theContentLen = inParams->inRTSPRequest->GetContentLength();
+	uint32_t theContentLen = inParams.inRTSPRequest->GetContentLength();
 
 	//
 	// Check for the existence of 2 attributes in the request: a pointer to our buffer for
@@ -429,19 +429,19 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 
 	//
 	// We have our buffer and offset. Read the data.
-	QTSS_Error theErr = inParams->inRTSPRequest->Read(theRequestBody, theContentLen, &theLen);
+	QTSS_Error theErr = inParams.inRTSPRequest->Read(theRequestBody, theContentLen, &theLen);
 	Assert(theErr != QTSS_BadArgument);
 
 	if (theErr == QTSS_RequestFailed)
 	{
 		//
 		// NEED TO RETURN RTSP ERROR RESPONSE
-		return inParams->inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
+		return inParams.inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
 	}
 
 	if ((theErr == QTSS_WouldBlock) || (theLen < theContentLen))
 	{
-		theErr = inParams->inRTSPRequest->RequestEvent(QTSS_ReadableEvent);
+		theErr = inParams.inRTSPRequest->RequestEvent(QTSS_ReadableEvent);
 		Assert(theErr == QTSS_NoErr);
 		return QTSS_NoErr;
 	}
@@ -457,7 +457,7 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 	SDPContainer checkedSDPContainer(editedSDP);
 	if (!checkedSDPContainer.Parse())
 	{
-		return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssUnsupportedMediaType);
+		return inParams.inRTSPRequest->SendErrorResponseWithMessage(qtssUnsupportedMediaType);
 	}
 
 	// ------------ reorder the sdp headers to make them proper.
@@ -474,11 +474,11 @@ QTSS_Error DoAnnounce(QTSS_StandardRTSP_Params* inParams)
 
 	//printf("QTSSReflectorModule:DoAnnounce SendResponse OK=200\n");
 
-	inParams->inRTSPRequest->SendHeader();
+	inParams.inRTSPRequest->SendHeader();
 	return QTSS_NoErr;
 }
 
-QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
+QTSS_Error DoDescribe(QTSS_StandardRTSP_Params& inParams)
 {
 	std::string theFileName;
 	ReflectorSession* theSession = DoSessionSetup(inParams, false, nullptr, &theFileName);
@@ -487,7 +487,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 		return QTSS_RequestFailed;
 
 	uint32_t theLen = 0;
-	auto opt = inParams->inClientSession->getAttribute(sOutputName);
+	auto opt = inParams.inClientSession->getAttribute(sOutputName);
 
 	// If there already  was an RTPSessionOutput attached to this Client Session,
 	// destroy it. 
@@ -495,7 +495,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	{
 		RTPSessionOutput* theOutput = boost::any_cast<RTPSessionOutput*>(opt.value());
 		RemoveOutput(theOutput, theOutput->GetReflectorSession(), false);
-		inParams->inClientSession->removeAttribute(sOutputName);
+		inParams.inClientSession->removeAttribute(sOutputName);
 	}
 	// send the DESCRIBE response
 
@@ -526,7 +526,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	{
 		sSessionMap->Release(theSession->GetRef());
 
-		return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssUnsupportedMediaType);
+		return inParams.inRTSPRequest->SendErrorResponseWithMessage(qtssUnsupportedMediaType);
 	}
 
 
@@ -538,7 +538,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	theDescribeVec[1].iov_base = const_cast<char *>(sortedSDP.data());
 	theDescribeVec[1].iov_len = sortedSDP.length();
 
-	inParams->inRTSPRequest->SendDescribeResponse(&theDescribeVec[0], 2, sortedSDP.length());
+	inParams.inRTSPRequest->SendDescribeResponse(&theDescribeVec[0], 2, sortedSDP.length());
 
 	sSessionMap->Release(theSession->GetRef());
 
@@ -549,7 +549,7 @@ QTSS_Error DoDescribe(QTSS_StandardRTSP_Params* inParams)
 	return QTSS_NoErr;
 }
 
-ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRTSP_Params* inParams, bool isPush, bool *foundSessionPtr)
+ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRTSP_Params &inParams, bool isPush, bool *foundSessionPtr)
 {
 	OSMutexLocker locker(sSessionMap->GetMutex());
 
@@ -651,12 +651,12 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 }
 
 // ONLY call when performing a setup.
-void DeleteReflectorPushSession(QTSS_StandardRTSP_Params* inParams, ReflectorSession* theSession, bool foundSession)
+void DeleteReflectorPushSession(QTSS_StandardRTSP_Params& inParams, ReflectorSession* theSession, bool foundSession)
 {
 	if(theSession)
 		sSessionMap->Release(theSession->GetRef());
 
-	inParams->inClientSession->removeAttribute(sBroadcasterSessionName);
+	inParams.inClientSession->removeAttribute(sBroadcasterSessionName);
 
 	if (foundSession)
 		return; // we didn't allocate the session so don't delete
@@ -672,7 +672,7 @@ void DeleteReflectorPushSession(QTSS_StandardRTSP_Params* inParams, ReflectorSes
 	}
 }
 
-QTSS_Error AddRTPStream(ReflectorSession* theSession, QTSS_StandardRTSP_Params* inParams, RTPStream **newStreamPtr)
+QTSS_Error AddRTPStream(ReflectorSession* theSession, QTSS_StandardRTSP_Params& inParams, RTPStream **newStreamPtr)
 {
 	// Ok, this is completely crazy but I can't think of a better way to do this that's
 	// safe so we'll do it this way for now. Because the ReflectorStreams use this session's
@@ -688,8 +688,8 @@ QTSS_Error AddRTPStream(ReflectorSession* theSession, QTSS_StandardRTSP_Params* 
 	//
 	// Turn off reliable UDP transport, because we are not yet equipped to
 	// do overbuffering.
-	QTSS_Error theErr = inParams->inClientSession->AddStream(
-		inParams->inRTSPRequest, newStreamPtr, qtssASFlagsForceUDPTransport);
+	QTSS_Error theErr = inParams.inClientSession->AddStream(
+		inParams.inRTSPRequest, newStreamPtr, qtssASFlagsForceUDPTransport);
 
 	if (theSession != nullptr)
 		for (uint32_t y = 0; y < theSession->GetNumStreams(); y++)
@@ -708,14 +708,14 @@ static void SendSetupRTSPResponse(RTPStream *inRTPInfo, RTSPRequestInterface *in
 	inRTPInfo->SendSetupResponse(inRTSPRequest);
 }
 
-QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
+QTSS_Error DoSetup(QTSS_StandardRTSP_Params &inParams)
 {
 	ReflectorSession* theSession = nullptr;
 
-	bool isPush = inParams->inRTSPRequest->IsPushRequest();
+	bool isPush = inParams.inRTSPRequest->IsPushRequest();
 	bool foundSession = false;
 
-	auto opt = inParams->inClientSession->getAttribute(sOutputName);
+	auto opt = inParams.inClientSession->getAttribute(sOutputName);
 	if (!opt)
 	{
 		if (!isPush)
@@ -724,13 +724,13 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 			if (theSession == nullptr)
 				return QTSS_RequestFailed;
 
-			auto* theNewOutput = new RTPSessionOutput(inParams->inClientSession, theSession, sStreamCookieName);
+			auto* theNewOutput = new RTPSessionOutput(inParams.inClientSession, theSession, sStreamCookieName);
 			theSession->AddOutput(theNewOutput, true);
-			inParams->inClientSession->addAttribute(sOutputName, theNewOutput);
+			inParams.inClientSession->addAttribute(sOutputName, theNewOutput);
 		}
 		else
 		{
-			auto opt = inParams->inClientSession->getAttribute(sBroadcasterSessionName);
+			auto opt = inParams.inClientSession->getAttribute(sBroadcasterSessionName);
 			if (!opt)
 			{
 				theSession = DoSessionSetup(inParams, isPush, &foundSession);
@@ -742,7 +742,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 				theSession = boost::any_cast<ReflectorSession*>(opt.value());
 			}
 
-			inParams->inClientSession->addAttribute(sBroadcasterSessionName, theSession);
+			inParams.inClientSession->addAttribute(sBroadcasterSessionName, theSession);
 		}
 	}
 	else
@@ -755,12 +755,12 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 
 	//unless there is a digit at the end of this path (representing trackID), don't
 	//even bother with the request
-	std::string theDigitStr = inParams->inRTSPRequest->GetFileDigit();
+	std::string theDigitStr = inParams.inRTSPRequest->GetFileDigit();
 	if (theDigitStr.empty())
 	{
 		if (isPush)
 			DeleteReflectorPushSession(inParams, theSession, foundSession);
-		return inParams->inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
+		return inParams.inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
 	}
 
 	uint32_t theTrackID = std::stoi(theDigitStr);
@@ -775,16 +775,16 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 		if (theStreamInfo == nullptr)
 		{
 			DeleteReflectorPushSession(inParams, theSession, foundSession);
-			return inParams->inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
+			return inParams.inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
 		}
 
 		if (theStreamInfo->fSetupToReceive)
 		{
 			DeleteReflectorPushSession(inParams, theSession, foundSession);
-			return inParams->inRTSPRequest->SendErrorResponse(qtssPreconditionFailed);
+			return inParams.inRTSPRequest->SendErrorResponse(qtssPreconditionFailed);
 		}
 
-		inParams->inRTSPRequest->SetUpServerPort(theStreamInfo->fPort);
+		inParams.inRTSPRequest->SetUpServerPort(theStreamInfo->fPort);
 
 		RTPStream *newStream = nullptr;
 		QTSS_Error theErr = AddRTPStream(theSession, inParams, &newStream);
@@ -792,16 +792,16 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 		if (theErr != QTSS_NoErr)
 		{
 			DeleteReflectorPushSession(inParams, theSession, foundSession);
-			return inParams->inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
+			return inParams.inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
 		}
 
 		//send the setup response
 
-		SendSetupRTSPResponse(newStream, inParams->inRTSPRequest, 0);
+		SendSetupRTSPResponse(newStream, inParams.inRTSPRequest, 0);
 
 		theStreamInfo->fSetupToReceive = true;
 		// This is an incoming data session. Set the Reflector Session in the ClientSession
-		inParams->inClientSession->addAttribute(sBroadcasterSessionName, theSession);
+		inParams.inClientSession->addAttribute(sBroadcasterSessionName, theSession);
 
 		if (theSession != nullptr)
 			theSession->AddBroadcasterClientSession(inParams);
@@ -818,7 +818,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	SDPSourceInfo::StreamInfo* theStreamInfo = theSession->GetSourceInfo()->GetStreamInfoByTrackID(theTrackID);
 	// If theStreamInfo is NULL, we don't have a legit track, so return an error
 	if (theStreamInfo == nullptr)
-		return inParams->inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
+		return inParams.inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
 
 	boost::string_view thePayloadName = theStreamInfo->fPayloadName;
 	bool r = qi::phrase_parse(thePayloadName.cbegin(), thePayloadName.cend(),
@@ -838,8 +838,8 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 		for (uint32_t x = 0; x < theSession->GetNumStreams(); x++)
 			theSession->GetStreamByIndex(x)->GetMutex()->Lock();
 
-		QTSS_Error theErr = inParams->inClientSession->AddStream(
-			inParams->inRTSPRequest, &newStream, 0);
+		QTSS_Error theErr = inParams.inClientSession->AddStream(
+			inParams.inRTSPRequest, &newStream, 0);
 
 		for (uint32_t y = 0; y < theSession->GetNumStreams(); y++)
 			theSession->GetStreamByIndex(y)->GetMutex()->Unlock();
@@ -855,9 +855,9 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	newStream->SetTimeScale(theStreamInfo->fTimeScale);
 
 	// We only want to allow over buffering to dynamic rate clients   
-	int32_t canDynamicRate = inParams->inRTSPRequest->GetDynamicRateState();
+	int32_t canDynamicRate = inParams.inRTSPRequest->GetDynamicRateState();
 	if (canDynamicRate < 1) // -1 no rate field, 0 off
-		inParams->inClientSession->SetOverBufferEnable(sFalse);
+		inParams.inClientSession->SetOverBufferEnable(sFalse);
 
 	// Place the stream cookie in this stream for future reference
 	void* theStreamCookie = theSession->GetStreamCookie(theTrackID);
@@ -868,7 +868,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 	newStream->SetNumQualityLevels(ReflectorSession::kNumQualityLevels);
 
 	//send the setup response
-	SendSetupRTSPResponse(newStream, inParams->inRTSPRequest, qtssSetupRespDontWriteSSRC);
+	SendSetupRTSPResponse(newStream, inParams.inRTSPRequest, qtssSetupRespDontWriteSSRC);
 
 #ifdef REFLECTORSESSION_DEBUG
 	printf("QTSSReflectorModule.cpp:DoSetup Session =%p refcount=%"   _U32BITARG_   "\n", theSession->GetRef(), theSession->GetRef()->GetRefCount());
@@ -879,9 +879,9 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params* inParams)
 
 
 
-bool HaveStreamBuffers(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSession)
+bool HaveStreamBuffers(QTSS_StandardRTSP_Params& inParams, ReflectorSession* inSession)
 {
-	if (inSession == nullptr || inParams == nullptr)
+	if (inSession == nullptr)
 		return false;
 
 	bool haveBufferedStreams = true; // set to false and return if we can't set the packets
@@ -895,7 +895,7 @@ bool HaveStreamBuffers(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inS
 
 
 
-	auto vecMap = inParams->inClientSession->GetStreams();
+	auto vecMap = inParams.inClientSession->GetStreams();
 	for (int i = 0; i < vecMap.size(); i++)
 	{
 		RTPStream* theRef = vecMap[i];
@@ -936,7 +936,7 @@ bool HaveStreamBuffers(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inS
 	return haveBufferedStreams;
 }
 
-QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSession)
+QTSS_Error DoPlay(QTSS_StandardRTSP_Params& inParams, ReflectorSession* inSession)
 {
 	QTSS_Error theErr = QTSS_NoErr;
 	uint32_t flags = 0;
@@ -944,22 +944,22 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 
 	if (inSession == nullptr)
 	{
-		auto opt = inParams->inClientSession->getAttribute(sBroadcasterSessionName);
+		auto opt = inParams.inClientSession->getAttribute(sBroadcasterSessionName);
 		if (!opt) return QTSS_RequestFailed;
 		inSession = boost::any_cast<ReflectorSession*>(opt.value());
 
-		inParams->inClientSession->addAttribute(sKillClientsEnabledName, sTearDownClientsOnDisconnect);
+		inParams.inClientSession->addAttribute(sKillClientsEnabledName, sTearDownClientsOnDisconnect);
 
 
 		Assert(inSession != nullptr);
 
-		inParams->inRTSPSession->addAttribute(sBroadcasterSessionName, inSession);
-		KeepSession(inParams->inRTSPRequest, true);
+		inParams.inRTSPSession->addAttribute(sBroadcasterSessionName, inSession);
+		KeepSession(inParams.inRTSPRequest, true);
 		//printf("QTSSReflectorModule.cpp:DoPlay (PUSH) inRTSPSession=%"   _U32BITARG_   " inClientSession=%"   _U32BITARG_   "\n",(uint32_t)inParams->inRTSPSession,(uint32_t)inParams->inClientSession);
 	}
 	else
 	{
-		auto opt = inParams->inClientSession->getAttribute(sOutputName);
+		auto opt = inParams.inClientSession->getAttribute(sOutputName);
 		if (!opt)
 			return QTSS_RequestFailed;
 
@@ -971,13 +971,13 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 		// interleaving the data over TCP. This must be set before calling QTSS_Play so the
 		// server can use it from within QTSS_Play
 		uint32_t bitsPerSecond = inSession->GetBitRate();
-		inParams->inClientSession->SetMovieAvgBitrate(bitsPerSecond);
+		inParams.inClientSession->SetMovieAvgBitrate(bitsPerSecond);
 
 		if (sPlayResponseRangeHeader)
 		{
-			auto opt = inParams->inClientSession->getAttribute(sRTPInfoWaitTime);
+			auto opt = inParams.inClientSession->getAttribute(sRTPInfoWaitTime);
 			if (!opt)
-				inParams->inRTSPRequest->AppendHeader(qtssRangeHeader, sTheNowRangeHeader);
+				inParams.inRTSPRequest->AppendHeader(qtssRangeHeader, sTheNowRangeHeader);
 		}
 
 		if (sForceRTPInfoSeqAndTime)
@@ -994,23 +994,23 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 			if (haveBufferedStreams) // send the cached rtp time and seq number in the response.
 			{
 
-				theErr = inParams->inClientSession->Play(
-					inParams->inRTSPRequest, qtssPlayRespWriteTrackInfo);
+				theErr = inParams.inClientSession->Play(
+					inParams.inRTSPRequest, qtssPlayRespWriteTrackInfo);
 				if (theErr != QTSS_NoErr)
 					return theErr;
 			}
 			else
 			{
-				auto opt = inParams->inClientSession->getAttribute(sRTPInfoWaitTime);
+				auto opt = inParams.inClientSession->getAttribute(sRTPInfoWaitTime);
 				if (!opt)
-					inParams->inClientSession->addAttribute(sRTPInfoWaitTime, (int32_t)0);
+					inParams.inClientSession->addAttribute(sRTPInfoWaitTime, (int32_t)0);
 				else
 				{
 					int32_t waitTimeLoopCount = boost::any_cast<int32_t>(opt.value());
 					if (waitTimeLoopCount < 1)
-						return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssClientNotFound);
+						return inParams.inRTSPRequest->SendErrorResponseWithMessage(qtssClientNotFound);
 
-					inParams->inClientSession->addAttribute(sRTPInfoWaitTime, waitTimeLoopCount - 1);
+					inParams.inClientSession->addAttribute(sRTPInfoWaitTime, waitTimeLoopCount - 1);
 				}
 
 				//printf("QTSSReflectorModule:DoPlay  wait 100ms waitTimeLoopCount=%ld\n", waitTimeLoopCount);
@@ -1019,15 +1019,15 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params* inParams, ReflectorSession* inSessio
 		}
 		else
 		{
-			theErr = inParams->inClientSession->Play(
-				inParams->inRTSPRequest, qtssPlayFlagsAppendServerInfo);
+			theErr = inParams.inClientSession->Play(
+				inParams.inRTSPRequest, qtssPlayFlagsAppendServerInfo);
 			if (theErr != QTSS_NoErr)
 				return theErr;
 		}
 
 	}
 
-	inParams->inClientSession->SendPlayResponse(inParams->inRTSPRequest, flags);
+	inParams.inClientSession->SendPlayResponse(inParams.inRTSPRequest, flags);
 
 #ifdef REFLECTORSESSION_DEBUG
 	printf("QTSSReflectorModule.cpp:DoPlay Session =%p refcount=%"   _U32BITARG_   "\n", inSession->GetRef(), inSession->GetRef()->GetRefCount());

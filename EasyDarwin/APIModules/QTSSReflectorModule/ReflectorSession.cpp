@@ -60,7 +60,7 @@ ReflectorSession::~ReflectorSession()
 	delete fSourceInfo;
 }
 
-QTSS_Error ReflectorSession::SetupReflectorSession(SDPSourceInfo* inInfo, QTSS_StandardRTSP_Params* inParams, uint32_t inFlags, bool filterState, uint32_t filterTimeout)
+QTSS_Error ReflectorSession::SetupReflectorSession(SDPSourceInfo* inInfo, QTSS_StandardRTSP_Params& inParams, uint32_t inFlags, bool filterState, uint32_t filterTimeout)
 {
 	// use the current SourceInfo
 	if (inInfo == nullptr)
@@ -103,20 +103,19 @@ QTSS_Error ReflectorSession::SetupReflectorSession(SDPSourceInfo* inInfo, QTSS_S
 	return QTSS_NoErr;
 }
 
-void ReflectorSession::AddBroadcasterClientSession(QTSS_StandardRTSP_Params* inParams)
+void ReflectorSession::AddBroadcasterClientSession(QTSS_StandardRTSP_Params& inParams)
 {
-	if (fStreamArray.empty() || nullptr == inParams)
+	if (fStreamArray.empty())
 		return;
 
 	for (uint32_t x = 0; x < fSourceInfo->GetNumStreams(); x++)
 	{
 		if (fStreamArray[x] != nullptr)
 		{   //printf("AddBroadcasterSession=%"   _U32BITARG_   "\n",inParams->inClientSession);
-			((ReflectorSocket*)fStreamArray[x]->GetSocketPair()->GetSocketA())->AddBroadcasterSession(inParams->inClientSession);
-			((ReflectorSocket*)fStreamArray[x]->GetSocketPair()->GetSocketB())->AddBroadcasterSession(inParams->inClientSession);
+			((ReflectorSocket*)fStreamArray[x]->GetSocketPair()->GetSocketA())->AddBroadcasterSession(inParams.inClientSession);
+			((ReflectorSocket*)fStreamArray[x]->GetSocketPair()->GetSocketB())->AddBroadcasterSession(inParams.inClientSession);
 		}
 	}
-	fBroadcasterSession = inParams->inClientSession;
 }
 
 void    ReflectorSession::AddOutput(ReflectorOutput* inOutput, bool isClient)
@@ -189,7 +188,6 @@ void    ReflectorSession::RemoveSessionFromOutput(RTPSession* inSession)
 		((ReflectorSocket*)fStreamArray[x]->GetSocketPair()->GetSocketA())->RemoveBroadcasterSession(inSession);
 		((ReflectorSocket*)fStreamArray[x]->GetSocketPair()->GetSocketB())->RemoveBroadcasterSession(inSession);
 	}
-	fBroadcasterSession = nullptr;
 }
 
 uint32_t  ReflectorSession::GetBitRate()

@@ -45,7 +45,6 @@
 #include "Attributes.h"
 #include "QTSS.h"
 
-#include "UDPDemuxer.h"
 #include "UDPSocketPool.h"
 
 #include "RTSPRequestInterface.h"
@@ -55,7 +54,7 @@
 
 class RTPSessionInterface;
 
-class RTPStream : public UDPDemuxerTask
+class RTPStream
 {
     public:
         
@@ -63,7 +62,7 @@ class RTPStream : public UDPDemuxerTask
         // CONSTRUCTOR / DESTRUCTOR
         
         RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession);
-        ~RTPStream() override;
+        ~RTPStream();
         
         //
         //ACCESS uint8_t

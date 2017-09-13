@@ -35,7 +35,7 @@
 #define __UDPSOCKETPOOL_H__
 
 #include <list>
-#include "UDPDemuxer.h"
+#include "SyncUnorderMap.h"
 #include "UDPSocket.h"
 #include "OSMutex.h"
 #include "OSQueue.h"
@@ -91,6 +91,7 @@ private:
 	OSMutex fMutex;
 };
 
+class RTPStream;
 class UDPSocketPair
 {
 public:
@@ -102,9 +103,11 @@ public:
 
 	UDPSocket*  GetSocketA() { return fSocketA; }
 	UDPSocket*  GetSocketB() { return fSocketB; }
-
+	SyncUnorderMap<RTPStream*>& GetSocketADemux() { return socketADemux; }
+	SyncUnorderMap<RTPStream*>& GetSocketBDemux() { return socketBDemux; }
 private:
-
+	SyncUnorderMap<RTPStream*> socketADemux;
+	SyncUnorderMap<RTPStream*> socketBDemux;
 	UDPSocket*  fSocketA;
 	UDPSocket*  fSocketB;
 	uint32_t      fRefCount;

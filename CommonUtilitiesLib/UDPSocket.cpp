@@ -56,11 +56,8 @@
 #endif
 
 UDPSocket::UDPSocket(Task* inTask, uint32_t inSocketType)
-	: Socket(inTask, inSocketType), fDemuxer(nullptr)
+	: Socket(inTask, inSocketType)
 {
-	if (inSocketType & kWantsDemuxer)
-		fDemuxer = new UDPDemuxer();
-
 	//setup msghdr
 	::memset(&fMsgAddr, 0, sizeof(fMsgAddr));
 }

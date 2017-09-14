@@ -186,7 +186,7 @@ public:
 	ReflectorSocket();
 	~ReflectorSocket() override = default;
 	void    AddBroadcasterSession(RTPSession* inSession) { fBroadcasterClientSession = inSession; }
-	void    RemoveBroadcasterSession(RTPSession* inSession) { if (inSession == fBroadcasterClientSession) fBroadcasterClientSession = nullptr; }
+	void    RemoveBroadcasterSession() { fBroadcasterClientSession = nullptr; }
 	void    AddSender(ReflectorSender* inSender);
 	void    RemoveSender(ReflectorSender* inStreamElem);
 	bool  HasSender() { return !fDemuxer.empty(); }
@@ -225,19 +225,42 @@ private:
 };
 
 
-class ReflectorSocketPool : public UDPSocketPool
+class ReflectorSocketPool
 {
+	enum
+	{
+		kLowestUDPPort = 6970,  //uint16_t
+		kHighestUDPPort = 65535 //uint16_t
+	};
+
+	std::list<SocketPair<ReflectorSocket>*> fUDPQueue;
+	std::mutex fMutex;
 public:
 
 	ReflectorSocketPool() = default;
-	~ReflectorSocketPool() override = default;
+	~ReflectorSocketPool() = default;
 
-	UDPSocketPair*  ConstructUDPSocketPair() override;
-	void            DestructUDPSocketPair(UDPSocketPair *inPair) override;
-	void            SetUDPSocketOptions(UDPSocketPair* inPair) override;
-	void                    DestructUDPSocket(ReflectorSocket* socket);
+	const std::list<SocketPair<ReflectorSocket>*>& GetSocketQueue() { return fUDPQueue; }
 
+	//Gets a UDP socket out of the pool. 
+	//inIPAddr = IP address you'd like this pair to be bound to.
+	//inPort = port you'd like this pair to be bound to, or 0 if you don't care
+	//inSrcIPAddr = srcIP address of incoming packets for the demuxer.
+	//inSrcPort = src port of incoming packets for the demuxer.
+	//This may return NULL if no pair is available that meets the criteria.
+	SocketPair<ReflectorSocket>*  GetUDPSocketPair(uint32_t inIPAddr, uint16_t inPort,
+		uint32_t inSrcIPAddr, uint16_t inSrcPort);
 
+	//When done using a UDP socket pair retrieved via GetUDPSocketPair, you must
+	//call this function. Doing so tells the pool which UDP sockets are in use,
+	//keeping the number of UDP sockets allocated at a minimum.
+	void ReleaseUDPSocketPair(SocketPair<ReflectorSocket>* inPair);
+
+	SocketPair<ReflectorSocket>*  CreateUDPSocketPair(uint32_t inAddr, uint16_t inPort);
+
+	SocketPair<ReflectorSocket>*  ConstructUDPSocketPair();
+	void            DestructUDPSocketPair(SocketPair<ReflectorSocket> *inPair);
+	void            SetUDPSocketOptions(SocketPair<ReflectorSocket>* inPair);
 };
 
 class ReflectorSender
@@ -255,7 +278,7 @@ public:
 
 	//We want to make sure that ReflectPackets only gets invoked when there
 	//is actually work to do, because it is an expensive function
-	bool      ShouldReflectNow(const int64_t& inCurrentTime, int64_t* ioWakeupTime);
+	bool      ShouldReflectNow(int64_t inCurrentTime, int64_t* ioWakeupTime);
 
 	//This function gets data from the multicast source and reflects.
 	//Returns the time at which it next needs to be invoked
@@ -333,7 +356,7 @@ public:
 		kStreamIDSize = sizeof(uint32_t) + sizeof(uint16_t)
 	};
 
-	ReflectorStream(SDPSourceInfo::StreamInfo* inInfo);
+	ReflectorStream(StreamInfo* inInfo);
 	~ReflectorStream();
 
 	//
@@ -342,7 +365,7 @@ public:
 	// Call this to initialize the reflector sockets. Uses the QTSS_RTSPRequestObject
 	// if provided to report any errors that occur 
 	// Passes the QTSS_ClientSessionObject to the socket so the socket can update the session if needed.
-	QTSS_Error BindSockets(QTSS_StandardRTSP_Params& inParams, uint32_t inReflectorSessionFlags, bool filterState, uint32_t timeout);
+	QTSS_Error BindSockets(RTSPRequest *inRequest, RTPSession* inSession, uint32_t inReflectorSessionFlags, bool filterState, uint32_t timeout);
 
 	// This stream reflects packets from the broadcast to specific ReflectorOutputs.
 	// You attach outputs to ReflectorStreams this way. You can force the ReflectorStream
@@ -366,12 +389,12 @@ public:
 	//
 	// ACCESSORS
 	uint32_t                  GetBitRate() { return fCurrentBitRate; }
-	SDPSourceInfo::StreamInfo* GetStreamInfo() { return &fStreamInfo; }
+	StreamInfo* GetStreamInfo() { return &fStreamInfo; }
 	OSMutex*                GetMutex() { return &fBucketMutex; }
 	void*                   GetStreamCookie() { return this; }
 	int16_t                  GetRTPChannel() { return fRTPChannel; }
 	int16_t                  GetRTCPChannel() { return fRTCPChannel; }
-	UDPSocketPair*          GetSocketPair() { return fSockets; }
+	SocketPair<ReflectorSocket>*          GetSocketPair() { return fSockets; }
 	ReflectorSender*        GetRTPSender() { return &fRTPSender; }
 	ReflectorSender*        GetRTCPSender() { return &fRTCPSender; }
 
@@ -412,7 +435,7 @@ private:
 	int32_t  FindBucket();
 
 	// Reflector sockets, retrieved from the socket pool
-	UDPSocketPair*      fSockets;
+	SocketPair<ReflectorSocket>*      fSockets;
 
 	QTSS_RTPTransportType fTransportType;
 
@@ -421,7 +444,7 @@ private:
 	SequenceNumberMap   fSequenceNumberMap; //for removing duplicate packets
 
 	// All the necessary info about this stream
-	SDPSourceInfo::StreamInfo  fStreamInfo;
+	StreamInfo  fStreamInfo;
 
 	enum
 	{

@@ -84,10 +84,6 @@ RTSPSession::RTSPSession()
 	rtspParams.inRTSPRequest = nullptr;
 	rtspParams.inClientSession = nullptr;
 
-	fLastRTPSessionID[0] = 0;
-	fLastRTPSessionIDPtr.Set(fLastRTPSessionID, 0);
-	Assert(fLastRTPSessionIDPtr.Ptr == &fLastRTPSessionID[0]);
-
 }
 
 RTSPSession::~RTSPSession()
@@ -106,7 +102,6 @@ int64_t RTSPSession::Run()
 {
 	EventFlags events = this->GetEvents();
 	QTSS_Error err = QTSS_NoErr;
-	Assert(fLastRTPSessionIDPtr.Ptr == &fLastRTPSessionID[0]);
 
 	//check for a timeout or a kill. If so, just consider the session dead
 	if ((events & Task::kTimeoutEvent) || (events & Task::kKillEvent))
@@ -408,6 +403,7 @@ int64_t RTSPSession::Run()
 	//fObjectHolders--  
 	if (!IsLiveSession() && fObjectHolders > 0) {
 		OSRefTable* theMap = getSingleton()->GetRTPSessionMap();
+		StrPtrLen fLastRTPSessionIDPtr(&fLastRTPSessionID[0], fLastRTPSessionID.length());
 		OSRef* theRef = theMap->Resolve(&fLastRTPSessionIDPtr);
 		if (theRef != nullptr) {
 			fRTPSession = (RTPSession*)theRef->GetObject();
@@ -443,21 +439,7 @@ void RTSPSession::SetupRequest()
 	if (theErr != QTSS_NoErr)
 		return;
 
-	// let's also refresh RTP session timeout so that it's kept alive in sync with the RTSP session.
-	 //
-	 // Attempt to find the RTP session for this request.
-	fRTPSession = FindRTPSession();
-
-	if (fRTPSession != nullptr)
-	{
-		fRTPSession->RefreshTimeout();
-		uint32_t headerBits = fRequest->GetBandwidthHeaderBits();
-		if (headerBits != 0)
-			fRTPSession->SetLastRTSPBandwithBits(headerBits);
-	}
 	QTSS_RTSPStatusCode statusCode = qtssSuccessOK;
-	char *body = nullptr;
-	uint32_t bodySizeBytes = 0;
 
 	// If this is an OPTIONS request, don't even bother letting modules see it. Just
 	// send a standard OPTIONS response, and be done.
@@ -477,10 +459,6 @@ void RTSPSession::SetupRequest()
 		boost::string_view require = fRequest->GetHeaderDict().Get(qtssRequireHeader);
 
 		fRequest->SendHeader();
-
-		// now write the body if there is one
-		if (bodySizeBytes > 0 && body != nullptr)
-			fRequest->Write(body, bodySizeBytes, nullptr, 0);
 
 		return;
 	}
@@ -530,6 +508,19 @@ void RTSPSession::SetupRequest()
 		}
 	}
 
+	// let's also refresh RTP session timeout so that it's kept alive in sync with the RTSP session.
+	//
+	// Attempt to find the RTP session for this request.
+	fRTPSession = FindRTPSession();
+
+	if (fRTPSession != nullptr)
+	{
+		fRTPSession->RefreshTimeout();
+		uint32_t headerBits = fRequest->GetBandwidthHeaderBits();
+		if (headerBits != 0)
+			fRTPSession->SetLastRTSPBandwithBits(headerBits);
+	}
+
 	// If we don't have an RTP session yet, create one...
 	if (fRTPSession == nullptr)
 	{
@@ -537,10 +528,6 @@ void RTSPSession::SetupRequest()
 		if (theErr != QTSS_NoErr)
 			return;
 	}
-
-	uint32_t headerBits = fRequest->GetBandwidthHeaderBits();
-	if (headerBits != 0)
-		fRTPSession->SetLastRTSPBandwithBits(headerBits);
 
 	// If it's a play request and the late tolerance is sent in the request use this value
 	if ((fRequest->GetMethod() == qtssPlayMethod) && (fRequest->GetLateToleranceInSec() != -1))
@@ -577,8 +564,7 @@ void RTSPSession::CleanupRequest()
 
 	if (this->IsLiveSession() == false) //clear out the ID so it can't be re-used.
 	{
-		fLastRTPSessionID[0] = 0;
-		fLastRTPSessionIDPtr.Set(fLastRTPSessionID, 0);
+		fLastRTPSessionID.clear();
 	}
 
 	if (fRequest != nullptr)
@@ -610,26 +596,11 @@ RTPSession*  RTSPSession::FindRTPSession()
 		return GetRTPSession(&theSessionIDV);
 	}
 
-	// If there wasn't a session ID in the headers, look for one in the RTSP session itself
-	if (fLastRTPSessionIDPtr.Len > 0)
-		return GetRTPSession(&fLastRTPSessionIDPtr);
-
 	return nullptr;
 }
 
 QTSS_Error  RTSPSession::CreateNewRTPSession()
 {
-	Assert(fLastRTPSessionIDPtr.Ptr == &fLastRTPSessionID[0]);
-
-	// This is a brand spanking new session. At this point, we need to create
-	// a new RTPSession object that will represent this session until it completes.
-	// Then, we need to pass the session onto one of the modules
-
-	// First of all, ask the server if it's ok to add a new session
-	QTSS_Error theErr = this->IsOkToAddNewRTPSession();
-	if (theErr != QTSS_NoErr)
-		return theErr;
-
 	// Create the RTPSession object
 	Assert(fRTPSession == nullptr);
 	fRTPSession = new RTPSession();
@@ -644,7 +615,7 @@ QTSS_Error  RTSPSession::CreateNewRTPSession()
 		QTSS_Error activationError = EPERM;
 		while (activationError == EPERM)
 		{
-			fLastRTPSessionIDPtr.Len = this->GenerateNewSessionID(fLastRTPSessionID);
+			fLastRTPSessionID = GenerateNewSessionID();
 
 			//ok, some module has bound this session, we can activate it.
 			//At this point, we may find out that this new session ID is a duplicate.
@@ -653,60 +624,24 @@ QTSS_Error  RTSPSession::CreateNewRTPSession()
 		}
 		Assert(activationError == QTSS_NoErr);
 	}
-	Assert(fLastRTPSessionIDPtr.Ptr == &fLastRTPSessionID[0]);
 
 	// Activate adds this session into the RTP session map. We need to therefore
 	// make sure to resolve the RTPSession object out of the map, even though
 	// we don't actually need to pointer.
+	StrPtrLen fLastRTPSessionIDPtr(&fLastRTPSessionID[0], fLastRTPSessionID.length());
 	OSRef* theRef = getSingleton()->GetRTPSessionMap()->Resolve(&fLastRTPSessionIDPtr);
 	Assert(theRef != nullptr);
 
 	return QTSS_NoErr;
 }
 
-uint32_t RTSPSession::GenerateNewSessionID(char* ioBuffer)
+std::string RTSPSession::GenerateNewSessionID()
 {
 	std::random_device rd;
 	std::mt19937 mt(rd());
 	std::uniform_int_distribution<int64_t> dist;
 
-	int64_t theSessionID = dist(mt);
-	sprintf(ioBuffer, "%" _64BITARG_ "d", theSessionID);
-	Assert(::strlen(ioBuffer) < QTSS_MAX_SESSION_ID_LENGTH);
-	return ::strlen(ioBuffer);
-}
-
-bool RTSPSession::OverMaxConnections(uint32_t buffer)
-{
-	return false;
-}
-
-QTSS_Error RTSPSession::IsOkToAddNewRTPSession()
-{
-	QTSServerInterface* theServer = getSingleton();
-	QTSS_ServerState theServerState = theServer->GetServerState();
-
-	//we may want to deny this connection for a couple of different reasons
-	//if the server is refusing new connections
-	if ((theServerState == qtssRefusingConnectionsState) ||
-		(theServerState == qtssIdleState) ||
-		(theServerState == qtssFatalErrorState) ||
-		(theServerState == qtssShuttingDownState))
-		return fRequest->SendErrorResponse(qtssServerUnavailable);
-
-	//if the max connection limit has been hit 
-	if (this->OverMaxConnections(0))
-		return fRequest->SendErrorResponse(qtssClientNotEnoughBandwidth);
-
-	//if the max bandwidth limit has been hit
-	int32_t maxKBits = ServerPrefs::GetMaxKBitsBandwidth();
-	if ((maxKBits > -1) && (theServer->GetCurBandwidthInBits() >= ((uint32_t)maxKBits * 1024)))
-		return fRequest->SendErrorResponse(qtssClientNotEnoughBandwidth);
-
-	//if the server is too loaded down (CPU too high, whatever)
-	// --INSERT WORKING CODE HERE--
-
-	return QTSS_NoErr;
+	return std::to_string(dist(mt));
 }
 
 QTSS_Error RTSPSession::DumpRequestData()
@@ -752,88 +687,4 @@ void RTSPSession::HandleIncomingDataPacket()
 	rtspIncomingDataParams.inPacketLen = fInputStream.GetRequestBuffer()->Len;
 
 	ReflectionModule::ProcessRTPData(&rtspIncomingDataParams);
-}
-
-RTSPSession1::RTSPSession1(RTSPServer &server, std::shared_ptr<Connection> connection) noexcept 
-: mServer(server), connection(std::move(connection)) 
-{
-	try {
-		//auto remote_endpoint = connection->socket.lowest_layer().remote_endpoint();
-		//request = std::make_shared<RTSPRequest1>(remote_endpoint.address().to_string(), remote_endpoint.port());
-		request = std::make_shared<RTSPRequest1>();
-	}
-	catch (...) {
-		request = std::make_shared<RTSPRequest1>();
-	}
-}
-
-std::unique_ptr<ReflectorSession> RTSPSession1::CreateSession(boost::string_view sessionName)
-{
-	std::lock_guard<std::mutex> lock(mServer.session_mutex);
-	auto it = mServer.sessionMap.find(std::string(sessionName));
-	if (it == mServer.sessionMap.end()) {
-		boost::string_view theFileData = CSdpCache::GetInstance()->getSdpMap(sessionName);
-
-		if (theFileData.empty())
-			return nullptr;
-
-		auto* theInfo = new SDPSourceInfo(theFileData); // will make a copy
-
-		if (!theInfo->IsReflectable())
-		{
-			delete theInfo;
-			return nullptr;
-		}
-
-		//
-		// Setup a ReflectorSession and bind the sockets. If we are negotiating,
-		// make sure to let the session know that this is a Push Session so
-		// ports may be modified.
-		uint32_t theSetupFlag = ReflectorSession::kMarkSetup | ReflectorSession::kIsPushSession;
-
-		ReflectorSession1 *theSession = new ReflectorSession1(sessionName);
-
-		QTSS_Error theErr = QTSS_NoErr;// theSession->SetupReflectorSession(theInfo, inParams, theSetupFlag, sOneSSRCPerStream, sTimeoutSSRCSecs);
-		if (theErr != QTSS_NoErr)
-		{
-			//delete theSession;
-			//CSdpCache::GetInstance()->eraseSdpMap(theSession->GetStreamName());
-			//theSession->StopTimer();
-			return nullptr;
-		}
-		mServer.sessionMap.insert(std::make_pair(sessionName, theSession));
-	}
-	return {};
-}
-
-void RTSPSession1::do_setup()
-{
-	bool isPush = request->IsPushRequest();
-	if (!rtp_OutputSession)
-	{
-		if (!isPush)
-		{
-#if 0
-			theSession = DoSessionSetup(inParams, isPush);
-			if (theSession == nullptr)
-				return QTSS_RequestFailed;
-			auto* theNewOutput = new RTPSessionOutput(inParams->inClientSession, theSession, sStreamCookieName);
-			theSession->AddOutput(theNewOutput, true);
-			inParams->inClientSession->addAttribute(sOutputName, theNewOutput);
-#endif
-		}
-		else
-		{
-			if (!broadcastSession)
-			{
-				broadcastSession = CreateSession("live.sdp");
-				//if (theSession == nullptr)
-//					return QTSS_RequestFailed;
-			}
-		}
-	}
-	else
-	{
-		//auto theSession = outputSession.value().GetReflectorSession();
-	}
 }

@@ -6,18 +6,18 @@
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/io_service.hpp>
 #include "RTSPUtility.h"
-#include "RTSPRequest.h"
 #include "RTSPConnection.h"
-#include "RTSPSession.h"
+#include "MyRTSPSession.h"
+#include "MyRTSPRequest.h"
 
 class Response : public std::enable_shared_from_this<Response>, public std::ostream {
 	friend class RTSPServer;
 	boost::asio::streambuf streambuf;
 
-	std::shared_ptr<RTSPSession1> session;
+	std::shared_ptr<MyRTSPSession> session;
 	long timeout_content;
 
-	Response(std::shared_ptr<RTSPSession1> session, long timeout_content) noexcept : std::ostream(&streambuf), session(std::move(session)), timeout_content(timeout_content) {}
+	Response(std::shared_ptr<MyRTSPSession> session, long timeout_content) noexcept : std::ostream(&streambuf), session(std::move(session)), timeout_content(timeout_content) {}
 
 	template <typename size_type>
 	void write_header(const CaseInsensitiveMap &header, size_type size) {
@@ -53,14 +53,16 @@ public:
 
 class ReflectorSession1;
 class RTSPServer {
-	friend class RTSPSession1;
+	friend class MyRTSPSession;
 	boost::asio::ip::tcp::acceptor acceptor_;
 	boost::asio::io_service& io_service_;
 	std::mutex connections_mutex;
 	std::mutex session_mutex;
-	std::map<std::string, ReflectorSession1*> sessionMap;
+	std::mutex rtp_mutex;
+	std::map<std::string, std::shared_ptr<MyRTPSession>> rtpMap;
+	std::map<std::string, std::shared_ptr<ReflectorSession1>> sessionMap;
 	std::shared_ptr<ScopeRunner> handler_runner{ new ScopeRunner() };
-	std::function<void(std::shared_ptr<RTSPRequest1>, const boost::system::error_code &)> on_error;
+	std::function<void(std::shared_ptr<MyRTSPRequest>, const boost::system::error_code &)> on_error;
 
 	std::unordered_set<Connection *> connections;
 	class Config {
@@ -109,8 +111,8 @@ public:
 		accept();
 	}
 	void accept();
-	void read_request_and_content(const std::shared_ptr<RTSPSession1> &session);
-	void write_response(const std::shared_ptr<RTSPSession1> &session,
-		std::function<void(std::shared_ptr<Response>, std::shared_ptr<RTSPRequest1>)> resource_function);
-	void operate_request(const std::shared_ptr<RTSPSession1> &session);
+	void read_request_and_content(const std::shared_ptr<MyRTSPSession> &session);
+	void write_response(const std::shared_ptr<MyRTSPSession> &session,
+		std::function<void(std::shared_ptr<Response>, std::shared_ptr<MyRTSPRequest>)> resource_function);
+	void operate_request(const std::shared_ptr<MyRTSPSession> &session);
 };

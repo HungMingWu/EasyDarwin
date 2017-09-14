@@ -38,6 +38,28 @@
 #include "QTSS.h"
 #include <boost/utility/string_view.hpp>
 
+constexpr static float eDefaultBufferDelay = 3.0;
+
+ // Each source is comprised of a set of streams. Those streams have
+ // the following metadata.
+struct StreamInfo
+{
+	StreamInfo() = default;
+	~StreamInfo() = default; // Deletes the memory allocated for the fPayloadName string             
+	uint32_t fSrcIPAddr{ 0 };  // Src IP address of content (this may be 0 if not known for sure)
+	uint32_t fDestIPAddr{ 0 }; // Dest IP address of content (destination IP addr for source broadcast!)
+	uint16_t fPort{ 0 };       // Dest (RTP) port of source content
+	uint16_t fTimeToLive{ 0 }; // Ttl for this stream
+	QTSS_RTPPayloadType fPayloadType{ 0 };   // Payload type of this stream
+	std::string fPayloadName; // Payload name of this stream
+	uint32_t fTrackID{ 0 };    // ID of this stream
+	std::string fTrackName;//Track Name of this stream
+	float fBufferDelay = eDefaultBufferDelay; // buffer delay (default is 3 seconds)
+	bool  fIsTCP{ false };     // Is this a TCP broadcast? If this is the case, the port and ttl are not valid
+	bool  fSetupToReceive{ false };    // If true then a push to the server is setup on this stream.
+	uint32_t  fTimeScale{ 0 };
+};
+
 class SDPSourceInfo
 {
 public:
@@ -46,26 +68,6 @@ public:
 	SDPSourceInfo(boost::string_view sdpData) { Parse(sdpData); }
 	SDPSourceInfo() = default;
 	~SDPSourceInfo();
-
-	// Each source is comprised of a set of streams. Those streams have
-	// the following metadata.
-	struct StreamInfo
-	{
-		StreamInfo() = default;
-		~StreamInfo() = default; // Deletes the memory allocated for the fPayloadName string             
-		uint32_t fSrcIPAddr{ 0 };  // Src IP address of content (this may be 0 if not known for sure)
-		uint32_t fDestIPAddr{ 0 }; // Dest IP address of content (destination IP addr for source broadcast!)
-		uint16_t fPort{ 0 };       // Dest (RTP) port of source content
-		uint16_t fTimeToLive{ 0 }; // Ttl for this stream
-		QTSS_RTPPayloadType fPayloadType{ 0 };   // Payload type of this stream
-		std::string fPayloadName; // Payload name of this stream
-		uint32_t fTrackID{ 0 };    // ID of this stream
-		std::string fTrackName;//Track Name of this stream
-		float fBufferDelay = eDefaultBufferDelay; // buffer delay (default is 3 seconds)
-		bool  fIsTCP{ false };     // Is this a TCP broadcast? If this is the case, the port and ttl are not valid
-		bool  fSetupToReceive{ false };    // If true then a push to the server is setup on this stream.
-		uint32_t  fTimeScale{ 0 };
-	};
 
 	// Returns the number of StreamInfo objects (number of Streams in this source)
 	uint32_t      GetNumStreams() { return fStreamArray.size(); }
@@ -86,7 +88,7 @@ public:
 	boost::string_view  GetSDPData() { return fSDPData; }
 
 private:
-	constexpr static float eDefaultBufferDelay = 3.0;
+	
 	std::vector<StreamInfo> fStreamArray;
 	enum
 	{

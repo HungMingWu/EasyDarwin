@@ -92,7 +92,7 @@ bool  SDPSourceInfo::IsReflectable()
 	return true;
 }
 
-SDPSourceInfo::StreamInfo* SDPSourceInfo::GetStreamInfo(uint32_t inIndex)
+StreamInfo* SDPSourceInfo::GetStreamInfo(uint32_t inIndex)
 {
 	if (inIndex < fStreamArray.size())
 		return &fStreamArray[inIndex];
@@ -100,7 +100,7 @@ SDPSourceInfo::StreamInfo* SDPSourceInfo::GetStreamInfo(uint32_t inIndex)
 		return nullptr;
 }
 
-SDPSourceInfo::StreamInfo* SDPSourceInfo::GetStreamInfoByTrackID(uint32_t inTrackID)
+StreamInfo* SDPSourceInfo::GetStreamInfoByTrackID(uint32_t inTrackID)
 {
 	if (fStreamArray.empty())
 		return nullptr;

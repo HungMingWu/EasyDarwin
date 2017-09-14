@@ -67,7 +67,7 @@ uint32_t                          ReflectorStream::sFirstPacketOffsetMsec = 500;
 
 uint32_t                          ReflectorStream::sRelocatePacketAgeMSec = 1000;
 
-ReflectorStream::ReflectorStream(SDPSourceInfo::StreamInfo* inInfo)
+ReflectorStream::ReflectorStream(StreamInfo* inInfo)
 	: fPacketCount(0),
 	fSockets(nullptr),
 	fRTPSender(nullptr, qtssWriteFlagsIsRTP),
@@ -162,8 +162,8 @@ ReflectorStream::~ReflectorStream()
 		//first things first, let's take this stream off the socket's queue
 		//of streams. This will basically ensure that no reflecting activity
 		//can happen on this stream.
-		((ReflectorSocket*)fSockets->GetSocketA())->RemoveSender(&fRTPSender);
-		((ReflectorSocket*)fSockets->GetSocketB())->RemoveSender(&fRTCPSender);
+		fSockets->GetSocketA()->RemoveSender(&fRTPSender);
+		fSockets->GetSocketB()->RemoveSender(&fRTCPSender);
 
 		//leave the multicast group. Because this socket is shared amongst several
 		//potential multicasts, we don't want to remain a member of a stale multicast
@@ -303,16 +303,14 @@ void  ReflectorStream::TearDownAllOutputs()
 }
 
 
-QTSS_Error ReflectorStream::BindSockets(QTSS_StandardRTSP_Params& inParams, uint32_t inReflectorSessionFlags, bool filterState, uint32_t timeout)
+QTSS_Error ReflectorStream::BindSockets(RTSPRequest *inRequest, RTPSession *inSession, uint32_t inReflectorSessionFlags, bool filterState, uint32_t timeout)
 {
 	// If the incoming data is RTSP interleaved, we don't need to do anything here
 	if (inReflectorSessionFlags & ReflectorSession::kIsPushSession)
 		fStreamInfo.fSetupToReceive = true;
 
-	RTSPRequest* inRequest = inParams.inRTSPRequest;
-
 	// Set the transport Type a Broadcaster
-	fTransportType = inParams.inRTSPRequest->GetTransportType();
+	fTransportType = inRequest->GetTransportType();
 
 	// get a pair of sockets. The socket must be bound on INADDR_ANY because we don't know
 	// which interface has access to this broadcast. If there is a source IP address
@@ -362,22 +360,22 @@ QTSS_Error ReflectorStream::BindSockets(QTSS_StandardRTSP_Params& inParams, uint
 	// on the same port by that source IP address. If we don't know the source IP addr,
 	// it is impossible for us to demux, and therefore we shouldn't allow multiple
 	// broadcasts on the same port.
-	if (((ReflectorSocket*)fSockets->GetSocketA())->HasSender() && (fStreamInfo.fSrcIPAddr == 0))
+	if (fSockets->GetSocketA()->HasSender() && (fStreamInfo.fSrcIPAddr == 0))
 		return inRequest->SendErrorResponse(qtssServerInternal);
 
 	//also put this stream onto the socket's queue of streams
-	((ReflectorSocket*)fSockets->GetSocketA())->AddSender(&fRTPSender);
-	((ReflectorSocket*)fSockets->GetSocketB())->AddSender(&fRTCPSender);
+	fSockets->GetSocketA()->AddSender(&fRTPSender);
+	fSockets->GetSocketB()->AddSender(&fRTCPSender);
 
 	// A broadcaster is setting up a UDP session so let the sockets update the session
 	if (fStreamInfo.fSetupToReceive &&  qtssRTPTransportTypeUDP == fTransportType)
 	{
-		((ReflectorSocket*)fSockets->GetSocketA())->AddBroadcasterSession(inParams.inClientSession);
-		((ReflectorSocket*)fSockets->GetSocketB())->AddBroadcasterSession(inParams.inClientSession);
+		fSockets->GetSocketA()->AddBroadcasterSession(inSession);
+		fSockets->GetSocketB()->AddBroadcasterSession(inSession);
 	}
 
-	((ReflectorSocket*)fSockets->GetSocketA())->SetSSRCFilter(filterState, timeout);
-	((ReflectorSocket*)fSockets->GetSocketB())->SetSSRCFilter(filterState, timeout);
+	fSockets->GetSocketA()->SetSSRCFilter(filterState, timeout);
+	fSockets->GetSocketB()->SetSSRCFilter(filterState, timeout);
 
 #if 1 
 	// Always set the Rcv buf size for the sockets. This is important because the
@@ -448,7 +446,7 @@ void ReflectorStream::PushPacket(char *packet, uint32_t packetLen, bool isRTCP)
 		if (isRTCP)
 		{
 			//printf("ReflectorStream::PushPacket RTCP packetlen = %"   _U32BITARG_   "\n",packetLen);
-			thePacket = ((ReflectorSocket*)fSockets->GetSocketB())->GetPacket();
+			thePacket = fSockets->GetSocketB()->GetPacket();
 			if (thePacket == nullptr)
 			{
 				//printf("ReflectorStream::PushPacket RTCP GetPacket() is NULL\n");
@@ -456,13 +454,13 @@ void ReflectorStream::PushPacket(char *packet, uint32_t packetLen, bool isRTCP)
 			}
 
 			thePacket->SetPacketData(packet, packetLen);
-			((ReflectorSocket*)fSockets->GetSocketB())->ProcessPacket(OS::Milliseconds(), thePacket, 0, 0);
-			((ReflectorSocket*)fSockets->GetSocketB())->Signal(Task::kIdleEvent);
+			fSockets->GetSocketB()->ProcessPacket(OS::Milliseconds(), thePacket, 0, 0);
+			fSockets->GetSocketB()->Signal(Task::kIdleEvent);
 		}
 		else
 		{
 			//printf("ReflectorStream::PushPacket RTP packetlen = %"   _U32BITARG_   "\n",packetLen);
-			thePacket = ((ReflectorSocket*)fSockets->GetSocketA())->GetPacket();
+			thePacket = fSockets->GetSocketA()->GetPacket();
 			if (thePacket == nullptr)
 			{
 				//printf("ReflectorStream::PushPacket GetPacket() is NULL\n");
@@ -479,8 +477,8 @@ void ReflectorStream::PushPacket(char *packet, uint32_t packetLen, bool isRTCP)
 			//	}
 			//}
 
-			((ReflectorSocket*)fSockets->GetSocketA())->ProcessPacket(OS::Milliseconds(), thePacket, 0, 0);
-			((ReflectorSocket*)fSockets->GetSocketA())->Signal(Task::kIdleEvent);
+			fSockets->GetSocketA()->ProcessPacket(OS::Milliseconds(), thePacket, 0, 0);
+			fSockets->GetSocketA()->Signal(Task::kIdleEvent);
 		}
 	}
 }
@@ -492,17 +490,17 @@ ReflectorSender::ReflectorSender(ReflectorStream* inStream, uint32_t inWriteFlag
 {
 }
 
-bool ReflectorSender::ShouldReflectNow(const int64_t& inCurrentTime, int64_t* ioWakeupTime)
+bool ReflectorSender::ShouldReflectNow(int64_t inCurrentTime, int64_t* ioWakeupTime)
 {
 	Assert(ioWakeupTime != nullptr);
 	//check to make sure there actually is work to do for this stream.
-	if ((!fHasNewPackets) && ((fNextTimeToRun == 0) || (inCurrentTime < fNextTimeToRun)))
+	if (!fHasNewPackets && (fNextTimeToRun == 0 || inCurrentTime < fNextTimeToRun))
 	{
 		//We don't need to do work right now, but
 		//this stream must still communicate when it needs to be woken up next
 		int64_t theWakeupTime = fNextTimeToRun + inCurrentTime;
 		//printf("ReflectorSender::ShouldReflectNow theWakeupTime=%qd newWakeUpTime=%qd  ioWakepTime=%qd\n", theWakeupTime, fNextTimeToRun + inCurrentTime,*ioWakeupTime);
-		if ((fNextTimeToRun > 0) && (theWakeupTime < *ioWakeupTime))
+		if (fNextTimeToRun > 0 && theWakeupTime < *ioWakeupTime)
 			*ioWakeupTime = theWakeupTime;
 		return false;
 	}
@@ -1350,7 +1348,7 @@ bool ReflectorSender::IsFrameLastPacket(ReflectorPacket* thePacket)
 	return false;
 }
 
-void ReflectorSocketPool::SetUDPSocketOptions(UDPSocketPair* inPair)
+void ReflectorSocketPool::SetUDPSocketOptions(SocketPair<ReflectorSocket>* inPair)
 {
 	// Fix add ReuseAddr for compatibility with MPEG4IP broadcaster which likes to use the same
 	//sockets.  
@@ -1362,37 +1360,132 @@ void ReflectorSocketPool::SetUDPSocketOptions(UDPSocketPair* inPair)
 }
 
 
-UDPSocketPair* ReflectorSocketPool::ConstructUDPSocketPair()
+SocketPair<ReflectorSocket>* ReflectorSocketPool::GetUDPSocketPair(uint32_t inIPAddr, uint16_t inPort,
+	uint32_t inSrcIPAddr, uint16_t inSrcPort)
 {
-	return new UDPSocketPair
-	(new ReflectorSocket(), new ReflectorSocket());
+	std::lock_guard<std::mutex> locker(fMutex);
+	if ((inSrcIPAddr != 0) || (inSrcPort != 0))
+	{
+		for (const auto &theElem : fUDPQueue)
+		{
+			//If we find a pair that is a) on the right IP address, and b) doesn't
+			//have this source IP & port in the demuxer already, we can return this pair
+			if ((theElem->GetSocketA()->GetLocalAddr() == inIPAddr) &&
+				((inPort == 0) || (theElem->GetSocketA()->GetLocalPort() == inPort)))
+			{
+				//check to make sure this source IP & port is not already in the demuxer.
+				//If not, we can return this socket pair.
+				if (((!theElem->GetSocketBDemux().AddrInMap({ 0, 0 })) &&
+					(!theElem->GetSocketBDemux().AddrInMap({ inSrcIPAddr, inSrcPort }))))
+				{
+					theElem->fRefCount++;
+					return theElem;
+				}
+				//If port is specified, there is NO WAY a socket pair can exist that matches
+				//the criteria (because caller wants a specific ip & port combination)
+				else if (inPort != 0)
+					return nullptr;
+			}
+		}
+	}
+	//if we get here, there is no pair already in the pool that matches the specified
+	//criteria, so we have to create a new pair.
+	return this->CreateUDPSocketPair(inIPAddr, inPort);
 }
 
-void ReflectorSocketPool::DestructUDPSocket(ReflectorSocket* socket)
+SocketPair<ReflectorSocket>*  ReflectorSocketPool::CreateUDPSocketPair(uint32_t inAddr, uint16_t inPort)
 {
-	if (socket) // allocated
+	//try to find an open pair of ports to bind these suckers tooo
+	std::lock_guard<std::mutex> locker(fMutex);
+	SocketPair<ReflectorSocket>* theElem = nullptr;
+	bool foundPair = false;
+	uint16_t curPort = kLowestUDPPort;
+	uint16_t stopPort = kHighestUDPPort - 1; // prevent roll over when iterating over port nums
+	uint16_t socketBPort = kLowestUDPPort + 1;
+
+	//If port is 0, then the caller doesn't care what port # we bind this socket to.
+	//Otherwise, ONLY attempt to bind this socket to the specified port
+	if (inPort != 0)
+		curPort = inPort;
+	if (inPort != 0)
+		stopPort = inPort;
+
+
+	while ((!foundPair) && (curPort < kHighestUDPPort))
 	{
-		//if (socket->GetLocalPort() > 0) // bound and active
-		//{   //The socket's run function may be executing RIGHT NOW! So we can't
-			//just delete the thing, we need to send the sockets kill events.
-			//printf("ReflectorSocketPool::DestructUDPSocketPair Signal kKillEvent socket=%p\n",socket);
-		socket->Signal(Task::kKillEvent);
-		//}
-		//else // not bound ok to delete
-		//{   //printf("ReflectorSocketPool::DestructUDPSocketPair delete socket=%p\n",socket);
-		//    delete socket;
-		//}  
+		socketBPort = curPort + 1; // make socket pairs adjacent to one another
+
+		theElem = ConstructUDPSocketPair();
+		Assert(theElem != nullptr);
+		if (theElem->GetSocketA()->Open() != OS_NoErr)
+		{
+			this->DestructUDPSocketPair(theElem);
+			return nullptr;
+		}
+		if (theElem->GetSocketB()->Open() != OS_NoErr)
+		{
+			this->DestructUDPSocketPair(theElem);
+			return nullptr;
+		}
+
+		// Set socket options on these new sockets
+		this->SetUDPSocketOptions(theElem);
+
+		OS_Error theErr = theElem->GetSocketA()->Bind(inAddr, curPort);
+		if (theErr == OS_NoErr)
+		{   //printf("fSocketA->Bind ok on port%u\n", curPort);
+			theErr = theElem->GetSocketB()->Bind(inAddr, socketBPort);
+			if (theErr == OS_NoErr)
+			{   //printf("fSocketB->Bind ok on port%u\n", socketBPort);
+				foundPair = true;
+				fUDPQueue.push_back(theElem);
+				theElem->fRefCount++;
+				return theElem;
+			}
+			//else printf("fSocketB->Bind failed on port%u\n", socketBPort);
+		}
+		//else printf("fSocketA->Bind failed on port%u\n", curPort);
+
+		//If we are looking to bind to a specific port set, and we couldn't then
+		//just break here.
+		if (inPort != 0)
+			break;
+
+		if (curPort >= stopPort) //test for stop condition
+			break;
+
+		curPort += 2; //try a higher port pair
+
+		this->DestructUDPSocketPair(theElem); //a bind failure
+		theElem = nullptr;
+	}
+	//if we couldn't find a pair of sockets, make sure to clean up our mess
+	if (theElem != nullptr)
+		this->DestructUDPSocketPair(theElem);
+
+	return nullptr;
+}
+
+void ReflectorSocketPool::ReleaseUDPSocketPair(SocketPair<ReflectorSocket>* inPair)
+{
+	std::lock_guard<std::mutex> locker(fMutex);
+	inPair->fRefCount--;
+	if (inPair->fRefCount == 0)
+	{
+		auto it = std::find(fUDPQueue.begin(), fUDPQueue.end(), inPair);
+		if (it != fUDPQueue.end())
+			fUDPQueue.erase(it);
+		DestructUDPSocketPair(inPair);
 	}
 }
 
-void ReflectorSocketPool::DestructUDPSocketPair(UDPSocketPair *inPair)
+SocketPair<ReflectorSocket>* ReflectorSocketPool::ConstructUDPSocketPair()
 {
-	//printf("ReflectorSocketPool::DestructUDPSocketPair inPair=%p socketA=%p\n", inPair,(ReflectorSocket*)inPair->GetSocketA());
-	this->DestructUDPSocket((ReflectorSocket*)inPair->GetSocketA());
+	return new SocketPair<ReflectorSocket>();
+}
 
-	//printf("ReflectorSocketPool::DestructUDPSocketPair inPair=%p socketB=%p\n", inPair,(ReflectorSocket*)inPair->GetSocketB());
-	this->DestructUDPSocket((ReflectorSocket*)inPair->GetSocketB());
-
+void ReflectorSocketPool::DestructUDPSocketPair(SocketPair<ReflectorSocket> *inPair)
+{
 	delete inPair;
 }
 
@@ -1618,7 +1711,7 @@ bool ReflectorSocket::ProcessPacket(const int64_t& inMilliseconds, ReflectorPack
 
 		// TODO:A、对H264视频RTP包进行关键帧过滤，保存最新关键帧首个RTP包指针
 		// 1、判断是否为视频H.264 RTP
-		SDPSourceInfo::StreamInfo* streamInfo = theSender->fStream->GetStreamInfo();
+		StreamInfo* streamInfo = theSender->fStream->GetStreamInfo();
 		if (!(thePacket->IsRTCP()) && (streamInfo->fPayloadType == qtssVideoPayloadType) && (streamInfo->fPayloadName =="H264/90000"))
 		{
 			// 2、在这里判断上面插入的thePacket是否为关键帧起始RTP包，如果是，这记录thePacket->fQueueElem

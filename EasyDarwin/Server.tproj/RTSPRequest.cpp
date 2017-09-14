@@ -152,6 +152,7 @@ QTSS_Error RTSPRequest::Parse()
 	bool r = phrase_parse(iter, end, rtspGrammar, qi::ascii::blank, rtspHeader);
 
 	if (r && iter == end) {
+		std::cout << "Full Request:\n" << std::string(requestHeader) << "\b\n";
 		std::cout << "Parsing succeeded\n";
 		//check the version
 		//fVersion = RTSPProtocol::GetVersion(rtspHeader.rtsp_version);
@@ -576,72 +577,4 @@ QTSS_Error RTSPRequest::SendErrorResponse(QTSS_RTSPStatusCode inStatusCode)
 	SendHeader();
 
 	return QTSS_RequestFailed;
-}
-
-bool RequestMessage::ParseNetworkModeSubHeader(boost::string_view inSubHeader, RTSPRequest1& req)
-{
-	static boost::string_view sUnicast("unicast");
-	static boost::string_view sMulticast("multiicast");
-
-	if (boost::iequals(inSubHeader, sUnicast))
-	{
-		req.fNetworkMode = qtssRTPNetworkModeUnicast;
-		return true;
-	}
-
-	if (boost::iequals(inSubHeader, sMulticast))
-	{
-		req.fNetworkMode = qtssRTPNetworkModeMulticast;
-		return true;
-	}
-
-	return false;
-}
-
-bool RequestMessage::ParseModeSubHeader(boost::string_view inModeSubHeader, RTSPRequest1& req)
-{
-	static boost::string_view sModeSubHeader("mode");
-	static boost::string_view sReceiveMode("receive");
-	static boost::string_view sRecordMode("record");
-
-	std::string name, mode;
-	bool r = qi::phrase_parse(inModeSubHeader.cbegin(), inModeSubHeader.cend(),
-		*(qi::alpha - "=") >> "=" >> *(qi::char_), qi::ascii::blank,
-		name, mode);
-	if (r && boost::iequals(name, sModeSubHeader)) {
-		if (boost::iequals(mode, sReceiveMode) || boost::iequals(mode, sRecordMode))
-			req.fTransportMode = qtssRTPTransportModeRecord;
-	}
-	return r;
-}
-
-bool RequestMessage::parse_setup(RTSPRequest1& req)
-{
-	std::vector<std::string> tokens = spirit_direct(req.header["Transport"], ";");
-	for (const auto &subHeader : tokens)
-	{
-		// Extract the relevent information from the relevent subheader.
-		// So far we care about 3 sub-headers
-
-		if (!ParseNetworkModeSubHeader(subHeader, req))
-		{
-			switch (subHeader[0])
-			{
-			case 'r':	// rtp/avp/??? Is this tcp or udp?
-			case 'R':   // RTP/AVP/??? Is this TCP or UDP?
-			{
-				if (boost::iequals(subHeader, "RTP/AVP/TCP"))
-					req.fTransportType = qtssRTPTransportTypeTCP;
-				break;
-			}
-			case 'm':   //mode sub-header
-			case 'M':   //mode sub-header
-			{
-				if (!ParseModeSubHeader(subHeader, req))
-					return false;
-			}
-			}
-		}
-	}
-	return true;
 }

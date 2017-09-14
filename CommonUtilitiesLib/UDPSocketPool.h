@@ -35,12 +35,54 @@
 #define __UDPSOCKETPOOL_H__
 
 #include <list>
+#include <mutex>
 #include "SyncUnorderMap.h"
 #include "UDPSocket.h"
 #include "OSMutex.h"
-#include "OSQueue.h"
 
-class UDPSocketPair;
+class RTPStream;
+class UDPSocketPair
+{
+public:
+
+	UDPSocketPair(UDPSocket* inSocketA, UDPSocket* inSocketB)
+		: fSocketA(inSocketA), fSocketB(inSocketB), fRefCount(0) {
+	}
+	~UDPSocketPair() = default;
+
+	UDPSocket*  GetSocketA() { return fSocketA; }
+	UDPSocket*  GetSocketB() { return fSocketB; }
+	SyncUnorderMap<RTPStream*>& GetSocketADemux() { return socketADemux; }
+	SyncUnorderMap<RTPStream*>& GetSocketBDemux() { return socketBDemux; }
+private:
+	SyncUnorderMap<RTPStream*> socketADemux;
+	SyncUnorderMap<RTPStream*> socketBDemux;
+	UDPSocket*  fSocketA;
+	UDPSocket*  fSocketB;
+	uint32_t      fRefCount;
+
+	friend class UDPSocketPool;
+};
+
+template <typename T>
+class SocketPair
+{
+public:
+
+	SocketPair() = default;
+	~SocketPair() = default;
+
+	std::unique_ptr<T>& GetSocketA() { return fSocketA; }
+	std::unique_ptr<T>& GetSocketB() { return fSocketB; }
+	SyncUnorderMap<RTPStream*>& GetSocketADemux() { return socketADemux; }
+	SyncUnorderMap<RTPStream*>& GetSocketBDemux() { return socketBDemux; }
+	uint32_t      fRefCount{ 0 };
+private:
+	SyncUnorderMap<RTPStream*> socketADemux;
+	SyncUnorderMap<RTPStream*> socketBDemux;
+	std::unique_ptr<T>  fSocketA{ std::make_unique<T>() };
+	std::unique_ptr<T>  fSocketB{ std::make_unique<T>() };
+};
 
 class UDPSocketPool
 {
@@ -91,28 +133,5 @@ private:
 	OSMutex fMutex;
 };
 
-class RTPStream;
-class UDPSocketPair
-{
-public:
-
-	UDPSocketPair(UDPSocket* inSocketA, UDPSocket* inSocketB)
-		: fSocketA(inSocketA), fSocketB(inSocketB), fRefCount(0) {
-	}
-	~UDPSocketPair() = default;
-
-	UDPSocket*  GetSocketA() { return fSocketA; }
-	UDPSocket*  GetSocketB() { return fSocketB; }
-	SyncUnorderMap<RTPStream*>& GetSocketADemux() { return socketADemux; }
-	SyncUnorderMap<RTPStream*>& GetSocketBDemux() { return socketBDemux; }
-private:
-	SyncUnorderMap<RTPStream*> socketADemux;
-	SyncUnorderMap<RTPStream*> socketBDemux;
-	UDPSocket*  fSocketA;
-	UDPSocket*  fSocketB;
-	uint32_t      fRefCount;
-
-	friend class UDPSocketPool;
-};
 #endif // __UDPSOCKETPOOL_H__
 

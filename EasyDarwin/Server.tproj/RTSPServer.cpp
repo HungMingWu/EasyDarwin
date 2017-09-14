@@ -5,6 +5,7 @@
 #include "RTSPSession.h"
 #include "SDPUtils.h"
 #include "sdpCache.h"
+#include "MyRTSPRequest.h"
 
 void Response::send(const std::function<void(const boost::system::error_code &)> &callback) noexcept
 {
@@ -22,7 +23,7 @@ void Response::send(const std::function<void(const boost::system::error_code &)>
 }
 void RTSPServer::accept()
 {
-	auto session = std::make_shared<RTSPSession1>(*this, create_connection(io_service_));
+	auto session = std::make_shared<MyRTSPSession>(*this, create_connection(io_service_));
 
 	acceptor_.async_accept(session->connection->socket, [this, session](const boost::system::error_code &ec) {
 		auto lock = session->connection->handler_runner->continue_lock();
@@ -45,7 +46,7 @@ void RTSPServer::accept()
 	});
 }
 
-void RTSPServer::read_request_and_content(const std::shared_ptr<RTSPSession1> &session)
+void RTSPServer::read_request_and_content(const std::shared_ptr<MyRTSPSession> &session)
 {
 	session->connection->set_timeout(config.timeout_request);
 	boost::asio::async_read_until(session->connection->socket, session->request->streambuf, "\r\n\r\n",
@@ -108,8 +109,8 @@ void RTSPServer::read_request_and_content(const std::shared_ptr<RTSPSession1> &s
 	});
 }
 
-void RTSPServer::write_response(const std::shared_ptr<RTSPSession1> &session,
-	std::function<void(std::shared_ptr<Response>, std::shared_ptr<RTSPRequest1>)> resource_function)
+void RTSPServer::write_response(const std::shared_ptr<MyRTSPSession> &session,
+	std::function<void(std::shared_ptr<Response>, std::shared_ptr<MyRTSPRequest>)> resource_function)
 {
 	session->connection->set_timeout(config.timeout_content);
 	auto response = std::shared_ptr<Response>(new Response(session, config.timeout_content), [this](Response *response_ptr) {
@@ -119,7 +120,7 @@ void RTSPServer::write_response(const std::shared_ptr<RTSPSession1> &session,
 				if (response->close_connection_after_response)
 					return;
 
-				auto new_session = std::make_shared<RTSPSession1>(*this, response->session->connection);
+				auto new_session = std::make_shared<MyRTSPSession>(*this, response->session->connection);
 				read_request_and_content(new_session);;
 			}
 			else if (this->on_error)
@@ -137,16 +138,17 @@ void RTSPServer::write_response(const std::shared_ptr<RTSPSession1> &session,
 		return;
 	}
 }
-void RTSPServer::operate_request(const std::shared_ptr<RTSPSession1> &session)
+void RTSPServer::operate_request(const std::shared_ptr<MyRTSPSession> &session)
 {
 	if (session->request->method == "OPTIONS") {
-		write_response(session, [](std::shared_ptr<Response> response, std::shared_ptr<RTSPRequest1> request) {
+		write_response(session, [](std::shared_ptr<Response> response, std::shared_ptr<MyRTSPRequest> request) {
 			*response << "RTSP/1.0 200 OK\r\n"
 				<< "Cseq: " << request->header["CSeq"] << "\r\n"
 				<< "Public: DESCRIBE, SETUP, TEARDOWN, PLAY, PAUSE, OPTIONS, ANNOUNCE, RECORD\r\n\r\n";
 		});
 	}
 	else if (session->request->method == "ANNOUNCE") {
+		session->FindOrCreateRTPSession();
 		std::string sdp = session->request->content.string();
 		SDPContainer checkedSDPContainer(sdp);
 		if (!checkedSDPContainer.Parse())
@@ -154,17 +156,17 @@ void RTSPServer::operate_request(const std::shared_ptr<RTSPSession1> &session)
 			//return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssUnsupportedMediaType);
 		}
 		CSdpCache::GetInstance()->setSdpMap("live.sdp", sdp);
-		write_response(session, [](std::shared_ptr<Response> response, std::shared_ptr<RTSPRequest1> request) {
+		write_response(session, [](std::shared_ptr<Response> response, std::shared_ptr<MyRTSPRequest> request) {
 			*response << "RTSP/1.0 200 OK\r\n"
 				<< "Cseq: " << request->header["CSeq"] << "\r\n\r\n";
 		});
 	}
 	else if (session->request->method == "SETUP") {
+		
 		session->do_setup();
-		write_response(session, [](std::shared_ptr<Response> response, std::shared_ptr<RTSPRequest1> request) {
+		write_response(session, [](std::shared_ptr<Response> response, std::shared_ptr<MyRTSPRequest> request) {
 			*response << "RTSP/1.0 200 OK\r\n"
 				<< "Cseq: " << request->header["CSeq"] << "\r\n"
-				<< "Cache-Control: no-cache\r\n"
 				<< "Session: 972255884303327207\r\n"
 				<< "Transport: RTP/AVP/TCP;unicast;mode=record;;interleaved=0-1\r\n\r\n";
 		});

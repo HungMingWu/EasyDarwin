@@ -101,12 +101,6 @@ static uint16_t   sDefaultMaximumStaticSDPPort = 65535;
 static bool   sTearDownClientsOnDisconnect = false;
 static bool   sDefaultTearDownClientsOnDisconnect = false;
 
-static bool   sOneSSRCPerStream = true;
-static bool   sDefaultOneSSRCPerStream = true;
-
-static uint32_t   sTimeoutSSRCSecs = 30;
-static uint32_t   sDefaultTimeoutSSRCSecs = 30;
-
 static uint32_t   sDefaultBroadcasterSessionTimeoutSecs = 30;
 
 static uint16_t sLastMax = 0;
@@ -265,10 +259,7 @@ namespace ReflectionModule
 		// it is a broadcaster session
 		//printf("QTSSReflectorModule.cpp:is broadcaster session\n");
 
-		SDPSourceInfo* theSoureInfo = theSession->GetSourceInfo();
-		Assert(theSoureInfo != nullptr);
-		if (theSoureInfo == nullptr)
-			return QTSS_NoErr;
+		SDPSourceInfo& theSoureInfo = theSession->GetSourceInfo();
 
 		uint32_t  numStreams = theSession->GetNumStreams();
 		//printf("QTSSReflectorModule.cpp:ProcessRTPData numStreams=%"   _U32BITARG_   "\n",numStreams);
@@ -304,7 +295,7 @@ namespace ReflectionModule
 					ReflectorStream* theStream = theSession->GetStreamByIndex(inIndex);
 					if (theStream == nullptr) return QTSS_Unimplemented;
 
-					SDPSourceInfo::StreamInfo* theStreamInfo = theStream->GetStreamInfo();
+					StreamInfo* theStreamInfo = theStream->GetStreamInfo();
 					uint16_t serverReceivePort = theStreamInfo->fPort;
 
 					bool isRTCP = false;
@@ -339,16 +330,14 @@ namespace ReflectionModule
 		{
 			inParams->inClientSession->removeAttribute(sBroadcasterSessionName);
 
-			SDPSourceInfo* theSoureInfo = theSession->GetSourceInfo();
-			if (theSoureInfo == nullptr)
-				return QTSS_NoErr;
+			SDPSourceInfo& theSoureInfo = theSession->GetSourceInfo();
 
 			uint32_t  numStreams = theSession->GetNumStreams();
-			SDPSourceInfo::StreamInfo* theStreamInfo = nullptr;
+			StreamInfo* theStreamInfo = nullptr;
 
 			for (uint32_t index = 0; index < numStreams; index++)
 			{
-				theStreamInfo = theSoureInfo->GetStreamInfo(index);
+				theStreamInfo = theSoureInfo.GetStreamInfo(index);
 				if (theStreamInfo != nullptr)
 					theStreamInfo->fSetupToReceive = false;
 			}
@@ -356,7 +345,7 @@ namespace ReflectionModule
 			auto opt = inParams->inClientSession->getAttribute(sKillClientsEnabledName);
 			bool killClients = boost::any_cast<bool>(opt.value()); // the pref as the default
 																   //printf("QTSSReflectorModule.cpp:DestroySession broadcaster theSession=%"   _U32BITARG_   "\n", (uint32_t) theSession);
-			theSession->RemoveSessionFromOutput(inParams->inClientSession);
+			theSession->RemoveSessionFromOutput();
 
 			RemoveOutput(nullptr, theSession, killClients);
 		}
@@ -572,11 +561,10 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 		if (theFileData.empty())
 			return nullptr;
 
-		auto* theInfo = new SDPSourceInfo(theFileData); // will make a copy
+		SDPSourceInfo theInfo(theFileData); // will make a copy
 
-		if (!theInfo->IsReflectable())
+		if (!theInfo.IsReflectable())
 		{
-			delete theInfo;
 			return nullptr;
 		}
 
@@ -588,13 +576,13 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 		if (isPush)
 			theSetupFlag |= ReflectorSession::kIsPushSession;
 
-		theSession = new ReflectorSession(inName);
+		theSession = new ReflectorSession(inName, theInfo);
 
 		theSession->SetHasBufferedStreams(true); // buffer the incoming streams for clients
 
 		// SetupReflectorSession stores theInfo in theSession so DONT delete the Info if we fail here, leave it alone.
 		// deleting the session will delete the info.
-		QTSS_Error theErr = theSession->SetupReflectorSession(theInfo, inParams, theSetupFlag, sOneSSRCPerStream, sTimeoutSSRCSecs);
+		QTSS_Error theErr = theSession->SetupReflectorSession(inParams, theSetupFlag);
 		if (theErr != QTSS_NoErr)
 		{
 			//delete theSession;
@@ -632,7 +620,7 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 			if (isPush && theSession && !(theSession->IsSetup()))
 			{
 				uint32_t theSetupFlag = ReflectorSession::kMarkSetup | ReflectorSession::kIsPushSession;
-				QTSS_Error theErr = theSession->SetupReflectorSession(nullptr, inParams, theSetupFlag);
+				QTSS_Error theErr = theSession->SetupReflectorSession(inParams, theSetupFlag);
 				if (theErr != QTSS_NoErr)
 				{
 					theSession =  nullptr;
@@ -770,7 +758,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params &inParams)
 		//printf("QTSSReflectorModule.cpp:DoSetup is push setup\n");
 
 		// Get info about this trackID
-		SDPSourceInfo::StreamInfo* theStreamInfo = theSession->GetSourceInfo()->GetStreamInfoByTrackID(theTrackID);
+		StreamInfo* theStreamInfo = theSession->GetSourceInfo().GetStreamInfoByTrackID(theTrackID);
 		// If theStreamInfo is NULL, we don't have a legit track, so return an error
 		if (theStreamInfo == nullptr)
 		{
@@ -804,7 +792,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params &inParams)
 		inParams.inClientSession->addAttribute(sBroadcasterSessionName, theSession);
 
 		if (theSession != nullptr)
-			theSession->AddBroadcasterClientSession(inParams);
+			theSession->AddBroadcasterClientSession(inParams.inClientSession);
 
 #ifdef REFLECTORSESSION_DEBUG
 		printf("QTSSReflectorModule.cpp:DoSetup Session =%p refcount=%"   _U32BITARG_   "\n", theSession->GetRef(), theSession->GetRef()->GetRefCount());
@@ -815,7 +803,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params &inParams)
 
 
 	// Get info about this trackID
-	SDPSourceInfo::StreamInfo* theStreamInfo = theSession->GetSourceInfo()->GetStreamInfoByTrackID(theTrackID);
+	StreamInfo* theStreamInfo = theSession->GetSourceInfo().GetStreamInfoByTrackID(theTrackID);
 	// If theStreamInfo is NULL, we don't have a legit track, so return an error
 	if (theStreamInfo == nullptr)
 		return inParams.inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
@@ -1050,8 +1038,7 @@ void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* theSession, bool 
 		else
 		{
 			// ÍÆËÍ¶Ë
-			SDPSourceInfo* theInfo = theSession->GetSourceInfo();
-			Assert(theInfo);
+			SDPSourceInfo& theInfo = theSession->GetSourceInfo();
 
 			//if (theInfo->IsRTSPControlled())
 			//{   

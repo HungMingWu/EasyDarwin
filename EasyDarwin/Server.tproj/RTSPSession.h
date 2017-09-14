@@ -73,16 +73,9 @@ private:
 	void CleanupRequest();
 
 	// Fancy random number generator
-	uint32_t GenerateNewSessionID(char* ioBuffer);
+	static std::string GenerateNewSessionID();
 
-	// Sends an error response & returns error if not ok.
-	QTSS_Error IsOkToAddNewRTPSession();
-
-	// test current connections handled by this object against server pref connection limit
-	bool OverMaxConnections(uint32_t buffer);
-
-	char                fLastRTPSessionID[QTSS_MAX_SESSION_ID_LENGTH];
-	StrPtrLen           fLastRTPSessionIDPtr;
+	std::string         fLastRTPSessionID;
 
 	RTSPRequest*        fRequest{ nullptr };
 	RTPSession*         fRTPSession{ nullptr };
@@ -127,18 +120,7 @@ private:
 
 };
 
-class RTSPServer;
-class RTSPSession1 {
-	RTSPServer& mServer;
-	std::unique_ptr<ReflectorSession> CreateSession(boost::string_view sessionName);
-public:
-	RTSPSession1(RTSPServer&, std::shared_ptr<Connection> connection) noexcept;
-	void do_setup();
-	std::unique_ptr<ReflectorSession> broadcastSession;
-	std::unique_ptr<RTPSessionOutput1> rtp_OutputSession;
-	std::shared_ptr<Connection> connection;
-	std::shared_ptr<RTSPRequest1> request;
-};
+
 
 #endif // __RTSPSESSION_H__
 

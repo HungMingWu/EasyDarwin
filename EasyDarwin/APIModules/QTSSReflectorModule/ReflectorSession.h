@@ -57,7 +57,7 @@ public:
 	//
 	// Caller may also provide a SourceInfo object, though it is not needed and
 	// will also need to be provided to SetupReflectorSession when that is called.
-	ReflectorSession(boost::string_view inSourceID, SDPSourceInfo* inInfo = nullptr);
+	ReflectorSession(boost::string_view inSourceID, const SDPSourceInfo &inInfo);
 	~ReflectorSession();
 
 	//
@@ -76,7 +76,7 @@ public:
 		kIsPushSession = 4  // When setting up streams handle port conflicts by allocating.
 	};
 
-	QTSS_Error      SetupReflectorSession(SDPSourceInfo* inInfo, QTSS_StandardRTSP_Params& inParams,
+	QTSS_Error      SetupReflectorSession(QTSS_StandardRTSP_Params& inParams,
 		uint32_t inFlags = kMarkSetup, bool filterState = true, uint32_t filterTimeout = 30);
 
 	// Packets get forwarded by attaching ReflectorOutput objects to a ReflectorSession.
@@ -84,16 +84,15 @@ public:
 	void    AddOutput(ReflectorOutput* inOutput, bool isClient);
 	void    RemoveOutput(ReflectorOutput* inOutput, bool isClient);
 	void    TearDownAllOutputs();
-	void    RemoveSessionFromOutput(RTPSession* inSession);
-	void    ManuallyMarkSetup() { fIsSetup = true; }
+	void    RemoveSessionFromOutput();
 
 	//
 	// ACCESSORS
 
 	OSRef*          GetRef() { return &fRef; }
 	uint32_t          GetNumOutputs() { return fNumOutputs; }
-	uint32_t          GetNumStreams() { return fSourceInfo->GetNumStreams(); }
-	SDPSourceInfo*     GetSourceInfo() { return fSourceInfo; }
+	uint32_t          GetNumStreams() { return fSourceInfo.GetNumStreams(); }
+	SDPSourceInfo& GetSourceInfo() { return fSourceInfo; }
 	boost::string_view GetLocalSDP()	{ return fLocalSDP; }
 
 	boost::string_view  GetStreamName() { return fSessionName; }
@@ -102,7 +101,7 @@ public:
 	bool			HasVideoKeyFrameUpdate() { return fHasVideoKeyFrameUpdate; }
 
 	ReflectorStream*	GetStreamByIndex(uint32_t inIndex) { return fStreamArray[inIndex].get(); }
-	void AddBroadcasterClientSession(QTSS_StandardRTSP_Params& inParams);
+	void AddBroadcasterClientSession(RTPSession* inClientSession);
 
 	// For the QTSSSplitterModule, this object can cache a QTSS_StreamRef
 	void            SetSocketStream(QTSS_StreamRef inStream) { fSocketStream = inStream; }
@@ -147,7 +146,7 @@ private:
 
 	// The reflector session needs to hang onto the source info object
 	// for it's entire lifetime. Right now, this is used for reflector-as-client.
-	SDPSourceInfo* fSourceInfo;
+	SDPSourceInfo fSourceInfo;
 	std::string fLocalSDP;
 
 	// For the QTSSSplitterModule, this object can cache a QTSS_StreamRef
@@ -163,10 +162,21 @@ private:
 
 class ReflectorSession1 {
 	std::string	fSessionName;
-	SDPSourceInfo* fSourceInfo;
+	SDPSourceInfo fSourceInfo;
+	std::string fLocalSDP;
 	bool fHasBufferedStreams{ true };
+	bool fIsSetup{ false };
+	std::vector<std::unique_ptr<ReflectorStream>>   fStreamArray;
 public:
-	ReflectorSession1(boost::string_view inSourceID, SDPSourceInfo* inInfo = nullptr);
+	enum
+	{
+		kMarkSetup = 1,     //After SetupReflectorSession is called, IsSetup returns true
+		kDontMarkSetup = 2, //After SetupReflectorSession is called, IsSetup returns false
+		kIsPushSession = 4  // When setting up streams handle port conflicts by allocating.
+	};
+	ReflectorSession1(boost::string_view inSourceID, const SDPSourceInfo &inInfo);
+	QTSS_Error SetupReflectorSession(QTSS_StandardRTSP_Params& inParams,
+		uint32_t inFlags = kMarkSetup, bool filterState = true, uint32_t filterTimeout = 30);
 };
 #endif
 

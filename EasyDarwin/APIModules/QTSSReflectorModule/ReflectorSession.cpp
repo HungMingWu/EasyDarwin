@@ -34,7 +34,7 @@
 #include <boost/asio/io_service.hpp>
 
 extern boost::asio::io_service io_service;
-ReflectorSession::ReflectorSession(boost::string_view inSourceID, SDPSourceInfo* inInfo) :
+ReflectorSession::ReflectorSession(boost::string_view inSourceID, const SDPSourceInfo& inInfo) :
 	fSessionName(inSourceID),
 	fSourceInfo(inInfo),
 	timer(io_service)
@@ -46,43 +46,25 @@ ReflectorSession::ReflectorSession(boost::string_view inSourceID, SDPSourceInfo*
 
 ReflectorSession::~ReflectorSession()
 {
-	// For each stream, check to see if the ReflectorStream should be deleted
-	for (uint32_t x = 0; x < fSourceInfo->GetNumStreams(); x++)
-	{
-		if (fStreamArray[x] == nullptr)
-			continue;
-
-		fStreamArray[x]->SetMyReflectorSession(nullptr);
-	}
-
-	// We own this object when it is given to us, so delete it now
-
-	delete fSourceInfo;
+	for (auto &stream : fStreamArray)
+		stream->SetMyReflectorSession(nullptr);
 }
 
-QTSS_Error ReflectorSession::SetupReflectorSession(SDPSourceInfo* inInfo, QTSS_StandardRTSP_Params& inParams, uint32_t inFlags, bool filterState, uint32_t filterTimeout)
+QTSS_Error ReflectorSession::SetupReflectorSession(QTSS_StandardRTSP_Params& inParams, uint32_t inFlags, bool filterState, uint32_t filterTimeout)
 {
-	// use the current SourceInfo
-	if (inInfo == nullptr)
-		inInfo = fSourceInfo;
-
-	// Store a reference to this sourceInfo permanently
-	Assert((fSourceInfo == nullptr) || (inInfo == fSourceInfo));
-	fSourceInfo = inInfo;
-
 	// this must be set to the new SDP.
-	fLocalSDP = inInfo->GetLocalSDP();
+	fLocalSDP = fSourceInfo.GetLocalSDP();
 
-	fStreamArray.resize(fSourceInfo->GetNumStreams());
+	fStreamArray.resize(fSourceInfo.GetNumStreams());
 
-	for (uint32_t x = 0; x < fSourceInfo->GetNumStreams(); x++)
+	for (uint32_t x = 0; x < fSourceInfo.GetNumStreams(); x++)
 	{
-		fStreamArray[x] = std::make_unique<ReflectorStream>(fSourceInfo->GetStreamInfo(x));
+		fStreamArray[x] = std::make_unique<ReflectorStream>(fSourceInfo.GetStreamInfo(x));
 		// Obviously, we may encounter an error binding the reflector sockets.
 		// If that happens, we'll just abort here, which will leave the ReflectorStream
 		// array in an inconsistent state, so we need to make sure in our cleanup
 		// code to check for NULL.
-		QTSS_Error theError = fStreamArray[x]->BindSockets(inParams, inFlags, filterState, filterTimeout);
+		QTSS_Error theError = fStreamArray[x]->BindSockets(inParams.inRTSPRequest, inParams.inClientSession, inFlags, filterState, filterTimeout);
 		if (theError != QTSS_NoErr)
 		{
 			fStreamArray[x] = nullptr;
@@ -93,7 +75,7 @@ QTSS_Error ReflectorSession::SetupReflectorSession(SDPSourceInfo* inInfo, QTSS_S
 		fStreamArray[x]->SetEnableBuffer(this->fHasBufferedStreams);// buffering is done by the stream's sender
 
 		// If the port was 0, update it to reflect what the actual RTP port is.
-		fSourceInfo->GetStreamInfo(x)->fPort = fStreamArray[x]->GetStreamInfo()->fPort;
+		fSourceInfo.GetStreamInfo(x)->fPort = fStreamArray[x]->GetStreamInfo()->fPort;
 		//printf("ReflectorSession::SetupReflectorSession fSourceInfo->GetStreamInfo(x)->fPort= %u\n",fSourceInfo->GetStreamInfo(x)->fPort);   
 	}
 
@@ -103,24 +85,18 @@ QTSS_Error ReflectorSession::SetupReflectorSession(SDPSourceInfo* inInfo, QTSS_S
 	return QTSS_NoErr;
 }
 
-void ReflectorSession::AddBroadcasterClientSession(QTSS_StandardRTSP_Params& inParams)
+void ReflectorSession::AddBroadcasterClientSession(RTPSession* inClientSession)
 {
-	if (fStreamArray.empty())
-		return;
-
-	for (uint32_t x = 0; x < fSourceInfo->GetNumStreams(); x++)
+	for (auto &stream : fStreamArray)
 	{
-		if (fStreamArray[x] != nullptr)
-		{   //printf("AddBroadcasterSession=%"   _U32BITARG_   "\n",inParams->inClientSession);
-			((ReflectorSocket*)fStreamArray[x]->GetSocketPair()->GetSocketA())->AddBroadcasterSession(inParams.inClientSession);
-			((ReflectorSocket*)fStreamArray[x]->GetSocketPair()->GetSocketB())->AddBroadcasterSession(inParams.inClientSession);
-		}
+		stream->GetSocketPair()->GetSocketA()->AddBroadcasterSession(inClientSession);
+		stream->GetSocketPair()->GetSocketB()->AddBroadcasterSession(inClientSession);
 	}
 }
 
 void    ReflectorSession::AddOutput(ReflectorOutput* inOutput, bool isClient)
 {
-	Assert(fSourceInfo->GetNumStreams() > 0);
+	Assert(fSourceInfo.GetNumStreams() > 0);
 
 	// We need to make sure that this output goes into the same bucket for each ReflectorStream.
 	int32_t bucket = -1;
@@ -129,7 +105,7 @@ void    ReflectorSession::AddOutput(ReflectorOutput* inOutput, bool isClient)
 	while (true)
 	{
 		uint32_t x = 0;
-		for (; x < fSourceInfo->GetNumStreams(); x++)
+		for (; x < fSourceInfo.GetNumStreams(); x++)
 		{
 			bucket = fStreamArray[x]->AddOutput(inOutput, bucket);
 			if (bucket == -1)   // If this output couldn't be added to this bucket,
@@ -167,7 +143,7 @@ void    ReflectorSession::AddOutput(ReflectorOutput* inOutput, bool isClient)
 void    ReflectorSession::RemoveOutput(ReflectorOutput* inOutput, bool isClient)
 {
 	--fNumOutputs;
-	for (uint32_t y = 0; y < fSourceInfo->GetNumStreams(); y++)
+	for (uint32_t y = 0; y < fSourceInfo.GetNumStreams(); y++)
 	{
 		fStreamArray[y]->RemoveOutput(inOutput);
 		if (isClient)
@@ -177,16 +153,16 @@ void    ReflectorSession::RemoveOutput(ReflectorOutput* inOutput, bool isClient)
 
 void ReflectorSession::TearDownAllOutputs()
 {
-	for (uint32_t y = 0; y < fSourceInfo->GetNumStreams(); y++)
-		fStreamArray[y]->TearDownAllOutputs();
+	for (auto &stream : fStreamArray)
+		stream->TearDownAllOutputs();
 }
 
-void    ReflectorSession::RemoveSessionFromOutput(RTPSession* inSession)
+void    ReflectorSession::RemoveSessionFromOutput()
 {
-	for (uint32_t x = 0; x < fSourceInfo->GetNumStreams(); x++)
+	for (auto &stream : fStreamArray)
 	{
-		((ReflectorSocket*)fStreamArray[x]->GetSocketPair()->GetSocketA())->RemoveBroadcasterSession(inSession);
-		((ReflectorSocket*)fStreamArray[x]->GetSocketPair()->GetSocketB())->RemoveBroadcasterSession(inSession);
+		stream->GetSocketPair()->GetSocketA()->RemoveBroadcasterSession();
+		stream->GetSocketPair()->GetSocketB()->RemoveBroadcasterSession();
 	}
 }
 
@@ -202,9 +178,9 @@ uint32_t  ReflectorSession::GetBitRate()
 
 void*   ReflectorSession::GetStreamCookie(uint32_t inStreamID)
 {
-	for (uint32_t x = 0; x < fSourceInfo->GetNumStreams(); x++)
+	for (uint32_t x = 0; x < fSourceInfo.GetNumStreams(); x++)
 	{
-		if (fSourceInfo->GetStreamInfo(x)->fTrackID == inStreamID)
+		if (fSourceInfo.GetStreamInfo(x)->fTrackID == inStreamID)
 			return fStreamArray[x]->GetStreamCookie();
 	}
 	return nullptr;
@@ -220,8 +196,43 @@ void ReflectorSession::Run(const boost::system::error_code &ec)
 	timer.async_wait(std::bind(&ReflectorSession::Run, this, std::placeholders::_1));
 }
 
-ReflectorSession1::ReflectorSession1(boost::string_view inSourceID, SDPSourceInfo* inInfo) :
-	fSessionName(inSourceID),
-	fSourceInfo(inInfo)
+ReflectorSession1::ReflectorSession1(boost::string_view inSourceID, const SDPSourceInfo &inInfo) 
+	: fSessionName(inSourceID),
+      fSourceInfo(inInfo)
 {
+}
+
+QTSS_Error ReflectorSession1::SetupReflectorSession(QTSS_StandardRTSP_Params& inParams, uint32_t inFlags, bool filterState, uint32_t filterTimeout)
+{
+	// this must be set to the new SDP.
+	fLocalSDP = fSourceInfo.GetLocalSDP();
+
+	fStreamArray.resize(fSourceInfo.GetNumStreams());
+
+	for (uint32_t x = 0; x < fSourceInfo.GetNumStreams(); x++)
+	{
+		fStreamArray[x] = std::make_unique<ReflectorStream>(fSourceInfo.GetStreamInfo(x));
+		// Obviously, we may encounter an error binding the reflector sockets.
+		// If that happens, we'll just abort here, which will leave the ReflectorStream
+		// array in an inconsistent state, so we need to make sure in our cleanup
+		// code to check for NULL.
+		QTSS_Error theError = fStreamArray[x]->BindSockets(inParams.inRTSPRequest, inParams.inClientSession, inFlags, filterState, filterTimeout);
+		if (theError != QTSS_NoErr)
+		{
+			fStreamArray[x] = nullptr;
+			return theError;
+		}
+		fStreamArray[x]->SetMyReflectorSession(nullptr); // this);
+
+		fStreamArray[x]->SetEnableBuffer(this->fHasBufferedStreams);// buffering is done by the stream's sender
+
+																	// If the port was 0, update it to reflect what the actual RTP port is.
+		fSourceInfo.GetStreamInfo(x)->fPort = fStreamArray[x]->GetStreamInfo()->fPort;
+		//printf("ReflectorSession::SetupReflectorSession fSourceInfo->GetStreamInfo(x)->fPort= %u\n",fSourceInfo->GetStreamInfo(x)->fPort);   
+	}
+
+	if (inFlags & kMarkSetup)
+		fIsSetup = true;
+
+	return QTSS_NoErr;
 }

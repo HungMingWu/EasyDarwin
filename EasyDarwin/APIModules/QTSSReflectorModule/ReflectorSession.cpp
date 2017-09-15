@@ -196,13 +196,22 @@ void ReflectorSession::Run(const boost::system::error_code &ec)
 	timer.async_wait(std::bind(&ReflectorSession::Run, this, std::placeholders::_1));
 }
 
-ReflectorSession1::ReflectorSession1(boost::string_view inSourceID, const SDPSourceInfo &inInfo) 
+MyReflectorSession::MyReflectorSession(boost::string_view inSourceID, const SDPSourceInfo &inInfo) 
 	: fSessionName(inSourceID),
       fSourceInfo(inInfo)
 {
 }
 
-QTSS_Error ReflectorSession1::SetupReflectorSession(QTSS_StandardRTSP_Params& inParams, uint32_t inFlags, bool filterState, uint32_t filterTimeout)
+void MyReflectorSession::AddBroadcasterClientSession(MyRTPSession* inClientSession)
+{
+	for (auto &stream : fStreamArray)
+	{
+		//stream->GetSocketPair()->GetSocketA()->AddBroadcasterSession(inClientSession);
+		//stream->GetSocketPair()->GetSocketB()->AddBroadcasterSession(inClientSession);
+	}
+}
+
+QTSS_Error MyReflectorSession::SetupReflectorSession(MyRTSPRequest &inRequest, MyRTPSession &inSession, uint32_t inFlags, bool filterState, uint32_t filterTimeout)
 {
 	// this must be set to the new SDP.
 	fLocalSDP = fSourceInfo.GetLocalSDP();
@@ -211,12 +220,12 @@ QTSS_Error ReflectorSession1::SetupReflectorSession(QTSS_StandardRTSP_Params& in
 
 	for (uint32_t x = 0; x < fSourceInfo.GetNumStreams(); x++)
 	{
-		fStreamArray[x] = std::make_unique<ReflectorStream>(fSourceInfo.GetStreamInfo(x));
+		fStreamArray[x] = std::make_unique<MyReflectorStream>(fSourceInfo.GetStreamInfo(x));
 		// Obviously, we may encounter an error binding the reflector sockets.
 		// If that happens, we'll just abort here, which will leave the ReflectorStream
 		// array in an inconsistent state, so we need to make sure in our cleanup
 		// code to check for NULL.
-		QTSS_Error theError = fStreamArray[x]->BindSockets(inParams.inRTSPRequest, inParams.inClientSession, inFlags, filterState, filterTimeout);
+		QTSS_Error theError = fStreamArray[x]->BindSockets(inRequest, inSession, inFlags, filterState, filterTimeout);
 		if (theError != QTSS_NoErr)
 		{
 			fStreamArray[x] = nullptr;

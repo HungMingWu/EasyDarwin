@@ -121,19 +121,15 @@ uint8_t RTSPSessionInterface::GetTwoChannelNumbers(boost::string_view inRTSPSess
 {
 	//
 	// Allocate 2 channel numbers
-	uint8_t theChannelNum = fCurChannelNum;
-	fCurChannelNum += 2;
-
-	//
 	// Put this sessionID to the proper place in the map
 	fChNumToSessIDMap.emplace_back(inRTSPSessionID.data(), inRTSPSessionID.length());
 
-	return theChannelNum;
+	return (fChNumToSessIDMap.size() - 1) * 2;
 }
 
 boost::string_view  RTSPSessionInterface::GetSessionIDForChannelNum(uint8_t inChannelNum)
 {
-	if (inChannelNum < fCurChannelNum)
+	if (inChannelNum < fChNumToSessIDMap.size() * 2)
 		return fChNumToSessIDMap[inChannelNum >> 1];
 	else
 		return {};

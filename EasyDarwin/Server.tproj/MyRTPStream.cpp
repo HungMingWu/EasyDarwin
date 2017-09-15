@@ -2,6 +2,67 @@
 #include "MyRTSPRequest.h"
 #include "MyRTSPSession.h"
 #include "MyRTPSession.h"
+#include "ServerPrefs.h"
+
+std::ostream& operator << (std::ostream& stream, const MyRTPStream& RTPStream)
+{
+	// This function appends a session header to the SETUP response, and
+	// checks to see if it is a 304 Not Modified. If it is, it sends the entire
+	// response and returns an error
+#if 0
+	if (ServerPrefs::GetRTSPTimeoutInSecs() > 0)  // adv the timeout
+		inRequest->AppendSessionHeaderWithTimeout(RTPStream.fSession.fRTSPSessionID, std::to_string(ServerPrefs::GetRTSPTimeoutInSecs()));
+	else
+		inRequest->AppendSessionHeaderWithTimeout(RTPStream.fSession.fRTSPSessionID, {}); // no timeout in resp.
+#endif
+
+	std::string ssrcStr = (RTPStream.fEnableSSRC) ? std::to_string(RTPStream.fSsrc) : std::string();
+
+	// We are either going to append the RTP / RTCP port numbers (UDP),
+	// or the channel numbers (TCP, interleaved)
+	if (!RTPStream.fIsTCP)
+	{
+#if 0
+		//
+		// With UDP retransmits its important the client starts sending RTCPs
+		// to the right address right away. The sure-firest way to get the client
+		// to do this is to put the src address in the transport. So now we do that always.
+		//
+		boost::string_view theSrcIPAddress = ServerPrefs::GetTransportSrcAddr();
+		if (theSrcIPAddress.empty()) {
+			//StrPtrLen *p = fSockets->GetSocketA()->GetLocalAddrStr();
+			theSrcIPAddress = std::string("127.0.0.1");
+		}
+
+
+		if (request->IsPushRequest())
+		{
+			std::string rtpPort = std::to_string(request->GetSetUpServerPort());
+			std::string rtcpPort = std::to_string(request->GetSetUpServerPort() + 1);
+			request->AppendTransportHeader(rtpPort, rtcpPort, {}, {}, theSrcIPAddress, ssrcStr);
+		}
+		else
+		{
+			// Append UDP socket port numbers.
+			UDPSocket* theRTPSocket = fSockets->GetSocketA();
+			UDPSocket* theRTCPSocket = fSockets->GetSocketB();
+			StrPtrLen *p = theRTPSocket->GetLocalPortStr();
+			StrPtrLen *p1 = theRTCPSocket->GetLocalPortStr();
+			request->AppendTransportHeader(std::string(p->Ptr, p->Len),
+				std::string(p1->Ptr, p1->Len), {}, {}, theSrcIPAddress, ssrcStr);
+		}
+#endif
+	}
+	else
+	{
+		// If these channel numbers fall outside prebuilt range, we will have to call sprintf.
+		std::string rtpChannel = std::to_string(RTPStream.fRTPChannel);
+		std::string rtcpChannel = std::to_string(RTPStream.fRTCPChannel);
+		//request->AppendTransportHeader({}, {}, rtpChannel, rtcpChannel, {}, ssrcStr);
+	}
+	return stream;
+}
+
 MyRTPStream::MyRTPStream(uint32_t inSSRC, MyRTPSession& inSession)
 	: fSession(inSession),
 	fSsrc(inSSRC)
@@ -9,9 +70,9 @@ MyRTPStream::MyRTPStream(uint32_t inSSRC, MyRTPSession& inSession)
 
 }
 
-void MyRTPStream::SetOverBufferState(MyRTSPRequest* request)
+void MyRTPStream::SetOverBufferState(MyRTSPRequest& request)
 {
-	int32_t requestedOverBufferState = request->GetDynamicRateState();
+	int32_t requestedOverBufferState = request.GetDynamicRateState();
 	bool enableOverBuffer = false;
 
 	switch (fTransportType)
@@ -44,26 +105,26 @@ void MyRTPStream::SetOverBufferState(MyRTSPRequest* request)
 	//if any stream turns it off then it is off for all streams
 	//a disable is from either the stream type default or a specific rtsp command to disable
 	if (!enableOverBuffer)
-		fSession.fOverbufferWindow->TurnOverbuffering(false);
+		fSession.fOverbufferWindow.TurnOverbuffering(false);
 }
 
-QTSS_Error MyRTPStream::Setup(MyRTSPRequest* request, QTSS_AddStreamFlags inFlags)
+QTSS_Error MyRTPStream::Setup(MyRTSPRequest& request, QTSS_AddStreamFlags inFlags)
 {
 	//Get the URL for this track
-	fStreamURL = request->GetFileName();//just in case someone wants to use string routines
+	fStreamURL = request.GetFileName();//just in case someone wants to use string routines
 
 	//
 	// Store the late-tolerance value that came out of hte x-RTP-Options header,
 	// so that when it comes time to determine our thinning params (when we PLAY),
 	// we will know this
-	fLateToleranceInSec = request->GetLateToleranceInSec();
+	fLateToleranceInSec = request.GetLateToleranceInSec();
 	if (fLateToleranceInSec == -1.0)
 		fLateToleranceInSec = 1.5;
 
 	//
 	// Setup the transport type
-	fTransportType = request->GetTransportType();
-	fNetworkMode = request->GetNetworkMode();
+	fTransportType = request.GetTransportType();
+	fNetworkMode = request.GetNetworkMode();
 
 	//
 	// Check to see if caller is forcing raw UDP transport
@@ -78,10 +139,10 @@ QTSS_Error MyRTPStream::Setup(MyRTSPRequest* request, QTSS_AddStreamFlags inFlag
 	if (fTransportType == qtssRTPTransportTypeTCP)
 	{
 		fIsTCP = true;
-		fSession.fOverbufferWindow->SetWindowSize(UINT32_MAX);
+		fSession.fOverbufferWindow.SetWindowSize(UINT32_MAX);
 
 		// If it is, get 2 channel numbers from the RTSP session.
-		fRTPChannel = request->GetSession().GetTwoChannelNumbers(fSession.GetSessionID());
+		fRTPChannel = request.GetSession().GetTwoChannelNumbers(fSession.fRTSPSessionID);
 		fRTCPChannel = fRTPChannel + 1;
 
 		// If we are interleaving, this is all we need to do to setup.

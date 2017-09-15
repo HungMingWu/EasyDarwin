@@ -77,24 +77,6 @@ void RTPSessionInterface::UpdateRTSPSession(RTSPSessionInterface* inNewRTSPSessi
 	}
 }
 
-QTSS_Error RTPSessionInterface::DoSessionSetupResponse(RTSPRequestInterface* inRequest)
-{
-	// This function appends a session header to the SETUP response, and
-	// checks to see if it is a 304 Not Modified. If it is, it sends the entire
-	// response and returns an error
-	if (ServerPrefs::GetRTSPTimeoutInSecs() > 0)  // adv the timeout
-		inRequest->AppendSessionHeaderWithTimeout(GetSessionID(), std::to_string(ServerPrefs::GetRTSPTimeoutInSecs()));
-	else
-		inRequest->AppendSessionHeaderWithTimeout(GetSessionID(), {}); // no timeout in resp.
-
-	if (inRequest->GetStatus() == qtssRedirectNotModified)
-	{
-		(void)inRequest->SendHeader();
-		return QTSS_RequestFailed;
-	}
-	return QTSS_NoErr;
-}
-
 void RTPSessionInterface::UpdateBitRateInternal(const int64_t& curTime)
 {
 	if (fState == qtssPausedState)

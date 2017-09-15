@@ -127,13 +127,6 @@ public:
 	}
 
 	void            SetAllTracksInterleaved(bool newValue) { fAllTracksInterleaved = newValue; }
-	//
-	// RTSP RESPONSES
-
-	// This function appends a session header to the SETUP response, and
-	// checks to see if it is a 304 Not Modified. If it is, it sends the entire
-	// response and returns an error
-	QTSS_Error DoSessionSetupResponse(RTSPRequestInterface* inRequest);
 
 	//
 	// RTSP SESSION

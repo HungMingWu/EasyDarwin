@@ -96,11 +96,15 @@ std::string MyRTSPRequest::GetFileDigit()
 
 std::string MyRTSPRequest::GetFileName()
 {
-	std::string str(path);
-	if (str[0] == '/') str = str.substr(1);
-	size_t nextDelimiter = str.find("/");
+	std::string theHost, uriPath;
+	bool r = qi::phrase_parse(path.cbegin(), path.cend(),
+		qi::no_case["RTSP://"] >> *(qi::char_ - "/") >> (qi::eoi | *(qi::char_)),
+		qi::ascii::blank, theHost, uriPath);
+
+	if (uriPath[0] == '/') uriPath = uriPath.substr(1);
+	size_t nextDelimiter = uriPath.find("/");
 	if (nextDelimiter == std::string::npos)
-		return str;
+		return uriPath;
 	else
-		return str.substr(0, nextDelimiter);
+		return uriPath.substr(0, nextDelimiter);
 }

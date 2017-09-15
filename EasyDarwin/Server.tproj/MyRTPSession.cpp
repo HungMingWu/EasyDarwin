@@ -1,8 +1,14 @@
 #include "MyRTPSession.h"
 #include "MyAssert.h"
 #include "MyRTPStream.h"
+#include "ServerPrefs.h"
+MyRTPSession::MyRTPSession() :
+	fOverbufferWindow(ServerPrefs::GetSendIntervalInMsec(), UINT32_MAX, ServerPrefs::GetMaxSendAheadTimeInSecs(),
+		ServerPrefs::GetOverbufferRate())
+{
 
-QTSS_Error MyRTPSession::AddStream(MyRTSPRequest* request, MyRTPStream** outStream,
+}
+QTSS_Error MyRTPSession::AddStream(MyRTSPRequest& request, MyRTPStream** outStream,
 	QTSS_AddStreamFlags inFlags)
 {
 	Assert(outStream != nullptr);

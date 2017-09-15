@@ -143,7 +143,6 @@ protected:
 	bool              fLiveSession{true};
 	unsigned int        fObjectHolders{0};
 
-	uint8_t               fCurChannelNum{0};
 	std::vector<std::string> fChNumToSessIDMap;
 
 	uint32_t              fSessionID;

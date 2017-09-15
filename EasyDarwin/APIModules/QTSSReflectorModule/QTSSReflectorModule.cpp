@@ -779,7 +779,6 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params &inParams)
 
 		SendSetupRTSPResponse(newStream, inParams.inRTSPRequest, 0);
 
-		theStreamInfo->fSetupToReceive = true;
 		// This is an incoming data session. Set the Reflector Session in the ClientSession
 		inParams.inClientSession->addAttribute(sBroadcasterSessionName, theSession);
 
@@ -815,14 +814,8 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params &inParams)
 		// session while we call QTSS_AddRTPStream. One brutal way to do this is to grab each
 		// ReflectorStream's mutex, which will stop every reflector stream from running.
 
-		for (uint32_t x = 0; x < theSession->GetNumStreams(); x++)
-			theSession->GetStreamByIndex(x)->GetMutex()->Lock();
-
 		QTSS_Error theErr = inParams.inClientSession->AddStream(
 			inParams.inRTSPRequest, &newStream, 0);
-
-		for (uint32_t y = 0; y < theSession->GetNumStreams(); y++)
-			theSession->GetStreamByIndex(y)->GetMutex()->Unlock();
 
 		if (theErr != QTSS_NoErr)
 			return theErr;

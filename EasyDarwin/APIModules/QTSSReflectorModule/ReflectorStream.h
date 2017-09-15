@@ -437,7 +437,7 @@ private:
 	// Reflector sockets, retrieved from the socket pool
 	SocketPair<ReflectorSocket>*      fSockets;
 
-	QTSS_RTPTransportType fTransportType;
+	QTSS_RTPTransportType fTransportType{ qtssRTPTransportTypeUDP };
 
 	ReflectorSender     fRTPSender;
 	ReflectorSender     fRTCPSender;
@@ -488,7 +488,7 @@ private:
 	bool              fHasFirstRTCPPacket;
 	bool              fHasFirstRTPPacket;
 
-	bool              fEnableBuffer;
+	bool              fEnableBuffer{ false };
 	uint32_t              fEyeCount;
 
 	uint32_t              fFirst_RTCP_RTP_Time;
@@ -532,5 +532,28 @@ void    ReflectorStream::UpdateBitRate(int64_t currentTime)
 		fLastBitRateSample = currentTime;
 	}
 }
+
+class MyRTSPRequest;
+class MyRTPSession;
+class MyReflectorStream {
+	// All the necessary info about this stream
+	StreamInfo  fStreamInfo;
+	ReflectorSession*	fMyReflectorSession;
+	bool fEnableBuffer{ false };
+	SocketPair<ReflectorSocket>*      fSockets;
+	QTSS_RTPTransportType fTransportType{ qtssRTPTransportTypeUDP };
+	ReflectorSender     fRTPSender;
+	ReflectorSender     fRTCPSender;
+public:
+	MyReflectorStream(StreamInfo* inInfo);
+	~MyReflectorStream() = default;
+	// Call this to initialize the reflector sockets. Uses the QTSS_RTSPRequestObject
+	// if provided to report any errors that occur 
+	// Passes the QTSS_ClientSessionObject to the socket so the socket can update the session if needed.
+	QTSS_Error BindSockets(MyRTSPRequest &inRequest, MyRTPSession &inSession, uint32_t inReflectorSessionFlags, bool filterState, uint32_t timeout);
+	void SetMyReflectorSession(ReflectorSession* reflector) { fMyReflectorSession = reflector; }
+	StreamInfo* GetStreamInfo() { return &fStreamInfo; }
+	void SetEnableBuffer(bool enableBuffer) { fEnableBuffer = enableBuffer; }
+};
 #endif //_REFLECTOR_SESSION_H_
 

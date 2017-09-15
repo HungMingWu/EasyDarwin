@@ -523,12 +523,6 @@ QTSS_Error RTSPRequest::SendErrorResponseWithMessage(QTSS_RTSPStatusCode inStatu
 
 void RTSPRequest::ReqSendDescribeResponse()
 {
-	if (GetStatus() == qtssRedirectNotModified)
-	{
-		SendHeader();
-		return;
-	}
-
 	//write content type header
 	static boost::string_view sContentType("application/sdp");
 	AppendHeader(qtssContentTypeHeader, sContentType);

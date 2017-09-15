@@ -3,7 +3,7 @@
 #include <string>
 #include <boost/utility/string_view.hpp>
 class RTSPServer;
-class ReflectorSession;
+class MyReflectorSession;
 class RTPSession;
 class MyRTPSession;
 class RTPSessionOutput1;
@@ -11,19 +11,20 @@ class Connection;
 class MyRTSPRequest;
 class MyRTSPSession {
 	RTSPServer& mServer;
-	std::shared_ptr<ReflectorSession> CreateSession(boost::string_view sessionName);
+	std::shared_ptr<MyReflectorSession> CreateSession(boost::string_view sessionName);
 	std::shared_ptr<MyRTPSession>     fRTPSession;
+	std::shared_ptr<MyReflectorSession> broadcastSession;
+	std::shared_ptr<RTPSessionOutput1> rtp_OutputSession;
+	std::shared_ptr<Connection> connection;
+	std::shared_ptr<MyRTSPRequest> request;
 	std::string fSessionID;
-	uint8_t fCurChannelNum{ 0 };
 	std::vector<std::string> fChNumToSessIDMap;
+	friend class Response;
+	friend class RTSPServer;
 public:
 	MyRTSPSession(RTSPServer&, std::shared_ptr<Connection> connection) noexcept;
 	void do_setup();
 	void FindOrCreateRTPSession();
-	std::shared_ptr<ReflectorSession> broadcastSession;
-	std::shared_ptr<RTPSessionOutput1> rtp_OutputSession;
-	std::shared_ptr<Connection> connection;
-	std::shared_ptr<MyRTSPRequest> request;
 
 	// If RTP data is interleaved into the RTSP connection, we need to associate
 	// 2 unique channel numbers with each RTP stream, one for RTP and one for RTCP.

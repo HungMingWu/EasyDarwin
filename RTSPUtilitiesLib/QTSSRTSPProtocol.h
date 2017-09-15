@@ -150,7 +150,7 @@ enum
     qtssRedirectPermMoved               = 8,        //301
     qtssRedirectTempMoved               = 9,        //302
     qtssRedirectSeeOther                = 10,       //303
-    qtssRedirectNotModified             = 11,       //304
+
     qtssUseProxy                        = 12,       //305
     qtssClientBadRequest                = 13,       //400
     qtssClientUnAuthorized              = 14,       //401

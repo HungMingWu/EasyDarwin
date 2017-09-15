@@ -72,20 +72,6 @@
 
 #define RTCP_TESTING 0
 
-boost::string_view RTPStream::sChannelNums[] =
-{
-	"0",
-	"1",
-	"2",
-	"3",
-	"4",
-	"5",
-	"6",
-	"7",
-	"8",
-	"9"
-};
-
 char *RTPStream::noType = "no-type";
 char *RTPStream::UDP = "UDP";
 char *RTPStream::RUDP = "RUDP";
@@ -387,8 +373,13 @@ QTSS_Error RTPStream::Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags)
 
 void RTPStream::SendSetupResponse(RTSPRequestInterface* inRequest)
 {
-	if (fSession->DoSessionSetupResponse(inRequest) != QTSS_NoErr)
-		return;
+	// This function appends a session header to the SETUP response, and
+	// checks to see if it is a 304 Not Modified. If it is, it sends the entire
+	// response and returns an error
+	if (ServerPrefs::GetRTSPTimeoutInSecs() > 0)  // adv the timeout
+		inRequest->AppendSessionHeaderWithTimeout(fSession->GetSessionID(), std::to_string(ServerPrefs::GetRTSPTimeoutInSecs()));
+	else
+		inRequest->AppendSessionHeaderWithTimeout(fSession->GetSessionID(), {}); // no timeout in resp.
 
 	this->AppendTransport(inRequest);
 
@@ -459,10 +450,6 @@ void RTPStream::AppendTransport(RTSPRequestInterface* request)
 				std::string(p1->Ptr, p1->Len), {}, {}, theSrcIPAddress, ssrcStr);
 		}
 	}
-	else if (fRTCPChannel < kNumPrebuiltChNums)
-		// We keep a certain number of channel number strings prebuilt, so most of the time
-		// we won't have to call sprintf
-		request->AppendTransportHeader({}, {}, sChannelNums[fRTPChannel], sChannelNums[fRTCPChannel], {}, ssrcStr);
 	else
 	{
 		// If these channel numbers fall outside prebuilt range, we will have to call sprintf.

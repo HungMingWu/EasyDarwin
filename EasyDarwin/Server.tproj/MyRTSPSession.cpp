@@ -6,6 +6,7 @@
 #include "ReflectorSession.h"
 #include "MyRTSPRequest.h"
 #include "MyRTPSession.h"
+#include "MyRTPStream.h"
 
 static std::string GenerateNewSessionID()
 {
@@ -29,7 +30,7 @@ MyRTSPSession::MyRTSPSession(RTSPServer &server, std::shared_ptr<Connection> con
 	}
 }
 
-std::shared_ptr<ReflectorSession> MyRTSPSession::CreateSession(boost::string_view sessionName)
+std::shared_ptr<MyReflectorSession> MyRTSPSession::CreateSession(boost::string_view sessionName)
 {
 	std::lock_guard<std::mutex> lock(mServer.session_mutex);
 	auto it = mServer.sessionMap.find(std::string(sessionName));
@@ -50,12 +51,12 @@ std::shared_ptr<ReflectorSession> MyRTSPSession::CreateSession(boost::string_vie
 		// Setup a ReflectorSession and bind the sockets. If we are negotiating,
 		// make sure to let the session know that this is a Push Session so
 		// ports may be modified.
-		uint32_t theSetupFlag = ReflectorSession1::kMarkSetup | ReflectorSession1::kIsPushSession;
+		uint32_t theSetupFlag = MyReflectorSession::kMarkSetup | MyReflectorSession::kIsPushSession;
 
-		ReflectorSession1 *theSession = new ReflectorSession1(sessionName, theInfo);
+		auto theSession = std::make_shared<MyReflectorSession>(sessionName, theInfo);
 
-		//QTSS_Error theErr = theSession->SetupReflectorSession(theSetupFlag);
-		if (1) //theErr != QTSS_NoErr)
+		QTSS_Error theErr = theSession->SetupReflectorSession(*request, *fRTPSession, theSetupFlag);
+		if (theErr != QTSS_NoErr)
 		{
 			//delete theSession;
 			//CSdpCache::GetInstance()->eraseSdpMap(theSession->GetStreamName());
@@ -63,6 +64,7 @@ std::shared_ptr<ReflectorSession> MyRTSPSession::CreateSession(boost::string_vie
 			return nullptr;
 		}
 		mServer.sessionMap.insert(std::make_pair(std::string(sessionName), theSession));
+		return theSession;
 	}
 	return {};
 }
@@ -87,7 +89,7 @@ void MyRTSPSession::do_setup()
 		{
 			if (!broadcastSession)
 			{
-				broadcastSession = CreateSession("live.sdp");
+				broadcastSession = CreateSession(request->GetFileName());
 				//if (theSession == nullptr)
 				//					return QTSS_RequestFailed;
 			}
@@ -130,33 +132,25 @@ void MyRTSPSession::do_setup()
 
 		request->SetUpServerPort(theStreamInfo->fPort);
 
-		RTPStream *newStream = nullptr;
-		//QTSS_Error theErr = AddRTPStream(theSession, inParams, &newStream);
-#if 0
+		MyRTPStream *newStream = nullptr;
+		QTSS_Error theErr = fRTPSession->AddStream(*request, &newStream, qtssASFlagsForceUDPTransport);
 		Assert(theErr == QTSS_NoErr);
 		if (theErr != QTSS_NoErr)
 		{
-			DeleteReflectorPushSession(inParams, theSession, foundSession);
-			return inParams.inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
+			// DeleteReflectorPushSession(inParams, theSession, foundSession);
+			// return inParams.inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
 		}
 
 		//send the setup response
+		newStream->EnableSSRC();
+		//newStream->SendSetupResponse(inRTSPRequest);
 
-		SendSetupRTSPResponse(newStream, inParams.inRTSPRequest, 0);
-
-		theStreamInfo->fSetupToReceive = true;
-		// This is an incoming data session. Set the Reflector Session in the ClientSession
-		inParams.inClientSession->addAttribute(sBroadcasterSessionName, theSession);
-
-		if (theSession != nullptr)
-			theSession->AddBroadcasterClientSession(inParams.inClientSession);
+		broadcastSession->AddBroadcasterClientSession(fRTPSession.get());
 
 #ifdef REFLECTORSESSION_DEBUG
 		printf("QTSSReflectorModule.cpp:DoSetup Session =%p refcount=%"   _U32BITARG_   "\n", theSession->GetRef(), theSession->GetRef()->GetRefCount());
 #endif
-
-		return QTSS_NoErr;
-#endif
+		return;
 	}
 }
 
@@ -188,14 +182,8 @@ void MyRTSPSession::FindOrCreateRTPSession()
 
 uint8_t MyRTSPSession::GetTwoChannelNumbers(boost::string_view inRTSPSessionID)
 {
-	//
 	// Allocate 2 channel numbers
-	uint8_t theChannelNum = fCurChannelNum;
-	fCurChannelNum += 2;
-
-	//
 	// Put this sessionID to the proper place in the map
-	fChNumToSessIDMap.emplace_back(inRTSPSessionID.data(), inRTSPSessionID.length());
-
-	return theChannelNum;
+	fChNumToSessIDMap.emplace_back(inRTSPSessionID);
+	return (fChNumToSessIDMap.size() - 1) * 2;
 }

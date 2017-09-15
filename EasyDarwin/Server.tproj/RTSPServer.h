@@ -51,7 +51,7 @@ public:
 	bool close_connection_after_response = false;
 };
 
-class ReflectorSession1;
+class MyReflectorSession;
 class RTSPServer {
 	friend class MyRTSPSession;
 	boost::asio::ip::tcp::acceptor acceptor_;
@@ -60,7 +60,7 @@ class RTSPServer {
 	std::mutex session_mutex;
 	std::mutex rtp_mutex;
 	std::map<std::string, std::shared_ptr<MyRTPSession>> rtpMap;
-	std::map<std::string, std::shared_ptr<ReflectorSession1>> sessionMap;
+	std::map<std::string, std::shared_ptr<MyReflectorSession>> sessionMap;
 	std::shared_ptr<ScopeRunner> handler_runner{ new ScopeRunner() };
 	std::function<void(std::shared_ptr<MyRTSPRequest>, const boost::system::error_code &)> on_error;
 

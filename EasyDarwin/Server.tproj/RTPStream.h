@@ -194,7 +194,6 @@ class RTPStream
         enum
         {
             kSenderReportIntervalInSecs = 7,
-            kNumPrebuiltChNums          = 10,
             kMaxQualityLevel            = 0,
             kIsRTCPPacket                 = true,
             kIsRTPPacket                  = false
@@ -361,8 +360,6 @@ class RTPStream
          
         void        SetTCPThinningParams();
         QTSS_Error  TCPWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags);
-
-        static boost::string_view           sChannelNums[];
 
         static char *noType;
         static char *UDP;

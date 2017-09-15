@@ -116,7 +116,6 @@ QTSS_Error RTPSession::AddStream(RTSPRequest* request, RTPStream** outStream,
 	{
 		// If the stream init succeeded, then put it into the array of setup streams
 		fStreamBuffer.push_back(*outStream);
-		fHasAnRTPStream = true;
 	}
 	return theErr;
 }

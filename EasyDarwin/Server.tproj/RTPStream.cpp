@@ -243,16 +243,6 @@ QTSS_Error RTPStream::Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags)
 	// Setup the transport type
 	fTransportType = request->GetTransportType();
 	fNetworkMode = request->GetNetworkMode();
-	//
-	// Only allow reliable UDP if it is enabled
-	if ((fTransportType == qtssRTPTransportTypeReliableUDP) && (!ServerPrefs::IsReliableUDPEnabled()))
-		fTransportType = qtssRTPTransportTypeUDP;
-
-	//
-	// Check to see if we are inside a valid reliable UDP directory
-	boost::string_view t(request->GetAbsoluteURL());
-	if ((fTransportType == qtssRTPTransportTypeReliableUDP) && (!ServerPrefs::IsPathInsideReliableUDPDir(t)))
-		fTransportType = qtssRTPTransportTypeUDP;
 
 	//
 	// Check to see if caller is forcing raw UDP transport

@@ -159,22 +159,10 @@ namespace ServerPrefs {
 	{
 		return {};
 	}
-	bool IsReliableUDPEnabled() {
-		constexpr bool fReliableUDP = true;
-		return fReliableUDP;
-	}
 	// for tcp buffer size scaling
 	float GetTCPSecondsToBuffer() {
 		constexpr float fTCPSecondsToBuffer = 0.5;
 		return fTCPSecondsToBuffer;
-	}
-	bool IsPathInsideReliableUDPDir(boost::string_view inPath)
-	{
-		std::vector<std::string> dirs;
-		for (const auto &dir : dirs)
-			if (boost::iequals(dir, inPath))
-				return true;
-		return false;
 	}
 	boost::string_view GetMovieFolder()
 	{

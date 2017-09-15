@@ -241,7 +241,7 @@ protected:
 	uint32_t                      fContentLength;
 
 	float                     fSpeed;
-	float                     fLateTolerance;
+	float                     fLateTolerance{ -1 };
 	std::string               fLateToleranceStr;
 	float                     fPrebufferAmt;
 

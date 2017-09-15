@@ -22,10 +22,10 @@ MyRTSPSession::MyRTSPSession(RTSPServer &server, std::shared_ptr<Connection> con
 	try {
 		//auto remote_endpoint = connection->socket.lowest_layer().remote_endpoint();
 		//request = std::make_shared<RTSPRequest1>(remote_endpoint.address().to_string(), remote_endpoint.port());
-		request = std::make_shared<MyRTSPRequest>();
+		request = std::make_shared<MyRTSPRequest>(*this);
 	}
 	catch (...) {
-		request = std::make_shared<MyRTSPRequest>();
+		request = std::make_shared<MyRTSPRequest>(*this);
 	}
 }
 
@@ -130,9 +130,9 @@ void MyRTSPSession::do_setup()
 
 		request->SetUpServerPort(theStreamInfo->fPort);
 
-#if 0
 		RTPStream *newStream = nullptr;
-		QTSS_Error theErr = AddRTPStream(theSession, inParams, &newStream);
+		//QTSS_Error theErr = AddRTPStream(theSession, inParams, &newStream);
+#if 0
 		Assert(theErr == QTSS_NoErr);
 		if (theErr != QTSS_NoErr)
 		{
@@ -184,4 +184,18 @@ void MyRTSPSession::FindOrCreateRTPSession()
 		mServer.rtpMap[fSessionID] = fRTPSession;
 	}
 	return;
+}
+
+uint8_t MyRTSPSession::GetTwoChannelNumbers(boost::string_view inRTSPSessionID)
+{
+	//
+	// Allocate 2 channel numbers
+	uint8_t theChannelNum = fCurChannelNum;
+	fCurChannelNum += 2;
+
+	//
+	// Put this sessionID to the proper place in the map
+	fChNumToSessIDMap.emplace_back(inRTSPSessionID.data(), inRTSPSessionID.length());
+
+	return theChannelNum;
 }

@@ -93,3 +93,14 @@ std::string MyRTSPRequest::GetFileDigit()
 		return path.substr(found + 1);
 	else return {};
 }
+
+std::string MyRTSPRequest::GetFileName()
+{
+	std::string str(path);
+	if (str[0] == '/') str = str.substr(1);
+	size_t nextDelimiter = str.find("/");
+	if (nextDelimiter == std::string::npos)
+		return str;
+	else
+		return str.substr(0, nextDelimiter);
+}

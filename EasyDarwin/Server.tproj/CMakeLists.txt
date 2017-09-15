@@ -14,6 +14,7 @@ set (SRC
      RTPSession.cpp RTPSession.h
 	 MyRTPSession.cpp MyRTPSession.h
      RTPStream.cpp RTPStream.h
+	 MyRTPStream.cpp MyRTPStream.h
      RTPOverbufferWindow.cpp RTPOverbufferWindow.h
      RTSPSessionInterface.cpp RTSPSessionInterface.h
      RTPSessionInterface.cpp RTPSessionInterface.h

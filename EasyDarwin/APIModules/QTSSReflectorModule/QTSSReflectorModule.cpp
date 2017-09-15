@@ -660,7 +660,7 @@ void DeleteReflectorPushSession(QTSS_StandardRTSP_Params& inParams, ReflectorSes
 	}
 }
 
-QTSS_Error AddRTPStream(ReflectorSession* theSession, QTSS_StandardRTSP_Params& inParams, RTPStream **newStreamPtr)
+QTSS_Error AddRTPStream(QTSS_StandardRTSP_Params& inParams, RTPStream **newStreamPtr)
 {
 	// Ok, this is completely crazy but I can't think of a better way to do this that's
 	// safe so we'll do it this way for now. Because the ReflectorStreams use this session's
@@ -669,19 +669,11 @@ QTSS_Error AddRTPStream(ReflectorSession* theSession, QTSS_StandardRTSP_Params& 
 	// ReflectorStream's mutex, which will stop every reflector stream from running.
 	Assert(newStreamPtr != nullptr);
 
-	if (theSession != nullptr)
-		for (uint32_t x = 0; x < theSession->GetNumStreams(); x++)
-			theSession->GetStreamByIndex(x)->GetMutex()->Lock();
-
 	//
 	// Turn off reliable UDP transport, because we are not yet equipped to
 	// do overbuffering.
 	QTSS_Error theErr = inParams.inClientSession->AddStream(
 		inParams.inRTSPRequest, newStreamPtr, qtssASFlagsForceUDPTransport);
-
-	if (theSession != nullptr)
-		for (uint32_t y = 0; y < theSession->GetNumStreams(); y++)
-			theSession->GetStreamByIndex(y)->GetMutex()->Unlock();
 
 	return theErr;
 }
@@ -775,7 +767,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params &inParams)
 		inParams.inRTSPRequest->SetUpServerPort(theStreamInfo->fPort);
 
 		RTPStream *newStream = nullptr;
-		QTSS_Error theErr = AddRTPStream(theSession, inParams, &newStream);
+		QTSS_Error theErr = AddRTPStream(inParams, &newStream);
 		Assert(theErr == QTSS_NoErr);
 		if (theErr != QTSS_NoErr)
 		{

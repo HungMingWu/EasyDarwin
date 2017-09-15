@@ -44,9 +44,7 @@ namespace ServerPrefs {
 	uint32_t GetQualityCheckIntervalInMsec();
 	uint32_t GetRTSPSessionTimeoutInSecs();
 	boost::string_view GetTransportSrcAddr();
-	bool IsReliableUDPEnabled();
 	float GetTCPSecondsToBuffer();
-	bool IsPathInsideReliableUDPDir(boost::string_view inPath);
 	boost::string_view GetMovieFolder();
 	std::vector<std::string> GetReqRTPStartTimeAdjust();
 }

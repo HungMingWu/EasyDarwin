@@ -4,6 +4,7 @@
 #include <string>
 #include <unordered_map>
 #include <boost/asio/streambuf.hpp>
+#include <boost/utility/string_view.hpp>
 #include "QTSS.h"
 
 class Content : public std::istream {
@@ -92,15 +93,28 @@ class MyRTSPRequest {
 	QTSS_RTPTransportType fTransportType;
 	QTSS_RTPTransportMode fTransportMode;
 	uint16_t fSetUpServerPort{ 0 };
+	float fLateTolerance{ -1 };
+
+	// -1 not in request, 0 off, 1 on
+	int32_t                      fEnableDynamicRateState;
+	MyRTSPSession&               fSession;
 public:
-	MyRTSPRequest(const std::string &remote_endpoint_address = std::string(), unsigned short remote_endpoint_port = 0) noexcept
-		: content(streambuf), remote_endpoint_address(remote_endpoint_address), remote_endpoint_port(remote_endpoint_port) {}
+	MyRTSPRequest(MyRTSPSession& session,
+		          const std::string &remote_endpoint_address = std::string(), 
+		          unsigned short remote_endpoint_port = 0) noexcept
+		: fSession(session), content(streambuf), remote_endpoint_address(remote_endpoint_address), remote_endpoint_port(remote_endpoint_port) {}
 
 	~MyRTSPRequest() = default;
 	bool IsPushRequest() { return (fTransportMode == qtssRTPTransportModeRecord) ? true : false; }
 	std::string GetFileDigit();
-	uint16_t GetSetUpServerPort() { return fSetUpServerPort; }
+	uint16_t GetSetUpServerPort() const { return fSetUpServerPort; }
 	void SetUpServerPort(uint16_t port) { fSetUpServerPort = port; }
+	float GetLateToleranceInSec() const { return fLateTolerance; }
+	QTSS_RTPTransportType       GetTransportType() { return fTransportType; }
+	QTSS_RTPNetworkMode         GetNetworkMode() { return fNetworkMode; }
+	int32_t                     GetDynamicRateState() { return fEnableDynamicRateState; }
+	std::string GetFileName();
+	MyRTSPSession&              GetSession() { return fSession; }
 };
 
 class RequestMessage {

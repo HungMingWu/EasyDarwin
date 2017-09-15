@@ -100,7 +100,6 @@ RTSPRequestInterface::RTSPRequestInterface(RTSPSessionInterface *session)
 	fNetworkMode(qtssRTPNetworkModeDefault),
 	fContentLength(0),
 	fSpeed(0),
-	fLateTolerance(-1),
 	fPrebufferAmt(-1),
 	fWindowSize(0),
 	fTransportMode(qtssRTPTransportModePlay),

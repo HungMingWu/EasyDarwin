@@ -58,11 +58,6 @@ public:
 	RTPSession();
 	~RTPSession() override;
 
-	//
-	//ACCESS FUNCTIONS
-
-	bool      HasAnRTPStream() { return fHasAnRTPStream; }
-
 	RTPStream*  FindRTPStreamForChannelNum(uint8_t inChannelNum);
 
 	//
@@ -125,7 +120,6 @@ private:
 		kCantGetMutexIdleTime = 10
 	};
 
-	bool              fHasAnRTPStream{false};
 	int32_t              fSessionQualityLevel;
 
 	char        fRTPStreamArray[kRTPStreamArraySize];

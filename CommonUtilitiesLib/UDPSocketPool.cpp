@@ -30,6 +30,7 @@
 
  */
 
+#include <algorithm>
 #include "UDPSocketPool.h"
 
 UDPSocketPair* UDPSocketPool::GetUDPSocketPair(uint32_t inIPAddr, uint16_t inPort,

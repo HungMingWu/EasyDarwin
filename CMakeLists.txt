@@ -20,7 +20,7 @@ if(MSVC)
 else()
     # GCC or Clang
     add_definitions(-include "${CMAKE_CURRENT_SOURCE_DIR}/Include/PlatformHeader.h")
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++11")
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} "-std=c++14")
     set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS} "-O0 -ggdb -std=c99")
 endif()
 

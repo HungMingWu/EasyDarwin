@@ -36,9 +36,6 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <unistd.h>
-#ifndef __Win32__
-#include "QTSSModuleUtils.h"
-#endif
 
 #endif
 
@@ -126,11 +123,6 @@ void TCPListenerSocket::ProcessEvent(int /*eventBits*/)
 				//the server is going to be failing on sockets, logs, qtgroups and qtuser auth file accesses and movie files. The server is not functional.
 		if (acceptError == EMFILE || acceptError == ENFILE)
 		{
-#ifndef __Win32__
-
-			QTSSModuleUtils::LogErrorStr(qtssFatalVerbosity, "Out of File Descriptors. Set max connections lower and check for competing usage from other processes. Exiting.");
-#endif
-
 			exit(EXIT_FAILURE);
 		}
 		else

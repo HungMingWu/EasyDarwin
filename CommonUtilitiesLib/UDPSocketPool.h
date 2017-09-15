@@ -35,6 +35,7 @@
 #define __UDPSOCKETPOOL_H__
 
 #include <list>
+#include <memory>
 #include <mutex>
 #include "SyncUnorderMap.h"
 #include "UDPSocket.h"

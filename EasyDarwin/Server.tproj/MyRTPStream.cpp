@@ -44,7 +44,7 @@ void MyRTPStream::SetOverBufferState(MyRTSPRequest* request)
 	//if any stream turns it off then it is off for all streams
 	//a disable is from either the stream type default or a specific rtsp command to disable
 	if (!enableOverBuffer)
-		fSession.fOverbufferWindow.TurnOverbuffering(false);
+		fSession.fOverbufferWindow->TurnOverbuffering(false);
 }
 
 QTSS_Error MyRTPStream::Setup(MyRTSPRequest* request, QTSS_AddStreamFlags inFlags)
@@ -78,7 +78,7 @@ QTSS_Error MyRTPStream::Setup(MyRTSPRequest* request, QTSS_AddStreamFlags inFlag
 	if (fTransportType == qtssRTPTransportTypeTCP)
 	{
 		fIsTCP = true;
-		fSession.fOverbufferWindow.SetWindowSize(UINT32_MAX);
+		fSession.fOverbufferWindow->SetWindowSize(UINT32_MAX);
 
 		// If it is, get 2 channel numbers from the RTSP session.
 		fRTPChannel = request->GetSession().GetTwoChannelNumbers(fSession.GetSessionID());

@@ -78,6 +78,7 @@ public:
 };
 
 class RequestMessage;
+class MyRTSPSession;
 
 class MyRTSPRequest {
 	friend class RTSPServer;

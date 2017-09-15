@@ -70,7 +70,7 @@ int64_t RTCPTask::Run()
 				{
 					thePacket.Len = 0;
 					theSocket->RecvFrom(&theRemoteAddr, &theRemotePort, thePacket.Ptr,
-						kMaxRTCPPacketSize, &thePacket.Len);
+						kMaxRTCPPacketSize, (size_t *)&thePacket.Len);
 					if (thePacket.Len == 0)
 					{
 						theSocket->RequestEvent(EV_RE);

@@ -35,6 +35,10 @@
 #ifndef __OSTHREAD__
 #define __OSTHREAD__
 
+#ifdef __linux
+#include <errno.h>
+#include <pthread.h>
+#endif
 #include "OSHeaders.h"
 
 class OSThread

@@ -9,7 +9,7 @@ class MyRTSPRequest;
 class MyRTPStream;
 class MyRTPSession {
 	std::vector<MyRTPStream*>       fStreamBuffer;
-	RTPOverbufferWindow fOverbufferWindow;
+	RTPOverbufferWindow *fOverbufferWindow;
 	std::string         fRTSPSessionID;
 	friend class MyRTPStream;
 public:

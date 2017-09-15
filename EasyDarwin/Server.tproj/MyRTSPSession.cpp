@@ -62,7 +62,7 @@ std::shared_ptr<ReflectorSession> MyRTSPSession::CreateSession(boost::string_vie
 			//theSession->StopTimer();
 			return nullptr;
 		}
-		mServer.sessionMap.insert(std::make_pair(sessionName, theSession));
+		mServer.sessionMap.insert(std::make_pair(std::string(sessionName), theSession));
 	}
 	return {};
 }

@@ -86,7 +86,7 @@ UDPSocket::SendTo(uint32_t inRemoteAddr, uint16_t inRemotePort, void* inBuffer, 
 }
 
 OS_Error UDPSocket::RecvFrom(uint32_t* outRemoteAddr, uint16_t* outRemotePort,
-	void* ioBuffer, uint32_t inBufLen, uint32_t* outRecvLen)
+	void* ioBuffer, size_t inBufLen, size_t* outRecvLen)
 {
 	Assert(outRecvLen != nullptr);
 	Assert(outRemoteAddr != nullptr);

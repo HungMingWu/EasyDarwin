@@ -45,6 +45,7 @@
 #ifndef __TASK_H__
 #define __TASK_H__
 
+#include <string.h>
 #include "OSQueue.h"
 #include "OSHeap.h"
 #include "OSThread.h"

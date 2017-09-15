@@ -30,6 +30,7 @@
 
  */
 
+#include <algorithm>
 #include "TimeoutTask.h"
 
 TimeoutTaskThread* TimeoutTask::sThread = nullptr;

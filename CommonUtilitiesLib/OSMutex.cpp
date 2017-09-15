@@ -37,6 +37,7 @@
 
 #include "OSMutex.h"
 #include <stdlib.h>
+#include <string.h>
 
  // Private globals
 #if __PTHREADS_MUTEXES__

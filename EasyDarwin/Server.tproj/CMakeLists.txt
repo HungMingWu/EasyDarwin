@@ -3,7 +3,8 @@ include_directories(../../CommonUtilitiesLib ../../RTSPUtilitiesLib
 					../APIModules/QTSSReflectorModule 
 					../RTCPUtilitiesLib ../APICommonCode
 					../RTPMetaInfoLib
-					../)
+					../
+					./)
 
 set (SRC 
      RunServer.cpp RunServer.h

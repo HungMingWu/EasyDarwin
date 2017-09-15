@@ -58,7 +58,7 @@ public:
 		void* inBuffer, uint32_t inLength);
 
 	OS_Error        RecvFrom(uint32_t* outRemoteAddr, uint16_t* outRemotePort,
-		void* ioBuffer, uint32_t inBufLen, uint32_t* outRecvLen);
+		void* ioBuffer, size_t inBufLen, size_t* outRecvLen);
 
 private:
 	struct sockaddr_in  fMsgAddr;

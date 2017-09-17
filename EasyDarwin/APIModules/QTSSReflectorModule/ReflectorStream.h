@@ -190,14 +190,14 @@ public:
 	void    AddSender(ReflectorSender* inSender);
 	void    RemoveSender(ReflectorSender* inStreamElem);
 	bool  HasSender() { return !fDemuxer.empty(); }
-	bool  ProcessPacket(const int64_t& inMilliseconds, ReflectorPacket* thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort);
+	bool  ProcessPacket(int64_t inMilliseconds, ReflectorPacket* thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort);
 	ReflectorPacket*    GetPacket();
 	int64_t      Run() override;
 	void    SetSSRCFilter(bool state, uint32_t timeoutSecs) { fFilterSSRCs = state; fTimeoutSecs = timeoutSecs; }
 private:
 
 	//virtual int64_t        Run();
-	void    GetIncomingData(const int64_t& inMilliseconds);
+	void    GetIncomingData(int64_t inMilliseconds);
 	void    FilterInvalidSSRCs(ReflectorPacket* thePacket, bool isRTCP);
 
 	//Number of packets to allocate when the socket is first created
@@ -533,27 +533,5 @@ void    ReflectorStream::UpdateBitRate(int64_t currentTime)
 	}
 }
 
-class MyRTSPRequest;
-class MyRTPSession;
-class MyReflectorStream {
-	// All the necessary info about this stream
-	StreamInfo  fStreamInfo;
-	ReflectorSession*	fMyReflectorSession;
-	bool fEnableBuffer{ false };
-	SocketPair<ReflectorSocket>*      fSockets;
-	QTSS_RTPTransportType fTransportType{ qtssRTPTransportTypeUDP };
-	ReflectorSender     fRTPSender;
-	ReflectorSender     fRTCPSender;
-public:
-	MyReflectorStream(StreamInfo* inInfo);
-	~MyReflectorStream() = default;
-	// Call this to initialize the reflector sockets. Uses the QTSS_RTSPRequestObject
-	// if provided to report any errors that occur 
-	// Passes the QTSS_ClientSessionObject to the socket so the socket can update the session if needed.
-	QTSS_Error BindSockets(MyRTSPRequest &inRequest, MyRTPSession &inSession, uint32_t inReflectorSessionFlags, bool filterState, uint32_t timeout);
-	void SetMyReflectorSession(ReflectorSession* reflector) { fMyReflectorSession = reflector; }
-	StreamInfo* GetStreamInfo() { return &fStreamInfo; }
-	void SetEnableBuffer(bool enableBuffer) { fEnableBuffer = enableBuffer; }
-};
 #endif //_REFLECTOR_SESSION_H_
 

@@ -3,10 +3,11 @@
 #include "RTSPServer.h"
 #include "sdpCache.h"
 #include "SDPSourceInfo.h"
-#include "ReflectorSession.h"
 #include "MyRTSPRequest.h"
 #include "MyRTPSession.h"
 #include "MyRTPStream.h"
+#include "MyReflectorSession.h"
+#include "MyAssert.h"
 
 static std::string GenerateNewSessionID()
 {
@@ -69,7 +70,7 @@ std::shared_ptr<MyReflectorSession> MyRTSPSession::CreateSession(boost::string_v
 	return {};
 }
 
-void MyRTSPSession::do_setup()
+std::error_code MyRTSPSession::do_setup()
 {
 	bool isPush = request->IsPushRequest();
 	if (!rtp_OutputSession)
@@ -150,8 +151,9 @@ void MyRTSPSession::do_setup()
 #ifdef REFLECTORSESSION_DEBUG
 		printf("QTSSReflectorModule.cpp:DoSetup Session =%p refcount=%"   _U32BITARG_   "\n", theSession->GetRef(), theSession->GetRef()->GetRefCount());
 #endif
-		return;
+		return {};
 	}
+	return {};
 }
 
 void MyRTSPSession::FindOrCreateRTPSession()

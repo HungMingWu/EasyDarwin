@@ -148,7 +148,6 @@ void RTSPServer::operate_request(const std::shared_ptr<MyRTSPSession> &session)
 		});
 	}
 	else if (session->request->method == "ANNOUNCE") {
-		session->FindOrCreateRTPSession();
 		std::string sdp = session->request->content.string();
 		SDPContainer checkedSDPContainer(sdp);
 		if (!checkedSDPContainer.Parse())
@@ -162,12 +161,12 @@ void RTSPServer::operate_request(const std::shared_ptr<MyRTSPSession> &session)
 		});
 	}
 	else if (session->request->method == "SETUP") {
-		
+		session->FindOrCreateRTPSession();
 		session->do_setup();
-		write_response(session, [](std::shared_ptr<Response> response, std::shared_ptr<MyRTSPRequest> request) {
+		write_response(session, [session](std::shared_ptr<Response> response, std::shared_ptr<MyRTSPRequest> request) {
 			*response << "RTSP/1.0 200 OK\r\n"
 				<< "Cseq: " << request->header["CSeq"] << "\r\n"
-				<< "Session: 972255884303327207\r\n"
+				<< "Session: " << session->fSessionID << "\r\n"
 				<< "Transport: RTP/AVP/TCP;unicast;mode=record;;interleaved=0-1\r\n\r\n";
 		});
 	}

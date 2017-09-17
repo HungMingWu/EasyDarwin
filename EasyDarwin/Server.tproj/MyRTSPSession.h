@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <string>
+#include <system_error>
 #include <boost/utility/string_view.hpp>
 class RTSPServer;
 class MyReflectorSession;
@@ -23,7 +24,7 @@ class MyRTSPSession {
 	friend class RTSPServer;
 public:
 	MyRTSPSession(RTSPServer&, std::shared_ptr<Connection> connection) noexcept;
-	void do_setup();
+	std::error_code do_setup();
 	void FindOrCreateRTPSession();
 
 	// If RTP data is interleaved into the RTSP connection, we need to associate

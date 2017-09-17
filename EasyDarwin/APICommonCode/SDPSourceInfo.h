@@ -35,8 +35,9 @@
 #ifndef __SDP_SOURCE_INFO_H__
 #define __SDP_SOURCE_INFO_H__
 
-#include "QTSS.h"
+#include <vector>
 #include <boost/utility/string_view.hpp>
+#include "QTSS.h"
 
 constexpr static float eDefaultBufferDelay = 3.0;
 

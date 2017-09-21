@@ -112,7 +112,10 @@ public:
 	}
 	void accept();
 	void read_request_and_content(const std::shared_ptr<MyRTSPSession> &session);
+	void read_data_packet(const std::shared_ptr<MyRTSPSession> &session);
 	void write_response(const std::shared_ptr<MyRTSPSession> &session,
+		std::function<void(std::shared_ptr<Response>, std::shared_ptr<MyRTSPRequest>)> resource_function);
+	void write_response1(const std::shared_ptr<MyRTSPSession> &session,
 		std::function<void(std::shared_ptr<Response>, std::shared_ptr<MyRTSPRequest>)> resource_function);
 	void operate_request(const std::shared_ptr<MyRTSPSession> &session);
 };

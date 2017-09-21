@@ -176,9 +176,6 @@ QTSS_Error RTSPRequest::Parse()
 	if (error != QTSS_NoErr)
 		return error;
 
-	//Response headers should set themselves up to reflect what's in the request headers
-	fResponseKeepAlive = fRequestKeepAlive;
-
 	//Make sure that there was some path that was extracted from this request. If not, there is no way
 	//we can process the request, so generate an error
 	if (absolutePath.empty())
@@ -285,9 +282,7 @@ QTSS_Error RTSPRequest::ParseHeaders(const std::map<std::string, std::string>& h
 		case qtssXRetransmitHeader:         ParseRetransmitHeader(theHeaderVal); break;
 		case qtssContentLengthHeader:       ParseContentLengthHeader(theHeaderVal); break;
 		case qtssSpeedHeader:               ParseSpeedHeader(theHeaderVal);     break;
-		case qtssXTransportOptionsHeader:   ParseTransportOptionsHeader(theHeaderVal); break;
 		case qtssXPreBufferHeader:          ParsePrebufferHeader(theHeaderVal); break;
-		case qtssXDynamicRateHeader:		ParseDynamicRateHeader(theHeaderVal); break;
 		case qtssBandwidthHeader:           ParseBandwidthHeader(theHeaderVal); break;
 		default:    break;
 		}
@@ -453,37 +448,10 @@ void  RTSPRequest::ParsePrebufferHeader(boost::string_view header)
 	}
 }
 
-void  RTSPRequest::ParseDynamicRateHeader(boost::string_view header)
-{
-	auto iter = header.cbegin(), end = header.cend();
-	int32_t value = 0;
-	bool r = qi::phrase_parse(iter, end, qi::int_, qi::ascii::blank, value);
-
-	// fEnableDynamicRate: < 0 undefined, 0 disable, > 0 enable
-	if (value > 0)
-		fEnableDynamicRateState = 1;
-	else
-		fEnableDynamicRateState = 0;
-}
-
 void RTSPRequest::ParseSpeedHeader(boost::string_view header)
 {
 	auto iter = header.cbegin(), end = header.cend();
 	bool r = qi::phrase_parse(iter, end, qi::float_, qi::ascii::blank, fSpeed);
-}
-
-void RTSPRequest::ParseTransportOptionsHeader(boost::string_view header)
-{
-	std::vector<std::string> tokens = spirit_direct(header, ";");
-	for (const auto &token : tokens)
-		if (boost::istarts_with(token, "late-tolerance")) {
-			bool r = qi::phrase_parse(token.cbegin(), token.cend(),
-				qi::omit[+(qi::char_ - "=")] >> "=" >> qi::double_, qi::ascii::blank, fLateTolerance);
-			if (r) {
-				fLateToleranceStr = token;
-				break;
-			}
-		}
 }
 
 void RTSPRequest::ParseModeSubHeader(boost::string_view inModeSubHeader)
@@ -513,7 +481,6 @@ QTSS_Error RTSPRequest::SendErrorResponseWithMessage(QTSS_RTSPStatusCode inStatu
 {
 	//set RTSP headers necessary for this error response message
 	SetStatus(inStatusCode);
-	SetResponseKeepAlive(false);
 	//send the response header. In all situations where errors could happen, we
 	//don't really care, cause there's nothing we can do anyway!
 	SendHeader();
@@ -564,7 +531,6 @@ QTSS_Error RTSPRequest::SendErrorResponse(QTSS_RTSPStatusCode inStatusCode)
 {
 	//set RTSP headers necessary for this error response message
 	SetStatus(inStatusCode);
-	SetResponseKeepAlive(false);
 
 	//send the response header. In all situations where errors could happen, we
 	//don't really care, cause there's nothing we can do anyway!

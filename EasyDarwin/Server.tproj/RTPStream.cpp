@@ -174,7 +174,6 @@ void RTPStream::SetQualityLevel(int32_t level)
 
 void  RTPStream::SetOverBufferState(RTSPRequestInterface* request)
 {
-	int32_t requestedOverBufferState = request->GetDynamicRateState();
 	bool enableOverBuffer = false;
 
 	switch (fTransportType)
@@ -182,8 +181,6 @@ void  RTPStream::SetOverBufferState(RTSPRequestInterface* request)
 	case qtssRTPTransportTypeReliableUDP:
 		{
 			enableOverBuffer = true; // default is on
-			if (requestedOverBufferState == 0) // client specifically set to false
-				enableOverBuffer = false;
 		}
 		break;
 
@@ -196,10 +193,7 @@ void  RTPStream::SetOverBufferState(RTSPRequestInterface* request)
 
 	case qtssRTPTransportTypeTCP:
 		{
-
 			enableOverBuffer = true; // default is on same as 4.0 and earlier. Allows tcp to compensate for falling behind from congestion or slow-start. 
-			if (requestedOverBufferState == 0) // client specifically set to false
-				enableOverBuffer = false;
 		}
 		break;
 
@@ -376,37 +370,10 @@ void RTPStream::SendSetupResponse(RTSPRequestInterface* inRequest)
 	// This function appends a session header to the SETUP response, and
 	// checks to see if it is a 304 Not Modified. If it is, it sends the entire
 	// response and returns an error
-	if (ServerPrefs::GetRTSPTimeoutInSecs() > 0)  // adv the timeout
-		inRequest->AppendSessionHeaderWithTimeout(fSession->GetSessionID(), std::to_string(ServerPrefs::GetRTSPTimeoutInSecs()));
-	else
-		inRequest->AppendSessionHeaderWithTimeout(fSession->GetSessionID(), {}); // no timeout in resp.
+	inRequest->AppendSessionHeader(fSession->GetSessionID());
 
 	this->AppendTransport(inRequest);
 
-	//
-	// Append the x-RTP-Options header if there was a late-tolerance field
-	if (!inRequest->GetLateToleranceStr().empty())
-		inRequest->AppendHeader(qtssXTransportOptionsHeader, inRequest->GetLateToleranceStr());
-
-	//
-	// Append the retransmit header if the client sent it
-	boost::string_view theRetrHdr = inRequest->GetHeaderDict().Get(qtssXRetransmitHeader);
-	if (!theRetrHdr.empty() && (fTransportType == qtssRTPTransportTypeReliableUDP))
-		inRequest->AppendHeader(qtssXRetransmitHeader, theRetrHdr);
-
-	// Append the dynamic rate header if the client sent it
-	int32_t theRequestedRate = inRequest->GetDynamicRateState();
-	static boost::string_view sHeaderOn("1");
-	static boost::string_view sHeaderOff("0");
-	if (theRequestedRate > 0)	// the client sent the header and wants a dynamic rate
-	{
-		if (fSession->GetOverbufferWindow()->GetOverbufferEnabled())
-			inRequest->AppendHeader(qtssXDynamicRateHeader, sHeaderOn); // send 1 if overbuffering is turned on
-		else
-			inRequest->AppendHeader(qtssXDynamicRateHeader, sHeaderOff); // send 0 if overbuffering is turned off
-	}
-	else if (theRequestedRate == 0) // the client sent the header but doesn't want a dynamic rate
-		inRequest->AppendHeader(qtssXDynamicRateHeader, sHeaderOff);
 	//else the client didn't send a header so do nothing 
 
 	inRequest->SendHeader();
@@ -466,7 +433,7 @@ void    RTPStream::AppendRTPInfo(QTSS_RTSPHeader inHeader, RTSPRequestInterface*
 	std::string seqNumberBuf = (inFlags & qtssPlayRespWriteTrackInfo) ? std::to_string(fFirstSeqNumber) : std::string{};
 
 	// There is no SSRC in RTP-Info header, it goes in the transport header.
-	request->AppendRTPInfoHeader(inHeader, fStreamURL, seqNumberBuf, {}, rtpTimeBuf, lastInfo);
+	request->AppendRTPInfoHeader(inHeader, fStreamURL, seqNumberBuf, rtpTimeBuf, lastInfo);
 }
 
 

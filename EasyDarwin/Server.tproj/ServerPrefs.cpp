@@ -110,10 +110,6 @@ namespace ServerPrefs {
 		constexpr uint32_t  fMinTCPBufferSizeInBytes = 8192;
 		return fMinTCPBufferSizeInBytes;
 	}
-	uint32_t GetRTSPTimeoutInSecs() {
-		constexpr uint32_t fRTSPTimeoutInSecs = 0;
-		return fRTSPTimeoutInSecs;
-	}
 
 	// Thinning algorithm parameters
 	int32_t GetDropAllVideoPacketsTimeInMsec() {

@@ -63,68 +63,21 @@ std::ostream& operator << (std::ostream& stream, const MyRTPStream& RTPStream)
 	return stream;
 }
 
-MyRTPStream::MyRTPStream(uint32_t inSSRC, MyRTPSession& inSession)
-	: fSession(inSession),
+MyRTPStream::MyRTPStream(MyRTSPRequest& request, uint32_t inSSRC, MyRTPSession& inSession, QTSS_AddStreamFlags inFlags)
+	: fStreamURL(request.GetFileName()),
+	fLateToleranceInSec(request.GetLateToleranceInSec()),
+	fTransportType(request.GetTransportType()),
+	fNetworkMode(request.GetNetworkMode()),
+	fSession(inSession),
 	fSsrc(inSSRC)
 {
-
-}
-
-void MyRTPStream::SetOverBufferState(MyRTSPRequest& request)
-{
-	int32_t requestedOverBufferState = request.GetDynamicRateState();
-	bool enableOverBuffer = false;
-
-	switch (fTransportType)
-	{
-		case qtssRTPTransportTypeReliableUDP:
-		{
-			enableOverBuffer = true; // default is on
-			if (requestedOverBufferState == 0) // client specifically set to false
-				enableOverBuffer = false;
-		}
-		break;
-
-		case qtssRTPTransportTypeUDP:
-		{
-			enableOverBuffer = false; // always off
-		}
-		break;
-
-		case qtssRTPTransportTypeTCP:
-		{
-			enableOverBuffer = true; // default is on same as 4.0 and earlier. Allows tcp to compensate for falling behind from congestion or slow-start. 
-			if (requestedOverBufferState == 0) // client specifically set to false
-				enableOverBuffer = false;
-		}
-		break;
-
-	}
-
-	//over buffering is enabled for the session by default
-	//if any stream turns it off then it is off for all streams
-	//a disable is from either the stream type default or a specific rtsp command to disable
-	if (!enableOverBuffer)
-		fSession.fOverbufferWindow.TurnOverbuffering(false);
-}
-
-QTSS_Error MyRTPStream::Setup(MyRTSPRequest& request, QTSS_AddStreamFlags inFlags)
-{
-	//Get the URL for this track
-	fStreamURL = request.GetFileName();//just in case someone wants to use string routines
-
 	//
 	// Store the late-tolerance value that came out of hte x-RTP-Options header,
 	// so that when it comes time to determine our thinning params (when we PLAY),
 	// we will know this
-	fLateToleranceInSec = request.GetLateToleranceInSec();
+
 	if (fLateToleranceInSec == -1.0)
 		fLateToleranceInSec = 1.5;
-
-	//
-	// Setup the transport type
-	fTransportType = request.GetTransportType();
-	fNetworkMode = request.GetNetworkMode();
 
 	//
 	// Check to see if caller is forcing raw UDP transport
@@ -144,9 +97,6 @@ QTSS_Error MyRTPStream::Setup(MyRTSPRequest& request, QTSS_AddStreamFlags inFlag
 		// If it is, get 2 channel numbers from the RTSP session.
 		fRTPChannel = request.GetSession().GetTwoChannelNumbers(fSession.fRTSPSessionID);
 		fRTCPChannel = fRTPChannel + 1;
-
-		// If we are interleaving, this is all we need to do to setup.
-		return QTSS_NoErr;
 	}
 #if 0
 	//
@@ -265,5 +215,42 @@ QTSS_Error MyRTPStream::Setup(MyRTSPRequest& request, QTSS_AddStreamFlags inFlag
 	//finally, register with the demuxer to get RTCP packets from the proper address
 	Assert(true == fSockets->GetSocketBDemux().RegisterTask({ fRemoteAddr, fRemoteRTCPPort }, this));
 #endif
-	return QTSS_NoErr;
+}
+
+void MyRTPStream::SetOverBufferState(MyRTSPRequest& request)
+{
+	int32_t requestedOverBufferState = request.GetDynamicRateState();
+	bool enableOverBuffer = false;
+
+	switch (fTransportType)
+	{
+		case qtssRTPTransportTypeReliableUDP:
+		{
+			enableOverBuffer = true; // default is on
+			if (requestedOverBufferState == 0) // client specifically set to false
+				enableOverBuffer = false;
+		}
+		break;
+
+		case qtssRTPTransportTypeUDP:
+		{
+			enableOverBuffer = false; // always off
+		}
+		break;
+
+		case qtssRTPTransportTypeTCP:
+		{
+			enableOverBuffer = true; // default is on same as 4.0 and earlier. Allows tcp to compensate for falling behind from congestion or slow-start. 
+			if (requestedOverBufferState == 0) // client specifically set to false
+				enableOverBuffer = false;
+		}
+		break;
+
+	}
+
+	//over buffering is enabled for the session by default
+	//if any stream turns it off then it is off for all streams
+	//a disable is from either the stream type default or a specific rtsp command to disable
+	if (!enableOverBuffer)
+		fSession.fOverbufferWindow.TurnOverbuffering(false);
 }

@@ -322,9 +322,6 @@ int64_t RTSPSession::Run()
 				// will post process regardless of whether the client actually gets our response
 				// or not.
 
-				//if this is not a keepalive request, we should kill the session NOW
-				fLiveSession = fRequest->GetResponseKeepAlive();
-
 				if (fRTPSession != nullptr)
 				{
 					// Invoke postprocessor modules only if there is an RTP session. We do NOT want

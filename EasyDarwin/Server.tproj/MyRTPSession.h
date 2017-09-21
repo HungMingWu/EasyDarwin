@@ -8,7 +8,7 @@
 class MyRTSPRequest;
 class MyRTPStream;
 class MyRTPSession {
-	std::vector<MyRTPStream*>       fStreamBuffer;
+	std::vector<MyRTPStream> fStreamBuffer;
 	RTPOverbufferWindow fOverbufferWindow;
 	std::string         fRTSPSessionID;
 	friend class MyRTPStream;
@@ -20,6 +20,7 @@ public:
 	//This call can only be made during an RTSP Setup request, and the
 	//RTSPRequestInterface must be provided.
 	//You may also opt to attach a codec name and type to this stream.
-	QTSS_Error  AddStream(MyRTSPRequest& request, MyRTPStream** outStream,
-		QTSS_AddStreamFlags inFlags);
+	void AddStream(MyRTSPRequest& request, QTSS_AddStreamFlags inFlags);
+
+	std::vector<MyRTPStream>& GetStreams() { return fStreamBuffer; }
 };

@@ -67,7 +67,7 @@ std::shared_ptr<MyReflectorSession> MyRTSPSession::CreateSession(boost::string_v
 		mServer.sessionMap.insert(std::make_pair(std::string(sessionName), theSession));
 		return theSession;
 	}
-	return {};
+	return it->second;
 }
 
 std::error_code MyRTSPSession::do_setup()
@@ -133,17 +133,11 @@ std::error_code MyRTSPSession::do_setup()
 
 		request->SetUpServerPort(theStreamInfo->fPort);
 
-		MyRTPStream *newStream = nullptr;
-		QTSS_Error theErr = fRTPSession->AddStream(*request, &newStream, qtssASFlagsForceUDPTransport);
-		Assert(theErr == QTSS_NoErr);
-		if (theErr != QTSS_NoErr)
-		{
-			// DeleteReflectorPushSession(inParams, theSession, foundSession);
-			// return inParams.inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
-		}
+		fRTPSession->AddStream(*request, qtssASFlagsForceUDPTransport);
 
+		auto &newStream = fRTPSession->GetStreams().back();
 		//send the setup response
-		newStream->EnableSSRC();
+		newStream.EnableSSRC();
 		//newStream->SendSetupResponse(inRTSPRequest);
 
 		broadcastSession->AddBroadcasterClientSession(fRTPSession.get());
@@ -152,6 +146,18 @@ std::error_code MyRTSPSession::do_setup()
 		printf("QTSSReflectorModule.cpp:DoSetup Session =%p refcount=%"   _U32BITARG_   "\n", theSession->GetRef(), theSession->GetRef()->GetRefCount());
 #endif
 		return {};
+	}
+	return {};
+}
+
+std::error_code MyRTSPSession::do_play(MyReflectorSession *session)
+{
+	if (session == nullptr) {
+		if (!broadcastSession) return {};
+		session = broadcastSession.get();
+	}
+	else {
+
 	}
 	return {};
 }

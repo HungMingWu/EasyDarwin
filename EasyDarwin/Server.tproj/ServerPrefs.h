@@ -33,7 +33,6 @@ namespace ServerPrefs {
 	bool GetRTSPServerInfoEnabled();
 	uint32_t GetMaxTCPBufferSizeInBytes();
 	uint32_t GetMinTCPBufferSizeInBytes();
-	uint32_t GetRTSPTimeoutInSecs();
 	int32_t GetDropAllVideoPacketsTimeInMsec();
 	int32_t GetDropAllPacketsTimeInMsec();
 	int32_t GetThinAllTheWayTimeInMsec();

@@ -101,15 +101,11 @@ public:
 	void    AppendContentBaseHeader(boost::string_view theURL);
 	void    AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 		boost::string_view url, boost::string_view seqNumber,
-		boost::string_view ssrc, boost::string_view rtpTime, bool lastRTPInfo);
+		boost::string_view rtpTime, bool lastRTPInfo);
 
 	void    AppendContentLength(uint32_t contentLength);
-	void    AppendSessionHeaderWithTimeout(boost::string_view inSessionID, boost::string_view inTimeout);
+	void    AppendSessionHeader(boost::string_view inSessionID);
 	void    AppendRetransmitHeader(uint32_t inAckTimeout);
-
-	// MODIFIERS
-
-	void SetKeepAlive(bool newVal) { fResponseKeepAlive = newVal; }
 
 	//SendHeader:
 	//Sends the RTSP headers, in their current state, to the client.
@@ -151,8 +147,6 @@ public:
 	QTSS_RTSPMethod             GetMethod() const { return fMethod; }
 	void                        SetStatus(QTSS_RTSPStatusCode status) { fStatus = status; }
 	QTSS_RTSPStatusCode         GetStatus() const { return fStatus; }
-	bool                        GetResponseKeepAlive() const { return fResponseKeepAlive; }
-	void                        SetResponseKeepAlive(bool keepAlive) { fResponseKeepAlive = keepAlive; }
 
 	//will be -1 unless there was a Range header. May have one or two values
 	double                     GetStartTime() { return fStartTime; }
@@ -165,7 +159,6 @@ public:
 	//
 	// Value of late-tolerance field of x-RTP-Options header
 	float                     GetLateToleranceInSec() { return fLateTolerance; }
-	boost::string_view        GetLateToleranceStr() { return fLateToleranceStr; }
 
 	// these get set if there is a transport header
 	uint16_t                      GetClientPortA() { return fClientPortA; }
@@ -192,8 +185,6 @@ public:
 
 	bool                      GetStale() { return fStale; }
 	void                        SetStale(bool stale) { fStale = stale; }
-
-	int32_t                      GetDynamicRateState() { return fEnableDynamicRateState; }
 
 	// DJM PROTOTYPE
 	uint32_t						GetRandomDataSize() { return fRandomDataSize; }
@@ -222,8 +213,6 @@ protected:
 	QTSS_RTSPMethod             fMethod;            //Method of this request
 	QTSS_RTSPStatusCode         fStatus;            //Current status of this request
    
-	bool                      fRequestKeepAlive;  //Does the client want keep-alive?
-	bool                      fResponseKeepAlive; //Are we going to keep-alive?
 	RTSPProtocol::RTSPVersion   fVersion;
 
 	double                     fStartTime;         //Range header info: start time
@@ -242,7 +231,6 @@ protected:
 
 	float                     fSpeed;
 	float                     fLateTolerance{ -1 };
-	std::string               fLateToleranceStr;
 	float                     fPrebufferAmt;
 
 	std::string               fFirstTransport;
@@ -262,9 +250,6 @@ protected:
 	uint16_t                      fSetUpServerPort;           //send this back as the server_port if is SETUP request
 
 	bool                      fStale;
-
-	// -1 not in request, 0 off, 1 on
-	int32_t                      fEnableDynamicRateState;
 
 	// DJM PROTOTYPE
 	uint32_t						fRandomDataSize;

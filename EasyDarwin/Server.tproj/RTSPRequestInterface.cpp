@@ -86,7 +86,6 @@ void RTSPRequestInterface::ReInit(RTSPSessionInterface *session)
 RTSPRequestInterface::RTSPRequestInterface(RTSPSessionInterface *session)
 	: fMethod(qtssIllegalMethod),
 	fStatus(qtssSuccessOK),
-	fRequestKeepAlive(true),
 	//fResponseKeepAlive(true), //parameter need not be set
 	fVersion(RTSPProtocol::k10Version),
 	fStartTime(-1),
@@ -105,7 +104,6 @@ RTSPRequestInterface::RTSPRequestInterface(RTSPSessionInterface *session)
 	fTransportMode(qtssRTPTransportModePlay),
 	fSetUpServerPort(0),
 	fStale(false),
-	fEnableDynamicRateState(-1),// -1 undefined, 0 disabled, 1 enabled
 	// DJM PROTOTYPE
 	fRandomDataSize(0),
 	fBandwidthBits(0),
@@ -149,7 +147,7 @@ void RTSPRequestInterface::AppendContentLength(uint32_t contentLength)
 	this->AppendHeader(qtssContentLengthHeader, std::to_string(contentLength));
 }
 
-void RTSPRequestInterface::AppendSessionHeaderWithTimeout(boost::string_view inSessionID, boost::string_view inTimeout)
+void RTSPRequestInterface::AppendSessionHeader(boost::string_view inSessionID)
 {
 	// Append a session header if there wasn't one already
 	if (GetHeaderDict().Get(qtssSessionHeader).empty())
@@ -157,21 +155,12 @@ void RTSPRequestInterface::AppendSessionHeaderWithTimeout(boost::string_view inS
 		if (!fStandardHeadersWritten)
 			this->WriteStandardHeaders();
 
-		static boost::string_view sTimeoutString(";timeout=");
-
 		// Just write out the session header and session ID
 		if (!inSessionID.empty())
 		{
 			fOutputStream->Put(RTSPProtocol::GetHeaderString(qtssSessionHeader));
 			fOutputStream->Put(ColonSpace);
 			fOutputStream->Put(inSessionID);
-
-			if (!inTimeout.empty())
-			{
-				fOutputStream->Put(sTimeoutString);
-				fOutputStream->Put(inTimeout);
-			}
-
 			fOutputStream->PutEOL();
 		}
 	}
@@ -315,7 +304,7 @@ void RTSPRequestInterface::AppendRetransmitHeader(uint32_t inAckTimeout)
 
 void RTSPRequestInterface::AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 	boost::string_view url, boost::string_view seqNumber,
-	boost::string_view ssrc, boost::string_view rtpTime, bool lastRTPInfo)
+	boost::string_view rtpTime, bool lastRTPInfo)
 {
 	static boost::string_view sURL("url=");
 	static boost::string_view sSeq(";seq=");
@@ -335,17 +324,14 @@ void RTSPRequestInterface::AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 	{
 		fOutputStream->Put(sURL);
 
-		if (true)
-		{
-			auto* theRequest = (RTSPRequestInterface*)this;
-			boost::string_view path = theRequest->GetAbsoluteURL();
+		auto* theRequest = (RTSPRequestInterface*)this;
+		boost::string_view path = theRequest->GetAbsoluteURL();
 
-			if (!path.empty())
-			{
-				fOutputStream->Put(path);
-				if (path.back() != '/')
-					fOutputStream->Put("/");
-			}
+		if (!path.empty())
+		{
+			fOutputStream->Put(path);
+			if (path.back() != '/')
+				fOutputStream->Put("/");
 		}
 
 		fOutputStream->Put(url);
@@ -354,11 +340,6 @@ void RTSPRequestInterface::AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 	{
 		fOutputStream->Put(sSeq);
 		fOutputStream->Put(seqNumber);
-	}
-	if (!ssrc.empty())
-	{
-		fOutputStream->Put(sSsrc);
-		fOutputStream->Put(ssrc);
 	}
 	if (!rtpTime.empty())
 	{
@@ -374,8 +355,6 @@ void RTSPRequestInterface::AppendRTPInfoHeader(QTSS_RTSPHeader inHeader,
 
 void RTSPRequestInterface::WriteStandardHeaders()
 {
-	static boost::string_view    sCloseString("Close");
-
 	fStandardHeadersWritten = true; //must be done here to prevent recursive calls
 
 	//if this is a "200 OK" response (most HTTP responses), we have some special
@@ -406,11 +385,6 @@ void RTSPRequestInterface::WriteStandardHeaders()
 	boost::string_view incomingID = fHeaderDict.Get(qtssSessionHeader);
 	if (!incomingID.empty())
 		AppendHeader(qtssSessionHeader, incomingID);
-
-	//follows the HTTP/1.1 convention: if server wants to close the connection, it
-	//tags the response with the Connection: close header
-	if (!fResponseKeepAlive)
-		AppendHeader(qtssConnectionHeader, sCloseString);
 }
 
 void RTSPRequestInterface::SendHeader()

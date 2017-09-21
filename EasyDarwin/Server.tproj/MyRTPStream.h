@@ -22,13 +22,12 @@ class MyRTPStream {
 	void SetOverBufferState(MyRTSPRequest& request);
 	friend std::ostream& operator << (std::ostream& stream, const MyRTPStream& RTPStream);
 public:
-	MyRTPStream(uint32_t inSSRC, MyRTPSession& inSession);
+	MyRTPStream(MyRTSPRequest& request, uint32_t inSSRC, MyRTPSession& inSession, QTSS_AddStreamFlags inFlags);
 	~MyRTPStream() = default;
 	uint32_t GetSSRC() const { return fSsrc; }
 
-	// Setup uses the info in the RTSPRequestInterface to associate
-	// all the necessary resources, ports, sockets, etc, etc, with this
-	// stream.
-	QTSS_Error Setup(MyRTSPRequest& request, QTSS_AddStreamFlags inFlags);
 	void EnableSSRC() { fEnableSSRC = true; }
+	uint8_t GetRTPChannelNum() const { return fRTPChannel; }
+	uint8_t GetRTCPChannelNum() const { return fRTCPChannel; }
+	std::string GetStreamURL() const { return fStreamURL; }
 };

@@ -113,11 +113,9 @@ private:
 	void    ParseContentLengthHeader(boost::string_view header);
 	void    ParseSpeedHeader(boost::string_view header);
 	void    ParsePrebufferHeader(boost::string_view header);
-	void    ParseTransportOptionsHeader(boost::string_view header);
 	void    ParseSessionHeader(boost::string_view header);
 	void    ParseModeSubHeader(boost::string_view inModeSubHeader);
 	bool    ParseNetworkModeSubHeader(boost::string_view inSubHeader);
-	void 	ParseDynamicRateHeader(boost::string_view header);
 	void    ParseBandwidthHeader(boost::string_view header);
 };
 

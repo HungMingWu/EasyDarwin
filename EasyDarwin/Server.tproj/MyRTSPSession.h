@@ -25,6 +25,7 @@ class MyRTSPSession {
 public:
 	MyRTSPSession(RTSPServer&, std::shared_ptr<Connection> connection) noexcept;
 	std::error_code do_setup();
+	std::error_code do_play(MyReflectorSession *session);
 	void FindOrCreateRTPSession();
 
 	// If RTP data is interleaved into the RTSP connection, we need to associate

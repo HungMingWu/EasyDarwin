@@ -84,7 +84,6 @@ static QTSServerInterface* sServer = nullptr;
 // Prefs
 static bool   sDefaultAllowNonSDPURLs = true;
 
-static bool   sRTPInfoDisabled = false;
 static bool   sDefaultRTPInfoDisabled = false;
 
 static bool   sDefaultAnnounceEnabled = true;
@@ -98,7 +97,6 @@ static uint16_t   sDefaultMinimumStaticSDPPort = 20000;
 static uint16_t   sMaximumStaticSDPPort = 0;
 static uint16_t   sDefaultMaximumStaticSDPPort = 65535;
 
-static bool   sTearDownClientsOnDisconnect = false;
 static bool   sDefaultTearDownClientsOnDisconnect = false;
 
 static uint32_t   sDefaultBroadcasterSessionTimeoutSecs = 30;
@@ -135,7 +133,6 @@ static bool   sDefaultPlayerCompatibility = true;
 static uint32_t   sAdjustMediaBandwidthPercent = 100;
 static uint32_t   sAdjustMediaBandwidthPercentDefault = 100;
 
-static bool   sForceRTPInfoSeqAndTime = false;
 static bool   sDefaultForceRTPInfoSeqAndTime = false;
 
 static std::string	sRedirectBroadcastsKeyword;
@@ -162,11 +159,6 @@ static QTSS_Error DoPlay(QTSS_StandardRTSP_Params& inParams, ReflectorSession* i
 static QTSS_Error DestroySession(QTSS_ClientSessionClosing_Params* inParams);
 static void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* inSession, bool killClients);
 static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params &inParams, bool isPush, bool *foundSessionPtr = nullptr, std::string* resultFilePath = nullptr);
-
-inline void KeepSession(RTSPRequest* theRequest, bool keep)
-{
-	theRequest->SetResponseKeepAlive(keep);
-}
 
 namespace ReflectionModule
 {
@@ -230,7 +222,6 @@ namespace ReflectionModule
 		case qtssTeardownMethod:
 			// Tell the server that this session should be killed, and send a TEARDOWN response
 			inParams.inClientSession->Teardown();
-			inParams.inRTSPRequest->SetKeepAlive(false);
 			inParams.inRTSPRequest->SendHeader();
 			break;
 		case qtssPauseMethod:
@@ -828,9 +819,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params &inParams)
 	newStream->SetTimeScale(theStreamInfo->fTimeScale);
 
 	// We only want to allow over buffering to dynamic rate clients   
-	int32_t canDynamicRate = inParams.inRTSPRequest->GetDynamicRateState();
-	if (canDynamicRate < 1) // -1 no rate field, 0 off
-		inParams.inClientSession->SetOverBufferEnable(sFalse);
+	inParams.inClientSession->SetOverBufferEnable(sFalse);
 
 	// Place the stream cookie in this stream for future reference
 	void* theStreamCookie = theSession->GetStreamCookie(theTrackID);
@@ -913,7 +902,6 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params& inParams, ReflectorSession* inSessio
 {
 	QTSS_Error theErr = QTSS_NoErr;
 	uint32_t flags = 0;
-	bool rtpInfoEnabled = false;
 
 	if (inSession == nullptr)
 	{
@@ -921,13 +909,9 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params& inParams, ReflectorSession* inSessio
 		if (!opt) return QTSS_RequestFailed;
 		inSession = boost::any_cast<ReflectorSession*>(opt.value());
 
-		inParams.inClientSession->addAttribute(sKillClientsEnabledName, sTearDownClientsOnDisconnect);
-
-
 		Assert(inSession != nullptr);
 
 		inParams.inRTSPSession->addAttribute(sBroadcasterSessionName, inSession);
-		KeepSession(inParams.inRTSPRequest, true);
 		//printf("QTSSReflectorModule.cpp:DoPlay (PUSH) inRTSPSession=%"   _U32BITARG_   " inClientSession=%"   _U32BITARG_   "\n",(uint32_t)inParams->inRTSPSession,(uint32_t)inParams->inClientSession);
 	}
 	else
@@ -953,51 +937,10 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params& inParams, ReflectorSession* inSessio
 				inParams.inRTSPRequest->AppendHeader(qtssRangeHeader, sTheNowRangeHeader);
 		}
 
-		if (sForceRTPInfoSeqAndTime)
-			rtpInfoEnabled = true;
-
-		if (sRTPInfoDisabled)
-			rtpInfoEnabled = false;
-
-		if (rtpInfoEnabled)
-		{
-			flags = qtssPlayRespWriteTrackInfo; //write first timestampe and seq num to rtpinfo
-
-			bool haveBufferedStreams = HaveStreamBuffers(inParams, inSession);
-			if (haveBufferedStreams) // send the cached rtp time and seq number in the response.
-			{
-
-				theErr = inParams.inClientSession->Play(
-					inParams.inRTSPRequest, qtssPlayRespWriteTrackInfo);
-				if (theErr != QTSS_NoErr)
-					return theErr;
-			}
-			else
-			{
-				auto opt = inParams.inClientSession->getAttribute(sRTPInfoWaitTime);
-				if (!opt)
-					inParams.inClientSession->addAttribute(sRTPInfoWaitTime, (int32_t)0);
-				else
-				{
-					int32_t waitTimeLoopCount = boost::any_cast<int32_t>(opt.value());
-					if (waitTimeLoopCount < 1)
-						return inParams.inRTSPRequest->SendErrorResponseWithMessage(qtssClientNotFound);
-
-					inParams.inClientSession->addAttribute(sRTPInfoWaitTime, waitTimeLoopCount - 1);
-				}
-
-				//printf("QTSSReflectorModule:DoPlay  wait 100ms waitTimeLoopCount=%ld\n", waitTimeLoopCount);
-				return QTSS_NoErr;
-			}
-		}
-		else
-		{
-			theErr = inParams.inClientSession->Play(
-				inParams.inRTSPRequest, qtssPlayFlagsAppendServerInfo);
-			if (theErr != QTSS_NoErr)
-				return theErr;
-		}
-
+		theErr = inParams.inClientSession->Play(
+			inParams.inRTSPRequest, qtssPlayFlagsAppendServerInfo);
+		if (theErr != QTSS_NoErr)
+			return theErr;
 	}
 
 	inParams.inClientSession->SendPlayResponse(inParams.inRTSPRequest, flags);
@@ -1031,7 +974,7 @@ void RemoveOutput(ReflectorOutput* inOutput, ReflectorSession* theSession, bool 
 			//}
 			//    
 
-			if (killClients || sTearDownClientsOnDisconnect)
+			if (killClients)
 			{
 				theSession->TearDownAllOutputs();
 			}

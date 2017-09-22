@@ -76,19 +76,11 @@ private:
 	bool                  fPreFilter;
 
 	uint16_t GetPacketSeqNumber(const std::vector<char> &inPacket);
-	void SetPacketSeqNumber(const std::vector<char> &inPacket, uint16_t inSeqNumber);
-	bool PacketShouldBeThinned(QTSS_RTPStreamObject inStream, const std::vector<char> &inPacket);
 	bool  FilterPacket(RTPStream *theStreamPtr, const std::vector<char> &inPacket);
 
 	uint32_t GetPacketRTPTime(StrPtrLen* packetStrPtr);
 	inline  bool PacketMatchesStream(void* inStreamCookie, RTPStream *theStreamPtr);
-	bool PacketReadyToSend(RTPStream *theStreamPtr, int64_t *currentTimePtr, uint32_t inFlags, uint64_t* packetIDPtr, int64_t* timeToSendThisPacketAgainPtr);
 	bool PacketAlreadySent(RTPStream *theStreamPtr, uint32_t inFlags, uint64_t* packetIDPtr);
-	QTSS_Error TrackRTCPBaseTime(QTSS_RTPStreamObject *theStreamPtr, StrPtrLen* inPacketStrPtr, int64_t *currentTimePtr, uint32_t inFlags, int64_t *packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr);
-	QTSS_Error RewriteRTCP(QTSS_RTPStreamObject *theStreamPtr, StrPtrLen* inPacketStrPtr, int64_t *currentTimePtr, uint32_t inFlags, int64_t *packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr);
-	QTSS_Error TrackRTPPackets(QTSS_RTPStreamObject *theStreamPtr, StrPtrLen* inPacketStrPtr, int64_t *currentTimePtr, uint32_t inFlags, int64_t *packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr);
-	QTSS_Error TrackRTCPPackets(QTSS_RTPStreamObject *theStreamPtr, StrPtrLen* inPacketStrPtr, int64_t *currentTimePtr, uint32_t inFlags, int64_t *packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr);
-	QTSS_Error TrackPackets(QTSS_RTPStreamObject *theStreamPtr, StrPtrLen* inPacketStrPtr, int64_t *currentTimePtr, uint32_t inFlags, int64_t *packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr);
 };
 
 bool RTPSessionOutput::PacketMatchesStream(void* inStreamCookie, RTPStream *theStreamPtr)

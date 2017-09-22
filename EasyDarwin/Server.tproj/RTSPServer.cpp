@@ -1,4 +1,3 @@
-#include <sstream>
 #include <boost/asio/read.hpp>
 #include <boost/asio/read_until.hpp>
 #include <boost/asio/write.hpp>
@@ -136,45 +135,16 @@ void RTSPServer::read_data_packet(const std::shared_ptr<MyRTSPSession> &session)
 		if (!lock)
 			return;
 		if (!ec) {
-			// request->streambuf.size() is not necessarily the same as bytes_transferred, from Boost-docs:
-			// "After a successful async_read_until operation, the streambuf may contain additional data beyond the delimiter"
-			// The chosen solution is to extract lines from the stream directly when parsing the header. What is left of the
-			// streambuf (maybe some bytes of the content) is appended to in the async_read-function below (for retrieving content).
-			size_t num_additional_bytes = session->request->streambuf.size() - bytes_transferred;
+			std::vector<char> s{ buffers_begin(session->request->streambuf.data()),
+					buffers_end(session->request->streambuf.data()) };
+			session->request->streambuf.consume(s.size());
+			auto* dataLenP = (uint16_t*)&s[0];
+			size_t interleavedPacketLen = ntohs(dataLenP[1]) + 4;
+			if (interleavedPacketLen > s.size()) {
 
-			// If content, read that as well
-			auto it = session->request->header.find("Content-Length");
-			if (it != session->request->header.end()) {
-				unsigned long long content_length = 0;
-				try {
-					content_length = std::stoull(it->second);
-				}
-				catch (const std::exception &e) {
-					if (on_error) {
-						//on_error(session->request, make_error_code::make_error_code(boost::system::errc::protocol_error));
-					}
-					return;
-				}
-				if (content_length > num_additional_bytes) {
-					session->connection->set_timeout(config.timeout_content);
-					boost::asio::async_read(session->connection->socket, session->request->streambuf, boost::asio::transfer_exactly(content_length - num_additional_bytes),
-						[this, session](const boost::system::error_code &ec, size_t /*bytes_transferred*/) {
-						session->connection->cancel_timeout();
-						auto lock = session->connection->handler_runner->continue_lock();
-						if (!lock)
-							return;
-						if (!ec)
-							operate_request(session);
-						else if (on_error)
-							on_error(session->request, ec);
-					});
-				}
-				else {
-					operate_request(session);
-				}
 			}
 			else {
-				operate_request(session);
+				session->process_rtppacket(&s[0], s.size());
 			}
 		}
 		else if (on_error)

@@ -71,9 +71,9 @@ public:
 	~SDPSourceInfo();
 
 	// Returns the number of StreamInfo objects (number of Streams in this source)
-	uint32_t      GetNumStreams() { return fStreamArray.size(); }
+	size_t GetNumStreams() const { return fStreamArray.size(); }
 	StreamInfo* GetStreamInfo(uint32_t inStreamIndex);
-	StreamInfo* GetStreamInfoByTrackID(uint32_t inTrackID);
+	const StreamInfo* GetStreamInfoByTrackID(uint32_t inTrackID) const;
 
 	// Returns whether this source is reflectable.
 	bool  IsReflectable();

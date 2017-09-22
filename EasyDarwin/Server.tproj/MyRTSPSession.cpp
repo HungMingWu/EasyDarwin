@@ -117,7 +117,7 @@ std::error_code MyRTSPSession::do_setup()
 	{
 		//printf("QTSSReflectorModule.cpp:DoSetup is push setup\n");
 		// Get info about this trackID
-		StreamInfo* theStreamInfo = broadcastSession->GetSourceInfo().GetStreamInfoByTrackID(theTrackID);
+		const StreamInfo* theStreamInfo = broadcastSession->GetSourceInfo().GetStreamInfoByTrackID(theTrackID);
 		// If theStreamInfo is NULL, we don't have a legit track, so return an error
 		if (theStreamInfo == nullptr)
 		{
@@ -159,6 +159,50 @@ std::error_code MyRTSPSession::do_play(MyReflectorSession *session)
 	else {
 
 	}
+	return {};
+}
+
+std::error_code MyRTSPSession::process_rtppacket(const char *packetData, size_t length)
+{
+	const SDPSourceInfo& theSoureInfo = broadcastSession->GetSourceInfo();
+	uint32_t  numStreams = theSoureInfo.GetNumStreams();
+	//printf("QTSSReflectorModule.cpp:ProcessRTPData numStreams=%"   _U32BITARG_   "\n",numStreams);
+
+	/*
+	  Stream data such as RTP packets is encapsulated by an ASCII dollar
+	  sign (24 hexadecimal), followed by a one-byte channel identifier,
+	  followed by the length of the encapsulated binary data as a binary,
+	  two-byte integer in network byte order. The stream data follows
+	  immediately afterwards, without a CRLF, but including the upper-layer
+	  protocol headers. Each $ block contains exactly one upper-layer
+	  protocol data unit, e.g., one RTP packet.
+	*/
+	uint8_t packetChannel = (uint8_t)packetData[1];
+
+	uint16_t  packetDataLen;
+	memcpy(&packetDataLen, &packetData[2], 2);
+	packetDataLen = ntohs(packetDataLen);
+
+	char*   rtpPacket = (char *)&packetData[4];
+
+	uint32_t inIndex = packetChannel / 2; // one stream per every 2 channels rtcp channel handled below
+	if (inIndex < numStreams)
+	{
+		MyReflectorStream& theStream = broadcastSession->GetStreamByIndex(inIndex);
+		//if (theStream == nullptr) return QTSS_Unimplemented;
+
+		StreamInfo* theStreamInfo = theStream.GetStreamInfo();
+		uint16_t serverReceivePort = theStreamInfo->fPort;
+
+		bool isRTCP = false;
+		if (packetChannel & 1)
+		{
+			serverReceivePort++;
+			isRTCP = true;
+		}
+		theStream.PushPacket(rtpPacket, packetDataLen, isRTCP);
+	}
+
 	return {};
 }
 

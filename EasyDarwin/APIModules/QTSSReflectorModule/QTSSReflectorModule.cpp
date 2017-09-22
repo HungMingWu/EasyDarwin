@@ -87,7 +87,6 @@ static bool   sDefaultAllowNonSDPURLs = true;
 static bool   sDefaultRTPInfoDisabled = false;
 
 static bool   sDefaultAnnounceEnabled = true;
-static bool   sBroadcastPushEnabled = true;
 static bool   sDefaultAllowDuplicateBroadcasts = false;
 
 static uint32_t   sMaxBroadcastAnnounceDuration = 0;
@@ -162,12 +161,8 @@ static ReflectorSession* DoSessionSetup(QTSS_StandardRTSP_Params &inParams, bool
 
 namespace ReflectionModule
 {
-	QTSS_Error Register(QTSS_Register_Params* inParams)
+	QTSS_Error Register()
 	{
-		// Tell the server our name!
-		static char* sModuleName = "QTSSReflectorModule";
-		::strcpy(inParams->outModuleName, sModuleName);
-
 		return QTSS_NoErr;
 	}
 
@@ -236,12 +231,8 @@ namespace ReflectionModule
 
 	QTSS_Error ProcessRTPData(QTSS_IncomingData_Params* inParams)
 	{
-		if (!sBroadcastPushEnabled)
-			return QTSS_NoErr;
-
 		//printf("QTSSReflectorModule:ProcessRTPData inRTSPSession=%"   _U32BITARG_   " inClientSession=%"   _U32BITARG_   "\n",inParams->inRTSPSession, inParams->inClientSession);
 
-		uint32_t theLen;
 		boost::optional<boost::any> attr = inParams->inRTSPSession->getAttribute(sBroadcasterSessionName);
 		if (!attr) return QTSS_NoErr;
 		ReflectorSession* theSession = boost::any_cast<ReflectorSession *>(attr.value());
@@ -569,8 +560,6 @@ ReflectorSession* FindOrCreateSession(boost::string_view inName, QTSS_StandardRT
 
 		theSession = new ReflectorSession(inName, theInfo);
 
-		theSession->SetHasBufferedStreams(true); // buffer the incoming streams for clients
-
 		// SetupReflectorSession stores theInfo in theSession so DONT delete the Info if we fail here, leave it alone.
 		// deleting the session will delete the info.
 		QTSS_Error theErr = theSession->SetupReflectorSession(inParams, theSetupFlag);
@@ -741,7 +730,7 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params &inParams)
 		//printf("QTSSReflectorModule.cpp:DoSetup is push setup\n");
 
 		// Get info about this trackID
-		StreamInfo* theStreamInfo = theSession->GetSourceInfo().GetStreamInfoByTrackID(theTrackID);
+		const StreamInfo* theStreamInfo = theSession->GetSourceInfo().GetStreamInfoByTrackID(theTrackID);
 		// If theStreamInfo is NULL, we don't have a legit track, so return an error
 		if (theStreamInfo == nullptr)
 		{
@@ -785,17 +774,16 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params &inParams)
 
 
 	// Get info about this trackID
-	StreamInfo* theStreamInfo = theSession->GetSourceInfo().GetStreamInfoByTrackID(theTrackID);
+	const StreamInfo* theStreamInfo = theSession->GetSourceInfo().GetStreamInfoByTrackID(theTrackID);
 	// If theStreamInfo is NULL, we don't have a legit track, so return an error
 	if (theStreamInfo == nullptr)
 		return inParams.inRTSPRequest->SendErrorResponse(qtssClientBadRequest);
 
 	boost::string_view thePayloadName = theStreamInfo->fPayloadName;
+#if 0
 	bool r = qi::phrase_parse(thePayloadName.cbegin(), thePayloadName.cend(),
 		qi::omit[+(qi::char_ - "/")] >> "/" >> qi::uint_, qi::ascii::blank, theStreamInfo->fTimeScale);
-
-	if (theStreamInfo->fTimeScale == 0)
-		theStreamInfo->fTimeScale = 90000;
+#endif
 
 	RTPStream *newStream = nullptr;
 	{
@@ -837,65 +825,6 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params &inParams)
 #endif
 
 	return QTSS_NoErr;
-}
-
-
-
-bool HaveStreamBuffers(QTSS_StandardRTSP_Params& inParams, ReflectorSession* inSession)
-{
-	if (inSession == nullptr)
-		return false;
-
-	bool haveBufferedStreams = true; // set to false and return if we can't set the packets
-	uint32_t y = 0;
-
-	int64_t packetArrivalTime = 0;
-
-	//lock all streams
-	for (y = 0; y < inSession->GetNumStreams(); y++)
-		inSession->GetStreamByIndex(y)->GetMutex()->Lock();
-
-
-
-	auto vecMap = inParams.inClientSession->GetStreams();
-	for (int i = 0; i < vecMap.size(); i++)
-	{
-		RTPStream* theRef = vecMap[i];
-		ReflectorStream* theReflectorStream = inSession->GetStreamByIndex(i);
-
-		//  if (!theReflectorStream->HasFirstRTCP())
-		//      printf("theStreamIndex =%"   _U32BITARG_   " no rtcp\n", theStreamIndex);
-
-		//  if (!theReflectorStream->HasFirstRTP())
-		//      printf("theStreamIndex = %"   _U32BITARG_   " no rtp\n", theStreamIndex);
-
-		if ((theReflectorStream == nullptr) || (false == theReflectorStream->HasFirstRTP()))
-		{
-			haveBufferedStreams = false;
-			//printf("1 breaking no buffered streams\n");
-			break;
-		}
-
-		uint16_t firstSeqNum = 0;
-		uint32_t firstTimeStamp = 0;
-		ReflectorSender* theSender = theReflectorStream->GetRTPSender();
-		haveBufferedStreams = theSender->GetFirstPacketInfo(&firstSeqNum, &firstTimeStamp, &packetArrivalTime);
-		//printf("theStreamIndex= %"   _U32BITARG_   " haveBufferedStreams=%d, seqnum=%d, timestamp=%"   _U32BITARG_   "\n", theStreamIndex, haveBufferedStreams, firstSeqNum, firstTimeStamp);
-
-		if (!haveBufferedStreams)
-		{
-			//printf("2 breaking no buffered streams\n");
-			break;
-		}
-
-		theRef->SetSeqNumber(firstSeqNum);
-		theRef->SetTimeStamp(firstTimeStamp);
-	}
-	//unlock all streams
-	for (y = 0; y < inSession->GetNumStreams(); y++)
-		inSession->GetStreamByIndex(y)->GetMutex()->Unlock();
-
-	return haveBufferedStreams;
 }
 
 QTSS_Error DoPlay(QTSS_StandardRTSP_Params& inParams, ReflectorSession* inSession)

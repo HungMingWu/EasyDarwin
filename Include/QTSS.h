@@ -631,17 +631,10 @@ typedef uint32_t QTSS_Role;
 // TYPEDEFS
 
 typedef void*           QTSS_StreamRef;
-typedef void*           QTSS_Object;
 typedef void*           QTSS_ServiceFunctionArgsPtr;
 typedef int32_t          QTSS_AttributeID;
 typedef int32_t          QTSS_ServiceID;
 typedef int64_t          QTSS_TimeVal;
-
-typedef QTSS_Object             QTSS_RTPStreamObject;
-typedef QTSS_Object             QTSS_FileObject;
-typedef QTSS_Object             QTSS_ModulePrefsObject;
-typedef QTSS_Object             QTSS_AttrInfoObject;
-typedef QTSS_Object             QTSS_ConnectedUserObject;
 
 typedef QTSS_StreamRef          QTSS_FileStream;
 typedef QTSS_StreamRef          QTSS_RTSPSessionStream;
@@ -661,28 +654,12 @@ class QTSServerInterface;
 // Each role has a unique set of parameters that get passed
 // to the module.
 
-typedef struct
-{
-    char outModuleName[QTSS_MAX_MODULE_NAME_LENGTH];
-} QTSS_Register_Params;
-
 class QTSSStream;
 
 typedef struct
 {
 	QTSServerInterface*         inServer;           // Global dictionaries
 } QTSS_Initialize_Params;
-
-typedef struct
-{
-    char*                       inBuffer;
-    
-} QTSS_ErrorLog_Params;
-
-typedef struct
-{
-    QTSS_ServerState            inNewState;
-} QTSS_StateChange_Params;
 
 typedef struct 
 {
@@ -700,11 +677,6 @@ typedef struct
 
 } QTSS_Filter_Params;
 
-typedef struct
-{
-	RTSPRequest*                inRTSPRequest;
-} QTSS_RTSPAuth_Params;
-
 typedef struct 
 {
 	RTSPSession*                inRTSPSession;
@@ -713,11 +685,6 @@ typedef struct
     uint32_t                    inPacketLen;
 
 } QTSS_IncomingData_Params;
-
-typedef struct
-{
-	RTSPSession*                inRTSPSession;
-} QTSS_RTSPSession_Params;
 
 typedef struct
 {
@@ -732,94 +699,13 @@ typedef struct
     QTSS_CliSesClosingReason        inReason;
 } QTSS_ClientSessionClosing_Params;
 
-typedef struct
-{
-	RTPSession*                 inClientSession;
-    QTSS_RTPStreamObject        inRTPStream;
-    void*                       inRTCPPacketData;
-    uint32_t                      inRTCPPacketDataLen;
-} QTSS_RTCPProcess_Params;
-
-typedef struct
-{
-    char*                       inPath;
-    QTSS_OpenFileFlags          inFlags;
-    QTSS_Object                 inFileObject;
-} QTSS_OpenFile_Params;
-
-typedef struct
-{
-    QTSS_Object                 inFileObject;
-    uint64_t                      inPosition;
-    uint32_t                      inSize;
-} QTSS_AdviseFile_Params;
-
-typedef struct
-{
-    QTSS_Object                 inFileObject;
-    uint64_t                      inFilePosition;
-    void*                       ioBuffer;
-    uint32_t                      inBufLen;
-    uint32_t*                     outLenRead;
-} QTSS_ReadFile_Params;
-
-typedef struct
-{
-    QTSS_Object                 inFileObject;
-} QTSS_CloseFile_Params;
-
-typedef struct
-{
-    QTSS_Object                 inFileObject;
-    QTSS_EventType              inEventMask;
-} QTSS_RequestEventFile_Params;
-
-//redis module
-typedef struct
-{
-	char *						inStreamName;
-	uint32_t						inChannel;
-	uint32_t						inNumOutputs;
-	uint32_t						inBitrate;
-	Easy_RedisAction			inAction;
-}Easy_StreamInfo_Params;
-
-typedef struct
-{
-	char * inSerial;
-	char * outCMSIP;
-	char * outCMSPort;
-}QTSS_GetAssociatedCMS_Params;
-
-typedef struct  
-{
-	char * inStreanID;
-	char * outresult;
-}QTSS_JudgeStreamID_Params;
 
 typedef union
 {
-    QTSS_ErrorLog_Params                errorParams;
-    QTSS_StateChange_Params             stateChangeParams;
-
     QTSS_Filter_Params                  rtspFilterParams;
-    QTSS_RTSPAuth_Params                rtspAthnParams;
 	QTSS_StandardRTSP_Params            rtspParams;
-    QTSS_RTSPSession_Params             rtspSessionClosingParams;
 
     QTSS_RTPSendPackets_Params          rtpSendPacketsParams;
-    QTSS_RTCPProcess_Params             rtcpProcessParams;
-    
-    QTSS_OpenFile_Params                openFilePreProcessParams;
-    QTSS_OpenFile_Params                openFileParams;
-    QTSS_AdviseFile_Params              adviseFileParams;
-    QTSS_ReadFile_Params                readFileParams;
-    QTSS_CloseFile_Params               closeFileParams;
-    QTSS_RequestEventFile_Params        reqEventFileParams;
-
-	Easy_StreamInfo_Params              easyStreamInfoParams;
-	QTSS_GetAssociatedCMS_Params	    GetAssociatedCMSParams;
-	QTSS_JudgeStreamID_Params			JudgeStreamIDParams;
 
 } QTSS_RoleParams, *QTSS_RoleParamPtr;
 
@@ -849,92 +735,7 @@ typedef struct
 
 typedef QTSS_Error (*QTSS_MainEntryPointPtr)(void* inPrivateArgs);
 typedef QTSS_Error (*QTSS_DispatchFuncPtr)(QTSS_Role inRole, QTSS_RoleParamPtr inParamBlock);
-                                                                                                           
-/********************************************************************/
-//  QTSS_AddStaticAttribute
-//
-//  Adds a new static attribute to a predefined object type. All added attributes implicitly have
-//  qtssAttrModeRead, qtssAttrModeWrite, and qtssAttrModePreempSafe permissions. "inUnused" should
-//  always be NULL. Specify the data type and name of the attribute.
-//
-//  This may only be called from the QTSS_Register role.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_OutOfState: If this function isn't being called from the Register role
-//              QTSS_BadArgument:   Adding an attribute to a nonexistent object type, attribute
-//                      name too long, or NULL arguments.
-//              QTSS_AttrNameExists: The name must be unique.
-QTSS_Error QTSS_AddStaticAttribute( QTSS_ObjectType inObjectType, char* inAttrName,
-                void* inUnused, QTSS_AttrDataType inAttrDataType);
-                
-/********************************************************************/
-//  QTSS_AddInstanceAttribute
-//
-//  Adds a new instance attribute to a predefined object type. All added attributes implicitly have
-//  qtssAttrModeRead, qtssAttrModeWrite, and qtssAttrModePreempSafe permissions. "inUnused" should
-//  always be NULL. Specify the data type and name of the attribute.
-//
-//  This may be called at any time.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_OutOfState: If this function isn't being called from the Register role
-//              QTSS_BadArgument:   Adding an attribute to a nonexistent object type, attribute
-//                      name too long, or NULL arguments.
-//              QTSS_AttrNameExists: The name must be unique.
-QTSS_Error QTSS_AddInstanceAttribute(   QTSS_Object inObject, char* inAttrName,
-        void* inUnused, QTSS_AttrDataType inAttrDataType);
-                                        
-/********************************************************************/
-//  QTSS_RemoveInstanceAttribute
-//
-//  Removes an existing instance attribute. This may be called at any time
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_OutOfState: If this function isn't being called from the Register role
-//              QTSS_BadArgument:   Bad object type.
-//              QTSS_AttrDoesntExist: Bad attribute ID
-QTSS_Error QTSS_RemoveInstanceAttribute(QTSS_Object inObject, QTSS_AttributeID inID);
-
-/********************************************************************/
-//  Getting attribute information
-//
-//  The following callbacks allow modules to discover at runtime what
-//  attributes exist in which objects and object types, and discover
-//  all attribute meta-data
-
-/********************************************************************/
-//  QTSS_IDForAttr
-//
-//  Given an attribute name, this returns its accompanying attribute ID.
-//  The ID can in turn be used to retrieve the attribute value from
-//  a object. This callback applies only to static attributes 
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-QTSS_Error QTSS_IDForAttr(QTSS_ObjectType inObjectType, const char* inAttributeName,
-                            QTSS_AttributeID* outID);
-
-/********************************************************************/
-//  QTSS_GetAttrInfoByName
-//
-//  Searches for an attribute with the specified name in the specified object.
-//  If found, this function returns a QTSS_AttrInfoObject describing the attribute.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument
-//              QTSS_AttrDoesntExist
-QTSS_Error QTSS_GetAttrInfoByName(QTSS_Object inObject, char* inAttrName,
-                                    QTSS_AttrInfoObject* outAttrInfoObject);
-
-/********************************************************************/
-//  QTSS_SetValue
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-//              QTSS_ReadOnly: Attribute is read only.
-//              QTSS_BadIndex: Attempt to set non-0 index of attribute with a param retrieval function.
-//
-QTSS_Error QTSS_SetValue (QTSS_Object inObject, QTSS_AttributeID inID, uint32_t inIndex, const void* inBuffer,  uint32_t inLen);
+                                                                                                                                                                   
 
 /*****************************************/
 //  SERVICES
@@ -956,38 +757,6 @@ QTSS_Error QTSS_SetValue (QTSS_Object inObject, QTSS_AttributeID inID, uint32_t 
 typedef QTSS_Error (*QTSS_ServiceFunctionPtr)(QTSS_ServiceFunctionArgsPtr);
 
 /********************************************************************/
-//  QTSS_AddService
-//
-//  This function registers a service with the specified name, and
-//  associates it with the specified function pointer.
-//  QTSS_AddService may only be called from the QTSS_Register role
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_OutOfState: If this function isn't being called from the Register role
-//              QTSS_BadArgument:   Service name too long, or NULL arguments.
-QTSS_Error QTSS_AddService(const char* inServiceName, QTSS_ServiceFunctionPtr inFunctionPtr);
-
-
-/********************************************************************/
-//  QTSS_IDForService
-//
-//  Much like QTSS_IDForAttr, this resolves a service name into its
-//  corresponding QTSS_ServiceID. The QTSS_ServiceID can then be used to
-//  invoke the service.
-//
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-QTSS_Error QTSS_IDForService(const char* inTag, QTSS_ServiceID* outID);
-
-/********************************************************************/
-//  QTSS_DoService
-//
-//  Invokes the service. Return value from this function comes from the service
-//  function itself, unless the QTSS_IllegalService errorcode is returned,
-//  which is returned when the QTSS_ServiceID is bad.
-QTSS_Error QTSS_DoService(QTSS_ServiceID inID, QTSS_ServiceFunctionArgsPtr inArgs);
-
-/********************************************************************/
 //  BUILT-IN SERVICES
 //
 //  The server registers some built-in services when it starts up.
@@ -995,47 +764,5 @@ QTSS_Error QTSS_DoService(QTSS_ServiceID inID, QTSS_ServiceFunctionArgsPtr inArg
 
 // Rereads the preferences, also causes the QTSS_RereadPrefs_Role to be invoked
 #define QTSS_REREAD_PREFS_SERVICE   "RereadPreferences"
-
-/*****************************************/
-//  ASYNC I/O CALLBACKS
-//
-//  QTSS modules must be kind in how they use the CPU. The server doesn't
-//  prevent a poorly implemented QTSS module from hogging the processing
-//  capability of the server, at the expense of other modules and other clients.
-//
-//  It is therefore imperitive that a module use non-blocking, or async, I/O.
-//  If a module were to block, say, waiting to read file data off disk, this stall
-//  would affect the entire server.
-//
-//  This problem is resolved in QTSS API in a number of ways.
-//
-//  Firstly, all QTSS_StreamRefs provided to modules are non-blocking, or async.
-//  Modules should be prepared to receive EWOULDBLOCK errors in response to
-//  QTSS_Read, QTSS_Write, & QTSS_WriteV calls, with certain noted exceptions
-//  in the case of responding to RTSP requests.
-//
-//  Modules that open their own file descriptors for network or file I/O can
-//  create separate threads for handling I/O. In this case, these descriptors
-//  can remain blocking, as long as they always block on the private module threads.
-//
-//  In most cases, however, creating a separate thread for I/O is not viable for the
-//  kind of work the module would like to do. For instance, a module may wish
-//  to respond to a RTSP DESCRIBE request, but can't immediately because constructing
-//  the response would require I/O that would block.
-//
-//  The problem is once the module returns from the QTSS_RTSPProcess_Role, the
-//  server will mistakenly consider the request handled, and move on. It won't
-//  know that the module has more work to do before it finishes processing the DESCRIBE.
-//
-//  In this case, the module needs to tell the server to delay processing of the
-//  DESCRIBE request until the file descriptor's blocking condition is lifted.
-//  The module can do this by using the provided "event" callback routines.
-
-//  Returns:    QTSS_NoErr
-//              QTSS_BadArgument: Bad argument
-//              QTSS_OutOfState: if this callback is made from a role that doesn't allow async I/O events
-//              QTSS_RequestFailed: Not currently possible to request an event. 
-
-QTSS_Error  QTSS_SetIdleTimer(int64_t inIdleMsec);
 
 #endif

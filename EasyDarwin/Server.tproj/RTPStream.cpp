@@ -1355,13 +1355,6 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 		DEBUG_RTCP_PRINTF(("RTPStream::ProcessIncomingRTCPPacket end parse rtcp currentPtr.Len = %"   _U32BITARG_   "\n", currentPtr.Len));
 	}
 
-	// Invoke the RTCP modules, allowing them to process this packet
-	QTSS_RoleParams theParams;
-	theParams.rtcpProcessParams.inRTPStream = this;
-	theParams.rtcpProcessParams.inClientSession = (RTPSession *)fSession;
-	theParams.rtcpProcessParams.inRTCPPacketData = inPacket->Ptr;
-	theParams.rtcpProcessParams.inRTCPPacketDataLen = inPacket->Len;
-
 	fSession->GetSessionMutex()->Unlock();
 }
 

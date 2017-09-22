@@ -100,11 +100,11 @@ StreamInfo* SDPSourceInfo::GetStreamInfo(uint32_t inIndex)
 		return nullptr;
 }
 
-StreamInfo* SDPSourceInfo::GetStreamInfoByTrackID(uint32_t inTrackID)
+const StreamInfo* SDPSourceInfo::GetStreamInfoByTrackID(uint32_t inTrackID) const
 {
 	if (fStreamArray.empty())
 		return nullptr;
-	for (auto &stream : fStreamArray)
+	for (const auto &stream : fStreamArray)
 		if (stream.fTrackID == inTrackID)
 			return &stream;
 	return nullptr;

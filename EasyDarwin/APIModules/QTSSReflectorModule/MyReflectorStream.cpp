@@ -132,3 +132,8 @@ QTSS_Error MyReflectorStream::BindSockets(MyRTSPRequest &inRequest, MyRTPSession
 
 	return QTSS_NoErr;
 }
+
+void MyReflectorStream::PushPacket(const char *packet, size_t packetLen, bool isRTCP)
+{
+
+}

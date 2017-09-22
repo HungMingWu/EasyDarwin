@@ -58,25 +58,6 @@
 #define REFLECTOR_THINNING_DEBUGGING 0 
 #define MAX_CACHE_SIZE  1024*1024*2
 
-//Define to use new potential workaround for NAT problems
-#define NAT_WORKAROUND 1
-
-typedef struct FU_Indicator_tag
-{
-	unsigned char F : 1;
-	unsigned char nRI : 2;
-	unsigned char type : 5;//
-}FAU_Indicator;
-
-typedef struct FU_Head_tag
-{
-	unsigned char nalu_type : 5;//little 5 bit
-	unsigned char r : 1;
-	unsigned char e : 1;
-	unsigned char s : 1;//high bit    
-}FU_Head;
-
-
 class ReflectorPacket;
 class ReflectorSender;
 class ReflectorStream;
@@ -191,7 +172,6 @@ public:
 	void    RemoveSender(ReflectorSender* inStreamElem);
 	bool  HasSender() { return !fDemuxer.empty(); }
 	bool  ProcessPacket(int64_t inMilliseconds, ReflectorPacket* thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort);
-	ReflectorPacket*    GetPacket();
 	int64_t      Run() override;
 	void    SetSSRCFilter(bool state, uint32_t timeoutSecs) { fFilterSSRCs = state; fTimeoutSecs = timeoutSecs; }
 private:
@@ -271,11 +251,6 @@ public:
 
 	int64_t  fSleepTime;
 
-	//Used for adjusting sequence numbers in light of thinning
-	uint16_t      GetPacketSeqNumber(const StrPtrLen& inPacket);
-	void        SetPacketSeqNumber(const StrPtrLen& inPacket, uint16_t inSeqNumber);
-	bool      PacketShouldBeThinned(QTSS_RTPStreamObject inStream, const StrPtrLen& inPacket);
-
 	//We want to make sure that ReflectPackets only gets invoked when there
 	//is actually work to do, because it is an expensive function
 	bool      ShouldReflectNow(int64_t inCurrentTime, int64_t* ioWakeupTime);
@@ -284,36 +259,20 @@ public:
 	//Returns the time at which it next needs to be invoked
 	void        ReflectPackets(int64_t* ioWakeupTime);
 
-	//this is the old way of doing reflect packets. It is only here until the relay code can be cleaned up.
-	void        ReflectRelayPackets(int64_t* ioWakeupTime);
-
 	ReflectorPacket*    SendPacketsToOutput(ReflectorOutput* theOutput, ReflectorPacket* currentPacket, int64_t currentTime, int64_t  bucketDelay, bool firstPacket);
-
-	uint32_t      GetOldestPacketRTPTime(bool *foundPtr);
-	uint16_t      GetFirstPacketRTPSeqNum(bool *foundPtr);
-	bool      GetFirstPacketInfo(uint16_t* outSeqNumPtr, uint32_t* outRTPTimePtr, int64_t* outArrivalTimePtr);
-
-	ReflectorPacket* GetClientBufferNextPacketTime(uint32_t inRTPTime);
-	bool      GetFirstRTPTimePacket(uint16_t* outSeqNumPtr, uint32_t* outRTPTimePtr, int64_t* outArrivalTimePtr);
 
 	void        RemoveOldPackets();
 	ReflectorPacket* GetClientBufferStartPacketOffset(int64_t offsetMsec, bool needKeyFrameFirstPacket = false);
 	ReflectorPacket* GetClientBufferStartPacket() { return GetClientBufferStartPacketOffset(0); };
 
-	// ->geyijyn@20150427
-	// 关键帧索引及丢帧方案
 	ReflectorPacket* NeedRelocateBookMark(ReflectorPacket* thePacket);
 	ReflectorPacket* GetNewestKeyFrameFirstPacket(ReflectorPacket* currentElem, int64_t offsetMsec);
-	bool IsKeyFrameFirstPacket(ReflectorPacket* thePacket);
-	bool IsFrameFirstPacket(ReflectorPacket* thePacket);
-	bool IsFrameLastPacket(ReflectorPacket* thePacket);
+	static bool IsKeyFrameFirstPacket(const ReflectorPacket &thePacket);
 
 	ReflectorStream*    fStream;
 	uint32_t              fWriteFlag;
 
 	std::list<std::unique_ptr<ReflectorPacket>> fPacketQueue;
-	ReflectorPacket*    fFirstNewPacketInQueue{ nullptr };
-	ReflectorPacket*    fFirstPacketInQueueForNewOutput{ nullptr };
 	ReflectorPacket*	fKeyFrameStartPacketElementPointer{ nullptr };//最新关键帧指针
 
 	//these serve as an optimization, keeping track of when this
@@ -335,7 +294,7 @@ public:
 	};
 
 	int64_t      fLastRRTime{ 0 };
-
+	void appendPacket(ReflectorPacket *thePacket);
 	friend class ReflectorSocket;
 	friend class ReflectorStream;
 };
@@ -415,8 +374,6 @@ public:
 	uint32_t                  GetTimeScale() { return fStreamInfo.fTimeScale; }
 	uint64_t                  fPacketCount;
 
-	void                    SetEnableBuffer(bool enableBuffer) { fEnableBuffer = enableBuffer; }
-	bool                  BufferEnabled() { return fEnableBuffer; }
 	inline  void                    UpdateBitRate(int64_t currentTime);
 	static uint32_t           sOverBufferInMsec;
 
@@ -488,7 +445,6 @@ private:
 	bool              fHasFirstRTCPPacket;
 	bool              fHasFirstRTPPacket;
 
-	bool              fEnableBuffer{ false };
 	uint32_t              fEyeCount;
 
 	uint32_t              fFirst_RTCP_RTP_Time;
@@ -503,7 +459,6 @@ private:
 	static uint32_t       sMaxFuturePacketMSec;
 	static uint32_t       sOverBufferInSec;
 	static uint32_t       sBucketDelayInMsec;
-	static bool       sUsePacketReceiveTime;
 	static uint32_t       sFirstPacketOffsetMsec;
 
 	static uint32_t       sRelocatePacketAgeMSec;

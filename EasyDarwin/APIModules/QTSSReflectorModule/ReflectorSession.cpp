@@ -71,9 +71,6 @@ QTSS_Error ReflectorSession::SetupReflectorSession(QTSS_StandardRTSP_Params& inP
 			return theError;
 		}
 		fStreamArray[x]->SetMyReflectorSession(this);
-
-		fStreamArray[x]->SetEnableBuffer(this->fHasBufferedStreams);// buffering is done by the stream's sender
-
 		// If the port was 0, update it to reflect what the actual RTP port is.
 		fSourceInfo.GetStreamInfo(x)->fPort = fStreamArray[x]->GetStreamInfo()->fPort;
 		//printf("ReflectorSession::SetupReflectorSession fSourceInfo->GetStreamInfo(x)->fPort= %u\n",fSourceInfo->GetStreamInfo(x)->fPort);   

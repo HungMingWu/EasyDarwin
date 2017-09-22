@@ -28,4 +28,5 @@ public:
 	StreamInfo* GetStreamInfo() { return &fStreamInfo; }
 	void SetEnableBuffer(bool enableBuffer) { fEnableBuffer = enableBuffer; }
 	SocketPair<MyReflectorSocket>* GetSocketPair() { return fSockets; }
+	void PushPacket(const char *packet, size_t packetLen, bool isRTCP);
 };

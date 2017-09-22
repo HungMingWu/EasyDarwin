@@ -25,5 +25,6 @@ public:
 	QTSS_Error SetupReflectorSession(MyRTSPRequest &inRequest, MyRTPSession &inSession,
 		uint32_t inFlags = kMarkSetup, bool filterState = true, uint32_t filterTimeout = 30);
 	void AddBroadcasterClientSession(MyRTPSession* inClientSession);
-	SDPSourceInfo& GetSourceInfo() { return fSourceInfo; }
+	const SDPSourceInfo& GetSourceInfo() const { return fSourceInfo; }
+	MyReflectorStream& GetStreamByIndex(uint32_t inIndex) { return *fStreamArray[inIndex]; }
 };

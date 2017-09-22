@@ -126,7 +126,6 @@ public:
 		kNumQualityLevels = 2       //uint32_t
 	};
 
-	void	SetHasBufferedStreams(bool enableBuffer) { fHasBufferedStreams = enableBuffer; }
 	void	SetHasVideoKeyFrameUpdate(bool indexUpdate) { fHasVideoKeyFrameUpdate = indexUpdate; }
 
 	void    StopTimer() { timer.cancel(); }
@@ -152,7 +151,6 @@ private:
 	// For the QTSSSplitterModule, this object can cache a QTSS_StreamRef
 	QTSS_StreamRef fSocketStream{ nullptr };
 
-	bool		fHasBufferedStreams{ false };
 	bool		fHasVideoKeyFrameUpdate{ false };
 
 private:

@@ -68,12 +68,12 @@ private:
 	RTPSession*             fClientSession;
 	ReflectorSession*       fReflectorSession;
 	std::string             fCookieAttrName;
-	uint32_t                  fBufferDelayMSecs;
-	int64_t                  fBaseArrivalTime;
-	bool                  fIsUDP;
-	bool                  fTransportInitialized;
-	bool                  fMustSynch;
-	bool                  fPreFilter;
+	uint32_t                  fBufferDelayMSecs{ ReflectorStream::sOverBufferInMsec };
+	int64_t                  fBaseArrivalTime{ 0 };
+	bool                  fIsUDP{ false };
+	bool                  fTransportInitialized{ false };
+	bool                  fMustSynch{ true };
+	bool                  fPreFilter{ true };
 
 	uint16_t GetPacketSeqNumber(const std::vector<char> &inPacket);
 	bool  FilterPacket(RTPStream *theStreamPtr, const std::vector<char> &inPacket);

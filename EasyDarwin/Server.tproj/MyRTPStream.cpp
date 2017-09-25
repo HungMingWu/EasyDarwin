@@ -185,27 +185,6 @@ MyRTPStream::MyRTPStream(MyRTSPRequest& request, uint32_t inSSRC, MyRTPSession& 
 
 		fResender.SetBandwidthTracker(fTracker);
 		fResender.SetDestination(fSockets->GetSocketA(), fRemoteAddr, fRemoteRTPPort);
-
-#if RTP_PACKET_RESENDER_DEBUGGING
-		if (QTSServerInterface::GetServer()->GetPrefs()->IsAckLoggingEnabled())
-		{
-			char        url[256];
-			char        logfile[256];
-			sprintf(logfile, "resend_log_%"   _U32BITARG_   "", fSession->GetRTSPSession()->GetSessionID());
-			StrPtrLen   logName(logfile);
-			fResender.SetLog(&logName);
-
-			StrPtrLen   *presoURL = fSession->GetValue(qtssCliSesPresentationURL);
-			uint32_t      clientAddr = request->GetSession()->GetSocket()->GetRemoteAddr();
-			memcpy(url, presoURL->Ptr, presoURL->Len);
-			url[presoURL->Len] = 0;
-			printf("RTPStream::Setup for %s will use ACKS, ip addr: %li.%li.%li.%li\n", url, (clientAddr & 0xff000000) >> 24
-				, (clientAddr & 0x00ff0000) >> 16
-				, (clientAddr & 0x0000ff00) >> 8
-				, (clientAddr & 0x000000ff)
-			);
-		}
-#endif
 	}
 
 	//

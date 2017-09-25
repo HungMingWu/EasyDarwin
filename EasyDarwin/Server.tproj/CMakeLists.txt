@@ -11,7 +11,6 @@ set (SRC
 	 QTSServer.cpp QTSServer.h
 	 QTSServerInterface.cpp QTSServerInterface.h
      RTSPRequestInterface.cpp RTSPRequestInterface.h
-     QTSSDataConverter.cpp QTSSDataConverter.h
      RTPSession.cpp RTPSession.h
 	 MyRTPSession.cpp MyRTPSession.h
      RTPStream.cpp RTPStream.h

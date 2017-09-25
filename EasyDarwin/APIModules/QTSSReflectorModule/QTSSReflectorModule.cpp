@@ -71,8 +71,6 @@ static boost::string_view       sOutputName = "QTSSReflectorModuleOutput";
 static boost::string_view       sKillClientsEnabledName = "QTSSReflectorModuleTearDownClients";
 
 //static boost::string_view       sSessionName = "QTSSReflectorModuleSession";
-// ATTRIBUTES
-static QTSS_AttributeID         sBufferOffsetAttr = qtssIllegalAttrID;
 
 // STATIC DATA
 
@@ -107,7 +105,6 @@ static bool   sDefaultEnforceStaticSDPPortRange = false;
 
 //static uint32_t   sDefaultMaxAnnouncedSDPLengthInKbytes = 4;
 
-static QTSS_AttributeID sIPAllowListID = qtssIllegalAttrID;
 static char*            sIPAllowList = nullptr;
 static char*            sLocalLoopBackAddress = "127.0.0.*";
 
@@ -139,8 +136,6 @@ static char*    sDefaultRedirectBroadcastsKeyword = "";
 static char*    sDefaultBroadcastsDir = ""; // match all
 static char*	sDefaultsBroadcasterGroup = "broadcaster";
 static std::string sBroadcasterGroup;
-
-static QTSS_AttributeID sBroadcastDirListID = qtssIllegalAttrID;
 
 static int32_t   sWaitTimeLoopCount = 10;
 

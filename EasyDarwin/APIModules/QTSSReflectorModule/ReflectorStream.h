@@ -67,14 +67,8 @@ class ReflectorSession;
 class ReflectorPacket
 {
 public:
-	ReflectorPacket() = default;
+	ReflectorPacket(const char *data, size_t len) : fPacket(data, data + len) {}
 	~ReflectorPacket() = default;
-
-	void    SetPacketData(const char *data, size_t length)
-	{
-		fPacket = std::vector<char>(data, data + length);
-	}
-
 	bool  IsRTCP() { return fIsRTCP; }
 	inline  uint32_t  GetPacketRTPTime();
 	inline  uint16_t  GetPacketRTPSeqNum();
@@ -89,6 +83,7 @@ private:
 	bool      fNeededByOutput{ false }; // is this packet still needed for output?
 	uint64_t      fStreamCountID{ 0 };
 
+	friend bool IsKeyFrameFirstPacket(const ReflectorPacket &thePacket);
 	friend class ReflectorSender;
 	friend class ReflectorSocket;
 	friend class RTPSessionOutput;
@@ -171,14 +166,14 @@ public:
 	void    AddSender(ReflectorSender* inSender);
 	void    RemoveSender(ReflectorSender* inStreamElem);
 	bool  HasSender() { return !fDemuxer.empty(); }
-	bool  ProcessPacket(int64_t inMilliseconds, ReflectorPacket* thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort);
+	bool  ProcessPacket(int64_t inMilliseconds, std::unique_ptr<ReflectorPacket> thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort);
 	int64_t      Run() override;
 	void    SetSSRCFilter(bool state, uint32_t timeoutSecs) { fFilterSSRCs = state; fTimeoutSecs = timeoutSecs; }
 private:
 
 	//virtual int64_t        Run();
 	void    GetIncomingData(int64_t inMilliseconds);
-	void    FilterInvalidSSRCs(ReflectorPacket* thePacket, bool isRTCP);
+	void    FilterInvalidSSRCs(ReflectorPacket &thePacket, bool isRTCP);
 
 	//Number of packets to allocate when the socket is first created
 	enum
@@ -190,7 +185,6 @@ private:
 	int64_t                      fLastBroadcasterTimeOutRefresh{0};
 	// Queue of senders
 	std::list<ReflectorSender*> fSenderQueue;
-	int64_t  fSleepTime{0};
 
 	uint32_t  fValidSSRC{0};
 	int64_t  fLastValidSSRCTime{0};
@@ -262,12 +256,9 @@ public:
 	ReflectorPacket*    SendPacketsToOutput(ReflectorOutput* theOutput, ReflectorPacket* currentPacket, int64_t currentTime, int64_t  bucketDelay, bool firstPacket);
 
 	void        RemoveOldPackets();
-	ReflectorPacket* GetClientBufferStartPacketOffset(int64_t offsetMsec, bool needKeyFrameFirstPacket = false);
-	ReflectorPacket* GetClientBufferStartPacket() { return GetClientBufferStartPacketOffset(0); };
+	ReflectorPacket* GetClientBufferStartPacketOffset(int64_t offsetMsec);
 
 	ReflectorPacket* NeedRelocateBookMark(ReflectorPacket* thePacket);
-	ReflectorPacket* GetNewestKeyFrameFirstPacket(ReflectorPacket* currentElem, int64_t offsetMsec);
-	static bool IsKeyFrameFirstPacket(const ReflectorPacket &thePacket);
 
 	ReflectorStream*    fStream;
 	uint32_t              fWriteFlag;
@@ -294,7 +285,7 @@ public:
 	};
 
 	int64_t      fLastRRTime{ 0 };
-	void appendPacket(ReflectorPacket *thePacket);
+	void appendPacket(std::unique_ptr<ReflectorPacket> thePacket);
 	friend class ReflectorSocket;
 	friend class ReflectorStream;
 };
@@ -343,7 +334,7 @@ public:
 	// by channel numbers
 	void	SetRTPChannelNum(int16_t inChannel) { fRTPChannel = inChannel; }
 	void	SetRTCPChannelNum(int16_t inChannel) { fRTCPChannel = inChannel; }
-	void	PushPacket(char *packet, uint32_t packetLen, bool isRTCP);
+	void	PushPacket(char *packet, size_t packetLen, bool isRTCP);
 
 	//
 	// ACCESSORS
@@ -357,18 +348,11 @@ public:
 	ReflectorSender*        GetRTPSender() { return &fRTPSender; }
 	ReflectorSender*        GetRTCPSender() { return &fRTCPSender; }
 
-	void                    SetHasFirstRTCP(bool hasPacket) { fHasFirstRTCPPacket = hasPacket; }
-	bool                  HasFirstRTCP() { return fHasFirstRTCPPacket; }
-
 	void                    SetFirst_RTCP_RTP_Time(uint32_t time) { fFirst_RTCP_RTP_Time = time; }
 	uint32_t                  GetFirst_RTCP_RTP_Time() { return fFirst_RTCP_RTP_Time; }
 
 	void                    SetFirst_RTCP_Arrival_Time(int64_t time) { fFirst_RTCP_Arrival_Time = time; }
 	int64_t                  GetFirst_RTCP_Arrival_Time() { return fFirst_RTCP_Arrival_Time; }
-
-
-	void                    SetHasFirstRTP(bool hasPacket) { fHasFirstRTPPacket = hasPacket; }
-	bool                  HasFirstRTP() { return fHasFirstRTPPacket; }
 
 	uint32_t                  GetBufferDelay() { return ReflectorStream::sOverBufferInMsec; }
 	uint32_t                  GetTimeScale() { return fStreamInfo.fTimeScale; }
@@ -441,9 +425,6 @@ private:
 	// If incoming data is RTSP interleaved
 	int16_t              fRTPChannel; //These will be -1 if not set to anything
 	int16_t              fRTCPChannel;
-
-	bool              fHasFirstRTCPPacket;
-	bool              fHasFirstRTPPacket;
 
 	uint32_t              fEyeCount;
 

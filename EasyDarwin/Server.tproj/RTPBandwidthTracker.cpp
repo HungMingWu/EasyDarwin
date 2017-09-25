@@ -46,14 +46,6 @@ void RTPBandwidthTracker::SetWindowSize(int32_t clientWindowSize)
 	fClientWindow = clientWindowSize;
 	fLastCongestionAdjust = 0;
 
-#if RTP_PACKET_RESENDER_DEBUGGING   
-	//€ test to see what happens w/o slow start at beginning
-	//if ( initSlowStart )
-	//  printf( "ack list initializing with slow start.\n" );
-	//else
-	//  printf( "ack list initializing at full speed.\n" );
-#endif
-
 	if (fUseSlowStart)
 	{
 		fSlowStartThreshold = clientWindowSize * 3 / 4;

@@ -62,19 +62,11 @@ static boost::string_view        sStreamByteCount = "qtssReflectorStreamByteCoun
 
 RTPSessionOutput::RTPSessionOutput(RTPSession* inClientSession, ReflectorSession* inReflectorSession,
 	boost::string_view inCookieAddrName)
-	: fClientSession(inClientSession),
+	: ReflectorOutput(inReflectorSession->GetNumStreams()), // create a bookmark for each stream we'll reflect
+	fClientSession(inClientSession),
 	fReflectorSession(inReflectorSession),
-	fCookieAttrName(inCookieAddrName),
-	fBufferDelayMSecs(ReflectorStream::sOverBufferInMsec),
-	fBaseArrivalTime(0),
-	fIsUDP(false),
-	fTransportInitialized(false),
-	fMustSynch(true),
-	fPreFilter(true)
+	fCookieAttrName(inCookieAddrName)
 {
-	// create a bookmark for each stream we'll reflect
-	this->InititializeBookmarks(inReflectorSession->GetNumStreams());
-
 }
 
 bool RTPSessionOutput::IsPlaying()

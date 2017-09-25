@@ -67,6 +67,64 @@ uint32_t                          ReflectorStream::sFirstPacketOffsetMsec = 500;
 
 uint32_t                          ReflectorStream::sRelocatePacketAgeMSec = 1000;
 
+bool IsKeyFrameFirstPacket(const ReflectorPacket &thePacket)
+{
+	if (thePacket.fPacket.size() < 20) return false;
+
+	uint8_t csrc_count = thePacket.fPacket[0] & 0x0f;
+	uint32_t rtp_head_size = /*sizeof(struct RTPHeader)*/12 + csrc_count * sizeof(uint32_t);
+	uint8_t nal_unit_type = thePacket.fPacket[rtp_head_size + 0] & 0x1F;
+	if (nal_unit_type == 24)//STAP-A
+	{
+		if (thePacket.fPacket.size() > rtp_head_size + 3)
+			nal_unit_type = thePacket.fPacket[rtp_head_size + 3] & 0x1F;
+	}
+	else if (nal_unit_type == 25)//STAP-B
+	{
+		if (thePacket.fPacket.size() > rtp_head_size + 5)
+			nal_unit_type = thePacket.fPacket[rtp_head_size + 5] & 0x1F;
+	}
+	else if (nal_unit_type == 26)//MTAP16
+	{
+		if (thePacket.fPacket.size() > rtp_head_size + 8)
+			nal_unit_type = thePacket.fPacket[rtp_head_size + 8] & 0x1F;
+	}
+	else if (nal_unit_type == 27)//MTAP24
+	{
+		if (thePacket.fPacket.size() > rtp_head_size + 9)
+			nal_unit_type = thePacket.fPacket[rtp_head_size + 9] & 0x1F;
+	}
+	else if ((nal_unit_type == 28) || (nal_unit_type == 29))//FU-A/B
+	{
+		if (thePacket.fPacket.size() > rtp_head_size + 1)
+		{
+			uint8_t startBit = thePacket.fPacket[rtp_head_size + 1] & 0x80;
+			if (startBit)
+				nal_unit_type = thePacket.fPacket[rtp_head_size + 1] & 0x1F;
+		}
+	}
+
+	return nal_unit_type == 5 || nal_unit_type == 7 || nal_unit_type == 8;
+}
+
+enum class KeyFrameType : char {
+	Video,
+	Audio,
+	None
+};
+
+static KeyFrameType needToUpdateKeyFrame(ReflectorStream* stream,
+	const ReflectorPacket &thePacket)
+{
+	StreamInfo* info = stream->GetStreamInfo();
+	if (info->fPayloadType == qtssVideoPayloadType && info->fPayloadName == "H264/90000"
+		&& IsKeyFrameFirstPacket(thePacket))
+		return KeyFrameType::Video;
+	if (info->fPayloadType == qtssAudioPayloadType && stream->GetMyReflectorSession()->HasVideoKeyFrameUpdate())
+		return KeyFrameType::Audio;
+	return KeyFrameType::None;
+}
+
 ReflectorStream::ReflectorStream(StreamInfo* inInfo)
 	: fPacketCount(0),
 	fSockets(nullptr),
@@ -84,8 +142,6 @@ ReflectorStream::ReflectorStream(StreamInfo* inInfo)
 
 	fRTPChannel(-1),
 	fRTCPChannel(-1),
-	fHasFirstRTCPPacket(false),
-	fHasFirstRTPPacket(false),
 	fEyeCount(0),
 	fFirst_RTCP_RTP_Time(0),
 	fFirst_RTCP_Arrival_Time(0),
@@ -201,11 +257,6 @@ int32_t ReflectorStream::AddOutput(ReflectorOutput* inOutput, int32_t putInThisB
 		for (uint32_t dTwo = 0; dTwo < sBucketSize; dTwo++)
 			Assert(fOutputArray[dOne][dTwo] != inOutput);
 #endif
-	if (inOutput)
-	{
-		inOutput->setNewFlag(true);
-	}
-
 	// If caller didn't specify a bucket, find a bucket
 	if (putInThisBucket < 0)
 		putInThisBucket = this->FindBucket();
@@ -433,21 +484,20 @@ void ReflectorStream::SendReceiverReport()
 	(void)fSockets->GetSocketB()->SendTo(fDestRTCPAddr, fDestRTCPPort, fReceiverReportBuffer, fReceiverReportSize);
 }
 
-void ReflectorStream::PushPacket(char *packet, uint32_t packetLen, bool isRTCP)
+void ReflectorStream::PushPacket(char *packet, size_t packetLen, bool isRTCP)
 {
 	if (packetLen > 0)
 	{
-		ReflectorPacket* thePacket = new ReflectorPacket;
-		thePacket->SetPacketData(packet, packetLen);
+		auto thePacket = std::make_unique<ReflectorPacket>(packet, packetLen);
 		if (isRTCP)
 		{
 			//printf("ReflectorStream::PushPacket RTCP packetlen = %"   _U32BITARG_   "\n",packetLen);
-			fSockets->GetSocketB()->ProcessPacket(OS::Milliseconds(), thePacket, 0, 0);
+			fSockets->GetSocketB()->ProcessPacket(OS::Milliseconds(), std::move(thePacket), 0, 0);
 			fSockets->GetSocketB()->Signal(Task::kIdleEvent);
 		}
 		else
 		{
-			fSockets->GetSocketA()->ProcessPacket(OS::Milliseconds(), thePacket, 0, 0);
+			fSockets->GetSocketA()->ProcessPacket(OS::Milliseconds(), std::move(thePacket), 0, 0);
 			fSockets->GetSocketA()->Signal(Task::kIdleEvent);
 		}
 	}
@@ -462,7 +512,6 @@ ReflectorSender::ReflectorSender(ReflectorStream* inStream, uint32_t inWriteFlag
 
 bool ReflectorSender::ShouldReflectNow(int64_t inCurrentTime, int64_t* ioWakeupTime)
 {
-	Assert(ioWakeupTime != nullptr);
 	//check to make sure there actually is work to do for this stream.
 	if (!fHasNewPackets && (fNextTimeToRun == 0 || inCurrentTime < fNextTimeToRun))
 	{
@@ -523,9 +572,6 @@ void ReflectorSender::ReflectPackets(int64_t* ioWakeupTime)
 
 	fNextTimeToRun = 1000;	// init to 1 secs
 
-	if (fWriteFlag == qtssWriteFlagsIsRTCP)
-		fNextTimeToRun = 1000;
-
 	//determine if we need to send a receiver report to the multicast source
 	if ((fWriteFlag == qtssWriteFlagsIsRTCP) && (currentTime > (fLastRRTime + kRRInterval)))
 	{
@@ -557,7 +603,6 @@ void ReflectorSender::ReflectPackets(int64_t* ioWakeupTime)
 			{
 				packetElem = fFirstPacketInQueueForNewOutput; // everybody starts at the oldest packet in the buffer delay or uses a bookmark
 				firstPacket = true;
-				theOutput->setNewFlag(false);
 			}
 
 			int64_t  bucketDelay = ReflectorStream::sBucketDelayInMsec * (int64_t)bucketIndex;
@@ -567,7 +612,7 @@ void ReflectorSender::ReflectPackets(int64_t* ioWakeupTime)
 				ReflectorPacket* thePacket = NeedRelocateBookMark(packetElem);
 
 				thePacket->fNeededByOutput = true; 				// flag to prevent removal in RemoveOldPackets
-				(void)theOutput->SetBookMarkPacket(thePacket); 	// store a reference to the packet
+				theOutput->SetBookMarkPacket(thePacket); 	// store a reference to the packet
 			}
 		}
 	}
@@ -589,18 +634,15 @@ void ReflectorSender::ReflectPackets(int64_t* ioWakeupTime)
 
 ReflectorPacket*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOutput, ReflectorPacket* currentPacket, int64_t currentTime, int64_t  bucketDelay, bool firstPacket)
 {
-	ReflectorPacket* lastPacket = currentPacket;
 	auto it = std::find_if(begin(fPacketQueue), end(fPacketQueue),
 		[currentPacket](const std::unique_ptr<ReflectorPacket> &pkt) {
 		return pkt.get() == currentPacket;
 	});
 
-	uint32_t count = 0;
 	QTSS_Error err = QTSS_NoErr;
 	for (; it != fPacketQueue.end(); ++it)
 	{
 		const auto &thePacket = *it;
-		lastPacket = thePacket.get();
 		int64_t  packetLateness = bucketDelay;
 		int64_t timeToSendPacket = -1;
 
@@ -641,15 +683,13 @@ ReflectorPacket*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOut
 
 			break;
 		}
-
-		count++;
 	}
 
-	return lastPacket;
+	return fPacketQueue.back().get();
 }
 
 
-ReflectorPacket* ReflectorSender::GetClientBufferStartPacketOffset(int64_t offsetMsec, bool needKeyFrameFirstPacket)
+ReflectorPacket* ReflectorSender::GetClientBufferStartPacketOffset(int64_t offsetMsec)
 {
 	int64_t theCurrentTime = OS::Milliseconds();
 	int64_t packetDelay = 0;
@@ -669,7 +709,6 @@ ReflectorPacket* ReflectorSender::GetClientBufferStartPacketOffset(int64_t offse
 
 void    ReflectorSender::RemoveOldPackets()
 {
-
 	// Iterate through the senders queue to clear out packets
 	// Start at the oldest packet and walk forward to the newest packet
 	// 
@@ -681,8 +720,6 @@ void    ReflectorSender::RemoveOldPackets()
 	for (auto it = fPacketQueue.begin(); it != fPacketQueue.end(); )
 	{
 		const auto &thePacket = *it;
-		//printf("ReflectorSender::RemoveOldPackets Packet %d in queue is %qd milliseconds old\n", DGetPacketSeqNumber( &thePacket->fPacketPtr ) ,theCurrentTime - thePacket->fTimeArrived);
-
 
 		packetDelay = theCurrentTime - thePacket->fTimeArrived;
 
@@ -693,120 +730,58 @@ void    ReflectorSender::RemoveOldPackets()
 			it = fPacketQueue.erase(it);
 		}
 		else
-		{   // we want to keep all of these but we should reset the ones that should be aged out unless marked
+		{
+			// we want to keep all of these but we should reset the ones that should be aged out unless marked
 			// as need the next time through reflect packets.
 			++it;
 
 			if (fKeyFrameStartPacketElementPointer == thePacket.get())
 					break;
 
-			//if(IsKeyFrameFirstPacket(thePacket))
-			//	break;
-
 			thePacket->fNeededByOutput = false; //mark not needed.. will be set next time through reflect packets
 			if (packetDelay <= currentMaxPacketDelay)  // this packet is going to be kept around as well as the ones that follow.
 				break;
 		}
 	}
-
-
 }
 
 // if current packet over max packetAgeTime, we need relocate the BookMark to
 // the new fKeyFrameStartPacketElementPointer
 ReflectorPacket* ReflectorSender::NeedRelocateBookMark(ReflectorPacket* thePacket)
 {
-	//1、判断当前Packet是否已经超过了最大缓冲周期时间(不判断音/视频、I/P帧)
-	//2、当时间超过了阀值,查找最新的fKeyFrameStartPacketElementPointer
-	//3、返回最新的fKeyFrameStartPacketElementPointer做为最新的BookMark
-
-	int64_t theCurrentTime = OS::Milliseconds();
-	int64_t packetDelay = 0;
-	int64_t currentMaxPacketDelay = ReflectorStream::sRelocatePacketAgeMSec;
-
 	Assert(thePacket);
 
-	packetDelay = theCurrentTime - thePacket->fTimeArrived;
+	int64_t packetDelay = OS::Milliseconds() - thePacket->fTimeArrived;
 
-	if ((packetDelay > currentMaxPacketDelay) /*&& IsFrameFirstPacket(thePacket)*/)//or IsFrameFirstPacket
+	if (packetDelay > ReflectorStream::sRelocatePacketAgeMSec)
 	{
-		if (fKeyFrameStartPacketElementPointer)
+		if (fKeyFrameStartPacketElementPointer && fKeyFrameStartPacketElementPointer->fTimeArrived > thePacket->fTimeArrived)
 		{
-			if (fKeyFrameStartPacketElementPointer->fTimeArrived > thePacket->fTimeArrived)
-			{
-				this->fStream->GetMyReflectorSession()->SetHasVideoKeyFrameUpdate(true);
-				return fKeyFrameStartPacketElementPointer;
-			}
+			fStream->GetMyReflectorSession()->SetHasVideoKeyFrameUpdate(true);
+			return fKeyFrameStartPacketElementPointer;
 		}
 	}
 
 	return thePacket;
 }
 
-ReflectorPacket*    ReflectorSender::GetNewestKeyFrameFirstPacket(ReflectorPacket* currentElem, int64_t offsetMsec)
+void ReflectorSender::appendPacket(std::unique_ptr<ReflectorPacket> thePacket)
 {
-	//printf("[geyijun] GetNewestKeyFrameFirstPacket---------------->1\n");
-	int64_t theCurrentTime = OS::Milliseconds();
-	int64_t packetDelay = 0;
-	ReflectorPacket* requestedPacket = nullptr;
-	auto it = std::find_if(begin(fPacketQueue), end(fPacketQueue),
-		[currentElem](const std::unique_ptr<ReflectorPacket> &pkt) {
-		return pkt.get() == currentElem;
-	});
-	for (; it != fPacketQueue.end(); ++it) // start at oldest packet in q
+	if (!thePacket->IsRTCP())
 	{
-		const auto &thePacket = *it;
-
-		if (IsKeyFrameFirstPacket(*thePacket))
-		{
-			requestedPacket = thePacket.get();
-			//printf("[geyijun]Maybe,GetNewestKeyFrameFirstPacket --->[%#x]\n",requestedPacket);	
-
-			//
-			packetDelay = theCurrentTime - thePacket->fTimeArrived;
-			if (offsetMsec > ReflectorStream::sOverBufferInMsec)
-				offsetMsec = ReflectorStream::sOverBufferInMsec;
-			if (packetDelay <= (ReflectorStream::sOverBufferInMsec - offsetMsec))
-			{
-				break;
-			}
-		}
-	}
-	if (requestedPacket == nullptr)
-	{
-		printf("[geyijun]GetNewestKeyFrameFirstPacket --->[NotFound]\n");
-	}
-	else
-	{
-		printf("[geyijun]Final,GetNewestKeyFrameFirstPacket --->[%#x]\n", requestedPacket);
-	}
-	return requestedPacket;
-}
-
-void ReflectorSender::appendPacket(ReflectorPacket *thePacket)
-{
-	StreamInfo* streamInfo = fStream->GetStreamInfo();
-	if (!(thePacket->IsRTCP()) && (streamInfo->fPayloadType == qtssVideoPayloadType) && (streamInfo->fPayloadName == "H264/90000"))
-	{
-		if (IsKeyFrameFirstPacket(*thePacket))
+		auto type = needToUpdateKeyFrame(fStream, *thePacket);
+		if (needToUpdateKeyFrame(fStream, *thePacket) != KeyFrameType::None)
 		{
 			if (fKeyFrameStartPacketElementPointer)
 				fKeyFrameStartPacketElementPointer->fNeededByOutput = false;
 
 			thePacket->fNeededByOutput = true;
-			fKeyFrameStartPacketElementPointer = thePacket;
-			fStream->GetMyReflectorSession()->SetHasVideoKeyFrameUpdate(true);
+			fKeyFrameStartPacketElementPointer = thePacket.get();
+			if (type == KeyFrameType::Video) 
+				fStream->GetMyReflectorSession()->SetHasVideoKeyFrameUpdate(true);
+			else 
+				fStream->GetMyReflectorSession()->SetHasVideoKeyFrameUpdate(false);
 		}
-	}
-
-	if (!(thePacket->IsRTCP()) && (streamInfo->fPayloadType == qtssAudioPayloadType) && fStream->GetMyReflectorSession()->HasVideoKeyFrameUpdate())
-	{
-		if (fKeyFrameStartPacketElementPointer)
-			fKeyFrameStartPacketElementPointer->fNeededByOutput = false;
-
-		thePacket->fNeededByOutput = true;
-		fKeyFrameStartPacketElementPointer = thePacket;
-		fStream->GetMyReflectorSession()->SetHasVideoKeyFrameUpdate(false);
 	}
 
 	fHasNewPackets = true;
@@ -817,60 +792,14 @@ void ReflectorSender::appendPacket(ReflectorPacket *thePacket)
 		// Because this is an RTP packet make sure to atomic add this because
 		// multiple sockets can be adding to this variable simultaneously
 		fStream->fBytesSentInThisInterval += thePacket->fPacket.size();
-		//printf("ReflectorSocket::ProcessPacket received RTP id=%qu\n", thePacket->fStreamCountID); 
-		fStream->SetHasFirstRTP(true);
 	}
 	else
 	{
-		//printf("ReflectorSocket::ProcessPacket received RTCP id=%qu\n", thePacket->fStreamCountID); 
-		fStream->SetHasFirstRTCP(true);
 		fStream->SetFirst_RTCP_RTP_Time(thePacket->GetPacketRTPTime());
 		fStream->SetFirst_RTCP_Arrival_Time(thePacket->fTimeArrived);
 	}
 
-	fPacketQueue.emplace_back(thePacket);
-}
-
-bool ReflectorSender::IsKeyFrameFirstPacket(const ReflectorPacket &thePacket)
-{
-	if (thePacket.fPacket.size() < 20) return false;
-
-	uint8_t csrc_count = thePacket.fPacket[0] & 0x0f;
-	uint32_t rtp_head_size = /*sizeof(struct RTPHeader)*/12 + csrc_count * sizeof(uint32_t);
-	uint8_t nal_unit_type = thePacket.fPacket[rtp_head_size + 0] & 0x1F;
-	//printf("[geyijun] IsKeyFrameFirstPacket 111--->nal_unit_type[%d]\n",nal_unit_type);
-	if (nal_unit_type == 24)//STAP-A
-	{
-		if (thePacket.fPacket.size() > rtp_head_size + 3)
-			nal_unit_type = thePacket.fPacket[rtp_head_size + 3] & 0x1F;
-	}
-	else if (nal_unit_type == 25)//STAP-B
-	{
-		if (thePacket.fPacket.size() > rtp_head_size + 5)
-			nal_unit_type = thePacket.fPacket[rtp_head_size + 5] & 0x1F;
-	}
-	else if (nal_unit_type == 26)//MTAP16
-	{
-		if (thePacket.fPacket.size() > rtp_head_size + 8)
-			nal_unit_type = thePacket.fPacket[rtp_head_size + 8] & 0x1F;
-	}
-	else if (nal_unit_type == 27)//MTAP24
-	{
-		if (thePacket.fPacket.size() > rtp_head_size + 9)
-			nal_unit_type = thePacket.fPacket[rtp_head_size + 9] & 0x1F;
-	}
-	else if ((nal_unit_type == 28) || (nal_unit_type == 29))//FU-A/B
-	{
-		//printf("[geyijun] IsKeyFrameFirstPacket fPacketPtr.Len[%d] rtp_head_size[%d]\n",thePacket->fPacketPtr.Len,rtp_head_size);	
-		if (thePacket.fPacket.size() > rtp_head_size + 1)
-		{
-			uint8_t startBit = thePacket.fPacket[rtp_head_size + 1] & 0x80;
-			if (startBit)
-				nal_unit_type = thePacket.fPacket[rtp_head_size + 1] & 0x1F;
-		}
-	}
-
-	return nal_unit_type == 5 || nal_unit_type == 7 || nal_unit_type == 8;
+	fPacketQueue.push_back(std::move(thePacket));
 }
 
 void ReflectorSocketPool::SetUDPSocketOptions(SocketPair<ReflectorSocket>* inPair)
@@ -1056,54 +985,35 @@ int64_t ReflectorSocket::Run()
 	if (theEvents & Task::kReadEvent)
 		this->GetIncomingData(theMilliseconds);
 
-#if DEBUG
-	//make sure that we haven't gotten here prematurely! This wouldn't mess
-	//anything up, but it would waste CPU.
-	if (theEvents & Task::kIdleEvent)
-	{
-		int32_t temp = (int32_t)(fSleepTime - theMilliseconds);
-		char tempBuf[20];
-		sprintf(tempBuf, "%" _S32BITARG_ "", temp);
-		WarnV(fSleepTime <= theMilliseconds, tempBuf);
-	}
-#endif
-
-	fSleepTime = 0;
+	int64_t fSleepTime = 0;
 	//Now that we've gotten all available packets, have the streams reflect
 	for (const auto &theSender2 : fSenderQueue)
 		if (theSender2 != nullptr && theSender2->ShouldReflectNow(theMilliseconds, &fSleepTime))
 			theSender2->ReflectPackets(&fSleepTime);
 
-#if DEBUG
-	theMilliseconds = OS::Milliseconds();
-#endif
-
 	//For smoothing purposes, the streams can mark when they want to wakeup.
 	if (fSleepTime > 0)
 		this->SetIdleTimer(fSleepTime);
-#if DEBUG
-	//The debugging check above expects real time.
-	fSleepTime += theMilliseconds;
-#endif
 
 	return 0;
 }
 
 
-void ReflectorSocket::FilterInvalidSSRCs(ReflectorPacket* thePacket, bool isRTCP)
-{   // assume the first SSRC we see is valid and all others are to be ignored.
-	if (thePacket->fPacket.size() > 0) do
+void ReflectorSocket::FilterInvalidSSRCs(ReflectorPacket &thePacket, bool isRTCP)
+{
+	// assume the first SSRC we see is valid and all others are to be ignored.
+	if (thePacket.fPacket.size() > 0) do
 	{
 		int64_t currentTime = OS::Milliseconds() / 1000;
 		if (0 == fValidSSRC)
 		{
-			fValidSSRC = thePacket->GetSSRC(isRTCP); // SSRC of 0 is allowed
+			fValidSSRC = thePacket.GetSSRC(isRTCP); // SSRC of 0 is allowed
 			fLastValidSSRCTime = currentTime;
 			//printf("socket=%"   _U32BITARG_   " FIRST PACKET fValidSSRC=%"   _U32BITARG_   " \n", (uint32_t) this,fValidSSRC);
 			break;
 		}
 
-		uint32_t packetSSRC = thePacket->GetSSRC(isRTCP);
+		uint32_t packetSSRC = thePacket.GetSSRC(isRTCP);
 		if (packetSSRC != 0)
 		{
 			if (packetSSRC == fValidSSRC)
@@ -1114,7 +1024,7 @@ void ReflectorSocket::FilterInvalidSSRCs(ReflectorPacket* thePacket, bool isRTCP
 			}
 
 			//printf("socket=%"   _U32BITARG_   " bad packet packetSSRC= %"   _U32BITARG_   " fValidSSRC=%"   _U32BITARG_   " \n", (uint32_t) this,packetSSRC,fValidSSRC);
-			thePacket->fPacket.clear(); // ignore this packet wrong SSRC
+			thePacket.fPacket.clear(); // ignore this packet wrong SSRC
 		}
 
 		// this executes whenever an invalid SSRC is found -- maybe the original stream ended and a new one is now active
@@ -1127,7 +1037,7 @@ void ReflectorSocket::FilterInvalidSSRCs(ReflectorPacket* thePacket, bool isRTCP
 	} while (false);
 }
 
-bool ReflectorSocket::ProcessPacket(int64_t inMilliseconds, ReflectorPacket* thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort)
+bool ReflectorSocket::ProcessPacket(int64_t inMilliseconds, std::unique_ptr<ReflectorPacket> thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort)
 {
 	bool done = false; // stop when result is true
 	if (thePacket != nullptr) do
@@ -1150,7 +1060,6 @@ bool ReflectorSocket::ProcessPacket(int64_t inMilliseconds, ReflectorPacket* the
 		{
 			//put the packet back on the free queue, because we didn't actually
 			//get any data here.
-			delete thePacket;
 			this->RequestEvent(EV_RE);
 			done = true;
 			//printf("ReflectorSocket::ProcessPacket no more packets on this socket!\n");
@@ -1169,7 +1078,6 @@ bool ReflectorSocket::ProcessPacket(int64_t inMilliseconds, ReflectorPacket* the
 				(theRTCPPacket.GetPacketType() != RTCPSRPacket::kSRPacketType))
 			{
 				//pretend as if we never got this packet
-				delete thePacket;
 				done = true;
 				break;
 			}
@@ -1178,7 +1086,7 @@ bool ReflectorSocket::ProcessPacket(int64_t inMilliseconds, ReflectorPacket* the
 		// Only reflect one SSRC stream at a time.
 		// Pass the packet and whether it is an RTCP or RTP packet based on the port number.
 		if (fFilterSSRCs)
-			this->FilterInvalidSSRCs(thePacket, GetLocalPort() & 1);// thePacket->fPacketPtr.Len is set to 0 for invalid SSRCs.
+			FilterInvalidSSRCs(*thePacket, GetLocalPort() & 1);// thePacket->fPacketPtr.Len is set to 0 for invalid SSRCs.
 
 		// Find the appropriate ReflectorSender for this packet.
 		ReflectorSender* theSender = fDemuxer.GetTask({ theRemoteAddr, 0 });
@@ -1190,7 +1098,6 @@ bool ReflectorSocket::ProcessPacket(int64_t inMilliseconds, ReflectorPacket* the
 		{
 			//uint16_t* theSeqNumberP = (uint16_t*)thePacket->fPacketPtr.Ptr;
 			//printf("ReflectorSocket::ProcessPacket no sender found for packet! sequence number=%d\n",ntohs(theSeqNumberP[1]));
-			delete thePacket; // don't process the packet
 			done = true;
 			break;
 		}
@@ -1200,7 +1107,7 @@ bool ReflectorSocket::ProcessPacket(int64_t inMilliseconds, ReflectorPacket* the
 		thePacket->fStreamCountID = ++(theSender->fStream->fPacketCount);
 		thePacket->fBucketsSeenThisPacket = 0;
 		thePacket->fTimeArrived = inMilliseconds;
-		theSender->appendPacket(thePacket);
+		theSender->appendPacket(std::move(thePacket));
 	} while (false);
 
 	return done;
@@ -1215,15 +1122,15 @@ void ReflectorSocket::GetIncomingData(int64_t inMilliseconds)
 	while (true)
 	{
 		//get a packet off the free queue.
-		ReflectorPacket* thePacket = new ReflectorPacket;
+		
 		static const size_t kMaxReflectorPacketSize = 2060;
 		static char fPacketPtr[kMaxReflectorPacketSize];
 		size_t fPacketLen;
 		(void)this->RecvFrom(&theRemoteAddr, &theRemotePort, fPacketPtr,
 			kMaxReflectorPacketSize, &fPacketLen);
 
-		thePacket->SetPacketData(fPacketPtr, fPacketLen);
-		if (this->ProcessPacket(inMilliseconds, thePacket, theRemoteAddr, theRemotePort))
+		auto thePacket = std::make_unique<ReflectorPacket>(fPacketPtr, fPacketLen);
+		if (this->ProcessPacket(inMilliseconds, std::move(thePacket), theRemoteAddr, theRemotePort))
 			break;
 
 		//printf("ReflectorSocket::GetIncomingData \n");

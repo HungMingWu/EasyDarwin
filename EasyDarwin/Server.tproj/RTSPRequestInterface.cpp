@@ -46,7 +46,6 @@
 
 #include "StringParser.h"
 #include "OSThread.h"
-#include "QTSSDataConverter.h"
 #include "QTSServerInterface.h"
 #include "ServerPrefs.h"
 
@@ -250,6 +249,7 @@ void RTSPRequestInterface::AppendTransportHeader(boost::string_view serverPortA,
 
 	if (!ssrc.empty() && fNetworkMode == qtssRTPNetworkModeUnicast && fTransportMode == qtssRTPTransportModePlay)
 	{
+#if 0
 		std::string theCString(ssrc);
 
 		uint32_t ssrcVal = 0;
@@ -261,6 +261,7 @@ void RTSPRequestInterface::AppendTransportHeader(boost::string_view serverPortA,
 		std::string hexSSRCX(hexSSRC.Ptr);
 		fOutputStream->Put(sSSRC);
 		fOutputStream->Put(hexSSRCX);
+#endif
 	}
 
 	fOutputStream->PutEOL();

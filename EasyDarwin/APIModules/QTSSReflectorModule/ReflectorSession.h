@@ -103,10 +103,6 @@ public:
 	ReflectorStream*	GetStreamByIndex(uint32_t inIndex) { return fStreamArray[inIndex].get(); }
 	void AddBroadcasterClientSession(RTPSession* inClientSession);
 
-	// For the QTSSSplitterModule, this object can cache a QTSS_StreamRef
-	void            SetSocketStream(QTSS_StreamRef inStream) { fSocketStream = inStream; }
-	QTSS_StreamRef  GetSocketStream() { return fSocketStream; }
-
 	// A ReflectorSession keeps track of the aggregate bit rate each
 	// stream is reflecting (RTP only). Initially, this will return 0
 	// until enough time passes to compute an accurate average.
@@ -147,9 +143,6 @@ private:
 	// for it's entire lifetime. Right now, this is used for reflector-as-client.
 	SDPSourceInfo fSourceInfo;
 	std::string fLocalSDP;
-
-	// For the QTSSSplitterModule, this object can cache a QTSS_StreamRef
-	QTSS_StreamRef fSocketStream{ nullptr };
 
 	bool		fHasVideoKeyFrameUpdate{ false };
 

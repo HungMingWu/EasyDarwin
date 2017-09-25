@@ -36,41 +36,6 @@
 #include "RTPStream.h"
 #include "OSMutex.h"
 
-#if RTP_PACKET_RESENDER_DEBUGGING
-#include "QTSSRollingLog.h"
-#include <stdarg.h>
-
-class MyAckListLog : public QTSSRollingLog
-{
-public:
-
-	MyAckListLog(char * logFName) : QTSSRollingLog() { this->SetTaskName("MyAckListLog"); ::strcpy(fLogFName, logFName); }
-	virtual ~MyAckListLog() {}
-
-	virtual char* GetLogName()
-	{
-		char *logFileNameStr = new char[80];
-
-		::strcpy(logFileNameStr, fLogFName);
-		return logFileNameStr;
-	}
-
-	virtual char* GetLogDir()
-	{
-		char *logDirStr = new char[80];
-
-		::strcpy(logDirStr, DEFAULTPATHS_LOG_DIR);
-		return logDirStr;
-	}
-
-	virtual uint32_t GetRollIntervalInDays() { return 0; }
-	virtual uint32_t GetMaxLogBytes() { return 0; }
-
-	char    fLogFName[128];
-
-};
-#endif
-
 static const uint32_t kPacketArrayIncreaseInterval = 32;// must be multiple of 2
 static const uint32_t kInitialPacketArraySize = 64;// must be multiple of kPacketArrayIncreaseInterval (Turns out this is as big as we typically need)
 //static const uint32_t kMaxPacketArraySize = 512;// must be multiple of kPacketArrayIncreaseInterval it would have to be a 3 mbit or more
@@ -92,102 +57,6 @@ RTPPacketResender::~RTPPacketResender()
 			sNumWastedBytes -= kMaxDataBufferSize - packet.fPacket.size();
 	}
 }
-
-#if RTP_PACKET_RESENDER_DEBUGGING
-void RTPPacketResender::logprintf(const char * format, ...)
-{
-	/*
-		WARNING - the logger is not multiple task thread safe.
-		its OK when we run just one thread for all of the
-		sending tasks though.
-
-		each logger for a given session will open up access
-		to the same log file.  with one thread we're serialized
-		on writing to the file, so it works.
-	*/
-
-	va_list argptr;
-	char    buff[1024];
-
-
-	va_start(argptr, format);
-
-	vsprintf(buff, format, argptr);
-
-	va_end(argptr);
-
-	if (fLogger)
-	{
-		fLogger->WriteToLog(buff, false);
-		printf(buff);
-	}
-}
-
-
-void RTPPacketResender::SetDebugInfo(uint32_t trackID, uint16_t remoteRTCPPort, uint32_t curPacketDelay)
-{
-	fTrackID = trackID;
-	fRemoteRTCPPort = remoteRTCPPort;
-	fCurrentPacketDelay = curPacketDelay;
-}
-
-void RTPPacketResender::SetLog(StrPtrLen *logname)
-{
-	/*
-		WARNING - see logprintf()
-	*/
-
-	char    logFName[128];
-
-	memcpy(logFName, logname->Ptr, logname->Len);
-	logFName[logname->Len] = 0;
-
-	if (fLogger)
-		delete fLogger;
-
-	fLogger = new MyAckListLog(logFName);
-
-	fLogger->EnableLog();
-}
-
-void RTPPacketResender::LogClose(int64_t inTimeSpentInFlowControl)
-{
-	this->logprintf("Flow control duration msec: %" _64BITARG_ "d. Max outstanding packets: %d\n", inTimeSpentInFlowControl, this->GetMaxPacketsInList());
-
-}
-
-
-uint32_t RTPPacketResender::SpillGuts(uint32_t inBytesSentThisInterval)
-{
-	if (fInfoDisplayTimer.DurationInMilliseconds() > 1000)
-	{
-		//fDisplayCount++;
-
-		// spill our guts on the state of KRR
-		char *isFlowed = "open";
-
-		if (fBandwidthTracker->IsFlowControlled())
-			isFlowed = "flowed";
-
-		int64_t  kiloBitperSecond = (((int64_t)inBytesSentThisInterval * (int64_t)1000 * (int64_t)8) / fInfoDisplayTimer.DurationInMilliseconds()) / (int64_t)1024;
-
-		//fStreamCumDuration += fInfoDisplayTimer.DurationInMilliseconds();
-		fInfoDisplayTimer.Reset();
-
-		//this->logprintf( "\n[%li] info for track %li, cur bytes %li, cur kbit/s %li\n", /*(int32_t)fStreamCumDuration,*/ fTrackID, (int32_t)inBytesSentThisInterval, (int32_t)kiloBitperSecond);
-		this->logprintf("\nx info for track %li, cur bytes %li, cur kbit/s %li\n", /*(int32_t)fStreamCumDuration,*/ fTrackID, (int32_t)inBytesSentThisInterval, (int32_t)kiloBitperSecond);
-		this->logprintf("stream is %s, bytes pending ack %li, cwnd %li, ssth %li, wind %li \n", isFlowed, fBandwidthTracker->BytesInList(), fBandwidthTracker->CongestionWindow(), fBandwidthTracker->SlowStartThreshold(), fBandwidthTracker->ClientWindowSize());
-		this->logprintf("stats- resends:  %li, expired:  %li, dupe acks: %li, sent: %li\n", fNumResends, fNumExpired, fNumAcksForMissingPackets, fNumSent);
-		this->logprintf("delays- cur:  %li, srtt: %li , dev: %li, rto: %li, bw: %li\n\n", fCurrentPacketDelay, fBandwidthTracker->RunningAverageMSecs(), fBandwidthTracker->RunningMeanDevationMSecs(), fBandwidthTracker->CurRetransmitTimeout(), fBandwidthTracker->GetCurrentBandwidthInBps());
-
-
-		inBytesSentThisInterval = 0;
-	}
-	return inBytesSentThisInterval;
-}
-
-#endif
-
 
 void RTPPacketResender::SetDestination(UDPSocket* inOutputSocket, uint32_t inDestAddr, uint16_t inDestPort)
 {
@@ -300,9 +169,6 @@ void RTPPacketResender::AddPacket(void * inRTPPacket, uint32_t packetSize, int32
 	}
 	else
 	{
-#if RTP_PACKET_RESENDER_DEBUGGING   
-		this->logprintf("packet too old to add: seq# %li, age limit %li, cur late %li, track id %li\n", (int32_t)ntohs(*((uint16_t*)(((char*)inRTPPacket) + 2))), (int32_t)ageLimit, fCurrentPacketDelay, fTrackID);
-#endif
 		fNumExpired++;
 	}
 	fNumSent++;
@@ -328,15 +194,11 @@ void RTPPacketResender::AckPacket(uint16_t inSeqNum, int64_t& inCurTimeInMsec)
 
 
 	if (theEntry == nullptr || theEntry->fPacket.size() == 0)
-	{   /*  we got an ack for a packet that has already expired or
+	{
+		/*
+			we got an ack for a packet that has already expired or
 			for a packet whose re-transmit crossed with it's original ack
-
 		*/
-#if RTP_PACKET_RESENDER_DEBUGGING   
-		this->logprintf("acked packet not found: %li, track id %li, OS::MSecs %li\n"
-			, (int32_t)inSeqNum, fTrackID, (int32_t)OS::Milliseconds()
-		);
-#endif
 		fNumAcksForMissingPackets++;
 		//printf("Ack for missing packet: %d\n", inSeqNum);
 
@@ -359,12 +221,6 @@ void RTPPacketResender::AckPacket(uint16_t inSeqNum, int64_t& inCurTimeInMsec)
 	else
 	{
 
-#if RTP_PACKET_RESENDER_DEBUGGING
-		Assert(inSeqNum == theEntry->fSeqNum);
-		this->logprintf("Ack for packet: %li, track id %li, OS::MSecs %qd\n"
-			, (int32_t)inSeqNum, fTrackID, OS::Milliseconds()
-		);
-#endif      
 		fBandwidthTracker->EmptyWindow(theEntry->fPacket.size());
 		if (theEntry->fNumResends == 0)
 		{
@@ -376,14 +232,7 @@ void RTPPacketResender::AckPacket(uint16_t inSeqNum, int64_t& inCurTimeInMsec)
 
 			//          printf("Got ack for packet %d RTT = %qd\n", inSeqNum, inCurTimeInMsec - theEntry->fAddedTime);
 		}
-		else
-		{
-#if RTP_PACKET_RESENDER_DEBUGGING
-			this->logprintf("re-tx'd packet acked.  ack num : %li, pack seq #: %li, num resends %li, track id %li, size %li, OS::MSecs %qd\n" \
-				, (int32_t)inSeqNum, (int32_t)ntohs(*((uint16_t*)(((char*)theEntry->fPacketData) + 2))), (int32_t)theEntry->fNumResends
-				, (int32_t)fTrackID, theEntry->fPacketSize, OS::Milliseconds());
-#endif
-		}
+
 		this->RemovePacket(foundIndex);
 	}
 }
@@ -453,15 +302,6 @@ void RTPPacketResender::ResendDueEntries()
 			// a chance to ack them and improves congestion avoidance and RTT calculation
 			if (curTime > theEntry->fExpireTime)
 			{
-#if RTP_PACKET_RESENDER_DEBUGGING   
-				unsigned char version;
-				version = *((char*)theEntry->fPacketData);
-				version &= 0x84;    // grab most sig 2 bits
-				version = version >> 6; // shift by 6 bits
-				this->logprintf("expired:  seq number %li, track id %li (port: %li), vers # %li, pack seq # %li, size: %li, OS::Msecs: %qd\n", \
-					(int32_t)ntohs(*((uint16_t*)(((char*)theEntry->fPacketData) + 2))), fTrackID, (int32_t)ntohs(fDestPort), \
-					(int32_t)version, (int32_t)ntohs(*((uint16_t*)(((char*)theEntry->fPacketData) + 2))), theEntry->fPacketSize, OS::Milliseconds());
-#endif
 				//
 				// This packet is expired
 				fNumExpired++;
@@ -477,12 +317,6 @@ void RTPPacketResender::ResendDueEntries()
 			//printf("Packet resent: %d\n", ((uint16_t*)theEntry->fPacketData)[1]);
 
 			theEntry->fNumResends++;
-#if RTP_PACKET_RESENDER_DEBUGGING   
-			this->logprintf("re-sent: %li RTO %li, track id %li (port %li), size: %li, OS::Ms %qd\n", (int32_t)ntohs(*((uint16_t*)(((char*)theEntry->fPacketData) + 2))), curTime - theEntry->fAddedTime, \
-				fTrackID, (int32_t)ntohs(fDestPort) \
-				, theEntry->fPacketSize, OS::Milliseconds());
-#endif      
-
 			fNumResends++;
 
 			numResends++;

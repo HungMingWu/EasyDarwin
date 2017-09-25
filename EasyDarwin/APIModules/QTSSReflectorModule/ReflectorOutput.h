@@ -38,11 +38,9 @@
 #define __REFLECTOR_OUTPUT_H__
 
 #include "QTSS.h"
-#include "StrPtrLen.h"
 #include "OSHeaders.h"
 #include "MyAssert.h"
 #include "OS.h"
-#include "OSQueue.h"
 
 class ReflectorPacket;
 
@@ -50,51 +48,18 @@ class ReflectorOutput
 {
 	public:
     
-		ReflectorOutput() = default;
+		ReflectorOutput(size_t numStreams) : fBookmarkedPacketsElemsArray(numStreams * 2) {};
 		virtual ~ReflectorOutput() = default;
         
         // an array of packet elements ( from fPacketQueue in ReflectorSender )
         // possibly one for each ReflectorSender that sends data to this ReflectorOutput        
         std::vector<ReflectorPacket*> fBookmarkedPacketsElemsArray;
-        int32_t              fAvailPosition{0};
         QTSS_TimeVal        fLastIntervalMilliSec{5};
         QTSS_TimeVal        fLastPacketTransmitTime{0};
 		OSMutex             fMutex;
-
-	//add by fantasy		
-	private:
-		uint64_t			fU64Seq;
-		bool			fNewOutput;
 	public:
-		uint64_t outPutSeq()
-		{
-			return fU64Seq;
-		}
-
-		bool addSeq()
-		{
-			fU64Seq ++;
-			if(fU64Seq == 0xffffffffffffffff)
-			{
-				fU64Seq = 0;
-			}
-			return true;
-		}
-		
-		bool getNewFlag()
-		{
-			return fNewOutput;
-		}
-
-		void setNewFlag(bool flag)
-		{
-			fNewOutput = flag;
-		}
-		//end add
-
-
 		inline  ReflectorPacket*    GetBookMarkedPacket(const std::list<std::unique_ptr<ReflectorPacket>> &thePacketQueue);
-		inline  bool          SetBookMarkPacket(ReflectorPacket* thePacketElemPtr);
+		inline  void SetBookMarkPacket(ReflectorPacket* thePacketElemPtr);
         
         // WritePacket
         //
@@ -105,84 +70,46 @@ class ReflectorOutput
         // be set to # of msec in which the packet can be sent, or -1 if unknown
         virtual QTSS_Error  WritePacket(const std::vector<char> &inPacket, void* inStreamCookie, uint32_t inFlags, int64_t packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSec, bool firstPacket ) = 0;
     
-        virtual void        TearDown() = 0;
+        virtual void      TearDown() = 0;
         virtual bool      IsUDP() = 0;
         virtual bool      IsPlaying() = 0;
         
         enum { kWaitMilliSec = 5, kMaxWaitMilliSec = 1000 };
-        
-   protected:
-        void    InititializeBookmarks( size_t numStreams ) 
-        {   
-            // need 2 bookmarks for each stream ( include RTCPs )
-            fBookmarkedPacketsElemsArray.resize(numStreams * 2);
-        }
-
 };
 
-bool  ReflectorOutput::SetBookMarkPacket(ReflectorPacket* thePacketElemPtr)
+void  ReflectorOutput::SetBookMarkPacket(ReflectorPacket* thePacketElemPtr)
 {
-    if (fAvailPosition != -1 && thePacketElemPtr)
-    {    
-        fBookmarkedPacketsElemsArray[fAvailPosition] = thePacketElemPtr; 
-        
-        for (uint32_t i = 0; i < fBookmarkedPacketsElemsArray.size(); i++)
-        {                   
-            if (fBookmarkedPacketsElemsArray[i] == nullptr)
-            {   
-                fAvailPosition = i;
-                return true;
-            }
-        }
-    }
-    
-    return false;
-
+	for (auto &elem : fBookmarkedPacketsElemsArray)
+		if (elem == nullptr) {
+			elem = thePacketElemPtr;
+			return;
+		}
 }
 
 ReflectorPacket*    ReflectorOutput::GetBookMarkedPacket(const std::list<std::unique_ptr<ReflectorPacket>> &thePacketQueue)
 {
     ReflectorPacket*        packetElem = nullptr;              
-    uint32_t              curBookmark = 0;
 
-    fAvailPosition = -1;       
-    
     // see if we've bookmarked a held packet for this Sender in this Output
-    while ( curBookmark < fBookmarkedPacketsElemsArray.size())
-    {                   
-		ReflectorPacket*    bookmarkedElem = fBookmarkedPacketsElemsArray[curBookmark];
-        
-        if ( bookmarkedElem )   // there may be holes in this array
-        {  
-			using namespace std;
-			auto it = find_if(begin(thePacketQueue), end(thePacketQueue),
-				[bookmarkedElem](const unique_ptr<ReflectorPacket> &pkt) {
-				return pkt.get() == bookmarkedElem;
-			});
-			if (it != end(thePacketQueue))
-            {   
-                // this packet was previously bookmarked for this specific queue
-                // remove if from the bookmark list and use it
-                // to jump ahead into the Sender's over all packet queue                        
-                fBookmarkedPacketsElemsArray[curBookmark] = nullptr;  
-                fAvailPosition = curBookmark;
-                packetElem = bookmarkedElem;
-                break;
-			}
-        }
-        else
-        {
-            fAvailPosition = curBookmark;
-        }
-        
-        curBookmark++;
-            
+    for (auto &bookmarkedElem : fBookmarkedPacketsElemsArray)
+    {         
+		if (!bookmarkedElem) continue;
+
+		auto it = std::find_if(begin(thePacketQueue), end(thePacketQueue),
+			[bookmarkedElem](const std::unique_ptr<ReflectorPacket> &pkt) {
+			return pkt.get() == bookmarkedElem;
+		});
+		if (it != end(thePacketQueue))
+		{
+			// this packet was previously bookmarked for this specific queue
+			// remove if from the bookmark list and use it
+			// to jump ahead into the Sender's over all packet queue                        
+			bookmarkedElem = nullptr;
+			packetElem = bookmarkedElem;
+			break;
+		}
     }
-    
+
     return packetElem;
-}                
-
-
-
-
+}
 #endif //__REFLECTOR_OUTPUT_H__

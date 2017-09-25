@@ -43,8 +43,6 @@
 #include "UDPSocket.h"
 #include "OSMutex.h"
 
-#define RTP_PACKET_RESENDER_DEBUGGING 0
-
 class MyAckListLog;
 
 class RTPResenderEntry
@@ -57,9 +55,6 @@ public:
 	int64_t              fOrigRetransTimeout;
 	uint32_t              fNumResends;
 	uint16_t              fSeqNum;
-#if RTP_PACKET_RESENDER_DEBUGGING
-	uint32_t              fPacketArraySizeWhenAdded;
-#endif
 };
 
 
@@ -102,16 +97,7 @@ public:
 
 	static uint32_t       GetWastedBufferBytes() { return sNumWastedBytes; }
 
-#if RTP_PACKET_RESENDER_DEBUGGING
-	void                SetDebugInfo(uint32_t trackID, uint16_t remoteRTCPPort, uint32_t curPacketDelay);
-	void                SetLog(StrPtrLen *logname);
-	uint32_t              SpillGuts(uint32_t inBytesSentThisInterval);
-	void                LogClose(int64_t inTimeSpentInFlowControl);
-	void                logprintf(const char * format, ...);
-
-#else
 	void                SetLog(StrPtrLen * /*logname*/) {}
-#endif
 
 private:
 
@@ -129,15 +115,6 @@ private:
 	uint32_t              fNumExpired{0};                // how many total packets dropped
 	uint32_t              fNumAcksForMissingPackets{0};  // how many acks received in the case where the packet was not in the list
 	uint32_t              fNumSent{0};                   // how many packets sent
-
-#if RTP_PACKET_RESENDER_DEBUGGING
-	MyAckListLog        *fLogger;
-
-	uint32_t              fTrackID;
-	uint16_t              fRemoteRTCPPort;
-	uint32_t              fCurrentPacketDelay;
-	DssDurationTimer    fInfoDisplayTimer;
-#endif
 
 	std::vector<RTPResenderEntry>   fPacketArray;
 	uint16_t              fStartSeqNum;

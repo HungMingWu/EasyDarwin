@@ -121,11 +121,6 @@ RTPStream::~RTPStream()
 		getSingleton()->GetSocketPool()->ReleaseUDPSocketPair(fSockets);
 	}
 
-#if RTP_PACKET_RESENDER_DEBUGGING
-	//fResender.LogClose(fFlowControlDurationMsec);
-	//printf("Flow control duration msec: %" _64BITARG_ "d. Max outstanding packets: %d\n", fFlowControlDurationMsec, fResender.GetMaxPacketsInList());
-#endif
-
 #if RTP_TCP_STREAM_DEBUG
 	if (fIsTCP)
 		printf("DEBUG: ~RTPStream %li sends got EAGAIN'd.\n", (int32_t)fNumPacketsDroppedOnTCPFlowControl);
@@ -333,27 +328,6 @@ QTSS_Error RTPStream::Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags)
 
 		fResender.SetBandwidthTracker(fTracker);
 		fResender.SetDestination(fSockets->GetSocketA(), fRemoteAddr, fRemoteRTPPort);
-
-#if RTP_PACKET_RESENDER_DEBUGGING
-		if (QTSServerInterface::GetServer()->GetPrefs()->IsAckLoggingEnabled())
-		{
-			char        url[256];
-			char        logfile[256];
-			sprintf(logfile, "resend_log_%"   _U32BITARG_   "", fSession->GetRTSPSession()->GetSessionID());
-			StrPtrLen   logName(logfile);
-			fResender.SetLog(&logName);
-
-			StrPtrLen   *presoURL = fSession->GetValue(qtssCliSesPresentationURL);
-			uint32_t      clientAddr = request->GetSession()->GetSocket()->GetRemoteAddr();
-			memcpy(url, presoURL->Ptr, presoURL->Len);
-			url[presoURL->Len] = 0;
-			printf("RTPStream::Setup for %s will use ACKS, ip addr: %li.%li.%li.%li\n", url, (clientAddr & 0xff000000) >> 24
-				, (clientAddr & 0x00ff0000) >> 16
-				, (clientAddr & 0x0000ff00) >> 8
-				, (clientAddr & 0x000000ff)
-			);
-		}
-#endif
 	}
 
 	//
@@ -563,11 +537,6 @@ QTSS_Error RTPStream::ReliableRTPWrite(void* inBuffer, uint32_t inLen, const int
 		fStreamCumDuration = OS::Milliseconds() - fSession->GetPlayTime();
 		//fInfoDisplayTimer.ResetToDuration( 1000 - fStreamCumDuration % 1000 );
 	}
-
-#if RTP_PACKET_RESENDER_DEBUGGING
-	fResender.SetDebugInfo(fTrackID, fRemoteRTCPPort, curPacketDelay);
-	fBytesSentThisInterval = fResender.SpillGuts(fBytesSentThisInterval);
-#endif
 
 	if (fResender.IsFlowControlled())
 	{
@@ -826,12 +795,6 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 
 		if (thePacket->suggestedWakeupTime > theTime)
 		{
-			// Assert(thePacket->suggestedWakeupTime >= fSession->GetOverbufferWindow()->GetSendInterval());
-#if RTP_PACKET_RESENDER_DEBUGGING
-			fResender.logprintf("Overbuffer window full. Num bytes in overbuffer: %d. Wakeup time: %qd\n", fSession->GetOverbufferWindow()->AvailableSpaceInWindow(), thePacket->packetTransmitTime);
-#endif
-			//printf("Overbuffer window full. Returning: %qd\n", thePacket->suggestedWakeupTime - theTime);
-
 			fSession->GetSessionMutex()->Unlock();// Make sure to unlock the mutex
 			return QTSS_WouldBlock;
 		}
@@ -851,59 +814,8 @@ QTSS_Error  RTPStream::Write(void* inBuffer, uint32_t inLen, uint32_t* outLenWri
 
 				this->UDPMonitorWrite(thePacket->packetData, inLen, kIsRTPPacket);
 			}
-
-			auto* theSeqNumP = (uint16_t*)thePacket->packetData;
-			uint16_t theSeqNum = ntohs(theSeqNumP[1]);
-
-#if 0 // testing
-			{
-				if (err == 0)
-				{
-					static int64_t time = -1;
-					static int byteCount = 0;
-					static int64_t startTime = -1;
-					static int totalBytes = 0;
-					static int numPackets = 0;
-					static int64_t firstTime;
-
-					if (theTime - time > 1000)
-					{
-						if (time != -1)
-						{
-							printf("   %qd KBit (%d in %qd secs)", byteCount * 8 * 1000 / (theTime - time) / 1024, totalBytes, (theTime - startTime) / 1000);
-							if (fTracker)
-								printf(" Window = %d\n", fTracker->CongestionWindow());
-							else
-								printf("\n");
-							printf("Packet #%d xmit time = %qd\n", numPackets, (thePacket->packetTransmitTime - firstTime) / 1000);
-						}
-						else
-						{
-							startTime = theTime;
-							firstTime = thePacket->packetTransmitTime;
-						}
-
-						byteCount = 0;
-						time = theTime;
-					}
-
-					byteCount += inLen;
-					totalBytes += inLen;
-					numPackets++;
-
-					printf("Packet %d for time %qd sent at %qd (%d bytes)\n", theSeqNum, thePacket->packetTransmitTime - fSession->GetPlayTime(), theTime - fSession->GetPlayTime(), inLen);
-				}
-			}
-#endif
-
 		}
 
-#if RTP_PACKET_RESENDER_DEBUGGING
-		if (err != QTSS_NoErr)
-			fResender.logprintf("Flow controlled: %qd Overbuffer window: %d. Cur time %qd\n", theCurrentPacketDelay, fSession->GetOverbufferWindow()->AvailableSpaceInWindow(), theTime);
-		else
-			fResender.logprintf("Sent packet: %d. Overbuffer window: %d Transmit time %qd. Cur time %qd\n", ntohs(theSeqNum[1]), fSession->GetOverbufferWindow()->AvailableSpaceInWindow(), thePacket->packetTransmitTime, theTime);
-#endif
 		//if (err != QTSS_NoErr)
 		//  printf("flow controlled\n");
 		if (err == QTSS_NoErr && inLen > 0)
@@ -981,9 +893,6 @@ void RTPStream::SendRTCPSR(const int64_t& inTime, bool inAppendBye)
 	theSR->SetRTPTimestamp(fLastRTPTimestamp);
 	theSR->SetPacketCount(fPacketCount);
 	theSR->SetByteCount(payloadByteCount);
-#if RTP_PACKET_RESENDER_DEBUGGING
-	fResender.logprintf("Recommending ack timeout of: %d\n", fSession->GetBandwidthTracker()->RecommendedClientAckTimeout());
-#endif
 	theSR->SetAckTimeout(fSession->GetBandwidthTracker()->RecommendedClientAckTimeout());
 
 	uint32_t thePacketLen = theSR->GetSRPacketLen();

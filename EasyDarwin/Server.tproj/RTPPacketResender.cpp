@@ -129,7 +129,7 @@ void RTPPacketResender::ClearOutstandingPackets()
 	Assert(fPacketsInList == 0);
 }
 
-void RTPPacketResender::AddPacket(void * inRTPPacket, uint32_t packetSize, int32_t ageLimit)
+void RTPPacketResender::AddPacket(const std::vector<char> &inRTPPacket, int32_t ageLimit)
 {
 	//OSMutexLocker packetQLocker(&fPacketQMutex);
 	// the caller needs to adjust the overall age limit by reducing it
@@ -137,12 +137,12 @@ void RTPPacketResender::AddPacket(void * inRTPPacket, uint32_t packetSize, int32
 
 	// we compute a re-transmit timeout based on the Karns RTT esmitate
 
-	auto* theSeqNumP = (uint16_t*)inRTPPacket;
+	uint16_t* theSeqNumP = (uint16_t *)(&inRTPPacket[0]);
 	uint16_t theSeqNum = ntohs(theSeqNumP[1]);
 
 	if (ageLimit > 0)
 	{
-		RTPResenderEntry* theEntry = this->GetEmptyEntry(theSeqNum, packetSize);
+		RTPResenderEntry* theEntry = this->GetEmptyEntry(theSeqNum, inRTPPacket.size());
 
 		//
 		// This may happen if this sequence number has already been added.
@@ -152,7 +152,7 @@ void RTPPacketResender::AddPacket(void * inRTPPacket, uint32_t packetSize, int32
 
 		//
 		// Reset all the information in the RTPResenderEntry
-		theEntry->fPacket = std::vector<char>((char *)inRTPPacket, (char *)inRTPPacket + packetSize);
+		theEntry->fPacket = inRTPPacket;
 		theEntry->fAddedTime = OS::Milliseconds();
 		theEntry->fOrigRetransTimeout = fBandwidthTracker->CurRetransmitTimeout();
 		theEntry->fExpireTime = theEntry->fAddedTime + ageLimit;
@@ -161,11 +161,11 @@ void RTPPacketResender::AddPacket(void * inRTPPacket, uint32_t packetSize, int32
 
 		//
 		// Track the number of wasted bytes we have
-		sNumWastedBytes += kMaxDataBufferSize - packetSize;
+		sNumWastedBytes += kMaxDataBufferSize - inRTPPacket.size();
 
 		//PLDoubleLinkedListNode<RTPResenderEntry> * listNode = new PLDoubleLinkedListNode<RTPResenderEntry>( new RTPResenderEntry(inRTPPacket, packetSize, ageLimit, fRTTEstimator.CurRetransmitTimeout() ) );
 		//fAckList.AddNodeToTail(listNode);
-		fBandwidthTracker->FillWindow(packetSize);
+		fBandwidthTracker->FillWindow(inRTPPacket.size());
 	}
 	else
 	{
@@ -313,7 +313,7 @@ void RTPPacketResender::ResendDueEntries()
 			}
 
 			// Resend this packet
-			fSocket->SendTo(fDestAddr, fDestPort, theEntry->fPacket.data(), theEntry->fPacket.size());
+			fSocket->SendTo(fDestAddr, fDestPort, theEntry->fPacket);
 			//printf("Packet resent: %d\n", ((uint16_t*)theEntry->fPacketData)[1]);
 
 			theEntry->fNumResends++;

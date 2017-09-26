@@ -56,16 +56,12 @@ static uint32_t                   sDefaultMaxFuturePacketTimeSec = 60;
 static uint32_t                   sDefaultFirstPacketOffsetMsec = 500;
 
 uint32_t                          ReflectorStream::sBucketSize = 16;
-uint32_t                          ReflectorStream::sOverBufferInMsec = 10000; // more or less what the client over buffer will be
 uint32_t                          ReflectorStream::sMaxFuturePacketMSec = 60000; // max packet future time
-uint32_t                          ReflectorStream::sMaxPacketAgeMSec = 20000;
 
 uint32_t                          ReflectorStream::sMaxFuturePacketSec = 60; // max packet future time
 uint32_t                          ReflectorStream::sOverBufferInSec = 10;
 uint32_t                          ReflectorStream::sBucketDelayInMsec = 73;
 uint32_t                          ReflectorStream::sFirstPacketOffsetMsec = 500;
-
-uint32_t                          ReflectorStream::sRelocatePacketAgeMSec = 1000;
 
 bool IsKeyFrameFirstPacket(const ReflectorPacket &thePacket)
 {
@@ -143,8 +139,6 @@ ReflectorStream::ReflectorStream(StreamInfo* inInfo)
 	fRTPChannel(-1),
 	fRTCPChannel(-1),
 	fEyeCount(0),
-	fFirst_RTCP_RTP_Time(0),
-	fFirst_RTCP_Arrival_Time(0),
 	fMyReflectorSession(nullptr),
 	fStreamInfo(*inInfo)
 {
@@ -481,7 +475,8 @@ void ReflectorStream::SendReceiverReport()
 	*theEyeWriter = htonl(0) & 0x7fffffff;
 
 	//send the packet to the multicast RTCP addr & port for this stream
-	(void)fSockets->GetSocketB()->SendTo(fDestRTCPAddr, fDestRTCPPort, fReceiverReportBuffer, fReceiverReportSize);
+	std::vector<char> temp(fReceiverReportBuffer, fReceiverReportBuffer + fReceiverReportSize);
+	(void)fSockets->GetSocketB()->SendTo(fDestRTCPAddr, fDestRTCPPort, temp);
 }
 
 void ReflectorStream::PushPacket(char *packet, size_t packetLen, bool isRTCP)
@@ -587,7 +582,8 @@ void ReflectorSender::ReflectPackets(int64_t* ioWakeupTime)
 	fStream->UpdateBitRate(currentTime);
 
 	ReflectorPacket *fFirstPacketInQueueForNewOutput = 
-		fKeyFrameStartPacketElementPointer ? fKeyFrameStartPacketElementPointer : GetClientBufferStartPacketOffset(0);
+		fKeyFrameStartPacketElementPointer ? fKeyFrameStartPacketElementPointer : 
+		GetClientBufferStartPacketOffset(std::chrono::seconds(0));
 
 	bool firstPacket = false;
 
@@ -689,18 +685,20 @@ ReflectorPacket*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOut
 }
 
 
-ReflectorPacket* ReflectorSender::GetClientBufferStartPacketOffset(int64_t offsetMsec)
+ReflectorPacket* ReflectorSender::GetClientBufferStartPacketOffset(std::chrono::seconds offset)
 {
-	int64_t theCurrentTime = OS::Milliseconds();
-	int64_t packetDelay = 0;
+	auto theCurrentTime = std::chrono::high_resolution_clock::now();
 
-	if (offsetMsec > ReflectorStream::sOverBufferInMsec)
-		offsetMsec = ReflectorStream::sOverBufferInMsec;
+	// more or less what the client over buffer will be
+	static constexpr auto sOverBufferInSec = std::chrono::seconds(10); 
+
+	if (offset > sOverBufferInSec)
+		offset = sOverBufferInSec;
 
 	for (const auto &thePacket : fPacketQueue)
 	{
-		packetDelay = theCurrentTime - thePacket->fTimeArrived;
-		if (packetDelay <= ReflectorStream::sOverBufferInMsec - offsetMsec)
+		auto packetDelay = theCurrentTime - thePacket->fTimeArrived1;
+		if (packetDelay <= sOverBufferInSec - offset)
 			return thePacket.get();
 	}
 
@@ -712,26 +710,26 @@ void    ReflectorSender::RemoveOldPackets()
 	// Iterate through the senders queue to clear out packets
 	// Start at the oldest packet and walk forward to the newest packet
 	// 
-	int64_t theCurrentTime = OS::Milliseconds();
-	int64_t packetDelay = 0;
-	int64_t currentMaxPacketDelay = ReflectorStream::sMaxPacketAgeMSec;
+	auto theCurrentTime = std::chrono::high_resolution_clock::now();
+	static constexpr auto sMaxPacketAge = std::chrono::seconds(20);
 
 
 	for (auto it = fPacketQueue.begin(); it != fPacketQueue.end(); )
 	{
 		const auto &thePacket = *it;
 
-		packetDelay = theCurrentTime - thePacket->fTimeArrived;
+		auto packetDelay = std::chrono::duration_cast<std::chrono::milliseconds>(theCurrentTime - thePacket->fTimeArrived1);
 
 		// walk q and remove packets that are too old
-		if (!thePacket->fNeededByOutput && packetDelay > currentMaxPacketDelay) // delete based on late tolerance and whether a client is blocked on the packet
+		if (!thePacket->fNeededByOutput && packetDelay > sMaxPacketAge) // delete based on late tolerance and whether a client is blocked on the packet
 		{
+			printf("erase packet\n");
 			// not needed and older than our required buffer
 			it = fPacketQueue.erase(it);
 		}
 		else
 		{
-			// we want to keep all of these but we should reset the ones that should be aged out unless marked
+			// we want to keep all of these but we should reset the es that should be aged out unless marked
 			// as need the next time through reflect packets.
 			++it;
 
@@ -739,7 +737,7 @@ void    ReflectorSender::RemoveOldPackets()
 					break;
 
 			thePacket->fNeededByOutput = false; //mark not needed.. will be set next time through reflect packets
-			if (packetDelay <= currentMaxPacketDelay)  // this packet is going to be kept around as well as the ones that follow.
+			if (packetDelay <= sMaxPacketAge)  // this packet is going to be kept around as well as the ones that follow.
 				break;
 		}
 	}
@@ -751,11 +749,13 @@ ReflectorPacket* ReflectorSender::NeedRelocateBookMark(ReflectorPacket* thePacke
 {
 	Assert(thePacket);
 
-	int64_t packetDelay = OS::Milliseconds() - thePacket->fTimeArrived;
+	auto packetDelay = 
+		std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - thePacket->fTimeArrived1);
 
-	if (packetDelay > ReflectorStream::sRelocatePacketAgeMSec)
+	static constexpr auto sRelocatePacketAge = std::chrono::seconds(1);
+	if (packetDelay > sRelocatePacketAge)
 	{
-		if (fKeyFrameStartPacketElementPointer && fKeyFrameStartPacketElementPointer->fTimeArrived > thePacket->fTimeArrived)
+		if (fKeyFrameStartPacketElementPointer && fKeyFrameStartPacketElementPointer->fTimeArrived1 > thePacket->fTimeArrived1)
 		{
 			fStream->GetMyReflectorSession()->SetHasVideoKeyFrameUpdate(true);
 			return fKeyFrameStartPacketElementPointer;
@@ -792,11 +792,6 @@ void ReflectorSender::appendPacket(std::unique_ptr<ReflectorPacket> thePacket)
 		// Because this is an RTP packet make sure to atomic add this because
 		// multiple sockets can be adding to this variable simultaneously
 		fStream->fBytesSentInThisInterval += thePacket->fPacket.size();
-	}
-	else
-	{
-		fStream->SetFirst_RTCP_RTP_Time(thePacket->GetPacketRTPTime());
-		fStream->SetFirst_RTCP_Arrival_Time(thePacket->fTimeArrived);
 	}
 
 	fPacketQueue.push_back(std::move(thePacket));
@@ -1107,6 +1102,7 @@ bool ReflectorSocket::ProcessPacket(int64_t inMilliseconds, std::unique_ptr<Refl
 		thePacket->fStreamCountID = ++(theSender->fStream->fPacketCount);
 		thePacket->fBucketsSeenThisPacket = 0;
 		thePacket->fTimeArrived = inMilliseconds;
+		thePacket->fTimeArrived1 = std::chrono::high_resolution_clock::now();
 		theSender->appendPacket(std::move(thePacket));
 	} while (false);
 

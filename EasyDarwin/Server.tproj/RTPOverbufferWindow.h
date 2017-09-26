@@ -74,17 +74,11 @@ public:
 	//
 	// The overbuffer window is full if the byte count is filled up, or if the
 	// bitrate is above the max play rate.
-	int64_t CheckTransmitTime(const int64_t& inTransmitTime, const int64_t& inCurrentTime, int32_t inPacketSize);
+	int64_t CheckTransmitTime(int64_t inTransmitTime, int64_t inCurrentTime, int32_t inPacketSize);
 
 	//
 	// Remembers that this packet has been sent
 	void AddPacketToWindow(int32_t inPacketSize);
-
-	//
-	// As time passes, transmit times that were in the future become transmit
-	// times that are in the past or present. Call this function to empty
-	// those old packets out of the window, freeing up space in the window.
-	void EmptyOutWindow(const int64_t& inCurrentTime);
 
 	//
 	// MarkBeginningOfWriteBurst

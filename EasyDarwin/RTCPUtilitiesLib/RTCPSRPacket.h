@@ -58,7 +58,7 @@ public:
 
 	// ACCESSORS
 
-	void*   GetSRPacket() { return &fSenderReportBuffer[0]; }
+	const char*   GetSRPacket() { return &fSenderReportBuffer[0]; }
 	uint32_t  GetSRPacketLen() { return fSenderReportWithServerInfoSize; }
 	uint32_t  GetSRWithByePacketLen() { return fSenderReportWithServerInfoSize + kByeSizeInBytes; }
 

@@ -106,7 +106,7 @@ public:
 	QTSS_Error RequestEvent(QTSS_EventType inEventMask);
 
 	// performs RTP over RTSP
-	QTSS_Error  InterleavedWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, unsigned char channel);
+	QTSS_Error  InterleavedWrite(const std::vector<char> &inBuffer, uint32_t* outLenWritten, unsigned char channel);
 
 	std::string GetRemoteAddr();
 protected:

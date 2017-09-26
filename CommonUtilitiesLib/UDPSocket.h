@@ -36,6 +36,7 @@
 #ifndef __UDPSOCKET_H__
 #define __UDPSOCKET_H__
 
+#include <vector>
 #include "Socket.h"
 
 
@@ -55,7 +56,7 @@ public:
 
 	//returns an ERRNO
 	OS_Error        SendTo(uint32_t inRemoteAddr, uint16_t inRemotePort,
-		void* inBuffer, uint32_t inLength);
+		const std::vector<char> &inBuffer);
 
 	OS_Error        RecvFrom(uint32_t* outRemoteAddr, uint16_t* outRemotePort,
 		void* ioBuffer, size_t inBufLen, size_t* outRecvLen);

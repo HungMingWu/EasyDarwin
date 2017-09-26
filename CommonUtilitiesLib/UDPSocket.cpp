@@ -64,21 +64,16 @@ UDPSocket::UDPSocket(Task* inTask, uint32_t inSocketType)
 
 
 OS_Error
-UDPSocket::SendTo(uint32_t inRemoteAddr, uint16_t inRemotePort, void* inBuffer, uint32_t inLength)
+UDPSocket::SendTo(uint32_t inRemoteAddr, uint16_t inRemotePort, const std::vector<char> &inBuffer)
 {
-	Assert(inBuffer != nullptr);
+	Assert(!inBuffer.empty());
 
 	struct sockaddr_in  theRemoteAddr;
 	theRemoteAddr.sin_family = AF_INET;
 	theRemoteAddr.sin_port = htons(inRemotePort);
 	theRemoteAddr.sin_addr.s_addr = htonl(inRemoteAddr);
 
-#ifdef __sgi__
-	int theErr = ::sendto(fFileDesc, inBuffer, inLength, 0, (sockaddr*)&theRemoteAddr, sizeof(theRemoteAddr));
-#else
-	// Win32 says that inBuffer is a char*
-	int theErr = ::sendto(fFileDesc, (char*)inBuffer, inLength, 0, (sockaddr*)&theRemoteAddr, sizeof(theRemoteAddr));
-#endif
+	int theErr = ::sendto(fFileDesc, &inBuffer[0], inBuffer.size(), 0, (sockaddr*)&theRemoteAddr, sizeof(theRemoteAddr));
 
 	if (theErr == -1)
 		return (OS_Error)OSThread::GetErrno();

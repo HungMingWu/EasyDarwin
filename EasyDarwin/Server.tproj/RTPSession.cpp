@@ -39,8 +39,6 @@
 #include "QTSSReflectorModule.h"
 #include "ServerPrefs.h"
 
-#define RTPSESSION_DEBUGGING 0
-
 RTPSession::RTPSession() :
 	RTPSessionInterface()
 {
@@ -191,10 +189,6 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 	// If we don't know any better, assume maximum buffer size.
 	uint32_t theBufferSize = ServerPrefs::GetMaxTCPBufferSizeInBytes();
 
-#if RTPSESSION_DEBUGGING
-	printf("RTPSession GetMovieAvgBitrate %li\n", (int32_t)this->GetMovieAvgBitrate());
-#endif
-
 	if (this->GetMovieAvgBitrate() > 0)
 	{
 		// We have a bit rate... use it.
@@ -220,10 +214,6 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 	if (fRTSPSession != nullptr)
 		fRTSPSession->GetSocket()->SetSocketBufSize(theBufferSize);
 
-
-#if RTPSESSION_DEBUGGING
-	printf("RTPSession %" _S32BITARG_ ": In Play, about to call Signal\n", (int32_t)this);
-#endif
 	this->Signal(Task::kStartEvent);
 
 	return QTSS_NoErr;
@@ -290,15 +280,10 @@ int64_t RTPSession::Run()
 	Assert(fActivateCalled);
 #endif
 	EventFlags events = this->GetEvents();
-	QTSS_RoleParams theParams;
+	QTSS_RTPSendPackets_Params rtpSendPacketsParams;
 	QTSS_ClientSessionClosing_Params clientSessionClosingParams;
 	clientSessionClosingParams.inClientSession = this;    //every single role being invoked now has this
 													//as the first parameter
-
-#if RTPSESSION_DEBUGGING
-	printf("RTPSession %" _S32BITARG_ ": In Run. Events %" _S32BITARG_ "\n", (int32_t)this, (int32_t)events);
-#endif
-
 	//if we have been instructed to go away, then let's delete ourselves
 	if ((events & Task::kKillEvent) || (events & Task::kTimeoutEvent) || (fModuleDoingAsyncStuff))
 	{
@@ -313,9 +298,6 @@ int64_t RTPSession::Run()
 			//(or, more accurately, that the stream object isn't being used by any other
 			//threads). We do this by first removing the session from the session map.
 
-#if RTPSESSION_DEBUGGING
-			printf("RTPSession %" _S32BITARG_ ": about to be killed. Eventmask = %" _S32BITARG_ "\n", (int32_t)this, (int32_t)events);
-#endif
 			// We cannot block waiting to UnRegister, because we have to
 			// give the RTSPSessionTask a chance to release the RTPSession.
 			OSRefTable* sessionTable = getSingleton()->GetRTPSessionMap();
@@ -369,8 +351,8 @@ int64_t RTPSession::Run()
 		//just make sure we haven't been scheduled before our scheduled play
 		//time. If so, reschedule ourselves for the proper time. (if client
 		//sends a play while we are already playing, this may occur)
-		theParams.rtpSendPacketsParams.inCurrentTime = OS::Milliseconds();
-		if (fNextSendPacketsTime > theParams.rtpSendPacketsParams.inCurrentTime)
+		rtpSendPacketsParams.inCurrentTime = OS::Milliseconds();
+		if (fNextSendPacketsTime > rtpSendPacketsParams.inCurrentTime)
 		{
 			RTPStream** retransStream = nullptr;
 			uint32_t retransStreamLen = 0;
@@ -380,25 +362,19 @@ int64_t RTPSession::Run()
 			for (auto retransStream : fStreamBuffer)
 				retransStream->SendRetransmits();
 
-			theParams.rtpSendPacketsParams.outNextPacketTime = fNextSendPacketsTime - theParams.rtpSendPacketsParams.inCurrentTime;
+			rtpSendPacketsParams.outNextPacketTime = fNextSendPacketsTime - rtpSendPacketsParams.inCurrentTime;
 		}
 		else
 		{
-#if RTPSESSION_DEBUGGING
-			printf("RTPSession %" _S32BITARG_ ": about to call SendPackets\n", (int32_t)this);
-#endif
-			if ((theParams.rtpSendPacketsParams.inCurrentTime - fLastBandwidthTrackerStatsUpdate) > 1000)
+			if ((rtpSendPacketsParams.inCurrentTime - fLastBandwidthTrackerStatsUpdate) > 1000)
 				this->GetBandwidthTracker()->UpdateStats();
 
-			theParams.rtpSendPacketsParams.outNextPacketTime = 0;
+			rtpSendPacketsParams.outNextPacketTime = 0;
 			// Async event registration is definitely allowed from this role.
-#if RTPSESSION_DEBUGGING
-			printf("RTPSession %" _S32BITARG_ ": back from sendPackets, nextPacketTime = %" _64BITARG_ "d\n", (int32_t)this, theParams.rtpSendPacketsParams.outNextPacketTime);
-#endif
 			//make sure not to get deleted accidently!
-			if (theParams.rtpSendPacketsParams.outNextPacketTime < 0)
-				theParams.rtpSendPacketsParams.outNextPacketTime = 0;
-			fNextSendPacketsTime = theParams.rtpSendPacketsParams.inCurrentTime + theParams.rtpSendPacketsParams.outNextPacketTime;
+			if (rtpSendPacketsParams.outNextPacketTime < 0)
+				rtpSendPacketsParams.outNextPacketTime = 0;
+			fNextSendPacketsTime = rtpSendPacketsParams.inCurrentTime + rtpSendPacketsParams.outNextPacketTime;
 		}
 
 	}
@@ -413,10 +389,10 @@ int64_t RTPSession::Run()
 	// We want to avoid waking up to do retransmits, and then going back to sleep for like, 1 msec. So, 
 	// only adjust the time to wake up if the next packet time is greater than the max retransmit delay +
 	// the standard interval between wakeups.
-	if (theParams.rtpSendPacketsParams.outNextPacketTime > (theRetransDelayInMsec + theSendInterval))
-		theParams.rtpSendPacketsParams.outNextPacketTime = theRetransDelayInMsec;
+	if (rtpSendPacketsParams.outNextPacketTime > (theRetransDelayInMsec + theSendInterval))
+		rtpSendPacketsParams.outNextPacketTime = theRetransDelayInMsec;
 
-	Assert(theParams.rtpSendPacketsParams.outNextPacketTime >= 0);//we'd better not get deleted accidently!
-	return theParams.rtpSendPacketsParams.outNextPacketTime;
+	Assert(rtpSendPacketsParams.outNextPacketTime >= 0);//we'd better not get deleted accidently!
+	return rtpSendPacketsParams.outNextPacketTime;
 }
 

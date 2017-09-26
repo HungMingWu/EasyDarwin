@@ -49,7 +49,6 @@ public:
 	~RTPSessionOutput() override = default;
 
 	ReflectorSession* GetReflectorSession() { return fReflectorSession; }
-	void InitializeStreams();
 
 	// This writes the packet out to the proper QTSS_RTPStreamObject.
 	// If this function returns QTSS_WouldBlock, timeToSendThisPacketAgain will
@@ -68,7 +67,7 @@ private:
 	RTPSession*             fClientSession;
 	ReflectorSession*       fReflectorSession;
 	std::string             fCookieAttrName;
-	uint32_t                  fBufferDelayMSecs{ ReflectorStream::sOverBufferInMsec };
+	uint32_t                  fBufferDelayMSecs{ 10000 };
 	int64_t                  fBaseArrivalTime{ 0 };
 	bool                  fIsUDP{ false };
 	bool                  fTransportInitialized{ false };

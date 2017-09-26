@@ -845,7 +845,6 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params& inParams, ReflectorSession* inSessio
 			return QTSS_RequestFailed;
 
 		RTPSessionOutput*  theOutput = boost::any_cast<RTPSessionOutput*>(opt.value());
-		theOutput->InitializeStreams();
 
 		// Tell the session what the bitrate of this reflection is. This is nice for logging,
 		// it also allows the server to scale the TCP buffer size appropriately if we are

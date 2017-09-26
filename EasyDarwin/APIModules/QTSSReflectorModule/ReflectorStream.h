@@ -35,6 +35,7 @@
 #define _REFLECTOR_STREAM_H_
 
 #include <atomic>
+#include <chrono>
 #include "QTSS.h"
 
 #include "IdleTask.h"
@@ -78,6 +79,7 @@ public:
 private:
 	uint32_t      fBucketsSeenThisPacket{ 0 };
 	int64_t      fTimeArrived{ 0 };
+	std::chrono::high_resolution_clock::time_point fTimeArrived1;
 	std::vector<char> fPacket;
 	bool      fIsRTCP{ false };
 	bool      fNeededByOutput{ false }; // is this packet still needed for output?
@@ -256,7 +258,7 @@ public:
 	ReflectorPacket*    SendPacketsToOutput(ReflectorOutput* theOutput, ReflectorPacket* currentPacket, int64_t currentTime, int64_t  bucketDelay, bool firstPacket);
 
 	void        RemoveOldPackets();
-	ReflectorPacket* GetClientBufferStartPacketOffset(int64_t offsetMsec);
+	ReflectorPacket* GetClientBufferStartPacketOffset(std::chrono::seconds offset);
 
 	ReflectorPacket* NeedRelocateBookMark(ReflectorPacket* thePacket);
 
@@ -348,18 +350,10 @@ public:
 	ReflectorSender*        GetRTPSender() { return &fRTPSender; }
 	ReflectorSender*        GetRTCPSender() { return &fRTCPSender; }
 
-	void                    SetFirst_RTCP_RTP_Time(uint32_t time) { fFirst_RTCP_RTP_Time = time; }
-	uint32_t                  GetFirst_RTCP_RTP_Time() { return fFirst_RTCP_RTP_Time; }
-
-	void                    SetFirst_RTCP_Arrival_Time(int64_t time) { fFirst_RTCP_Arrival_Time = time; }
-	int64_t                  GetFirst_RTCP_Arrival_Time() { return fFirst_RTCP_Arrival_Time; }
-
-	uint32_t                  GetBufferDelay() { return ReflectorStream::sOverBufferInMsec; }
 	uint32_t                  GetTimeScale() { return fStreamInfo.fTimeScale; }
 	uint64_t                  fPacketCount;
 
 	inline  void                    UpdateBitRate(int64_t currentTime);
-	static uint32_t           sOverBufferInMsec;
 
 	void                    IncEyeCount() { OSMutexLocker locker(&fBucketMutex); fEyeCount++; }
 	void                    DecEyeCount() { OSMutexLocker locker(&fBucketMutex); fEyeCount--; }
@@ -428,21 +422,15 @@ private:
 
 	uint32_t              fEyeCount;
 
-	uint32_t              fFirst_RTCP_RTP_Time;
-	int64_t              fFirst_RTCP_Arrival_Time;
-
 	ReflectorSession*	fMyReflectorSession;
 
 	static uint32_t       sBucketSize;
-	static uint32_t       sMaxPacketAgeMSec;
 	static uint32_t       sMaxFuturePacketSec;
 
 	static uint32_t       sMaxFuturePacketMSec;
 	static uint32_t       sOverBufferInSec;
 	static uint32_t       sBucketDelayInMsec;
 	static uint32_t       sFirstPacketOffsetMsec;
-
-	static uint32_t       sRelocatePacketAgeMSec;
 
 	friend class ReflectorSocket;
 	friend class ReflectorSender;

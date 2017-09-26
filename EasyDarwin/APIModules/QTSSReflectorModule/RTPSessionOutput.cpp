@@ -34,31 +34,8 @@
 #include "RTPSessionOutput.h"
 #include "ReflectorStream.h"
 
-
-#if DEBUG 
-#define RTP_SESSION_DEBUGGING 0
-#else
-#define RTP_SESSION_DEBUGGING 0
-#endif
-
-static boost::string_view        sLastRTCPTransmit = "qtssReflectorStreamLastRTCPTransmit";
-static boost::string_view        sNextSeqNum = "qtssNextSeqNum";
-static boost::string_view        sSeqNumOffset = "qtssSeqNumOffset";
-static boost::string_view        sLastQualityChange = "qtssLastQualityChange";
 static boost::string_view        sLastRTPPacketID = "qtssReflectorStreamLastRTPPacketID";
 static boost::string_view        sLastRTCPPacketID = "qtssReflectorStreamLastRTCPPacketID";
-static boost::string_view        sFirstRTPCurrentTime = "qtssReflectorStreamStartRTPCurrent";
-static boost::string_view        sFirstRTPArrivalTime = "qtssReflectorStreamStartRTPArrivalTime";
-static boost::string_view        sFirstRTPTimeStamp = "qtssReflectorStreamStartRTPTimeStamp";
-static boost::string_view        sBaseRTPTimeStamp = "qtssReflectorStreamBaseRTPTimeStamp";
-static boost::string_view        sBaseArrivalTimeStamp = "qtssReflectorStreamBaseArrivalTime";
-static boost::string_view        sStreamSSRC = "qtssReflectorStreamSSRC";
-static boost::string_view        sStreamPacketCount = "qtssReflectorStreamPacketCount";
-static boost::string_view        sStreamByteCount = "qtssReflectorStreamByteCount";
-//static boost::string_view        sFirstRTCPArrivalTime = "qtssReflectorStreamStartRTCPArrivalTime";
-//static boost::string_view        sLastRTPTimeStamp = "qtssReflectorStreamLastRTPTimeStamp";
-//static boost::string_view        sFirstRTCPTimeStamp = "qtssReflectorStreamStartRTCPTimeStamp";
-//static boost::string_view        sFirstRTCPCurrentTime = "qtssReflectorStreamStartRTCPCurrent";
 
 RTPSessionOutput::RTPSessionOutput(RTPSession* inClientSession, ReflectorSession* inReflectorSession,
 	boost::string_view inCookieAddrName)
@@ -77,25 +54,14 @@ bool RTPSessionOutput::IsPlaying()
 	return fClientSession->GetSessionState() == qtssPlayingState;
 }
 
-void RTPSessionOutput::InitializeStreams()
-{
-	for (auto theStreamPtr : fClientSession->GetStreams())
-		theStreamPtr->addAttribute(sStreamPacketCount, (uint32_t)0);
-}
-
-
-
 bool RTPSessionOutput::IsUDP()
 {
 	if (fTransportInitialized)
 		return fIsUDP;
 
-
-	uint32_t                  theLen = 0;
 	if (fClientSession->GetSessionState() != qtssPlayingState);
 		return true;
 
-	QTSS_RTPTransportType *theTransportTypePtr = nullptr;
 	for (auto theStreamPtr : fClientSession->GetStreams())
 	{
 		QTSS_RTPTransportType theTransportType = theStreamPtr->GetTransportType();
@@ -120,16 +86,8 @@ bool RTPSessionOutput::IsUDP()
 
 bool  RTPSessionOutput::FilterPacket(RTPStream *theStreamPtr, const std::vector<char> &inPacket)
 {
-	uint32_t theLen = 0;
-
-	//see if we started sending and if so then just keep sending (reset on a play)
-	boost::optional<boost::any> opt = theStreamPtr->getAttribute(sStreamPacketCount);
-	if (opt && boost::any_cast<uint32_t>(opt.value()) > 0)
-		return false;
-
 	Assert(theStreamPtr);
-
-	uint16_t seqnum = this->GetPacketSeqNumber(inPacket);
+	uint16_t seqnum = GetPacketSeqNumber(inPacket);
 	uint16_t firstSeqNum = theStreamPtr->GetSeqNumber();
 
 	if (seqnum < firstSeqNum)
@@ -179,7 +137,6 @@ bool  RTPSessionOutput::PacketAlreadySent(RTPStream *theStreamPtr, uint32_t inFl
 
 QTSS_Error  RTPSessionOutput::WritePacket(const std::vector<char> &inPacket, void* inStreamCookie, uint32_t inFlags, int64_t packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr, bool firstPacket)
 {
-	uint32_t                  theLen = 0;
 	QTSS_Error              writeErr = QTSS_NoErr;
 	int64_t                  currentTime = OS::Milliseconds();
 
@@ -204,14 +161,13 @@ QTSS_Error  RTPSessionOutput::WritePacket(const std::vector<char> &inPacket, voi
 			// TrackPackets below is for re-writing the rtcps we don't use it right now-- shouldn't need to    
 			// (void) this->TrackPackets(theStreamPtr, inPacket, &currentTime,inFlags,  &packetLatenessInMSec, timeToSendThisPacketAgain, packetIDPtr,arrivalTimeMSecPtr);
 
-			QTSS_PacketStruct thePacket;
-			thePacket.packetData = (void *)&inPacket[0];
+			QTSS_PacketStruct thePacket{ inPacket };
 			int64_t delayMSecs = fBufferDelayMSecs - (currentTime - *arrivalTimeMSecPtr);
 			thePacket.packetTransmitTime = (currentTime - packetLatenessInMSec);
 			if (fBufferDelayMSecs > 0)
 				thePacket.packetTransmitTime += delayMSecs; // add buffer time where oldest buffered packet as now == 0 and newest is entire buffer time in the future.
 
-			writeErr = theStreamPtr->Write(&thePacket, inPacket.size(), nullptr, inFlags | qtssWriteFlagsWriteBurstBegin);
+			writeErr = theStreamPtr->Write(&thePacket, nullptr, inFlags | qtssWriteFlagsWriteBurstBegin);
 			if (writeErr == QTSS_WouldBlock)
 			{
 				//printf("QTSS_Write == QTSS_WouldBlock\n");
@@ -239,7 +195,6 @@ QTSS_Error  RTPSessionOutput::WritePacket(const std::vector<char> &inPacket, voi
 				else if (inFlags & qtssWriteFlagsIsRTCP)
 				{
 					theStreamPtr->addAttribute(sLastRTCPPacketID, *packetIDPtr);
-					theStreamPtr->addAttribute(sLastRTCPTransmit, currentTime);
 				}
 			}
 		}

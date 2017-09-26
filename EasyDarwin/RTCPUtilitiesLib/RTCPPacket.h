@@ -30,9 +30,6 @@
 
 */
 
-//#define DEBUG_RTCP_PACKETS 1
-
-
 #ifndef _RTCPPACKET_H_
 #define _RTCPPACKET_H_
 

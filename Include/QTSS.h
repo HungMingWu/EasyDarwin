@@ -27,22 +27,15 @@
 #define QTSS_H
 #include "OSHeaders.h"
 #include <string>
+#include <vector>
 #include "QTSSRTSPProtocol.h"
 
 #ifndef __Win32__
 #include <sys/uio.h>
 #endif
 
-#define QTSS_MAX_MODULE_NAME_LENGTH     64
-#define QTSS_MAX_SESSION_ID_LENGTH      64
-#define QTSS_MAX_ATTRIBUTE_NAME_SIZE    64
-#define QTSS_MAX_URL_LENGTH				512
-#define QTSS_MAX_NAME_LENGTH			128
 #define QTSS_MAX_REQUEST_BUFFER_SIZE	2*1024
-#define EASY_ACCENCODER_BUFFER_SIZE_LEN	16*1024*4
-#define QTSS_MAX_ATTRIBUTE_NUMS			128
 
-#define EASY_KEY_SPLITER				"-"
 
 //*******************************
 // ENUMERATED TYPES
@@ -232,39 +225,6 @@ enum
 typedef uint32_t QTSS_RTPPayloadType;
 
 /**********************************/
-// QTSS API OBJECT TYPES
-enum
-{
-    qtssDynamicObjectType           = FOUR_CHARS_TO_INT('d', 'y', 'm', 'c'), //dymc
-    qtssRTPStreamObjectType         = FOUR_CHARS_TO_INT('r', 's', 't', 'o'), //rsto
-    qtssClientSessionObjectType     = FOUR_CHARS_TO_INT('c', 's', 'e', 'o'), //cseo
-    qtssRTSPSessionObjectType       = FOUR_CHARS_TO_INT('s', 's', 'e', 'o'), //sseo
-    qtssRTSPRequestObjectType       = FOUR_CHARS_TO_INT('s', 'r', 'q', 'o'), //srqo
-    qtssRTSPHeaderObjectType        = FOUR_CHARS_TO_INT('s', 'h', 'd', 'o'), //shdo
-    qtssServerObjectType            = FOUR_CHARS_TO_INT('s', 'e', 'r', 'o'), //sero
-    qtssPrefsObjectType             = FOUR_CHARS_TO_INT('p', 'r', 'f', 'o'), //prfo
-    qtssTextMessagesObjectType      = FOUR_CHARS_TO_INT('t', 'x', 't', 'o'), //txto
-    qtssFileObjectType              = FOUR_CHARS_TO_INT('f', 'i', 'l', 'e'), //file
-    qtssModuleObjectType            = FOUR_CHARS_TO_INT('m', 'o', 'd', 'o'), //modo
-    qtssModulePrefsObjectType       = FOUR_CHARS_TO_INT('m', 'o', 'd', 'p'), //modp
-    qtssAttrInfoObjectType          = FOUR_CHARS_TO_INT('a', 't', 't', 'r'), //attr
-
-    qtssConnectedUserObjectType     = FOUR_CHARS_TO_INT('c', 'u', 's', 'r'), //cusr
-	easyHTTPSessionObjectType		= FOUR_CHARS_TO_INT('e', 'h', 's', 'o')  //ehso
-    
-};
-typedef uint32_t QTSS_ObjectType;
-
-enum
-{
-    qtssOpenFileNoFlags =       0,
-    qtssOpenFileAsync =         1,  // File stream will be asynchronous (read may return QTSS_WouldBlock)
-    qtssOpenFileReadAhead =     2   // File stream will be used for a linear read through the file.
-};
-typedef uint32_t QTSS_OpenFileFlags;
-
-
-/**********************************/
 // SERVER STATES
 //
 //  An attribute in the QTSS_ServerObject returns the server state
@@ -339,18 +299,9 @@ typedef struct
     QTSS_CliSesClosingReason        inReason;
 } QTSS_ClientSessionClosing_Params;
 
-
-typedef union
-{
-	QTSS_StandardRTSP_Params            rtspParams;
-
-    QTSS_RTPSendPackets_Params          rtpSendPacketsParams;
-
-} QTSS_RoleParams, *QTSS_RoleParamPtr;
-
 typedef struct
 {
-    void*                           packetData;
+    const std::vector<char>         &packetData;
     QTSS_TimeVal                    packetTransmitTime;
     QTSS_TimeVal                    suggestedWakeupTime;
 } QTSS_PacketStruct;

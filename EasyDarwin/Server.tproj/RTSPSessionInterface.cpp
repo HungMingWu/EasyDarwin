@@ -38,12 +38,6 @@
 #include "ServerPrefs.h"
 #include "StringParser.h"
 
-#if DEBUG
-#define RTSP_SESSION_INTERFACE_DEBUGGING 1
-#else
-#define RTSP_SESSION_INTERFACE_DEBUGGING 0
-#endif
-
 unsigned int            RTSPSessionInterface::sSessionIDCounter = kFirstRTSPSessionID;
 
 RTSPSessionInterface::RTSPSessionInterface()
@@ -143,10 +137,10 @@ boost::string_view  RTSPSessionInterface::GetSessionIDForChannelNum(uint8_t inCh
 /
 */
 
-QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, unsigned char channel)
+QTSS_Error RTSPSessionInterface::InterleavedWrite(const std::vector<char > &inBuffer, uint32_t* outLenWritten, unsigned char channel)
 {
 
-	if (inLen == 0 && fTCPCoalesceBuffer.empty())
+	if (inBuffer.empty() && fTCPCoalesceBuffer.empty())
 	{
 		if (outLenWritten != nullptr)
 			*outLenWritten = 0;
@@ -177,8 +171,8 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, uint32_t inLen
 
 
 	// flush rules
-	if ((inLen > kTCPCoalesceDirectWriteSize || inLen == 0) && fTCPCoalesceBuffer.size() > 0
-		|| (inLen + fTCPCoalesceBuffer.size() + kInteleaveHeaderSize > kTCPCoalesceBufferSize) && fTCPCoalesceBuffer.size() > 0
+	if ((inBuffer.size() > kTCPCoalesceDirectWriteSize || inBuffer.empty()) && fTCPCoalesceBuffer.size() > 0
+		|| (inBuffer.size() + fTCPCoalesceBuffer.size() + kInteleaveHeaderSize > kTCPCoalesceBufferSize) && fTCPCoalesceBuffer.size() > 0
 		)
 	{
 		uint32_t      buffLenWritten;
@@ -189,10 +183,6 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, uint32_t inLen
 
 		err = this->GetOutputStream()->WriteV(iov, 2, fTCPCoalesceBuffer.size(), &buffLenWritten, RTSPResponseStream::kAllOrNothing);
 
-#if RTSP_SESSION_INTERFACE_DEBUGGING 
-		printf("InterleavedWrite: flushing %li\n", fTCPCoalesceBuffer.size());
-#endif
-
 		if (err == QTSS_NoErr)
 			fTCPCoalesceBuffer.clear();
 	}
@@ -202,26 +192,22 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, uint32_t inLen
 	if (err == QTSS_NoErr)
 	{
 
-		if (inLen > kTCPCoalesceDirectWriteSize)
+		if (inBuffer.size() > kTCPCoalesceDirectWriteSize)
 		{
 			struct RTPInterleaveHeader  rih;
 
 			// write direct to stream
 			rih.header = '$';
 			rih.channel = channel;
-			rih.len = htons((uint16_t)inLen);
+			rih.len = htons((uint16_t)inBuffer.size());
 
 			iov[1].iov_base = (char*)&rih;
 			iov[1].iov_len = sizeof(rih);
 
-			iov[2].iov_base = (char*)inBuffer;
-			iov[2].iov_len = inLen;
+			iov[2].iov_base = const_cast<char *>(&inBuffer[0]);
+			iov[2].iov_len = inBuffer.size();
 
-			err = this->GetOutputStream()->WriteV(iov, 3, inLen + sizeof(rih), outLenWritten, RTSPResponseStream::kAllOrNothing);
-
-#if RTSP_SESSION_INTERFACE_DEBUGGING 
-			printf("InterleavedWrite: bypass %li\n", inLen);
-#endif
+			err = this->GetOutputStream()->WriteV(iov, 3, inBuffer.size() + sizeof(rih), outLenWritten, RTSPResponseStream::kAllOrNothing);
 
 		}
 		else
@@ -234,14 +220,11 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, uint32_t inLen
 			// if we ever turn TCPCoalesce back on, this should be optimized
 			// for processors w/o alignment restrictions as above.
 
-			int16_t  pcketLen = htons((uint16_t)inLen);
+			int16_t  pcketLen = htons((uint16_t)inBuffer.size());
 			std::copy(&pcketLen, &pcketLen + 2, std::back_inserter(fTCPCoalesceBuffer));
 
-			std::copy((const char *)inBuffer, (const char *)inBuffer + inLen, std::back_inserter(fTCPCoalesceBuffer));
+			std::copy(begin(inBuffer), end(inBuffer), std::back_inserter(fTCPCoalesceBuffer));
 
-#if RTSP_SESSION_INTERFACE_DEBUGGING 
-			printf("InterleavedWrite: coalesce %li, total bufff %li\n", inLen, fNumInCoalesceBuffer);
-#endif
 		}
 	}
 
@@ -253,7 +236,7 @@ QTSS_Error RTSPSessionInterface::InterleavedWrite(void* inBuffer, uint32_t inLen
 			 if no error, then all was written.
 		*/
 		if (outLenWritten != nullptr)
-			*outLenWritten = inLen;
+			*outLenWritten = inBuffer.size();
 	}
 
 	this->GetSessionMutex()->Unlock();

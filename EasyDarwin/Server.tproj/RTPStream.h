@@ -84,7 +84,7 @@ class RTPStream
         
         // Write sends RTP data to the client. Caller must specify
         // either qtssWriteFlagsIsRTP or qtssWriteFlagsIsRTCP
-        QTSS_Error  Write(void* inBuffer, uint32_t inLen,
+        QTSS_Error  Write(QTSS_PacketStruct* thePacket,
                                         uint32_t* outLenWritten, QTSS_WriteFlags inFlags);
         
         
@@ -322,13 +322,7 @@ class RTPStream
                        
 		uint32_t      fCurrentAckTimeout{ 0 };
 		int32_t      fMaxSendAheadTimeMSec{ 0 };
-        
-#if DEBUG
-		uint32_t      fNumPacketsDroppedOnTCPFlowControl{ 0 };
-		int64_t      fFlowControlStartedMsec{ 0 };
-		int64_t      fFlowControlDurationMsec{ 0 };
-#endif
-        
+
         // If we are interleaving RTP data over the TCP connection,
         // these are channel numbers to use for RTP & RTCP
 		uint8_t   fRTPChannel{ 0 };
@@ -352,10 +346,10 @@ class RTPStream
         
         //-----------------------------------------------------------
         // acutally write the data out that way
-        QTSS_Error  InterleavedWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, unsigned char channel );
+        QTSS_Error  InterleavedWrite(const std::vector<char> &inBuffer, uint32_t* outLenWritten, unsigned char channel );
 
         // implements the ReliableRTP protocol
-        QTSS_Error  ReliableRTPWrite(void* inBuffer, uint32_t inLen, const int64_t& curPacketDelay);
+        QTSS_Error  ReliableRTPWrite(const std::vector<char> &inBuffer, const int64_t& curPacketDelay);
 
          
         void        SetTCPThinningParams();
@@ -366,8 +360,8 @@ class RTPStream
         static char *RUDP;
         static char *TCP;
         
-        bool UpdateQualityLevel(const int64_t& inTransmitTime, const int64_t& inCurrentPacketDelay,
-                                        const int64_t& inCurrentTime, uint32_t inPacketSize);
+        bool UpdateQualityLevel(int64_t inTransmitTime, int64_t inCurrentPacketDelay,
+                                        int64_t inCurrentTime, uint32_t inPacketSize);
         
         void            DisableThinning() { fDisableThinning = true; }
 		void			SetInitialMaxQualityLevel();
@@ -379,12 +373,7 @@ class RTPStream
         void PrintRTCPSenderReport(char* packetBuff, uint32_t inLen);
 
         void SetOverBufferState(RTSPRequestInterface* request);
-        
-        bool TestRTCPPackets(StrPtrLen* inPacketPtr, uint32_t itemName);
-        
-        void UDPMonitorWrite(void* thePacketData, uint32_t inLen, bool isRTCP);
-
-
+        void UDPMonitorWrite(const std::vector<char> &thePacketData, bool isRTCP);
 };
 
 #endif // __RTPSTREAM_H__

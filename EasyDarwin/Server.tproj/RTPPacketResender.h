@@ -73,7 +73,7 @@ public:
 	//
 	// AddPacket adds a new packet to the resend queue. This will not send the packet.
 	// AddPacket itself is not thread safe.
-	void                AddPacket(void * rtpPacket, uint32_t packetSize, int32_t ageLimitInMsec);
+	void                AddPacket(const std::vector<char> &rtpPacket, int32_t ageLimitInMsec);
 
 	//
 	// Acks a packet. Also not thread safe.

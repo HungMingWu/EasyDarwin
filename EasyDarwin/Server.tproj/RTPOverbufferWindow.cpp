@@ -65,7 +65,7 @@ RTPOverbufferWindow::RTPOverbufferWindow(uint32_t inSendInterval, uint32_t inIni
 
 }
 
-int64_t RTPOverbufferWindow::CheckTransmitTime(const int64_t& inTransmitTime, const int64_t& inCurrentTime, int32_t inPacketSize)
+int64_t RTPOverbufferWindow::CheckTransmitTime(int64_t inTransmitTime, int64_t inCurrentTime, int32_t inPacketSize)
 {
 	// if this is the beginning of a bucket interval, roll over figures from last time.
 	// accumulate statistics over the period of a second
@@ -164,11 +164,6 @@ void RTPOverbufferWindow::AddPacketToWindow(int32_t inPacketSize)
 	fBytesDuringBucket += inPacketSize;
 	fBytesDuringLastSecond += inPacketSize;
 	fBytesSentSinceLastReport += inPacketSize;
-}
-
-void RTPOverbufferWindow::EmptyOutWindow(const int64_t& inCurrentTime)
-{
-	// no longer needed
 }
 
 void RTPOverbufferWindow::SetWindowSize(uint32_t inWindowSizeInBytes)

@@ -118,24 +118,13 @@ QTSS_Error RTPSession::AddStream(RTSPRequest* request, RTPStream** outStream,
 	return theErr;
 }
 
-void RTPSession::SetStreamThinningParams(float inLateTolerance)
-{
-	// Set the thinning params in all the RTPStreams of the RTPSession
-	// Go through all the streams, setting their thinning params
-	for (auto theStream : fStreamBuffer)
-	{
-		theStream->SetLateTolerance(inLateTolerance);
-		theStream->SetThinningParams();
-	}
-}
-
 QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFlags)
 {
 	//first setup the play associated session interface variables
 	Assert(request != nullptr);
 
 	//what time is this play being issued at?
-	fLastBitRateUpdateTime = fNextSendPacketsTime = fPlayTime = OS::Milliseconds();
+	fNextSendPacketsTime = fPlayTime = OS::Milliseconds();
 	if (fIsFirstPlay)
 		fFirstPlayTime = fPlayTime;
 	fAdjustedPlayTime = fPlayTime - ((int64_t)(request->GetStartTime() * 1000));
@@ -160,19 +149,6 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 	//  printf("bitrate = %d, window size = %d\n", bitRate, theWindowSize);
 	this->GetBandwidthTracker()->SetWindowSize(theWindowSize);
 	this->GetOverbufferWindow()->ResetOverBufferWindow();
-
-	//
-	// Go through all the streams, setting their thinning params
-
-	for (auto theStream : fStreamBuffer)
-	{
-		theStream->SetThinningParams();
-		theStream->ResetThinningDelayParams();
-		//
-		// If we are using reliable UDP, then make sure to clear all the packets
-		// from the previous play spurt out of the resender
-		theStream->GetResender()->ClearOutstandingPackets();
-	}
 
 	//  printf("movie bitrate = %d, window size = %d\n", this->GetMovieAvgBitrate(), theWindowSize);
 	Assert(this->GetBandwidthTracker()->BytesInList() == 0);
@@ -321,9 +297,8 @@ int64_t RTPSession::Run()
 
 			if (this->GetPlayFlags() & qtssPlayFlagsSendRTCP)
 			{
-				int64_t byePacketTime = OS::Milliseconds();
 				for (auto theStream : fStreamBuffer)
-					theStream->SendRTCPSR(byePacketTime, true);
+					theStream->SendRTCPSR(true);
 			}
 		}
 
@@ -356,11 +331,6 @@ int64_t RTPSession::Run()
 		{
 			RTPStream** retransStream = nullptr;
 			uint32_t retransStreamLen = 0;
-
-			//
-			// Send retransmits if we need to
-			for (auto retransStream : fStreamBuffer)
-				retransStream->SendRetransmits();
 
 			rtpSendPacketsParams.outNextPacketTime = fNextSendPacketsTime - rtpSendPacketsParams.inCurrentTime;
 		}

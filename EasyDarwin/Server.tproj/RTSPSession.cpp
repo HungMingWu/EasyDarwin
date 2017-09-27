@@ -482,13 +482,6 @@ void RTSPSession::SetupRequest()
 			return;
 		}
 
-		// refresh RTP session timeout so that it's kept alive in sync with the RTSP session.
-		if (fRequest->GetLateToleranceInSec() != -1)
-		{
-			fRTPSession->SetStreamThinningParams(fRequest->GetLateToleranceInSec());
-			fRequest->SendHeader();
-			return;
-		}
 		// let modules handle it if they want it.
 
 	}
@@ -524,10 +517,6 @@ void RTSPSession::SetupRequest()
 		if (theErr != QTSS_NoErr)
 			return;
 	}
-
-	// If it's a play request and the late tolerance is sent in the request use this value
-	if ((fRequest->GetMethod() == qtssPlayMethod) && (fRequest->GetLateToleranceInSec() != -1))
-		fRTPSession->SetStreamThinningParams(fRequest->GetLateToleranceInSec());
 
 	// Check to see if this is a "ping" PLAY request (a PLAY request while already
 	// playing with no Range header). If so, just send back a 200 OK response and do nothing.

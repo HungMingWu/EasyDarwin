@@ -57,41 +57,15 @@
 
 #define RTCP_TESTING 0
 
-char *RTPStream::noType = "no-type";
-char *RTPStream::UDP = "UDP";
-char *RTPStream::RUDP = "RUDP";
-char *RTPStream::TCP = "TCP";
-
 RTPStream::RTPStream(uint32_t inSSRC, RTPSessionInterface* inSession)
 	: fSession(inSession),
 	fSsrc(inSSRC),
 	fQualityLevel(ServerPrefs::GetDefaultStreamQuality()),
 
-	fStreamStartTimeOSms(OS::Milliseconds()),
-	fDisableThinning(ServerPrefs::GetDisableThinning()),
+	fDisableThinning(true), //ServerPrefs::GetDisableThinning()),
 	fDefaultQualityLevel(ServerPrefs::GetDefaultStreamQuality()),
-	fMaxQualityLevel(fDefaultQualityLevel),
-	fUDPMonitorEnabled(ServerPrefs::GetUDPMonitorEnabled()),
-	fMonitorVideoDestPort(ServerPrefs::GetUDPMonitorVideoPort()),
-	fMonitorAudioDestPort(ServerPrefs::GetUDPMonitorAudioPort())
+	fMaxQualityLevel(fDefaultQualityLevel)
 {
-	if (fUDPMonitorEnabled)
-	{
-		std::string destIP(ServerPrefs::GetMonitorDestIP());
-		std::string srcIP(ServerPrefs::GetMonitorSrcIP());
-
-		fMonitorAddr = SocketUtils::ConvertStringToAddr(destIP.c_str());
-		fPlayerToMonitorAddr = SocketUtils::ConvertStringToAddr(srcIP.c_str());
-
-		fMonitorSocket = ::socket(AF_INET, SOCK_DGRAM, 0);
-#ifdef __Win32__
-		u_long one = 1;
-		(void) ::ioctlsocket(fMonitorSocket, FIONBIO, &one);
-#else
-		int flag = ::fcntl(fMonitorSocket, F_GETFL, 0);
-		(void) ::fcntl(fMonitorSocket, F_SETFL, flag | O_NONBLOCK);
-#endif
-	}
 }
 
 RTPStream::~RTPStream()
@@ -105,24 +79,11 @@ RTPStream::~RTPStream()
 
 		getSingleton()->GetSocketPool()->ReleaseUDPSocketPair(fSockets);
 	}
-
-	if (fMonitorSocket != 0)
-	{
-#ifdef __Win32__
-		::closesocket(fMonitorSocket);
-#else   
-		close(fMonitorSocket);
-#endif
-	}
-
 }
 
 int32_t RTPStream::GetQualityLevel()
 {
-	if (fTransportType == qtssRTPTransportTypeUDP)
-		return std::min<int32_t>(fQualityLevel, fNumQualityLevels - 1);
-	else
-		return fSession->GetQualityLevel();
+	return fSession->GetQualityLevel();
 }
 
 void RTPStream::SetQualityLevel(int32_t level)
@@ -139,10 +100,7 @@ void RTPStream::SetQualityLevel(int32_t level)
 	if (level == fQualityLevel)
 		return;
 
-	if (fTransportType == qtssRTPTransportTypeUDP)
-		fQualityLevel = level;
-	else
-		fSession->SetQualityLevel(level);
+	fSession->SetQualityLevel(level);
 
 	fLastQualityLevel = level;
 }
@@ -153,19 +111,6 @@ void  RTPStream::SetOverBufferState(RTSPRequestInterface* request)
 
 	switch (fTransportType)
 	{
-	case qtssRTPTransportTypeReliableUDP:
-		{
-			enableOverBuffer = true; // default is on
-		}
-		break;
-
-	case qtssRTPTransportTypeUDP:
-		{
-			enableOverBuffer = false; // always off
-		}
-		break;
-
-
 	case qtssRTPTransportTypeTCP:
 		{
 			enableOverBuffer = true; // default is on same as 4.0 and earlier. Allows tcp to compensate for falling behind from congestion or slow-start. 
@@ -173,12 +118,6 @@ void  RTPStream::SetOverBufferState(RTSPRequestInterface* request)
 		break;
 
 	}
-
-	//over buffering is enabled for the session by default
-	//if any stream turns it off then it is off for all streams
-	//a disable is from either the stream type default or a specific rtsp command to disable
-	if (!enableOverBuffer)
-		fSession->GetOverbufferWindow()->TurnOverbuffering(false);
 }
 
 QTSS_Error RTPStream::Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags)
@@ -187,22 +126,9 @@ QTSS_Error RTPStream::Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags)
 	fStreamURL = request->GetFileName();//just in case someone wants to use string routines
 
 	//
-	// Store the late-tolerance value that came out of hte x-RTP-Options header,
-	// so that when it comes time to determine our thinning params (when we PLAY),
-	// we will know this
-	fLateToleranceInSec = request->GetLateToleranceInSec();
-	if (fLateToleranceInSec == -1.0)
-		fLateToleranceInSec = 1.5;
-
-	//
 	// Setup the transport type
 	fTransportType = request->GetTransportType();
 	fNetworkMode = request->GetNetworkMode();
-
-	//
-	// Check to see if caller is forcing raw UDP transport
-	if ((fTransportType == qtssRTPTransportTypeReliableUDP) && (inFlags & qtssASFlagsForceUDPTransport))
-		fTransportType = qtssRTPTransportTypeUDP;
 
 	//
 	// decide whether to overbuffer
@@ -261,10 +187,7 @@ QTSS_Error RTPStream::Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags)
 		sourceAddr = request->GetSourceAddr();
 
 	// if the transport is TCP or RUDP, then we only want one session quality level instead of a per stream one
-	if (fTransportType != qtssRTPTransportTypeUDP)
-	{
-		this->SetQualityLevel(*(fSession->GetQualityLevelPtr()));
-	}
+	this->SetQualityLevel(*(fSession->GetQualityLevelPtr()));
 
 
 	// If the destination address is multicast, we need to setup multicast socket options
@@ -295,20 +218,6 @@ QTSS_Error RTPStream::Setup(RTSPRequest* request, QTSS_AddStreamFlags inFlags)
 
 	if (fSockets == nullptr)
 		return request->SendErrorResponse(qtssServerInternal);
-
-	else if (fTransportType == qtssRTPTransportTypeReliableUDP)
-	{
-		//
-		// FIXME - we probably want to get rid of this slow start flag in the API
-		bool useSlowStart = !(inFlags & qtssASFlagsDontUseSlowStart);
-		if (!ServerPrefs::IsSlowStartEnabled())
-			useSlowStart = false;
-
-		fTracker = fSession->GetBandwidthTracker();
-
-		fResender.SetBandwidthTracker(fTracker);
-		fResender.SetDestination(fSockets->GetSocketA(), fRemoteAddr, fRemoteRTPPort);
-	}
 
 	//
 	// Record the Server RTP port
@@ -390,42 +299,6 @@ void    RTPStream::AppendRTPInfo(QTSS_RTSPHeader inHeader, RTSPRequestInterface*
 	request->AppendRTPInfoHeader(inHeader, fStreamURL, seqNumberBuf, rtpTimeBuf, lastInfo);
 }
 
-
-//UDP Monitor reflected  write
-void RTPStream::UDPMonitorWrite(const std::vector<char> &thePacketData, bool isRTCP)
-{
-	if (false == fUDPMonitorEnabled || 0 == fMonitorSocket || thePacketData.empty())
-		return;
-
-	if ((0 != fPlayerToMonitorAddr) && (this->fRemoteAddr != fPlayerToMonitorAddr))
-		return;
-
-	uint16_t RTCPportOffset = (true == isRTCP) ? 1 : 0;
-
-
-	struct sockaddr_in sin;
-	memset(&sin, 0, sizeof(struct sockaddr_in));
-	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr = htonl(fMonitorAddr);
-
-	if (fPayloadType == qtssVideoPayloadType)
-		sin.sin_port = /*(in_port_t) */htons(fMonitorVideoDestPort + RTCPportOffset);
-	else if (fPayloadType == qtssAudioPayloadType)
-		sin.sin_port = /*(in_port_t)*/ htons(fMonitorAudioDestPort + RTCPportOffset);
-
-	if (sin.sin_port != 0)
-	{
-		int result = ::sendto(fMonitorSocket, &thePacketData[0], thePacketData.size(), 0, (struct sockaddr *)&sin, sizeof(struct sockaddr));
-		//if (DEBUG)
-		// {   if (result < 0)
-		//         printf("RTCP Monitor Socket sendto failed\n");
-		//     else if (0)
-		//         printf("RTCP Monitor Socket sendto port=%hu, packetLen=%"   _U32BITARG_   "\n", ntohs(sin.sin_port), inLen);
-		// }
-	}
-
-}
-
 /*********************************
 /
 /   InterleavedWrite
@@ -461,213 +334,6 @@ QTSS_Error  RTPStream::InterleavedWrite(const std::vector<char> &inBuffer, uint3
 	return err;
 }
 
-//SendRetransmits must be called from a fSession mutex protected caller
-void    RTPStream::SendRetransmits()
-{
-
-	if (fTransportType == qtssRTPTransportTypeReliableUDP)
-		fResender.ResendDueEntries();
-
-
-}
-
-//ReliableRTPWrite must be called from a fSession mutex protected caller
-QTSS_Error RTPStream::ReliableRTPWrite(const std::vector<char> &inBuffer, const int64_t& curPacketDelay)
-{
-	QTSS_Error err = QTSS_NoErr;
-
-	// this must ALSO be called in response to a packet timeout
-	// event that can be resecheduled as necessary by the fResender
-	// for -hacking- purposes we'l do it just as we write packets,
-	// but we won't be able to play low bit-rate movies ( like MIDI )
-	// until this is a schedulable task
-
-	// Send retransmits for all streams on this session
-	//
-	// Send retransmits if we need to
-	for (auto retransStream : fSession->GetStreams())
-	{
-		//printf("Resending packets for stream: %d\n",(*retransStream)->fTrackID);
-		//printf("RTPStream::ReliableRTPWrite. Calling ResendDueEntries\n");
-		retransStream->fResender.ResendDueEntries();
-	}
-
-	if (!fSawFirstPacket)
-	{
-		fSawFirstPacket = true;
-		fStreamCumDuration = 0;
-		fStreamCumDuration = OS::Milliseconds() - fSession->GetPlayTime();
-		//fInfoDisplayTimer.ResetToDuration( 1000 - fStreamCumDuration % 1000 );
-	}
-
-	if (fResender.IsFlowControlled())
-	{
-		err = QTSS_WouldBlock;
-	}
-	else
-	{
-		//
-		// Assign a lifetime to the packet using the current delay of the packet and
-		// the time until this packet becomes stale.
-		fBytesSentThisInterval += inBuffer.size();
-		fResender.AddPacket(inBuffer, (int32_t)(fDropAllPacketsForThisStreamDelay - curPacketDelay));
-
-		(void)fSockets->GetSocketA()->SendTo(fRemoteAddr, fRemoteRTPPort, inBuffer);
-	}
-
-
-	return err;
-}
-
-void RTPStream::SetThinningParams()
-{
-	int32_t toleranceAdjust = 1500 - (int32_t(fLateToleranceInSec * 1000));
-
-	if (fPayloadType == qtssVideoPayloadType)
-		fDropAllPacketsForThisStreamDelay = ServerPrefs::GetDropAllVideoPacketsTimeInMsec() - toleranceAdjust;
-	else
-		fDropAllPacketsForThisStreamDelay = ServerPrefs::GetDropAllPacketsTimeInMsec() - toleranceAdjust;
-
-	fThinAllTheWayDelay = ServerPrefs::GetThinAllTheWayTimeInMsec() - toleranceAdjust;
-	fAlwaysThinDelay = ServerPrefs::GetAlwaysThinTimeInMsec() - toleranceAdjust;
-	fStartThinningDelay = ServerPrefs::GetStartThinningTimeInMsec() - toleranceAdjust;
-	fStartThickingDelay = ServerPrefs::GetStartThickingTimeInMsec() - toleranceAdjust;
-	fThickAllTheWayDelay = ServerPrefs::GetThickAllTheWayTimeInMsec();
-	fQualityCheckInterval = ServerPrefs::GetQualityCheckIntervalInMsec();
-	fSession->fLastQualityCheckTime = 0;
-	fSession->fLastQualityCheckMediaTime = 0;
-	fSession->fStartedThinning = false;
-
-
-}
-
-void RTPStream::SetInitialMaxQualityLevel()
-{
-	uint32_t movieBitRate = GetSession().GetMovieAvgBitrate();
-	uint32_t bandwidth = GetSession().GetMaxBandwidthBits();
-	if (bandwidth != 0 && movieBitRate != 0)
-	{
-		double ratio = movieBitRate / static_cast<double>(bandwidth);
-
-		//interpolate between ratio and fNumQualityLevels such that 0.90 maps to 0 and 3.0 maps to fNumQualityLevels
-		SetMaxQualityLevelLimit(static_cast<int32_t>(fNumQualityLevels * (ratio / 2.1 - 0.43)));
-		SetQualityLevel(GetQualityLevel());
-	}
-}
-
-
-bool RTPStream::UpdateQualityLevel(int64_t inTransmitTime, int64_t inCurrentPacketDelay,
-	int64_t inCurrentTime, uint32_t inPacketSize)
-{
-	Assert(fNumQualityLevels > 0);
-
-	if (inTransmitTime <= fSession->GetPlayTime())
-		return true;
-
-	//->geyijyn@20150427
-	//---视频流不进行thinning 算法丢帧
-	//<- 
-	if (fPayloadType == qtssVideoPayloadType)
-		return true;
-
-	if (fTransportType == qtssRTPTransportTypeUDP)
-		return true;
-
-	if (fSession->fLastQualityCheckTime == 0)
-	{
-		// Reset the interval for checking quality levels
-		fSession->fLastQualityCheckTime = inCurrentTime;
-		fSession->fLastQualityCheckMediaTime = inTransmitTime;
-		fLastCurrentPacketDelay = inCurrentPacketDelay;
-		return true;
-	}
-
-	if (!fSession->fStartedThinning)
-	{
-		// if we're still behind but not falling further behind, then don't thin
-		if ((inCurrentPacketDelay > fStartThinningDelay) && (inCurrentPacketDelay - fLastCurrentPacketDelay < 250))
-		{
-			if (inCurrentPacketDelay < fLastCurrentPacketDelay)
-				fLastCurrentPacketDelay = inCurrentPacketDelay;
-			return true;
-		}
-		else
-		{
-			fSession->fStartedThinning = true;
-		}
-	}
-
-	if ((fSession->fLastQualityCheckTime == 0) || (inCurrentPacketDelay > fThinAllTheWayDelay))
-	{
-		//
-		// Reset the interval for checking quality levels
-		fSession->fLastQualityCheckTime = inCurrentTime;
-		fSession->fLastQualityCheckMediaTime = inTransmitTime;
-		fLastCurrentPacketDelay = inCurrentPacketDelay;
-
-		if (inCurrentPacketDelay > fThinAllTheWayDelay)
-		{
-			//
-			// If we have fallen behind enough such that we risk trasmitting
-			// stale packets to the client, AGGRESSIVELY thin the stream
-			this->SetMinQuality();
-			//          if (fPayloadType == qtssVideoPayloadType)
-			//              printf("Q=%d, delay = %qd\n", GetQualityLevel(), inCurrentPacketDelay);
-			if (inCurrentPacketDelay > fDropAllPacketsForThisStreamDelay)
-			{
-				fStalePacketsDropped++;
-				return false; // We should not send this packet
-			}
-		}
-	}
-
-	if (fNumQualityLevels <= 2)
-	{
-		if ((inCurrentPacketDelay < fStartThickingDelay) && (GetQualityLevel() > 0))
-			this->SetMaxQuality();
-
-		return true;        // not enough quality levels to do fine tuning
-	}
-
-	if (((inCurrentTime - fSession->fLastQualityCheckTime) > fQualityCheckInterval) ||
-		((inTransmitTime - fSession->fLastQualityCheckMediaTime) > fQualityCheckInterval))
-	{
-		if ((inCurrentPacketDelay > fAlwaysThinDelay) && (GetQualityLevel() < (int32_t)fNumQualityLevels))
-			SetQualityLevel(GetQualityLevel() + 1);
-		else if ((inCurrentPacketDelay > fStartThinningDelay) && (inCurrentPacketDelay > fLastCurrentPacketDelay))
-		{
-			if (!fWaitOnLevelAdjustment && (GetQualityLevel() < (int32_t)fNumQualityLevels))
-			{
-				SetQualityLevel(GetQualityLevel() + 1);
-				fWaitOnLevelAdjustment = true;
-			}
-			else
-				fWaitOnLevelAdjustment = false;
-		}
-
-		if ((inCurrentPacketDelay < fStartThickingDelay) && (GetQualityLevel() > 0) && (inCurrentPacketDelay < fLastCurrentPacketDelay))
-		{
-			SetQualityLevel(GetQualityLevel() - 1);
-			fWaitOnLevelAdjustment = true;
-		}
-
-		if (inCurrentPacketDelay < fThickAllTheWayDelay)
-		{
-			this->SetMaxQuality();
-			fWaitOnLevelAdjustment = false;
-		}
-
-		//		if (fPayloadType == qtssVideoPayloadType)
-		//			printf("Q=%d, delay = %qd\n", GetQualityLevel(), inCurrentPacketDelay);
-		fLastCurrentPacketDelay = inCurrentPacketDelay;
-		fSession->fLastQualityCheckTime = inCurrentTime;
-		fSession->fLastQualityCheckMediaTime = inTransmitTime;
-	}
-
-	return true; // We should send this packet
-}
-
-
 QTSS_Error  RTPStream::Write(QTSS_PacketStruct* thePacket, uint32_t* outLenWritten, uint32_t inFlags)
 {
 	Assert(fSession != nullptr);
@@ -680,19 +346,7 @@ QTSS_Error  RTPStream::Write(QTSS_PacketStruct* thePacket, uint32_t* outLenWritt
 
 	//
 	// Data passed into this version of write must be a QTSS_PacketStruct
-	thePacket->suggestedWakeupTime = -1;
 	int64_t theCurrentPacketDelay = theTime - thePacket->packetTransmitTime;
-
-	//If we are doing rate-adaptation, set the maximum quality level if the bandwidth header is received
-	if (!fInitialMaxQualityLevelIsSet && !fDisableThinning)
-	{
-		fInitialMaxQualityLevelIsSet = true;
-		SetInitialMaxQualityLevel();
-	}
-
-	//
-	// Update the bit rate value
-	fSession->UpdateCurrentBitRate(theTime);
 
 	//
 	// Is this the first write in a write burst?
@@ -701,59 +355,18 @@ QTSS_Error  RTPStream::Write(QTSS_PacketStruct* thePacket, uint32_t* outLenWritt
 
 	if (inFlags & qtssWriteFlagsIsRTCP)
 	{
-		//
-		// Check to see if this packet is ready to send
-		if (false == fSession->GetOverbufferWindow()->GetOverbufferEnabled()) // only force rtcps on time if overbuffering is off
-		{
-			thePacket->suggestedWakeupTime = fSession->GetOverbufferWindow()->CheckTransmitTime(thePacket->packetTransmitTime, theTime, thePacket->packetData.size());
-			if (thePacket->suggestedWakeupTime > theTime)
-			{
-				Assert(thePacket->suggestedWakeupTime >= fSession->GetOverbufferWindow()->GetSendInterval());
-				fSession->GetSessionMutex()->Unlock();// Make sure to unlock the mutex
-				return QTSS_WouldBlock;
-			}
-		}
-
 		if (fTransportType == qtssRTPTransportTypeTCP)// write out in interleave format on the RTSP TCP channel
 		{
 			err = this->InterleavedWrite(thePacket->packetData, outLenWritten, fRTCPChannel);
 		}
-		else if (!thePacket->packetData.empty())
-		{
-			(void)this->fSockets->GetSocketB()->SendTo(fRemoteAddr, fRemoteRTCPPort, thePacket->packetData);
-
-			this->UDPMonitorWrite(thePacket->packetData, kIsRTCPPacket);
-
-		}
-;
 	}
 	else if (inFlags & qtssWriteFlagsIsRTP)
 	{
-		// Check to see if this packet fits in the overbuffer window
-		thePacket->suggestedWakeupTime = fSession->GetOverbufferWindow()->CheckTransmitTime(thePacket->packetTransmitTime, theTime, thePacket->packetData.size());
-
-		if (thePacket->suggestedWakeupTime > theTime)
-		{
-			fSession->GetSessionMutex()->Unlock();// Make sure to unlock the mutex
-			return QTSS_WouldBlock;
-		}
-
 		//
 		// Check to make sure our quality level is correct. This function
 		// also tells us whether this packet is just too old to send
-		if (this->UpdateQualityLevel(thePacket->packetTransmitTime, theCurrentPacketDelay, theTime, thePacket->packetData.size()))
-		{
-			if (fTransportType == qtssRTPTransportTypeTCP)    // write out in interleave format on the RTSP TCP channel.
-				err = this->InterleavedWrite(thePacket->packetData, outLenWritten, fRTPChannel);
-			else if (fTransportType == qtssRTPTransportTypeReliableUDP)
-				err = this->ReliableRTPWrite(thePacket->packetData, theCurrentPacketDelay);
-			else if (!thePacket->packetData.empty())
-			{
-				(void)fSockets->GetSocketA()->SendTo(fRemoteAddr, fRemoteRTPPort, thePacket->packetData);
-
-				this->UDPMonitorWrite(thePacket->packetData, kIsRTPPacket);
-			}
-		}
+		if (fTransportType == qtssRTPTransportTypeTCP)    // write out in interleave format on the RTSP TCP channel.
+			err = this->InterleavedWrite(thePacket->packetData, outLenWritten, fRTPChannel);
 
 		//if (err != QTSS_NoErr)
 		//  printf("flow controlled\n");
@@ -763,13 +376,6 @@ QTSS_Error  RTPStream::Write(QTSS_PacketStruct* thePacket, uint32_t* outLenWritt
 			// update if the socket is flow controlled or some such thing)
 
 			fSession->GetOverbufferWindow()->AddPacketToWindow(thePacket->packetData.size());
-			fSession->UpdatePacketsSent(1);
-			fSession->UpdateBytesSent(thePacket->packetData.size());
-			getSingleton()->IncrementTotalRTPBytes(thePacket->packetData.size());
-			getSingleton()->IncrementTotalPackets();
-
-			getSingleton()->IncrementTotalLate(theCurrentPacketDelay);
-			getSingleton()->IncrementTotalQuality(this->GetQualityLevel());
 
 			// Record the RTP timestamp for RTCPs
 			auto* timeStampP = (uint32_t*)(&thePacket->packetData[0]);
@@ -793,7 +399,7 @@ QTSS_Error  RTPStream::Write(QTSS_PacketStruct* thePacket, uint32_t* outLenWritt
 				// is what we should report in RTCP for
 				// synchronization purposes, not theTime,
 				// which is the actual transmission time.
-				this->SendRTCPSR(thePacket->packetTransmitTime);
+				this->SendRTCPSR();
 			}
 
 		}
@@ -815,7 +421,7 @@ QTSS_Error  RTPStream::Write(QTSS_PacketStruct* thePacket, uint32_t* outLenWritt
 
 // SendRTCPSR is called by the session as well as the strem
 // SendRTCPSR must be called from a fSession mutex protected caller
-void RTPStream::SendRTCPSR(const int64_t& inTime, bool inAppendBye)
+void RTPStream::SendRTCPSR(bool inAppendBye)
 {
 	// This will roll over, after which payloadByteCount will be all messed up.
 	// But because it is a 32 bit number, that is bound to happen eventually,
@@ -844,11 +450,6 @@ void RTPStream::SendRTCPSR(const int64_t& inTime, bool inAppendBye)
 		uint32_t  wasWritten;
 
 		err = this->InterleavedWrite(temp, &wasWritten, fRTCPChannel);
-	}
-	else
-	{
-		err = fSockets->GetSocketB()->SendTo(fRemoteAddr, fRemoteRTCPPort, temp);
-		this->UDPMonitorWrite(temp, kIsRTCPPacket);
 	}
 }
 
@@ -887,11 +488,6 @@ bool RTPStream::ProcessCompressedQTSSPacket(RTCPPacket &rtcpPacket, int64_t &cur
 	if (!compressedQTSSPacket.ParseAPPData((uint8_t*)currentPtr.Ptr, currentPtr.Len))
 		return false;//abort if we discover a malformed app packet
 
-
-	fReceiverBitRate = compressedQTSSPacket.GetReceiverBitRate();
-	fAvgLateMsec = compressedQTSSPacket.GetAverageLateMilliseconds();
-
-	fPercentPacketsLost = compressedQTSSPacket.GetPercentPacketsLost();
 	fAvgBufDelayMsec = compressedQTSSPacket.GetAverageBufferDelayMilliseconds();
 	fIsGettingBetter = (uint16_t)compressedQTSSPacket.GetIsGettingBetter();
 	fIsGettingWorse = (uint16_t)compressedQTSSPacket.GetIsGettingWorse();
@@ -908,11 +504,7 @@ bool RTPStream::ProcessCompressedQTSSPacket(RTCPPacket &rtcpPacket, int64_t &cur
 
 
 	// Update our overbuffer window size to match what the client is telling us
-	if (fTransportType != qtssRTPTransportTypeUDP)
-	{
-		//  printf("Setting over buffer to %d\n", compressedQTSSPacket.GetOverbufferWindowSize());
-		fSession->GetOverbufferWindow()->SetWindowSize(compressedQTSSPacket.GetOverbufferWindowSize());
-	}
+	fSession->GetOverbufferWindow()->SetWindowSize(compressedQTSSPacket.GetOverbufferWindowSize());
 	return true;
 }
 
@@ -926,31 +518,7 @@ bool RTPStream::ProcessAckPacket(RTCPPacket &rtcpPacket, int64_t &curTime)
 	if (!theAckPacket.ParseAPPData(packetBuffer, packetLen))
 		return false;
 
-	if (nullptr != fTracker && false == fTracker->ReadyForAckProcessing()) // this stream must be ready to receive acks.  Between RTSP setup and sending of first packet on stream we must protect against a bad ack.
-		return false;//abort if we receive an ack when we haven't sent anything.
-
-	// Only check for ack packets if we are using Reliable UDP
-	if (fTransportType == qtssRTPTransportTypeReliableUDP)
-	{
-		uint16_t theSeqNum = theAckPacket.GetAckSeqNum();
-		fResender.AckPacket(theSeqNum, curTime);
-		//printf("Got ack: %d\n",theSeqNum);
-
-		for (uint16_t maskCount = 0; maskCount < theAckPacket.GetAckMaskSizeInBits(); maskCount++)
-		{
-			if (theAckPacket.IsNthBitEnabled(maskCount))
-			{
-				fResender.AckPacket(theSeqNum + maskCount + 1, curTime);
-				//printf("Got ack in mask: %d\n",theSeqNum + maskCount + 1);
-			}
-		}
-
-	}
-
 	return true;
-
-
-
 }
 
 void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
@@ -1121,97 +689,4 @@ void RTPStream::ProcessIncomingRTCPPacket(StrPtrLen* inPacket)
 	}
 
 	fSession->GetSessionMutex()->Unlock();
-}
-
-float RTPStream::GetStreamStartTimeSecs()
-{
-	return (float)((OS::Milliseconds() - this->fSession->GetSessionCreateTime()) / 1000.0);
-}
-
-char* RTPStream::GetStreamTypeStr()
-{
-	char *streamType = nullptr;
-
-	switch (fTransportType)
-	{
-	case qtssRTPTransportTypeUDP:   streamType = RTPStream::UDP;
-		break;
-
-	case qtssRTPTransportTypeReliableUDP: streamType = RTPStream::RUDP;
-		break;
-
-	case qtssRTPTransportTypeTCP: streamType = RTPStream::TCP;
-		break;
-
-	default:
-		streamType = RTPStream::noType;
-	};
-
-	return streamType;
-}
-
-void RTPStream::PrintRTP(char* packetBuff, uint32_t inLen)
-{
-
-	uint16_t sequence = ntohs(((uint16_t*)packetBuff)[1]);
-	uint32_t timestamp = ntohl(((uint32_t*)packetBuff)[1]);
-	uint32_t ssrc = ntohl(((uint32_t*)packetBuff)[2]);
-
-
-
-	if (fFirstTimeStamp == 0)
-		fFirstTimeStamp = timestamp;
-
-	float rtpTimeInSecs = 0.0;
-	if (fTimescale > 0 && fFirstTimeStamp < timestamp)
-		rtpTimeInSecs = (float)(timestamp - fFirstTimeStamp) / (float)fTimescale;
-
-	if (!fPayloadName.empty())
-		printf("%s\n", fPayloadName.c_str());
-	else
-		printf("?");
-
-
-	printf(" H_ssrc=%" _S32BITARG_ " H_seq=%u H_ts=%"   _U32BITARG_   " seq_count=%"   _U32BITARG_   " ts_secs=%.3f \n", ssrc, sequence, timestamp, fPacketCount + 1, rtpTimeInSecs);
-
-}
-
-
-void RTPStream::PrintRTCPSenderReport(char* packetBuff, uint32_t inLen)
-{
-
-	auto* theReport = (uint32_t*)packetBuff;
-
-	theReport++;
-	uint32_t ssrc = htonl(*theReport);
-
-	theReport++;
-	int64_t ntp = 0;
-	::memcpy(&ntp, theReport, sizeof(int64_t));
-	ntp = OS::NetworkToHostSInt64(ntp);
-	time_t theTime = OS::Time1900Fixed64Secs_To_UnixTimeSecs(ntp);
-
-	theReport += 2;
-	uint32_t timestamp = ntohl(*theReport);
-	float theTimeInSecs = 0.0;
-
-	if (fFirstTimeStamp == 0)
-		fFirstTimeStamp = timestamp;
-
-	if (fTimescale > 0 && fFirstTimeStamp < timestamp)
-		theTimeInSecs = (float)(timestamp - fFirstTimeStamp) / (float)fTimescale;
-
-	theReport++;
-	uint32_t packetcount = ntohl(*theReport);
-
-	theReport++;
-	uint32_t bytecount = ntohl(*theReport);
-
-	if (!fPayloadName.empty())
-		printf("%s\n", fPayloadName.c_str());
-	else
-		printf("?");
-
-	printf(" H_ssrc=%"   _U32BITARG_   " H_bytes=%"   _U32BITARG_   " H_ts=%"   _U32BITARG_   " H_pckts=%"   _U32BITARG_   " ts_secs=%.3f H_ntp=%s\n",
-		ssrc, bytecount, timestamp, packetcount, theTimeInSecs, std::ctime(&theTime));
 }

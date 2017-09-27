@@ -53,7 +53,9 @@ public:
 	// This writes the packet out to the proper QTSS_RTPStreamObject.
 	// If this function returns QTSS_WouldBlock, timeToSendThisPacketAgain will
 	// be set to # of msec in which the packet can be sent, or -1 if unknown
-	QTSS_Error  WritePacket(const std::vector<char> &inPacketData, void* inStreamCookie, uint32_t inFlags, int64_t packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSec, bool firstPacket) override;
+	QTSS_Error  WritePacket(const std::vector<char> &inPacketData, void* inStreamCookie,
+		uint32_t inFlags, int64_t packetLatenessInMSec, 
+		uint64_t* packetIDPtr, int64_t* arrivalTimeMSec, bool firstPacket) override;
 	void TearDown() override;
 
 	bool  IsUDP() override;

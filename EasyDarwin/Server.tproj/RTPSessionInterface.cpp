@@ -77,28 +77,6 @@ void RTPSessionInterface::UpdateRTSPSession(RTSPSessionInterface* inNewRTSPSessi
 	}
 }
 
-void RTPSessionInterface::UpdateBitRateInternal(const int64_t& curTime)
-{
-	if (fState == qtssPausedState)
-	{
-		fMovieCurrentBitRate = 0;
-		fLastBitRateUpdateTime = curTime;
-		fLastBitRateBytes = fBytesSent;
-	}
-	else
-	{
-		uint32_t bitsInInterval = (fBytesSent - fLastBitRateBytes) * 8;
-		int64_t updateTime = (curTime - fLastBitRateUpdateTime) / 1000;
-		if (updateTime > 0) // leave Bit Rate the same if updateTime is 0 also don't divide by 0.
-			fMovieCurrentBitRate = (uint32_t)(bitsInInterval / updateTime);
-		fTracker.UpdateAckTimeout(bitsInInterval, curTime - fLastBitRateUpdateTime);
-		fLastBitRateBytes = fBytesSent;
-		fLastBitRateUpdateTime = curTime;
-	}
-	//printf("fMovieCurrentBitRate=%"   _U32BITARG_   "\n",fMovieCurrentBitRate);
-	//printf("Cur bandwidth: %d. Cur ack timeout: %d.\n",fTracker.GetCurrentBandwidthInBps(), fTracker.RecommendedClientAckTimeout());
-}
-
 float RTPSessionInterface::GetPacketLossPercent()
 {
 	RTPStream* theStream = nullptr;

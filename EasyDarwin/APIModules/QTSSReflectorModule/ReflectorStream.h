@@ -249,11 +249,11 @@ public:
 
 	//We want to make sure that ReflectPackets only gets invoked when there
 	//is actually work to do, because it is an expensive function
-	bool      ShouldReflectNow(int64_t inCurrentTime, int64_t* ioWakeupTime);
+	bool      ShouldReflectNow();
 
 	//This function gets data from the multicast source and reflects.
 	//Returns the time at which it next needs to be invoked
-	void        ReflectPackets(int64_t* ioWakeupTime);
+	void        ReflectPackets();
 
 	ReflectorPacket*    SendPacketsToOutput(ReflectorOutput* theOutput, ReflectorPacket* currentPacket, int64_t currentTime, int64_t  bucketDelay, bool firstPacket);
 
@@ -271,14 +271,7 @@ public:
 	//these serve as an optimization, keeping track of when this
 	//sender needs to run so it doesn't run unnecessarily
 
-	inline void SetNextTimeToRun(int64_t nextTime)
-	{
-		fNextTimeToRun = nextTime;
-		//printf("SetNextTimeToRun =%"_64BITARG_"d\n", fNextTimeToRun);
-	}
-
 	bool      fHasNewPackets{ false };
-	int64_t      fNextTimeToRun{ 0 };
 
 	//how often to send RRs to the source
 	enum
@@ -372,7 +365,7 @@ private:
 	// Reflector sockets, retrieved from the socket pool
 	SocketPair<ReflectorSocket>*      fSockets;
 
-	QTSS_RTPTransportType fTransportType{ qtssRTPTransportTypeUDP };
+	QTSS_RTPTransportType fTransportType{ qtssRTPTransportTypeTCP };
 
 	ReflectorSender     fRTPSender;
 	ReflectorSender     fRTCPSender;

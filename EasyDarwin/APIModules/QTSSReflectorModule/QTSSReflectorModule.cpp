@@ -112,7 +112,6 @@ static bool   sAuthenticateLocalBroadcast = false;
 static bool   sDefaultAuthenticateLocalBroadcast = false;
 
 static bool	sDefaultDisableOverbuffering = false;
-static bool	sFalse = false;
 
 static bool   sDefaultReflectBroadcasts = true;
 
@@ -800,9 +799,6 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params &inParams)
 	newStream->SetPayLoadType(theStreamInfo->fPayloadType);
 	newStream->SetSDPStreamID(theTrackID);
 	newStream->SetTimeScale(theStreamInfo->fTimeScale);
-
-	// We only want to allow over buffering to dynamic rate clients   
-	inParams.inClientSession->SetOverBufferEnable(sFalse);
 
 	// Place the stream cookie in this stream for future reference
 	void* theStreamCookie = theSession->GetStreamCookie(theTrackID);

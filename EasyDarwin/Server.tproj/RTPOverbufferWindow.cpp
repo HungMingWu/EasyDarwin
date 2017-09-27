@@ -48,7 +48,6 @@ RTPOverbufferWindow::RTPOverbufferWindow(uint32_t inSendInterval, uint32_t inIni
 	fPreviousBucketTimeAhead(0),
 	fMaxSendAheadTime(inMaxSendAheadTimeInSec * 1000),
 	fWriteBurstBeginning(false),
-	fOverbufferingEnabled(true),
 	fOverbufferRate(inOverbufferRate),
 	fSendAheadDurationInMsec(1000),
 	fOverbufferWindowBegin(-1),
@@ -56,94 +55,12 @@ RTPOverbufferWindow::RTPOverbufferWindow(uint32_t inSendInterval, uint32_t inIni
 {
 	if (fSendInterval == 0)
 	{
-		fOverbufferingEnabled = false;
 		fSendInterval = 200;
 	}
 
 	if (fOverbufferRate < 1.0)
 		fOverbufferRate = 1.0;
 
-}
-
-int64_t RTPOverbufferWindow::CheckTransmitTime(int64_t inTransmitTime, int64_t inCurrentTime, int32_t inPacketSize)
-{
-	// if this is the beginning of a bucket interval, roll over figures from last time.
-	// accumulate statistics over the period of a second
-	if (inCurrentTime - fBucketBegin > fSendInterval)
-	{
-		fPreviousBucketBegin = fBucketBegin;
-		fBucketBegin = inCurrentTime;
-		if (fPreviousBucketBegin == 0)
-			fPreviousBucketBegin = fBucketBegin - fSendInterval;
-		fBytesDuringBucket = 0;
-		if (inCurrentTime - fLastSecondStart > 1000)
-		{
-			fBytesDuringPreviousSecond = fBytesDuringLastSecond;
-			fBytesDuringLastSecond = 0;
-			fPreviousSecondStart = fLastSecondStart;
-			fLastSecondStart = inCurrentTime;
-		}
-
-		fPreviousBucketTimeAhead = fBucketTimeAhead;
-	}
-
-	if (fOverbufferWindowBegin == -1)
-		fOverbufferWindowBegin = inCurrentTime;
-
-	if ((inTransmitTime <= inCurrentTime + fSendInterval) ||
-		(fOverbufferingEnabled && (inTransmitTime <= inCurrentTime + fSendInterval + fSendAheadDurationInMsec)))
-	{
-		//
-		// If this happens, this packet needs to be sent regardless of overbuffering
-		return -1;
-	}
-
-	if (!fOverbufferingEnabled || (fWindowSize == 0))
-		return inTransmitTime;
-
-	// if the client is running low on memory, wait a while for it to be freed up
-	// there's nothing magic bout these numbers, we're just trying to be conservative
-	if ((fWindowSize != -1) && (inPacketSize * 5 > fWindowSize - fBytesSentSinceLastReport))
-	{
-		return inCurrentTime + (fSendInterval * 5);  // client reports don't come that often
-	}
-
-	// if we're far enough ahead, then wait until it's time to send more packets
-	if (inTransmitTime - inCurrentTime > fMaxSendAheadTime)
-		return inTransmitTime - fMaxSendAheadTime + fSendInterval;
-
-	// during the first second just send packets normally
-//    if (fPreviousSecondStart == -1)
-//        return inCurrentTime + fSendInterval;
-
-	// now figure if we want to send this packet during this bucket.  We have two limitations.
-	// First we scale up bitrate slowly, so we should only try and send a little more than we
-	// sent recently (averaged over a second or two).  However, we always try and send at
-	// least the current bitrate and never more than double.
-//    int32_t currentBitRate = fBytesDuringBucket * 1000 / (inCurrentTime - fPreviousBucketBegin);
-//  int32_t averageBitRate = (fBytesDuringPreviousSecond + fBytesDuringLastSecond) * 1000 / (inCurrentTime - fPreviousSecondStart);
-//    int32_t averageBitRate = fBytesDuringPreviousSecond * 1000 / (fLastSecondStart - fPreviousSecondStart);
-	fBucketTimeAhead = inTransmitTime - inCurrentTime;
-	//	printf("Current br = %d, average br = %d (cta = %qd, pta = %qd)\n", currentBitRate, averageBitRate, currentTimeAhead, fPreviousBucketTimeAhead);
-
-		// always try and stay as far ahead as we were before
-	if (fBucketTimeAhead < fPreviousBucketTimeAhead)
-		return -1;
-
-	// but don't send at more that double the bitrate (for any given time we should only get further
-	// ahead by that amount of time)
-	//printf("cta - pta = %qd, ct - pbb = %qd\n", fBucketTimeAhead - fPreviousBucketTimeAhead, int64_t((inCurrentTime - fPreviousBucketBegin) * (fOverbufferRate - 1.0)));
-	if (fBucketTimeAhead - fPreviousBucketTimeAhead > ((inCurrentTime - fPreviousBucketBegin) * (fOverbufferRate - 1.0)))
-	{
-		fBucketTimeAhead = fPreviousBucketTimeAhead + int64_t((inCurrentTime - fPreviousBucketBegin) * (fOverbufferRate - 1.0));
-		return inCurrentTime + fSendInterval;		// this will get us to the next bucket
-	}
-
-	// don't send more than 10% over the average bitrate for the previous second
-//    if (currentBitRate > averageBitRate * 11 / 10)
-//        return inCurrentTime + fSendInterval;       // this will get us to the next bucket
-
-	return -1;  // send this packet
 }
 
 void RTPOverbufferWindow::ResetOverBufferWindow()

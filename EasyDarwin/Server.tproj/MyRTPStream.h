@@ -8,7 +8,6 @@ class MyRTSPRequest;
 class MyRTPStream {
 	uint32_t      fSsrc;
 	std::string   fStreamURL;
-	float     fLateToleranceInSec{ 0 };
 	bool      fIsTCP{ false };
 	bool      fEnableSSRC{ false };
 	QTSS_RTPTransportType   fTransportType{ qtssRTPTransportTypeTCP };

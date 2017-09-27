@@ -76,9 +76,6 @@ public:
 	QTSS_Error  AddStream(RTSPRequest* request, RTPStream** outStream,
 		QTSS_AddStreamFlags inFlags);
 
-	//Reset the thinning params for all streams using the late tolerance value
-	void SetStreamThinningParams(float inLateTolerance);
-
 	//Begins playing all streams. Currently must be associated with an RTSP Play
 	//request, and the request interface must be provided.
 	QTSS_Error  Play(RTSPRequestInterface* request, QTSS_PlayFlags inFlags);

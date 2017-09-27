@@ -81,55 +81,16 @@ public:
 	// STATISTICS MANIPULATION
 	// These functions are how the server keeps its statistics current
 
-	//total rtp bytes sent by the server
-	void            IncrementTotalRTPBytes(size_t bytes)
-	{
-		fPeriodicRTPBytes += bytes;
-	}
-	//total rtp packets sent by the server
-	void            IncrementTotalPackets()
-	{
-		//(void)atomic_add(&fPeriodicRTPPackets, 1);
-		++fPeriodicRTPPackets;
-	}
 	//total rtp bytes reported as lost by the clients
 	void            IncrementTotalRTPPacketsLost(size_t packets)
 	{
 		fPeriodicRTPPacketsLost -= packets;
 	}
 
-	void            IncrementTotalLate(int64_t milliseconds)
-	{
-		OSMutexLocker locker(&fMutex);
-		fTotalLate += milliseconds;
-		if (milliseconds > fCurrentMaxLate) fCurrentMaxLate = milliseconds;
-		if (milliseconds > fMaxLate) fMaxLate = milliseconds;
-	}
-
-	void            IncrementTotalQuality(int32_t level)
-	{
-		OSMutexLocker locker(&fMutex); fTotalQuality += level;
-	}
-
-
 	void            IncrementNumThinned(int32_t inDifference)
 	{
 		OSMutexLocker locker(&fMutex); fNumThinned += inDifference;
 	}
-
-	void            ClearTotalLate()
-	{
-		OSMutexLocker locker(&fMutex); fTotalLate = 0;
-	}
-	void            ClearCurrentMaxLate()
-	{
-		OSMutexLocker locker(&fMutex); fCurrentMaxLate = 0;
-	}
-	void            ClearTotalQuality()
-	{
-		OSMutexLocker locker(&fMutex); fTotalQuality = 0;
-	}
-
 
 	void 			InitNumThreads(uint32_t numThreads) { fNumThreads = numThreads; }
 	//
@@ -138,7 +99,6 @@ public:
 	QTSS_ServerState    GetServerState() { return fServerState; }
 	void                SetServerState(QTSS_ServerState state) { fServerState = state; }
 
-	uint32_t              GetCurBandwidthInBits() { return fCurrentRTPBandwidthInBits; }
 	uint32_t              GetAvgBandwidthInBits() { return fAvgRTPBandwidthInBits; }
 	uint32_t              GetRTPPacketsPerSec() { return fRTPPacketsPerSecond; }
 	uint64_t              GetTotalRTPBytes() { return fTotalRTPBytes; }
@@ -148,10 +108,6 @@ public:
 	bool              SigIntSet() { return fSigInt; }
 	bool				SigTermSet() { return fSigTerm; }
 
-	int64_t				GetMaxLate() { return fMaxLate; };
-	int64_t				GetTotalLate() { return fTotalLate; };
-	int64_t				GetCurrentMaxLate() { return fCurrentMaxLate; };
-	int64_t				GetTotalQuality() { return fTotalQuality; };
 	int32_t				GetNumThinned() { return fNumThinned; };
 	uint32_t				GetNumThreads() { return fNumThreads; };
 
@@ -236,14 +192,9 @@ private:
 	//implement total byte counting by atomic adding to this variable, then every
 	//once in awhile updating the sTotalBytes.
 	
-	std::atomic_size_t         fPeriodicRTPBytes{0};
-
 	std::atomic_size_t         fPeriodicRTPPacketsLost{0};
 
-	std::atomic_size_t         fPeriodicRTPPackets{0};
-
 	//stores the current served bandwidth in BITS per second
-	uint32_t              fCurrentRTPBandwidthInBits{0};
 	uint32_t              fAvgRTPBandwidthInBits{0};
 	uint32_t              fRTPPacketsPerSecond{0};
 
@@ -257,34 +208,9 @@ private:
 	bool              fSigInt{false};
 	bool              fSigTerm{false};
 
-	int64_t          fMaxLate{0};
-	int64_t          fTotalLate{0};
-	int64_t          fCurrentMaxLate{0};
-	int64_t          fTotalQuality{0};
 	int32_t          fNumThinned{0};
 	uint32_t          fNumThreads{0};
-
-	friend class RTPStatsUpdaterTask;
 };
 
-
-class RTPStatsUpdaterTask
-{
-public:
-
-	// This class runs periodically to compute current totals & averages
-	RTPStatsUpdaterTask();
-	~RTPStatsUpdaterTask() = default;
-
-private:
-	boost::asio::steady_timer timer;
-	void Run(const boost::system::error_code &ec);
-	RTPSessionInterface* GetNewestSession(OSRefTable* inRTPSessionMap);
-	float GetCPUTimeInSeconds();
-
-	int64_t fLastBandwidthTime{0};
-	int64_t fLastBandwidthAvg{0};
-	int64_t fLastBytesSent{0};
-};
 QTSServerInterface* getSingleton();
 #endif // __QTSSERVERINTERFACE_H__

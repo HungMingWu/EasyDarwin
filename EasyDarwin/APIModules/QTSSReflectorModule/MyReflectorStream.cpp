@@ -78,25 +78,8 @@ QTSS_Error MyReflectorStream::BindSockets(MyRTSPRequest &inRequest, MyRTPSession
 	fSockets->GetSocketA()->AddSender(&fRTPSender);
 	fSockets->GetSocketB()->AddSender(&fRTCPSender);
 
-	// A broadcaster is setting up a UDP session so let the sockets update the session
-	if (fStreamInfo.fSetupToReceive &&  qtssRTPTransportTypeUDP == fTransportType)
-	{
-		//fSockets->GetSocketA()->AddBroadcasterSession(inSession);
-		//fSockets->GetSocketB()->AddBroadcasterSession(inSession);
-	}
-
 	fSockets->GetSocketA()->SetSSRCFilter(filterState, timeout);
 	fSockets->GetSocketB()->SetSSRCFilter(filterState, timeout);
-
-#if 0
-	// Always set the Rcv buf size for the sockets. This is important because the
-	// server is going to be getting many packets on these sockets.
-	if (qtssRTPTransportTypeUDP == fTransportType)
-	{
-		fSockets->GetSocketA()->SetSocketRcvBufSize(1024 * 1024);
-		fSockets->GetSocketB()->SetSocketRcvBufSize(1024 * 1024);
-	}
-#endif
 
 	//If the broadcaster is sending RTP directly to us, we don't
 	//need to join a multicast group because we're not using multicast

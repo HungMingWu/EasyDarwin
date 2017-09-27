@@ -65,25 +65,11 @@ std::ostream& operator << (std::ostream& stream, const MyRTPStream& RTPStream)
 
 MyRTPStream::MyRTPStream(MyRTSPRequest& request, uint32_t inSSRC, MyRTPSession& inSession, QTSS_AddStreamFlags inFlags)
 	: fStreamURL(request.GetFileName()),
-	fLateToleranceInSec(request.GetLateToleranceInSec()),
 	fTransportType(request.GetTransportType()),
 	fNetworkMode(request.GetNetworkMode()),
 	fSession(inSession),
 	fSsrc(inSSRC)
 {
-	//
-	// Store the late-tolerance value that came out of hte x-RTP-Options header,
-	// so that when it comes time to determine our thinning params (when we PLAY),
-	// we will know this
-
-	if (fLateToleranceInSec == -1.0)
-		fLateToleranceInSec = 1.5;
-
-	//
-	// Check to see if caller is forcing raw UDP transport
-	if ((fTransportType == qtssRTPTransportTypeReliableUDP) && (inFlags & qtssASFlagsForceUDPTransport))
-		fTransportType = qtssRTPTransportTypeUDP;
-
 	//
 	// decide whether to overbuffer
 	SetOverBufferState(request);
@@ -173,19 +159,6 @@ MyRTPStream::MyRTPStream(MyRTSPRequest& request, uint32_t inSSRC, MyRTPSession& 
 	if (fSockets == nullptr)
 		return request->SendErrorResponse(qtssServerInternal);
 
-	else if (fTransportType == qtssRTPTransportTypeReliableUDP)
-	{
-		//
-		// FIXME - we probably want to get rid of this slow start flag in the API
-		bool useSlowStart = !(inFlags & qtssASFlagsDontUseSlowStart);
-		if (!ServerPrefs::IsSlowStartEnabled())
-			useSlowStart = false;
-
-		fTracker = fSession->GetBandwidthTracker();
-
-		fResender.SetBandwidthTracker(fTracker);
-		fResender.SetDestination(fSockets->GetSocketA(), fRemoteAddr, fRemoteRTPPort);
-	}
 
 	//
 	// Record the Server RTP port
@@ -203,20 +176,6 @@ void MyRTPStream::SetOverBufferState(MyRTSPRequest& request)
 
 	switch (fTransportType)
 	{
-		case qtssRTPTransportTypeReliableUDP:
-		{
-			enableOverBuffer = true; // default is on
-			if (requestedOverBufferState == 0) // client specifically set to false
-				enableOverBuffer = false;
-		}
-		break;
-
-		case qtssRTPTransportTypeUDP:
-		{
-			enableOverBuffer = false; // always off
-		}
-		break;
-
 		case qtssRTPTransportTypeTCP:
 		{
 			enableOverBuffer = true; // default is on same as 4.0 and earlier. Allows tcp to compensate for falling behind from congestion or slow-start. 
@@ -226,10 +185,4 @@ void MyRTPStream::SetOverBufferState(MyRTSPRequest& request)
 		break;
 
 	}
-
-	//over buffering is enabled for the session by default
-	//if any stream turns it off then it is off for all streams
-	//a disable is from either the stream type default or a specific rtsp command to disable
-	if (!enableOverBuffer)
-		fSession.fOverbufferWindow.TurnOverbuffering(false);
 }

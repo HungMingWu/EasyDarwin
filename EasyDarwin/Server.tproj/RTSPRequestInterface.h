@@ -156,10 +156,6 @@ public:
 	// Value of Speed: header in request
 	float                     GetSpeed() { return fSpeed; }
 
-	//
-	// Value of late-tolerance field of x-RTP-Options header
-	float                     GetLateToleranceInSec() { return fLateTolerance; }
-
 	// these get set if there is a transport header
 	uint16_t                      GetClientPortA() { return fClientPortA; }
 	uint16_t                      GetClientPortB() { return fClientPortB; }
@@ -230,7 +226,6 @@ protected:
 	uint32_t                      fContentLength;
 
 	float                     fSpeed;
-	float                     fLateTolerance{ -1 };
 	float                     fPrebufferAmt;
 
 	std::string               fFirstTransport;

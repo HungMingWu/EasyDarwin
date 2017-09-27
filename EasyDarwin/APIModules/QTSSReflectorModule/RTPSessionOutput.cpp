@@ -62,23 +62,7 @@ bool RTPSessionOutput::IsUDP()
 	if (fClientSession->GetSessionState() != qtssPlayingState);
 		return true;
 
-	for (auto theStreamPtr : fClientSession->GetStreams())
-	{
-		QTSS_RTPTransportType theTransportType = theStreamPtr->GetTransportType();
-		if (theTransportType == qtssRTPTransportTypeUDP)
-		{
-			fIsUDP = true;
-			break; // treat entire session UDP
-		}
-		else
-		{
-			fIsUDP = false;
-		}
-	}
-
-	//if (fIsUDP) printf("RTPSessionOutput::RTPSessionOutput Standard UDP client\n");
-	 //else printf("RTPSessionOutput::RTPSessionOutput Buffered Client\n");
-
+	fIsUDP = true;
 	fTransportInitialized = true;
 	return fIsUDP;
 }
@@ -135,7 +119,9 @@ bool  RTPSessionOutput::PacketAlreadySent(RTPStream *theStreamPtr, uint32_t inFl
 	return packetSent;
 }
 
-QTSS_Error  RTPSessionOutput::WritePacket(const std::vector<char> &inPacket, void* inStreamCookie, uint32_t inFlags, int64_t packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr, bool firstPacket)
+QTSS_Error  RTPSessionOutput::WritePacket(const std::vector<char> &inPacket, void* inStreamCookie, 
+	uint32_t inFlags, int64_t packetLatenessInMSec,
+	uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr, bool firstPacket)
 {
 	QTSS_Error              writeErr = QTSS_NoErr;
 	int64_t                  currentTime = OS::Milliseconds();
@@ -173,7 +159,6 @@ QTSS_Error  RTPSessionOutput::WritePacket(const std::vector<char> &inPacket, voi
 				//printf("QTSS_Write == QTSS_WouldBlock\n");
 			   //
 			   // We are flow controlled. See if we know when flow control will be lifted and report that
-				*timeToSendThisPacketAgain = thePacket.suggestedWakeupTime;
 
 				if (firstPacket)
 				{
@@ -183,9 +168,6 @@ QTSS_Error  RTPSessionOutput::WritePacket(const std::vector<char> &inPacket, voi
 			}
 			else
 			{
-				fLastIntervalMilliSec = currentTime - fLastPacketTransmitTime;
-				if (fLastIntervalMilliSec > 100) //reset interval maybe first packet or it has been blocked for awhile
-					fLastIntervalMilliSec = 5;
 				fLastPacketTransmitTime = currentTime;
 
 				if (inFlags & qtssWriteFlagsIsRTP)

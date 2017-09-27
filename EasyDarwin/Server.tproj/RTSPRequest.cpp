@@ -413,13 +413,6 @@ void  RTSPRequest::ParseRetransmitHeader(boost::string_view header)
 	if (!foundRetransmitProt)
 		return;
 
-	//
-	// We are using Reliable RTP as the transport for this stream,
-	// but if there was a previous transport header that indicated TCP,
-	// do not set the transport to be reliable UDP
-	if (fTransportType == qtssRTPTransportTypeUDP)
-		fTransportType = qtssRTPTransportTypeReliableUDP;
-
 	tokens = spirit_direct(processStr, ";");
 	static boost::string_view kWindow("window");
 	for (const auto &token : tokens)

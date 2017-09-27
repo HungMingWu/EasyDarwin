@@ -14,7 +14,7 @@ class MyReflectorStream {
 	MyReflectorSession*	fMyReflectorSession;
 	bool fEnableBuffer{ false };
 	SocketPair<MyReflectorSocket>*      fSockets;
-	QTSS_RTPTransportType fTransportType{ qtssRTPTransportTypeUDP };
+	QTSS_RTPTransportType fTransportType{ qtssRTPTransportTypeTCP };
 	MyReflectorSender     fRTPSender;
 	MyReflectorSender     fRTCPSender;
 public:

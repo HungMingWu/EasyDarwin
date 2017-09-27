@@ -54,7 +54,6 @@ class ReflectorOutput
         // an array of packet elements ( from fPacketQueue in ReflectorSender )
         // possibly one for each ReflectorSender that sends data to this ReflectorOutput        
         std::vector<ReflectorPacket*> fBookmarkedPacketsElemsArray;
-        QTSS_TimeVal        fLastIntervalMilliSec{5};
         QTSS_TimeVal        fLastPacketTransmitTime{0};
 		OSMutex             fMutex;
 	public:
@@ -68,7 +67,9 @@ class ReflectorOutput
         // packetLateness is how many MSec's late this packet is in being delivered ( will be < 0 if its early )
         // If this function returns QTSS_WouldBlock, timeToSendThisPacketAgain will
         // be set to # of msec in which the packet can be sent, or -1 if unknown
-        virtual QTSS_Error  WritePacket(const std::vector<char> &inPacket, void* inStreamCookie, uint32_t inFlags, int64_t packetLatenessInMSec, int64_t* timeToSendThisPacketAgain, uint64_t* packetIDPtr, int64_t* arrivalTimeMSec, bool firstPacket ) = 0;
+        virtual QTSS_Error  WritePacket(const std::vector<char> &inPacket, void* inStreamCookie,
+			uint32_t inFlags, int64_t packetLatenessInMSec,
+			uint64_t* packetIDPtr, int64_t* arrivalTimeMSec, bool firstPacket ) = 0;
     
         virtual void      TearDown() = 0;
         virtual bool      IsUDP() = 0;

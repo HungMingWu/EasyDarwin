@@ -46,9 +46,7 @@
 #include "QTSS.h"
 
 #include "UDPSocketPool.h"
-
 #include "RTSPRequestInterface.h"
-#include "RTPPacketResender.h"
 #include "QTSServerInterface.h"
 #include "RTCPPacket.h"
 
@@ -70,7 +68,6 @@ class RTPStream
         uint32_t      GetSSRC()                   { return fSsrc; }
         uint8_t       GetRTPChannelNum()          { return fRTPChannel; }
         uint8_t       GetRTCPChannelNum()         { return fRTCPChannel; }
-        RTPPacketResender* GetResender()        { return &fResender; }
         QTSS_RTPTransportType GetTransportType() { return fTransportType; }
         uint32_t      GetStalePacketsDropped()    { return fStalePacketsDropped; }
         uint32_t      GetTotalPacketsRecv()       { return fTotalPacketsRecv; }
@@ -122,23 +119,7 @@ class RTPStream
 
 
         // Send a RTCP SR on this stream. Pass in true if this SR should also have a BYE
-        void SendRTCPSR(const int64_t& inTime, bool inAppendBye = false);
-        
-        //
-        // Retransmits get sent when there is new data to be sent, but this function
-        // should be called periodically even if there is no new packet data, as
-        // the pipe should have a steady stream of data in it. 
-        void SendRetransmits();
-
-        //
-        // Update the thinning parameters for this stream to match current prefs
-        void SetThinningParams();
-        
-		//
-		// Reset the delay parameters that are stored for the thinning calculations
-		void ResetThinningDelayParams() { fLastCurrentPacketDelay = 0; }
-		
-		void SetLateTolerance(float inLateToleranceInSec) { fLateToleranceInSec = inLateToleranceInSec; }
+        void SendRTCPSR(bool inAppendBye = false);
 		
 		void EnableSSRC() { fEnableSSRC = true; }
 		void DisableSSRC() { fEnableSSRC = false; }
@@ -147,17 +128,6 @@ class RTPStream
         void            SetMaxQuality() { SetQualityLevel(kMaxQualityLevel); }
         int32_t          GetQualityLevel();
         void            SetQualityLevel(int32_t level);
-		void			HalveQualityLevel()
-		{
-			uint32_t minLevel = fNumQualityLevels - 1;
-			SetQualityLevel(minLevel - (minLevel - GetQualityLevel()) / 2);
-		}
-		void			SetMaxQualityLevelLimit(int32_t newMaxLimit) //Changes what is the best quality level possible
-		{
-			int32_t minLevel = std::max<int32_t>(0, fNumQualityLevels - 2); //do not drop down  to key frames
-			fMaxQualityLevel = std::max<int32_t>(std::min<int32_t>(minLevel, newMaxLimit), 0);
-			SetQualityLevel(GetQualityLevel());
-		}
 
 		int32_t			GetMaxQualityLevelLimit() { return fMaxQualityLevel; }
 		
@@ -170,7 +140,6 @@ class RTPStream
 		float GetBufferDelay() const { return fBufferDelay; }
 		bool isTCP() const { return fIsTCP; }
 		uint32_t GetTotalLostPackets() const { return fTotalLostPackets; }
-		uint16_t GetPercentPacketsLost() const { return fPercentPacketsLost; }
 		uint16_t GetWorse() const { return fIsGettingWorse; }
 		uint16_t GetBetter() const { return fIsGettingBetter; }
 		void SetPayloadName(boost::string_view name) { fPayloadName = std::string(name); }
@@ -206,26 +175,12 @@ class RTPStream
         //or fresh ones (only fresh in extreme special cases)
 		UDPSocketPair*          fSockets{ nullptr };
         RTPSessionInterface*    fSession;
-
-        // info for kinda reliable UDP
-        //DssDurationTimer      fInfoDisplayTimer;
-		int32_t                  fBytesSentThisInterval{ 0 };
-		int32_t                  fDisplayCount{ 0 };
-		bool                  fSawFirstPacket{ false };
-        int64_t                  fStreamCumDuration;
-        // manages UDP retransmits
-        RTPPacketResender       fResender;
-		RTPBandwidthTracker*    fTracker{ nullptr };
-
         
         //who am i sending to?
 		uint32_t      fRemoteAddr{ 0 };
 		uint16_t      fRemoteRTPPort{ 0 };
 		uint16_t      fRemoteRTCPPort{ 0 };
 		uint16_t      fLocalRTPPort{ 0 };
-		uint32_t	    fMonitorAddr{ 0 };
-		int         fMonitorSocket{ 0 };
-		uint32_t      fPlayerToMonitorAddr{ 0 };
 
         //RTCP stuff 
 		int64_t      fLastSenderReportTime{ 0 };
@@ -267,9 +222,6 @@ class RTPStream
 		uint32_t      fFractionLostPackets{ 0 };
 		uint32_t      fTotalLostPackets{ 0 };
 		uint32_t      fJitter{ 0 };
-		uint32_t      fReceiverBitRate{ 0 };
-		uint16_t      fAvgLateMsec{ 0 };
-		uint16_t      fPercentPacketsLost{ 0 };
 		uint16_t      fAvgBufDelayMsec{ 0 };
 		uint16_t      fIsGettingBetter{ 0 };
 		uint16_t      fIsGettingWorse{ 0 };
@@ -306,19 +258,9 @@ class RTPStream
         // that are dependent on prefs and parameters in the SETUP.
         // These params, as well as the current packet delay determine
         // whether a packet gets dropped.
-		int32_t      fThinAllTheWayDelay{ 0 };
-		int32_t      fAlwaysThinDelay{ 0 };
-		int32_t      fStartThinningDelay{ 0 };
-		int32_t      fStartThickingDelay{ 0 };
-		int32_t      fThickAllTheWayDelay{ 0 };
-		int32_t      fQualityCheckInterval{ 0 };
-		int32_t      fDropAllPacketsForThisStreamDelay{ 0 };
 		uint32_t      fStalePacketsDropped{ 0 };
-		int64_t      fLastCurrentPacketDelay{ 0 };
-		bool      fWaitOnLevelAdjustment{ true };
         
 		float     fBufferDelay{ 3.0 }; // from the sdp
-		float     fLateToleranceInSec{ 0 };
                        
 		uint32_t      fCurrentAckTimeout{ 0 };
 		int32_t      fMaxSendAheadTimeMSec{ 0 };
@@ -330,8 +272,6 @@ class RTPStream
         
 		QTSS_RTPNetworkMode     fNetworkMode{ qtssRTPNetworkModeDefault };
         
-        int64_t  fStreamStartTimeOSms;
-                
 		int32_t fLastQualityLevel{ 0 };
 		int32_t fLastRateLevel{ 0 };
        
@@ -339,41 +279,19 @@ class RTPStream
 		int64_t fLastQualityUpdate{ 0 };
         uint32_t fDefaultQualityLevel;
         int32_t fMaxQualityLevel;
-		bool fInitialMaxQualityLevelIsSet{ false };
-		bool fUDPMonitorEnabled;
-		uint16_t fMonitorVideoDestPort;
-		uint16_t fMonitorAudioDestPort;
         
         //-----------------------------------------------------------
         // acutally write the data out that way
         QTSS_Error  InterleavedWrite(const std::vector<char> &inBuffer, uint32_t* outLenWritten, unsigned char channel );
-
-        // implements the ReliableRTP protocol
-        QTSS_Error  ReliableRTPWrite(const std::vector<char> &inBuffer, const int64_t& curPacketDelay);
-
          
         void        SetTCPThinningParams();
-        QTSS_Error  TCPWrite(void* inBuffer, uint32_t inLen, uint32_t* outLenWritten, uint32_t inFlags);
-
-        static char *noType;
-        static char *UDP;
-        static char *RUDP;
-        static char *TCP;
-        
-        bool UpdateQualityLevel(int64_t inTransmitTime, int64_t inCurrentPacketDelay,
-                                        int64_t inCurrentTime, uint32_t inPacketSize);
-        
+                
         void            DisableThinning() { fDisableThinning = true; }
 		void			SetInitialMaxQualityLevel();
         
-        char *GetStreamTypeStr();
         enum { rtp = 0, rtcpSR = 1, rtcpRR = 2, rtcpACK = 3, rtcpAPP = 4 };
-		float GetStreamStartTimeSecs();
-        void PrintRTP(char* packetBuff, uint32_t inLen);
-        void PrintRTCPSenderReport(char* packetBuff, uint32_t inLen);
 
         void SetOverBufferState(RTSPRequestInterface* request);
-        void UDPMonitorWrite(const std::vector<char> &thePacketData, bool isRTCP);
 };
 
 #endif // __RTPSTREAM_H__

@@ -218,9 +218,7 @@ ReflectorStream::~ReflectorStream()
 			fSockets->GetSocketB()->LeaveMulticast(fStreamInfo.fDestIPAddr);
 		}
 		//now release the socket pair
-		if (qtssRTPTransportTypeUDP == fTransportType)
-			sSocketPool.ReleaseUDPSocketPair(fSockets);
-		else if (qtssRTPTransportTypeTCP == fTransportType)
+		if (qtssRTPTransportTypeTCP == fTransportType)
 			sSocketPool.DestructUDPSocketPair(fSockets);
 	}
 
@@ -368,32 +366,6 @@ QTSS_Error ReflectorStream::BindSockets(RTSPRequest *inRequest, RTPSession *inSe
 	{
 		fSockets = sSocketPool.ConstructUDPSocketPair();
 	}
-	else
-	{
-#if 0
-		if (isMulticastDest)
-		{
-			fSockets = sSocketPool.GetUDPSocketPair(INADDR_ANY, fStreamInfo.fPort, fStreamInfo.fSrcIPAddr, 0);
-		}
-		else
-		{
-			fSockets = sSocketPool.GetUDPSocketPair(fStreamInfo.fDestIPAddr, fStreamInfo.fPort, fStreamInfo.fSrcIPAddr, 0);
-		}
-
-		if ((fSockets == nullptr) && fStreamInfo.fSetupToReceive)
-		{
-			fStreamInfo.fPort = 0;
-			if (isMulticastDest)
-			{
-				fSockets = sSocketPool.GetUDPSocketPair(INADDR_ANY, fStreamInfo.fPort, fStreamInfo.fSrcIPAddr, 0);
-			}
-			else
-			{
-				fSockets = sSocketPool.GetUDPSocketPair(fStreamInfo.fDestIPAddr, fStreamInfo.fPort, fStreamInfo.fSrcIPAddr, 0);
-			}
-		}
-#endif
-	}
 
 	if (fSockets == nullptr)
 		return inRequest->SendErrorResponse(qtssServerInternal);
@@ -409,25 +381,8 @@ QTSS_Error ReflectorStream::BindSockets(RTSPRequest *inRequest, RTPSession *inSe
 	fSockets->GetSocketA()->AddSender(&fRTPSender);
 	fSockets->GetSocketB()->AddSender(&fRTCPSender);
 
-	// A broadcaster is setting up a UDP session so let the sockets update the session
-	if (fStreamInfo.fSetupToReceive &&  qtssRTPTransportTypeUDP == fTransportType)
-	{
-		fSockets->GetSocketA()->AddBroadcasterSession(inSession);
-		fSockets->GetSocketB()->AddBroadcasterSession(inSession);
-	}
-
 	fSockets->GetSocketA()->SetSSRCFilter(filterState, timeout);
 	fSockets->GetSocketB()->SetSSRCFilter(filterState, timeout);
-
-#if 1 
-	// Always set the Rcv buf size for the sockets. This is important because the
-	// server is going to be getting many packets on these sockets.
-	if (qtssRTPTransportTypeUDP == fTransportType)
-	{
-		fSockets->GetSocketA()->SetSocketRcvBufSize(1024 * 1024);
-		fSockets->GetSocketB()->SetSocketRcvBufSize(1024 * 1024);
-	}
-#endif
 
 	//If the broadcaster is sending RTP directly to us, we don't
 	//need to join a multicast group because we're not using multicast
@@ -448,13 +403,6 @@ QTSS_Error ReflectorStream::BindSockets(RTSPRequest *inRequest, RTPSession *inSe
 
 	// If the port is 0, update the port to be the actual port value
 	fStreamInfo.fPort = fSockets->GetSocketA()->GetLocalPort();
-
-	//finally, register these sockets for events
-	if (qtssRTPTransportTypeUDP == fTransportType)
-	{
-		fSockets->GetSocketA()->RequestEvent(EV_RE);
-		fSockets->GetSocketB()->RequestEvent(EV_RE);
-	}
 
 	return QTSS_NoErr;
 }
@@ -505,19 +453,11 @@ ReflectorSender::ReflectorSender(ReflectorStream* inStream, uint32_t inWriteFlag
 {
 }
 
-bool ReflectorSender::ShouldReflectNow(int64_t inCurrentTime, int64_t* ioWakeupTime)
+bool ReflectorSender::ShouldReflectNow()
 {
 	//check to make sure there actually is work to do for this stream.
-	if (!fHasNewPackets && (fNextTimeToRun == 0 || inCurrentTime < fNextTimeToRun))
-	{
-		//We don't need to do work right now, but
-		//this stream must still communicate when it needs to be woken up next
-		int64_t theWakeupTime = fNextTimeToRun + inCurrentTime;
-		//printf("ReflectorSender::ShouldReflectNow theWakeupTime=%qd newWakeUpTime=%qd  ioWakepTime=%qd\n", theWakeupTime, fNextTimeToRun + inCurrentTime,*ioWakeupTime);
-		if (fNextTimeToRun > 0 && theWakeupTime < *ioWakeupTime)
-			*ioWakeupTime = theWakeupTime;
+	if (!fHasNewPackets)
 		return false;
-	}
 	return true;
 }
 
@@ -558,14 +498,12 @@ static uint16_t DGetPacketSeqNumber(StrPtrLen* inPacket)
 /               inFreeQueue - queue of free packets.
 */
 
-void ReflectorSender::ReflectPackets(int64_t* ioWakeupTime)
+void ReflectorSender::ReflectPackets()
 {
 	int64_t currentTime = OS::Milliseconds();
 
 	//make sure to reset these state variables
 	fHasNewPackets = false;
-
-	fNextTimeToRun = 1000;	// init to 1 secs
 
 	//determine if we need to send a receiver report to the multicast source
 	if ((fWriteFlag == qtssWriteFlagsIsRTCP) && (currentTime > (fLastRRTime + kRRInterval)))
@@ -614,18 +552,6 @@ void ReflectorSender::ReflectPackets(int64_t* ioWakeupTime)
 	}
 
 	RemoveOldPackets();
-
-	//Don't forget that the caller also wants to know when we next want to run
-	if (*ioWakeupTime == 0)
-		*ioWakeupTime = fNextTimeToRun;
-	else if ((fNextTimeToRun > 0) && (*ioWakeupTime > fNextTimeToRun))
-		*ioWakeupTime = fNextTimeToRun;
-	// exit with fNextTimeToRun in real time, not relative time.
-	fNextTimeToRun += currentTime;
-
-	// printf("SetNextTimeToRun fNextTimeToRun=%qd + currentTime=%qd\n", fNextTimeToRun, currentTime);
-	// printf("ReflectorSender::ReflectPackets *ioWakeupTime = %qd\n", *ioWakeupTime);
-
 }
 
 ReflectorPacket*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOutput, ReflectorPacket* currentPacket, int64_t currentTime, int64_t  bucketDelay, bool firstPacket)
@@ -639,44 +565,14 @@ ReflectorPacket*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOut
 	for (; it != fPacketQueue.end(); ++it)
 	{
 		const auto &thePacket = *it;
-		int64_t  packetLateness = bucketDelay;
-		int64_t timeToSendPacket = -1;
 
 		//printf("packetLateness %qd, seq# %li\n", packetLateness, (int32_t) DGetPacketSeqNumber( &thePacket->fPacketPtr ) );          
 
-		err = theOutput->WritePacket(thePacket->fPacket, fStream, fWriteFlag, packetLateness, &timeToSendPacket, &thePacket->fStreamCountID, &thePacket->fTimeArrived, firstPacket);
+		err = theOutput->WritePacket(thePacket->fPacket, fStream, fWriteFlag, 
+			bucketDelay, &thePacket->fStreamCountID, &thePacket->fTimeArrived, firstPacket);
 
 		if (err == QTSS_WouldBlock)
-		{ // call us again in # ms to retry on an EAGAIN
-
-			if ((timeToSendPacket > 0) && ((fNextTimeToRun + currentTime) > timeToSendPacket)) // blocked but we are scheduled to wake up later
-				fNextTimeToRun = timeToSendPacket - currentTime;
-
-			if (theOutput->fLastIntervalMilliSec < 5)
-				theOutput->fLastIntervalMilliSec = 5;
-
-			if (timeToSendPacket < 0) // blocked and we are behind
-			{    //printf("fNextTimeToRun = theOutput->fLastIntervalMilliSec=%qd;\n", theOutput->fLastIntervalMilliSec); // Use the last packet interval 
-				this->SetNextTimeToRun(theOutput->fLastIntervalMilliSec);
-			}
-
-			if (fNextTimeToRun > 100) //don't wait that long
-			{    //printf("fNextTimeToRun = %qd now 100;\n", fNextTimeToRun);
-				this->SetNextTimeToRun(100);
-			}
-
-			if (fNextTimeToRun < 5) //wait longer
-			{    //printf("fNextTimeToRun = 5;\n");
-				this->SetNextTimeToRun(5);
-			}
-
-			if (theOutput->fLastIntervalMilliSec >= 100) // allow up to 1 second max -- allow some time for the socket to clear and don't go into a tight loop if the client is gone.
-				theOutput->fLastIntervalMilliSec = 100;
-			else
-				theOutput->fLastIntervalMilliSec *= 2; // scale upwards over time
-
-			//printf ( "Blocked ReflectorSender::SendPacketsToOutput timeToSendPacket=%qd fLastIntervalMilliSec=%qd fNextTimeToRun=%qd \n", timeToSendPacket, theOutput->fLastIntervalMilliSec, fNextTimeToRun);
-
+		{ 
 			break;
 		}
 	}
@@ -712,7 +608,6 @@ void    ReflectorSender::RemoveOldPackets()
 	// 
 	auto theCurrentTime = std::chrono::high_resolution_clock::now();
 	static constexpr auto sMaxPacketAge = std::chrono::seconds(20);
-
 
 	for (auto it = fPacketQueue.begin(); it != fPacketQueue.end(); )
 	{
@@ -980,15 +875,13 @@ int64_t ReflectorSocket::Run()
 	if (theEvents & Task::kReadEvent)
 		this->GetIncomingData(theMilliseconds);
 
-	int64_t fSleepTime = 0;
 	//Now that we've gotten all available packets, have the streams reflect
 	for (const auto &theSender2 : fSenderQueue)
-		if (theSender2 != nullptr && theSender2->ShouldReflectNow(theMilliseconds, &fSleepTime))
-			theSender2->ReflectPackets(&fSleepTime);
+		if (theSender2 != nullptr && theSender2->ShouldReflectNow())
+			theSender2->ReflectPackets();
 
 	//For smoothing purposes, the streams can mark when they want to wakeup.
-	if (fSleepTime > 0)
-		this->SetIdleTimer(fSleepTime);
+	this->SetIdleTimer(1000);
 
 	return 0;
 }

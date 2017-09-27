@@ -177,7 +177,6 @@ void QTSServer::InitModules(QTSS_ServerState inEndState)
 void QTSServer::StartTasks()
 {
 	fRTCPTask = new RTCPTask();
-	fStatsTask = new RTPStatsUpdaterTask();
 
 	//
 	// Start listening

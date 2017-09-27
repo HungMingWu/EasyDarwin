@@ -94,7 +94,6 @@ class MyRTSPRequest {
 	QTSS_RTPTransportType fTransportType;
 	QTSS_RTPTransportMode fTransportMode;
 	uint16_t fSetUpServerPort{ 0 };
-	float fLateTolerance{ -1 };
 
 	// -1 not in request, 0 off, 1 on
 	int32_t                      fEnableDynamicRateState;
@@ -110,7 +109,6 @@ public:
 	std::string GetFileDigit();
 	uint16_t GetSetUpServerPort() const { return fSetUpServerPort; }
 	void SetUpServerPort(uint16_t port) { fSetUpServerPort = port; }
-	float GetLateToleranceInSec() const { return fLateTolerance; }
 	QTSS_RTPTransportType       GetTransportType() { return fTransportType; }
 	QTSS_RTPNetworkMode         GetNetworkMode() { return fNetworkMode; }
 	int32_t                     GetDynamicRateState() { return fEnableDynamicRateState; }

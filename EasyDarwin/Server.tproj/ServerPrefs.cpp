@@ -17,10 +17,6 @@ namespace ServerPrefs {
 		constexpr uint32_t  fABUpdateTimeInSecs = 60;
 		return fABUpdateTimeInSecs;
 	}
-	bool GetDisableThinning() {
-		constexpr bool fDisableThinning = false;
-		return fDisableThinning;
-	}
 	uint16_t GetDefaultStreamQuality() {
 		constexpr uint16_t fDefaultStreamQuality = 0;
 		return fDefaultStreamQuality;
@@ -82,26 +78,6 @@ namespace ServerPrefs {
 		constexpr uint32_t fMaxSendAheadTimeInSecs = 25;
 		return fMaxSendAheadTimeInSecs;
 	}
-	bool GetUDPMonitorEnabled() {
-		constexpr bool fUDPMonitorEnabled = false;
-		return fUDPMonitorEnabled;
-	}
-	uint16_t GetUDPMonitorVideoPort() {
-		constexpr uint16_t fUDPMonitorVideoPort = 5002;
-		return fUDPMonitorVideoPort;
-	}
-	uint16_t GetUDPMonitorAudioPort() {
-		constexpr uint16_t fUDPMonitorAudioPort = 5004;
-		return fUDPMonitorAudioPort;
-	}
-	boost::string_view GetMonitorDestIP() {
-		boost::string_view dstIP("127.0.0.1");
-		return dstIP;
-	}
-	boost::string_view GetMonitorSrcIP() {
-		boost::string_view srcIP("0.0.0.0");
-		return srcIP;
-	}
 	uint32_t GetMaxTCPBufferSizeInBytes() {
 		constexpr uint32_t fMaxTCPBufferSizeInBytes = 200000;
 		return fMaxTCPBufferSizeInBytes;
@@ -112,37 +88,9 @@ namespace ServerPrefs {
 	}
 
 	// Thinning algorithm parameters
-	int32_t GetDropAllVideoPacketsTimeInMsec() {
-		constexpr int32_t fDropAllVideoPacketsTimeInMsec = 1750;
-		return fDropAllVideoPacketsTimeInMsec;
-	}
-	int32_t GetDropAllPacketsTimeInMsec() {
-		constexpr int32_t fDropAllPacketsTimeInMsec = 2500;
-		return fDropAllPacketsTimeInMsec;
-	}
-	int32_t GetThinAllTheWayTimeInMsec() {
-		constexpr int32_t fThinAllTheWayTimeInMsec = 1500;
-		return fThinAllTheWayTimeInMsec;
-	}
-	int32_t GetAlwaysThinTimeInMsec() {
-		constexpr int32_t fAlwaysThinTimeInMsec = 750;
-		return fAlwaysThinTimeInMsec;
-	}
 	int32_t GetStartThinningTimeInMsec() {
 		constexpr int32_t fStartThinningTimeInMsec = 0;
 		return fStartThinningTimeInMsec;
-	}
-	int32_t GetStartThickingTimeInMsec() {
-		constexpr int32_t fStartThickingTimeInMsec = 250;
-		return fStartThickingTimeInMsec;
-	}
-	int32_t GetThickAllTheWayTimeInMsec() {
-		constexpr int32_t fThickAllTheWayTimeInMsec = -2000;
-		return fThickAllTheWayTimeInMsec;
-	}
-	uint32_t GetQualityCheckIntervalInMsec() {
-		constexpr uint32_t fQualityCheckIntervalInMsec = 1000;
-		return fQualityCheckIntervalInMsec;
 	}
 	//This is the real timeout
 	uint32_t GetRTSPSessionTimeoutInSecs() {

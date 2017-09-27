@@ -63,20 +63,6 @@ public:
 	void	SetWindowSize(uint32_t inWindowSizeInBytes);
 
 	//
-	// Without changing the window size, you can enable / disable all overbuffering
-	// using these calls. Defaults to enabled
-	void    TurnOverbuffering(bool turned) { fOverbufferingEnabled = turned; }
-	bool    GetOverbufferEnabled() const { return fOverbufferingEnabled; }
-
-	//
-	// If the overbuffer window is full, this returns a time in the future when
-	// enough space will open up for this packet. Otherwise, returns -1.
-	//
-	// The overbuffer window is full if the byte count is filled up, or if the
-	// bitrate is above the max play rate.
-	int64_t CheckTransmitTime(int64_t inTransmitTime, int64_t inCurrentTime, int32_t inPacketSize);
-
-	//
 	// Remembers that this packet has been sent
 	void AddPacketToWindow(int32_t inPacketSize);
 
@@ -109,7 +95,6 @@ private:
 	uint32_t fMaxSendAheadTime;
 
 	bool fWriteBurstBeginning;
-	bool fOverbufferingEnabled;
 
 	float fOverbufferRate;
 	uint32_t fSendAheadDurationInMsec;

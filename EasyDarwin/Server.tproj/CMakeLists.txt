@@ -20,7 +20,6 @@ set (SRC
      RTPSessionInterface.cpp RTPSessionInterface.h
      RTSPSession.cpp RTSPSession.h
 	 MyRTSPSession.cpp MyRTSPSession.h
-     RTPPacketResender.cpp RTPPacketResender.h
      RTPBandwidthTracker.cpp RTPBandwidthTracker.h
      RTSPResponseStream.cpp RTSPResponseStream.h
      RTSPRequest.cpp RTSPRequest.h

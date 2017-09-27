@@ -88,8 +88,6 @@ public:
 	OSMutex*        GetSessionMutex() { return &fSessionMutex; }
 	OSMutex*		GetRTSPSessionMutex() { return  &fRTSPSessionMutex; }
 
-	uint32_t          GetPacketsSent() { return fPacketsSent; }
-	uint32_t          GetBytesSent() { return fBytesSent; }
 	OSRef*      GetRef() { return &fRTPMapElem; }
 	RTSPSessionInterface* GetRTSPSession() { return fRTSPSession; }
 	uint32_t      GetMovieAvgBitrate() { return fMovieAverageBitRate; }
@@ -115,16 +113,6 @@ public:
 
 	//The session tracks the total number of bytes sent during the session.
 	//Streams can update that value by calling this function
-	void            UpdateBytesSent(uint32_t bytesSent) { fBytesSent += bytesSent; }
-
-	//The session tracks the total number of packets sent during the session.
-	//Streams can update that value by calling this function                
-	void            UpdatePacketsSent(uint32_t packetsSent) { fPacketsSent += packetsSent; }
-
-	void            UpdateCurrentBitRate(const int64_t& curTime)
-	{
-		if (curTime > (fLastBitRateUpdateTime + 3000)) this->UpdateBitRateInternal(curTime);
-	}
 
 	void            SetAllTracksInterleaved(bool newValue) { fAllTracksInterleaved = newValue; }
 
@@ -145,9 +133,6 @@ public:
 			getSingleton()->IncrementNumThinned(-1);
 		fSessionQualityLevel = level;
 	}
-	int64_t          fLastQualityCheckTime{0};
-	int64_t			fLastQualityCheckMediaTime{0};
-	bool			fStartedThinning{false};
 
 	// Used by RTPStream to increment the RTCP packet and byte counts.
 	void            IncrTotalRTCPPacketsRecv() { fTotalRTCPPacketsRecv++; }
@@ -157,7 +142,6 @@ public:
 
 	uint32_t          GetLastRTSPBandwithBits() { return fLastRTSPBandwidthHeaderBits; }
 	void              SetLastRTSPBandwithBits(uint32_t bandwidth) { fLastRTSPBandwidthHeaderBits = bandwidth; }
-	uint32_t          GetCurrentMovieBitRate() { return fMovieCurrentBitRate; }
 
 	uint32_t          GetMaxBandwidthBits() { uint32_t maxRTSP = GetLastRTSPBandwithBits();  return  maxRTSP; }
 	boost::string_view GetSessionID() const { return fRTSPSessionID; }
@@ -165,12 +149,6 @@ public:
 	float GetPacketLossPercent();
 	uint64_t GetMovieSizeInBytes() const { return fMovieSizeInBytes; }
 	double GetMovieDuration() const { return fMovieDuration; }
-	void SetOverBufferEnable(bool enabled) {
-		GetOverbufferWindow()->TurnOverbuffering(enabled);
-	}
-	bool GetOverBufferEnable() {
-		return GetOverbufferWindow()->GetOverbufferEnabled();
-	}
 protected:
 	// These variables are setup by the derived RTPSession object when
 	// Play and Pause get called
@@ -203,9 +181,6 @@ protected:
 	//The RTSP session ID that refers to this client session
 	std::string         fRTSPSessionID;
 	StrPtrLen           fRTSPSessionIDV;
-	uint32_t      fLastBitRateBytes{0};
-	int64_t      fLastBitRateUpdateTime{0};
-	uint32_t      fMovieCurrentBitRate{0};
 
 	// In order to facilitate sending data over the RTSP channel from
 	// an RTP session, we store a pointer to the RTSP session used in
@@ -215,11 +190,6 @@ protected:
 	std::vector<RTPStream*>       fStreamBuffer;
 	TimeoutTask fTimeoutTask;
 private:
-
-	//
-	// Utility function for calculating current bit rate
-	void UpdateBitRateInternal(const int64_t& curTime);
-
 	//for timing out this session
 
 	uint32_t      fTimeout;
@@ -232,8 +202,6 @@ private:
 	uint32_t      fNumQualityLevels{0};
 
 	//Statistics
-	uint32_t fBytesSent{0};
-	uint32_t fPacketsSent{0};
 	float fPacketLossPercent{0.0};
 	int64_t fTimeConnected{0};
 	uint32_t fTotalRTCPPacketsRecv{0};

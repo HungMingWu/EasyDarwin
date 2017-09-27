@@ -180,8 +180,6 @@ typedef uint32_t QTSS_RTSPSessionType;
 // What type of RTP transport is being used for the RTP stream?
 enum
 {
-    qtssRTPTransportTypeUDP         = 0,
-    qtssRTPTransportTypeReliableUDP = 1,
     qtssRTPTransportTypeTCP         = 2,
     qtssRTPTransportTypeUnknown     = 3
 };
@@ -303,7 +301,6 @@ typedef struct
 {
     const std::vector<char>         &packetData;
     QTSS_TimeVal                    packetTransmitTime;
-    QTSS_TimeVal                    suggestedWakeupTime;
 } QTSS_PacketStruct;
                                                                                                                                                                  
 #endif

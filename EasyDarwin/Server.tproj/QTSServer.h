@@ -100,7 +100,6 @@ private:
 	//
 	// GLOBAL TASKS
 	RTCPTask*           fRTCPTask;
-	RTPStatsUpdaterTask*fStatsTask;
 	static char*        sPortPrefString;
 
 	// Call module init roles

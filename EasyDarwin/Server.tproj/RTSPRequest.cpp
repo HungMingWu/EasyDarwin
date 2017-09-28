@@ -283,7 +283,6 @@ QTSS_Error RTSPRequest::ParseHeaders(const std::map<std::string, std::string>& h
 		case qtssContentLengthHeader:       ParseContentLengthHeader(theHeaderVal); break;
 		case qtssSpeedHeader:               ParseSpeedHeader(theHeaderVal);     break;
 		case qtssXPreBufferHeader:          ParsePrebufferHeader(theHeaderVal); break;
-		case qtssBandwidthHeader:           ParseBandwidthHeader(theHeaderVal); break;
 		default:    break;
 		}
 	}
@@ -463,12 +462,6 @@ void RTSPRequest::ParseModeSubHeader(boost::string_view inModeSubHeader)
 	}
 }
 // DJM PROTOTYPE
-
-void  RTSPRequest::ParseBandwidthHeader(boost::string_view header)
-{
-	auto iter = header.cbegin(), end = header.cend();
-	bool r = qi::phrase_parse(iter, end, qi::uint_, qi::ascii::blank, fBandwidthBits);
-}
 
 QTSS_Error RTSPRequest::SendErrorResponseWithMessage(QTSS_RTSPStatusCode inStatusCode)
 {

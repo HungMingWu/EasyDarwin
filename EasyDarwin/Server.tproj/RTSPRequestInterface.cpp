@@ -105,7 +105,6 @@ RTSPRequestInterface::RTSPRequestInterface(RTSPSessionInterface *session)
 	fStale(false),
 	// DJM PROTOTYPE
 	fRandomDataSize(0),
-	fBandwidthBits(0),
 
 	// private storage initializes after protected and public storage above
 	fSession(session),

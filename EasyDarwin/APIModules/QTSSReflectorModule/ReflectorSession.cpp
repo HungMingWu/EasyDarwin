@@ -163,16 +163,6 @@ void    ReflectorSession::RemoveSessionFromOutput()
 	}
 }
 
-uint32_t  ReflectorSession::GetBitRate()
-{
-	uint32_t retval = 0;
-	for (const auto &streamArray : fStreamArray)
-		if (streamArray != nullptr)
-			retval += streamArray->GetBitRate();
-
-	return retval;
-}
-
 void*   ReflectorSession::GetStreamCookie(uint32_t inStreamID)
 {
 	for (uint32_t x = 0; x < fSourceInfo.GetNumStreams(); x++)

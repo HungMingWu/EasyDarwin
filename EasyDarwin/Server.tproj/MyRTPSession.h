@@ -3,13 +3,11 @@
 #include <string>
 #include <boost/utility/string_view.hpp>
 #include "QTSS.h"
-#include "RTPOverbufferWindow.h"
 
 class MyRTSPRequest;
 class MyRTPStream;
 class MyRTPSession {
 	std::vector<MyRTPStream> fStreamBuffer;
-	RTPOverbufferWindow fOverbufferWindow;
 	std::string         fRTSPSessionID;
 	friend class MyRTPStream;
 public:

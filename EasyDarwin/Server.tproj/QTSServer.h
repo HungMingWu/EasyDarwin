@@ -99,7 +99,6 @@ private:
 
 	//
 	// GLOBAL TASKS
-	RTCPTask*           fRTCPTask;
 	static char*        sPortPrefString;
 
 	// Call module init roles

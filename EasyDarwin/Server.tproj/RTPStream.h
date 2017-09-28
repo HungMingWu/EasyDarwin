@@ -69,9 +69,6 @@ class RTPStream
         uint8_t       GetRTPChannelNum()          { return fRTPChannel; }
         uint8_t       GetRTCPChannelNum()         { return fRTCPChannel; }
         QTSS_RTPTransportType GetTransportType() { return fTransportType; }
-        uint32_t      GetStalePacketsDropped()    { return fStalePacketsDropped; }
-        uint32_t      GetTotalPacketsRecv()       { return fTotalPacketsRecv; }
-		void          SetSDPStreamID(uint32_t id) { fTrackID = id; }
 		RTPSessionInterface &GetSession()		{ return *fSession; }
         
         // Setup uses the info in the RTSPRequestInterface to associate
@@ -81,7 +78,7 @@ class RTPStream
         
         // Write sends RTP data to the client. Caller must specify
         // either qtssWriteFlagsIsRTP or qtssWriteFlagsIsRTCP
-        QTSS_Error  Write(QTSS_PacketStruct* thePacket,
+        QTSS_Error  Write(const std::vector<char> &thePacket,
                                         uint32_t* outLenWritten, QTSS_WriteFlags inFlags);
         
         
@@ -109,46 +106,10 @@ class RTPStream
         //to process the packet right now!
         void ProcessIncomingRTCPPacket(StrPtrLen* inPacket);
 
-        //Process the incoming ack RTCP packet
-        bool ProcessAckPacket(RTCPPacket &rtcpPacket, int64_t &curTime);
-
-        //Process the incoming qtss app RTCP packet
-        bool ProcessCompressedQTSSPacket(RTCPPacket &rtcpPacket, int64_t &curTime, StrPtrLen &currentPtr);
-        
-        bool ProcessNADUPacket(RTCPPacket &rtcpPacket, int64_t &curTime, StrPtrLen &currentPtr, uint32_t highestSeqNum);
-
-
-        // Send a RTCP SR on this stream. Pass in true if this SR should also have a BYE
-        void SendRTCPSR(bool inAppendBye = false);
-		
 		void EnableSSRC() { fEnableSSRC = true; }
 		void DisableSSRC() { fEnableSSRC = false; }
-				
-        void            SetMinQuality() { SetQualityLevel(fNumQualityLevels); }
-        void            SetMaxQuality() { SetQualityLevel(kMaxQualityLevel); }
-        int32_t          GetQualityLevel();
-        void            SetQualityLevel(int32_t level);
 
-		int32_t			GetMaxQualityLevelLimit() { return fMaxQualityLevel; }
-		
-		uint32_t          GetNumQualityLevels() { return fNumQualityLevels; } 
-		void              SetNumQualityLevels(uint32_t level) { fNumQualityLevels = level; }
-		QTSS_RTPPayloadType GetPayLoadType() { return fPayloadType; }
-		void SetPayLoadType(QTSS_RTPPayloadType type) { fPayloadType = type; }
-		uint32_t GetTimeScale() const {	return fTimescale; }
-		void SetTimeScale(uint32_t scale) { fTimescale = scale; }
-		float GetBufferDelay() const { return fBufferDelay; }
 		bool isTCP() const { return fIsTCP; }
-		uint32_t GetTotalLostPackets() const { return fTotalLostPackets; }
-		uint16_t GetWorse() const { return fIsGettingWorse; }
-		uint16_t GetBetter() const { return fIsGettingBetter; }
-		void SetPayloadName(boost::string_view name) { fPayloadName = std::string(name); }
-		boost::string_view GetPayloadName() const { return fPayloadName; }
-		uint32_t GetPacketsLostInRTCPInterval() { return fCurPacketsLostInRTCPInterval; }
-		uint32_t GetPacketCountInRTCPInterval() { return 0; }
-		void SetTimeStamp(uint32_t timestamp) { fFirstTimeStamp = timestamp; }
-		void SetSeqNumber(uint16_t number) { fFirstSeqNumber = number; }
-		uint16_t GetSeqNumber() const { return fFirstSeqNumber; }
 		inline void addAttribute(boost::string_view key, boost::any value) {
 			attr.addAttribute(key, value);
 		}
@@ -167,103 +128,23 @@ class RTPStream
             kIsRTCPPacket                 = true,
             kIsRTPPacket                  = false
         };
-    
-		int64_t fLastQualityChange{ 0 };
-        int32_t fQualityInterval;
 
         //either pointers to the statically allocated sockets (maintained by the server)
         //or fresh ones (only fresh in extreme special cases)
 		UDPSocketPair*          fSockets{ nullptr };
         RTPSessionInterface*    fSession;
-        
-        //who am i sending to?
-		uint32_t      fRemoteAddr{ 0 };
-		uint16_t      fRemoteRTPPort{ 0 };
-		uint16_t      fRemoteRTCPPort{ 0 };
-		uint16_t      fLocalRTPPort{ 0 };
 
-        //RTCP stuff 
-		int64_t      fLastSenderReportTime{ 0 };
-		uint32_t      fPacketCount{ 0 };
-		uint32_t      fLastPacketCount{ 0 };
-		uint32_t      fPacketCountInRTCPInterval{ 0 };
-		uint32_t      fByteCount{ 0 };
-        
-        // DICTIONARY ATTRIBUTES
-        
-        //Module assigns a streamID to this object
-		uint32_t      fTrackID{ 0 };
-        
         //low-level RTP stuff 
         uint32_t      fSsrc;
 		bool      fEnableSSRC{ false };
-        
-        //Payload name and codec type.
-        std::string         fPayloadName;
-		QTSS_RTPPayloadType fPayloadType{ qtssUnknownPayloadType };
 
 		Attributes attr;
-        //Media information.
-		uint16_t      fFirstSeqNumber{ 0 };//used in sending the play response
-		uint32_t      fFirstTimeStamp{ 0 };//RTP time
-		uint32_t      fTimescale{ 0 };
         
         //what is the URL for this stream?
         std::string   fStreamURL;
-        
-        int32_t      fQualityLevel;
-		uint32_t      fNumQualityLevels{ 0 };
-        
-		uint32_t      fLastRTPTimestamp{ 0 };
-		int64_t		fLastNTPTimeStamp{ 0 };
-		uint32_t		fEstRTT{ 0 };				//The estimated RTT calculated from RTCP's DLSR and LSR fields
-        
-        // RTCP data
-		uint32_t      fFractionLostPackets{ 0 };
-		uint32_t      fTotalLostPackets{ 0 };
-		uint32_t      fJitter{ 0 };
-		uint16_t      fAvgBufDelayMsec{ 0 };
-		uint16_t      fIsGettingBetter{ 0 };
-		uint16_t      fIsGettingWorse{ 0 };
-		uint32_t      fNumEyes{ 0 };
-		uint32_t      fNumEyesActive{ 0 };
-		uint32_t      fNumEyesPaused{ 0 };
-		uint32_t      fTotalPacketsRecv{ 0 };
-        uint32_t      fPriorTotalPacketsRecv;
-		uint16_t      fTotalPacketsDropped{ 0 };
-		uint16_t      fTotalPacketsLost{ 0 };
-		uint32_t      fCurPacketsLostInRTCPInterval{ 0 };
-		uint16_t      fClientBufferFill{ 0 };
-		uint16_t      fFrameRate{ 0 };
-		uint16_t      fExpectedFrameRate{ 0 };
-		uint16_t      fAudioDryCount{ 0 };
-		uint32_t      fClientSSRC{ 0 };
-        
+
 		bool      fIsTCP{ false };
 		QTSS_RTPTransportType   fTransportType{ qtssRTPTransportTypeTCP };
-        
-        // HTTP params
-        // Each stream has a set of thinning related tolerances,
-        // that are dependent on prefs and parameters in the SETUP.
-        // These params, as well as the current packet delay determine
-        // whether a packet gets dropped.
-		int32_t      fTurnThinningOffDelay_TCP{ 0 };
-		int32_t      fIncreaseThinningDelay_TCP{ 0 };
-		int32_t      fDropAllPacketsForThisStreamDelay_TCP{ 0 };
-		uint32_t      fStalePacketsDropped_TCP{ 0 };
-		int64_t      fTimeStreamCaughtUp_TCP{ 0 };
-		int64_t      fLastQualityLevelIncreaseTime_TCP{ 0 };
-        //
-        // Each stream has a set of thinning related tolerances,
-        // that are dependent on prefs and parameters in the SETUP.
-        // These params, as well as the current packet delay determine
-        // whether a packet gets dropped.
-		uint32_t      fStalePacketsDropped{ 0 };
-        
-		float     fBufferDelay{ 3.0 }; // from the sdp
-                       
-		uint32_t      fCurrentAckTimeout{ 0 };
-		int32_t      fMaxSendAheadTimeMSec{ 0 };
 
         // If we are interleaving RTP data over the TCP connection,
         // these are channel numbers to use for RTP & RTCP
@@ -271,27 +152,12 @@ class RTPStream
 		uint8_t   fRTCPChannel{ 0 };
         
 		QTSS_RTPNetworkMode     fNetworkMode{ qtssRTPNetworkModeDefault };
-        
-		int32_t fLastQualityLevel{ 0 };
-		int32_t fLastRateLevel{ 0 };
-       
-        bool fDisableThinning;
-		int64_t fLastQualityUpdate{ 0 };
-        uint32_t fDefaultQualityLevel;
-        int32_t fMaxQualityLevel;
-        
+
         //-----------------------------------------------------------
         // acutally write the data out that way
         QTSS_Error  InterleavedWrite(const std::vector<char> &inBuffer, uint32_t* outLenWritten, unsigned char channel );
-         
-        void        SetTCPThinningParams();
-                
-        void            DisableThinning() { fDisableThinning = true; }
-		void			SetInitialMaxQualityLevel();
-        
-        enum { rtp = 0, rtcpSR = 1, rtcpRR = 2, rtcpACK = 3, rtcpAPP = 4 };
 
-        void SetOverBufferState(RTSPRequestInterface* request);
+        enum { rtp = 0, rtcpSR = 1, rtcpRR = 2, rtcpACK = 3, rtcpAPP = 4 };
 };
 
 #endif // __RTPSTREAM_H__

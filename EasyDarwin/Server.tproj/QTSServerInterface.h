@@ -87,11 +87,6 @@ public:
 		fPeriodicRTPPacketsLost -= packets;
 	}
 
-	void            IncrementNumThinned(int32_t inDifference)
-	{
-		OSMutexLocker locker(&fMutex); fNumThinned += inDifference;
-	}
-
 	void 			InitNumThreads(uint32_t numThreads) { fNumThreads = numThreads; }
 	//
 	// ACCESSORS
@@ -108,7 +103,6 @@ public:
 	bool              SigIntSet() { return fSigInt; }
 	bool				SigTermSet() { return fSigTerm; }
 
-	int32_t				GetNumThinned() { return fNumThinned; };
 	uint32_t				GetNumThreads() { return fNumThreads; };
 
 	//Allows you to map RTP session IDs (strings) to actual RTP session objects
@@ -208,7 +202,6 @@ private:
 	bool              fSigInt{false};
 	bool              fSigTerm{false};
 
-	int32_t          fNumThinned{0};
 	uint32_t          fNumThreads{0};
 };
 

@@ -67,26 +67,6 @@ bool RTPSessionOutput::IsUDP()
 	return fIsUDP;
 }
 
-
-bool  RTPSessionOutput::FilterPacket(RTPStream *theStreamPtr, const std::vector<char> &inPacket)
-{
-	Assert(theStreamPtr);
-	uint16_t seqnum = GetPacketSeqNumber(inPacket);
-	uint16_t firstSeqNum = theStreamPtr->GetSeqNumber();
-
-	if (seqnum < firstSeqNum)
-	{
-		//printf("RTPSessionOutput::FilterPacket don't send packet = %u < first=%lu\n", seqnum, firstSeqNum);
-		return true;
-	}
-
-	//printf("RTPSessionOutput::FilterPacket found first packet = %u \n", firstSeqNum);
-
-	fPreFilter = false;
-	return fPreFilter;
-}
-
-
 bool  RTPSessionOutput::PacketAlreadySent(RTPStream *theStreamPtr, uint32_t inFlags, uint64_t* packetIDPtr)
 {
 	Assert(theStreamPtr);
@@ -138,22 +118,13 @@ QTSS_Error  RTPSessionOutput::WritePacket(const std::vector<char> &inPacket, voi
 	{
 		if (this->PacketMatchesStream(inStreamCookie, theStreamPtr))
 		{
-			if ((inFlags & qtssWriteFlagsIsRTP) && FilterPacket(theStreamPtr, inPacket))
-				return  QTSS_NoErr; // keep looking at packets
-
 			if (PacketAlreadySent(theStreamPtr, inFlags, packetIDPtr))
 				return QTSS_NoErr; // keep looking at packets
 
 			// TrackPackets below is for re-writing the rtcps we don't use it right now-- shouldn't need to    
 			// (void) this->TrackPackets(theStreamPtr, inPacket, &currentTime,inFlags,  &packetLatenessInMSec, timeToSendThisPacketAgain, packetIDPtr,arrivalTimeMSecPtr);
 
-			QTSS_PacketStruct thePacket{ inPacket };
-			int64_t delayMSecs = fBufferDelayMSecs - (currentTime - *arrivalTimeMSecPtr);
-			thePacket.packetTransmitTime = (currentTime - packetLatenessInMSec);
-			if (fBufferDelayMSecs > 0)
-				thePacket.packetTransmitTime += delayMSecs; // add buffer time where oldest buffered packet as now == 0 and newest is entire buffer time in the future.
-
-			writeErr = theStreamPtr->Write(&thePacket, nullptr, inFlags | qtssWriteFlagsWriteBurstBegin);
+			writeErr = theStreamPtr->Write(inPacket, nullptr, inFlags);
 			if (writeErr == QTSS_WouldBlock)
 			{
 				//printf("QTSS_Write == QTSS_WouldBlock\n");
@@ -188,18 +159,8 @@ QTSS_Error  RTPSessionOutput::WritePacket(const std::vector<char> &inPacket, voi
 	return writeErr;
 }
 
-uint16_t RTPSessionOutput::GetPacketSeqNumber(const std::vector<char> &inPacket)
-{
-	if (inPacket.size() < 4)
-		return 0;
-
-	//The RTP seq number is the second short of the packet
-	auto* seqNumPtr = (uint16_t*)&inPacket[0];
-	return ntohs(seqNumPtr[1]);
-}
-
 void RTPSessionOutput::TearDown()
 {
-	fClientSession->SetTeardownReason(qtssCliSesTearDownBroadcastEnded);
+	//fClientSession->SetTeardownReason(qtssCliSesTearDownBroadcastEnded);
 	fClientSession->Teardown();
 }

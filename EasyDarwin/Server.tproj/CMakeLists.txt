@@ -15,17 +15,14 @@ set (SRC
 	 MyRTPSession.cpp MyRTPSession.h
      RTPStream.cpp RTPStream.h
 	 MyRTPStream.cpp MyRTPStream.h
-     RTPOverbufferWindow.cpp RTPOverbufferWindow.h
      RTSPSessionInterface.cpp RTSPSessionInterface.h
      RTPSessionInterface.cpp RTPSessionInterface.h
      RTSPSession.cpp RTSPSession.h
 	 MyRTSPSession.cpp MyRTSPSession.h
-     RTPBandwidthTracker.cpp RTPBandwidthTracker.h
      RTSPResponseStream.cpp RTSPResponseStream.h
      RTSPRequest.cpp RTSPRequest.h
 	 MyRTSPRequest.cpp MyRTSPRequest.h
 	 RTSPRequestStream.cpp RTSPRequestStream.h
-	 RTCPTask.cpp RTCPTask.h
 	 ServerPrefs.h ServerPrefs.cpp
 	 RTSPConnection.h RTSPUtility.h
 	 RTSPServer.h RTSPServer.cpp)

@@ -74,10 +74,6 @@ private:
 	bool                  fIsUDP{ false };
 	bool                  fTransportInitialized{ false };
 	bool                  fMustSynch{ true };
-	bool                  fPreFilter{ true };
-
-	uint16_t GetPacketSeqNumber(const std::vector<char> &inPacket);
-	bool  FilterPacket(RTPStream *theStreamPtr, const std::vector<char> &inPacket);
 
 	uint32_t GetPacketRTPTime(StrPtrLen* packetStrPtr);
 	inline  bool PacketMatchesStream(void* inStreamCookie, RTPStream *theStreamPtr);

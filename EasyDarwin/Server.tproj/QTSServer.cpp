@@ -61,7 +61,6 @@
 #include "RTSPSession.h"
 
 #include "RTPStream.h"
-#include "RTCPTask.h"
 #include "ServerPrefs.h"
 
 #ifdef _WIN32
@@ -176,8 +175,6 @@ void QTSServer::InitModules(QTSS_ServerState inEndState)
 
 void QTSServer::StartTasks()
 {
-	fRTCPTask = new RTCPTask();
-
 	//
 	// Start listening
 	for (uint32_t x = 0; x < fNumListeners; x++)
@@ -388,15 +385,13 @@ bool RTSPListenerSocket::OverMaxConnections(uint32_t buffer)
 
 UDPSocketPair*  RTPSocketPool::ConstructUDPSocketPair()
 {
-	Task* theTask = ((QTSServer*)getSingleton())->fRTCPTask;
-
 	//construct a pair of UDP sockets, the lower one for RTP data (outgoing only, no demuxer
 	//necessary), and one for RTCP data (incoming, so definitely need a demuxer).
 	//These are nonblocking sockets that DON'T receive events (we are going to poll for data)
 	// They do receive events - we don't poll from them anymore
 	return new
-		UDPSocketPair(new UDPSocket(theTask, Socket::kNonBlockingSocketType),
-			new UDPSocket(theTask, Socket::kNonBlockingSocketType));
+		UDPSocketPair(new UDPSocket(nullptr, Socket::kNonBlockingSocketType),
+			new UDPSocket(nullptr, Socket::kNonBlockingSocketType));
 }
 
 void RTPSocketPool::DestructUDPSocketPair(UDPSocketPair* inPair)

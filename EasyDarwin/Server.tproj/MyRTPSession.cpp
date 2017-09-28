@@ -2,9 +2,7 @@
 #include "MyAssert.h"
 #include "MyRTPStream.h"
 #include "ServerPrefs.h"
-MyRTPSession::MyRTPSession() :
-	fOverbufferWindow(ServerPrefs::GetSendIntervalInMsec(), UINT32_MAX, ServerPrefs::GetMaxSendAheadTimeInSecs(),
-		ServerPrefs::GetOverbufferRate())
+MyRTPSession::MyRTPSession()
 {
 
 }

@@ -84,7 +84,6 @@ typedef uint32_t QTSS_AddStreamFlags;
 // QTSS_PlayFlags used in the QTSS_Play Callback function.
 enum 
 {
-    qtssPlayFlagsSendRTCP           = 0x00000010,   // have the server generate RTCP Sender Reports 
     qtssPlayFlagsAppendServerInfo   = 0x00000020    // have the server append the server info APP packet to your RTCP Sender Reports
 };
 typedef uint32_t QTSS_PlayFlags;
@@ -95,7 +94,6 @@ enum
     qtssWriteFlagsNoFlags           = 0x00000000,
     qtssWriteFlagsIsRTP             = 0x00000001,
     qtssWriteFlagsIsRTCP            = 0x00000002,   
-    qtssWriteFlagsWriteBurstBegin   = 0x00000004,
     qtssWriteFlagsBufferData        = 0x00000008
 };
 typedef uint32_t QTSS_WriteFlags;
@@ -103,7 +101,6 @@ typedef uint32_t QTSS_WriteFlags;
 // Flags for QTSS_SendStandardRTSPResponse
 enum
 {
-    qtssPlayRespWriteTrackInfo      = 0x00000001,
     qtssSetupRespDontWriteSSRC      = 0x00000002
 };
 
@@ -296,11 +293,5 @@ typedef struct
 	RTPSession*                     inClientSession;
     QTSS_CliSesClosingReason        inReason;
 } QTSS_ClientSessionClosing_Params;
-
-typedef struct
-{
-    const std::vector<char>         &packetData;
-    QTSS_TimeVal                    packetTransmitTime;
-} QTSS_PacketStruct;
                                                                                                                                                                  
 #endif

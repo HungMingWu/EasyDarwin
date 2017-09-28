@@ -343,7 +343,6 @@ public:
 	ReflectorSender*        GetRTPSender() { return &fRTPSender; }
 	ReflectorSender*        GetRTCPSender() { return &fRTCPSender; }
 
-	uint32_t                  GetTimeScale() { return fStreamInfo.fTimeScale; }
 	uint64_t                  fPacketCount;
 
 	inline  void                    UpdateBitRate(int64_t currentTime);

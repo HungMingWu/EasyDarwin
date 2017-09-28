@@ -105,9 +105,6 @@ private:
 	//where timeouts, deletion conditions get processed
 	int64_t  Run() override;
 
-	// Utility function used by Play
-	uint32_t PowerOf2Floor(uint32_t inNumToFloor);
-
 	//overbuffer logging function
 	void LogOverbufferStats();
 

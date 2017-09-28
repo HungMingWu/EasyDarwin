@@ -185,8 +185,6 @@ public:
 	// DJM PROTOTYPE
 	uint32_t						GetRandomDataSize() { return fRandomDataSize; }
 
-	uint32_t                      GetBandwidthHeaderBits() { return fBandwidthBits; }
-
 	//If the URI ends with one or more digits, this points to those.
 	std::string         GetFileDigit();
 	void SetUpServerPort(uint16_t port) { fSetUpServerPort = port; }
@@ -248,8 +246,6 @@ protected:
 
 	// DJM PROTOTYPE
 	uint32_t						fRandomDataSize;
-
-	uint32_t                      fBandwidthBits;
 private:
 
 	RTSPSessionInterface*   fSession;

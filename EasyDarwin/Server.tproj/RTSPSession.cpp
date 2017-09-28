@@ -503,12 +503,7 @@ void RTSPSession::SetupRequest()
 	fRTPSession = FindRTPSession();
 
 	if (fRTPSession != nullptr)
-	{
 		fRTPSession->RefreshTimeout();
-		uint32_t headerBits = fRequest->GetBandwidthHeaderBits();
-		if (headerBits != 0)
-			fRTPSession->SetLastRTSPBandwithBits(headerBits);
-	}
 
 	// If we don't have an RTP session yet, create one...
 	if (fRTPSession == nullptr)

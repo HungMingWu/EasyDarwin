@@ -123,72 +123,9 @@ QTSS_Error  RTPSession::Play(RTSPRequestInterface* request, QTSS_PlayFlags inFla
 	//first setup the play associated session interface variables
 	Assert(request != nullptr);
 
-	//what time is this play being issued at?
-	fNextSendPacketsTime = fPlayTime = OS::Milliseconds();
-	if (fIsFirstPlay)
-		fFirstPlayTime = fPlayTime;
-	fAdjustedPlayTime = fPlayTime - ((int64_t)(request->GetStartTime() * 1000));
-
-	//for RTCP SRs, we also need to store the play time in NTP
-	fNTPPlayTime = OS::TimeMilli_To_1900Fixed64Secs(fPlayTime);
-
 	//we are definitely playing now, so schedule the object!
 	fState = qtssPlayingState;
-	fIsFirstPlay = false;
 	fPlayFlags = inFlags;
-
-	uint32_t theWindowSize;
-	uint32_t bitRate = this->GetMovieAvgBitrate();
-	if ((bitRate == 0) || (bitRate > ServerPrefs::GetWindowSizeMaxThreshold() * 1024))
-		theWindowSize = 1024 * ServerPrefs::GetLargeWindowSizeInK();
-	else if (bitRate > ServerPrefs::GetWindowSizeThreshold() * 1024)
-		theWindowSize = 1024 * ServerPrefs::GetMediumWindowSizeInK();
-	else
-		theWindowSize = 1024 * ServerPrefs::GetSmallWindowSizeInK();
-
-	//  printf("bitrate = %d, window size = %d\n", bitRate, theWindowSize);
-	this->GetBandwidthTracker()->SetWindowSize(theWindowSize);
-	this->GetOverbufferWindow()->ResetOverBufferWindow();
-
-	//  printf("movie bitrate = %d, window size = %d\n", this->GetMovieAvgBitrate(), theWindowSize);
-	Assert(this->GetBandwidthTracker()->BytesInList() == 0);
-
-	// Set the size of the RTSPSession's send buffer to an appropriate max size
-	// based on the bitrate of the movie. This has 2 benefits:
-	// 1) Each socket normally defaults to 32 K. A smaller buffer prevents the
-	// system from getting buffer starved if lots of clients get flow-controlled
-	//
-	// 2) We may need to scale up buffer sizes for high-bandwidth movies in order
-	// to maximize thruput, and we may need to scale down buffer sizes for low-bandwidth
-	// movies to prevent us from buffering lots of data that the client can't use
-
-	// If we don't know any better, assume maximum buffer size.
-	uint32_t theBufferSize = ServerPrefs::GetMaxTCPBufferSizeInBytes();
-
-	if (this->GetMovieAvgBitrate() > 0)
-	{
-		// We have a bit rate... use it.
-		float realBufferSize = (float)this->GetMovieAvgBitrate() * ServerPrefs::GetTCPSecondsToBuffer();
-		theBufferSize = (uint32_t)realBufferSize;
-		theBufferSize >>= 3; // Divide by 8 to convert from bits to bytes
-
-		// Round down to the next lowest power of 2.
-		theBufferSize = this->PowerOf2Floor(theBufferSize);
-
-		// This is how much data we should buffer based on the scaling factor... if it is
-		// lower than the min, raise to min
-		if (theBufferSize < ServerPrefs::GetMinTCPBufferSizeInBytes())
-			theBufferSize = ServerPrefs::GetMinTCPBufferSizeInBytes();
-
-		// Same deal for max buffer size
-		if (theBufferSize > ServerPrefs::GetMaxTCPBufferSizeInBytes())
-			theBufferSize = ServerPrefs::GetMaxTCPBufferSizeInBytes();
-
-	}
-
-	Assert(fRTSPSession != nullptr); // can this ever happen?
-	if (fRTSPSession != nullptr)
-		fRTSPSession->GetSocket()->SetSocketBufSize(theBufferSize);
 
 	this->Signal(Task::kStartEvent);
 
@@ -203,19 +140,6 @@ void RTPSession::Pause()
 	{
 		//(*theStream)->Pause();
 	}
-}
-
-uint32_t RTPSession::PowerOf2Floor(uint32_t inNumToFloor)
-{
-	uint32_t retVal = 0x10000000;
-	while (retVal > 0)
-	{
-		if (retVal & inNumToFloor)
-			return retVal;
-		else
-			retVal >>= 1;
-	}
-	return retVal;
 }
 
 void RTPSession::Teardown()
@@ -290,16 +214,6 @@ int64_t RTPSession::Run()
 
 			// Set the reason parameter 
 			clientSessionClosingParams.inReason = fClosingReason;
-
-			// If RTCP packets are being generated internally for this stream, 
-			// Send a BYE now.
-			uint32_t theLen = 0;
-
-			if (this->GetPlayFlags() & qtssPlayFlagsSendRTCP)
-			{
-				for (auto theStream : fStreamBuffer)
-					theStream->SendRTCPSR(true);
-			}
 		}
 
 		//at this point, we know no one is using this session, so invoke the
@@ -336,9 +250,6 @@ int64_t RTPSession::Run()
 		}
 		else
 		{
-			if ((rtpSendPacketsParams.inCurrentTime - fLastBandwidthTrackerStatsUpdate) > 1000)
-				this->GetBandwidthTracker()->UpdateStats();
-
 			rtpSendPacketsParams.outNextPacketTime = 0;
 			// Async event registration is definitely allowed from this role.
 			//make sure not to get deleted accidently!
@@ -348,19 +259,6 @@ int64_t RTPSession::Run()
 		}
 
 	}
-
-	//
-	// Make sure the duration between calls to Run() isn't greater than the
-	// max retransmit delay interval.
-	uint32_t theRetransDelayInMsec = ServerPrefs::GetMaxRetransmitDelayInMsec();
-	uint32_t theSendInterval = ServerPrefs::GetSendIntervalInMsec();
-
-	//
-	// We want to avoid waking up to do retransmits, and then going back to sleep for like, 1 msec. So, 
-	// only adjust the time to wake up if the next packet time is greater than the max retransmit delay +
-	// the standard interval between wakeups.
-	if (rtpSendPacketsParams.outNextPacketTime > (theRetransDelayInMsec + theSendInterval))
-		rtpSendPacketsParams.outNextPacketTime = theRetransDelayInMsec;
 
 	Assert(rtpSendPacketsParams.outNextPacketTime >= 0);//we'd better not get deleted accidently!
 	return rtpSendPacketsParams.outNextPacketTime;

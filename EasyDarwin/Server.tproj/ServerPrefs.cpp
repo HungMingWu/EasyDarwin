@@ -30,41 +30,9 @@ namespace ServerPrefs {
 		boost::string_view realm("EasyDarwin");
 		return realm;
 	}
-	bool IsSlowStartEnabled() {
-		constexpr bool  fIsSlowStartEnabled = true;
-		return fIsSlowStartEnabled;
-	}
 	uint32_t GetRTPSessionTimeoutInSecs() {
 		constexpr uint32_t fRTPSessionTimeoutInSecs = 120;
 		return fRTPSessionTimeoutInSecs;
-	}
-	uint32_t GetSendIntervalInMsec() {
-		constexpr uint32_t fSendIntervalInMsec = 50;
-		return fSendIntervalInMsec;
-	}
-	float GetOverbufferRate() {
-		constexpr float	fOverbufferRate = 2.0;
-		return fOverbufferRate;
-	}
-	uint32_t GetWindowSizeMaxThreshold() {
-		constexpr uint32_t fWindowSizeMaxThreshold = 200;
-		return fWindowSizeMaxThreshold;
-	}
-	uint32_t GetLargeWindowSizeInK() {
-		constexpr uint32_t  fLargeWindowSizeInK = 64;
-		return fLargeWindowSizeInK;
-	}
-	uint32_t GetWindowSizeThreshold() {
-		constexpr uint32_t fWindowSizeThreshold = 200;
-		return fWindowSizeThreshold;
-	}
-	uint32_t GetMediumWindowSizeInK() {
-		constexpr uint32_t fMediumWindowSizeInK = 48;
-		return fMediumWindowSizeInK;
-	}
-	uint32_t GetSmallWindowSizeInK() {
-		constexpr uint32_t  fSmallWindowSizeInK = 24;
-		return fSmallWindowSizeInK;
 	}
 	int32_t  GetMaxKBitsBandwidth() {
 		constexpr int32_t fMaxBandwidthInKBits = 102400;
@@ -74,19 +42,6 @@ namespace ServerPrefs {
 		constexpr uint32_t fMaxRetransDelayInMsec = 500;
 		return fMaxRetransDelayInMsec;
 	}
-	uint32_t GetMaxSendAheadTimeInSecs() {
-		constexpr uint32_t fMaxSendAheadTimeInSecs = 25;
-		return fMaxSendAheadTimeInSecs;
-	}
-	uint32_t GetMaxTCPBufferSizeInBytes() {
-		constexpr uint32_t fMaxTCPBufferSizeInBytes = 200000;
-		return fMaxTCPBufferSizeInBytes;
-	}
-	uint32_t GetMinTCPBufferSizeInBytes() {
-		constexpr uint32_t  fMinTCPBufferSizeInBytes = 8192;
-		return fMinTCPBufferSizeInBytes;
-	}
-
 	// Thinning algorithm parameters
 	int32_t GetStartThinningTimeInMsec() {
 		constexpr int32_t fStartThinningTimeInMsec = 0;

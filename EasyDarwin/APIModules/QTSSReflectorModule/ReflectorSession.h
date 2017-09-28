@@ -103,11 +103,6 @@ public:
 	ReflectorStream*	GetStreamByIndex(uint32_t inIndex) { return fStreamArray[inIndex].get(); }
 	void AddBroadcasterClientSession(RTPSession* inClientSession);
 
-	// A ReflectorSession keeps track of the aggregate bit rate each
-	// stream is reflecting (RTP only). Initially, this will return 0
-	// until enough time passes to compute an accurate average.
-	uint32_t          GetBitRate();
-
 	// Each stream has a cookie associated with it. When the stream writes a packet
 	// to an output, this cookie is used to identify which stream is writing the packet.
 	// The below function is useful so outputs can get the cookie value for a stream ID,
@@ -119,7 +114,6 @@ public:
 	{
 		kAudioOnlyQuality = 1,      //uint32_t
 		kNormalQuality = 0,         //uint32_t
-		kNumQualityLevels = 2       //uint32_t
 	};
 
 	void	SetHasVideoKeyFrameUpdate(bool indexUpdate) { fHasVideoKeyFrameUpdate = indexUpdate; }

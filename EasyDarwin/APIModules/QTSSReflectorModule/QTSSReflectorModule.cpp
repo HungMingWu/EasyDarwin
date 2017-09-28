@@ -794,19 +794,10 @@ QTSS_Error DoSetup(QTSS_StandardRTSP_Params &inParams)
 			return theErr;
 	}
 
-	// Set up items for this stream
-	newStream->SetPayloadName(thePayloadName);
-	newStream->SetPayLoadType(theStreamInfo->fPayloadType);
-	newStream->SetSDPStreamID(theTrackID);
-	newStream->SetTimeScale(theStreamInfo->fTimeScale);
-
 	// Place the stream cookie in this stream for future reference
 	void* theStreamCookie = theSession->GetStreamCookie(theTrackID);
 	Assert(theStreamCookie != nullptr);
 	newStream->addAttribute(sStreamCookieName, theStreamCookie);
-
-	// Set the number of quality levels.
-	newStream->SetNumQualityLevels(ReflectorSession::kNumQualityLevels);
 
 	//send the setup response
 	SendSetupRTSPResponse(newStream, inParams.inRTSPRequest, qtssSetupRespDontWriteSSRC);
@@ -846,8 +837,6 @@ QTSS_Error DoPlay(QTSS_StandardRTSP_Params& inParams, ReflectorSession* inSessio
 		// it also allows the server to scale the TCP buffer size appropriately if we are
 		// interleaving the data over TCP. This must be set before calling QTSS_Play so the
 		// server can use it from within QTSS_Play
-		uint32_t bitsPerSecond = inSession->GetBitRate();
-		inParams.inClientSession->SetMovieAvgBitrate(bitsPerSecond);
 
 		if (sPlayResponseRangeHeader)
 		{

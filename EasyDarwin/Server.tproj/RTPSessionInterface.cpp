@@ -38,29 +38,15 @@
 #include "RTPStream.h"
 #include "ServerPrefs.h"
 
-unsigned int            RTPSessionInterface::sRTPSessionIDCounter = 0;
-
 RTPSessionInterface::RTPSessionInterface()
 	: Task(),
 	// assume true until proven false!
-	fTimeoutTask(nullptr, ServerPrefs::GetRTPSessionTimeoutInSecs() * 1000),
-	fTracker(ServerPrefs::IsSlowStartEnabled()),
-	fOverbufferWindow(ServerPrefs::GetSendIntervalInMsec(), UINT32_MAX, ServerPrefs::GetMaxSendAheadTimeInSecs(),
-		ServerPrefs::GetOverbufferRate())
+	fTimeoutTask(nullptr, ServerPrefs::GetRTPSessionTimeoutInSecs() * 1000)
 {
 	//don't actually setup the fTimeoutTask until the session has been bound!
 	//(we don't want to get timeouts before the session gets bound)
 
 	fTimeoutTask.SetTask(this);
-	fTimeout = ServerPrefs::GetRTPSessionTimeoutInSecs() * 1000;
-	//fUniqueID = (uint32_t)atomic_add(&sRTPSessionIDCounter, 1);
-	fUniqueID = ++sRTPSessionIDCounter;
-
-	// fQualityUpdate is a counter the starting value is the unique ID so every session starts at a different position
-	fQualityUpdate = fUniqueID;
-
-	//mark the session create time
-	fSessionCreateTime = OS::Milliseconds();
 }
 
 void RTPSessionInterface::UpdateRTSPSession(RTSPSessionInterface* inNewRTSPSession)
@@ -75,40 +61,4 @@ void RTPSessionInterface::UpdateRTSPSession(RTSPSessionInterface* inNewRTSPSessi
 		fRTSPSession = inNewRTSPSession;
 		fRTSPSession->IncrementObjectHolderCount();
 	}
-}
-
-float RTPSessionInterface::GetPacketLossPercent()
-{
-	RTPStream* theStream = nullptr;
-	uint32_t theLen = sizeof(theStream);
-
-	int64_t packetsLost = 0;
-	int64_t packetsSent = 0;
-
-	for (auto theStream : fStreamBuffer)
-	{
-		uint32_t streamCurPacketsLost = theStream->GetPacketsLostInRTCPInterval();
-		//printf("stream = %d streamCurPacketsLost = %"   _U32BITARG_   " \n",x, streamCurPacketsLost);
-
-		uint32_t streamCurPackets = theStream->GetPacketCountInRTCPInterval();
-		//printf("stream = %d streamCurPackets = %"   _U32BITARG_   " \n",x, streamCurPackets);
-
-		packetsSent += (int64_t)streamCurPackets;
-		packetsLost += (int64_t)streamCurPacketsLost;
-		//printf("stream calculated loss = %f \n",x, (float) streamCurPacketsLost / (float) streamCurPackets);
-
-	}
-
-	//Assert(packetsLost <= packetsSent);
-	if (packetsSent > 0)
-	{
-		if (packetsLost <= packetsSent)
-			fPacketLossPercent = (float)((((float)packetsLost / (float)packetsSent) * 100.0));
-		else
-			fPacketLossPercent = 100.0;
-	}
-	else
-		fPacketLossPercent = 0.0;
-
-	return fPacketLossPercent;
 }

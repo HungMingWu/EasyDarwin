@@ -67,10 +67,9 @@ bool RTPSessionOutput::IsUDP()
 	return fIsUDP;
 }
 
-bool  RTPSessionOutput::PacketAlreadySent(RTPStream *theStreamPtr, uint32_t inFlags, uint64_t* packetIDPtr)
+bool  RTPSessionOutput::PacketAlreadySent(RTPStream *theStreamPtr, uint32_t inFlags, uint64_t packetID)
 {
 	Assert(theStreamPtr);
-	Assert(packetIDPtr);
 
 	uint32_t theLen = 0;
 	uint64_t *lastPacketIDPtr = nullptr;
@@ -79,7 +78,7 @@ bool  RTPSessionOutput::PacketAlreadySent(RTPStream *theStreamPtr, uint32_t inFl
 	if (inFlags & qtssWriteFlagsIsRTP)
 	{
 		boost::optional<boost::any> opt = theStreamPtr->getAttribute(sLastRTPPacketID);
-		if (opt && *packetIDPtr <= boost::any_cast<uint64_t>(opt.value()))
+		if (opt && packetID <= boost::any_cast<uint64_t>(opt.value()))
 		{
 			//printf("RTPSessionOutput::WritePacket Don't send RTP packet id =%qu\n", *packetIDPtr);
 			packetSent = true;
@@ -89,7 +88,7 @@ bool  RTPSessionOutput::PacketAlreadySent(RTPStream *theStreamPtr, uint32_t inFl
 	else if (inFlags & qtssWriteFlagsIsRTCP)
 	{
 		boost::optional<boost::any> opt = theStreamPtr->getAttribute(sLastRTCPPacketID);
-		if (opt && *packetIDPtr <= boost::any_cast<uint64_t>(opt.value()))
+		if (opt && packetID <= boost::any_cast<uint64_t>(opt.value()))
 		{
 			//printf("RTPSessionOutput::WritePacket Don't send RTP packet id =%qu\n", *packetIDPtr);
 			packetSent = true;
@@ -100,11 +99,10 @@ bool  RTPSessionOutput::PacketAlreadySent(RTPStream *theStreamPtr, uint32_t inFl
 }
 
 QTSS_Error  RTPSessionOutput::WritePacket(const std::vector<char> &inPacket, void* inStreamCookie, 
-	uint32_t inFlags, int64_t packetLatenessInMSec,
-	uint64_t* packetIDPtr, int64_t* arrivalTimeMSecPtr, bool firstPacket)
+	uint32_t inFlags,
+	uint64_t packetID)
 {
 	QTSS_Error              writeErr = QTSS_NoErr;
-	int64_t                  currentTime = OS::Milliseconds();
 
 	if (inPacket.empty())
 		return QTSS_NoErr;
@@ -118,7 +116,7 @@ QTSS_Error  RTPSessionOutput::WritePacket(const std::vector<char> &inPacket, voi
 	{
 		if (this->PacketMatchesStream(inStreamCookie, theStreamPtr))
 		{
-			if (PacketAlreadySent(theStreamPtr, inFlags, packetIDPtr))
+			if (PacketAlreadySent(theStreamPtr, inFlags, packetID))
 				return QTSS_NoErr; // keep looking at packets
 
 			// TrackPackets below is for re-writing the rtcps we don't use it right now-- shouldn't need to    
@@ -127,27 +125,16 @@ QTSS_Error  RTPSessionOutput::WritePacket(const std::vector<char> &inPacket, voi
 			writeErr = theStreamPtr->Write(inPacket, nullptr, inFlags);
 			if (writeErr == QTSS_WouldBlock)
 			{
-				//printf("QTSS_Write == QTSS_WouldBlock\n");
-			   //
-			   // We are flow controlled. See if we know when flow control will be lifted and report that
-
-				if (firstPacket)
-				{
-					fBufferDelayMSecs = (currentTime - *arrivalTimeMSecPtr);
-					//printf("firstPacket fBufferDelayMSecs =%lu \n", fBufferDelayMSecs);
-				}
 			}
 			else
 			{
-				fLastPacketTransmitTime = currentTime;
-
 				if (inFlags & qtssWriteFlagsIsRTP)
 				{
-					theStreamPtr->addAttribute(sLastRTPPacketID, *packetIDPtr);
+					theStreamPtr->addAttribute(sLastRTPPacketID, packetID);
 				}
 				else if (inFlags & qtssWriteFlagsIsRTCP)
 				{
-					theStreamPtr->addAttribute(sLastRTCPPacketID, *packetIDPtr);
+					theStreamPtr->addAttribute(sLastRTCPPacketID, packetID);
 				}
 			}
 		}

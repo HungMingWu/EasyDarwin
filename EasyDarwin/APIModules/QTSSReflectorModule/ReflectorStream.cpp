@@ -60,7 +60,6 @@ uint32_t                          ReflectorStream::sMaxFuturePacketMSec = 60000;
 
 uint32_t                          ReflectorStream::sMaxFuturePacketSec = 60; // max packet future time
 uint32_t                          ReflectorStream::sOverBufferInSec = 10;
-uint32_t                          ReflectorStream::sBucketDelayInMsec = 73;
 uint32_t                          ReflectorStream::sFirstPacketOffsetMsec = 500;
 
 bool IsKeyFrameFirstPacket(const ReflectorPacket &thePacket)
@@ -126,7 +125,6 @@ ReflectorStream::ReflectorStream(StreamInfo* inInfo)
 	fSockets(nullptr),
 	fRTPSender(this, qtssWriteFlagsIsRTP),
 	fRTCPSender(this, qtssWriteFlagsIsRTCP),
-	fNumElements(0),
 	fBucketMutex(),
 
 	fDestRTCPAddr(0),
@@ -142,9 +140,6 @@ ReflectorStream::ReflectorStream(StreamInfo* inInfo)
 	fMyReflectorSession(nullptr),
 	fStreamInfo(*inInfo)
 {
-
-	// ALLOCATE BUCKET ARRAY
-	this->AllocateBucketArray(kMinNumBuckets);
 
 	// WRITE RTCP PACKET
 
@@ -200,8 +195,6 @@ ReflectorStream::ReflectorStream(StreamInfo* inInfo)
 
 ReflectorStream::~ReflectorStream()
 {
-	Assert(fNumElements == 0);
-
 	if (fSockets != nullptr)
 	{
 		//first things first, let's take this stream off the socket's queue
@@ -230,113 +223,31 @@ ReflectorStream::~ReflectorStream()
 	}
 }
 
-void ReflectorStream::AllocateBucketArray(uint32_t inNumBuckets)
-{
-	//allocate the 2-dimensional array
-	fOutputArray.resize(inNumBuckets);
-	for (uint32_t x = 0; x < inNumBuckets; x++)
-		fOutputArray[x].resize(sBucketSize);
-}
-
-
-int32_t ReflectorStream::AddOutput(ReflectorOutput* inOutput, int32_t putInThisBucket)
+void ReflectorStream::AddOutput(ReflectorOutput* inOutput)
 {
 	OSMutexLocker locker(&fBucketMutex);
-
-#if DEBUG
-	// We should never be adding an output twice to a stream
-	for (uint32_t dOne = 0; dOne < fNumBuckets; dOne++)
-		for (uint32_t dTwo = 0; dTwo < sBucketSize; dTwo++)
-			Assert(fOutputArray[dOne][dTwo] != inOutput);
-#endif
-	// If caller didn't specify a bucket, find a bucket
-	if (putInThisBucket < 0)
-		putInThisBucket = this->FindBucket();
-
-	Assert(putInThisBucket >= 0);
-
-	if (fOutputArray.size() <= (uint32_t)putInThisBucket)
-		AllocateBucketArray(putInThisBucket * 2);
-
-	for (uint32_t y = 0; y < sBucketSize; y++)
-	{
-		if (fOutputArray[putInThisBucket][y] == nullptr)
-		{
-			fOutputArray[putInThisBucket][y] = inOutput;
-#if REFLECTOR_STREAM_DEBUGGING 
-			printf("Adding new output (0x%lx) to bucket %" _S32BITARG_ ", index %" _S32BITARG_ ",\nnum buckets %li bucketSize: %li \n", (int32_t)inOutput, putInThisBucket, y, (int32_t)fNumBuckets, (int32_t)sBucketSize);
-#endif
-			fNumElements++;
-			return putInThisBucket;
-		}
-	}
-	// There was no empty spot in the specified bucket. Return an error
-	return -1;
-}
-
-int32_t ReflectorStream::FindBucket()
-{
-	// If we need more buckets, allocate them.
-	if (fNumElements == (sBucketSize * fOutputArray.size()))
-		AllocateBucketArray(fOutputArray.size() * 2);
-
-	//find the first open spot in the array
-	for (int32_t putInThisBucket = 0; (uint32_t)putInThisBucket < fOutputArray.size(); putInThisBucket++)
-	{
-		for (uint32_t y = 0; y < sBucketSize; y++)
-			if (fOutputArray[putInThisBucket][y] == nullptr)
-				return putInThisBucket;
-	}
-	Assert(0);
-	return 0;
+	fOutputArray.push_back(inOutput);
 }
 
 void  ReflectorStream::RemoveOutput(ReflectorOutput* inOutput)
 {
 	OSMutexLocker locker(&fBucketMutex);
-	Assert(fNumElements > 0);
-
-	//look at all the indexes in the array
-	for (uint32_t x = 0; x < fOutputArray.size(); x++)
-	{
-		for (uint32_t y = 0; y < sBucketSize; y++)
-		{
-			//The array may have blank spaces!
-			if (fOutputArray[x][y] == inOutput)
-			{
-				fOutputArray[x][y] = nullptr;//just clear out the pointer
-
-#if REFLECTOR_STREAM_DEBUGGING  
-				printf("Removing output %x from bucket %" _S32BITARG_ ", index %" _S32BITARG_ "\n", inOutput, x, y);
-#endif
-				fNumElements--;
-				return;
-			}
-		}
-	}
-	Assert(0);
+	auto it = std::find(begin(fOutputArray), end(fOutputArray), inOutput);
+	if (it != end(fOutputArray))
+		fOutputArray.erase(it);
 }
 
 void  ReflectorStream::TearDownAllOutputs()
 {
-
 	OSMutexLocker locker(&fBucketMutex);
 
 	//look at all the indexes in the array
-	for (uint32_t x = 0; x < fOutputArray.size(); x++)
+	for (auto &theOutputPtr : fOutputArray)
 	{
-		for (uint32_t y = 0; y < sBucketSize; y++)
-		{
-			ReflectorOutput* theOutputPtr = fOutputArray[x][y];
-			//The array may have blank spaces!
-			if (theOutputPtr != nullptr)
-			{
-				theOutputPtr->TearDown();
+		theOutputPtr->TearDown();
 #if REFLECTOR_STREAM_DEBUGGING  
-				printf("TearDownAllOutputs Removing output from bucket %" _S32BITARG_ ", index %" _S32BITARG_ "\n", x, y);
+		printf("TearDownAllOutputs Removing output from bucket %" _S32BITARG_ ", index %" _S32BITARG_ "\n", x, y);
 #endif
-			}
-		}
 	}
 }
 
@@ -380,9 +291,6 @@ QTSS_Error ReflectorStream::BindSockets(RTSPRequest *inRequest, RTPSession *inSe
 	//also put this stream onto the socket's queue of streams
 	fSockets->GetSocketA()->AddSender(&fRTPSender);
 	fSockets->GetSocketB()->AddSender(&fRTCPSender);
-
-	fSockets->GetSocketA()->SetSSRCFilter(filterState, timeout);
-	fSockets->GetSocketB()->SetSSRCFilter(filterState, timeout);
 
 	//If the broadcaster is sending RTP directly to us, we don't
 	//need to join a multicast group because we're not using multicast
@@ -523,38 +431,28 @@ void ReflectorSender::ReflectPackets()
 		fKeyFrameStartPacketElementPointer ? fKeyFrameStartPacketElementPointer : 
 		GetClientBufferStartPacketOffset(std::chrono::seconds(0));
 
-	bool firstPacket = false;
-
-	for (uint32_t bucketIndex = 0; bucketIndex < fStream->fOutputArray.size(); bucketIndex++)
+	for (auto &theOutput : fStream->fOutputArray)
 	{
-		for (uint32_t bucketMemberIndex = 0; bucketMemberIndex < fStream->sBucketSize; bucketMemberIndex++)
+		if (false == theOutput->IsPlaying()) continue;
+		OSMutexLocker locker(&theOutput->fMutex);
+		ReflectorPacket* packetElem = theOutput->GetBookMarkedPacket(fPacketQueue);
+		if (packetElem == nullptr) // should only be a new output
+			packetElem = fFirstPacketInQueueForNewOutput; // everybody starts at the oldest packet in the buffer delay or uses a bookmark
+
+		packetElem = SendPacketsToOutput(theOutput, packetElem, currentTime);
+		if (packetElem)
 		{
-			ReflectorOutput* theOutput = fStream->fOutputArray[bucketIndex][bucketMemberIndex];
-			if (theOutput == nullptr || false == theOutput->IsPlaying()) continue;
-			OSMutexLocker locker(&theOutput->fMutex);
-			ReflectorPacket* packetElem = theOutput->GetBookMarkedPacket(fPacketQueue);
-			if (packetElem == nullptr) // should only be a new output
-			{
-				packetElem = fFirstPacketInQueueForNewOutput; // everybody starts at the oldest packet in the buffer delay or uses a bookmark
-				firstPacket = true;
-			}
+			ReflectorPacket* thePacket = NeedRelocateBookMark(packetElem);
 
-			int64_t  bucketDelay = ReflectorStream::sBucketDelayInMsec * (int64_t)bucketIndex;
-			packetElem = SendPacketsToOutput(theOutput, packetElem, currentTime, bucketDelay, firstPacket);
-			if (packetElem)
-			{
-				ReflectorPacket* thePacket = NeedRelocateBookMark(packetElem);
-
-				thePacket->fNeededByOutput = true; 				// flag to prevent removal in RemoveOldPackets
-				theOutput->SetBookMarkPacket(thePacket); 	// store a reference to the packet
-			}
+			thePacket->fNeededByOutput = true; 				// flag to prevent removal in RemoveOldPackets
+			theOutput->SetBookMarkPacket(thePacket); 	// store a reference to the packet
 		}
 	}
 
 	RemoveOldPackets();
 }
 
-ReflectorPacket*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOutput, ReflectorPacket* currentPacket, int64_t currentTime, int64_t  bucketDelay, bool firstPacket)
+ReflectorPacket*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOutput, ReflectorPacket* currentPacket, int64_t currentTime)
 {
 	auto it = std::find_if(begin(fPacketQueue), end(fPacketQueue),
 		[currentPacket](const std::unique_ptr<ReflectorPacket> &pkt) {
@@ -569,7 +467,7 @@ ReflectorPacket*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOut
 		//printf("packetLateness %qd, seq# %li\n", packetLateness, (int32_t) DGetPacketSeqNumber( &thePacket->fPacketPtr ) );          
 
 		err = theOutput->WritePacket(thePacket->fPacket, fStream, fWriteFlag, 
-			bucketDelay, &thePacket->fStreamCountID, &thePacket->fTimeArrived, firstPacket);
+			thePacket->fStreamCountID);
 
 		if (err == QTSS_WouldBlock)
 		{ 
@@ -593,7 +491,7 @@ ReflectorPacket* ReflectorSender::GetClientBufferStartPacketOffset(std::chrono::
 
 	for (const auto &thePacket : fPacketQueue)
 	{
-		auto packetDelay = theCurrentTime - thePacket->fTimeArrived1;
+		auto packetDelay = theCurrentTime - thePacket->fTimeArrived;
 		if (packetDelay <= sOverBufferInSec - offset)
 			return thePacket.get();
 	}
@@ -613,7 +511,7 @@ void    ReflectorSender::RemoveOldPackets()
 	{
 		const auto &thePacket = *it;
 
-		auto packetDelay = std::chrono::duration_cast<std::chrono::milliseconds>(theCurrentTime - thePacket->fTimeArrived1);
+		auto packetDelay = std::chrono::duration_cast<std::chrono::milliseconds>(theCurrentTime - thePacket->fTimeArrived);
 
 		// walk q and remove packets that are too old
 		if (!thePacket->fNeededByOutput && packetDelay > sMaxPacketAge) // delete based on late tolerance and whether a client is blocked on the packet
@@ -645,12 +543,12 @@ ReflectorPacket* ReflectorSender::NeedRelocateBookMark(ReflectorPacket* thePacke
 	Assert(thePacket);
 
 	auto packetDelay = 
-		std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - thePacket->fTimeArrived1);
+		std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - thePacket->fTimeArrived);
 
 	static constexpr auto sRelocatePacketAge = std::chrono::seconds(1);
 	if (packetDelay > sRelocatePacketAge)
 	{
-		if (fKeyFrameStartPacketElementPointer && fKeyFrameStartPacketElementPointer->fTimeArrived1 > thePacket->fTimeArrived1)
+		if (fKeyFrameStartPacketElementPointer && fKeyFrameStartPacketElementPointer->fTimeArrived > thePacket->fTimeArrived)
 		{
 			fStream->GetMyReflectorSession()->SetHasVideoKeyFrameUpdate(true);
 			return fKeyFrameStartPacketElementPointer;
@@ -886,45 +784,6 @@ int64_t ReflectorSocket::Run()
 	return 0;
 }
 
-
-void ReflectorSocket::FilterInvalidSSRCs(ReflectorPacket &thePacket, bool isRTCP)
-{
-	// assume the first SSRC we see is valid and all others are to be ignored.
-	if (thePacket.fPacket.size() > 0) do
-	{
-		int64_t currentTime = OS::Milliseconds() / 1000;
-		if (0 == fValidSSRC)
-		{
-			fValidSSRC = thePacket.GetSSRC(isRTCP); // SSRC of 0 is allowed
-			fLastValidSSRCTime = currentTime;
-			//printf("socket=%"   _U32BITARG_   " FIRST PACKET fValidSSRC=%"   _U32BITARG_   " \n", (uint32_t) this,fValidSSRC);
-			break;
-		}
-
-		uint32_t packetSSRC = thePacket.GetSSRC(isRTCP);
-		if (packetSSRC != 0)
-		{
-			if (packetSSRC == fValidSSRC)
-			{
-				fLastValidSSRCTime = currentTime;
-				//printf("socket=%"   _U32BITARG_   " good packet\n", (uint32_t) this );
-				break;
-			}
-
-			//printf("socket=%"   _U32BITARG_   " bad packet packetSSRC= %"   _U32BITARG_   " fValidSSRC=%"   _U32BITARG_   " \n", (uint32_t) this,packetSSRC,fValidSSRC);
-			thePacket.fPacket.clear(); // ignore this packet wrong SSRC
-		}
-
-		// this executes whenever an invalid SSRC is found -- maybe the original stream ended and a new one is now active
-		if ((fLastValidSSRCTime + fTimeoutSecs) < currentTime) // fValidSSRC timed out --no packets with this SSRC seen for awhile
-		{
-			fValidSSRC = 0; // reset the valid SSRC with the next packet's SSRC
-		 //printf("RESET fValidSSRC\n");
-		}
-
-	} while (false);
-}
-
 bool ReflectorSocket::ProcessPacket(int64_t inMilliseconds, std::unique_ptr<ReflectorPacket> thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort)
 {
 	bool done = false; // stop when result is true
@@ -971,11 +830,6 @@ bool ReflectorSocket::ProcessPacket(int64_t inMilliseconds, std::unique_ptr<Refl
 			}
 		}
 
-		// Only reflect one SSRC stream at a time.
-		// Pass the packet and whether it is an RTCP or RTP packet based on the port number.
-		if (fFilterSSRCs)
-			FilterInvalidSSRCs(*thePacket, GetLocalPort() & 1);// thePacket->fPacketPtr.Len is set to 0 for invalid SSRCs.
-
 		// Find the appropriate ReflectorSender for this packet.
 		ReflectorSender* theSender = fDemuxer.GetTask({ theRemoteAddr, 0 });
 		// If there is a generic sender for this socket, use it.
@@ -993,9 +847,7 @@ bool ReflectorSocket::ProcessPacket(int64_t inMilliseconds, std::unique_ptr<Refl
 		Assert(theSender != nullptr); // at this point we have a sender
 
 		thePacket->fStreamCountID = ++(theSender->fStream->fPacketCount);
-		thePacket->fBucketsSeenThisPacket = 0;
-		thePacket->fTimeArrived = inMilliseconds;
-		thePacket->fTimeArrived1 = std::chrono::high_resolution_clock::now();
+		thePacket->fTimeArrived = std::chrono::high_resolution_clock::now();
 		theSender->appendPacket(std::move(thePacket));
 	} while (false);
 

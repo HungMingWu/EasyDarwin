@@ -96,50 +96,22 @@ void    ReflectorSession::AddOutput(ReflectorOutput* inOutput, bool isClient)
 	Assert(fSourceInfo.GetNumStreams() > 0);
 
 	// We need to make sure that this output goes into the same bucket for each ReflectorStream.
-	int32_t bucket = -1;
-	int32_t lastBucket = -1;
-
 	while (true)
 	{
 		uint32_t x = 0;
 		for (; x < fSourceInfo.GetNumStreams(); x++)
 		{
-			bucket = fStreamArray[x]->AddOutput(inOutput, bucket);
-			if (bucket == -1)   // If this output couldn't be added to this bucket,
-				break;          // break and try again
-			else
-			{
-				lastBucket = bucket; // Remember the last successful bucket placement.
-				if (isClient)
-					fStreamArray[x]->IncEyeCount();
-			}
+			fStreamArray[x]->AddOutput(inOutput);
+			if (isClient)
+				fStreamArray[x]->IncEyeCount();
 		}
 
-		if (bucket == -1)
-		{
-			// If there was some kind of conflict adding this output to this bucket,
-			// we need to remove it from the streams to which it was added.
-			for (uint32_t y = 0; y < x; y++)
-			{
-				fStreamArray[y]->RemoveOutput(inOutput);
-				if (isClient)
-					fStreamArray[y]->DecEyeCount();
-			}
-
-			// Because there was an error, we need to start the whole process over again,
-			// this time starting from a higher bucket
-			lastBucket = bucket = lastBucket + 1;
-		}
-		else
-			break;
+		break;
 	}
-	//(void)atomic_add(&fNumOutputs, 1);
-	++fNumOutputs;
 }
 
 void    ReflectorSession::RemoveOutput(ReflectorOutput* inOutput, bool isClient)
 {
-	--fNumOutputs;
 	for (uint32_t y = 0; y < fSourceInfo.GetNumStreams(); y++)
 	{
 		fStreamArray[y]->RemoveOutput(inOutput);

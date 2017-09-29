@@ -54,30 +54,25 @@ public:
 	// If this function returns QTSS_WouldBlock, timeToSendThisPacketAgain will
 	// be set to # of msec in which the packet can be sent, or -1 if unknown
 	QTSS_Error  WritePacket(const std::vector<char> &inPacketData, void* inStreamCookie,
-		uint32_t inFlags, int64_t packetLatenessInMSec, 
-		uint64_t* packetIDPtr, int64_t* arrivalTimeMSec, bool firstPacket) override;
+		uint32_t inFlags, 
+		uint64_t packetID) override;
 	void TearDown() override;
 
 	bool  IsUDP() override;
 
 	bool  IsPlaying() override;
-
-	void SetBufferDelay(uint32_t delay) { fBufferDelayMSecs = delay; }
-
 private:
 
 	RTPSession*             fClientSession;
 	ReflectorSession*       fReflectorSession;
 	std::string             fCookieAttrName;
-	uint32_t                  fBufferDelayMSecs{ 10000 };
 	int64_t                  fBaseArrivalTime{ 0 };
 	bool                  fIsUDP{ false };
 	bool                  fTransportInitialized{ false };
 	bool                  fMustSynch{ true };
 
-	uint32_t GetPacketRTPTime(StrPtrLen* packetStrPtr);
 	inline  bool PacketMatchesStream(void* inStreamCookie, RTPStream *theStreamPtr);
-	bool PacketAlreadySent(RTPStream *theStreamPtr, uint32_t inFlags, uint64_t* packetIDPtr);
+	bool PacketAlreadySent(RTPStream *theStreamPtr, uint32_t inFlags, uint64_t packetID);
 };
 
 bool RTPSessionOutput::PacketMatchesStream(void* inStreamCookie, RTPStream *theStreamPtr)

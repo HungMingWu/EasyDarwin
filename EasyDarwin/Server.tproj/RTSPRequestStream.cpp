@@ -42,10 +42,8 @@ RTSPRequestStream::RTSPRequestStream(TCPSocket* sock)
 	fRetreatBytes(0),
 	fRetreatBytesRead(0),
 	fCurOffset(0),
-	fEncodedBytesRemaining(0),
 	fRequest(fRequestBuffer, 0),
-	fRequestPtr(nullptr),
-	fDecode(false)
+	fRequestPtr(nullptr)
 {}
 
 QTSS_Error RTSPRequestStream::ReadRequest()
@@ -66,27 +64,7 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 			if ((fRetreatBytes > 0) && (fRequest.Len > 0))
 				::memmove(fRequest.Ptr, fRequest.Ptr + fRequest.Len + fRetreatBytesRead, fRetreatBytes);
 
-			// if we are decoding, we need to also move over the remaining encoded bytes
-			// to the right position in the fRequestBuffer
-			if (fEncodedBytesRemaining > 0)
-			{
-				//Assert(fEncodedBytesRemaining < 4);
-
-				// The right position is at fRetreatBytes offset in the request buffer. The reason for this is:
-				//  1) We need to find a place in the request buffer where we know we have enough space to store
-				//  fEncodedBytesRemaining. fRetreatBytes + fEncodedBytesRemaining will always be less than
-				//  kRequestBufferSize because all this data must have been in the same request buffer, together, at one point.
-				//
-				//  2) We need to make sure that there is always more data in the RequestBuffer than in the decoded
-				//  request buffer, otherwise we could overrun the decoded request buffer (we bounds check on the encoded
-				//  buffer, not the decoded buffer). Leaving fRetreatBytes as empty space in the request buffer ensures
-				//  that this principle is maintained. 
-				::memmove(&fRequestBuffer[fRetreatBytes], &fRequestBuffer[fCurOffset - fEncodedBytesRemaining], fEncodedBytesRemaining);
-				fCurOffset = fRetreatBytes + fEncodedBytesRemaining;
-				Assert(fCurOffset < kRequestBufferSizeInBytes);
-			}
-			else
-				fCurOffset = fRetreatBytes;
+			fCurOffset = fRetreatBytes;
 
 			newOffset = fRequest.Len = fRetreatBytes;
 			fRetreatBytes = fRetreatBytesRead = 0;
@@ -102,7 +80,6 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 				// If this is true, just fall through and decode the data.
 				newOffset = fRetreatBytes;
 				fRetreatBytes = 0;
-				Assert(fEncodedBytesRemaining == 0);
 			}
 			else
 			{
@@ -119,21 +96,7 @@ QTSS_Error RTSPRequestStream::ReadRequest()
 				}
 			}
 
-			if (fDecode)
-			{
-				// If we need to decode this data, do it now.
-				Assert(fCurOffset >= fEncodedBytesRemaining);
-				QTSS_Error decodeErr = this->DecodeIncomingData(&fRequestBuffer[fCurOffset - fEncodedBytesRemaining],
-					newOffset + fEncodedBytesRemaining);
-				// If the above function returns an error, it is because we've
-				// encountered some non-base64 data in the stream. We can process
-				// everything up until that point, but all data after this point will
-				// be ignored.
-				if (decodeErr == QTSS_NoErr)
-					Assert(fEncodedBytesRemaining < 4);
-			}
-			else
-				fRequest.Len += newOffset;
+			fRequest.Len += newOffset;
 			Assert(fRequest.Len < kRequestBufferSizeInBytes);
 			fCurOffset += newOffset;
 		}
@@ -266,60 +229,3 @@ QTSS_Error RTSPRequestStream::Read(void* ioBuffer, uint32_t inBufLen, uint32_t* 
 
 	return theErr;
 }
-
-QTSS_Error RTSPRequestStream::DecodeIncomingData(char* inSrcData, uint32_t inSrcDataLen)
-{
-	Assert(fRetreatBytes == 0);
-
-	if (fRequest.Ptr == &fRequestBuffer[0])
-	{
-		fRequest.Ptr = new char[kRequestBufferSizeInBytes];
-		fRequest.Len = 0;
-	}
-
-	// We always decode up through the last chunk of 4.
-	fEncodedBytesRemaining = inSrcDataLen & 3;
-
-	// Let our friendly Base64Decode function know this by NULL terminating at that point
-	uint32_t bytesToDecode = inSrcDataLen - fEncodedBytesRemaining;
-	char endChar = inSrcData[bytesToDecode];
-	inSrcData[bytesToDecode] = '\0';
-
-	uint32_t encodedBytesConsumed = 0;
-
-	// Loop until the whole load is decoded
-	while (encodedBytesConsumed < bytesToDecode)
-	{
-		Assert((encodedBytesConsumed & 3) == 0);
-		Assert((bytesToDecode & 3) == 0);
-
-		uint32_t bytesDecoded = 0;// Base64decode(fRequest.Ptr + fRequest.Len, inSrcData + encodedBytesConsumed);
-
-		// If bytesDecoded is 0, we will end up being in an endless loop. The
-		// base64 must be corrupt, so let's just return an error and abort
-		if (bytesDecoded == 0)
-		{
-			//Assert(0);
-			return QTSS_BadArgument;
-		}
-
-		fRequest.Len += bytesDecoded;
-
-		// Assuming the stream is valid, the # of encoded bytes we just consumed is
-		// 4/3rds of the number of decoded bytes returned by the decode function,
-		// rounded up to the nearest multiple of 4.
-		encodedBytesConsumed += (bytesDecoded / 3) * 4;
-		if ((bytesDecoded % 3) > 0)
-			encodedBytesConsumed += 4;
-
-	}
-
-	// Make sure to replace the sacred endChar
-	inSrcData[bytesToDecode] = endChar;
-
-	Assert(fRequest.Len < kRequestBufferSizeInBytes);
-	Assert(encodedBytesConsumed == bytesToDecode);
-
-	return QTSS_NoErr;
-}
-

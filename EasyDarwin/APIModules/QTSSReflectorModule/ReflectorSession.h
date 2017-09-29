@@ -90,7 +90,6 @@ public:
 	// ACCESSORS
 
 	OSRef*          GetRef() { return &fRef; }
-	uint32_t          GetNumOutputs() { return fNumOutputs; }
 	uint32_t          GetNumStreams() { return fSourceInfo.GetNumStreams(); }
 	SDPSourceInfo& GetSourceInfo() { return fSourceInfo; }
 	boost::string_view GetLocalSDP()	{ return fLocalSDP; }
@@ -128,9 +127,6 @@ private:
 	OSRef       fRef;
 
 	std::string	fSessionName;
-
-	unsigned int        fNumOutputs{ 0 };
-
 	std::vector<std::unique_ptr<ReflectorStream>>   fStreamArray;
 
 	// The reflector session needs to hang onto the source info object

@@ -74,9 +74,6 @@ public:
 	// this will be used by RTSPSessionInterface::SnarfInputSocket
 	void                AttachToSocket(TCPSocket* sock) { fSocket = sock; }
 
-	// Tell the request stream whether or not to decode from base64.
-	void                IsBase64Encoded(bool isDataEncoded) { fDecode = isDataEncoded; }
-
 	//GetRequestBuffer
 	//This returns a buffer containing the full client request. The length is set to
 	//the exact length of the request headers. This will return NULL UNLESS this object
@@ -94,21 +91,15 @@ private:
 		kRequestBufferSizeInBytes = QTSS_MAX_REQUEST_BUFFER_SIZE        //uint32_t
 	};
 
-	// Base64 decodes into fRequest.Ptr, updates fRequest.Len, and returns the amount
-	// of data left undecoded in inSrcData
-	QTSS_Error              DecodeIncomingData(char* inSrcData, uint32_t inSrcDataLen);
-
 	TCPSocket*              fSocket;
 	uint32_t                  fRetreatBytes;
 	uint32_t                  fRetreatBytesRead; // Used by Read() when it is reading RetreatBytes
 
 	char                    fRequestBuffer[kRequestBufferSizeInBytes];
 	uint32_t                  fCurOffset; // tracks how much valid data is in the above buffer
-	uint32_t                  fEncodedBytesRemaining; // If we are decoding, tracks how many encoded bytes are in the buffer
 
 	StrPtrLen               fRequest;
 	StrPtrLen*              fRequestPtr;    // pointer to a request header
-	bool                  fDecode;        // should we base 64 decode?
 	bool                  fIsDataPacket;  // is this a data packet? Like for a record?
 };
 

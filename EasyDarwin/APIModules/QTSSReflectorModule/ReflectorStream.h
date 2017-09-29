@@ -77,9 +77,7 @@ public:
 	inline  int64_t  GetPacketNTPTime();
 
 private:
-	uint32_t      fBucketsSeenThisPacket{ 0 };
-	int64_t      fTimeArrived{ 0 };
-	std::chrono::high_resolution_clock::time_point fTimeArrived1;
+	std::chrono::high_resolution_clock::time_point fTimeArrived;
 	std::vector<char> fPacket;
 	bool      fIsRTCP{ false };
 	bool      fNeededByOutput{ false }; // is this packet still needed for output?
@@ -170,12 +168,10 @@ public:
 	bool  HasSender() { return !fDemuxer.empty(); }
 	bool  ProcessPacket(int64_t inMilliseconds, std::unique_ptr<ReflectorPacket> thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort);
 	int64_t      Run() override;
-	void    SetSSRCFilter(bool state, uint32_t timeoutSecs) { fFilterSSRCs = state; fTimeoutSecs = timeoutSecs; }
 private:
 
 	//virtual int64_t        Run();
 	void    GetIncomingData(int64_t inMilliseconds);
-	void    FilterInvalidSSRCs(ReflectorPacket &thePacket, bool isRTCP);
 
 	//Number of packets to allocate when the socket is first created
 	enum
@@ -190,8 +186,6 @@ private:
 
 	uint32_t  fValidSSRC{0};
 	int64_t  fLastValidSSRCTime{0};
-	bool  fFilterSSRCs{true};
-	uint32_t  fTimeoutSecs{30};
 
 	bool  fHasReceiveTime{false};
 	uint64_t  fFirstReceiveTime{0};
@@ -255,7 +249,7 @@ public:
 	//Returns the time at which it next needs to be invoked
 	void        ReflectPackets();
 
-	ReflectorPacket*    SendPacketsToOutput(ReflectorOutput* theOutput, ReflectorPacket* currentPacket, int64_t currentTime, int64_t  bucketDelay, bool firstPacket);
+	ReflectorPacket*    SendPacketsToOutput(ReflectorOutput* theOutput, ReflectorPacket* currentPacket, int64_t currentTime);
 
 	void        RemoveOldPackets();
 	ReflectorPacket* GetClientBufferStartPacketOffset(std::chrono::seconds offset);
@@ -318,7 +312,7 @@ public:
 	// Pass in -1 if you don't care. AddOutput returns the bucket index this output was
 	// placed into, or -1 on an error.
 
-	int32_t  AddOutput(ReflectorOutput* inOutput, int32_t putInThisBucket);
+	void  AddOutput(ReflectorOutput* inOutput);
 
 	// Removes the specified output from this ReflectorStream.
 	void    RemoveOutput(ReflectorOutput* inOutput); // Removes this output from all tracks
@@ -358,8 +352,6 @@ private:
 
 	//Sends an RTCP receiver report to the broadcast source
 	void    SendReceiverReport();
-	void    AllocateBucketArray(uint32_t inNumBuckets);
-	int32_t  FindBucket();
 
 	// Reflector sockets, retrieved from the socket pool
 	SocketPair<ReflectorSocket>*      fSockets;
@@ -382,10 +374,8 @@ private:
 	};
 
 	// BUCKET ARRAY
-	//ReflectorOutputs are kept in a 2-dimensional array, "Buckets"
-	std::vector<std::vector<ReflectorOutput*>>     fOutputArray;
-
-	uint32_t      fNumElements;       //Number of reflector outputs in the array
+	//ReflectorOutputs are kept in a 1-dimensional array
+	std::vector<ReflectorOutput*>     fOutputArray;
 
 	//Bucket array can't be modified while we are sending packets.
 	OSMutex     fBucketMutex;
@@ -421,7 +411,6 @@ private:
 
 	static uint32_t       sMaxFuturePacketMSec;
 	static uint32_t       sOverBufferInSec;
-	static uint32_t       sBucketDelayInMsec;
 	static uint32_t       sFirstPacketOffsetMsec;
 
 	friend class ReflectorSocket;

@@ -10,6 +10,7 @@ set (SRC ${SRC} ${CMAKE_CURRENT_SOURCE_DIR}/QTSSReflectorModule.cpp
 				${CMAKE_CURRENT_SOURCE_DIR}/MyReflectorSocket.h
 				${CMAKE_CURRENT_SOURCE_DIR}/MyReflectorStream.cpp
 				${CMAKE_CURRENT_SOURCE_DIR}/MyReflectorStream.h
+				${CMAKE_CURRENT_SOURCE_DIR}/MyReflectorPacket.h
 				${CMAKE_CURRENT_SOURCE_DIR}/MyReflectorSender.cpp
 				${CMAKE_CURRENT_SOURCE_DIR}/MyReflectorSender.h
 				${CMAKE_CURRENT_SOURCE_DIR}/RTPSessionOutput.cpp

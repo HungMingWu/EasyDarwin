@@ -36,6 +36,7 @@
 #include "RTSPRequest.h"
 #include "SDPSourceInfo.h"
 #include "MyRTSPRequest.h"
+#include "MyReflectorPacket.h"
 
 #if DEBUG
 #define REFLECTOR_STREAM_DEBUGGING 0
@@ -62,46 +63,6 @@ uint32_t                          ReflectorStream::sMaxFuturePacketSec = 60; // 
 uint32_t                          ReflectorStream::sOverBufferInSec = 10;
 uint32_t                          ReflectorStream::sFirstPacketOffsetMsec = 500;
 
-bool IsKeyFrameFirstPacket(const ReflectorPacket &thePacket)
-{
-	if (thePacket.fPacket.size() < 20) return false;
-
-	uint8_t csrc_count = thePacket.fPacket[0] & 0x0f;
-	uint32_t rtp_head_size = /*sizeof(struct RTPHeader)*/12 + csrc_count * sizeof(uint32_t);
-	uint8_t nal_unit_type = thePacket.fPacket[rtp_head_size + 0] & 0x1F;
-	if (nal_unit_type == 24)//STAP-A
-	{
-		if (thePacket.fPacket.size() > rtp_head_size + 3)
-			nal_unit_type = thePacket.fPacket[rtp_head_size + 3] & 0x1F;
-	}
-	else if (nal_unit_type == 25)//STAP-B
-	{
-		if (thePacket.fPacket.size() > rtp_head_size + 5)
-			nal_unit_type = thePacket.fPacket[rtp_head_size + 5] & 0x1F;
-	}
-	else if (nal_unit_type == 26)//MTAP16
-	{
-		if (thePacket.fPacket.size() > rtp_head_size + 8)
-			nal_unit_type = thePacket.fPacket[rtp_head_size + 8] & 0x1F;
-	}
-	else if (nal_unit_type == 27)//MTAP24
-	{
-		if (thePacket.fPacket.size() > rtp_head_size + 9)
-			nal_unit_type = thePacket.fPacket[rtp_head_size + 9] & 0x1F;
-	}
-	else if ((nal_unit_type == 28) || (nal_unit_type == 29))//FU-A/B
-	{
-		if (thePacket.fPacket.size() > rtp_head_size + 1)
-		{
-			uint8_t startBit = thePacket.fPacket[rtp_head_size + 1] & 0x80;
-			if (startBit)
-				nal_unit_type = thePacket.fPacket[rtp_head_size + 1] & 0x1F;
-		}
-	}
-
-	return nal_unit_type == 5 || nal_unit_type == 7 || nal_unit_type == 8;
-}
-
 enum class KeyFrameType : char {
 	Video,
 	Audio,
@@ -109,7 +70,7 @@ enum class KeyFrameType : char {
 };
 
 static KeyFrameType needToUpdateKeyFrame(ReflectorStream* stream,
-	const ReflectorPacket &thePacket)
+	const MyReflectorPacket &thePacket)
 {
 	StreamInfo* info = stream->GetStreamInfo();
 	if (info->fPayloadType == qtssVideoPayloadType && info->fPayloadName == "H264/90000"
@@ -121,8 +82,7 @@ static KeyFrameType needToUpdateKeyFrame(ReflectorStream* stream,
 }
 
 ReflectorStream::ReflectorStream(StreamInfo* inInfo)
-	: fPacketCount(0),
-	fSockets(nullptr),
+	: fSockets(nullptr),
 	fRTPSender(this, qtssWriteFlagsIsRTP),
 	fRTCPSender(this, qtssWriteFlagsIsRTCP),
 	fBucketMutex(),
@@ -131,7 +91,7 @@ ReflectorStream::ReflectorStream(StreamInfo* inInfo)
 	fDestRTCPPort(0),
 
 	fCurrentBitRate(0),
-	fLastBitRateSample(OS::Milliseconds()), // don't calculate our first bit rate until kBitRateAvgIntervalInMilSecs has passed!
+	fLastBitRateSample(std::chrono::high_resolution_clock::now()), // don't calculate our first bit rate until kBitRateAvgIntervalInMilSecs has passed!
 	fBytesSentInThisInterval(0),
 
 	fRTPChannel(-1),
@@ -339,16 +299,16 @@ void ReflectorStream::PushPacket(char *packet, size_t packetLen, bool isRTCP)
 {
 	if (packetLen > 0)
 	{
-		auto thePacket = std::make_unique<ReflectorPacket>(packet, packetLen);
+		auto thePacket = std::make_unique<MyReflectorPacket>(packet, packetLen);
 		if (isRTCP)
 		{
 			//printf("ReflectorStream::PushPacket RTCP packetlen = %"   _U32BITARG_   "\n",packetLen);
-			fSockets->GetSocketB()->ProcessPacket(OS::Milliseconds(), std::move(thePacket), 0, 0);
+			fSockets->GetSocketB()->ProcessPacket(std::chrono::high_resolution_clock::now(), std::move(thePacket), 0, 0);
 			fSockets->GetSocketB()->Signal(Task::kIdleEvent);
 		}
 		else
 		{
-			fSockets->GetSocketA()->ProcessPacket(OS::Milliseconds(), std::move(thePacket), 0, 0);
+			fSockets->GetSocketA()->ProcessPacket(std::chrono::high_resolution_clock::now(), std::move(thePacket), 0, 0);
 			fSockets->GetSocketA()->Signal(Task::kIdleEvent);
 		}
 	}
@@ -408,13 +368,15 @@ static uint16_t DGetPacketSeqNumber(StrPtrLen* inPacket)
 
 void ReflectorSender::ReflectPackets()
 {
-	int64_t currentTime = OS::Milliseconds();
+	auto currentTime = std::chrono::high_resolution_clock::now();
 
 	//make sure to reset these state variables
 	fHasNewPackets = false;
 
 	//determine if we need to send a receiver report to the multicast source
-	if ((fWriteFlag == qtssWriteFlagsIsRTCP) && (currentTime > (fLastRRTime + kRRInterval)))
+	static constexpr auto kRRInterval = std::chrono::milliseconds(5000);
+	if (fWriteFlag == qtssWriteFlagsIsRTCP && 
+		std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - fLastRRTime) > kRRInterval)
 	{
 		fLastRRTime = currentTime;
 		fStream->SendReceiverReport();
@@ -427,7 +389,7 @@ void ReflectorSender::ReflectPackets()
 	// Check to see if we should update the session's bitrate average
 	fStream->UpdateBitRate(currentTime);
 
-	ReflectorPacket *fFirstPacketInQueueForNewOutput = 
+	MyReflectorPacket *fFirstPacketInQueueForNewOutput = 
 		fKeyFrameStartPacketElementPointer ? fKeyFrameStartPacketElementPointer : 
 		GetClientBufferStartPacketOffset(std::chrono::seconds(0));
 
@@ -435,14 +397,14 @@ void ReflectorSender::ReflectPackets()
 	{
 		if (false == theOutput->IsPlaying()) continue;
 		OSMutexLocker locker(&theOutput->fMutex);
-		ReflectorPacket* packetElem = theOutput->GetBookMarkedPacket(fPacketQueue);
+		MyReflectorPacket* packetElem = theOutput->GetBookMarkedPacket(fPacketQueue);
 		if (packetElem == nullptr) // should only be a new output
 			packetElem = fFirstPacketInQueueForNewOutput; // everybody starts at the oldest packet in the buffer delay or uses a bookmark
 
-		packetElem = SendPacketsToOutput(theOutput, packetElem, currentTime);
+		packetElem = SendPacketsToOutput(theOutput, packetElem);
 		if (packetElem)
 		{
-			ReflectorPacket* thePacket = NeedRelocateBookMark(packetElem);
+			MyReflectorPacket* thePacket = NeedRelocateBookMark(packetElem);
 
 			thePacket->fNeededByOutput = true; 				// flag to prevent removal in RemoveOldPackets
 			theOutput->SetBookMarkPacket(thePacket); 	// store a reference to the packet
@@ -452,10 +414,10 @@ void ReflectorSender::ReflectPackets()
 	RemoveOldPackets();
 }
 
-ReflectorPacket*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOutput, ReflectorPacket* currentPacket, int64_t currentTime)
+MyReflectorPacket*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOutput, MyReflectorPacket* currentPacket)
 {
 	auto it = std::find_if(begin(fPacketQueue), end(fPacketQueue),
-		[currentPacket](const std::unique_ptr<ReflectorPacket> &pkt) {
+		[currentPacket](const std::unique_ptr<MyReflectorPacket> &pkt) {
 		return pkt.get() == currentPacket;
 	});
 
@@ -479,7 +441,7 @@ ReflectorPacket*    ReflectorSender::SendPacketsToOutput(ReflectorOutput* theOut
 }
 
 
-ReflectorPacket* ReflectorSender::GetClientBufferStartPacketOffset(std::chrono::seconds offset)
+MyReflectorPacket* ReflectorSender::GetClientBufferStartPacketOffset(std::chrono::seconds offset)
 {
 	auto theCurrentTime = std::chrono::high_resolution_clock::now();
 
@@ -538,7 +500,7 @@ void    ReflectorSender::RemoveOldPackets()
 
 // if current packet over max packetAgeTime, we need relocate the BookMark to
 // the new fKeyFrameStartPacketElementPointer
-ReflectorPacket* ReflectorSender::NeedRelocateBookMark(ReflectorPacket* thePacket)
+MyReflectorPacket* ReflectorSender::NeedRelocateBookMark(MyReflectorPacket* thePacket)
 {
 	Assert(thePacket);
 
@@ -558,7 +520,7 @@ ReflectorPacket* ReflectorSender::NeedRelocateBookMark(ReflectorPacket* thePacke
 	return thePacket;
 }
 
-void ReflectorSender::appendPacket(std::unique_ptr<ReflectorPacket> thePacket)
+void ReflectorSender::appendPacket(std::unique_ptr<MyReflectorPacket> thePacket)
 {
 	if (!thePacket->IsRTCP())
 	{
@@ -767,11 +729,9 @@ int64_t ReflectorSocket::Run()
 	if (theEvents & Task::kKillEvent)
 		return -1;
 
-	int64_t theMilliseconds = OS::Milliseconds();
-
 	//Only check for data on the socket if we've actually been notified to that effect
 	if (theEvents & Task::kReadEvent)
-		this->GetIncomingData(theMilliseconds);
+		this->GetIncomingData(std::chrono::high_resolution_clock::now());
 
 	//Now that we've gotten all available packets, have the streams reflect
 	for (const auto &theSender2 : fSenderQueue)
@@ -784,7 +744,7 @@ int64_t ReflectorSocket::Run()
 	return 0;
 }
 
-bool ReflectorSocket::ProcessPacket(int64_t inMilliseconds, std::unique_ptr<ReflectorPacket> thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort)
+bool ReflectorSocket::ProcessPacket(time_point now, std::unique_ptr<MyReflectorPacket> thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort)
 {
 	bool done = false; // stop when result is true
 	if (thePacket != nullptr) do
@@ -794,12 +754,13 @@ bool ReflectorSocket::ProcessPacket(int64_t inMilliseconds, std::unique_ptr<Refl
 		else
 			thePacket->fIsRTCP = false;
 
+		static constexpr auto kRefreshBroadcastSessionInterval = std::chrono::milliseconds(10000);
 		if (fBroadcasterClientSession != nullptr) // alway refresh timeout even if we are filtering.
 		{
-			if ((inMilliseconds - fLastBroadcasterTimeOutRefresh) > kRefreshBroadcastSessionIntervalMilliSecs)
+			if (std::chrono::duration_cast<std::chrono::milliseconds>(now - fLastBroadcasterTimeOutRefresh) > kRefreshBroadcastSessionInterval)
 			{
 				fBroadcasterClientSession->RefreshTimeouts();
-				fLastBroadcasterTimeOutRefresh = inMilliseconds;
+				fLastBroadcasterTimeOutRefresh = now;
 			}
 		}
 
@@ -855,7 +816,7 @@ bool ReflectorSocket::ProcessPacket(int64_t inMilliseconds, std::unique_ptr<Refl
 }
 
 
-void ReflectorSocket::GetIncomingData(int64_t inMilliseconds)
+void ReflectorSocket::GetIncomingData(time_point now)
 {
 	uint32_t theRemoteAddr = 0;
 	uint16_t theRemotePort = 0;
@@ -870,8 +831,8 @@ void ReflectorSocket::GetIncomingData(int64_t inMilliseconds)
 		(void)this->RecvFrom(&theRemoteAddr, &theRemotePort, fPacketPtr,
 			kMaxReflectorPacketSize, &fPacketLen);
 
-		auto thePacket = std::make_unique<ReflectorPacket>(fPacketPtr, fPacketLen);
-		if (this->ProcessPacket(inMilliseconds, std::move(thePacket), theRemoteAddr, theRemotePort))
+		auto thePacket = std::make_unique<MyReflectorPacket>(fPacketPtr, fPacketLen);
+		if (this->ProcessPacket(now, std::move(thePacket), theRemoteAddr, theRemotePort))
 			break;
 
 		//printf("ReflectorSocket::GetIncomingData \n");

@@ -1,4 +1,5 @@
 #pragma once
+#include <atomic>
 #include "SDPSourceInfo.h"
 #include "MyReflectorSender.h"
 #include "UDPSocketPool.h"
@@ -17,6 +18,10 @@ class MyReflectorStream {
 	QTSS_RTPTransportType fTransportType{ qtssRTPTransportTypeTCP };
 	MyReflectorSender     fRTPSender;
 	MyReflectorSender     fRTCPSender;
+	std::atomic_size_t fBytesSentInThisInterval{ 0 };
+	uint64_t                  fPacketCount;
+	friend class MyReflectorSender;
+	friend class MyReflectorSocket;
 public:
 	MyReflectorStream(StreamInfo* inInfo);
 	~MyReflectorStream() = default;
@@ -29,4 +34,6 @@ public:
 	void SetEnableBuffer(bool enableBuffer) { fEnableBuffer = enableBuffer; }
 	SocketPair<MyReflectorSocket>* GetSocketPair() { return fSockets; }
 	void PushPacket(const char *packet, size_t packetLen, bool isRTCP);
+	const StreamInfo& GetStreamInfo() const { return fStreamInfo; }
+	MyReflectorSession* GetMyReflectorSession() { return fMyReflectorSession; }
 };

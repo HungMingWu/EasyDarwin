@@ -55,48 +55,6 @@ public:
 	static int64_t   HostToNetworkSInt64(int64_t hostOrdered);
 	static int64_t   NetworkToHostSInt64(int64_t networkOrdered);
 
-	static int64_t	TimeMilli_To_Fixed64Secs(int64_t inMilliseconds); //new CISCO provided implementation
-	//disable: calculates integer value only                { return (int64_t) ( (double) inMilliseconds / 1000) * ((int64_t) 1 << 32 ) ; }
-	static int64_t	Fixed64Secs_To_TimeMilli(int64_t inFixed64Secs)
-	{
-		auto value = (uint64_t)inFixed64Secs; return (value >> 32) * 1000 + (((value % ((uint64_t)1 << 32)) * 1000) >> 32);
-	}
-
-	//This converts the local time (from OS::Milliseconds) to NTP time.
-	static int64_t	TimeMilli_To_1900Fixed64Secs(int64_t inMilliseconds)
-	{
-		return TimeMilli_To_Fixed64Secs(sMsecSince1900) + TimeMilli_To_Fixed64Secs(inMilliseconds);
-	}
-
-	static int64_t	TimeMilli_To_UnixTimeMilli(int64_t inMilliseconds)
-	{
-		return inMilliseconds;
-	}
-
-	static time_t	TimeMilli_To_UnixTimeSecs(int64_t inMilliseconds)
-	{
-		return (time_t)((int64_t)TimeMilli_To_UnixTimeMilli(inMilliseconds) / (int64_t)1000);
-	}
-
-	static time_t   Time1900Fixed64Secs_To_UnixTimeSecs(int64_t in1900Fixed64Secs)
-	{
-		return (time_t)((int64_t)((int64_t)(in1900Fixed64Secs - TimeMilli_To_Fixed64Secs(sMsecSince1900)) / ((int64_t)1 << 32)));
-	}
-
-	static int64_t   Time1900Fixed64Secs_To_TimeMilli(int64_t in1900Fixed64Secs)
-	{
-		return   ((int64_t)((double)((int64_t)in1900Fixed64Secs - (int64_t)TimeMilli_To_Fixed64Secs(sMsecSince1900)) / (double)((int64_t)1 << 32)) * 1000);
-	}
-
-	// Returns the offset in hours between local time and GMT (or UTC) time.
-	static int32_t   GetGMTOffset();
-
-	//Both these functions return QTSS_NoErr, QTSS_FileExists, or POSIX errorcode
-	//Makes whatever directories in this path that don't exist yet 
-	static OS_Error RecursiveMakeDir(char *inPath);
-	//Makes the directory at the end of this path
-	static OS_Error MakeDir(char *inPath);
-
 	// Discovery of how many processors are on this machine
 	static uint32_t   GetNumProcessors();
 

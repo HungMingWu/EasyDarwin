@@ -32,47 +32,7 @@ QTSS_Error MyReflectorStream::BindSockets(MyRTSPRequest &inRequest, MyRTPSession
 	}
 	else
 	{
-#if 0
-		// changing INADDR_ANY to fStreamInfo.fDestIPAddr to deal with NATs (need to track this change though)
-		// change submitted by denis@berlin.ccc.de
-
-		bool isMulticastDest = (SocketUtils::IsMulticastIPAddr(fStreamInfo.fDestIPAddr));
-
-		if (isMulticastDest)
-		{
-			fSockets = sSocketPool.GetUDPSocketPair(INADDR_ANY, fStreamInfo.fPort, fStreamInfo.fSrcIPAddr, 0);
-		}
-		else
-		{
-			fSockets = sSocketPool.GetUDPSocketPair(fStreamInfo.fDestIPAddr, fStreamInfo.fPort, fStreamInfo.fSrcIPAddr, 0);
-		}
-
-		if ((fSockets == nullptr) && fStreamInfo.fSetupToReceive)
-		{
-			fStreamInfo.fPort = 0;
-			if (isMulticastDest)
-			{
-				fSockets = sSocketPool.GetUDPSocketPair(INADDR_ANY, fStreamInfo.fPort, fStreamInfo.fSrcIPAddr, 0);
-			}
-			else
-			{
-				fSockets = sSocketPool.GetUDPSocketPair(fStreamInfo.fDestIPAddr, fStreamInfo.fPort, fStreamInfo.fSrcIPAddr, 0);
-			}
-		}
-#endif
 	}
-
-#if 0
-	if (fSockets == nullptr)
-		return inRequest->SendErrorResponse(qtssServerInternal);
-
-	// If we know the source IP address of this broadcast, we can demux incoming traffic
-	// on the same port by that source IP address. If we don't know the source IP addr,
-	// it is impossible for us to demux, and therefore we shouldn't allow multiple
-	// broadcasts on the same port.
-	if (fSockets->GetSocketA()->HasSender() && (fStreamInfo.fSrcIPAddr == 0))
-		return inRequest->SendErrorResponse(qtssServerInternal);
-#endif
 
 	//also put this stream onto the socket's queue of streams
 	fSockets->GetSocketA()->AddSender(&fRTPSender);
@@ -83,40 +43,26 @@ QTSS_Error MyReflectorStream::BindSockets(MyRTSPRequest &inRequest, MyRTPSession
 
 	//If the broadcaster is sending RTP directly to us, we don't
 	//need to join a multicast group because we're not using multicast
-#if 0
-	if (isMulticastDest)
-	{
-		QTSS_Error err = fSockets->GetSocketA()->JoinMulticast(fStreamInfo.fDestIPAddr);
-		if (err == QTSS_NoErr)
-			err = fSockets->GetSocketB()->JoinMulticast(fStreamInfo.fDestIPAddr);
-		// If we get an error when setting the TTL, this isn't too important (TTL on
-		// these sockets is only useful for RTCP RRs.
-		if (err == QTSS_NoErr)
-			(void)fSockets->GetSocketA()->SetTtl(fStreamInfo.fTimeToLive);
-		if (err == QTSS_NoErr)
-			(void)fSockets->GetSocketB()->SetTtl(fStreamInfo.fTimeToLive);
-
-		if (err != QTSS_NoErr)
-			return inRequest->SendErrorResponse(qtssServerInternal);
-	}
-#endif
 
 	// If the port is 0, update the port to be the actual port value
 	fStreamInfo.fPort = fSockets->GetSocketA()->GetLocalPort();
-
-#if 0
-	//finally, register these sockets for events
-	if (qtssRTPTransportTypeUDP == fTransportType)
-	{
-		fSockets->GetSocketA()->RequestEvent(EV_RE);
-		fSockets->GetSocketB()->RequestEvent(EV_RE);
-	}
-#endif
 
 	return QTSS_NoErr;
 }
 
 void MyReflectorStream::PushPacket(const char *packet, size_t packetLen, bool isRTCP)
 {
-
+	if (packetLen > 0)
+	{
+		auto thePacket = std::make_unique<MyReflectorPacket>(packet, packetLen);
+		if (isRTCP)
+		{
+			//printf("ReflectorStream::PushPacket RTCP packetlen = %"   _U32BITARG_   "\n",packetLen);
+			fSockets->GetSocketB()->ProcessPacket(std::chrono::high_resolution_clock::now(), std::move(thePacket), 0, 0);
+		}
+		else
+		{
+			fSockets->GetSocketA()->ProcessPacket(std::chrono::high_resolution_clock::now(), std::move(thePacket), 0, 0);
+		}
+	}
 }

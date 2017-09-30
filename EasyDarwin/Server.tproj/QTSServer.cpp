@@ -148,10 +148,6 @@ bool QTSServer::Initialize(uint16_t inPortOverride, bool createListeners, const 
 		return false;
 
 	//
-	// STARTUP TIME - record it
-	fGMTOffset = OS::GetGMTOffset();
-
-	//
 	// BEGIN LISTENING
 	if (createListeners)
 		CreateListeners(false, inPortOverride);

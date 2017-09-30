@@ -42,7 +42,7 @@
 #include "MyAssert.h"
 #include "OS.h"
 
-class ReflectorPacket;
+class MyReflectorPacket;
 
 class ReflectorOutput
 {
@@ -53,11 +53,11 @@ class ReflectorOutput
         
         // an array of packet elements ( from fPacketQueue in ReflectorSender )
         // possibly one for each ReflectorSender that sends data to this ReflectorOutput        
-        std::vector<ReflectorPacket*> fBookmarkedPacketsElemsArray;
+        std::vector<MyReflectorPacket*> fBookmarkedPacketsElemsArray;
 		OSMutex             fMutex;
 	public:
-		inline  ReflectorPacket*    GetBookMarkedPacket(const std::list<std::unique_ptr<ReflectorPacket>> &thePacketQueue);
-		inline  void SetBookMarkPacket(ReflectorPacket* thePacketElemPtr);
+		inline  MyReflectorPacket*    GetBookMarkedPacket(const std::list<std::unique_ptr<MyReflectorPacket>> &thePacketQueue);
+		inline  void SetBookMarkPacket(MyReflectorPacket* thePacketElemPtr);
         
         // WritePacket
         //
@@ -77,7 +77,7 @@ class ReflectorOutput
         enum { kWaitMilliSec = 5, kMaxWaitMilliSec = 1000 };
 };
 
-void  ReflectorOutput::SetBookMarkPacket(ReflectorPacket* thePacketElemPtr)
+void  ReflectorOutput::SetBookMarkPacket(MyReflectorPacket* thePacketElemPtr)
 {
 	for (auto &elem : fBookmarkedPacketsElemsArray)
 		if (elem == nullptr) {
@@ -86,9 +86,9 @@ void  ReflectorOutput::SetBookMarkPacket(ReflectorPacket* thePacketElemPtr)
 		}
 }
 
-ReflectorPacket*    ReflectorOutput::GetBookMarkedPacket(const std::list<std::unique_ptr<ReflectorPacket>> &thePacketQueue)
+MyReflectorPacket*    ReflectorOutput::GetBookMarkedPacket(const std::list<std::unique_ptr<MyReflectorPacket>> &thePacketQueue)
 {
-    ReflectorPacket*        packetElem = nullptr;              
+    MyReflectorPacket*        packetElem = nullptr;              
 
     // see if we've bookmarked a held packet for this Sender in this Output
     for (auto &bookmarkedElem : fBookmarkedPacketsElemsArray)
@@ -96,7 +96,7 @@ ReflectorPacket*    ReflectorOutput::GetBookMarkedPacket(const std::list<std::un
 		if (!bookmarkedElem) continue;
 
 		auto it = std::find_if(begin(thePacketQueue), end(thePacketQueue),
-			[bookmarkedElem](const std::unique_ptr<ReflectorPacket> &pkt) {
+			[bookmarkedElem](const std::unique_ptr<MyReflectorPacket> &pkt) {
 			return pkt.get() == bookmarkedElem;
 		});
 		if (it != end(thePacketQueue))

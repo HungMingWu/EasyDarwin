@@ -160,8 +160,6 @@ protected:
 	TCPListenerSocket**         fListeners{nullptr};
 	uint32_t                      fNumListeners{0}; // Number of elements in the array
 
-	int32_t						fGMTOffset{0};
-
 	static std::string                  sPublicHeaderStr;
 
 private:

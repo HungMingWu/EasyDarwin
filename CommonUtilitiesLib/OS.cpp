@@ -176,27 +176,6 @@ int64_t OS::Milliseconds()
 
 }
 
-int32_t OS::GetGMTOffset()
-{
-#ifdef __Win32__
-	TIME_ZONE_INFORMATION tzInfo;
-	DWORD theErr = ::GetTimeZoneInformation(&tzInfo);
-	if (theErr == TIME_ZONE_ID_INVALID)
-		return 0;
-
-	return ((tzInfo.Bias / 60) * -1);
-#else
-
-	time_t clock = 0; //Make 'clock' initialized for valgrind
-	struct tm  *tmptr = localtime(&clock);
-	if (tmptr == nullptr)
-		return 0;
-
-	return tmptr->tm_gmtoff / 3600;//convert seconds to  hours before or after GMT
-#endif
-}
-
-
 int64_t OS::HostToNetworkSInt64(int64_t hostOrdered)
 {
 #if BIGENDIAN
@@ -219,69 +198,6 @@ int64_t OS::NetworkToHostSInt64(int64_t networkOrdered)
 		| (uint64_t)(((uint64_t)0x00ff0000 << 8) & (networkOrdered >> 8)) | (uint64_t)((uint64_t)0x00ff0000 & (networkOrdered >> 24))
 		| (uint64_t)((uint64_t)0x0000ff00 & (networkOrdered >> 40)) | (uint64_t)((uint64_t)0x00ff & (networkOrdered >> 56)));
 #endif
-}
-
-
-OS_Error OS::MakeDir(char* inPath)
-{
-	struct stat theStatBuffer;
-	if (::stat(inPath, &theStatBuffer) == -1)
-	{
-		//this directory doesn't exist, so let's try to create it
-#ifdef __Win32__
-		if ((inPath[1] == ':') && (strlen(inPath) == 2))
-			return OS_NoErr;
-
-		if (::mkdir(inPath) == -1)
-#else
-		if (::mkdir(inPath, 0777) == -1)
-#endif
-			return (OS_Error)OSThread::GetErrno();
-	}
-#ifdef __Win32__
-	else if (!(theStatBuffer.st_mode & _S_IFDIR)) // MSVC++ doesn't define the S_ISDIR macro
-		return EEXIST; // there is a file at this point in the path!
-#else
-	else if (!S_ISDIR(theStatBuffer.st_mode))
-		return EEXIST;//there is a file at this point in the path!
-#endif
-
-	//directory exists
-	return OS_NoErr;
-}
-
-OS_Error OS::RecursiveMakeDir(char* inPath)
-{
-	Assert(inPath != nullptr);
-
-	//iterate through the path, replacing '/' with '\0' as we go
-	char *thePathTraverser = inPath;
-
-	//skip over the first / in the path.
-	if (*thePathTraverser == kPathDelimiterChar)
-		thePathTraverser++;
-
-	while (*thePathTraverser != '\0')
-	{
-		if (*thePathTraverser == kPathDelimiterChar)
-		{
-			//we've found a filename divider. Now that we have a complete
-			//filename, see if this partial path exists.
-
-			//make the partial path into a C string
-			*thePathTraverser = '\0';
-			OS_Error theErr = MakeDir(inPath);
-			//there is a directory here. Just continue in our traversal
-			*thePathTraverser = kPathDelimiterChar;
-
-			if (theErr != OS_NoErr)
-				return theErr;
-		}
-		thePathTraverser++;
-	}
-
-	//need to create the last directory in the path
-	return MakeDir(inPath);
 }
 
 bool OS::ThreadSafe()
@@ -424,18 +340,4 @@ uint32_t OS::GetNumProcessors()
 
 
 	return 1;
-}
-
-//CISCO provided fix for integer + fractional fixed64.
-int64_t OS::TimeMilli_To_Fixed64Secs(int64_t inMilliseconds)
-{
-	int64_t result = inMilliseconds / 1000;  // The result is in lower bits.
-	result <<= 32;  // shift it to higher 32 bits
-	// Take the remainder (rem = inMilliseconds%1000) and multiply by
-	// 2**32, divide by 1000, effectively this gives (rem/1000) as a
-	// binary fraction.
-	double p = ldexp((double)(inMilliseconds % 1000), +32) / 1000.;
-	auto frac = (uint32_t)p;
-	result |= frac;
-	return result;
 }

@@ -59,104 +59,14 @@
 #define REFLECTOR_THINNING_DEBUGGING 0 
 #define MAX_CACHE_SIZE  1024*1024*2
 
-class ReflectorPacket;
-class ReflectorSender;
 class ReflectorStream;
-class RTPSessionOutput;
 class ReflectorSession;
-
-class ReflectorPacket
-{
-public:
-	ReflectorPacket(const char *data, size_t len) : fPacket(data, data + len) {}
-	~ReflectorPacket() = default;
-	bool  IsRTCP() { return fIsRTCP; }
-	inline  uint32_t  GetPacketRTPTime();
-	inline  uint16_t  GetPacketRTPSeqNum();
-	inline  uint32_t  GetSSRC(bool isRTCP);
-	inline  int64_t  GetPacketNTPTime();
-
-private:
-	std::chrono::high_resolution_clock::time_point fTimeArrived;
-	std::vector<char> fPacket;
-	bool      fIsRTCP{ false };
-	bool      fNeededByOutput{ false }; // is this packet still needed for output?
-	uint64_t      fStreamCountID{ 0 };
-
-	friend bool IsKeyFrameFirstPacket(const ReflectorPacket &thePacket);
-	friend class ReflectorSender;
-	friend class ReflectorSocket;
-	friend class RTPSessionOutput;
-
-
-};
-
-uint32_t ReflectorPacket::GetSSRC(bool isRTCP)
-{
-	if (fPacket.size() < 8)
-		return 0;
-
-	auto* theSsrcPtr = (uint32_t*)fPacket.data();
-	if (isRTCP)// RTCP 
-		return ntohl(theSsrcPtr[1]);
-
-	if (fPacket.size() < 12)
-		return 0;
-
-	return ntohl(theSsrcPtr[2]);  // RTP SSRC
-}
-
-uint32_t ReflectorPacket::GetPacketRTPTime()
-{
-	uint32_t timestamp = 0;
-	if (!fIsRTCP)
-	{
-		//The RTP timestamp number is the second long of the packet
-		if (fPacket.size() < 8)
-			return 0;
-		timestamp = ntohl(((uint32_t*)fPacket.data())[1]);
-	}
-	else
-	{
-		if (fPacket.size() < 20)
-			return 0;
-		timestamp = ntohl(((uint32_t*)fPacket.data())[4]);
-	}
-	return timestamp;
-}
-
-uint16_t ReflectorPacket::GetPacketRTPSeqNum()
-{
-	Assert(!fIsRTCP); // not a supported type
-
-	if (fPacket.size() < 4 || fIsRTCP)
-		return 0;
-
-	uint16_t sequence = ntohs(((uint16_t*)fPacket.data())[1]); //The RTP sequenc number is the second short of the packet
-	return sequence;
-}
-
-
-int64_t  ReflectorPacket::GetPacketNTPTime()
-{
-	Assert(fIsRTCP); // not a supported type
-	if (fPacket.size() < 16 || !fIsRTCP)
-		return 0;
-
-	auto* theReport = (uint32_t*)fPacket.data();
-	theReport += 2;
-	int64_t ntp = 0;
-	::memcpy(&ntp, theReport, sizeof(int64_t));
-
-	return OS::Time1900Fixed64Secs_To_TimeMilli(OS::NetworkToHostSInt64(ntp));
-
-
-}
-
+class ReflectorSender;
 
 //Custom UDP socket classes for doing reflector packet retrieval, socket management
 class ReflectorSocket : public IdleTask, public UDPSocket
 {
+	using time_point = std::chrono::high_resolution_clock::time_point;
 public:
 
 	ReflectorSocket();
@@ -166,21 +76,20 @@ public:
 	void    AddSender(ReflectorSender* inSender);
 	void    RemoveSender(ReflectorSender* inStreamElem);
 	bool  HasSender() { return !fDemuxer.empty(); }
-	bool  ProcessPacket(int64_t inMilliseconds, std::unique_ptr<ReflectorPacket> thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort);
+	bool  ProcessPacket(time_point now, std::unique_ptr<MyReflectorPacket> thePacket, uint32_t theRemoteAddr, uint16_t theRemotePort);
 	int64_t      Run() override;
 private:
 
 	//virtual int64_t        Run();
-	void    GetIncomingData(int64_t inMilliseconds);
+	void    GetIncomingData(time_point now);
 
 	//Number of packets to allocate when the socket is first created
 	enum
 	{
-		kRefreshBroadcastSessionIntervalMilliSecs = 10000,
 		kSSRCTimeOut = 30000 // milliseconds before clearing the SSRC if no new ssrcs have come in
 	};
 	RTPSession*                  fBroadcasterClientSession{nullptr};
-	int64_t                      fLastBroadcasterTimeOutRefresh{0};
+	time_point                   fLastBroadcasterTimeOutRefresh;
 	// Queue of senders
 	std::list<ReflectorSender*> fSenderQueue;
 
@@ -249,38 +158,33 @@ public:
 	//Returns the time at which it next needs to be invoked
 	void        ReflectPackets();
 
-	ReflectorPacket*    SendPacketsToOutput(ReflectorOutput* theOutput, ReflectorPacket* currentPacket, int64_t currentTime);
+	MyReflectorPacket*    SendPacketsToOutput(ReflectorOutput* theOutput, MyReflectorPacket* currentPacket);
 
 	void        RemoveOldPackets();
-	ReflectorPacket* GetClientBufferStartPacketOffset(std::chrono::seconds offset);
+	MyReflectorPacket* GetClientBufferStartPacketOffset(std::chrono::seconds offset);
 
-	ReflectorPacket* NeedRelocateBookMark(ReflectorPacket* thePacket);
+	MyReflectorPacket* NeedRelocateBookMark(MyReflectorPacket* thePacket);
 
 	ReflectorStream*    fStream;
 	uint32_t              fWriteFlag;
 
-	std::list<std::unique_ptr<ReflectorPacket>> fPacketQueue;
-	ReflectorPacket*	fKeyFrameStartPacketElementPointer{ nullptr };//最新关键帧指针
+	std::list<std::unique_ptr<MyReflectorPacket>> fPacketQueue;
+	MyReflectorPacket*	fKeyFrameStartPacketElementPointer{ nullptr };//最新关键帧指针
 
 	//these serve as an optimization, keeping track of when this
 	//sender needs to run so it doesn't run unnecessarily
 
 	bool      fHasNewPackets{ false };
 
-	//how often to send RRs to the source
-	enum
-	{
-		kRRInterval = 5000      //int64_t (every 5 seconds)
-	};
-
-	int64_t      fLastRRTime{ 0 };
-	void appendPacket(std::unique_ptr<ReflectorPacket> thePacket);
+	std::chrono::high_resolution_clock::time_point fLastRRTime;
+	void appendPacket(std::unique_ptr<MyReflectorPacket> thePacket);
 	friend class ReflectorSocket;
 	friend class ReflectorStream;
 };
 
 class ReflectorStream
 {
+	using time_point = std::chrono::high_resolution_clock::time_point;
 public:
 
 	enum
@@ -337,9 +241,9 @@ public:
 	ReflectorSender*        GetRTPSender() { return &fRTPSender; }
 	ReflectorSender*        GetRTCPSender() { return &fRTCPSender; }
 
-	uint64_t                  fPacketCount;
+	uint64_t                  fPacketCount{ 0 };
 
-	inline  void                    UpdateBitRate(int64_t currentTime);
+	inline  void                    UpdateBitRate(time_point currentTime);
 
 	void                    IncEyeCount() { OSMutexLocker locker(&fBucketMutex); fEyeCount++; }
 	void                    DecEyeCount() { OSMutexLocker locker(&fBucketMutex); fEyeCount--; }
@@ -370,7 +274,6 @@ private:
 		kReceiverReportSize = 16,               //uint32_t
 		kAppSize = 36,                          //uint32_t
 		kMinNumBuckets = 16,                    //uint32_t
-		kBitRateAvgIntervalInMilSecs = 30000 // time between bitrate averages
 	};
 
 	// BUCKET ARRAY
@@ -394,7 +297,7 @@ private:
 
 	// Used for calculating average bit rate
 	uint32_t              fCurrentBitRate;
-	int64_t              fLastBitRateSample;
+	time_point            fLastBitRateSample;
 	
 	std::atomic_size_t   fBytesSentInThisInterval;// unsigned int because we need to atomic_add 
 
@@ -421,16 +324,16 @@ public:
 };
 
 
-void    ReflectorStream::UpdateBitRate(int64_t currentTime)
+void    ReflectorStream::UpdateBitRate(time_point currentTime)
 {
-	if ((fLastBitRateSample + ReflectorStream::kBitRateAvgIntervalInMilSecs) < currentTime)
+	static constexpr auto kBitRateAvgInterval = std::chrono::milliseconds(30000); // time between bitrate averages
+	if (std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - fLastBitRateSample) > kBitRateAvgInterval)
 	{
 		unsigned int intervalBytes = fBytesSentInThisInterval;
 		fBytesSentInThisInterval -= intervalBytes;
 
 		// Multiply by 1000 to convert from milliseconds to seconds, and by 8 to convert from bytes to bits
-		float bps = (float)(intervalBytes * 8) / (float)(currentTime - fLastBitRateSample);
-		bps *= 1000;
+		float bps = (float)(intervalBytes * 8 * 1000) / std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - fLastBitRateSample).count();
 		fCurrentBitRate = (uint32_t)bps;
 
 		// Don't check again for awhile!

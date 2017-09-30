@@ -156,15 +156,14 @@ void RTSPServer::write_response(const std::shared_ptr<MyRTSPSession> &session,
 	std::function<void(std::shared_ptr<Response>, std::shared_ptr<MyRTSPRequest>)> resource_function)
 {
 	session->connection->set_timeout(config.timeout_content);
-	auto response = std::shared_ptr<Response>(new Response(session, config.timeout_content), [this](Response *response_ptr) {
+	auto response = std::shared_ptr<Response>(new Response(session, config.timeout_content), [this, session](Response *response_ptr) {
 		auto response = std::shared_ptr<Response>(response_ptr);
-		response->send([this, response](const boost::system::error_code &ec) {
+		response->send([this, response, session](const boost::system::error_code &ec) {
 			if (!ec) {
 				if (response->close_connection_after_response)
 					return;
 
-				auto new_session = std::make_shared<MyRTSPSession>(*this, response->session->connection);
-				read_request_and_content(new_session);;
+				read_request_and_content(session);;
 			}
 			else if (this->on_error)
 				this->on_error(response->session->request, ec);
@@ -186,15 +185,14 @@ void RTSPServer::write_response1(const std::shared_ptr<MyRTSPSession> &session,
 	std::function<void(std::shared_ptr<Response>, std::shared_ptr<MyRTSPRequest>)> resource_function)
 {
 	session->connection->set_timeout(config.timeout_content);
-	auto response = std::shared_ptr<Response>(new Response(session, config.timeout_content), [this](Response *response_ptr) {
+	auto response = std::shared_ptr<Response>(new Response(session, config.timeout_content), [this, session](Response *response_ptr) {
 		auto response = std::shared_ptr<Response>(response_ptr);
-		response->send([this, response](const boost::system::error_code &ec) {
+		response->send([this, response, session](const boost::system::error_code &ec) {
 			if (!ec) {
 				if (response->close_connection_after_response)
 					return;
 
-				auto new_session = std::make_shared<MyRTSPSession>(*this, response->session->connection);
-				read_data_packet(new_session);;
+				read_data_packet(session);;
 			}
 			else if (this->on_error)
 				this->on_error(response->session->request, ec);

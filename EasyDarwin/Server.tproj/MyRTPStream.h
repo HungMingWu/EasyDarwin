@@ -1,5 +1,6 @@
 #pragma once
-#include <stdint.h>
+#include <cstdint>
+#include <atomic>
 #include <iostream>
 #include <string>
 #include "QTSS.h"
@@ -13,7 +14,6 @@ class MyRTPStream {
 	QTSS_RTPTransportType   fTransportType{ qtssRTPTransportTypeTCP };
 	QTSS_RTPNetworkMode     fNetworkMode{ qtssRTPNetworkModeDefault };
 	MyRTPSession& fSession;
-
 	// If we are interleaving RTP data over the TCP connection,
 	// these are channel numbers to use for RTP & RTCP
 	uint8_t   fRTPChannel{ 0 };

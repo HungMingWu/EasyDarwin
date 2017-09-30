@@ -1,4 +1,5 @@
 #pragma once
+#include <chrono>
 #include <memory>
 #include <string>
 #include <vector>
@@ -8,12 +9,16 @@
 class MyRTPSession;
 class MyRTSPRequest;
 class MyReflectorSession {
+	using time_point = std::chrono::high_resolution_clock::time_point;
 	std::string	fSessionName;
 	SDPSourceInfo fSourceInfo;
 	std::string fLocalSDP;
 	bool fHasBufferedStreams{ true };
 	bool fIsSetup{ false };
 	std::vector<std::unique_ptr<MyReflectorStream>>   fStreamArray;
+	RTPSession*                  fBroadcasterClientSession{ nullptr };
+	time_point                   fLastBroadcasterTimeOutRefresh;
+	bool fHasVideoKeyFrameUpdate{ false };
 public:
 	enum
 	{
@@ -27,4 +32,6 @@ public:
 	void AddBroadcasterClientSession(MyRTPSession* inClientSession);
 	const SDPSourceInfo& GetSourceInfo() const { return fSourceInfo; }
 	MyReflectorStream& GetStreamByIndex(uint32_t inIndex) { return *fStreamArray[inIndex]; }
+	bool HasVideoKeyFrameUpdate() { return fHasVideoKeyFrameUpdate; }
+	void SetHasVideoKeyFrameUpdate(bool indexUpdate) { fHasVideoKeyFrameUpdate = indexUpdate; }
 };

@@ -21,4 +21,5 @@ public:
 	void AddStream(MyRTSPRequest& request, QTSS_AddStreamFlags inFlags);
 
 	std::vector<MyRTPStream>& GetStreams() { return fStreamBuffer; }
+	void RefreshTimeouts() { }
 };

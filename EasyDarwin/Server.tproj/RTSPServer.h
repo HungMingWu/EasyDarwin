@@ -9,6 +9,7 @@
 #include "RTSPConnection.h"
 #include "MyRTSPSession.h"
 #include "MyRTSPRequest.h"
+#include "coroutine_wrappers.h"
 
 class Response : public std::enable_shared_from_this<Response>, public std::ostream {
 	friend class RTSPServer;
@@ -108,14 +109,12 @@ public:
 	RTSPServer(boost::asio::io_service& io_svr) : io_service_(io_svr), acceptor_(io_svr,
 		boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), 10554))
 	{
-		accept();
+		AcceptConnections();
 	}
-	void accept();
+	CoTask AcceptConnections();
+	void deal_with_packet(const std::shared_ptr<MyRTSPSession> &session);
 	void read_request_and_content(const std::shared_ptr<MyRTSPSession> &session);
-	void read_data_packet(const std::shared_ptr<MyRTSPSession> &session);
 	void write_response(const std::shared_ptr<MyRTSPSession> &session,
-		std::function<void(std::shared_ptr<Response>, std::shared_ptr<MyRTSPRequest>)> resource_function);
-	void write_response1(const std::shared_ptr<MyRTSPSession> &session,
 		std::function<void(std::shared_ptr<Response>, std::shared_ptr<MyRTSPRequest>)> resource_function);
 	void operate_request(const std::shared_ptr<MyRTSPSession> &session);
 };

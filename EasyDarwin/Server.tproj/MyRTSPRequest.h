@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -6,29 +7,6 @@
 #include <boost/asio/streambuf.hpp>
 #include <boost/utility/string_view.hpp>
 #include "QTSS.h"
-
-class Content : public std::istream {
-	friend class MyRTSPRequest;
-public:
-	size_t size() noexcept {
-		return streambuf.size();
-	}
-	/// Convenience function to return std::string. The stream buffer is consumed.
-	std::string string() noexcept {
-		try {
-			std::stringstream ss;
-			ss << rdbuf();
-			return ss.str();
-		}
-		catch (...) {
-			return std::string();
-		}
-	}
-
-private:
-	boost::asio::streambuf &streambuf;
-	Content(boost::asio::streambuf &streambuf) noexcept : std::istream(&streambuf), streambuf(streambuf) {}
-};
 
 inline bool case_insensitive_equal(const std::string &str1, const std::string &str2) noexcept {
 	return str1.size() == str2.size() &&
@@ -85,7 +63,7 @@ class MyRTSPRequest {
 	friend class RequestMessage;
 	friend class MyRTSPSession;
 	boost::asio::streambuf streambuf;
-	Content content;
+public:
 	std::string method, path, query_string, rtsp_version;
 	std::string remote_endpoint_address;
 	unsigned short remote_endpoint_port;
@@ -97,12 +75,10 @@ class MyRTSPRequest {
 
 	// -1 not in request, 0 off, 1 on
 	int32_t                      fEnableDynamicRateState;
-	MyRTSPSession&               fSession;
 public:
-	MyRTSPRequest(MyRTSPSession& session,
-		          const std::string &remote_endpoint_address = std::string(), 
+	MyRTSPRequest(const std::string &remote_endpoint_address = std::string(), 
 		          unsigned short remote_endpoint_port = 0) noexcept
-		: fSession(session), content(streambuf), remote_endpoint_address(remote_endpoint_address), remote_endpoint_port(remote_endpoint_port) {}
+		: remote_endpoint_address(remote_endpoint_address), remote_endpoint_port(remote_endpoint_port) {}
 
 	~MyRTSPRequest() = default;
 	bool IsPushRequest() { return (fTransportMode == qtssRTPTransportModeRecord) ? true : false; }
@@ -113,7 +89,6 @@ public:
 	QTSS_RTPNetworkMode         GetNetworkMode() { return fNetworkMode; }
 	int32_t                     GetDynamicRateState() { return fEnableDynamicRateState; }
 	std::string GetFileName();
-	MyRTSPSession&              GetSession() { return fSession; }
 };
 
 class RequestMessage {
@@ -122,7 +97,8 @@ class RequestMessage {
 	static bool parse_setup(MyRTSPRequest& req);
 public:
 	/// Parse request line and header fields
-	static bool parse(std::istream &stream, MyRTSPRequest& req) noexcept {
+	static bool parse(std::string &string, MyRTSPRequest& req) noexcept {
+		std::istringstream stream(string);
 		req.header.clear();
 		std::string line;
 		getline(stream, line);

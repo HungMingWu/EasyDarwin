@@ -80,7 +80,7 @@ MyRTPStream::MyRTPStream(MyRTSPRequest& request, uint32_t inSSRC, MyRTPSession& 
 		fIsTCP = true;
 
 		// If it is, get 2 channel numbers from the RTSP session.
-		fRTPChannel = request.GetSession().GetTwoChannelNumbers(fSession.fRTSPSessionID);
+		fRTPChannel = 0;// request.GetSession().GetTwoChannelNumbers(fSession.fRTSPSessionID);
 		fRTCPChannel = fRTPChannel + 1;
 	}
 }

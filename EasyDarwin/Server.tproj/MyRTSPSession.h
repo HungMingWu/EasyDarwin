@@ -24,6 +24,10 @@ class MyRTSPSession {
 	friend class RTSPServer;
 public:
 	MyRTSPSession(RTSPServer&, std::shared_ptr<Connection> connection) noexcept;
+	~MyRTSPSession()
+	{
+		int a = 1;
+	}
 	std::error_code do_setup();
 	std::error_code do_play(MyReflectorSession *session);
 	std::error_code process_rtppacket(const char *packetData, size_t length);

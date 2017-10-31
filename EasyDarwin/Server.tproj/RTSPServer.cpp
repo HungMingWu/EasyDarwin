@@ -10,6 +10,7 @@
 #include "MyRTSPRequest.h"
 #include "MyRTPSession.h"
 #include "MyRTPStream.h"
+#include <fmt/format.h>
 
 template <typename S>
 static std::vector<std::string> spirit_direct(const S& input, char const* delimiter)
@@ -37,48 +38,117 @@ void Response::send(const std::function<void(const boost::system::error_code &)>
 			callback(ec);
 	});
 }
-void RTSPServer::accept()
-{
-	auto session = std::make_shared<MyRTSPSession>(*this, create_connection(io_service_));
 
-	acceptor_.async_accept(session->connection->socket, [this, session](const boost::system::error_code &ec) {
-		auto lock = session->connection->handler_runner->continue_lock();
-		if (!lock)
-			return;
-
-		// Immediately start accepting a new connection (unless io_service has been stopped)
-		if (ec != boost::asio::error::operation_aborted)
-			this->accept();
-
-		if (!ec) {
-			boost::asio::ip::tcp::no_delay option(true);
-			boost::system::error_code ec;
-			session->connection->socket.set_option(option, ec);
-
-			read_request_and_content(session);
+CoTask RunRTSPSession(boost::asio::ip::tcp::socket socket) {
+	boost::asio::streambuf buffer;
+	MyRTSPRequest request;
+	while (true) {
+		auto result = co_await AsyncRead(socket, buffer.prepare(4));
+		if (!result) {
+			std::cerr << "Error when reading: " << result.Error().message() << "\n";
+			break;
 		}
-		else if (on_error)
-			on_error(session->request, ec);
-	});
+		buffer.commit(result.Get());
+		const char *firstChar = boost::asio::buffer_cast<const char*>(buffer.data());
+		if (*firstChar == '$') {
+		}
+		else {
+			result = co_await AsyncReadUntil(socket, buffer);
+			if (!result) {
+				std::cerr << "Error when reading: " << result.Error().message() << "\n";
+				break;
+			}
+			std::string text{ boost::asio::buffer_cast<const char*>(buffer.data()), result.Get() };
+			std::string content;
+			buffer.consume(result.Get());
+			if (!RequestMessage::parse(text, request)) {
+				return;
+			}
+			auto it = request.header.find("Content-Length");
+			if (it != request.header.end()) {
+				unsigned long long content_length = 0;
+				try {
+					content_length = std::stoull(it->second);
+				}
+				catch (const std::exception &e) {
+					return;
+				}
+				content.resize(content_length);
+				size_t kkk = content.size();
+				result = co_await AsyncRead(
+					socket, boost::asio::buffer(&content[0], content.size()));
+				if (!result) {
+					std::cerr << "Error when reading: " << result.Error().message() << "\n";
+					break;
+				} else 
+				{
+					int a = 1;
+					buffer.consume(content_length);
+				}
+				
+			}
+			if (request.method == "OPTIONS") {
+				std::string output = 
+					fmt::format("RTSP/1.0 200 OK\r\n"
+						        "Cseq: {} \r\n"
+            					"Public: DESCRIBE, SETUP, TEARDOWN, PLAY, PAUSE, OPTIONS, ANNOUNCE, RECORD\r\n\r\n", request.header["CSeq"]);
+				result = co_await AsyncWrite(
+					socket, boost::asio::buffer(output));
+				if (!result) {
+					std::cerr << "Error when writing: " << result.Error().message() << "\n";
+					break;
+				}
+			}
+			if (request.method == "ANNOUNCE") {
+				SDPContainer checkedSDPContainer(content);
+				if (!checkedSDPContainer.Parse())
+				{
+					//return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssUnsupportedMediaType);
+				}
+				CSdpCache::GetInstance()->setSdpMap("live.sdp", content);
+				std::string output = fmt::format("RTSP/1.0 200 OK\r\n"
+					"Cseq: {} \r\n", request.header["CSeq"]);
+				result = co_await AsyncWrite(
+					socket, boost::asio::buffer(output.data(), output.length()));
+			}
+		}
+	}
 }
 
-void RTSPServer::read_request_and_content(const std::shared_ptr<MyRTSPSession> &session)
-{
-	session->connection->set_timeout(config.timeout_request);
-	boost::asio::async_read_until(session->connection->socket, session->request->streambuf, "\r\n\r\n",
-		[this, session](const boost::system::error_code &ec, size_t bytes_transferred) {
-		session->connection->cancel_timeout();
-		auto lock = session->connection->handler_runner->continue_lock();
-		if (!lock)
-			return;
-		if (!ec) {
-			// request->streambuf.size() is not necessarily the same as bytes_transferred, from Boost-docs:
-			// "After a successful async_read_until operation, the streambuf may contain additional data beyond the delimiter"
-			// The chosen solution is to extract lines from the stream directly when parsing the header. What is left of the
-			// streambuf (maybe some bytes of the content) is appended to in the async_read-function below (for retrieving content).
-			size_t num_additional_bytes = session->request->streambuf.size() - bytes_transferred;
+CoTask RTSPServer::AcceptConnections() {
+	while (true) {
+		Result<boost::asio::ip::tcp::socket> result = co_await AsyncAccept(acceptor_);
+		if (result) {
+			RunRTSPSession(std::move(result.Get()));
+		}
+		else {
+			std::cerr << "Error accepting connection: " << result.Error().message()
+				<< "\n";
+			break;
+		}
+	}
+}
 
-			if (!RequestMessage::parse(session->request->content, *session->request)) {
+void RTSPServer::deal_with_packet(const std::shared_ptr<MyRTSPSession> &session)
+{
+	const auto *begin = boost::asio::buffer_cast<const char*>(session->request->streambuf.data());
+	if (*begin == '$') {
+		int a = 1;
+	}
+	else {
+		static const boost::string_view spilt("\r\n\r\n");
+		std::string
+			text{ boost::asio::buffer_cast<const char*>(session->request->streambuf.data()),
+			session->request->streambuf.size() };
+		size_t pos = text.rfind(spilt.data());
+		if (pos == std::string::npos) {
+				
+		}
+		else {
+			pos += spilt.size();
+			size_t num_additional_bytes = text.length() - pos;
+
+			if (!RequestMessage::parse(text, *session->request)) {
 				if (on_error) {
 					//	on_error(session->request, make_error_code::make_error_code(boost::system::errc::protocol_error));
 				}
@@ -98,54 +168,41 @@ void RTSPServer::read_request_and_content(const std::shared_ptr<MyRTSPSession> &
 					}
 					return;
 				}
-				if (content_length > num_additional_bytes) {
-					session->connection->set_timeout(config.timeout_content);
-					boost::asio::async_read(session->connection->socket, session->request->streambuf, boost::asio::transfer_exactly(content_length - num_additional_bytes),
-						[this, session](const boost::system::error_code &ec, size_t /*bytes_transferred*/) {
-						session->connection->cancel_timeout();
-						auto lock = session->connection->handler_runner->continue_lock();
-						if (!lock)
-							return;
-						if (!ec)
-							operate_request(session);
-						else if (on_error)
-							on_error(session->request, ec);
-					});
+				if (content_length <= num_additional_bytes) {
+					if (session->request->method == "ANNOUNCE") {
+					}
+					else {
+						operate_request(session);
+					}
+					session->request->streambuf.consume(pos + content_length);
 				}
-				else {
-					operate_request(session);
+				else
+				{
+					int a = 1;
 				}
 			}
 			else {
 				operate_request(session);
+				session->request->streambuf.consume(pos);
 			}
 		}
-		else if (on_error)
-			on_error(session->request, ec);
-	});
+	}
 }
 
-void RTSPServer::read_data_packet(const std::shared_ptr<MyRTSPSession> &session)
+void RTSPServer::read_request_and_content(const std::shared_ptr<MyRTSPSession> &session)
 {
+	constexpr size_t blocks = 2048;
 	session->connection->set_timeout(config.timeout_request);
-	boost::asio::async_read(session->connection->socket, session->request->streambuf, boost::asio::transfer_at_least(4),
+	session->connection->socket.async_read_some(session->request->streambuf.prepare(blocks),
 		[this, session](const boost::system::error_code &ec, size_t bytes_transferred) {
 		session->connection->cancel_timeout();
 		auto lock = session->connection->handler_runner->continue_lock();
 		if (!lock)
 			return;
+		session->request->streambuf.commit(bytes_transferred);
 		if (!ec) {
-			std::vector<char> s{ buffers_begin(session->request->streambuf.data()),
-					buffers_end(session->request->streambuf.data()) };
-			session->request->streambuf.consume(s.size());
-			auto* dataLenP = (uint16_t*)&s[0];
-			size_t interleavedPacketLen = ntohs(dataLenP[1]) + 4;
-			if (interleavedPacketLen > s.size()) {
-
-			}
-			else {
-				session->process_rtppacket(&s[0], s.size());
-			}
+			deal_with_packet(session);
+			read_request_and_content(session);
 		}
 		else if (on_error)
 			on_error(session->request, ec);
@@ -181,58 +238,9 @@ void RTSPServer::write_response(const std::shared_ptr<MyRTSPSession> &session,
 	}
 }
 
-void RTSPServer::write_response1(const std::shared_ptr<MyRTSPSession> &session,
-	std::function<void(std::shared_ptr<Response>, std::shared_ptr<MyRTSPRequest>)> resource_function)
-{
-	session->connection->set_timeout(config.timeout_content);
-	auto response = std::shared_ptr<Response>(new Response(session, config.timeout_content), [this, session](Response *response_ptr) {
-		auto response = std::shared_ptr<Response>(response_ptr);
-		response->send([this, response, session](const boost::system::error_code &ec) {
-			if (!ec) {
-				if (response->close_connection_after_response)
-					return;
-
-				read_data_packet(session);;
-			}
-			else if (this->on_error)
-				this->on_error(response->session->request, ec);
-		});
-	});
-
-	try {
-		resource_function(response, session->request);
-	}
-	catch (const std::exception &e) {
-		if (on_error) {
-			//	on_error(session->request, make_error_code::make_error_code(boost::system::errc::operation_canceled));
-		}
-		return;
-	}
-}
-
 void RTSPServer::operate_request(const std::shared_ptr<MyRTSPSession> &session)
 {
-	if (session->request->method == "OPTIONS") {
-		write_response(session, [](std::shared_ptr<Response> response, std::shared_ptr<MyRTSPRequest> request) {
-			*response << "RTSP/1.0 200 OK\r\n"
-				<< "Cseq: " << request->header["CSeq"] << "\r\n"
-				<< "Public: DESCRIBE, SETUP, TEARDOWN, PLAY, PAUSE, OPTIONS, ANNOUNCE, RECORD\r\n\r\n";
-		});
-	}
-	else if (session->request->method == "ANNOUNCE") {
-		std::string sdp = session->request->content.string();
-		SDPContainer checkedSDPContainer(sdp);
-		if (!checkedSDPContainer.Parse())
-		{
-			//return inParams->inRTSPRequest->SendErrorResponseWithMessage(qtssUnsupportedMediaType);
-		}
-		CSdpCache::GetInstance()->setSdpMap("live.sdp", sdp);
-		write_response(session, [](std::shared_ptr<Response> response, std::shared_ptr<MyRTSPRequest> request) {
-			*response << "RTSP/1.0 200 OK\r\n"
-				<< "Cseq: " << request->header["CSeq"] << "\r\n\r\n";
-		});
-	}
-	else if (session->request->method == "SETUP") {
+	if (session->request->method == "SETUP") {
 		session->FindOrCreateRTPSession();
 		std::error_code ec = session->do_setup();
 		if (!ec) {
@@ -258,7 +266,7 @@ void RTSPServer::operate_request(const std::shared_ptr<MyRTSPSession> &session)
 		session->FindOrCreateRTPSession();
 		if (!session->rtp_OutputSession) {
 			std::error_code ec = session->do_play(nullptr);
-			write_response1(session, [session](std::shared_ptr<Response> response, std::shared_ptr<MyRTSPRequest> request) {
+			write_response(session, [session](std::shared_ptr<Response> response, std::shared_ptr<MyRTSPRequest> request) {
 				auto &streams = session->fRTPSession->GetStreams();
 				std::string transportStr = request->header["Transport"];
 				std::string output;

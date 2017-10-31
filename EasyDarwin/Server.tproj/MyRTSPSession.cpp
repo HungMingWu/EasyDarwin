@@ -24,10 +24,10 @@ MyRTSPSession::MyRTSPSession(RTSPServer &server, std::shared_ptr<Connection> con
 	try {
 		//auto remote_endpoint = connection->socket.lowest_layer().remote_endpoint();
 		//request = std::make_shared<RTSPRequest1>(remote_endpoint.address().to_string(), remote_endpoint.port());
-		request = std::make_shared<MyRTSPRequest>(*this);
+		request = std::make_shared<MyRTSPRequest>();
 	}
 	catch (...) {
-		request = std::make_shared<MyRTSPRequest>(*this);
+		request = std::make_shared<MyRTSPRequest>();
 	}
 }
 

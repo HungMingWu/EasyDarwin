@@ -85,7 +85,7 @@ bool RequestMessage::parse_setup(MyRTSPRequest& req)
 	return true;
 }
 
-std::string MyRTSPRequest::GetFileDigit()
+std::string MyRTSPRequest::GetFileDigit() const
 {
 	static std::string digits("0123456789");
 	std::size_t found = path.find_last_not_of(digits);
@@ -94,7 +94,7 @@ std::string MyRTSPRequest::GetFileDigit()
 	else return {};
 }
 
-std::string MyRTSPRequest::GetFileName()
+std::string MyRTSPRequest::GetFileName() const
 {
 	std::string theHost, uriPath;
 	bool r = qi::phrase_parse(path.cbegin(), path.cend(),

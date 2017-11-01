@@ -62,7 +62,6 @@ class MyRTSPRequest {
 	friend class RTSPServer;
 	friend class RequestMessage;
 	friend class MyRTSPSession;
-	boost::asio::streambuf streambuf;
 public:
 	std::string method, path, query_string, rtsp_version;
 	std::string remote_endpoint_address;
@@ -82,13 +81,13 @@ public:
 
 	~MyRTSPRequest() = default;
 	bool IsPushRequest() { return (fTransportMode == qtssRTPTransportModeRecord) ? true : false; }
-	std::string GetFileDigit();
+	std::string GetFileDigit() const;
 	uint16_t GetSetUpServerPort() const { return fSetUpServerPort; }
 	void SetUpServerPort(uint16_t port) { fSetUpServerPort = port; }
 	QTSS_RTPTransportType       GetTransportType() { return fTransportType; }
 	QTSS_RTPNetworkMode         GetNetworkMode() { return fNetworkMode; }
 	int32_t                     GetDynamicRateState() { return fEnableDynamicRateState; }
-	std::string GetFileName();
+	std::string GetFileName() const;
 };
 
 class RequestMessage {

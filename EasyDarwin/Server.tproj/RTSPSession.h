@@ -40,7 +40,6 @@
 #include "RTSPRequestStream.h"
 #include "RTSPRequest.h"
 #include "RTPSession.h"
-#include "RTSPConnection.h"
 #include "RTPSessionOutput.h"
 
 class RTSPSession : public RTSPSessionInterface

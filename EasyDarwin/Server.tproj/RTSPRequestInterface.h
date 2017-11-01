@@ -175,7 +175,7 @@ public:
 	RTSPSessionInterface*       GetSession() { return fSession; }
 	const HeaderDict&           GetHeaderDict() const { return fHeaderDict; }
 
-	bool						IsPushRequest() { return (fTransportMode == qtssRTPTransportModeRecord) ? true : false; }
+	bool						IsPushRequest() const { return (fTransportMode == qtssRTPTransportModeRecord) ? true : false; }
 	uint16_t                      GetSetUpServerPort() { return fSetUpServerPort; }
 	QTSS_RTPTransportMode       GetTransportMode() { return fTransportMode; }
 

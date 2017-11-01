@@ -18,20 +18,12 @@ static std::string GenerateNewSessionID()
 	return std::to_string(dist(mt));
 }
 
-MyRTSPSession::MyRTSPSession(RTSPServer &server, std::shared_ptr<Connection> connection) noexcept
-	: mServer(server), connection(std::move(connection))
+MyRTSPSession::MyRTSPSession(RTSPServer &server) noexcept
+	: mServer(server)
 {
-	try {
-		//auto remote_endpoint = connection->socket.lowest_layer().remote_endpoint();
-		//request = std::make_shared<RTSPRequest1>(remote_endpoint.address().to_string(), remote_endpoint.port());
-		request = std::make_shared<MyRTSPRequest>();
-	}
-	catch (...) {
-		request = std::make_shared<MyRTSPRequest>();
-	}
 }
 
-std::shared_ptr<MyReflectorSession> MyRTSPSession::CreateSession(boost::string_view sessionName)
+std::shared_ptr<MyReflectorSession> MyRTSPSession::CreateSession(MyRTSPRequest &request, boost::string_view sessionName)
 {
 	std::lock_guard<std::mutex> lock(mServer.session_mutex);
 	auto it = mServer.sessionMap.find(std::string(sessionName));
@@ -56,7 +48,7 @@ std::shared_ptr<MyReflectorSession> MyRTSPSession::CreateSession(boost::string_v
 
 		auto theSession = std::make_shared<MyReflectorSession>(sessionName, theInfo);
 
-		QTSS_Error theErr = theSession->SetupReflectorSession(*request, *fRTPSession, theSetupFlag);
+		QTSS_Error theErr = theSession->SetupReflectorSession(request, *fRTPSession, theSetupFlag);
 		if (theErr != QTSS_NoErr)
 		{
 			//delete theSession;
@@ -70,9 +62,9 @@ std::shared_ptr<MyReflectorSession> MyRTSPSession::CreateSession(boost::string_v
 	return it->second;
 }
 
-std::error_code MyRTSPSession::do_setup()
+std::error_code MyRTSPSession::do_setup(MyRTSPRequest &request)
 {
-	bool isPush = request->IsPushRequest();
+	bool isPush = request.IsPushRequest();
 	if (!rtp_OutputSession)
 	{
 		if (!isPush)
@@ -90,7 +82,7 @@ std::error_code MyRTSPSession::do_setup()
 		{
 			if (!broadcastSession)
 			{
-				broadcastSession = CreateSession(request->GetFileName());
+				broadcastSession = CreateSession(request, request.GetFileName());
 				//if (theSession == nullptr)
 				//					return QTSS_RequestFailed;
 			}
@@ -103,7 +95,7 @@ std::error_code MyRTSPSession::do_setup()
 
 	//unless there is a digit at the end of this path (representing trackID), don't
 	//even bother with the request
-	std::string theDigitStr = request->GetFileDigit();
+	std::string theDigitStr = request.GetFileDigit();
 	if (theDigitStr.empty())
 	{
 		//if (isPush)
@@ -131,9 +123,9 @@ std::error_code MyRTSPSession::do_setup()
 			//return inParams.inRTSPRequest->SendErrorResponse(qtssPreconditionFailed);
 		}
 
-		request->SetUpServerPort(theStreamInfo->fPort);
+		request.SetUpServerPort(theStreamInfo->fPort);
 
-		fRTPSession->AddStream(*request, qtssASFlagsForceUDPTransport);
+		fRTPSession->AddStream(request, qtssASFlagsForceUDPTransport);
 
 		auto &newStream = fRTPSession->GetStreams().back();
 		//send the setup response
@@ -206,14 +198,14 @@ std::error_code MyRTSPSession::process_rtppacket(const char *packetData, size_t 
 	return {};
 }
 
-void MyRTSPSession::FindOrCreateRTPSession()
+void MyRTSPSession::FindOrCreateRTPSession(MyRTSPRequest &request)
 {
 	// This function attempts to locate the appropriate RTP session for this RTSP
 	// Request. It uses an RTSP session ID as a key to finding the correct RTP session,
 	// and it looks for this session ID in two places. First, the RTSP session ID header
 	// in the RTSP request, and if there isn't one there, in the RTSP session object itself.
-	auto it = request->header.find("Session");
-	if (it != end(request->header)) {
+	auto it = request.header.find("Session");
+	if (it != end(request.header)) {
 		std::string theSessionID = it->second;
 		std::lock_guard<std::mutex> lock(mServer.rtp_mutex);
 		fRTPSession = mServer.rtpMap[theSessionID];
